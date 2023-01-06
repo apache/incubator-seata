@@ -15,28 +15,26 @@
  */
 package io.seata.spring.aot;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
+import javax.sql.DataSource;
 
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.spring.util.ResourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
+import static io.seata.common.DefaultValues.DRUID_LOCATION;
 import static io.seata.spring.aot.AotUtils.ALL_MEMBER_CATEGORIES;
 import static io.seata.spring.aot.AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE;
 import static io.seata.spring.aot.AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE_AND_INVOKE;
+import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS;
 
 /**
  * The seata runtime hints registrar
@@ -45,107 +43,104 @@ import static io.seata.spring.aot.AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE_AND
  */
 class SeataRuntimeHints implements RuntimeHintsRegistrar {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataRuntimeHints.class);
+	private static final Set<String> OTHER_SERVICES = new HashSet<>();
 
-    private static final Set<String> OTHER_SERVICES = new HashSet<>();
-
-    static {
-        OTHER_SERVICES.add("com.alibaba.dubbo.rpc.Filter");
-        OTHER_SERVICES.add("com.alipay.sofa.rpc.filter.Filter");
-        OTHER_SERVICES.add("com.taobao.hsf.invocation.filter.RPCFilter");
-        OTHER_SERVICES.add("com.weibo.api.motan.filter.Filter");
-    }
+	static {
+		OTHER_SERVICES.add("com.alibaba.dubbo.rpc.Filter");
+		OTHER_SERVICES.add("com.alipay.sofa.rpc.filter.Filter");
+		OTHER_SERVICES.add("com.taobao.hsf.invocation.filter.RPCFilter");
+		OTHER_SERVICES.add("com.weibo.api.motan.filter.Filter");
+	}
 
 
-    @Override
-    public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-        ReflectionHints reflectionHints = hints.reflection();
+	@Override
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+		ReflectionHints reflectionHints = hints.reflection();
 
-        // Register the services in 'META-INF/services'
-        Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
-        for (Resource resource : resources) {
-            if (!this.isSeataServicesResource(resource)) {
-                // Register only the services required by seata.
-                continue;
-            }
+		// Register the services in 'META-INF/services', only the services required by seata.
+		Predicate<Resource> predicate = this::isSeataServicesResource;
+		AotUtils.registerReflectionServices(reflectionHints, predicate, MEMBER_CATEGORIES_FOR_INSTANTIATE);
 
-            try (InputStreamReader isr = new InputStreamReader(resource.getInputStream());
-                 BufferedReader br = new BufferedReader(isr)) {
-                br.lines().forEach(className -> {
-                    AotUtils.registerReflectionType(reflectionHints,
-                            MEMBER_CATEGORIES_FOR_INSTANTIATE,
-                            className);
-                });
-            } catch (IOException e) {
-                LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
-            }
-        }
+		// Register for AT mode
+		this.registerHintsForATMode(hints);
 
-        // Register the seata classes
-        AotUtils.registerReflectionType(reflectionHints,
-                MEMBER_CATEGORIES_FOR_INSTANTIATE,
-                "io.seata.sqlparser.druid.DruidDbTypeParserImpl",
-                "io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl",
-                "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory",
-                "io.seata.serializer.protobuf.ProtobufSerializer"
-        );
-        AotUtils.registerReflectionType(reflectionHints,
-                ALL_MEMBER_CATEGORIES,
-                BranchUndoLog.class,
-                SQLUndoLog.class,
-                TableRecords.class,
-                TableRecords.EmptyTableRecords.class,
-                io.seata.rm.datasource.sql.struct.Row.class,
-                io.seata.rm.datasource.sql.struct.Field.class
-        );
+		// Register for XA mode
+		this.registerHintsForXAMode(hints);
 
-        // Register the MySQL classes for AT mode, see the class 'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
-        Set<Class<?>> classes = ReflectionUtil.getClassesByPackage("com.github.benmanes.caffeine.cache");
-        if (classes.size() > 0) {
-            for (Class<?> clazz : classes) {
-                String simpleClassName = clazz.getSimpleName();
-                if (simpleClassName.length() > 0 && simpleClassName.toUpperCase().equals(simpleClassName)) {
-                    AotUtils.registerReflectionType(reflectionHints,
-                            MEMBER_CATEGORIES_FOR_INSTANTIATE,
-                            clazz);
-                }
-            }
-        }
+		// Register the seata classes
+		AotUtils.registerReflectionType(reflectionHints,
+				MEMBER_CATEGORIES_FOR_INSTANTIATE,
+				"io.seata.sqlparser.druid.DruidDbTypeParserImpl", // see DruidDelegatingDbTypeParser
+				"io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl", // see DruidDelegatingSQLRecognizerFactory
+				"io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory", // see AntlrDelegatingSQLRecognizerFactory
+				"io.seata.serializer.protobuf.ProtobufSerializer" // see SerializerServiceLoader
+		);
+	}
 
-        // Register the MySQL classes for XA mode, see the class 'com.alibaba.druid.util.MySqlUtils'
-        AotUtils.registerReflectionType(reflectionHints,
-                MEMBER_CATEGORIES_FOR_INSTANTIATE_AND_INVOKE,
-                "com.mysql.cj.api.conf.PropertySet",
-                "com.mysql.cj.api.conf.ReadableProperty",
-                "com.mysql.cj.api.jdbc.JdbcConnection",
-                "com.mysql.cj.conf.PropertySet",
-                "com.mysql.cj.conf.ReadableProperty",
-                "com.mysql.cj.conf.RuntimeProperty",
-                "com.mysql.cj.jdbc.JdbcConnection",
-                "com.mysql.cj.jdbc.MysqlXAConnection",
-                "com.mysql.cj.jdbc.SuspendableXAConnection"
-        );
+	private void registerHintsForATMode(RuntimeHints hints) {
+		ReflectionHints reflectionHints = hints.reflection();
 
-//        hints.resources().registerPattern("lib/sqlparser/druid.jar");
-//        hints.resources().registerPattern("META-INF/services/io.seata.*");
-//        hints.resources().registerPattern("META-INF/seata/io.seata.*");
-//        for (String servicesFileName : OTHER_SERVICES) {
-//            hints.resources().registerPattern("META-INF/services/" + servicesFileName);
-//            hints.resources().registerPattern("META-INF/seata/" + servicesFileName);
-//        }
-    }
+		// Register the MySQL classes for AT mode, see the class 'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
+		String caffeineCachePackage = "com.github.benmanes.caffeine.cache";
+		Set<Class<?>> classes = ReflectionUtil.getClassesByPackage(caffeineCachePackage);
+		if (classes.size() > 0) {
+			for (Class<?> clazz : classes) {
+				String simpleClassName = clazz.getSimpleName();
+				if (simpleClassName.length() > 0 && simpleClassName.toUpperCase().equals(simpleClassName)) {
+					AotUtils.registerReflectionType(reflectionHints,
+							MEMBER_CATEGORIES_FOR_INSTANTIATE,
+							clazz);
+				}
+			}
+		}
+
+		// Register DataSource for 'io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice'
+		reflectionHints.registerType(DataSource.class, INVOKE_DECLARED_METHODS);
+
+		// Register the beans for serialize
+		AotUtils.registerReflectionType(reflectionHints,
+				ALL_MEMBER_CATEGORIES,
+				BranchUndoLog.class,
+				SQLUndoLog.class,
+				TableRecords.class,
+				TableRecords.EmptyTableRecords.class,
+				io.seata.rm.datasource.sql.struct.Row.class,
+				io.seata.rm.datasource.sql.struct.Field.class
+		);
+
+		// Register 'druid.jar' for 'io.seata.sqlparser.druid.DefaultDruidLoader'
+		hints.resources().registerPattern(DRUID_LOCATION);
+	}
 
 
-    private boolean isSeataServicesResource(Resource resource) {
-        if (resource.getFilename() == null) {
-            return false;
-        }
+	private void registerHintsForXAMode(RuntimeHints hints) {
+		// Register the MySQL classes for XA mode.
+		// See the class 'com.alibaba.druid.util.MySqlUtils'
+		AotUtils.registerReflectionType(hints.reflection(),
+				MEMBER_CATEGORIES_FOR_INSTANTIATE_AND_INVOKE,
+				"com.mysql.cj.api.conf.PropertySet",
+				"com.mysql.cj.api.conf.ReadableProperty",
+				"com.mysql.cj.api.jdbc.JdbcConnection",
+				"com.mysql.cj.conf.PropertySet",
+				"com.mysql.cj.conf.ReadableProperty",
+				"com.mysql.cj.conf.RuntimeProperty",
+				"com.mysql.cj.jdbc.JdbcConnection",
+				"com.mysql.cj.jdbc.MysqlXAConnection",
+				"com.mysql.cj.jdbc.SuspendableXAConnection"
+		);
+	}
 
-        if (resource.getFilename().startsWith("io.seata")) {
-            return true;
-        }
 
-        return OTHER_SERVICES.contains(resource.getFilename());
-    }
+	private boolean isSeataServicesResource(Resource resource) {
+		if (resource.getFilename() == null) {
+			return false;
+		}
+
+		if (resource.getFilename().startsWith("io.seata")) {
+			return true;
+		}
+
+		return OTHER_SERVICES.contains(resource.getFilename());
+	}
 
 }

@@ -15,19 +15,26 @@
  */
 package io.seata.spring.aot;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import io.seata.common.util.ReflectionUtil;
+import io.seata.spring.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.core.NativeDetector;
 import org.springframework.core.SpringProperties;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import static org.springframework.aot.hint.MemberCategory.DECLARED_CLASSES;
 import static org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS;
@@ -101,6 +108,9 @@ public class AotUtils {
         return NativeDetector.inNativeImage();
     }
 
+
+    //region # register reflection hints
+
     /**
      * Recursively register the class and its supper classes, interfaces, fields, and the parameters of methods to the reflection hints.
      *
@@ -170,6 +180,7 @@ public class AotUtils {
         }
     }
 
+
     public static void registerReflectionType(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
         for (String className : classNames) {
             try {
@@ -190,4 +201,33 @@ public class AotUtils {
         reflectionHints.registerType(clazz, memberCategories);
         LOGGER.debug("Register reflection type: {}", clazz.getName());
     }
+
+
+    //region ## register resources
+
+    public static void registerReflectionServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
+        Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
+        for (Resource resource : resources) {
+            if (predicate != null && !predicate.test(resource)) {
+                continue;
+            }
+
+            try (InputStreamReader isr = new InputStreamReader(resource.getInputStream());
+                 BufferedReader br = new BufferedReader(isr)) {
+                br.lines().forEach(className -> {
+                    AotUtils.registerReflectionType(reflectionHints, memberCategories, className);
+                });
+            } catch (IOException e) {
+                LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void registerReflectionServices(ReflectionHints reflectionHints, MemberCategory... memberCategories) {
+        registerReflectionServices(reflectionHints, null, memberCategories);
+    }
+
+    //endregion ##
+
+    //endregion #
 }
