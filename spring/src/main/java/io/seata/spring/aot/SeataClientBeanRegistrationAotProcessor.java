@@ -33,13 +33,13 @@ import static io.seata.spring.aot.AotUtils.ALL_MEMBER_CATEGORIES;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 
 /**
- * The seata bean registration AOT processor
+ * The seata-client bean registration AOT processor
  *
  * @author wang.liang
  */
-class SeataBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+class SeataClientBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataBeanRegistrationAotProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataClientBeanRegistrationAotProcessor.class);
 
     @Override
     public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {

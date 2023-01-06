@@ -38,11 +38,11 @@ import static io.seata.spring.aot.AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE_AND
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS;
 
 /**
- * The seata runtime hints registrar
+ * The seata-client runtime hints registrar
  *
  * @author wang.liang
  */
-class SeataRuntimeHints implements RuntimeHintsRegistrar {
+class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
 
     private static final Set<String> OTHER_SERVICES = new HashSet<>();
 
