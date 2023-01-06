@@ -36,18 +36,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import static org.springframework.aot.hint.MemberCategory.DECLARED_CLASSES;
-import static org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS;
 import static org.springframework.aot.hint.MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS;
-import static org.springframework.aot.hint.MemberCategory.INTROSPECT_DECLARED_METHODS;
-import static org.springframework.aot.hint.MemberCategory.INTROSPECT_PUBLIC_CONSTRUCTORS;
-import static org.springframework.aot.hint.MemberCategory.INTROSPECT_PUBLIC_METHODS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS;
-import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
-import static org.springframework.aot.hint.MemberCategory.PUBLIC_CLASSES;
-import static org.springframework.aot.hint.MemberCategory.PUBLIC_FIELDS;
 
 /**
  * The AOT utils
@@ -62,14 +54,7 @@ public class AotUtils {
     public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
     public static final String SPRING_AOT_ENABLED = "spring.aot.enabled";
 
-    public static final MemberCategory[] ALL_MEMBER_CATEGORIES = new MemberCategory[]{
-        INTROSPECT_PUBLIC_CONSTRUCTORS, INVOKE_PUBLIC_CONSTRUCTORS,
-        INTROSPECT_DECLARED_CONSTRUCTORS, INVOKE_DECLARED_CONSTRUCTORS,
-        PUBLIC_FIELDS, DECLARED_FIELDS,
-        INTROSPECT_PUBLIC_METHODS, INVOKE_PUBLIC_METHODS,
-        INTROSPECT_DECLARED_METHODS, INVOKE_DECLARED_METHODS,
-        PUBLIC_CLASSES, DECLARED_CLASSES
-    };
+    public static final MemberCategory[] ALL_MEMBER_CATEGORIES = MemberCategory.values();
 
     public static final MemberCategory[] MEMBER_CATEGORIES_FOR_INSTANTIATE = new MemberCategory[]{
         INTROSPECT_DECLARED_CONSTRUCTORS, INVOKE_DECLARED_CONSTRUCTORS
