@@ -75,7 +75,19 @@
             <artifactId>kotlinx-coroutines-core</artifactId>
         </dependency>
 
-
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-spring-framework-dummy</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Use this dependency when developing -->
+        <!--<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>6.0.3</version>
+            <scope>provided</scope>
+        </dependency>-->
     </dependencies>
 
     <build>

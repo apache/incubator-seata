@@ -53,6 +53,7 @@
         <module>rm</module>
         <module>rm-datasource</module>
         <module>spring</module>
+        <module>spring-framework-dummy</module>
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>

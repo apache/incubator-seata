@@ -15,15 +15,16 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.sql.DataSource;
 
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
+import io.seata.spring.aot.AotUtils;
 import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,15 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) {
+        if (AotUtils.isAotProcessing()) {
+            if (!DataSource.class.isAssignableFrom(beanClass)) {
+                return DO_NOT_PROXY;
+            }
+
+            if (this.shouldSkip(beanClass, beanName)) {
+                return DO_NOT_PROXY;
+            }
+        }
         return advisors;
     }
 
@@ -88,6 +98,7 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
             DataSource origin = (DataSource) bean;
             SeataDataSourceProxy proxy = buildProxy(origin, dataSourceProxyMode);
             DataSourceProxyHolder.put(origin, proxy);
+            LOGGER.info("Auto proxy data source '{}' by '{}' mode.", beanName, dataSourceProxyMode);
             return enhancer;
         }
 

@@ -16,11 +16,16 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
@@ -28,10 +33,8 @@ import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.lang.Nullable;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
@@ -56,33 +59,33 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(originalConfiguration.getClass(),
-            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
-                if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
-                    Object result;
-                    String rawDataId = (String)args[0];
-                    result = originalConfiguration.getConfigFromSys(rawDataId);
-                    if (null == result) {
-                        if (args.length == 1) {
-                            result = get(convertDataId(rawDataId));
-                        } else {
-                            result = get(convertDataId(rawDataId), args[1]);
+        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
+                , (proxy, method, args) -> {
+                    if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
+                        Object result;
+                        String rawDataId = (String)args[0];
+                        result = originalConfiguration.getConfigFromSys(rawDataId);
+                        if (null == result) {
+                            if (args.length == 1) {
+                                result = get(convertDataId(rawDataId));
+                            } else {
+                                result = get(convertDataId(rawDataId), args[1]);
+                            }
+                        }
+                        if (result != null) {
+                            // If the return type is String,need to convert the object to string
+                            if (method.getReturnType().equals(String.class)) {
+                                return String.valueOf(result);
+                            }
+                            return result;
                         }
                     }
-                    if (result != null) {
-                        // If the return type is String,need to convert the object to string
-                        if (method.getReturnType().equals(String.class)) {
-                            return String.valueOf(result);
-                        }
-                        return result;
-                    }
-                }
 
-                return method.invoke(originalConfiguration, args);
-            });
+                    return method.invoke(originalConfiguration, args);
+                });
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
+    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InvocationTargetException {
         Object result = get(dataId);
         if (result == null) {
             return defaultValue;
@@ -90,31 +93,25 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object get(String dataId) throws IllegalAccessException, InvocationTargetException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
-        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        Object valueObject = null;
-        if (propertyClass != null) {
-            try {
-                valueObject = getFieldValue(
-                    Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
-                        try {
-                            return propertyClass.newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            LOGGER.error("PropertyClass for prefix: [" + propertyPrefix
-                                + "] should not be null. error :" + e.getMessage(), e);
-                        }
-                        return null;
-                    })), propertySuffix, dataId);
-            } catch (NoSuchBeanDefinitionException ignore) {
 
-            }
-        } else {
+        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        if (propertyClass == null) {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
 
-        return valueObject;
+        Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+            try {
+                return propertyClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOGGER.warn("PropertyClass for prefix: [" + propertyPrefix + "] should not be null. error :" + e.getMessage(), e);
+                return null;
+            }
+        });
+        Objects.requireNonNull(propertyObj, "Property object for prefix: [" + propertyPrefix + "] should not be null.");
+        return getFieldValue(propertyObj, propertySuffix, dataId);
     }
 
     /**
@@ -126,19 +123,57 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return java.lang.Object
      * @author xingfudeshi@gmail.com
      */
-    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
-        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
-            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
-        if (fieldOptional.isPresent()) {
-            Field field = fieldOptional.get();
-            if (Objects.equals(field.getType(), Map.class)) {
-                return getConfig(dataId, null, String.class);
-            }
-            field.setAccessible(true);
-            Object defaultValue = field.get(object);
-            return getConfig(dataId, defaultValue, field.getType());
+    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException, InvocationTargetException {
+        ValueAndType defaultValueType = this.getDefaultValueAndType(object, fieldName);
+        if (defaultValueType == null) {
+            return getConfig(dataId, null, String.class);
+        } else {
+            return getConfig(dataId, defaultValueType.getValue(), defaultValueType.getType());
         }
+    }
+
+    @Nullable
+    private ValueAndType getDefaultValueAndType(Object object, String fieldName) throws IllegalAccessException, InvocationTargetException {
+        Field[] fields = object.getClass().getDeclaredFields();
+        if (fields.length > 0) {
+            Optional<Field> fieldOptional = Stream.of(fields)
+                    .filter(f -> f.getName().equalsIgnoreCase(fieldName))
+                    .findAny();
+            if (fieldOptional.isPresent()) {
+                Field field = fieldOptional.get();
+                if (isMapOrColl(field.getType())) {
+                    return null;
+                }
+                field.setAccessible(true);
+                return new ValueAndType(field.get(object), field.getType());
+            }
+        }
+
+        String getMethodName = "get" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
+        try {
+            Method getMethod = object.getClass().getMethod(getMethodName);
+            if (isMapOrColl(getMethod.getReturnType())) {
+                return null;
+            }
+            return new ValueAndType(getMethod.invoke(object), getMethod.getReturnType());
+        } catch (NoSuchMethodException e) {
+        }
+
+        String isMethodName = "is" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
+        try {
+            Method getMethod = object.getClass().getMethod(isMethodName);
+            return new ValueAndType(getMethod.invoke(object), getMethod.getReturnType());
+        } catch (NoSuchMethodException e) {
+            LOGGER.warn("No such method '{}()' and '{}()' in the class '{}', this may be a problem. Please contact community.",
+                    getMethodName, isMethodName, object.getClass().getSimpleName());
+        }
+
         return null;
+    }
+
+
+    private boolean isMapOrColl(Class<?> type) {
+        return Map.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type);
     }
 
     /**
@@ -191,9 +226,10 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     /**
      * get spring config
-     * @param dataId data id
+     *
+     * @param dataId       data id
      * @param defaultValue default value
-     * @param type type
+     * @param type         type
      * @return object
      */
     private Object getConfig(String dataId, Object defaultValue, Class<?> type) {
@@ -204,6 +240,27 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), type);
         }
         return value != null ? value : defaultValue;
+    }
+
+
+    private static class ValueAndType {
+        private Object value;
+        private Class<?> type;
+
+
+        public ValueAndType(Object value, Class<?> type) {
+            this.value = value;
+            this.type = type;
+        }
+
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Class<?> getType() {
+            return type;
+        }
     }
 
 }
