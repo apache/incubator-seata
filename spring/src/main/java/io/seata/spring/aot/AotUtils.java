@@ -50,8 +50,12 @@ public class AotUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AotUtils.class);
 
-    // See https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java
-    private static final boolean imageCode = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+    /**
+     * The native-image code
+     *
+     * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
+     */
+    private static final String imageCode = System.getProperty("org.graalvm.nativeimage.imagecode");
 
 
     public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
@@ -89,13 +93,22 @@ public class AotUtils {
     }
 
     /**
+     * Gets the native-image code.
+     *
+     * @return the native-image code
+     */
+    public static String getNativeImageCode() {
+        return imageCode;
+    }
+
+    /**
      * Whether run in native-image
      *
      * @return the boolean
      * @see NativeDetector#inNativeImage()
      */
     public static boolean inNativeImage() {
-        return imageCode;
+        return imageCode != null;
     }
 
 
