@@ -114,6 +114,59 @@ public class AotUtils {
 
     //region # Register type to ReflectionHints
 
+    public static void registerType(ReflectionHints reflectionHints, Class<?> clazz, MemberCategory... memberCategories) {
+        reflectionHints.registerType(clazz, memberCategories);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.info("Register reflection type '{}' with member categories {}", clazz.getName(), memberCategories);
+        }
+    }
+
+    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
+        for (String className : classNames) {
+            try {
+                registerType(reflectionHints, Class.forName(className), memberCategories);
+            } catch (ClassNotFoundException | NoClassDefFoundError e) {
+                LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
+            }
+        }
+    }
+
+    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?>... classes) {
+        for (Class<?> clazz : classes) {
+            registerType(reflectionHints, clazz, memberCategories);
+        }
+    }
+
+
+    //region ## Register 'classpath*:META-INF/services/*' to ReflectionHints
+
+    public static void registerServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
+        Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
+        for (Resource resource : resources) {
+            if (predicate != null && !predicate.test(resource)) {
+                continue;
+            }
+
+            try (InputStreamReader isr = new InputStreamReader(resource.getInputStream());
+                 BufferedReader br = new BufferedReader(isr)) {
+                br.lines().forEach(className -> {
+                    AotUtils.registerTypes(reflectionHints, memberCategories, className);
+                });
+            } catch (IOException e) {
+                LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
+            }
+        }
+    }
+
+    public static void registerServices(ReflectionHints reflectionHints, MemberCategory... memberCategories) {
+        registerServices(reflectionHints, null, memberCategories);
+    }
+
+    //endregion ##
+
+
+    //region ## Register all of class to ReflectionHints
+
     /**
      * Recursively register the class and its supper classes, interfaces, fields, and the parameters of methods to the reflection hints.
      *
@@ -180,55 +233,6 @@ public class AotUtils {
                 registerAllOfClassInternal(cache, true, reflectionHints, parameterType, memberCategories);
             }
         }
-    }
-
-
-    public static void registerType(ReflectionHints reflectionHints, Class<?> clazz, MemberCategory... memberCategories) {
-        reflectionHints.registerType(clazz, memberCategories);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.info("Register reflection type '{}' with member categories {}", clazz.getName(), memberCategories);
-        }
-    }
-
-    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
-        for (String className : classNames) {
-            try {
-                registerType(reflectionHints, Class.forName(className), memberCategories);
-            } catch (ClassNotFoundException | NoClassDefFoundError e) {
-                LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
-            }
-        }
-    }
-
-    public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, Class<?>... classes) {
-        for (Class<?> clazz : classes) {
-            registerType(reflectionHints, clazz, memberCategories);
-        }
-    }
-
-
-    //region ## Register 'classpath*:META-INF/services/*' to ReflectionHints
-
-    public static void registerServices(ReflectionHints reflectionHints, @Nullable Predicate<Resource> predicate, MemberCategory... memberCategories) {
-        Resource[] resources = ResourceUtil.getResources("classpath*:META-INF/services/*");
-        for (Resource resource : resources) {
-            if (predicate != null && !predicate.test(resource)) {
-                continue;
-            }
-
-            try (InputStreamReader isr = new InputStreamReader(resource.getInputStream());
-                 BufferedReader br = new BufferedReader(isr)) {
-                br.lines().forEach(className -> {
-                    AotUtils.registerTypes(reflectionHints, memberCategories, className);
-                });
-            } catch (IOException e) {
-                LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
-            }
-        }
-    }
-
-    public static void registerServices(ReflectionHints reflectionHints, MemberCategory... memberCategories) {
-        registerServices(reflectionHints, null, memberCategories);
     }
 
     //endregion ##
