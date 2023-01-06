@@ -42,7 +42,7 @@ public class StoreDBProperties {
     private String lockTable = "lock_table";
     private String distributedLockTable = "distributed_lock";
     private Integer queryLimit = DEFAULT_QUERY_LIMIT;
-    private Integer maxWait = 5000;
+    private Long maxWait = 5000L;
 
     public String getDatasource() {
         return datasource;
@@ -160,11 +160,11 @@ public class StoreDBProperties {
         return this;
     }
 
-    public Integer getMaxWait() {
+    public Long getMaxWait() {
         return maxWait;
     }
 
-    public StoreDBProperties setMaxWait(Integer maxWait) {
+    public StoreDBProperties setMaxWait(Long maxWait) {
         this.maxWait = maxWait;
         return this;
     }
