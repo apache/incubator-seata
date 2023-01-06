@@ -55,7 +55,7 @@ public class AotUtils {
      *
      * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
      */
-    private static final String imageCode = System.getProperty("org.graalvm.nativeimage.imagecode");
+    private static final String IMAGE_CODE = System.getProperty("org.graalvm.nativeimage.imagecode");
 
 
     public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
@@ -98,7 +98,7 @@ public class AotUtils {
      * @return the native-image code
      */
     public static String getNativeImageCode() {
-        return imageCode;
+        return IMAGE_CODE;
     }
 
     /**
@@ -108,7 +108,7 @@ public class AotUtils {
      * @see NativeDetector#inNativeImage()
      */
     public static boolean inNativeImage() {
-        return imageCode != null;
+        return IMAGE_CODE != null;
     }
 
 
