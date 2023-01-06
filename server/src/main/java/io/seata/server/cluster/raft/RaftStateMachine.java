@@ -219,12 +219,16 @@ public class RaftStateMachine extends StateMachineAdapter {
                     branchSessionByteMap.forEach((k, v) -> {
                         BranchSession branchSession = new BranchSession();
                         branchSession.decode(v);
-                        try {
-                            branchSession.lock();
-                            sessionMap.get(branchSession.getXid()).add(branchSession);
-                        } catch (TransactionException e) {
-                            LOGGER.error(e.getMessage());
-                        }
+                        Optional.ofNullable(sessionMap.get(branchSession.getXid())).ifPresent(globalSession -> {
+                            if (globalSession.isActive()) {
+                                try {
+                                    branchSession.lock();
+                                } catch (TransactionException e) {
+                                    LOGGER.error(e.getMessage());
+                                }
+                            }
+                            globalSession.add(branchSession);
+                        });
                     });
                     sessionMap.values().parallelStream().forEach(globalSession -> {
                         if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
@@ -252,15 +256,15 @@ public class RaftStateMachine extends StateMachineAdapter {
         boolean leader = isLeader();
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
-        DefaultCoordinator.getInstance().setPrevent(true);
-        // become the leader again,reloading global session
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
                 SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT,
-                    false);
+                        false);
             });
         }
+        DefaultCoordinator.getInstance().setPrevent(true);
+        // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group));
     }

@@ -219,23 +219,18 @@ public class SessionHolder {
                             case RollbackRetrying:
                             case TimeoutRollbacking:
                             case TimeoutRollbackRetrying:
-                                globalSession.getBranchSessions().parallelStream().forEach(branchSession -> {
-                                    if (storeMode == SessionMode.RAFT) {
-                                        if (globalSession.getStatus() == GlobalStatus.Rollbacking) {
-                                            globalSession.setStatus(GlobalStatus.RollbackRetrying);
-                                            LOGGER.info("xid :{} change status RollbackRetrying",
-                                                globalSession.getXid());
-                                        }
-                                    }
-                                    branchSession.setLockStatus(LockStatus.Rollbacking);
-                                });
                                 queueToRetryRollback(globalSession);
                                 break;
                             case Begin:
                                 if (storeMode == SessionMode.RAFT) {
-                                    globalSession.setStatus(GlobalStatus.RollbackRetrying);
-                                    LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
-                                    queueToRetryRollback(globalSession);
+                                    if (globalSession.isActive()) {
+                                        globalSession.setStatus(GlobalStatus.RollbackRetrying);
+                                        LOGGER.info("xid :{} change status RollbackRetrying", globalSession.getXid());
+                                    } else {
+                                        // This means that the transaction is unlocked, but a reelection has occurred before the transaction state has been updated
+                                        // so the transaction needs to be resubmitted (deleted)
+                                        globalSession.setStatus(GlobalStatus.Committing);
+                                    }
                                 } else {
                                     globalSession.setActive(true);
                                 }
@@ -277,7 +272,7 @@ public class SessionHolder {
     private static void removeInErrorState(GlobalSession globalSession) {
         try {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
-            getRootSessionManager().onSuccessEnd(globalSession);
+            getRootSessionManager().removeGlobalSession(globalSession);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
             }

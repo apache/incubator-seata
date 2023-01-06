@@ -30,6 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -159,15 +160,19 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                             }
                             // Cluster changes or reaches timeout refresh time
                             if (fetch) {
+                                AtomicBoolean success = new AtomicBoolean(true);
                                 METADATA.groups().parallelStream().forEach(group -> {
                                     try {
                                         acquireClusterMetaData(group);
                                     } catch (Exception e) {
+                                        success.set(false);
                                         // prevents an exception from being thrown that causes the thread to break
                                         LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
                                     }
                                 });
-                                currentTime = System.currentTimeMillis();
+                                if (success.get()) {
+                                    currentTime = System.currentTimeMillis();
+                                }
                             }
                         }
                     });

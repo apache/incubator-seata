@@ -33,6 +33,7 @@ public class GlobalReleaseLockExecute extends AbstractRaftMsgExecute {
             if (logger.isDebugEnabled()) {
                 logger.debug("releaseGlobalSessionLock xid: {}", globalSession.getXid());
             }
+            globalSession.setActive(false);
             return raftLockManager.localReleaseGlobalSessionLock(globalSession);
         }
         return false;

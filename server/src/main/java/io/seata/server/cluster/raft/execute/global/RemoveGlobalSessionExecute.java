@@ -15,13 +15,13 @@
  */
 package io.seata.server.cluster.raft.execute.global;
 
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
-import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
@@ -40,25 +40,25 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
         // when the global transaction needs to be deleted, it does not affect any consistency issues, and can be
         // deleted in an asynchronous thread to improve the throughput of the state machine
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-        GlobalSession globalSession =
-                raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
-        try {
-            raftLockManager.localReleaseGlobalSessionLock(globalSession);
-        } catch (TransactionException e) {
-            logger.error(e.getMessage(), e);
-        }
-        EXECUTOR.execute(() -> {
-            if (globalSession != null) {
+       
+        Optional.ofNullable(raftSessionManager.findGlobalSession(sessionSyncMsg.getGlobalSession().getXid()))
+            .ifPresent(globalSession -> {
                 try {
-                    raftSessionManager.removeGlobalSession(globalSession);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("end xid: {}", globalSession.getXid());
-                    }
+                    raftLockManager.localReleaseGlobalSessionLock(globalSession);
+                    EXECUTOR.execute(() -> {
+                        try {
+                            raftSessionManager.removeGlobalSession(globalSession);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("end xid: {}", globalSession.getXid());
+                            }
+                        } catch (TransactionException e) {
+                            logger.error("remove global fail error:{}", e.getMessage());
+                        }
+                    });
                 } catch (TransactionException e) {
-                    logger.error("remove global fail error:{}", e.getMessage());
+                    logger.error(e.getMessage(), e);
                 }
-            }
-        });
+            });
         return true;
     }
 

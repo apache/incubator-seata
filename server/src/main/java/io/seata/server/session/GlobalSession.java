@@ -636,9 +636,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         } else {
             byteBuffer.putInt(0);
         }
-
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
+        byteBuffer.putInt(active ? 1 : 0);
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -647,7 +647,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes,
         byte[] xidBytes, byte[] applicationDataBytes) {
-        final int size = 8 // transactionId
+        return 8 // transactionId
             + 4 // timeout
             + 2 // byApplicationIdBytes.length
             + 2 // byServiceGroupBytes.length
@@ -656,12 +656,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + 4 // applicationDataBytes.length
             + 8 // beginTime
             + 1 // statusCode
+            + 1 // active
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
-        return size;
     }
 
     @Override
@@ -703,6 +703,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
+        this.active = byteBuffer.getInt() == 1;
     }
 
     /**
