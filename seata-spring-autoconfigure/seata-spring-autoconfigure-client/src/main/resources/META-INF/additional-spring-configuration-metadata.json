@@ -359,6 +359,9 @@
         },
         {
           "value": "LeastActiveLoadBalance"
+        },
+        {
+          "value": "RandomLoadBalance"
         }
       ]
     },
