@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
-    private Set<String> methodsToProxy = new HashSet<>();
+    private final Set<String> methodsToProxy = new HashSet<>();
 
     /**
      * @param target
