@@ -51,7 +51,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
         if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
             Class<?>[] interfaceToProxy = target.getClass().getInterfaces();
-            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(null, interfaceToProxy, null);
+            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(null, interfaceToProxy, methodsToProxy);
             ConfigurationCache.addConfigListener(io.seata.common.ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
         }
