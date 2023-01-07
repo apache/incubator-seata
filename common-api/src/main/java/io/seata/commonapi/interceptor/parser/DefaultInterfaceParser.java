@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 
-    protected static final List<InterfaceParser> allInterfaceParsers = new ArrayList<>();
+    protected static final List<InterfaceParser> ALL_INTERFACE_PARSERS = new ArrayList<>();
 
 
     private static class SingletonHolder {
@@ -49,13 +49,13 @@ public class DefaultInterfaceParser implements InterfaceParser {
     protected void initInterfaceParser() {
         List<InterfaceParser> interfaceParsers = EnhancedServiceLoader.loadAll(InterfaceParser.class);
         if (CollectionUtils.isNotEmpty(interfaceParsers)) {
-            allInterfaceParsers.addAll(interfaceParsers);
+            ALL_INTERFACE_PARSERS.addAll(interfaceParsers);
         }
     }
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target) throws Exception {
-        for (InterfaceParser interfaceParser : allInterfaceParsers) {
+        for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
             ProxyInvocationHandler proxyInvocationHandler = interfaceParser.parserInterfaceToProxy(target);
             if (proxyInvocationHandler != null) {
                 return proxyInvocationHandler;

@@ -22,7 +22,6 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
