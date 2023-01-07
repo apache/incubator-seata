@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
@@ -31,11 +32,11 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
  */
 public class Metadata {
 
-    private final Map<String, Node> leaders = new HashMap<>();
+    private final Map<String, Node> leaders = new ConcurrentHashMap<>();
 
-    private final Map<String, Long> clusterTerm = new HashMap<>();
+    private final Map<String, Long> clusterTerm = new ConcurrentHashMap<>();
 
-    private final Map<String, List<Node>> nodes = new HashMap<>();
+    private final Map<String, List<Node>> nodes = new ConcurrentHashMap<>();
 
     private StoreMode storeMode = StoreMode.FILE;
 
