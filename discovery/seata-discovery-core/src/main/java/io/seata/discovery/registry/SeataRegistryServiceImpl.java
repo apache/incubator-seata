@@ -172,6 +172,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                                 });
                                 if (success.get()) {
                                     currentTime = System.currentTimeMillis();
+                                    LOGGER.info("refreshMetadata time: {}", currentTime);
                                 }
                             }
                         }

@@ -29,6 +29,8 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.listener.ClusterChangeListener;
 import io.seata.server.cluster.watch.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final Map<String, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
 
@@ -64,6 +68,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                             // Re-register
                             boolean success = registryWatcher(watcher);
                             if (!success) {
+                                logger.info("notify cluster change event");
                                 HttpServletResponse httpServletResponse =
                                     (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
                                 httpServletResponse.setStatus(HttpServletResponse.SC_OK);
@@ -83,6 +88,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         // Notifications are made of changes in cluster information
         Optional.ofNullable(WATCHERS.remove(event.getGroup()))
             .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                logger.info("notify cluster change event");
                 HttpServletResponse httpServletResponse =
                     (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
                 watcher.setDone(true);

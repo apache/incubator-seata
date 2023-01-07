@@ -77,11 +77,11 @@ public class ClusterController {
 
     @GetMapping("/cluster")
     public MetadataResponse cluster(@RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group) {
-        String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
         MetadataResponse metadataResponse = new MetadataResponse();
-        metadataResponse.setMode(mode);
         RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer(group);
         if (raftServer != null) {
+            String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+            metadataResponse.setMode(mode);
             String currentConf = ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_CLUSTER);
             if (!StringUtils.isBlank(currentConf)) {
                 final Configuration currentClusters = new Configuration();
