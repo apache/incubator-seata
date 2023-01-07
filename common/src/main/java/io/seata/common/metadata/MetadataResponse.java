@@ -23,6 +23,8 @@ public class MetadataResponse {
 
     String mode;
 
+    long term;
+
     public List<Node> getNodes() {
         return nodes;
     }
@@ -39,12 +41,12 @@ public class MetadataResponse {
         this.mode = mode;
     }
 
-    @Override
-    public String toString() {
-        return "MetadataResponse{" +
-                "nodes=" + nodes +
-                ", mode='" + mode + '\'' +
-                '}';
+    public long getTerm() {
+        return term;
     }
 
+    public void setTerm(long term) {
+        this.term = term;
+    }
+    
 }

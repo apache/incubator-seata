@@ -47,7 +47,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
+    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
 
     @PostConstruct
@@ -57,7 +57,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             for (String group : WATCHERS.keySet()) {
                 Optional.ofNullable(WATCHERS.remove(group))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                        if (System.currentTimeMillis() > watcher.getTimeout()) {
+                        if (System.currentTimeMillis() >= watcher.getTimeout()) {
                             HttpServletResponse httpServletResponse =
                                 (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
                             watcher.setDone(true);
@@ -66,14 +66,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         }
                         if (!watcher.isDone()) {
                             // Re-register
-                            boolean success = registryWatcher(watcher);
-                            if (!success) {
-                                logger.info("notify cluster change event");
-                                HttpServletResponse httpServletResponse =
-                                    (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-                                ((AsyncContext)watcher.getAsyncContext()).complete();
-                            }
+                            registryWatcher(watcher);
                         }
                     }));
             }
@@ -84,28 +77,31 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
-        GROUP_UPDATE_TIME.put(event.getGroup(), System.currentTimeMillis());
+        GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
         // Notifications are made of changes in cluster information
         Optional.ofNullable(WATCHERS.remove(event.getGroup()))
-            .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                logger.info("notify cluster change event");
-                HttpServletResponse httpServletResponse =
-                    (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                watcher.setDone(true);
-                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-                ((AsyncContext)watcher.getAsyncContext()).complete();
-            }));
+            .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
     }
 
-    public boolean registryWatcher(Watcher<?> watcher) {
+    private void notify(Watcher<?> watcher){
+        AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
+        HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
+        watcher.setDone(true);
+        if (logger.isDebugEnabled()) {
+            logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
+        }
+        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+        asyncContext.complete();
+    }
+
+    public void registryWatcher(Watcher<?> watcher) {
         String group = watcher.getGroup();
-        Long lastChangeTime = GROUP_UPDATE_TIME.get(group);
-        if (lastChangeTime == null || watcher.getLastUpdateTime() >= lastChangeTime) {
+        Long term = GROUP_UPDATE_TIME.get(group);
+        if (term == null || watcher.getTerm() >= term) {
             WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
         } else {
-            return false;
+            notify(watcher);
         }
-        return true;
     }
 
 }

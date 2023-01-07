@@ -30,15 +30,15 @@ public class Watcher<T> {
 
     private long timeout;
 
-    private long lastUpdateTime;
+    private long term;
 
     private String protocol = HTTP;
 
-    public Watcher(String group, T asyncContext, int timeout, long lastUpdateTime) {
+    public Watcher(String group, T asyncContext, int timeout, long term) {
         this.group = group;
         this.asyncContext = asyncContext;
         this.timeout = System.currentTimeMillis() + timeout;
-        this.lastUpdateTime = lastUpdateTime;
+        this.term = term;
     }
 
     public String getGroup() {
@@ -81,12 +81,12 @@ public class Watcher<T> {
         this.protocol = protocol;
     }
 
-    public long getLastUpdateTime() {
-        return lastUpdateTime;
+    public long getTerm() {
+        return term;
     }
 
-    public void setLastUpdateTime(long lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
+    public void setTerm(long term) {
+        this.term = term;
     }
 
     public interface Protocol {

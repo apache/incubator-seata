@@ -100,6 +100,11 @@ public class RaftStateMachine extends StateMachineAdapter {
      */
     private final AtomicLong leaderTerm = new AtomicLong(-1);
 
+    /**
+     * current term
+     */
+    private final AtomicLong currentTerm = new AtomicLong(-1);
+
     public boolean isLeader() {
         return this.leaderTerm.get() > 0;
     }
@@ -256,6 +261,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         boolean leader = isLeader();
         this.leaderTerm.set(term);
         super.onLeaderStart(term);
+        this.currentTerm.set(term);
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
@@ -266,7 +272,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         DefaultCoordinator.getInstance().setPrevent(true);
         // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group));
+            .publishEvent(new ClusterChangeEvent(this, group, term));
     }
 
     @Override
@@ -284,16 +290,17 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onStartFollowing(final LeaderChangeContext ctx) {
         super.onStartFollowing(ctx);
+        this.currentTerm.set(ctx.getTerm());
         DefaultCoordinator.getInstance().setPrevent(false);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group));
+                .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm()));
     }
 
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         super.onConfigurationCommitted(conf);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group));
+                .publishEvent(new ClusterChangeEvent(this, group));
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {
@@ -309,6 +316,10 @@ public class RaftStateMachine extends StateMachineAdapter {
             LOGGER.error("Message synchronization failure: {}, msgType: {}", e.getMessage(), msg.getMsgType(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    public AtomicLong getCurrentTerm() {
+        return currentTerm;
     }
 
 }

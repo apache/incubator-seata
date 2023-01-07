@@ -32,7 +32,9 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 public class Metadata {
 
     private final Map<String, Node> leaders = new HashMap<>();
-    private final Map<String, Long> leaderUpdateTimes = new HashMap<>();
+
+    private final Map<String, Long> clusterTerm = new HashMap<>();
+
     private final Map<String, List<Node>> nodes = new HashMap<>();
 
     private StoreMode storeMode = StoreMode.FILE;
@@ -48,20 +50,6 @@ public class Metadata {
     public void setLeaderNode(Node node) {
         String group = node.getGroup();
         this.leaders.put(node.getGroup(), node);
-        this.leaderUpdateTimes.put(group, System.currentTimeMillis());
-    }
-
-    public boolean isExpired() {
-        return isExpired(DEFAULT_SEATA_GROUP);
-    }
-
-    public boolean isExpired(String group) {
-        Long timestamp = leaderUpdateTimes.get(group);
-        return timestamp == null || (System.currentTimeMillis() - timestamp) > 1000;
-    }
-
-    public boolean isNotExpired() {
-        return !isExpired();
     }
 
     public void setLeader(Node leader) {
@@ -106,6 +94,10 @@ public class Metadata {
 
     public void setStoreMode(StoreMode storeMode) {
         this.storeMode = storeMode;
+    }
+
+    public Map<String, Long> getClusterTerm() {
+        return clusterTerm;
     }
 
     @Override

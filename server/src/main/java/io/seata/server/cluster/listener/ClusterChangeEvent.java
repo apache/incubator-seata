@@ -25,6 +25,14 @@ public class ClusterChangeEvent extends ApplicationEvent {
 
     private String group;
 
+    private long term;
+
+    public ClusterChangeEvent(Object source, String group, long term) {
+        super(source);
+        this.group = group;
+        this.term = term;
+    }
+
     public ClusterChangeEvent(Object source, String group) {
         super(source);
         this.group = group;
@@ -41,4 +49,13 @@ public class ClusterChangeEvent extends ApplicationEvent {
     public void setGroup(String group) {
         this.group = group;
     }
+
+    public long getTerm() {
+        return term;
+    }
+
+    public void setTerm(long term) {
+        this.term = term;
+    }
+
 }

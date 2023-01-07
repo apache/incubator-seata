@@ -156,7 +156,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                             // Forced refresh of metadata information after set age
                             boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
                             if (!fetch) {
-                                fetch = watch(currentTime);
+                                fetch = watch();
                             }
                             // Cluster changes or reaches timeout refresh time
                             if (fetch) {
@@ -172,7 +172,9 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                                 });
                                 if (success.get()) {
                                     currentTime = System.currentTimeMillis();
-                                    LOGGER.info("refreshMetadata time: {}", currentTime);
+                                    if (LOGGER.isDebugEnabled()) {
+                                        LOGGER.debug("refresh seata cluster metadata time: {}", currentTime);
+                                    }
                                 }
                             }
                         }
@@ -253,24 +255,26 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         return RegistryService.super.aliveLookup(transactionServiceGroup);
     }
 
-    private static boolean watch(long lastUpdateTime) {
-        Map<String, String> param = new HashMap<>();
-        StringJoiner stringJoiner = new StringJoiner(ENDPOINT_AGAIN_SPLIT_CHAR);
-        METADATA.groups().parallelStream().forEach(stringJoiner::add);
-        param.put("groupIds", stringJoiner.toString());
-        param.put("lastUpdateTime", String.valueOf(lastUpdateTime));
-        String tcAddress = queryHttpAddress(DEFAULT_SEATA_GROUP);
-        try (CloseableHttpResponse response = doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
-            if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+    private static boolean watch() {
+        try {
+            Map<String, String> param = new HashMap<>();
+            param.put("groupTerms", OBJECT_MAPPER.writeValueAsString(METADATA.getClusterTerm()));
+            String tcAddress = queryHttpAddress(DEFAULT_SEATA_GROUP);
+            try (CloseableHttpResponse response =
+                doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+                if (response != null) {
+                    StatusLine statusLine = response.getStatusLine();
+                    return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+                }
+            } catch (Exception e) {
+                LOGGER.error("watch cluster fail: {}", e.getMessage());
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException ignored) {
+                }
             }
-        } catch (Exception e) {
-            LOGGER.error("watch cluster fail: {}", e.getMessage());
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException ignored) {
-            }
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.getMessage(), e);
         }
         return false;
     }
@@ -293,45 +297,39 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     }
 
     private static void acquireClusterMetaData(String group) {
-        if (METADATA.isExpired(group)) {
-            synchronized (group.intern()) {
-                if (METADATA.isExpired(group)) {
-                    String tcAddress = queryHttpAddress(group);
-                    if (StringUtils.isNotBlank(tcAddress)) {
-                        Map<String, String> param = new HashMap<>();
-                        param.put("group", group);
-                        String response = null;
-                        try (CloseableHttpResponse httpResponse =
-                            doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
-                            if (httpResponse != null
-                                && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                                response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                            }
-                            MetadataResponse metadataResponse = null;
-                            if (StringUtils.isNotBlank(response)) {
-                                try {
-                                    metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
-                                } catch (JsonProcessingException e) {
-                                    LOGGER.error(e.getMessage(), e);
-                                    return;
-                                }
-                            }
-                            if (metadataResponse != null) {
-                                List<Node> list = new ArrayList<>();
-                                for (Node node : metadataResponse.getNodes()) {
-                                    if (node.getRole() == ClusterRole.LEADER) {
-                                        METADATA.setLeader(node);
-                                    }
-                                    list.add(node);
-                                }
-                                METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
-                                METADATA.setNodes(group, list);
-                            }
-                        } catch (IOException e) {
-                            LOGGER.error(e.getMessage(), e);
-                        }
+        String tcAddress = queryHttpAddress(group);
+        if (StringUtils.isNotBlank(tcAddress)) {
+            Map<String, String> param = new HashMap<>();
+            param.put("group", group);
+            String response = null;
+            try (CloseableHttpResponse httpResponse =
+                doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
+                if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                }
+                MetadataResponse metadataResponse = null;
+                if (StringUtils.isNotBlank(response)) {
+                    try {
+                        metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
+                    } catch (JsonProcessingException e) {
+                        LOGGER.error(e.getMessage(), e);
+                        return;
                     }
                 }
+                if (metadataResponse != null) {
+                    List<Node> list = new ArrayList<>();
+                    for (Node node : metadataResponse.getNodes()) {
+                        if (node.getRole() == ClusterRole.LEADER) {
+                            METADATA.setLeader(node);
+                        }
+                        list.add(node);
+                    }
+                    METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
+                    METADATA.setNodes(group, list);
+                    METADATA.getClusterTerm().put(group, metadataResponse.getTerm());
+                }
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }

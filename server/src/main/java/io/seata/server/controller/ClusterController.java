@@ -16,7 +16,9 @@
 package io.seata.server.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,11 +26,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.XID;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
@@ -67,6 +70,9 @@ public class ClusterController {
 
     @Resource
     private ApplicationContext applicationContext;
+
+    @Resource
+    private ObjectMapper objectMapper;
 
     private ServerProperties serverProperties;
 
@@ -123,6 +129,7 @@ public class ClusterController {
                             node.setHostAddress(follower.getIp());
                             return node;
                         }).collect(Collectors.toList()));
+                        metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());
                         metadataResponse.setNodes(new ArrayList<>(nodes));
                     }
                 } catch (Exception e) {
@@ -134,18 +141,18 @@ public class ClusterController {
     }
 
     @GetMapping("/watch")
-    public void watch(HttpServletRequest request, @RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String groupIds,
-        @RequestParam(defaultValue = "29000") int timeout, Long lastUpdateTime) {
+    public void watch(HttpServletRequest request, @RequestParam String groupTerms,
+        @RequestParam(defaultValue = "29000") int timeout) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        for (String group : groupIds.split(",")) {
-            Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, lastUpdateTime);
-            boolean success = clusterWatcherManager.registryWatcher(watcher);
-            if (!success) {
-                HttpServletResponse httpServletResponse = (HttpServletResponse)watcher.getAsyncContext().getResponse();
-                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-                context.complete();
-            }
+        try {
+            Map<String, Object> groupTermMap = objectMapper.readValue(groupTerms, HashMap.class);
+            groupTermMap.forEach((group, term) -> {
+                Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+                clusterWatcherManager.registryWatcher(watcher);
+            });
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
