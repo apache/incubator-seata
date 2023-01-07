@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import io.seata.commonapi.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -36,7 +37,7 @@ public class ActionInterceptorHandlerTest {
     /**
      * The Action interceptor handler.
      */
-    protected  ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     /**
      * Test business action context.

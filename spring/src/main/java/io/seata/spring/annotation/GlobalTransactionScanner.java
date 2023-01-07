@@ -15,18 +15,11 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.commonapi.remoting.RemotingParser;
+import io.seata.commonapi.util.ProxyUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -36,24 +29,16 @@ import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
+import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
-import io.seata.spring.tcc.TccActionInterceptor;
-import io.seata.spring.util.OrderUtil;
-import io.seata.spring.util.SpringProxyUtils;
-import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -62,11 +47,19 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.Ordered;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
+
 
 /**
  * The type Global transaction scanner.
@@ -209,8 +202,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         if (DEFAULT_TX_GROUP_OLD.equals(txServiceGroup)) {
             LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, " +
-                    "please change your default configuration as soon as possible " +
-                    "and we don't recommend you to use default tx-service-group's value provided by seata",
+                            "please change your default configuration as soon as possible " +
+                            "and we don't recommend you to use default tx-service-group's value provided by seata",
                     DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
         }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
@@ -245,23 +238,24 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     /**
      * The following will be scanned, and added corresponding interceptor:
-     *
+     * <p>
      * TM:
-     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
-     * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
      *
+     * @see GlobalTransactional // TM annotation
+     * Corresponding interceptor:
+     * @see io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalTransaction(io.seata.commonapi.interceptor.InvocationWrapper, io.seata.commonapi.annotation.AspectTransactional) // TM handler
+     * <p>
      * GlobalLock:
-     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
+     * @see GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
-     *
+     * @see GlobalTransactionalInterceptorHandler#handleGlobalLock(io.seata.commonapi.interceptor.InvocationWrapper, io.seata.spring.annotation.GlobalLock)  // GlobalLock handler
+     * <p>
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
      * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
-     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
+     * @see RemotingParser // Remote TCC service parser
      * Corresponding interceptor:
-     * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+     * @see TccActionInterceptorHandler // the interceptor of TCC mode
      */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
@@ -275,48 +269,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                interceptor = null;
-                //check TCC proxy
-                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
-                    // init tcc fence clean task if enable useTccFence
-                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
-                    //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
-                    interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
-                    ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                            (ConfigurationChangeListener)interceptor);
-                } else {
-                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
-
-                    if (!existsAnnotation(new Class[]{serviceInterface})
-                        && !existsAnnotation(interfacesIfJdk)) {
-                        return bean;
-                    }
-
-                    if (globalTransactionalInterceptor == null) {
-                        globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationCache.addConfigListener(
-                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                (ConfigurationChangeListener)globalTransactionalInterceptor);
-                    }
-                    interceptor = globalTransactionalInterceptor;
+                Object resultBean = ProxyUtil.createProxy(bean);
+                if (bean != resultBean) {
+                    PROXYED_SET.add(beanName);
                 }
-
-                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
-                if (!AopUtils.isAopProxy(bean)) {
-                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
-                } else {
-                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    int pos;
-                    for (Advisor avr : advisor) {
-                        // Find the position based on the advisor's order, and add to advisors by pos
-                        pos = findAddSeataAdvisorPosition(advised, avr);
-                        advised.addAdvisor(pos, avr);
-                    }
-                }
-                PROXYED_SET.add(beanName);
-                return bean;
+                return resultBean;
             }
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -325,7 +282,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private boolean doCheckers(Object bean, String beanName) {
         if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
-            || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
             return false;
         }
 
@@ -346,148 +303,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         return true;
     }
 
-
-    //region the methods about findAddSeataAdvisorPosition  START
-
-    /**
-     * Find pos for `advised.addAdvisor(pos, avr);`
-     *
-     * @param advised      the advised
-     * @param seataAdvisor the seata advisor
-     * @return the pos
-     */
-    private int findAddSeataAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
-        // Get seataAdvisor's order and interceptorPosition
-        int seataOrder = OrderUtil.getOrder(seataAdvisor);
-        SeataInterceptorPosition seataInterceptorPosition = getSeataInterceptorPosition(seataAdvisor);
-
-        // If the interceptorPosition is any, check lowest or highest.
-        if (SeataInterceptorPosition.Any == seataInterceptorPosition) {
-            if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
-                // the last position
-                return advised.getAdvisors().length;
-            } else if (seataOrder == Ordered.HIGHEST_PRECEDENCE) {
-                // the first position
-                return 0;
-            }
-        } else {
-            // If the interceptorPosition is not any, compute position if has TransactionInterceptor.
-            Integer position = computePositionIfHasTransactionInterceptor(advised, seataAdvisor, seataInterceptorPosition, seataOrder);
-            if (position != null) {
-                // the position before or after TransactionInterceptor
-                return position;
-            }
-        }
-
-        // Find position
-        return this.findPositionInAdvisors(advised.getAdvisors(), seataAdvisor);
-    }
-
-    @Nullable
-    private Integer computePositionIfHasTransactionInterceptor(AdvisedSupport advised, Advisor seataAdvisor, SeataInterceptorPosition seataInterceptorPosition, int seataOrder) {
-        // Find the TransactionInterceptor's advisor, order and position
-        Advisor otherAdvisor = null;
-        Integer transactionInterceptorPosition = null;
-        Integer transactionInterceptorOrder = null;
-        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
-            otherAdvisor = advised.getAdvisors()[i];
-            if (isTransactionInterceptor(otherAdvisor)) {
-                transactionInterceptorPosition = i;
-                transactionInterceptorOrder = OrderUtil.getOrder(otherAdvisor);
-                break;
-            }
-        }
-        // If the TransactionInterceptor does not exist, return null
-        if (transactionInterceptorPosition == null) {
-            return null;
-        }
-
-        // Reset seataOrder if the seataOrder is not match the position
-        Advice seataAdvice = seataAdvisor.getAdvice();
-        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherThan(seataOrder, transactionInterceptorOrder)) {
-            int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
-            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
-                        seataAdvice.getClass().getSimpleName(), seataOrder,
-                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
-                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
-            }
-            // the position after the TransactionInterceptor's advisor
-            return transactionInterceptorPosition + 1;
-        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerThan(seataOrder, transactionInterceptorOrder)) {
-            int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
-            ((SeataInterceptor)seataAdvice).setOrder(newSeataOrder);
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
-                        seataAdvice.getClass().getSimpleName(), seataOrder,
-                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
-                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
-            }
-            // the position before the TransactionInterceptor's advisor
-            return transactionInterceptorPosition;
-        }
-
-        return null;
-    }
-
-    private int findPositionInAdvisors(Advisor[] advisors, Advisor seataAdvisor) {
-        Advisor advisor;
-        for (int i = 0, l = advisors.length; i < l; ++i) {
-            advisor = advisors[i];
-            if (OrderUtil.higherOrEquals(seataAdvisor, advisor)) {
-                // the position before the current advisor
-                return i;
-            }
-        }
-
-        // the last position, after all the advisors
-        return advisors.length;
-    }
-
-    private SeataInterceptorPosition getSeataInterceptorPosition(Advisor seataAdvisor) {
-        Advice seataAdvice = seataAdvisor.getAdvice();
-        if (seataAdvice instanceof SeataInterceptor) {
-            return ((SeataInterceptor)seataAdvice).getPosition();
-        } else {
-            return SeataInterceptorPosition.Any;
-        }
-    }
-
-    private boolean isTransactionInterceptor(Advisor advisor) {
-        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(advisor.getAdvice().getClass().getName());
-    }
-
-    //endregion the methods about findAddSeataAdvisorPosition  END
-
-
-    private boolean existsAnnotation(Class<?>[] classes) {
-        if (CollectionUtils.isNotEmpty(classes)) {
-            for (Class<?> clazz : classes) {
-                if (clazz == null) {
-                    continue;
-                }
-                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
-                if (trxAnno != null) {
-                    return true;
-                }
-                Method[] methods = clazz.getMethods();
-                for (Method method : methods) {
-                    trxAnno = method.getAnnotation(GlobalTransactional.class);
-                    if (trxAnno != null) {
-                        return true;
-                    }
-
-                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
-                    if (lockAnno != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
         return new MethodDesc(anno, method);
     }
@@ -505,7 +320,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("Global transaction is disabled.");
             }
             ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                    (ConfigurationChangeListener)this);
+                    (ConfigurationChangeListener) this);
             return;
         }
         if (initialized.compareAndSet(false, true)) {

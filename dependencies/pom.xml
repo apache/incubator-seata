@@ -35,7 +35,6 @@
         <dubbo-seata.version>1.0.0</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <bytebuddy.version>1.12.13</bytebuddy.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -113,6 +112,7 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
+        <bytebuddy.version>1.12.17</bytebuddy.version>
     </properties>
 
     <dependencyManagement>
