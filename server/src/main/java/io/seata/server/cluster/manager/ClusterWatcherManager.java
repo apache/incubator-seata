@@ -83,7 +83,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
     }
 
-    private void notify(Watcher<?> watcher){
+    private void notify(Watcher<?> watcher) {
         AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
         HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
         watcher.setDone(true);
