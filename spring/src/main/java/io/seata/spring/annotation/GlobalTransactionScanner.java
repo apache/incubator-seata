@@ -17,7 +17,7 @@ package io.seata.spring.annotation;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.commonapi.annotation.AspectTransactional;
+import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.commonapi.remoting.RemotingParser;
 import io.seata.commonapi.util.ProxyUtil;
 import io.seata.config.ConfigurationCache;
@@ -34,7 +34,6 @@ import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -244,12 +243,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      *
      * @see GlobalTransactional // TM annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
+     * @see io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalTransaction(io.seata.commonapi.interceptor.InvocationWrapper, io.seata.commonapi.annotation.AspectTransactional) // TM handler
      * <p>
      * GlobalLock:
      * @see GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
+     * @see GlobalTransactionalInterceptorHandler#handleGlobalLock(io.seata.commonapi.interceptor.InvocationWrapper, io.seata.spring.annotation.GlobalLock)  // GlobalLock handler
      * <p>
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
