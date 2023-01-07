@@ -548,7 +548,7 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("load clazz instance error: {}", e.getMessage());
+                        LOGGER.warn("load clazz instance error ", e);
                     }
                 }
             }
