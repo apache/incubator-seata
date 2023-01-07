@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 
-    protected static List<InterfaceParser> allInterfaceParsers = new ArrayList<>();
+    protected static final List<InterfaceParser> allInterfaceParsers = new ArrayList<>();
 
 
     private static class SingletonHolder {
