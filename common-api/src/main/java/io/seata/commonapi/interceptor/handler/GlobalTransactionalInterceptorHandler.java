@@ -147,7 +147,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
-        Class targetClass = invocation.getTarget().getClass();
+        Class<?> targetClass = invocation.getTarget().getClass();
         Method specificMethod = invocation.getMethod();
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
             final Method method = invocation.getMethod();
