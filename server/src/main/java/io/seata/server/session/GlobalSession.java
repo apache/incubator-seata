@@ -703,7 +703,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
-        this.active = byteBuffer.getInt() == 1;
+        if (byteBuffer.hasRemaining()) {
+            this.active = byteBuffer.getInt() == 1;
+        }
     }
 
     /**
