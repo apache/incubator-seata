@@ -96,7 +96,9 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
     private void registerHintsForATMode(RuntimeHints hints) {
         ReflectionHints reflectionHints = hints.reflection();
 
-        // Register the MySQL classes for AT mode, see the class 'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
+        // Register implementation classes of 'com.github.benmanes.caffeine.cache.NodeFactory'.
+        // See the class  'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
+        // See the method 'com.github.benmanes.caffeine.cache.NodeFactory.newFactory(Caffeine<K, V> builder, boolean isAsync)'
         String caffeineCachePackage = "com.github.benmanes.caffeine.cache";
         Set<Class<?>> classes = ReflectionUtil.getClassesByPackage(caffeineCachePackage);
         if (classes.size() > 0) {
