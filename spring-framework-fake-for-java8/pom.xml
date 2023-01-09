@@ -23,7 +23,7 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-spring-framework-fake</artifactId>
+    <artifactId>seata-spring-framework-fake-for-java8</artifactId>
     <name>seata-spring-framework-fake ${project.version}</name>
     <description>spring-framework-fake for Seata built with Maven</description>
 

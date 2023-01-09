@@ -77,7 +77,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-framework-fake</artifactId>
+            <artifactId>seata-spring-framework-fake-for-java8</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

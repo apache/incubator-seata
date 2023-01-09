@@ -565,7 +565,7 @@ public class EnhancedServiceLoader {
                 }
             } else {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.warn("Load [{}] class fail: no urls found is null in '{}'.", type.getName(), dir);
+                    LOGGER.warn("Load [{}] class fail: no urls found in '{}'.", type.getName(), dir);
                 }
             }
         }
