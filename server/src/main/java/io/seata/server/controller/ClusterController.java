@@ -32,7 +32,6 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.seata.common.XID;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
@@ -54,7 +53,6 @@ import org.springframework.web.bind.annotation.RestController;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
  * @author funkye
