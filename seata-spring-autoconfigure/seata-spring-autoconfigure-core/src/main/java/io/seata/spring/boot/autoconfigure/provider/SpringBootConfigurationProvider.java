@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
@@ -65,7 +66,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     result = originalConfiguration.getConfigFromSys(rawDataId);
                     if (null == result) {
                         String dataId = convertDataId(rawDataId);
-                        Class<?> dataType = method.getReturnType();
+                        Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
                         Object defaultValue = null;
 
                         // Get defaultValue from the arguments
