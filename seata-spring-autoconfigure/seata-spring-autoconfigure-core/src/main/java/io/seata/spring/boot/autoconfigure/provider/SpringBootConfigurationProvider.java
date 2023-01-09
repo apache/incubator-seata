@@ -63,10 +63,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     String rawDataId = (String)args[0];
                     result = originalConfiguration.getConfigFromSys(rawDataId);
                     if (null == result) {
+                        String dataId = convertDataId(rawDataId);
+                        Class<?> dataType = method.getReturnType();
                         if (args.length == 1) {
-                            result = get(convertDataId(rawDataId));
+                            result = get(dataId, dataType);
                         } else {
-                            result = get(convertDataId(rawDataId), args[1]);
+                            Object defaultValue = args[1];
+
+                            // See: Configuration.getConfig(String dataId, long timeoutMills);
+                            if (defaultValue != null && !dataType.isAssignableFrom(defaultValue.getClass())) {
+                                defaultValue = null;
+                            }
+
+                            result = get(dataId, dataType, defaultValue);
                         }
                     }
                     if (result != null) {
@@ -82,15 +91,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             });
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
-        Object result = get(dataId);
+    private Object get(String dataId, Class<?> dataType, Object defaultValue) throws IllegalAccessException {
+        Object result = get(dataId, dataType);
         if (result == null) {
             return defaultValue;
         }
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object get(String dataId, Class<?> dataType) throws IllegalAccessException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
 
@@ -112,7 +121,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         Objects.requireNonNull(propertyObj, "Instantiate the property fail");
 
         // Get config, and take the field value of the propertyObj as the default value
-        return getFieldValue(propertyObj, propertySuffix, dataId);
+        return getFieldValue(propertyObj, propertySuffix, dataId, dataType);
     }
 
     /**
@@ -124,24 +133,22 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return java.lang.Object
      * @author xingfudeshi@gmail.com
      */
-    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
+    private Object getFieldValue(Object object, String fieldName, String dataId, Class<?> dataType) throws IllegalAccessException {
         Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
             .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
 
         // Get defaultValue and type
         Object defaultValue = null;
-        Class<?> type = String.class;
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            type = field.getType();
-            if (!Map.class.isAssignableFrom(type)) {
+            if (!Map.class.isAssignableFrom(field.getType())) {
                 field.setAccessible(true);
                 defaultValue = field.get(object);
             }
         }
 
         // Get config
-        return getConfig(dataId, defaultValue, type);
+        return getConfig(dataId, defaultValue, dataType);
     }
 
     /**
