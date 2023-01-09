@@ -135,7 +135,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
             type = field.getType();
-            if (!isMapOrColl(type)) {
+            if (!Map.class.isAssignableFrom(type)) {
                 field.setAccessible(true);
                 defaultValue = field.get(object);
             }
@@ -143,11 +143,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
         // Get config
         return getConfig(dataId, defaultValue, type);
-    }
-
-    private boolean isMapOrColl(Class<?> clazz) {
-        return Map.class.isAssignableFrom(clazz)
-                || Collection.class.isAssignableFrom(clazz);
     }
 
     /**
