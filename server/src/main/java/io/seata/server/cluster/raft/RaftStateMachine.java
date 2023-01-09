@@ -155,7 +155,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         // gets a record of the session at the moment
         Map<String, Object> maps = new HashMap<>(2);
-        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
         int initialCapacity = sessionMap.size();
         Map<String, byte[]> globalSessionByteMap = new HashMap<>(initialCapacity);
@@ -171,8 +171,8 @@ public class RaftStateMachine extends StateMachineAdapter {
         maps.put(BRANCH_SESSION_MAP_KEY, branchSessionByteMap);
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(maps);
-        LOGGER.info("globalSessionMap size :{}, branchSessionMap map size: {}", globalSessionByteMap.size(),
-            branchSessionByteMap.size());
+        LOGGER.info("groupId: {}, globalSessionMap size: {}, branchSessionMap map size: {}", group,
+            globalSessionByteMap.size(), branchSessionByteMap.size());
         String path = new StringBuilder(writer.getPath()).append(File.separator).append("data").toString();
         if (RaftSnapshotFile.save(raftSnapshot, path)) {
             if (writer.addFile("data")) {
@@ -206,7 +206,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
             }
             Map<String, Object> maps = RaftSnapshotFile.load(path);
-            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager();
+            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(GLOBAL_SESSION_MAP_KEY);
             Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP_KEY);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
@@ -260,16 +260,17 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onLeaderStart(final long term) {
         boolean leader = isLeader();
         this.leaderTerm.set(term);
-        super.onLeaderStart(term);
+        LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
         this.currentTerm.set(term);
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
-                LOGGER.info("session map: {} ", SessionHolder.getRootSessionManager().allSessions().size());
+                LOGGER.info("groupId: {}, session map: {} ", group,
+                    SessionHolder.getRootSessionManager().allSessions().size());
                 SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT,
-                        false);
+                    false);
             });
         }
-        DefaultCoordinator.getInstance().setPrevent(true);
+        DefaultCoordinator.getInstance().setPrevent(group, true);
         // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, term));
@@ -278,29 +279,29 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
-        super.onLeaderStop(status);
-        DefaultCoordinator.getInstance().setPrevent(false);
+        LOGGER.info("groupId: {}, onLeaderStop: status={}.", group, status);
+        DefaultCoordinator.getInstance().setPrevent(group, true);
     }
 
     @Override
     public void onStopFollowing(final LeaderChangeContext ctx) {
-        super.onStopFollowing(ctx);
+        LOGGER.info("groupId: {}, onStopFollowing: {}.", group, ctx);
     }
 
     @Override
     public void onStartFollowing(final LeaderChangeContext ctx) {
-        super.onStartFollowing(ctx);
+        LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
-        DefaultCoordinator.getInstance().setPrevent(false);
+        DefaultCoordinator.getInstance().setPrevent(group, true);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm()));
+            .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm()));
     }
 
     @Override
     public void onConfigurationCommitted(Configuration conf) {
-        super.onConfigurationCommitted(conf);
+        LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                .publishEvent(new ClusterChangeEvent(this, group));
+            .publishEvent(new ClusterChangeEvent(this, group));
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {

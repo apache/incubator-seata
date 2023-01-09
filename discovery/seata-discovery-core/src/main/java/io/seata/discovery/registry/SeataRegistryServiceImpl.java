@@ -78,8 +78,6 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
-    private static final String ENDPOINT_AGAIN_SPLIT_CHAR = ",";
-
     private static final Map<String, List<InetSocketAddress>> INIT_ADDRESSES = new HashMap<>();
 
     private static final Metadata METADATA = new Metadata();

@@ -17,6 +17,8 @@ package io.seata.common.metadata;
 
 import java.util.Objects;
 
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
+
 /**
  * @author funkye
  */
@@ -31,6 +33,17 @@ public class Node {
     private int httpPort;
 
     private String group;
+
+    public Node(int nettyPort, int raftPort) {
+        this.nettyPort = nettyPort;
+        if (this.nettyPort <= 0) {
+            this.nettyPort = raftPort - SERVICE_OFFSET_SPRING_BOOT;
+        }
+        this.httpPort = this.nettyPort - SERVICE_OFFSET_SPRING_BOOT;
+    }
+
+    public Node() {
+    }
 
     private ClusterRole role = ClusterRole.MEMBER;
 

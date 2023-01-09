@@ -19,12 +19,16 @@ package io.seata.core.protocol.transaction;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.rpc.RpcContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+
 /**
  * The type Abstract transaction request.
  *
  * @author sharajava
  */
 public abstract class AbstractTransactionRequest extends AbstractMessage {
+
+    protected String groupId = DEFAULT_SEATA_GROUP;
 
     /**
      * Handle abstract transaction response.
@@ -33,4 +37,12 @@ public abstract class AbstractTransactionRequest extends AbstractMessage {
      * @return the abstract transaction response
      */
     public abstract AbstractTransactionResponse handle(RpcContext rpcContext);
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 }

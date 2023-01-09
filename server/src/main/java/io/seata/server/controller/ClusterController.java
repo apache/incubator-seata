@@ -103,29 +103,23 @@ public class ClusterController {
                     PeerId leader = routeTable.selectLeader(group);
                     if (leader != null) {
                         Set<Node> nodes = new HashSet<>();
-                        Node leaderNode = new Node();
+                        Node leaderNode = new Node(leader.getIdx(), leader.getPort());
                         leaderNode.setRole(ClusterRole.LEADER);
                         leaderNode.setGroup(group);
-                        leaderNode.setHttpPort(leader.getIdx() - SERVICE_OFFSET_SPRING_BOOT);
-                        leaderNode.setNettyPort(leader.getIdx());
                         leaderNode.setHostAddress(leader.getIp());
                         nodes.add(leaderNode);
                         Configuration configuration = routeTable.getConfiguration(group);
                         nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
-                            Node node = new Node();
+                            Node node = new Node(learner.getIdx(), learner.getPort());
                             node.setGroup(group);
                             node.setRole(ClusterRole.LEARNER);
-                            node.setHttpPort(serverProperties.getPort());
-                            node.setNettyPort(XID.getPort());
                             node.setHostAddress(learner.getIp());
                             return node;
                         }).collect(Collectors.toList()));
                         nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
-                            Node node = new Node();
+                            Node node = new Node(follower.getIdx(), follower.getPort());
                             node.setGroup(group);
                             node.setRole(ClusterRole.FOLLOWER);
-                            node.setHttpPort(follower.getIdx() - SERVICE_OFFSET_SPRING_BOOT);
-                            node.setNettyPort(follower.getIdx());
                             node.setHostAddress(follower.getIp());
                             return node;
                         }).collect(Collectors.toList()));

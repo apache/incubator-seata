@@ -15,6 +15,9 @@
  */
 package io.seata.server;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.StoreException;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
@@ -57,7 +60,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTCInboundHandler.class);
 
-    protected volatile boolean prevent = true;
+    protected static final Map<String, Boolean> GROUP_PREVENT = new ConcurrentHashMap<>();
 
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
@@ -360,7 +363,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
     @Override
     public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
         try {
-            if (!prevent) {
+            if (!isPrevent(request.getGroupId())) {
                 throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing !");
             }
@@ -371,14 +374,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         }
     }
 
-    public boolean isPrevent() {
+    public boolean isPrevent(String group) {
+        return GROUP_PREVENT.computeIfAbsent(group, value -> setPrevent(group, false));
+    }
+
+    public boolean setPrevent(String group, boolean prevent) {
+        prevent = StoreConfig.getSessionMode() != StoreConfig.SessionMode.RAFT || prevent;
+        GROUP_PREVENT.put(group, prevent);
         return prevent;
     }
 
-    public void setPrevent(boolean prevent) {
-        if (StoreConfig.getSessionMode() == StoreConfig.SessionMode.RAFT) {
-            this.prevent = prevent;
-        }
-    }
-    
 }

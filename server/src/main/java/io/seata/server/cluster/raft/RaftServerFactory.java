@@ -30,6 +30,8 @@ import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.option.RaftOptions;
 import com.alipay.sofa.jraft.rpc.CliClientService;
+import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
+import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
@@ -93,19 +95,17 @@ public class RaftServerFactory {
         }
         int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
         String host = XID.getIpAddress();
-        int nettyPort = XID.getPort();
         PeerId serverId = null;
         if (port <= 0) {
             // Highly available deployments require different nodes
             for (PeerId peer : initConf.getPeers()) {
-                if (StringUtils.equals(peer.getIp(), host) && peer.getIdx() == nettyPort) {
+                if (StringUtils.equals(peer.getIp(), host)) {
                     serverId = peer;
-                    break;
                 }
             }
         } else {
             // Local debugging use
-            serverId = new PeerId(host, port, nettyPort);
+            serverId = new PeerId(host, port);
         }
         String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
@@ -114,9 +114,13 @@ public class RaftServerFactory {
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverId.getPort();
-        final NodeOptions nodeOptions = initNodeOptions(initConf);
         try {
-            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, nodeOptions);
+            // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
+            final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
+            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, initNodeOptions(initConf), rpcServer);
+            if (!rpcServer.init(null)) {
+                throw new RuntimeException("start raft group: " + DEFAULT_SEATA_GROUP + "fail!");
+            }
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP, raftServer);
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());

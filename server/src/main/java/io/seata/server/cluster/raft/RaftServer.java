@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
+import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
-import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
 import io.seata.config.ConfigurationCache;
@@ -53,14 +53,12 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
     private final Node node;
     private final CliService cliService;
 
-    public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions)
+    public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions, final RpcServer rpcServer)
         throws IOException {
         String groupPath = dataPath + File.separator + groupId;
         // Initialization path
         FileUtils.forceMkdir(new File(groupPath));
 
-        // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
-        final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
         // Initialize the state machine
         this.raftStateMachine = new RaftStateMachine(groupId);
         // Set the state machine to startup parameters
@@ -75,10 +73,11 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
         boolean reporterEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework
-        this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
+        this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer, true);
         this.cliService = RaftServerFactory.getCliServiceInstance();
         ConfigurationCache.addConfigListener(SERVER_RAFT_CLUSTER, this);
-        this.node = this.raftGroupService.start();
+        this.node = this.raftGroupService.start(false);
+        RouteTable.getInstance().updateConfiguration(groupId, nodeOptions.getInitialConf());
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
                 .outputTo(logger).convertRatesTo(TimeUnit.SECONDS)
