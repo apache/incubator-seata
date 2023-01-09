@@ -12,6 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
+- [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -23,5 +24,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [xssdpgy](https://github.com/xssdpgy)
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
+- [yuruixin](https://github.com/yuruixin)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
