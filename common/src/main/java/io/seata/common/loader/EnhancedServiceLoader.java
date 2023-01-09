@@ -538,7 +538,7 @@ public class EnhancedServiceLoader {
                                     }
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("Load [{}] class fail. {}", line, e.getMessage());
+                                    LOGGER.warn("Load [{}] class fail. ", line, e);
                                 } catch (ClassCastException e) {
                                     LOGGER.error("Load [{}] class fail, please make sure the extension" +
                                             " config in {} implements {}.", line, fileName, type.getName());
@@ -546,7 +546,7 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("load clazz instance error: {}", e.getMessage());
+                        LOGGER.warn("load clazz instance error: ", e);
                     }
                 }
             }
