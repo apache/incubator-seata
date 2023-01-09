@@ -16,6 +16,7 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -127,16 +128,26 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
         Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
             .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+
+        // Get defaultValue and type
+        Object defaultValue = null;
+        Class<?> type = String.class;
         if (fieldOptional.isPresent()) {
             Field field = fieldOptional.get();
-            if (Objects.equals(field.getType(), Map.class)) {
-                return getConfig(dataId, null, String.class);
+            type = field.getType();
+            if (!isMapOrColl(type)) {
+                field.setAccessible(true);
+                defaultValue = field.get(object);
             }
-            field.setAccessible(true);
-            Object defaultValue = field.get(object);
-            return getConfig(dataId, defaultValue, field.getType());
         }
-        return null;
+
+        // Get config
+        return getConfig(dataId, defaultValue, type);
+    }
+
+    private boolean isMapOrColl(Class<?> clazz) {
+        return Map.class.isAssignableFrom(clazz)
+                || Collection.class.isAssignableFrom(clazz);
     }
 
     /**
