@@ -99,6 +99,43 @@ public final class ReflectionUtil {
     }
 
     /**
+     * Get the wrapped class
+     *
+     * @param clazz the class
+     * @return the wrapped class
+     */
+    public static Class<?> getWrappedClass(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (clazz.equals(byte.class)) {
+                return Byte.class;
+            }
+            if (clazz.equals(boolean.class)) {
+                return Boolean.class;
+            }
+            if (clazz.equals(char.class)) {
+                return Character.class;
+            }
+            if (clazz.equals(short.class)) {
+                return Short.class;
+            }
+            if (clazz.equals(int.class)) {
+                return Integer.class;
+            }
+            if (clazz.equals(long.class)) {
+                return Long.class;
+            }
+            if (clazz.equals(float.class)) {
+                return Float.class;
+            }
+            if (clazz.equals(double.class)) {
+                return Double.class;
+            }
+        }
+
+        return clazz;
+    }
+
+    /**
      * Gets classes by package
      *
      * @param pack the package
