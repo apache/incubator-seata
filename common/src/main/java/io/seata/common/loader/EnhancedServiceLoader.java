@@ -517,7 +517,10 @@ public class EnhancedServiceLoader {
                 urls = ClassLoader.getSystemResources(fileName);
             }
             if (urls != null) {
+                boolean hasServiceFile = false;
+                boolean hasClasses = false;
                 while (urls.hasMoreElements()) {
+                    hasServiceFile = true;
                     java.net.URL url = urls.nextElement();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
                         String line;
@@ -528,6 +531,7 @@ public class EnhancedServiceLoader {
                             }
                             line = line.trim();
                             if (line.length() > 0) {
+                                hasClasses = true;
                                 try {
                                     ExtensionDefinition<S> extensionDefinition = getUnloadedExtensionDefinition(line, loader);
                                     if (extensionDefinition == null) {
@@ -546,8 +550,20 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("load clazz instance error: ", e);
+                        LOGGER.warn("load class instance error:", e);
                     }
+                }
+
+                if (LOGGER.isDebugEnabled()) {
+                    if (!hasServiceFile) {
+                        LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
+                    } else if (!hasClasses) {
+                        LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
+                    }
+                }
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.warn("Load [{}] class fail: no urls found in '{}'.", type.getName(), dir);
                 }
             }
         }

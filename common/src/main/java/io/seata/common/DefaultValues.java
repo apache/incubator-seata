@@ -141,7 +141,7 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
@@ -226,7 +226,7 @@ public interface DefaultValues {
     int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
 
     /**
-     *the constant DEFAULT_PROMETHEUS_PORT
+     * the constant DEFAULT_PROMETHEUS_PORT
      */
     int DEFAULT_PROMETHEUS_PORT = 9898;
 
@@ -281,4 +281,9 @@ public interface DefaultValues {
     int DEFAULT_REDIS_MIN_IDLE = 10;
 
     int DEFAULT_QUERY_LIMIT = 1000;
+
+    /**
+     * Default druid location in classpath
+     */
+    String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 }
