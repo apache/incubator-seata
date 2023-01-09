@@ -15,6 +15,9 @@
  */
 package io.seata.common.metadata;
 
+/**
+ * @author funkye
+ */
 public enum ClusterRole {
 
     /**

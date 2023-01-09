@@ -89,7 +89,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     protected final Object mergeLock = new Object();
-    protected int acquireClusterRetryCount = this.acquireClusterRetryCount();
+
     /**
      * The find leader executor.
      */
@@ -338,13 +338,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return true:enable, false:disable
      */
     protected abstract boolean isEnableClientBatchSendRequest();
-
-    /**
-     * Whether to enable batch sending of requests, hand over to subclass implementation.
-     *
-     * @return true:enable, false:disable
-     */
-    protected abstract int acquireClusterRetryCount();
 
     /**
      * get Rpc Request Timeout

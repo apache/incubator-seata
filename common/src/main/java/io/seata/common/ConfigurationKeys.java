@@ -915,11 +915,6 @@ public interface ConfigurationKeys {
     String CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_TM_PREFIX + "acquireClusterRetryCount";
 
     /**
-     * The constant CLIENT_REPORT_ACQUIRE_CLUSTER_RETRY_COUNT.
-     */
-    String CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_RM_PREFIX + "acquireClusterRetryCount";
-
-    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";

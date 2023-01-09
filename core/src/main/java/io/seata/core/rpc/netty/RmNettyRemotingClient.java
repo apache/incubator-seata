@@ -51,8 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
-import static io.seata.core.constants.ConfigurationKeys.CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
 
 /**
  * The Rm netty client.
@@ -283,12 +281,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public boolean isEnableClientBatchSendRequest() {
         return enableClientBatchSendRequest;
-    }
-
-    @Override
-    public int acquireClusterRetryCount() {
-        return ConfigurationFactory.getInstance().getInt(CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT,
-            DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT);
     }
 
     @Override

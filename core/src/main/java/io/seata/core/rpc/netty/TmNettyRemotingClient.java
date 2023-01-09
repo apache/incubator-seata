@@ -44,9 +44,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT;
-import static io.seata.core.constants.ConfigurationKeys.CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
@@ -59,7 +56,6 @@ import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-
 public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
     private static volatile TmNettyRemotingClient instance;
@@ -290,12 +286,6 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private void initConnection() {
         getClientChannelManager().reconnect(transactionServiceGroup);
-    }
-
-    @Override
-    protected int acquireClusterRetryCount() {
-        return ConfigurationFactory.getInstance().getInt(CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT,
-                DEFAULT_CLIENT_ACQUIRE_CLUSTER_RETRY_COUNT);
     }
 
 }
