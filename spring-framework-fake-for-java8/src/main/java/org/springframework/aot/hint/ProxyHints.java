@@ -15,6 +15,11 @@
  */
 package org.springframework.aot.hint;
 
+/**
+ * ProxyHints's fake
+ *
+ * @author wang.liang
+ */
 public class ProxyHints {
 
 //    public Stream<JdkProxyHint> jdkProxyHints() {

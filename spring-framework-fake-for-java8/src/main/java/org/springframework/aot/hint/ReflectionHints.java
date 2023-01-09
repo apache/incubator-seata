@@ -21,6 +21,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * ReflectionHints's fake
+ *
+ * @author wang.liang
+ */
 public class ReflectionHints {
 
 //    public Stream<TypeHint> typeHints() {

@@ -24,6 +24,11 @@ import org.springframework.lang.Nullable;
 import java.lang.reflect.Executable;
 import java.util.function.Supplier;
 
+/**
+ * RegisteredBean's fake
+ *
+ * @author wang.liang
+ */
 public final class RegisteredBean {
 
     private RegisteredBean(ConfigurableListableBeanFactory beanFactory, Supplier<String> beanName,

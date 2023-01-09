@@ -15,6 +15,11 @@
  */
 package org.springframework.aot.hint;
 
+/**
+ * MemberCategory's fake
+ *
+ * @author wang.liang
+ */
 public enum MemberCategory {
 
     PUBLIC_FIELDS,

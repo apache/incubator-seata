@@ -17,6 +17,11 @@ package org.springframework.aot.hint;
 
 import org.springframework.core.io.Resource;
 
+/**
+ * ResourceHints's fake
+ *
+ * @author wang.liang
+ */
 public class ResourceHints {
 
 //    public Stream<ResourcePatternHints> resourcePatternHints() {

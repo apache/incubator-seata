@@ -15,6 +15,11 @@
  */
 package org.springframework.aot.hint;
 
+/**
+ * RuntimeHints's fake
+ *
+ * @author wang.liang
+ */
 public class RuntimeHints {
 
     public ReflectionHints reflection() {

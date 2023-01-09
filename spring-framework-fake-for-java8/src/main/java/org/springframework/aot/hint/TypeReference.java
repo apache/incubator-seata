@@ -19,6 +19,11 @@ import org.springframework.lang.Nullable;
 
 import java.util.List;
 
+/**
+ * TypeReference's fake
+ *
+ * @author wang.liang
+ */
 public interface TypeReference {
 
     String getName();

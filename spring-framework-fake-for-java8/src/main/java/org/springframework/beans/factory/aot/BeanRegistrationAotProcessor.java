@@ -18,6 +18,11 @@ package org.springframework.beans.factory.aot;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.lang.Nullable;
 
+/**
+ * BeanRegistrationAotProcessor's fake
+ *
+ * @author wang.liang
+ */
 @FunctionalInterface
 public interface BeanRegistrationAotProcessor {
 

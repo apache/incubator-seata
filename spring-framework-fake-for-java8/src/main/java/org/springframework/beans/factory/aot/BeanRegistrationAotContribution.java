@@ -17,6 +17,11 @@ package org.springframework.beans.factory.aot;
 
 import org.springframework.aot.generate.GenerationContext;
 
+/**
+ * BeanRegistrationAotContribution's fake
+ *
+ * @author wang.liang
+ */
 @FunctionalInterface
 public interface BeanRegistrationAotContribution {
 

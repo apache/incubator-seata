@@ -17,6 +17,11 @@ package org.springframework.aot.hint;
 
 import java.io.Serializable;
 
+/**
+ * SerializationHints's fake
+ *
+ * @author wang.liang
+ */
 public class SerializationHints {
 
 //    public Stream<JavaSerializationHint> javaSerializationHints() {

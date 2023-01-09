@@ -15,6 +15,11 @@
  */
 package org.springframework.aot.hint;
 
+/**
+ * ExecutableMode's fake
+ *
+ * @author wang.liang
+ */
 public enum ExecutableMode {
 
     INTROSPECT,

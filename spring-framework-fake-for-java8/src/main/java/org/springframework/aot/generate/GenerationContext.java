@@ -17,6 +17,11 @@ package org.springframework.aot.generate;
 
 import org.springframework.aot.hint.RuntimeHints;
 
+/**
+ * GenerationContext's fake
+ *
+ * @author wang.liang
+ */
 public interface GenerationContext {
 
 //    GeneratedClasses getGeneratedClasses();

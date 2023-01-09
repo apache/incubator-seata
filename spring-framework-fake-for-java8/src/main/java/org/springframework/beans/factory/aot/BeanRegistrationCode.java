@@ -15,6 +15,11 @@
  */
 package org.springframework.beans.factory.aot;
 
+/**
+ * BeanRegistrationCode's fake
+ *
+ * @author wang.liang
+ */
 public interface BeanRegistrationCode {
 
 //    ClassName getClassName();

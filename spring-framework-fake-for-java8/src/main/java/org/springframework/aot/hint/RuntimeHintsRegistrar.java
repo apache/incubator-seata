@@ -17,6 +17,11 @@ package org.springframework.aot.hint;
 
 import org.springframework.lang.Nullable;
 
+/**
+ * RuntimeHintsRegistrar's fake
+ *
+ * @author wang.liang
+ */
 @FunctionalInterface
 public interface RuntimeHintsRegistrar {
 
