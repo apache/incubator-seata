@@ -16,9 +16,6 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.lang.Nullable;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
@@ -86,7 +82,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             });
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InvocationTargetException {
+    private Object get(String dataId, Object defaultValue) throws IllegalAccessException {
         Object result = get(dataId);
         if (result == null) {
             return defaultValue;
@@ -94,24 +90,28 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         return result;
     }
 
-    private Object get(String dataId) throws IllegalAccessException, InvocationTargetException {
+    private Object get(String dataId) throws IllegalAccessException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
 
+        // Get the property class
         Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         if (propertyClass == null) {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
 
+        // Instantiate the property
         Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
             try {
                 return propertyClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
                 LOGGER.warn("PropertyClass for prefix: [" + propertyPrefix + "] should not be null. error :" + e.getMessage(), e);
-                return null;
             }
+            return null;
         });
-        Objects.requireNonNull(propertyObj, "Property object for prefix: [" + propertyPrefix + "] should not be null.");
+        Objects.requireNonNull(propertyObj, "Instantiate the property fail");
+
+        // Get config, and take the field value of the propertyObj as the default value
         return getFieldValue(propertyObj, propertySuffix, dataId);
     }
 
@@ -124,58 +124,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return java.lang.Object
      * @author xingfudeshi@gmail.com
      */
-    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException, InvocationTargetException {
-        ValueAndType defaultValueType = this.getDefaultValueAndType(object, fieldName);
-        if (defaultValueType == null) {
-            return getConfig(dataId, null, String.class);
-        } else {
-            return getConfig(dataId, defaultValueType.getValue(), defaultValueType.getType());
-        }
-    }
-
-    @Nullable
-    private ValueAndType getDefaultValueAndType(Object object, String fieldName) throws IllegalAccessException, InvocationTargetException {
-        Field[] fields = object.getClass().getDeclaredFields();
-        if (fields.length > 0) {
-            Optional<Field> fieldOptional = Stream.of(fields)
-                    .filter(f -> f.getName().equalsIgnoreCase(fieldName))
-                    .findAny();
-            if (fieldOptional.isPresent()) {
-                Field field = fieldOptional.get();
-                if (isMapOrColl(field.getType())) {
-                    return null;
-                }
-                field.setAccessible(true);
-                return new ValueAndType(field.get(object), field.getType());
+    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
+        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
+            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
+        if (fieldOptional.isPresent()) {
+            Field field = fieldOptional.get();
+            if (Objects.equals(field.getType(), Map.class)) {
+                return getConfig(dataId, null, String.class);
             }
+            field.setAccessible(true);
+            Object defaultValue = field.get(object);
+            return getConfig(dataId, defaultValue, field.getType());
         }
-
-        String getMethodName = "get" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
-        try {
-            Method getMethod = object.getClass().getMethod(getMethodName);
-            if (isMapOrColl(getMethod.getReturnType())) {
-                return null;
-            }
-            return new ValueAndType(getMethod.invoke(object), getMethod.getReturnType());
-        } catch (NoSuchMethodException e) {
-            // do nothing
-        }
-
-        String isMethodName = "is" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
-        try {
-            Method getMethod = object.getClass().getMethod(isMethodName);
-            return new ValueAndType(getMethod.invoke(object), getMethod.getReturnType());
-        } catch (NoSuchMethodException e) {
-            LOGGER.warn("No such method '{}()' and '{}()' in the class '{}', this may be a problem. Please contact community.",
-                    getMethodName, isMethodName, object.getClass().getSimpleName());
-        }
-
         return null;
-    }
-
-
-    private boolean isMapOrColl(Class<?> type) {
-        return Map.class.isAssignableFrom(type) || Collection.class.isAssignableFrom(type);
     }
 
     /**
@@ -242,27 +203,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), type);
         }
         return value != null ? value : defaultValue;
-    }
-
-
-    private static class ValueAndType {
-        private Object value;
-        private Class<?> type;
-
-
-        public ValueAndType(Object value, Class<?> type) {
-            this.value = value;
-            this.type = type;
-        }
-
-
-        public Object getValue() {
-            return value;
-        }
-
-        public Class<?> getType() {
-            return type;
-        }
     }
 
 }
