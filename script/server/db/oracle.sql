@@ -48,7 +48,7 @@ CREATE TABLE lock_table
     resource_id    VARCHAR2(256),
     table_name     VARCHAR2(32),
     pk             VARCHAR2(36),
-    status         NUMBER(3)     NOT NULL DEFAULT 0,
+    status         NUMBER(3)   DEFAULT 0 NOT NULL,
     gmt_create     TIMESTAMP(0),
     gmt_modified   TIMESTAMP(0),
     PRIMARY KEY (row_key)
@@ -56,7 +56,7 @@ CREATE TABLE lock_table
 
 comment on column lock_table.status is '0:locked ,1:rollbacking';
 CREATE INDEX idx_branch_id ON lock_table (branch_id);
-CREATE INDEX idx_xid ON lock_table (xid);
+CREATE INDEX idx_lock_table_xid ON lock_table (xid);
 CREATE INDEX idx_status ON lock_table (status);
 
 CREATE TABLE distributed_lock (
