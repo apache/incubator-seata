@@ -19,15 +19,15 @@ import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import com.esotericsoftware.kryo.util.Pool;
 import de.javakaffee.kryoserializers.BitSetSerializer;
-import de.javakaffee.kryoserializers.CollectionsSingletonListSerializer;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
 import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
@@ -50,7 +50,7 @@ public class KryoSerializerFactory {
             kryo.setRegistrationRequired(false);
 
             // register serializer
-            kryo.register(Collections.singletonList("").getClass(), new CollectionsSingletonListSerializer());
+            kryo.register(Arrays.asList("").getClass());
             kryo.register(InvocationHandler.class, new JdkProxySerializer());
             kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
             kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
