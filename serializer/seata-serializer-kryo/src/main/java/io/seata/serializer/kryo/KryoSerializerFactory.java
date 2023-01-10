@@ -21,13 +21,17 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import com.esotericsoftware.kryo.util.Pool;
-import de.javakaffee.kryoserializers.*;
+import de.javakaffee.kryoserializers.BitSetSerializer;
+import de.javakaffee.kryoserializers.CollectionsSingletonListSerializer;
+import de.javakaffee.kryoserializers.JdkProxySerializer;
+import de.javakaffee.kryoserializers.RegexSerializer;
+import de.javakaffee.kryoserializers.URISerializer;
+import de.javakaffee.kryoserializers.UUIDSerializer;
 import io.seata.core.serializer.SerializerClassRegistry;
 
 /**
