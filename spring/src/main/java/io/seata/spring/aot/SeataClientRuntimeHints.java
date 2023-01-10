@@ -99,7 +99,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
         // Register implementation classes of 'com.github.benmanes.caffeine.cache.NodeFactory'.
         // See the class  'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
         // See the method 'com.github.benmanes.caffeine.cache.NodeFactory.newFactory(Caffeine<K, V> builder, boolean isAsync)'
-        String caffeineCachePackage = "com.github.benmanes.caffeine.cache";
+        /*String caffeineCachePackage = "com.github.benmanes.caffeine.cache";
         Set<Class<?>> classes = ReflectionUtil.getClassesByPackage(caffeineCachePackage);
         if (classes.size() > 0) {
             for (Class<?> clazz : classes) {
@@ -108,7 +108,9 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
                     AotUtils.registerType(reflectionHints, clazz, MEMBER_CATEGORIES_FOR_INSTANTIATE);
                 }
             }
-        }
+        }*/
+        // Only register the classes used,
+        AotUtils.registerType(reflectionHints, "com.github.benmanes.caffeine.cache.PDWMS", MEMBER_CATEGORIES_FOR_INSTANTIATE);
 
         // Register DataSource for 'io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice'
         AotUtils.registerType(reflectionHints, DataSource.class, INVOKE_DECLARED_METHODS);

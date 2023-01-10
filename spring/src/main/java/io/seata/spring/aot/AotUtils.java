@@ -120,6 +120,15 @@ public class AotUtils {
         }
     }
 
+    public static void registerType(ReflectionHints reflectionHints, String className, MemberCategory... memberCategories) {
+        try {
+            Class<?> clazz = Class.forName(className);
+            registerType(reflectionHints, clazz, memberCategories);
+        } catch (ClassNotFoundException e) {
+            LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
+        }
+    }
+
     public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
         for (String className : classNames) {
             try {
