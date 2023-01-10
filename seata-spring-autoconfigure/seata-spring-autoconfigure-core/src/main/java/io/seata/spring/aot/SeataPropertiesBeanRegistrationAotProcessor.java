@@ -15,7 +15,6 @@
  */
 package io.seata.spring.aot;
 
-import io.seata.spring.aot.AotUtils;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
