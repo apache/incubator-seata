@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.kryo;
 
+import com.esotericsoftware.kryo.Kryo;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -36,6 +37,15 @@ public class KryoSerializerTest {
     @BeforeAll
     public static void before() {
         kryoCodec = new KryoSerializer();
+    }
+
+    @Test
+    public void testSerializerFactory() {
+        KryoSerializerFactory factory = KryoSerializerFactory.getInstance();
+        KryoInnerSerializer kryoInnerSerializer = factory.get();
+        Kryo kryo = kryoInnerSerializer.getKryo();
+        assertThat(kryo).isNotNull();
+        factory.returnKryo(kryoInnerSerializer);
     }
 
     @Test
