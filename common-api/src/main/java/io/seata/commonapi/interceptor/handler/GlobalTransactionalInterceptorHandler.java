@@ -249,17 +249,18 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
             });
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
+            Throwable cause = e.getCause();
             switch (code) {
                 case RollbackDone:
                     throw e.getOriginalException();
                 case BeginFailure:
                     succeed = false;
-                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
+                    failureHandler.onBeginFailure(e.getTransaction(), cause);
+                    throw cause;
                 case CommitFailure:
                     succeed = false;
-                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                    throw e.getCause();
+                    failureHandler.onCommitFailure(e.getTransaction(), cause);
+                    throw cause;
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
@@ -268,7 +269,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                     throw e.getOriginalException();
                 case TimeoutRollback:
                     failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
-                    throw e.getCause();
+                    throw cause;
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
