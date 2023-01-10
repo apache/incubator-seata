@@ -72,7 +72,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         if (args.length > 1) {
                             defaultValue = args[1];
 
-                            // See: Configuration.getConfig(String dataId, long timeoutMills);
+                            // See Configuration#getConfig(String dataId, long timeoutMills)
                             if (defaultValue != null && !dataType.isAssignableFrom(defaultValue.getClass())) {
                                 defaultValue = null;
                             }

@@ -66,10 +66,10 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
         // Register the seata classes
         AotUtils.registerTypes(reflectionHints,
                 AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE,
-                "io.seata.sqlparser.druid.DruidDbTypeParserImpl", // see DruidDelegatingDbTypeParser
-                "io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl", // see DruidDelegatingSQLRecognizerFactory
-                "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory", // see AntlrDelegatingSQLRecognizerFactory
-                "io.seata.serializer.protobuf.ProtobufSerializer" // see SerializerServiceLoader
+                "io.seata.sqlparser.druid.DruidDbTypeParserImpl", // See DruidDelegatingDbTypeParser
+                "io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl", // See DruidDelegatingSQLRecognizerFactory
+                "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory", // See AntlrDelegatingSQLRecognizerFactory
+                "io.seata.serializer.protobuf.ProtobufSerializer" // See SerializerServiceLoader
         );
     }
 
@@ -93,19 +93,9 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
         ReflectionHints reflectionHints = hints.reflection();
 
         // Register implementation classes of 'com.github.benmanes.caffeine.cache.NodeFactory'.
-        // See the class  'io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache'
-        // See the method 'com.github.benmanes.caffeine.cache.NodeFactory.newFactory(Caffeine<K, V> builder, boolean isAsync)'
-        /*String caffeineCachePackage = "com.github.benmanes.caffeine.cache";
-        Set<Class<?>> classes = ReflectionUtil.getClassesByPackage(caffeineCachePackage);
-        if (classes.size() > 0) {
-            for (Class<?> clazz : classes) {
-                String simpleClassName = clazz.getSimpleName();
-                if (simpleClassName.length() > 0 && simpleClassName.toUpperCase().equals(simpleClassName)) {
-                    AotUtils.registerType(reflectionHints, clazz, AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE);
-                }
-            }
-        }*/
         // Only register the classes used,
+        // See io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache
+        // See com.github.benmanes.caffeine.cache.NodeFactory#newFactory(Caffeine<K, V> builder, boolean isAsync)
         AotUtils.registerTypes(reflectionHints,
                 AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE,
                 "com.github.benmanes.caffeine.cache.PDWMS",
@@ -132,7 +122,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
 
     private void registerHintsForXAMode(RuntimeHints hints) {
         // Register the MySQL classes for XA mode.
-        // See the class 'com.alibaba.druid.util.MySqlUtils'
+        // See com.alibaba.druid.util.MySqlUtils
         AotUtils.registerTypes(hints.reflection(),
                 AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE_AND_INVOKE,
                 "com.mysql.cj.api.conf.PropertySet",

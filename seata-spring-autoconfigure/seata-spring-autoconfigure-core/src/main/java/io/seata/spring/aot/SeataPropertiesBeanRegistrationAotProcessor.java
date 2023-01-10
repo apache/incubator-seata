@@ -60,7 +60,7 @@ class SeataPropertiesBeanRegistrationAotProcessor implements BeanRegistrationAot
             ReflectionHints reflectionHints = generationContext.getRuntimeHints().reflection();
 
             // register the properties bean class
-            // See SpringBootConfigurationProvider.getDefaultValueFromPropertyObject(...)
+            // See SpringBootConfigurationProvider#getDefaultValueFromPropertyObject(...)
             AotUtils.registerType(reflectionHints, propertiesBeanClass, DECLARED_FIELDS);
         }
 
