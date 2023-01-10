@@ -31,7 +31,6 @@ service.disableGlobalTransaction=false
 
 client.metadataMaxAgeMs=30000
 #Transaction rule configuration, only for the client
-client.rm.acquireClusterRetryCount=2
 client.rm.asyncCommitBufferLimit=10000
 client.rm.lock.retryInterval=10
 client.rm.lock.retryTimes=30
@@ -45,7 +44,6 @@ client.rm.sagaBranchRegisterEnable=false
 client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
 client.rm.sqlParserType=druid
-client.tm.acquireClusterRetryCount=2
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 client.tm.defaultGlobalTransactionTimeout=60000
@@ -137,7 +135,6 @@ server.raft.reporterInitialDelay=60
 server.raft.serialization=kryo
 server.raft.compressor=none
 server.enableParallelRequestHandle=false
-
 
 #Metrics configuration, only for the server
 metrics.enabled=false

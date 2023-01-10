@@ -74,14 +74,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
-    public void sendSyncRequestAll(Object msg) {
-        Optional<Collection<Channel>> optional = Optional.ofNullable(ChannelManager.getRmChannels().values());
-        optional.ifPresent(channels -> channels.parallelStream().forEach(channel -> {
-            RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-            super.sendAsync(channel, rpcMessage);
-        }));
-    }
-
     @Override
     public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
         if (channel == null) {

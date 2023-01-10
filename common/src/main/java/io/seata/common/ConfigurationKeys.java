@@ -910,11 +910,6 @@ public interface ConfigurationKeys {
     String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
 
     /**
-     * The constant CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT.
-     */
-    String CLIENT_TM_ACQUIRE_CLUSTER_RETRY_COUNT = CLIENT_TM_PREFIX + "acquireClusterRetryCount";
-
-    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";

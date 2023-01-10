@@ -18,7 +18,6 @@ package io.seata.spring.boot.autoconfigure;
 import java.util.concurrent.atomic.AtomicBoolean;
 import io.seata.spring.boot.autoconfigure.properties.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.TransportProperties;
 import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
@@ -42,7 +41,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
-
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
@@ -113,7 +111,6 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
             PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
-            PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
         }
     }
 

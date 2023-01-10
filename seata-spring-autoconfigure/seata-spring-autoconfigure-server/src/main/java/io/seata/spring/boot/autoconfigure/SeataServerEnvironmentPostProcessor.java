@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import io.seata.spring.boot.autoconfigure.properties.StoreProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRaftProperties;
@@ -41,6 +41,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SESSION_PREFIX
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
@@ -79,6 +80,7 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
             PROPERTY_BEAN_MAP.put(SERVER_RAFT_PREFIX, ServerRaftProperties.class);
             PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
         }
     }
 

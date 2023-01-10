@@ -141,11 +141,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(Object msg) throws TimeoutException {
-        return sendSyncRequest(msg, false);
-    }
-
-    @Override
-    public Object sendSyncRequest(Object msg, boolean retrying) throws TimeoutException {
         String serverAddress = loadBalance(getTransactionServiceGroup(), msg);
         long timeoutMillis = this.getRpcRequestTimeout();
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
@@ -181,21 +176,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
                 return response;
             } catch (Exception exx) {
-                LOGGER.error("wait response error:{},ip:{},request:{}",
-                    exx.getMessage(), serverAddress, rpcMessage.getBody());
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), serverAddress, rpcMessage.getBody());
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException) exx;
+                    throw (TimeoutException)exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
-            } finally {
-                if (retrying) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("leader re-election occurs, RPC retry ");
-                    }
-                }
             }
-
         } else {
             Channel channel = clientChannelManager.acquireChannel(serverAddress);
             return super.sendSync(channel, rpcMessage, timeoutMillis);

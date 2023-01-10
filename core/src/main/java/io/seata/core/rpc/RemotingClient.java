@@ -48,20 +48,6 @@ public interface RemotingClient {
 
     /**
      * client send sync request.
-     * In this request, if
-     * {@link RmNettyRemotingClient#isEnableClientBatchSendRequest()}
-     * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
-     * the message will be sent in batches.
-     *
-     * @param msg transaction message {@link io.seata.core.protocol}
-     * @param retrying rpc retry {@link io.seata.core.protocol}
-     * @return server result message
-     * @throws TimeoutException
-     */
-    Object sendSyncRequest(Object msg, boolean retrying) throws TimeoutException;
-
-    /**
-     * client send sync request.
      *
      * @param channel client channel
      * @param msg     transaction message {@code io.seata.core.protocol}
