@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 
-import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
