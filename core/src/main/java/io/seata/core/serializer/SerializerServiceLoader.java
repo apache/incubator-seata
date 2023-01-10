@@ -30,7 +30,7 @@ public final class SerializerServiceLoader {
     }
 
 
-    private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "io.seata.serializer.protobuf.ProtobufSerializer";
+    public static final String PROTOBUF_SERIALIZER_CLASS_NAME = "io.seata.serializer.protobuf.ProtobufSerializer";
 
     /**
      * Load the service of {@link Serializer}

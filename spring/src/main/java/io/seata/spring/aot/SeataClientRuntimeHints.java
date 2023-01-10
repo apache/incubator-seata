@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 
+import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -69,7 +70,13 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
                 "io.seata.sqlparser.druid.DruidDbTypeParserImpl", // See DruidDelegatingDbTypeParser
                 "io.seata.sqlparser.druid.DruidSQLRecognizerFactoryImpl", // See DruidDelegatingSQLRecognizerFactory
                 "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory", // See AntlrDelegatingSQLRecognizerFactory
-                "io.seata.serializer.protobuf.ProtobufSerializer" // See SerializerServiceLoader
+                SerializerServiceLoader.PROTOBUF_SERIALIZER_CLASS_NAME, // See SerializerServiceLoader
+                "org.apache.dubbo.rpc.RpcContext", // See DubboConstants and AlibabaDubboTransactionPropagationFilter
+                // See HSFRemotingParser
+                "com.taobao.hsf.app.api.util.HSFApiConsumerBean",
+                "com.taobao.hsf.app.api.util.HSFApiProviderBean",
+                "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean",
+                "com.taobao.hsf.app.spring.util.HSFSpringProviderBean"
         );
     }
 
@@ -134,6 +141,14 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
                 "com.mysql.cj.jdbc.JdbcConnection",
                 "com.mysql.cj.jdbc.MysqlXAConnection",
                 "com.mysql.cj.jdbc.SuspendableXAConnection"
+        );
+
+        // Register the Oracle classes for XA mode.
+        // See io.seata.rm.datasource.util.XAUtils#createXAConnection
+        AotUtils.registerTypes(hints.reflection(),
+                AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE,
+                "oracle.jdbc.driver.T4CXAConnection",
+                "oracle.jdbc.xa.client.OracleXAConnection"
         );
     }
 
