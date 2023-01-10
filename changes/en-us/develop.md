@@ -14,6 +14,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 - [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5193](https://github.com/seata/seata/pull/5193)] optimize update hikari 4.0.3 druid 1.2.12 mysql8-jdbc 8.0.31 to stable version
 
 
 ### test:
@@ -27,5 +28,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
