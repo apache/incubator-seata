@@ -122,6 +122,9 @@ public final class ReflectionUtil {
             if (clazz.equals(double.class)) {
                 return Double.class;
             }
+            if (clazz.equals(void.class)) {
+                return Void.class;
+            }
         }
 
         return clazz;
