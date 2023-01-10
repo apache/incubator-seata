@@ -15,8 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
