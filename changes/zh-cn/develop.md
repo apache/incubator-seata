@@ -14,6 +14,7 @@
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5089](https://github.com/seata/seata/pull/5089)] 优化 TCC fence log 清理定时任务的 delay 参数值检查
 
 
 ### test:
@@ -27,5 +28,6 @@
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
+- [dmego](https://github.com/dmego)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
