@@ -62,7 +62,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
