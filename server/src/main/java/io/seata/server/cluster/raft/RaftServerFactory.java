@@ -100,6 +100,10 @@ public class RaftServerFactory {
             // Highly available deployments require different nodes
             for (PeerId peer : initConf.getPeers()) {
                 if (StringUtils.equals(peer.getIp(), host)) {
+                    if (serverId != null) {
+                        throw new IllegalArgumentException(
+                            "server.raft.cluster has duplicate ip, For local debugging, use -Dserver.raftPort to specify the raft port");
+                    }
                     serverId = peer;
                 }
             }
