@@ -16,10 +16,10 @@
 package io.seata.rm.tcc.interceptor;
 
 import io.seata.common.Constants;
-import io.seata.commonapi.interceptor.ActionInterceptorHandler;
-import io.seata.commonapi.interceptor.InvocationWrapper;
-import io.seata.commonapi.interceptor.TwoPhaseBusinessActionParam;
-import io.seata.commonapi.interceptor.handler.AbstractProxyInvocationHandler;
+import io.seata.integrationapi.interceptor.ActionInterceptorHandler;
+import io.seata.integrationapi.interceptor.InvocationWrapper;
+import io.seata.integrationapi.interceptor.TwoPhaseBusinessActionParam;
+import io.seata.integrationapi.interceptor.handler.AbstractProxyInvocationHandler;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;

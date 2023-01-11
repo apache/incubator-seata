@@ -1,0 +1,3 @@
+integrationapi.remoting.parser.DubboRemotingParser
+integrationapi.remoting.parser.SofaRpcRemotingParser
+integrationapi.remoting.parser.HSFRemotingParser

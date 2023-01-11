@@ -16,7 +16,7 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.DefaultValues;
-import io.seata.commonapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

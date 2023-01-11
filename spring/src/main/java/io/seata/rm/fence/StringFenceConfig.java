@@ -16,8 +16,8 @@
 package io.seata.rm.fence;
 
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.commonapi.fence.config.CommonFenceConfig;
-import io.seata.commonapi.fence.exception.CommonFenceException;
+import io.seata.integrationapi.fence.config.CommonFenceConfig;
+import io.seata.integrationapi.fence.exception.CommonFenceException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;

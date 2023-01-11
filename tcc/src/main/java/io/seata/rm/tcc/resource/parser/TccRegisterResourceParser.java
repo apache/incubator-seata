@@ -16,11 +16,11 @@
 package io.seata.rm.tcc.resource.parser;
 
 import io.seata.common.exception.FrameworkException;
-import io.seata.commonapi.interceptor.ActionContextUtil;
-import io.seata.commonapi.interceptor.TxBeanParserUtils;
-import io.seata.commonapi.interceptor.parser.RegisterResourceParser;
-import io.seata.commonapi.remoting.RemotingDesc;
-import io.seata.commonapi.remoting.parser.DefaultRemotingParser;
+import io.seata.integrationapi.interceptor.ActionContextUtil;
+import io.seata.integrationapi.interceptor.TxBeanParserUtils;
+import io.seata.integrationapi.interceptor.parser.RegisterResourceParser;
+import io.seata.integrationapi.remoting.RemotingDesc;
+import io.seata.integrationapi.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;

@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import io.seata.commonapi.interceptor.ActionInterceptorHandler;
+import io.seata.integrationapi.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;

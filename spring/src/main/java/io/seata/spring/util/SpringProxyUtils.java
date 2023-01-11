@@ -16,7 +16,7 @@
 package io.seata.spring.util;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.commonapi.util.DubboUtil;
+import io.seata.integrationapi.util.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;

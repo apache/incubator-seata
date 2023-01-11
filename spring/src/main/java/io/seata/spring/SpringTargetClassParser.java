@@ -15,7 +15,7 @@
  */
 package io.seata.spring;
 
-import io.seata.commonapi.interceptor.parser.TargetClassParser;
+import io.seata.integrationapi.interceptor.parser.TargetClassParser;
 import io.seata.spring.util.SpringProxyUtils;
 
 /**

@@ -54,7 +54,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>common-api</artifactId>
+            <artifactId>seata-integration-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

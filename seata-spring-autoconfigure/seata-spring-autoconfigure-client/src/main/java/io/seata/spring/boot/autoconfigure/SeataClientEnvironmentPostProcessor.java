@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.common.holder.ObjectHolder;
-import io.seata.commonapi.fence.config.CommonFenceConfig;
+import io.seata.integrationapi.fence.config.CommonFenceConfig;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;

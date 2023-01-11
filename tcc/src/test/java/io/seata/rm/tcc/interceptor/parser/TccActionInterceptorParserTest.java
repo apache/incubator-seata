@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import io.seata.commonapi.interceptor.handler.ProxyInvocationHandler;
+import io.seata.integrationapi.interceptor.handler.ProxyInvocationHandler;
 import io.seata.rm.tcc.NormalTccActionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
