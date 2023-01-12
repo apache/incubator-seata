@@ -1,5 +1,5 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar= \
-io.seata.spring.aot.SeataConfigurationRuntimeHints
+io.seata.spring.aot.SeataDiscoveryAndConfigurationRuntimeHints
 
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
 io.seata.spring.aot.SeataPropertiesBeanRegistrationAotProcessor

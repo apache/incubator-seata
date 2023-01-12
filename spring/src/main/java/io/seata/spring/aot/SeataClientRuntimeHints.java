@@ -113,8 +113,7 @@ class SeataClientRuntimeHints implements RuntimeHintsRegistrar {
         AotUtils.registerType(reflectionHints, DataSource.class, INVOKE_DECLARED_METHODS);
 
         // Register the beans for serialize
-        AotUtils.registerTypes(reflectionHints,
-                AotUtils.ALL_MEMBER_CATEGORIES,
+        AotUtils.registerTypesForSerialize(reflectionHints,
                 BranchUndoLog.class,
                 SQLUndoLog.class,
                 TableRecords.class,

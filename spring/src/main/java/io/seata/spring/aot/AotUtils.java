@@ -145,6 +145,20 @@ public class AotUtils {
         }
     }
 
+    /**
+     * Register the types for serialize, without knowing the type of the serializer
+     *
+     * @param reflectionHints the reflection hints
+     * @param classes the classes
+     */
+    public static void registerTypesForSerialize(ReflectionHints reflectionHints, Class<?>... classes) {
+        registerTypes(reflectionHints, ALL_MEMBER_CATEGORIES, classes);
+    }
+
+    public static void registerTypesForSerialize(ReflectionHints reflectionHints, String... classNames) {
+        registerTypes(reflectionHints, ALL_MEMBER_CATEGORIES, classNames);
+    }
+
 
     //region ## Register 'classpath*:META-INF/services/*' to ReflectionHints
 
