@@ -130,6 +130,11 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         this.initDefaultGlobalTransactionTimeout();
     }
 
+    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Class[] interfaceToProxy, Set<String> methodsToProxy, AspectTransactional aspectTransactional) {
+        this(failureHandler, interfaceToProxy, methodsToProxy);
+        this.aspectTransactional = aspectTransactional;
+    }
+
     @Override
     public Class[] getInterfaceToProxy() {
         return interfaceToProxy;
