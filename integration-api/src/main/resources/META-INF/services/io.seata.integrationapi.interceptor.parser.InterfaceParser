@@ -1,1 +1,1 @@
-integrationapi.interceptor.parser.GlobalTransactionalInterceptorParser
+io.seata.integrationapi.interceptor.parser.GlobalTransactionalInterceptorParser

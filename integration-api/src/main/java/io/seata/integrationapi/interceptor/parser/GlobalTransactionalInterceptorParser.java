@@ -22,6 +22,7 @@ import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
+import io.seata.tm.api.FailureHandlerHolder;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -51,7 +52,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
         if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
             Class<?>[] interfaceToProxy = target.getClass().getInterfaces();
-            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(null, interfaceToProxy, methodsToProxy);
+            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), interfaceToProxy, methodsToProxy);
             ConfigurationCache.addConfigListener(io.seata.common.ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
         }

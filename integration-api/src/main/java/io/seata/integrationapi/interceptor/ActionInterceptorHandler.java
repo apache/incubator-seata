@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.SkipCallbackWrapperException;
@@ -32,6 +31,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
 import io.seata.integrationapi.fence.DefaultCommonFenceHandler;
+import io.seata.integrationapi.util.JsonUtil;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -194,7 +194,7 @@ public class ActionInterceptorHandler {
 
         //Init applicationData
         Map<String, Object> applicationContext = Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context);
-        String applicationContextStr = JSON.toJSONString(applicationContext);
+        String applicationContextStr = JsonUtil.toJSONString(applicationContext);
         try {
             //registry branch record
             Long branchId = DefaultResourceManager.get().branchRegister(businessActionParam.getBranchType(), actionName, null, xid,
