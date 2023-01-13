@@ -61,8 +61,10 @@ import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 
 
 /**
+ * The type Global transactional interceptor handler.
+ *
+ * @author slievrly
  * @author leezongjie
- * @date 2022/11/26
  */
 public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocationHandler implements ConfigurationChangeListener {
 

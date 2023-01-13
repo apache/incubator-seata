@@ -46,15 +46,6 @@ public @interface GlobalLock {
     int lockRetryInterval() default 0;
 
     /**
-     * customized global lock retry interval(unit: ms)
-     * you may use this to override global config of "client.rm.lock.retryInterval"
-     * note: 0 or negative number will take no effect(which mean fall back to global config)
-     * @return lock retry interval
-     */
-    @Deprecated
-    int lockRetryInternal() default 0;
-
-    /**
      * customized global lock retry times
      * you may use this to override global config of "client.rm.lock.retryTimes"
      * note: negative number will take no effect(which mean fall back to global config)
