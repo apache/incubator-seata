@@ -27,18 +27,18 @@ import org.springframework.lang.Nullable;
  */
 class SeataTCCModeRuntimeHints implements RuntimeHintsRegistrar {
 
-	@Override
-	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		ReflectionHints reflectionHints = hints.reflection();
+    @Override
+    public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
+        ReflectionHints reflectionHints = hints.reflection();
 
-		// Register following classes for HSFRemotingParser#isHsf
-		AotUtils.registerTypes(reflectionHints,
-				AotUtils.EMPTY_MEMBER_CATEGORIES,
-				"com.taobao.hsf.app.api.util.HSFApiConsumerBean",
-				"com.taobao.hsf.app.api.util.HSFApiProviderBean",
-				"com.taobao.hsf.app.spring.util.HSFSpringConsumerBean",
-				"com.taobao.hsf.app.spring.util.HSFSpringProviderBean"
-		);
-	}
+        // Register following classes for HSFRemotingParser#isHsf
+        AotUtils.registerTypes(reflectionHints,
+                AotUtils.EMPTY_MEMBER_CATEGORIES,
+                "com.taobao.hsf.app.api.util.HSFApiConsumerBean",
+                "com.taobao.hsf.app.api.util.HSFApiProviderBean",
+                "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean",
+                "com.taobao.hsf.app.spring.util.HSFSpringProviderBean"
+        );
+    }
 
 }
