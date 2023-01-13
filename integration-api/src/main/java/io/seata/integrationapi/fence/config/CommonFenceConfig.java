@@ -15,20 +15,20 @@
  */
 package io.seata.integrationapi.fence.config;
 
-import io.seata.common.DefaultValues;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.integrationapi.fence.DefaultCommonFenceHandler;
-import io.seata.integrationapi.fence.store.db.CommonFenceStoreDataBaseDAO;
-import io.seata.core.rpc.Disposable;
-import org.apache.commons.lang.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import io.seata.common.DefaultValues;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.rpc.Disposable;
+import io.seata.integrationapi.fence.DefaultCommonFenceHandler;
+import io.seata.integrationapi.fence.store.db.CommonFenceStoreDataBaseDAO;
+import org.apache.commons.lang.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common Fence Config
