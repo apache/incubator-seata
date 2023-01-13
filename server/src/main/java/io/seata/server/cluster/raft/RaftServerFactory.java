@@ -39,6 +39,10 @@ import io.seata.common.store.StoreMode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.FileRegistryServiceImpl;
+import io.seata.discovery.registry.MultiRegistryFactory;
+import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registry.SeataRegistryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +96,11 @@ public class RaftServerFactory {
         final Configuration initConf = new Configuration();
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
+        }
+        for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
+            if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
+                throw new IllegalArgumentException("Raft cluster not support other Registration Center:" + initConfStr);
+            }
         }
         int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
         String host = XID.getIpAddress();
