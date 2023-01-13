@@ -15,14 +15,17 @@
  */
 package io.seata.spring.annotation;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkException;
+import io.seata.core.context.RootContext;
 import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import org.springframework.aop.framework.ProxyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,26 +70,26 @@ public class MethodDescTest {
         Assertions.assertEquals(transactional.name(), "MockClassAnnotation");
     }
 
-//    @Test
-//    public void testGlobalTransactional() throws NoSuchMethodException {
-//        MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
-//        ProxyFactory proxyFactory = new ProxyFactory();
-//        proxyFactory.setTarget(mockClassAnnotation);
-//        proxyFactory.addAdvice(new GlobalTransactionalInterceptor(null));
-//        Object proxy = proxyFactory.getProxy();
-//        mockClassAnnotation = (MockClassAnnotation)proxy;
-//        mockClassAnnotation.toString();
-//        Assertions.assertNull(RootContext.getXID());
-//        mockClassAnnotation.hashCode();
-//        Assertions.assertNull(RootContext.getXID());
-//        mockClassAnnotation.equals("test");
-//        Assertions.assertNull(RootContext.getXID());
-//        try {
-//            mockClassAnnotation.doBiz("test");
-//        } catch (FrameworkException e) {
-//            Assertions.assertEquals("No available service", e.getMessage());
-//        }
-//    }
+    @Test
+    public void testGlobalTransactional() throws NoSuchMethodException {
+        MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
+        ProxyFactory proxyFactory = new ProxyFactory();
+        proxyFactory.setTarget(mockClassAnnotation);
+        proxyFactory.addAdvice(new AspectTransactionalInterceptor());
+        Object proxy = proxyFactory.getProxy();
+        mockClassAnnotation = (MockClassAnnotation)proxy;
+        mockClassAnnotation.toString();
+        Assertions.assertNull(RootContext.getXID());
+        mockClassAnnotation.hashCode();
+        Assertions.assertNull(RootContext.getXID());
+        mockClassAnnotation.equals("test");
+        Assertions.assertNull(RootContext.getXID());
+        try {
+            mockClassAnnotation.doBiz("test");
+        } catch (FrameworkException e) {
+            Assertions.assertEquals("No available service", e.getMessage());
+        }
+    }
 
     @Test
     public void testGetTransactionAnnotation()
