@@ -24,12 +24,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import io.seata.common.aot.NativeUtils;
 import io.seata.common.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
-import org.springframework.core.NativeDetector;
 import org.springframework.core.SpringProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
@@ -45,19 +45,10 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
  *
  * @author wang.liang
  */
-public class AotUtils {
+public class AotUtils extends NativeUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AotUtils.class);
 
-    /**
-     * The native-image code
-     *
-     * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
-     */
-    private static final String NATIVE_IMAGE_CODE = System.getProperty("org.graalvm.nativeimage.imagecode");
-
-
-    public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
     public static final String SPRING_AOT_ENABLED = "spring.aot.enabled";
 
 
@@ -82,40 +73,12 @@ public class AotUtils {
 
 
     /**
-     * Whether AOT processing
-     *
-     * @return the boolean
-     */
-    public static boolean isAotProcessing() {
-        return "true".equalsIgnoreCase(System.getProperty(SPRING_AOT_PROCESSING));
-    }
-
-    /**
      * Whether AOT enabled
      *
      * @return the boolean
      */
-    public static boolean isAotEnabled() {
+    public static boolean isSpringAotEnabled() {
         return SpringProperties.getFlag(SPRING_AOT_ENABLED);
-    }
-
-    /**
-     * Gets the native-image code.
-     *
-     * @return the native-image code
-     */
-    public static String getNativeImageCode() {
-        return NATIVE_IMAGE_CODE;
-    }
-
-    /**
-     * Whether run in native-image
-     *
-     * @return the boolean
-     * @see NativeDetector#inNativeImage()
-     */
-    public static boolean inNativeImage() {
-        return NATIVE_IMAGE_CODE != null;
     }
 
 

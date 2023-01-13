@@ -54,11 +54,6 @@
             <artifactId>seata-serializer-all</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-aot-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!-- spring  -->
         <dependency>

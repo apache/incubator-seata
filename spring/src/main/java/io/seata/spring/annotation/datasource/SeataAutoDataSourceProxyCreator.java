@@ -20,11 +20,11 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.sql.DataSource;
 
+import io.seata.common.aot.NativeUtils;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.xa.DataSourceProxyXA;
-import io.seata.spring.aot.AotUtils;
 import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +60,7 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) {
-        if (AotUtils.isAotProcessing()) {
+        if (NativeUtils.isSpringAotProcessing()) {
             if (!DataSource.class.isAssignableFrom(beanClass)) {
                 return DO_NOT_PROXY;
             }

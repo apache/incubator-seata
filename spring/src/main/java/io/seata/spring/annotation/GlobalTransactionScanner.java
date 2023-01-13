@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
+import io.seata.common.aot.NativeUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
@@ -38,7 +39,6 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
-import io.seata.spring.aot.AotUtils;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
@@ -507,7 +507,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
             throws BeansException {
-        if (AotUtils.isAotProcessing()) {
+        if (NativeUtils.isSpringAotProcessing()) {
             if (isTccAutoProxy(beanClass)) {
                 LOGGER.info("Proxy TCC service: {}", beanName);
                 return new Object[]{new TccActionInterceptor()};
