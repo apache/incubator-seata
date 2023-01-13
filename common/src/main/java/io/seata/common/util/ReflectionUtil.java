@@ -91,6 +91,21 @@ public final class ReflectionUtil {
     }
 
     /**
+     * Whether the class exists
+     *
+     * @param className the class name
+     * @return the boolean
+     */
+    public static boolean existsClass(String className) {
+        try {
+            getClassByName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * Get the wrapped class
      *
      * @param clazz the class

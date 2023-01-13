@@ -61,7 +61,15 @@ public class AotUtils {
     public static final String SPRING_AOT_ENABLED = "spring.aot.enabled";
 
 
+    /**
+     * Usually used for serialization
+     */
     public static final MemberCategory[] ALL_MEMBER_CATEGORIES = MemberCategory.values();
+
+    /**
+     * Only used for load class
+     */
+    public static final MemberCategory[] EMPTY_MEMBER_CATEGORIES = new MemberCategory[0];
 
     public static final MemberCategory[] MEMBER_CATEGORIES_FOR_INSTANTIATE = new MemberCategory[]{
         INTROSPECT_DECLARED_CONSTRUCTORS, INVOKE_DECLARED_CONSTRUCTORS
@@ -122,7 +130,7 @@ public class AotUtils {
 
     public static void registerType(ReflectionHints reflectionHints, String className, MemberCategory... memberCategories) {
         try {
-            Class<?> clazz = Class.forName(className);
+            Class<?> clazz = ReflectionUtil.getClassByName(className);
             registerType(reflectionHints, clazz, memberCategories);
         } catch (ClassNotFoundException e) {
             LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
@@ -132,7 +140,7 @@ public class AotUtils {
     public static void registerTypes(ReflectionHints reflectionHints, MemberCategory[] memberCategories, String... classNames) {
         for (String className : classNames) {
             try {
-                registerType(reflectionHints, Class.forName(className), memberCategories);
+                registerType(reflectionHints, ReflectionUtil.getClassByName(className), memberCategories);
             } catch (ClassNotFoundException | NoClassDefFoundError e) {
                 LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
             }
@@ -149,7 +157,7 @@ public class AotUtils {
      * Register the types for serialize, without knowing the type of the serializer
      *
      * @param reflectionHints the reflection hints
-     * @param classes the classes
+     * @param classes         the classes
      */
     public static void registerTypesForSerialize(ReflectionHints reflectionHints, Class<?>... classes) {
         registerTypes(reflectionHints, ALL_MEMBER_CATEGORIES, classes);

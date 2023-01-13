@@ -54,6 +54,11 @@
             <artifactId>seata-serializer-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-spring-aot-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -74,20 +79,6 @@
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-framework-fake-for-java8</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- During development, replace `seata-spring-framework-fake-for-java8` with the following dependency. -->
-        <!--<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>6.0.3</version>
-            <scope>provided</scope>
-        </dependency>-->
     </dependencies>
 
     <build>

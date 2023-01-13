@@ -20,8 +20,6 @@ import java.util.ServiceLoader;
 
 import com.alibaba.nacos.common.notify.DefaultPublisher;
 import com.alibaba.nacos.common.notify.EventPublisher;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -29,27 +27,18 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.lang.Nullable;
 
-import static io.seata.config.zk.ZookeeperConfiguration.FILE_CONFIG_KEY_PREFIX;
-import static io.seata.config.zk.ZookeeperConfiguration.SERIALIZER_KEY;
-
 /**
- * The seata configuration runtime hints registrar
+ * The seata nacos discovery and configuration runtime hints registrar
  *
  * @author wang.liang
  */
-class SeataDiscoveryAndConfigurationRuntimeHints implements RuntimeHintsRegistrar {
+class SeataNacosDiscoveryAndConfigurationRuntimeHints implements RuntimeHintsRegistrar {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataDiscoveryAndConfigurationRuntimeHints.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataNacosDiscoveryAndConfigurationRuntimeHints.class);
 
 
     @Override
     public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-        this.registerHintsForNacos(hints);
-        this.registerHintsForZookeeper(hints);
-    }
-
-    // Nacos
-    private void registerHintsForNacos(RuntimeHints hints) {
         ReflectionHints reflectionHints = hints.reflection();
 
         // Register the 'nacos-client.jar!/nacos-version.txt' to the resource hints.
@@ -79,18 +68,6 @@ class SeataDiscoveryAndConfigurationRuntimeHints implements RuntimeHintsRegistra
                 eventPublisherClass == null ? DefaultPublisher.class : eventPublisherClass,
                 AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE
         );
-    }
-
-
-    // Zookeeper
-    private void registerHintsForZookeeper(RuntimeHints hints) {
-        ReflectionHints reflectionHints = hints.reflection();
-
-        // See io.seata.config.zk.ZookeeperConfiguration#getZkSerializer
-        String serializer = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
-        if (StringUtils.isNotBlank(serializer)) {
-            AotUtils.registerType(reflectionHints, serializer, AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE);
-        }
     }
 
 }

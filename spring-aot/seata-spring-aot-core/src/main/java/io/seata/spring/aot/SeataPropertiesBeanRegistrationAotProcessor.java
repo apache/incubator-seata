@@ -15,6 +15,8 @@
  */
 package io.seata.spring.aot;
 
+import io.seata.common.util.ReflectionUtil;
+import io.seata.spring.boot.autoconfigure.StarterConstants;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -22,7 +24,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS;
 
 /**
@@ -34,16 +35,18 @@ class SeataPropertiesBeanRegistrationAotProcessor implements BeanRegistrationAot
 
     @Override
     public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
-        Class<?> beanClass = registeredBean.getBeanClass();
-        if (PROPERTY_BEAN_MAP.containsValue(beanClass)) {
-            return new SeataPropertiesBeanRegistrationAotContribution(beanClass);
+        if (ReflectionUtil.existsClass("io.seata.spring.boot.autoconfigure.StarterConstants")) {
+            Class<?> beanClass = registeredBean.getBeanClass();
+            if (StarterConstants.PROPERTY_BEAN_MAP.containsValue(beanClass)) {
+                return new SeataPropertiesBeanRegistrationAotContribution(beanClass);
+            }
         }
         return null;
     }
 
 
     /**
-     * The seata tcc bean registration AOT contribution
+     * The seata properties bean registration AOT contribution
      */
     private static class SeataPropertiesBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 

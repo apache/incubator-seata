@@ -15,6 +15,8 @@
  */
 package io.seata.spring.aot;
 
+import java.util.Set;
+
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.spring.annotation.GlobalTransactionScanner;
@@ -27,8 +29,6 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 
-import java.util.Set;
-
 import static io.seata.spring.aot.AotUtils.ALL_MEMBER_CATEGORIES;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
 
@@ -37,9 +37,9 @@ import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
  *
  * @author wang.liang
  */
-class SeataClientBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
+class SeataLocalTCCBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataClientBeanRegistrationAotProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataLocalTCCBeanRegistrationAotProcessor.class);
 
     @Override
     public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
