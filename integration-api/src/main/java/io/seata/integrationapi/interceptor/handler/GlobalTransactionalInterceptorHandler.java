@@ -43,10 +43,7 @@ import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
-import io.seata.tm.api.FailureHandler;
-import io.seata.tm.api.TransactionalExecutor;
-import io.seata.tm.api.TransactionalTemplate;
+import io.seata.tm.api.*;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -112,7 +109,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
     public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Class[] interfaceToProxy, Set<String> methodsToProxy) {
-        this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
+        this.failureHandler = failureHandler == null ? FailureHandlerHolder.getFailureHandler() : failureHandler;
         this.interfaceToProxy = interfaceToProxy;
         this.methodsToProxy = methodsToProxy;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,

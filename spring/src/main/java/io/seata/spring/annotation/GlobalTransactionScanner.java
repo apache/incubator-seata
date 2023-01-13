@@ -41,6 +41,7 @@ import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
+import io.seata.tm.api.FailureHandlerHolder;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
@@ -77,8 +78,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
-
-    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME = "org.springframework.transaction.interceptor.TransactionInterceptor";
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_BEAN_NAME_SET = new HashSet<>();
@@ -170,6 +169,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.txServiceGroup = txServiceGroup;
         this.mode = mode;
         this.failureHandlerHook = failureHandlerHook;
+        FailureHandlerHolder.setFailureHandler(this.failureHandlerHook);
     }
 
     /**
