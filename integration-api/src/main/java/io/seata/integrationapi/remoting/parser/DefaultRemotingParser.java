@@ -15,16 +15,16 @@
  */
 package io.seata.integrationapi.remoting.parser;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.integrationapi.remoting.RemotingDesc;
 import io.seata.integrationapi.remoting.RemotingParser;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * parsing remoting bean

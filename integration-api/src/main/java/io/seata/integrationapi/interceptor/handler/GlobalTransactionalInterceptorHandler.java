@@ -15,12 +15,18 @@
  */
 package io.seata.integrationapi.interceptor.handler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
-import io.seata.integrationapi.annotation.AspectTransactional;
-import io.seata.integrationapi.event.DegradeCheckEvent;
-import io.seata.integrationapi.interceptor.InvocationWrapper;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -29,6 +35,9 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
 import io.seata.core.model.GlobalLockConfig;
+import io.seata.integrationapi.annotation.AspectTransactional;
+import io.seata.integrationapi.event.DegradeCheckEvent;
+import io.seata.integrationapi.interceptor.InvocationWrapper;
 import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
@@ -43,15 +52,6 @@ import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;

@@ -15,11 +15,16 @@
  */
 package io.seata.spring.annotation;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
-import io.seata.integrationapi.remoting.RemotingParser;
-import io.seata.integrationapi.util.ProxyUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -28,6 +33,9 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
+import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.integrationapi.remoting.RemotingParser;
+import io.seata.integrationapi.util.ProxyUtil;
 import io.seata.rm.RMClient;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
@@ -48,18 +56,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
-
 
 /**
  * The type Global transaction scanner.
