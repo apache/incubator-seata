@@ -23,11 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.integrationapi.util.JsonUtil;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.ParamType;
@@ -247,7 +247,7 @@ public final class ActionContextUtil {
                 || actionContext instanceof Character) {
             return actionContext;
         } else {
-            return JSON.toJSONString(actionContext);
+            return JsonUtil.toJSONString(actionContext);
         }
     }
 
@@ -283,9 +283,9 @@ public final class ActionContextUtil {
         // JSON to Object
         try {
             if (value instanceof CharSequence || value instanceof Character) {
-                return JSON.parseObject(value.toString(), targetClazz);
+                return JsonUtil.parseObject(value.toString(), targetClazz);
             } else {
-                return JSON.parseObject(JSON.toJSONString(value), targetClazz);
+                return JsonUtil.parseObject(JsonUtil.toJSONString(value), targetClazz);
             }
         } catch (RuntimeException e) {
             String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
