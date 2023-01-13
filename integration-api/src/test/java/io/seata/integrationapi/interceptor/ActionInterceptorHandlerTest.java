@@ -13,19 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.interceptor;
-
-import io.seata.integrationapi.interceptor.ActionInterceptorHandler;
-import io.seata.rm.tcc.TccAction;
-import io.seata.rm.tcc.TccParam;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+package io.seata.integrationapi.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import io.seata.rm.tcc.api.BusinessActionContext;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Action interceptor handler test.
@@ -46,11 +43,11 @@ public class ActionInterceptorHandlerTest {
      */
     @Test
     public void testBusinessActionContext() throws NoSuchMethodException {
-        Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",
-                BusinessActionContext.class, int.class, List.class, TccParam.class);
+        Method prepareMethod = TestAction.class.getDeclaredMethod("prepare",
+                BusinessActionContext.class, int.class, List.class, TestParam.class);
         List<Object> list = new ArrayList<>();
         list.add("b");
-        TccParam tccParam = new TccParam (1, "abc@ali.com");
+        TestParam tccParam = new TestParam(1, "abc@ali.com");
 
         Map<String, Object>  paramContext = actionInterceptorHandler.fetchActionRequestContext(prepareMethod,
                 new Object[]{null, 10, list, tccParam});

@@ -246,7 +246,7 @@ public class ActionInterceptorHandler {
      * @param arguments the arguments
      * @return the context
      */
-    public Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
+    protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
