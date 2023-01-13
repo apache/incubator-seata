@@ -18,13 +18,12 @@ package io.seata.spring.aot;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
-
-import static org.springframework.aot.hint.MemberCategory.DECLARED_FIELDS;
 
 /**
  * The seata properties bean registration AOT processor
@@ -64,7 +63,7 @@ class SeataPropertiesBeanRegistrationAotProcessor implements BeanRegistrationAot
 
             // register the properties bean class
             // See SpringBootConfigurationProvider#getDefaultValueFromPropertyObject(...)
-            AotUtils.registerType(reflectionHints, propertiesBeanClass, DECLARED_FIELDS);
+            AotUtils.registerType(reflectionHints, propertiesBeanClass, MemberCategory.DECLARED_FIELDS);
         }
 
     }
