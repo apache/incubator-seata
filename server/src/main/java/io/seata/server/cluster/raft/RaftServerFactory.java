@@ -97,11 +97,6 @@ public class RaftServerFactory {
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-            if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
-                throw new IllegalArgumentException("Raft cluster not support other Registration Center:" + initConfStr);
-            }
-        }
         int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
         String host = XID.getIpAddress();
         PeerId serverId = null;
@@ -123,6 +118,11 @@ public class RaftServerFactory {
         String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         StoreMode storeMode = StoreMode.get(mode);
         if (storeMode.equals(StoreMode.RAFT)) {
+            for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
+                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
+                    throw new IllegalArgumentException("Raft store mode not support other Registration Center:" + initConfStr);
+                }
+            }
             raftMode = true;
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
