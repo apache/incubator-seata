@@ -113,6 +113,7 @@ public class SessionHolder {
         if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
+        String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
@@ -137,7 +138,7 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            SESSION_MANAGER_MAP.put(DEFAULT_SEATA_GROUP, ROOT_SESSION_MANAGER);
+            SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
@@ -153,7 +154,7 @@ public class SessionHolder {
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
         RaftServerFactory.getInstance().init();
-        if (RaftServerFactory.getInstance().getRaftServer() != null) {
+        if (RaftServerFactory.getInstance().getRaftServer(group) != null) {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
         } else {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
@@ -468,10 +469,10 @@ public class SessionHolder {
     }
 
     public static void destroy() {
-        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer();
-        if (raftServer != null) {
+        Collection<RaftServer> raftServers = RaftServerFactory.getInstance().getRaftServers();
+        if (raftServers != null) {
             try {
-                raftServer.close();
+                raftServers.forEach(RaftServer::close);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage());
             }

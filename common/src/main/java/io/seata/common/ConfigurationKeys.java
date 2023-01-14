@@ -845,6 +845,11 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_CLUSTER = SERVER_RAFT + "cluster";
 
     /**
+     * The constant SERVER_RAFT_GROUP.
+     */
+    String SERVER_RAFT_GROUP = SERVER_RAFT + "group";
+
+    /**
      * The constant SERVER_RAFT_AUTO_JOIN.
      */
     String SERVER_RAFT_AUTO_JOIN = SERVER_RAFT + "autoJoin";

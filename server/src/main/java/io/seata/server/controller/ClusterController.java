@@ -32,11 +32,13 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
@@ -46,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,6 +82,22 @@ public class ClusterController {
         serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
+    @GetMapping("/changeCluster")
+    public Result<?> changeCluster(@RequestParam String raftClusterStr){
+        Result<?> result =  new Result<>();
+        final Configuration newConf = new Configuration();
+        if (!newConf.parse(raftClusterStr)) {
+            result.setMessage("fail to parse initConf:" + raftClusterStr);
+        } else {
+            RaftServerFactory.groups().forEach(group -> {
+                RaftServerFactory.getCliServiceInstance().changePeers(group,
+                    RouteTable.getInstance().getConfiguration(group), newConf);
+                RouteTable.getInstance().updateConfiguration(group, newConf);
+            });
+        }
+        return result;
+    }
+
     @GetMapping("/cluster")
     public MetadataResponse cluster(@RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
@@ -86,16 +105,7 @@ public class ClusterController {
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
             metadataResponse.setMode(mode);
-            String currentConf = ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_CLUSTER);
-            if (!StringUtils.isBlank(currentConf)) {
-                final Configuration currentClusters = new Configuration();
-                if (!currentClusters.parse(currentConf)) {
-                    throw new IllegalArgumentException("fail to parse initConf:" + currentConf);
-                }
                 RouteTable routeTable = RouteTable.getInstance();
-                if (!Objects.equals(routeTable.getConfiguration(group), currentClusters)) {
-                    routeTable.updateConfiguration(group, currentClusters);
-                }
                 try {
                     routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);
                     PeerId leader = routeTable.selectLeader(group);
@@ -127,7 +137,6 @@ public class ClusterController {
                 } catch (Exception e) {
                     LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
                 }
-            }
         }
         return metadataResponse;
     }

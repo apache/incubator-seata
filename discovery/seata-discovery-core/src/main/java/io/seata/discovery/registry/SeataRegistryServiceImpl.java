@@ -60,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS;
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type File registry service.
@@ -255,8 +254,10 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     private static boolean watch() {
         try {
             Map<String, String> param = new HashMap<>();
-            param.put("groupTerms", OBJECT_MAPPER.writeValueAsString(METADATA.getClusterTerm()));
-            String tcAddress = queryHttpAddress(DEFAULT_SEATA_GROUP);
+            Map<String, Long> groupTerms = METADATA.getClusterTerm();
+            param.put("groupTerms", OBJECT_MAPPER.writeValueAsString(groupTerms));
+            String clusterName = FILE_REGISTRY_SERVICE.getServiceGroup(CURRENT_TRANSACTION_SERVICE_GROUP);
+            String tcAddress = queryHttpAddress(clusterName);
             try (CloseableHttpResponse response =
                 doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
                 if (response != null) {

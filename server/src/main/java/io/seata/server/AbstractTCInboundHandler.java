@@ -45,6 +45,7 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.TCInboundHandler;
 import io.seata.core.rpc.RpcContext;
+import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
@@ -362,8 +363,10 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
      */
     @Override
     public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
+        String group = request.getGroupId();
+        RaftClusterContext.bindGroup(group);
         try {
-            if (!isPrevent(request.getGroupId())) {
+            if (!isPrevent(group)) {
                 throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing !");
             }
@@ -371,6 +374,8 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         } catch (TransactionException tex) {
             LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             callback.onTransactionException(request, response, tex);
+        } finally {
+            RaftClusterContext.unbindGroup();
         }
     }
 

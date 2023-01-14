@@ -24,8 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
-
 /**
  * @author funkye
  */
@@ -39,10 +37,6 @@ public class Metadata {
 
     private StoreMode storeMode = StoreMode.FILE;
 
-    public Node getLeader() {
-        return getLeader(DEFAULT_SEATA_GROUP);
-    }
-
     public Node getLeader(String group) {
         return leaders.get(group);
     }
@@ -53,15 +47,11 @@ public class Metadata {
     }
 
     public void setLeader(Node leader) {
-        setLeader(DEFAULT_SEATA_GROUP, leader);
+        setLeader(leader.getGroup(), leader);
     }
 
     public void setLeader(String group, Node leader) {
         this.leaders.put(group, leader);
-    }
-
-    public List<Node> getNodes() {
-        return getNodes(DEFAULT_SEATA_GROUP);
     }
 
     public List<Node> getNodes(String group) {
@@ -70,10 +60,6 @@ public class Metadata {
 
     public void setNodes(String group, List<Node> nodes) {
         this.nodes.put(group, nodes);
-    }
-
-    public void setNodes(List<Node> nodes) {
-        setNodes(DEFAULT_SEATA_GROUP, nodes);
     }
 
     public boolean containsGroup(String group) {

@@ -16,10 +16,12 @@
 package io.seata.server.cluster.raft;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
@@ -45,7 +47,6 @@ import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.SeataRegistryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
@@ -127,15 +128,16 @@ public class RaftServerFactory {
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverId.getPort();
+        String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         try {
             // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
             final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
-            RaftServer raftServer = new RaftServer(dataPath, DEFAULT_SEATA_GROUP, serverId, initNodeOptions(initConf), rpcServer);
+            RaftServer raftServer = new RaftServer(dataPath, group, serverId, initNodeOptions(initConf), rpcServer);
             if (!rpcServer.init(null)) {
-                throw new RuntimeException("start raft group: " + DEFAULT_SEATA_GROUP + "fail!");
+                throw new RuntimeException("start raft group: " + group + "fail!");
             }
             // as the foundation for multi raft group in the future
-            RAFT_SERVER_MAP.put(DEFAULT_SEATA_GROUP, raftServer);
+            RAFT_SERVER_MAP.put(group, raftServer);
             LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
@@ -144,41 +146,29 @@ public class RaftServerFactory {
         if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
             List<PeerId> currentPeers = null;
             try {
-                currentPeers = getCliServiceInstance().getPeers(DEFAULT_SEATA_GROUP, initConf);
+                currentPeers = getCliServiceInstance().getPeers(group, initConf);
             } catch (Exception e) {
                 // In the first deployment, the leader cannot be found
             }
             if (CollectionUtils.isNotEmpty(currentPeers)) {
                 if (!currentPeers.contains(serverId)) {
-                    Status status = getCliServiceInstance().addPeer(DEFAULT_SEATA_GROUP, initConf, serverId);
+                    Status status = getCliServiceInstance().addPeer(group, initConf, serverId);
                     if (!status.isOk()) {
-                        LOGGER.error("failed to join the RAFT cluster: {}. Please check the status of the cluster",
-                            initConfStr);
+                        LOGGER.error(
+                            "failed to join the RAFT cluster: {}. Please check the status of the cluster, status error: {}",
+                            initConfStr, status.getErrorMsg());
                     }
                 }
             }
         }
     }
 
-    public RaftServer getRaftServer() {
-        return getRaftServer(DEFAULT_SEATA_GROUP);
-    }
-
     public RaftServer getRaftServer(String group) {
         return RAFT_SERVER_MAP.get(group);
     }
 
-    public RaftStateMachine getStateMachine() {
-        return getStateMachine(DEFAULT_SEATA_GROUP);
-    }
-
-    public RaftStateMachine getStateMachine(String group) {
-        return RAFT_SERVER_MAP.get(group).getRaftStateMachine();
-    }
-
-
-    public Boolean isLeader() {
-        return isLeader(DEFAULT_SEATA_GROUP);
+    public Collection<RaftServer> getRaftServers() {
+        return RAFT_SERVER_MAP.values();
     }
 
     public Boolean isLeader(String group) {
@@ -192,14 +182,6 @@ public class RaftServerFactory {
 
     public Boolean isRaftMode() {
         return raftMode;
-    }
-
-    public Boolean isNotRaftModeLeader() {
-        return isNotRaftModeLeader(DEFAULT_SEATA_GROUP);
-    }
-
-    public Boolean isNotRaftModeLeader(String group) {
-        return !isLeader(group) && isRaftMode();
     }
 
     private RaftOptions initRaftOptions() {
@@ -228,6 +210,10 @@ public class RaftServerFactory {
         // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         return nodeOptions;
+    }
+
+    public static Set<String> groups() {
+        return RAFT_SERVER_MAP.keySet();
     }
 
     private static class SingletonHandler {

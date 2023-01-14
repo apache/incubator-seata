@@ -23,29 +23,23 @@ import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RouteTable;
-import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
-import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.Disposable;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_CLUSTER;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 
 /**
  * @author funkye
  */
-public class RaftServer implements ConfigurationChangeListener, Disposable, Closeable {
+public class RaftServer implements Disposable, Closeable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final RaftStateMachine raftStateMachine;
@@ -75,7 +69,6 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer, true);
         this.cliService = RaftServerFactory.getCliServiceInstance();
-        ConfigurationCache.addConfigListener(SERVER_RAFT_CLUSTER, this);
         this.node = this.raftGroupService.start(false);
         RouteTable.getInstance().updateConfiguration(groupId, nodeOptions.getInitialConf());
         if (reporterEnabled) {
@@ -97,20 +90,6 @@ public class RaftServer implements ConfigurationChangeListener, Disposable, Clos
 
     public RaftStateMachine getRaftStateMachine() {
         return raftStateMachine;
-    }
-
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (SERVER_RAFT_CLUSTER.equals(event.getDataId())) {
-            final Configuration newConf = new Configuration();
-            if (newConf.parse(event.getNewValue())) {
-                Node node = getNode();
-                if (node != null && node.isLeader()) {
-                    CliService cliService = getCliService();
-                    cliService.changePeers(DEFAULT_SEATA_GROUP, getNode().getOptions().getInitialConf(), newConf);
-                }
-            }
-        }
     }
 
     @Override

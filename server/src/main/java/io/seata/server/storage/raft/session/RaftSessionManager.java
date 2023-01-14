@@ -205,4 +205,7 @@ public class RaftSessionManager extends FileSessionManager {
         this.name = name;
     }
 
+    @Override
+    public void destroy() {}
+
 }

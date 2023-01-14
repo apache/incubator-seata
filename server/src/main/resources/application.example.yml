@@ -117,6 +117,7 @@ seata:
 
   server:
     raft:
+      group: default
       cluster:
       snapshot-interval: 600
       apply-batch: 32

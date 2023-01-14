@@ -15,13 +15,18 @@
  */
 package io.seata.server.storage.raft.lock;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.loader.LoadLevel;
+import io.seata.config.ConfigurationFactory;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @description raft distributed lock
@@ -33,25 +38,29 @@ public class RaftDistributedLocker implements DistributedLocker {
     protected static final Logger LOGGER = LoggerFactory.getLogger(
             RedisDistributedLocker.class);
 
+    private final String group = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+
     /**
      * Acquire the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO distributedLockDO
+     * @return boolean
      */
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
-        return RaftServerFactory.getInstance().isLeader();
+        RaftClusterContext.bindGroup(group);
+        return RaftServerFactory.getInstance().isLeader(group);
     }
 
     /**
      * Release the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO distributedLockDO
+     * @return boolean
      */
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
+        RaftClusterContext.unbindGroup();
         return true;
     }
     
