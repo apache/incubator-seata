@@ -30,6 +30,8 @@ public class ServerRaftProperties {
 
     private String cluster;
 
+    private String group;
+
     private Boolean autoJoin = false;
 
     private Integer snapshotInterval = 600;
@@ -156,6 +158,14 @@ public class ServerRaftProperties {
 
     public void setCompressor(String compressor) {
         this.compressor = compressor;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
 }

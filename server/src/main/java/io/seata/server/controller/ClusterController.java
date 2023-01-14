@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -32,11 +31,9 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
@@ -48,12 +45,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_CLUSTER;
 import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
@@ -83,8 +78,8 @@ public class ClusterController {
     }
 
     @GetMapping("/changeCluster")
-    public Result<?> changeCluster(@RequestParam String raftClusterStr){
-        Result<?> result =  new Result<>();
+    public Result<?> changeCluster(@RequestParam String raftClusterStr) {
+        Result<?> result = new Result<>();
         final Configuration newConf = new Configuration();
         if (!newConf.parse(raftClusterStr)) {
             result.setMessage("fail to parse initConf:" + raftClusterStr);
@@ -105,38 +100,38 @@ public class ClusterController {
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
             metadataResponse.setMode(mode);
-                RouteTable routeTable = RouteTable.getInstance();
-                try {
-                    routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);
-                    PeerId leader = routeTable.selectLeader(group);
-                    if (leader != null) {
-                        Set<Node> nodes = new HashSet<>();
-                        Node leaderNode = new Node(leader.getIdx(), leader.getPort());
-                        leaderNode.setRole(ClusterRole.LEADER);
-                        leaderNode.setGroup(group);
-                        leaderNode.setHostAddress(leader.getIp());
-                        nodes.add(leaderNode);
-                        Configuration configuration = routeTable.getConfiguration(group);
-                        nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
-                            Node node = new Node(learner.getIdx(), learner.getPort());
-                            node.setGroup(group);
-                            node.setRole(ClusterRole.LEARNER);
-                            node.setHostAddress(learner.getIp());
-                            return node;
-                        }).collect(Collectors.toList()));
-                        nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
-                            Node node = new Node(follower.getIdx(), follower.getPort());
-                            node.setGroup(group);
-                            node.setRole(ClusterRole.FOLLOWER);
-                            node.setHostAddress(follower.getIp());
-                            return node;
-                        }).collect(Collectors.toList()));
-                        metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());
-                        metadataResponse.setNodes(new ArrayList<>(nodes));
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
+            RouteTable routeTable = RouteTable.getInstance();
+            try {
+                routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);
+                PeerId leader = routeTable.selectLeader(group);
+                if (leader != null) {
+                    Set<Node> nodes = new HashSet<>();
+                    Node leaderNode = new Node(leader.getIdx(), leader.getPort());
+                    leaderNode.setRole(ClusterRole.LEADER);
+                    leaderNode.setGroup(group);
+                    leaderNode.setHostAddress(leader.getIp());
+                    nodes.add(leaderNode);
+                    Configuration configuration = routeTable.getConfiguration(group);
+                    nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
+                        Node node = new Node(learner.getIdx(), learner.getPort());
+                        node.setGroup(group);
+                        node.setRole(ClusterRole.LEARNER);
+                        node.setHostAddress(learner.getIp());
+                        return node;
+                    }).collect(Collectors.toList()));
+                    nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
+                        Node node = new Node(follower.getIdx(), follower.getPort());
+                        node.setGroup(group);
+                        node.setRole(ClusterRole.FOLLOWER);
+                        node.setHostAddress(follower.getIp());
+                        return node;
+                    }).collect(Collectors.toList()));
+                    metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());
+                    metadataResponse.setNodes(new ArrayList<>(nodes));
                 }
+            } catch (Exception e) {
+                LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
+            }
         }
         return metadataResponse;
     }
@@ -149,7 +144,8 @@ public class ClusterController {
         try {
             Map<String, Object> groupTermMap = objectMapper.readValue(groupTerms, HashMap.class);
             groupTermMap.forEach((group, term) -> {
-                Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+                Watcher<AsyncContext> watcher =
+                    new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
                 clusterWatcherManager.registryWatcher(watcher);
             });
         } catch (JsonProcessingException e) {
