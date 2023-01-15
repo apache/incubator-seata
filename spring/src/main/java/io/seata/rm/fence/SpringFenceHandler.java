@@ -52,10 +52,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class SpringFenceHandler implements FenceHandler {
 
-    private SpringFenceHandler() {
-        throw new IllegalStateException("Utility class");
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringFenceHandler.class);
 
     private static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();

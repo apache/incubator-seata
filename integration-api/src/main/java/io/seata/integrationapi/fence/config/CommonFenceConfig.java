@@ -17,6 +17,7 @@ package io.seata.integrationapi.fence.config;
 
 import java.time.Duration;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,7 +96,8 @@ public class CommonFenceConfig implements Disposable {
                 } catch (RuntimeException e) {
                     LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
                 }
-            }, 0, periodSeconds, TimeUnit.SECONDS);
+            },  new Random(System.currentTimeMillis()).nextInt(60), periodSeconds, TimeUnit.SECONDS);
+
             LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod);
         } catch (NumberFormatException e) {
             LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
