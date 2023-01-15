@@ -28,7 +28,7 @@ import javax.sql.DataSource;
  * @author leezongjie
  * @date 2022/12/17
  */
-public class StringFenceConfig extends CommonFenceConfig implements InitializingBean {
+public class SpringFenceConfig extends CommonFenceConfig implements InitializingBean {
 
     /**
      * Common fence datasource
@@ -40,7 +40,7 @@ public class StringFenceConfig extends CommonFenceConfig implements Initializing
      */
     private final PlatformTransactionManager transactionManager;
 
-    public StringFenceConfig(DataSource dataSource, PlatformTransactionManager transactionManager) {
+    public SpringFenceConfig(DataSource dataSource, PlatformTransactionManager transactionManager) {
         this.dataSource = dataSource;
         this.transactionManager = transactionManager;
     }

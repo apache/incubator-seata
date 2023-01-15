@@ -55,7 +55,7 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
     public AspectTransactionalInterceptor(FailureHandler failureHandler, AspectTransactional aspectTransactional) {
         this.failureHandler = failureHandler;
         this.aspectTransactional = aspectTransactional;
-        this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, null, this.aspectTransactional);
+        this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, this.aspectTransactional);
     }
 
     @Nullable

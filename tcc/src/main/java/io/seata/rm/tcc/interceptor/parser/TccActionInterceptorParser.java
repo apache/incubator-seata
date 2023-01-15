@@ -15,14 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.integrationapi.interceptor.TxBeanParserUtils;
 import io.seata.integrationapi.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integrationapi.interceptor.parser.DefaultResourceRegisterParser;
@@ -31,6 +24,12 @@ import io.seata.integrationapi.remoting.RemotingDesc;
 import io.seata.integrationapi.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author leezongjie
@@ -51,9 +50,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
                     //if it is a tcc remote reference
                     Set<String> methodsToProxy = tccProxyTargetMethod(remotingDesc);
                     if (remotingDesc != null && !methodsToProxy.isEmpty()) {
-                        Class[] interfaceToProxy = target.getClass().getInterfaces();
-                        ProxyInvocationHandler proxyInvocationHandler = new TccActionInterceptorHandler(interfaceToProxy, methodsToProxy);
-                        ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
+                        ProxyInvocationHandler proxyInvocationHandler = new TccActionInterceptorHandler(remotingDesc, methodsToProxy);
                         return proxyInvocationHandler;
                     }
                 }
@@ -75,7 +72,14 @@ public class TccActionInterceptorParser implements InterfaceParser {
         Set<String> methodsToProxy = new HashSet<>();
         //check if it is TCC bean
         Class<?> tccServiceClazz = remotingDesc.getServiceClass();
-        Method[] methods = tccServiceClazz.getMethods();
+        Set<Method> methods = new HashSet<>(Arrays.asList(tccServiceClazz.getMethods()));
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(tccServiceClazz);
+        if (interfaceClasses != null) {
+            for (Class<?> interClass : interfaceClasses) {
+                methods.addAll(Arrays.asList(interClass.getMethods()));
+            }
+        }
+
         TwoPhaseBusinessAction twoPhaseBusinessAction;
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
@@ -83,6 +87,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
                 methodsToProxy.add(method.getName());
             }
         }
+
         if (methodsToProxy.isEmpty()) {
             return Collections.emptySet();
         }

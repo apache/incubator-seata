@@ -17,7 +17,6 @@ package io.seata.integrationapi.interceptor.handler;
 
 import io.seata.integrationapi.interceptor.DefaultInvocationWrapper;
 import io.seata.integrationapi.interceptor.InvocationWrapper;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -27,8 +26,6 @@ import java.lang.reflect.Method;
  * @date 2022/11/26
  */
 public class DefaultInvocationHandler implements InvocationHandler {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(DefaultInvocationHandler.class);
 
     private ProxyInvocationHandler proxyInvocationHandler;
     private Object delegate;

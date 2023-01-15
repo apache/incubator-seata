@@ -16,6 +16,7 @@
 package io.seata.rm.tcc.resource.parser;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.integrationapi.interceptor.ActionContextUtil;
 import io.seata.integrationapi.interceptor.TxBeanParserUtils;
 import io.seata.integrationapi.interceptor.parser.RegisterResourceParser;
@@ -29,6 +30,9 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author leezongjie
@@ -46,7 +50,13 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                     try {
                         //service bean, registry resource
                         Class<?> serviceClass = remotingDesc.getServiceClass();
-                        Method[] methods = serviceClass.getMethods();
+                        Set<Method> methods = new HashSet<>(Arrays.asList(serviceClass.getMethods()));
+                        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceClass);
+                        if (interfaceClasses != null) {
+                            for (Class<?> interClass : interfaceClasses) {
+                                methods.addAll(Arrays.asList(interClass.getMethods()));
+                            }
+                        }
                         Object targetBean = remotingDesc.getTargetBean();
                         for (Method m : methods) {
                             TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);

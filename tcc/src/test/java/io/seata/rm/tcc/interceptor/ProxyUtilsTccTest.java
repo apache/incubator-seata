@@ -117,5 +117,14 @@ public class ProxyUtilsTccTest {
 
     }
 
+    @Test
+    public void testTccImplementOtherMethod(){
+        NormalTccActionImpl tccAction = new NormalTccActionImpl();
+        NormalTccActionImpl tccActionProxy = ProxyUtil.createProxy(tccAction);
+
+        Assertions.assertTrue(tccActionProxy.otherMethod());
+
+    }
+
 
 }

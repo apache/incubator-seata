@@ -25,11 +25,7 @@ import io.seata.integrationapi.interceptor.InvocationWrapper;
  */
 public interface ProxyInvocationHandler {
 
-    Class[] getInterfaceToProxy();
-
     Set<String> getMethodsToProxy();
-
-    boolean interfaceProxyMode();
 
     Object invoke(InvocationWrapper invocation) throws Throwable;
 
