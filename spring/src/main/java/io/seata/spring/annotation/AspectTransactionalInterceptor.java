@@ -37,6 +37,7 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
 
     private final FailureHandler failureHandler;
     private final AspectTransactional aspectTransactional;
+    private final GlobalTransactionalInterceptorHandler globalTransactionalInterceptorHandler;
 
     private static final AspectTransactional DEFAULT_ASPECT_TRANSACTIONAL = new AspectTransactional();
 
@@ -55,6 +56,7 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
     public AspectTransactionalInterceptor(FailureHandler failureHandler, AspectTransactional aspectTransactional) {
         this.failureHandler = failureHandler;
         this.aspectTransactional = aspectTransactional;
+        this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, null, this.aspectTransactional);
     }
 
     @Nullable
@@ -64,8 +66,6 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
         Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         InvocationWrapper invocationWrapper = new DefaultInvocationWrapper(null, invocation.getThis(), specificMethod, invocation.getArguments());
 
-        Class<?>[] interfaceToProxy = targetClass != null ? targetClass.getInterfaces() : null;
-        ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, interfaceToProxy, null, this.aspectTransactional);
-        return proxyInvocationHandler.invoke(invocationWrapper);
+        return this.globalTransactionalInterceptorHandler.invoke(invocationWrapper);
     }
 }
