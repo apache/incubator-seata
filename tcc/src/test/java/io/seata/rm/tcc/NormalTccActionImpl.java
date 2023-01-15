@@ -40,4 +40,9 @@ public class NormalTccActionImpl implements NormalTccAction {
     public boolean rollback(BusinessActionContext actionContext, TccParam param) {
         return false;
     }
+
+    public boolean otherMethod(){
+        return true;
+    }
+
 }

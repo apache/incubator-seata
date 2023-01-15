@@ -74,7 +74,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
 
-    private Class[] interfaceToProxy;
     private Set<String> methodsToProxy;
 
     private volatile boolean disable;
@@ -111,9 +110,8 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         }
     }
 
-    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Class[] interfaceToProxy, Set<String> methodsToProxy) {
+    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy) {
         this.failureHandler = failureHandler == null ? FailureHandlerHolder.getFailureHandler() : failureHandler;
-        this.interfaceToProxy = interfaceToProxy;
         this.methodsToProxy = methodsToProxy;
         this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 DEFAULT_DISABLE_GLOBAL_TRANSACTION);
@@ -132,24 +130,14 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         this.initDefaultGlobalTransactionTimeout();
     }
 
-    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Class[] interfaceToProxy, Set<String> methodsToProxy, AspectTransactional aspectTransactional) {
-        this(failureHandler, interfaceToProxy, methodsToProxy);
+    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy, AspectTransactional aspectTransactional) {
+        this(failureHandler, methodsToProxy);
         this.aspectTransactional = aspectTransactional;
-    }
-
-    @Override
-    public Class[] getInterfaceToProxy() {
-        return interfaceToProxy;
     }
 
     @Override
     public Set<String> getMethodsToProxy() {
         return methodsToProxy;
-    }
-
-    @Override
-    public boolean interfaceProxyMode() {
-        return false;
     }
 
     @Override

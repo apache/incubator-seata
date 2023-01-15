@@ -19,7 +19,6 @@ import io.seata.integrationapi.interceptor.handler.DefaultInvocationHandler;
 import io.seata.integrationapi.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integrationapi.interceptor.parser.DefaultInterfaceParser;
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 
 import java.util.HashMap;
@@ -45,10 +44,9 @@ public class ProxyUtil {
                 if (proxyInvocationHandler == null) {
                     return target;
                 }
-                DynamicType.Builder.MethodDefinition.ImplementationDefinition<?> implementationDefinition = new ByteBuddy()
-                            .subclass(target.getClass())
-                            .method(isDeclaredBy(target.getClass()));
-                T proxy = (T) implementationDefinition.intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
+                T proxy = (T) new ByteBuddy().subclass(target.getClass())
+                        .method(isDeclaredBy(target.getClass()))
+                        .intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
                         .make()
                         .load(target.getClass().getClassLoader())
                         .getLoaded()

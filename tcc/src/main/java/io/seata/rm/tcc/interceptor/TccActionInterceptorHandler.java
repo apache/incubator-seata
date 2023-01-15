@@ -15,52 +15,40 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import io.seata.common.Constants;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.integrationapi.interceptor.ActionInterceptorHandler;
 import io.seata.integrationapi.interceptor.InvocationWrapper;
 import io.seata.integrationapi.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integrationapi.interceptor.handler.AbstractProxyInvocationHandler;
+import io.seata.integrationapi.remoting.RemotingDesc;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author leezongjie
  * @date 2022/11/26
  */
-public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler implements ConfigurationChangeListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorHandler.class);
-
-    private volatile boolean disable = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
-    private Class[] interfaceToProxy;
     private Set<String> methodsToProxy;
+    private RemotingDesc remotingDesc;
 
-    public TccActionInterceptorHandler(Class[] interfaceToProxy, Set<String> methodsToProxy) {
-        this.interfaceToProxy = interfaceToProxy;
+    private Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
+
+    public TccActionInterceptorHandler(RemotingDesc remotingDesc, Set<String> methodsToProxy) {
+        this.remotingDesc = remotingDesc;
         this.methodsToProxy = methodsToProxy;
-    }
-
-    @Override
-    public Class[] getInterfaceToProxy() {
-        return interfaceToProxy;
     }
 
     @Override
@@ -69,18 +57,14 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     }
 
     @Override
-    public boolean interfaceProxyMode() {
-        return true;
-    }
-
-    @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
-        if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
+        if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
             //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = invocation.getMethod();
-        TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+        TwoPhaseBusinessAction businessAction = parseAnnotation(method);
+
         //try method
         if (businessAction != null) {
             //save the xid
@@ -121,12 +105,28 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return invocation.proceed();
     }
 
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
-            LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                    disable, event.getNewValue());
-            disable = Boolean.parseBoolean(event.getNewValue().trim());
-        }
+    private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
+        TwoPhaseBusinessAction result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
+            TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+            if (businessAction == null && remotingDesc.getServiceClass() != null) {
+                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(remotingDesc.getServiceClass());
+                if (interfaceClasses != null) {
+                    for (Class<?> interClass : interfaceClasses) {
+                        try {
+                            Method m = interClass.getMethod(method.getName(), method.getParameterTypes());
+                            businessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
+                            if (businessAction != null) {
+                                break;
+                            }
+                        } catch (NoSuchMethodException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+            return businessAction;
+        });
+        return result;
     }
+
 }
