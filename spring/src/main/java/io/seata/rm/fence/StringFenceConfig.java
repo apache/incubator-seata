@@ -47,10 +47,10 @@ public class StringFenceConfig extends CommonFenceConfig implements Initializing
 
     @Override
     public void afterPropertiesSet() {
-        init();
         if (dataSource != null) {
             // set dataSource
             SpringFenceHandler.setDataSource(dataSource);
+            init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }

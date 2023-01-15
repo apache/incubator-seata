@@ -48,7 +48,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     private static final int TICKS_PER_WHEEL = 8;
 
-    private HashedWheelTimer timer = new HashedWheelTimer(
+    private static final HashedWheelTimer timer = new HashedWheelTimer(
         new NamedThreadFactory("failedTransactionRetry", 1),
         TICK_DURATION, TimeUnit.SECONDS, TICKS_PER_WHEEL);
 

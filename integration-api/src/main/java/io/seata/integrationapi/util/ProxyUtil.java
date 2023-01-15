@@ -45,15 +45,9 @@ public class ProxyUtil {
                 if (proxyInvocationHandler == null) {
                     return target;
                 }
-                DynamicType.Builder.MethodDefinition.ImplementationDefinition<?> implementationDefinition;
-                if (proxyInvocationHandler.interfaceProxyMode()) {
-                    implementationDefinition = new ByteBuddy().subclass(Object.class)
-                            .implement(proxyInvocationHandler.getInterfaceToProxy());
-                } else {
-                    implementationDefinition = new ByteBuddy()
+                DynamicType.Builder.MethodDefinition.ImplementationDefinition<?> implementationDefinition = new ByteBuddy()
                             .subclass(target.getClass())
                             .method(isDeclaredBy(target.getClass()));
-                }
                 T proxy = (T) implementationDefinition.intercept(InvocationHandlerAdapter.of(new DefaultInvocationHandler(proxyInvocationHandler, target)))
                         .make()
                         .load(target.getClass().getClassLoader())
