@@ -15,11 +15,12 @@
  */
 package io.seata.spring.annotation;
 
+import java.lang.reflect.Method;
+
 import io.seata.integrationapi.annotation.AspectTransactional;
 import io.seata.integrationapi.interceptor.DefaultInvocationWrapper;
 import io.seata.integrationapi.interceptor.InvocationWrapper;
 import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
-import io.seata.integrationapi.interceptor.handler.ProxyInvocationHandler;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -27,8 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
-
-import java.lang.reflect.Method;
 
 /**
  * @author ruishansun
