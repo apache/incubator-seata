@@ -50,9 +50,9 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         try {
             TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
                     .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
-        } catch (RuntimeException e) {
-            LOGGER.warn("Build the `TABLE_META_CACHE` failed:", e);
-            throw e;
+        } catch (Throwable t) {
+            LOGGER.warn("Build the `TABLE_META_CACHE` failed:", t);
+            throw t;
         }
     }
 
