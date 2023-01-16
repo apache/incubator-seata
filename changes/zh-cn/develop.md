@@ -17,7 +17,7 @@
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)
-- [[#5193](https://github.com/seata/seata/pull/5193)] 优化升级 hikari 4.0.3 druid 1.2.12 mysql8-jdbc 8.0.31 到稳定版
+- [[#5193](https://github.com/seata/seata/pull/5193)] 优化升级 hikari druid mysql 到稳定版
 
 
 ### test:
