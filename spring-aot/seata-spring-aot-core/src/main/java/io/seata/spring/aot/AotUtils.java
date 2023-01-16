@@ -97,6 +97,12 @@ public class AotUtils extends NativeUtils {
             registerType(reflectionHints, clazz, memberCategories);
         } catch (ClassNotFoundException e) {
             LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
+        } catch (NoClassDefFoundError e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.warn("Register reflection type '{}' error:", className, e);
+            } else {
+                LOGGER.warn("Register reflection type '{}' error: {}: {}", className, e.getClass().getName(), e.getMessage());
+            }
         }
     }
 
@@ -104,8 +110,14 @@ public class AotUtils extends NativeUtils {
         for (String className : classNames) {
             try {
                 registerType(reflectionHints, ReflectionUtil.getClassByName(className), memberCategories);
-            } catch (ClassNotFoundException | NoClassDefFoundError e) {
+            } catch (ClassNotFoundException e) {
                 LOGGER.warn("Register reflection type failed: class not found '{}'.", className);
+            } catch (NoClassDefFoundError e) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.warn("Register reflection type '{}' error:", className, e);
+                } else {
+                    LOGGER.warn("Register reflection type '{}' error: {}: {}", className, e.getClass().getName(), e.getMessage());
+                }
             }
         }
     }
@@ -146,7 +158,7 @@ public class AotUtils extends NativeUtils {
                     AotUtils.registerTypes(reflectionHints, memberCategories, className);
                 });
             } catch (IOException e) {
-                LOGGER.error("Register services '{}' fail: {}", resource.getFilename(), e.getMessage(), e);
+                LOGGER.error("Register services '{}' fail:", resource.getFilename(), e);
             }
         }
     }

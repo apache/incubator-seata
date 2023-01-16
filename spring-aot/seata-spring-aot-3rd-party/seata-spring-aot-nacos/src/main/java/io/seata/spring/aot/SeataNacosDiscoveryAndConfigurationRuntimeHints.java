@@ -20,6 +20,7 @@ import java.util.ServiceLoader;
 
 import com.alibaba.nacos.common.notify.DefaultPublisher;
 import com.alibaba.nacos.common.notify.EventPublisher;
+import io.seata.common.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aot.hint.ReflectionHints;
@@ -52,22 +53,33 @@ class SeataNacosDiscoveryAndConfigurationRuntimeHints implements RuntimeHintsReg
                 "com.alibaba.nacos.client.naming.core.PushReceiver$PushPacket"
         );
 
-        // Register the implementation class of the interface EventPublisher to the reflection hints.
-        // See com.alibaba.nacos.common.notify.NotifyCenter#static
-        Class<?> eventPublisherClass = null;
-        try {
-            final ServiceLoader<EventPublisher> loader = ServiceLoader.load(EventPublisher.class);
-            Iterator<EventPublisher> iterator = loader.iterator();
-            if (iterator.hasNext()) {
-                eventPublisherClass = iterator.next().getClass();
-            }
-        } catch (RuntimeException e) {
-            LOGGER.warn("Load the implementation class of the interface 'EventPublisher' fail. Default implementation 'DefaultPublisher' will be used.", e);
-        }
-        AotUtils.registerType(reflectionHints,
-                eventPublisherClass == null ? DefaultPublisher.class : eventPublisherClass,
-                AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE
+        AotUtils.registerTypes(reflectionHints,
+                AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE,
+                "com.alibaba.nacos.client.naming.NacosNamingService"
         );
+
+        if (ReflectionUtil.existsClass("com.alibaba.nacos.common.notify.EventPublisher")) {
+            // Register the implementation class of the interface EventPublisher to the reflection hints.
+            // See com.alibaba.nacos.common.notify.NotifyCenter#static
+            Class<?> eventPublisherClass = null;
+            try {
+                try {
+                    final ServiceLoader<EventPublisher> loader = ServiceLoader.load(EventPublisher.class);
+                    Iterator<EventPublisher> iterator = loader.iterator();
+                    if (iterator.hasNext()) {
+                        eventPublisherClass = iterator.next().getClass();
+                    }
+                } catch (RuntimeException | NoClassDefFoundError e) {
+                    LOGGER.warn("Load the implementation class of the interface 'EventPublisher' fail. Default implementation 'DefaultPublisher' will be used.", e);
+                }
+                if (eventPublisherClass == null) {
+                    eventPublisherClass = DefaultPublisher.class;
+                }
+                AotUtils.registerType(reflectionHints, eventPublisherClass, AotUtils.MEMBER_CATEGORIES_FOR_INSTANTIATE);
+            } catch (NoClassDefFoundError e) {
+                LOGGER.warn("Register reflection implementation class of the interface EventPublisher error:", e);
+            }
+        }
     }
 
 }
