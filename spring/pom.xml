@@ -74,6 +74,8 @@
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <build>
