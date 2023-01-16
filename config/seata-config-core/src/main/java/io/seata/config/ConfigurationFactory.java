@@ -71,10 +71,10 @@ public final class ConfigurationFactory {
             }
         } catch (EnhancedServiceNotFoundException e) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.warn("load Configuration failed: {}", e.getMessage(), e);
+                LOGGER.warn("failed to load extConfiguration: {}", e.getMessage(), e);
             }
         } catch (Exception e) {
-            LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
+            LOGGER.error("failed to load extConfiguration: {}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
     }

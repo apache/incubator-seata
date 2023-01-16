@@ -105,7 +105,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
             }
 
-            // Instantiate the property
+            // Instantiate the property object
             Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
                 try {
                     return propertyClass.newInstance();
