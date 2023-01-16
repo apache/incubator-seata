@@ -43,7 +43,6 @@ import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.FailureHandlerHolder;
 import io.seata.tm.api.TransactionalExecutor;
