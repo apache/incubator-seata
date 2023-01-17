@@ -18,6 +18,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 - [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
 
 
 ### test:
@@ -32,5 +33,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [Bughue](https://github.com/Bughue)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
