@@ -35,21 +35,14 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
         GlobalTransactionDO globalTransactionDO = sessionSyncMsg.getGlobalSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(globalTransactionDO.getXid());
         if (globalSession != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("xid: {}, change status: {}", globalSession.getXid(), globalSession.getStatus());
-            }
             globalSession.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
             if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                    || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                 globalSession.getBranchSessions().parallelStream()
-                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-            } else if (GlobalStatus.Committed.equals(globalSession.getStatus())
-                || GlobalStatus.Rollbacked.equals(globalSession.getStatus())) {
-                // Delete transactions in advance to improve the efficiency of the state machine
-                raftSessionManager.removeGlobalSession(globalSession);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("end xid: {}", globalSession.getXid());
-                }
+                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("xid: {}, change status: {}", globalSession.getXid(), globalSession.getStatus());
             }
         }
         return true;

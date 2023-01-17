@@ -138,7 +138,9 @@ public class SessionHelper {
         if (retryGlobal || !DELAY_HANDLE_SESSION) {
             long beginTime = System.currentTimeMillis();
             boolean retryBranch = globalSession.getStatus() == GlobalStatus.CommitRetrying;
-            globalSession.changeGlobalStatus(GlobalStatus.Committed);
+            if (!globalSession.getStatus().equals(GlobalStatus.Committed)) {
+                globalSession.changeGlobalStatus(GlobalStatus.Committed);
+            }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
@@ -204,7 +206,9 @@ public class SessionHelper {
             if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
-                globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
+                if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
+                    globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
+                }
             }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION && !timeoutDone) {

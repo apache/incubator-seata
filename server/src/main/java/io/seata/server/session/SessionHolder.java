@@ -189,14 +189,28 @@ public class SessionHolder {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
-                    case UnKnown:
-                    case Committed:
-                    case CommitFailed:
                     case Rollbacked:
+                        try {
+                            SessionHelper.endCommitFailed(globalSession, true);
+                        } catch (TransactionException e) {
+                            LOGGER.error("Could not handle the global session, xid: {},error: {}",
+                                globalSession.getXid(), e.getMessage());
+                        }
+                        break;
+                    case Committed:
+                        try {
+                            SessionHelper.endCommitted(globalSession, true);
+                        } catch (TransactionException e) {
+                            LOGGER.error("Could not handle the global session, xid: {},error: {}",
+                                globalSession.getXid(), e.getMessage());
+                        }
+                        break;
+                    case Finished:
+                    case UnKnown:
+                    case CommitFailed:
                     case RollbackFailed:
                     case TimeoutRollbacked:
                     case TimeoutRollbackFailed:
-                    case Finished:
                         removeInErrorState(globalSession);
                         break;
                     case AsyncCommitting:
