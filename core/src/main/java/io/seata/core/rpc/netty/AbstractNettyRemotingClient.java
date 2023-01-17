@@ -80,21 +80,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String SINGLE_LOG_POSTFIX = ";";
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
-    private static final String ADDRESS_SPLIT_CHAR = ",";
-    private static final String ADDRESS_LINK_CHAR = ":";
-
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     protected final Object mergeLock = new Object();
-
-    /**
-     * The find leader executor.
-     */
-    protected ScheduledThreadPoolExecutor findLeaderExecutor;
-
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
