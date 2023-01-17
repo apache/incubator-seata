@@ -16,6 +16,7 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -63,29 +64,44 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result;
                     String rawDataId = (String)args[0];
+
+                    // Get config value from the system property
                     result = originalConfiguration.getConfigFromSys(rawDataId);
-                    if (null == result) {
+
+                    if (result == null) {
                         String dataId = convertDataId(rawDataId);
                         Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
-                        Object defaultValue = null;
 
-                        // Get defaultValue from the arguments
+                        // Get config value from the springboot environment
+                        result = getConfigFromEnvironment(dataId, dataType);
+                        if (result != null) {
+                            return result;
+                        }
+
+                        // Get config defaultValue from the arguments
                         if (args.length > 1) {
-                            defaultValue = args[1];
+                            result = args[1];
 
-                            // See Configuration#getConfig(String dataId, long timeoutMills)
-                            if (defaultValue != null && !dataType.isAssignableFrom(defaultValue.getClass())) {
-                                defaultValue = null;
+                            if (result != null) {
+                                // See Configuration#getConfig(String dataId, long timeoutMills)
+                                if (dataType.isAssignableFrom(result.getClass())) {
+                                    return result;
+                                } else {
+                                    result = null;
+                                }
                             }
                         }
 
-                        result = get(dataId, dataType, defaultValue);
-                    }
-                    if (result != null) {
-                        // If the return type is String,need to convert the object to string
-                        if (method.getReturnType().equals(String.class)) {
-                            return String.valueOf(result);
+                        // Get config defaultValue from the property object
+                        try {
+                            result = getDefaultValueFromPropertyObject(dataId);
+                        } catch (Throwable t) {
+                            LOGGER.error("Get default value of the config '{}' failed:", dataId, t);
                         }
+                    }
+
+                    if (result != null) {
+                        result = this.convertType(result, method.getReturnType());
                         return result;
                     }
                 }
@@ -94,35 +110,29 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             });
     }
 
-    private Object get(String dataId, Class<?> dataType, Object defaultValue) throws IllegalAccessException {
-        // If defaultValue is null, get from the property object.
-        if (defaultValue == null) {
-            String propertyPrefix = getPropertyPrefix(dataId);
-            String propertySuffix = getPropertySuffix(dataId);
+    private Object getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException {
+        String propertyPrefix = getPropertyPrefix(dataId);
+        String propertySuffix = getPropertySuffix(dataId);
 
-            // Get the property class
-            Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
-            if (propertyClass == null) {
-                throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
-            }
-
-            // Instantiate the property object
-            Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
-                try {
-                    return propertyClass.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    LOGGER.warn("PropertyClass for prefix: [" + propertyPrefix + "] should not be null. error :" + e.getMessage(), e);
-                }
-                return null;
-            });
-            Objects.requireNonNull(propertyObj, "Instantiate the property fail");
-
-            // Get defaultValue from the property object
-            defaultValue = getDefaultValueFromPropertyObject(propertyObj, propertySuffix);
+        // Get the property class
+        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        if (propertyClass == null) {
+            throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
 
-        // Get config
-        return getConfig(dataId, dataType, defaultValue);
+        // Instantiate the property object
+        Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+            try {
+                return propertyClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOGGER.warn("PropertyClass for prefix: [" + propertyPrefix + "] should not be null. error :" + e.getMessage(), e);
+            }
+            return null;
+        });
+        Objects.requireNonNull(propertyObj, "Instantiate the property fail");
+
+        // Get defaultValue from the property object
+        return getDefaultValueFromPropertyObject(propertyObj, propertySuffix);
     }
 
     /**
@@ -203,17 +213,38 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      *
      * @param dataId       data id
      * @param dataType     data type
-     * @param defaultValue default value
      * @return object
      */
-    private Object getConfig(String dataId, Class<?> dataType, Object defaultValue) {
-        ConfigurableEnvironment environment =
-            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+    @Nullable
+    private Object getConfigFromEnvironment(String dataId, Class<?> dataType) {
+        ConfigurableEnvironment environment = (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
         Object value = environment.getProperty(dataId, dataType);
         if (value == null) {
             value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), dataType);
         }
-        return value != null ? value : defaultValue;
+        return value;
+    }
+
+    private Object convertType(Object configValue, Class<?> dataType) {
+        if (String.class.equals(dataType)) {
+            return String.valueOf(configValue);
+        }
+        if (long.class.equals(dataType)) {
+            return Long.parseLong(String.valueOf(configValue));
+        }
+        if (int.class.equals(dataType)) {
+            return Integer.parseInt(String.valueOf(configValue));
+        }
+        if (short.class.equals(dataType)) {
+            return Short.parseShort(String.valueOf(configValue));
+        }
+        if (boolean.class.equals(dataType)) {
+            return Boolean.parseBoolean(String.valueOf(configValue));
+        }
+        if (Duration.class.equals(dataType)) {
+            return Duration.parse(String.valueOf(configValue));
+        }
+        return configValue;
     }
 
 }
