@@ -18,6 +18,8 @@
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)
 
+### security:
+- [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
@@ -31,5 +33,6 @@
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [Bughue](https://github.com/Bughue)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
