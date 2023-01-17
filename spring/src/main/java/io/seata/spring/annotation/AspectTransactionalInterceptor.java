@@ -61,7 +61,6 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
         Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         InvocationWrapper invocationWrapper = new DefaultInvocationWrapper(null, invocation.getThis(), specificMethod, invocation.getArguments());
-
         return this.globalTransactionalInterceptorHandler.invoke(invocationWrapper);
     }
 }
