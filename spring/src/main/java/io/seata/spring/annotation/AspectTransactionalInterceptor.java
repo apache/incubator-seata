@@ -24,8 +24,6 @@ import io.seata.integrationapi.interceptor.handler.GlobalTransactionalIntercepto
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
 
@@ -57,10 +55,9 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
         this.aspectTransactional = aspectTransactional;
         this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, this.aspectTransactional);
     }
-
-    @Nullable
+    
     @Override
-    public Object invoke(@NotNull MethodInvocation invocation) throws Throwable {
+    public Object invoke(MethodInvocation invocation) throws Throwable {
         Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         InvocationWrapper invocationWrapper = new DefaultInvocationWrapper(null, invocation.getThis(), specificMethod, invocation.getArguments());
