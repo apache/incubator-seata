@@ -52,7 +52,11 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void addGlobalSession(GlobalSession globalSession) throws TransactionException {
-        super.addGlobalSession(globalSession);
+        if (!getSessionMap().containsKey(globalSession.getXid())) {
+            super.addGlobalSession(globalSession);
+        } else {
+            onStatusChange(globalSession, globalSession.getStatus());
+        }
     }
 
     @Override

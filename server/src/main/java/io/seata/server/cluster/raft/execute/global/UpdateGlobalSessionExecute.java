@@ -39,7 +39,11 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
             if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
                 || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                 globalSession.getBranchSessions().parallelStream()
-                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+            } else if (GlobalStatus.Committed.equals(globalSession.getStatus())
+                || GlobalStatus.Rollbacked.equals(globalSession.getStatus())) {
+                // Delete transactions in advance to improve the efficiency of the state machine
+                raftSessionManager.removeGlobalSession(globalSession);
             }
             if (logger.isDebugEnabled()) {
                 logger.debug("xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());

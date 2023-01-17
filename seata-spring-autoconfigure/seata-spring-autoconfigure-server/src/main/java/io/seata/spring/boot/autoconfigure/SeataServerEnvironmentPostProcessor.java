@@ -16,7 +16,7 @@
 package io.seata.spring.boot.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import io.seata.spring.boot.autoconfigure.properties.server.StoreProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRaftProperties;
