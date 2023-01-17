@@ -19,6 +19,8 @@
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)
 - [[#5153](https://github.com/seata/seata/pull/5153)] 只允许AT去尝试跨RM获取channel
 
+### security:
+- [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
