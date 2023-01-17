@@ -16,7 +16,7 @@
 package io.seata.rm.tcc.json;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.integrationapi.json.JsonParser;
+import io.seata.integration.tx.api.json.JsonParser;
 
 /**
  * @author leezongjie

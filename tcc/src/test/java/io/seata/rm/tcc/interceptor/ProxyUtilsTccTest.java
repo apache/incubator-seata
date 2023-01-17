@@ -15,7 +15,7 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import io.seata.integrationapi.util.ProxyUtil;
+import io.seata.integration.tx.api.util.ProxyUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;

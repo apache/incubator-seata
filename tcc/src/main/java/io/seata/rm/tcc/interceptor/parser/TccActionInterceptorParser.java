@@ -16,12 +16,12 @@
 package io.seata.rm.tcc.interceptor.parser;
 
 import io.seata.common.util.ReflectionUtil;
-import io.seata.integrationapi.interceptor.TxBeanParserUtils;
-import io.seata.integrationapi.interceptor.handler.ProxyInvocationHandler;
-import io.seata.integrationapi.interceptor.parser.DefaultResourceRegisterParser;
-import io.seata.integrationapi.interceptor.parser.InterfaceParser;
-import io.seata.integrationapi.remoting.RemotingDesc;
-import io.seata.integrationapi.remoting.parser.DefaultRemotingParser;
+import io.seata.integration.tx.api.interceptor.TxBeanParserUtils;
+import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import io.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
+import io.seata.integration.tx.api.interceptor.parser.InterfaceParser;
+import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 

@@ -15,8 +15,8 @@
  */
 package io.seata.spring.tcc;
 
-import io.seata.integrationapi.remoting.RemotingDesc;
-import io.seata.integrationapi.util.ProxyUtil;
+import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.integration.tx.api.util.ProxyUtil;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

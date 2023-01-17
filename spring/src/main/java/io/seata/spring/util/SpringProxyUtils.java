@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.integrationapi.util.DubboUtil;
+import io.seata.integration.tx.api.util.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;

@@ -17,9 +17,9 @@ package io.seata.rm.tcc.remoting.parser;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
-import io.seata.integrationapi.remoting.Protocols;
-import io.seata.integrationapi.remoting.RemotingDesc;
-import io.seata.integrationapi.remoting.parser.AbstractedRemotingParser;
+import io.seata.integration.tx.api.remoting.Protocols;
+import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
 import io.seata.rm.tcc.api.LocalTCC;
 import org.springframework.aop.framework.AopProxyUtils;
 

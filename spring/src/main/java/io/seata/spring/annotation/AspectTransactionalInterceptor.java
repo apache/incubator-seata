@@ -17,10 +17,10 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.Method;
 
-import io.seata.integrationapi.annotation.AspectTransactional;
-import io.seata.integrationapi.interceptor.DefaultInvocationWrapper;
-import io.seata.integrationapi.interceptor.InvocationWrapper;
-import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.integration.tx.api.annotation.AspectTransactional;
+import io.seata.integration.tx.api.interceptor.DefaultInvocationWrapper;
+import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.tm.api.FailureHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

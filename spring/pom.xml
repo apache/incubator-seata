@@ -46,7 +46,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-integration-api</artifactId>
+            <artifactId>seata-integration-tx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

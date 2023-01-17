@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.FrameworkException;
 import io.seata.core.context.RootContext;
-import io.seata.integrationapi.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
