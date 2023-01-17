@@ -217,6 +217,7 @@ public class DefaultCore implements Core {
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
+                            LOGGER.info("Commit branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
                             //not at branch
@@ -325,10 +326,10 @@ public class DefaultCore implements Core {
                             return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
                             SessionHelper.endRollbackFailed(globalSession, retrying);
-                            LOGGER.info("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.error("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return false;
                         default:
-                            LOGGER.info("Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                            LOGGER.error("Rollback branch transaction fail and will retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             if (!retrying) {
                                 globalSession.queueToRetryRollback();
                             }
