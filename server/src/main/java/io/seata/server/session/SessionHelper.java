@@ -30,6 +30,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.store.StoreConfig.SessionMode;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type Session helper.
@@ -55,6 +57,8 @@ public class SessionHelper {
 
     private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
             ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
+
+    private static final String GROUP = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
 
     /**
      * The instance of DefaultCoordinator
@@ -258,12 +262,14 @@ public class SessionHelper {
             return;
         }
         sessions.parallelStream().forEach(globalSession -> {
+            RaftClusterContext.bindGroup(GROUP);
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
             } catch (Throwable th) {
                 LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
             } finally {
+                RaftClusterContext.unbindGroup();
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
         });

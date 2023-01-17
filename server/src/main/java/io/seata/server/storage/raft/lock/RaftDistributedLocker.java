@@ -21,7 +21,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,6 @@ public class RaftDistributedLocker implements DistributedLocker {
      */
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
-        RaftClusterContext.bindGroup(group);
         return RaftServerFactory.getInstance().isLeader(group);
     }
 
@@ -60,7 +58,6 @@ public class RaftDistributedLocker implements DistributedLocker {
      */
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
-        RaftClusterContext.unbindGroup();
         return true;
     }
     

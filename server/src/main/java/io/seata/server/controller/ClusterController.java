@@ -138,7 +138,7 @@ public class ClusterController {
 
     @GetMapping("/watch")
     public void watch(HttpServletRequest request, @RequestParam String groupTerms,
-        @RequestParam(defaultValue = "29000") int timeout) {
+        @RequestParam(defaultValue = "28000") int timeout) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
         try {
