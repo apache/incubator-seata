@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -77,7 +78,7 @@ public class ClusterController {
         serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
-    @GetMapping("/changeCluster")
+    @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
         Result<?> result = new Result<>();
         final Configuration newConf = new Configuration();
@@ -99,7 +100,7 @@ public class ClusterController {
         RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer(group);
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
-            metadataResponse.setMode(mode);
+            metadataResponse.setStoreMode(mode);
             RouteTable routeTable = RouteTable.getInstance();
             try {
                 routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);

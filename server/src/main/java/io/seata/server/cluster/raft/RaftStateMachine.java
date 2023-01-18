@@ -204,9 +204,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         String path = new StringBuilder(reader.getPath()).append(File.separator).append("data").toString();
         try {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            }
+            LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
             Map<String, Object> maps = RaftSnapshotFile.load(path);
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
             Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(GLOBAL_SESSION_MAP_KEY);

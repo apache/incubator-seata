@@ -17,11 +17,14 @@ package io.seata.common.metadata;
 
 import java.util.List;
 
+/**
+ * @author funkye
+ */
 public class MetadataResponse {
 
     List<Node> nodes;
 
-    String mode;
+    String storeMode;
 
     long term;
 
@@ -33,12 +36,12 @@ public class MetadataResponse {
         this.nodes = nodes;
     }
 
-    public String getMode() {
-        return mode;
+    public String getStoreMode() {
+        return storeMode;
     }
 
-    public void setMode(String mode) {
-        this.mode = mode;
+    public void setStoreMode(String storeMode) {
+        this.storeMode = storeMode;
     }
 
     public long getTerm() {

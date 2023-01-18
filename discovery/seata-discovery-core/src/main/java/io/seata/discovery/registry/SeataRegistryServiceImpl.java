@@ -322,7 +322,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                         }
                         list.add(node);
                     }
-                    METADATA.setStoreMode(StoreMode.get(metadataResponse.getMode()));
+                    METADATA.setStoreMode(StoreMode.get(metadataResponse.getStoreMode()));
                     METADATA.setNodes(group, list);
                     METADATA.getClusterTerm().put(group, metadataResponse.getTerm());
                 }
