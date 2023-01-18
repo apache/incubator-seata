@@ -66,11 +66,15 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onBegin(GlobalSession globalSession) throws TransactionException {
-        super.addGlobalSession(globalSession);
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
             if (status.isOk()) {
-                completableFuture.complete(true);
+                try {
+                    super.addGlobalSession(globalSession);
+                    completableFuture.complete(true);
+                } catch (TransactionException e) {
+                    completableFuture.completeExceptionally(e);
+                }
             } else {
                 try {
                     completableFuture.completeExceptionally(
@@ -131,12 +135,11 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        globalSession.add(branchSession);
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         branchSession.setStatus(BranchStatus.Registered);
         Closure closure = status -> {
             if (status.isOk()) {
-                completableFuture.complete(true);
+                completableFuture.complete(globalSession.add(branchSession));
             } else {
                 try {
                     completableFuture.completeExceptionally(
