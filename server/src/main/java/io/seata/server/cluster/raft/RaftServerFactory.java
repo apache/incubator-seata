@@ -138,11 +138,11 @@ public class RaftServerFactory {
             final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
             RaftServer raftServer = new RaftServer(dataPath, group, serverId, initNodeOptions(initConf), rpcServer);
             if (!rpcServer.init(null)) {
-                throw new RuntimeException("start raft group: " + group + "fail!");
+                throw new RuntimeException("start raft group: " + group + " fail!");
             }
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(group, raftServer);
-            LOGGER.info("started seata server raft cluster，group: {} ", group);
+            LOGGER.info("started seata server raft cluster, group: {} ", group);
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
         }
