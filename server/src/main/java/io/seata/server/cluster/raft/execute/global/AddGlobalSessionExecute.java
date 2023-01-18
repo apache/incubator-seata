@@ -29,12 +29,13 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
-        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
+        RaftSessionManager raftSessionManager =
+            (RaftSessionManager)SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
+        raftSessionManager.getSessionMap().putIfAbsent(globalSession.getXid(), globalSession);
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-        raftSessionManager.addGlobalSession(globalSession);
         if (logger.isDebugEnabled()) {
-            logger.debug("addGlobalSession xid: {},status: {}", globalSession.getXid(), globalSession.getStatus());
+            logger.debug("add session xid: {}", globalSession.getXid());
         }
         return true;
     }
