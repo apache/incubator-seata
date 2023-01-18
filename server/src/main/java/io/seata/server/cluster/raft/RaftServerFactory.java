@@ -138,7 +138,7 @@ public class RaftServerFactory {
             }
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(group, raftServer);
-            LOGGER.info("started counter server at port:{}", raftServer.getNode().getNodeId().getPeerId().getPort());
+            LOGGER.info("started seata server raft cluster，group: {} ", group);
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
         }

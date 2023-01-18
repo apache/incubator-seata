@@ -183,7 +183,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
             }
         } else {
-            done.run(new Status(RaftError.EIO, "Fail to save counter snapshot %s", path));
+            done.run(new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path));
         }
     }
 
