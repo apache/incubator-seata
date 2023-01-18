@@ -130,6 +130,7 @@ public class RaftServerFactory {
             // Local debugging use
             serverId = new PeerId(host, port);
         }
+        boolean autoJoinCluster = CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false);
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverId.getPort();
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
@@ -142,20 +143,15 @@ public class RaftServerFactory {
             }
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(group, raftServer);
-            LOGGER.info("started seata server raft cluster, group: {} ", group);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
-        }
-        // whether to join an existing cluster
-        if (CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false)) {
-            List<PeerId> currentPeers = null;
-            try {
-                currentPeers = getCliServiceInstance().getPeers(group, initConf);
-            } catch (Exception e) {
-                // In the first deployment, the leader cannot be found
-            }
-            if (CollectionUtils.isNotEmpty(currentPeers)) {
-                if (!currentPeers.contains(serverId)) {
+            // whether to join an existing cluster
+            if (autoJoinCluster) {
+                List<PeerId> currentPeers = null;
+                try {
+                    currentPeers = getCliServiceInstance().getPeers(group, initConf);
+                } catch (Exception e) {
+                    // In the first deployment, the leader cannot be found
+                }
+                if (CollectionUtils.isNotEmpty(currentPeers) && !currentPeers.contains(serverId)) {
                     Status status = getCliServiceInstance().addPeer(group, initConf, serverId);
                     if (!status.isOk()) {
                         LOGGER.error(
@@ -164,6 +160,9 @@ public class RaftServerFactory {
                     }
                 }
             }
+            LOGGER.info("started seata server raft cluster, group: {} ", group);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
         }
     }
 
