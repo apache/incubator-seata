@@ -43,6 +43,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
+import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
@@ -267,8 +268,13 @@ public class RaftStateMachine extends StateMachineAdapter {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("groupId: {}, session map: {} ", group,
                     SessionHolder.getRootSessionManager().allSessions().size());
-                SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), StoreConfig.SessionMode.RAFT,
-                    false);
+                RaftClusterContext.bindGroup(group);
+                try {
+                    SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(),
+                        StoreConfig.SessionMode.RAFT, false);
+                } finally {
+                    RaftClusterContext.unbindGroup();
+                }
             });
         }
         DefaultCoordinator.getInstance().setPrevent(group, true);

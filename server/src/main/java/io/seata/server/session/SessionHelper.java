@@ -203,12 +203,11 @@ public class SessionHelper {
             }
             boolean retryBranch =
                     currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
-            if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+            if (!currentStatus.equals(GlobalStatus.TimeoutRollbacked)
+                && SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
-            } else {
-                if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
-                    globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
-                }
+            } else if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
+                globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
             }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION && !timeoutDone) {

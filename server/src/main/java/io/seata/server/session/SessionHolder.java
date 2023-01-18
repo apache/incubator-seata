@@ -188,10 +188,13 @@ public class SessionHolder {
             && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
+                LOGGER.info("session:{}, status: {}",globalSession.getXid(),globalStatus);
                 switch (globalStatus) {
+                    case TimeoutRollbacked:
                     case Rollbacked:
                         try {
-                            SessionHelper.endCommitFailed(globalSession, true);
+                            globalSession.addSessionLifecycleListener(getRootSessionManager());
+                            SessionHelper.endRollbacked(globalSession, true);
                         } catch (TransactionException e) {
                             LOGGER.error("Could not handle the global session, xid: {},error: {}",
                                 globalSession.getXid(), e.getMessage());
@@ -199,6 +202,7 @@ public class SessionHolder {
                         break;
                     case Committed:
                         try {
+                            globalSession.addSessionLifecycleListener(getRootSessionManager());
                             SessionHelper.endCommitted(globalSession, true);
                         } catch (TransactionException e) {
                             LOGGER.error("Could not handle the global session, xid: {},error: {}",
@@ -209,7 +213,6 @@ public class SessionHolder {
                     case UnKnown:
                     case CommitFailed:
                     case RollbackFailed:
-                    case TimeoutRollbacked:
                     case TimeoutRollbackFailed:
                         removeInErrorState(globalSession);
                         break;
