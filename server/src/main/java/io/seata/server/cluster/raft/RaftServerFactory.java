@@ -88,11 +88,25 @@ public class RaftServerFactory {
 
     public void init() {
         String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
-        if (StringUtils.isBlank(initConfStr)) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("initialize SofaJRaft fail , server.raft.cluster is null");
+        String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+        StoreMode storeMode = StoreMode.get(mode);
+        if (storeMode.equals(StoreMode.RAFT)) {
+            for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
+                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
+                    throw new IllegalArgumentException("Raft store mode not support other Registration Center");
+                }
             }
+            raftMode = true;
+        }
+        if (StringUtils.isBlank(initConfStr)) {
+            if (raftMode) {
+                throw new IllegalArgumentException(
+                    "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_CLUSTER);
+            }
+            LOGGER.info("raft mode is not enabled");
             return;
+        } else {
+            LOGGER.warn("raft mode and raft cluster is an experimental feature");
         }
         final Configuration initConf = new Configuration();
         if (!initConf.parse(initConfStr)) {
@@ -115,16 +129,6 @@ public class RaftServerFactory {
         } else {
             // Local debugging use
             serverId = new PeerId(host, port);
-        }
-        String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        StoreMode storeMode = StoreMode.get(mode);
-        if (storeMode.equals(StoreMode.RAFT)) {
-            for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
-                    throw new IllegalArgumentException("Raft store mode not support other Registration Center:" + initConfStr);
-                }
-            }
-            raftMode = true;
         }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + serverId.getPort();
