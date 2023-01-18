@@ -188,7 +188,6 @@ public class SessionHolder {
             && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
-                LOGGER.info("session:{}, status: {}",globalSession.getXid(),globalStatus);
                 switch (globalStatus) {
                     case TimeoutRollbacked:
                     case Rollbacked:
