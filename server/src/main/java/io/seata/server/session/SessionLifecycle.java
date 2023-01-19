@@ -60,6 +60,7 @@ public interface SessionLifecycle {
 
     /**
      * Release the lock of branch.
+     *
      * @param branchSession the branch session
      * @throws TransactionException the transaction exception
      */
@@ -75,6 +76,7 @@ public interface SessionLifecycle {
 
     /**
      * Remove branch and release the lock of branch.
+     *
      * @param branchSession the branchSession
      * @throws TransactionException the TransactionException
      */
