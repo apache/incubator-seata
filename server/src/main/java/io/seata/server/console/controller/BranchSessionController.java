@@ -15,8 +15,9 @@
  */
 package io.seata.server.console.controller;
 
-import javax.annotation.Resource;
 import io.seata.server.console.service.BranchSessionService;
+import jakarta.annotation.Resource;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("console/branchSession")
 public class BranchSessionController {
 
-    @Resource(type = BranchSessionService.class)
-    private BranchSessionService branchSessionService;
-
+	@Resource(type = BranchSessionService.class)
+	private BranchSessionService branchSessionService;
 
 }

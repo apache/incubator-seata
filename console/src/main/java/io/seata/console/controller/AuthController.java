@@ -15,13 +15,13 @@
  */
 package io.seata.console.controller;
 
-import javax.servlet.http.HttpServletResponse;
-
-import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.constant.Code;
+import io.seata.console.constant.SecurityConstants;
 import io.seata.console.result.SingleResult;
 import io.seata.console.security.User;
 import io.seata.console.utils.JwtTokenUtils;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -41,39 +41,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    @Autowired
-    private JwtTokenUtils jwtTokenUtils;
-    @Autowired
-    private AuthenticationManager authenticationManager;
+	@Autowired
+	private JwtTokenUtils jwtTokenUtils;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-    /**
-     * Whether the Seata is in broken states or not, and cannot recover except by being restarted
-     *
-     * @param response the response
-     * @param user     the user
-     * @return HTTP code equal to 200 indicates that Seata is in right states. HTTP code equal to 500 indicates that
-     * Seata is in broken states.
-     */
-    @PostMapping("/login")
-    public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-            user.getUsername(), user.getPassword());
+	/**
+	 * Whether the Seata is in broken states or not, and cannot recover except by being restarted
+	 *
+	 * @param response the response
+	 * @param user     the user
+	 * @return HTTP code equal to 200 indicates that Seata is in right states. HTTP code equal to 500 indicates that
+	 * Seata is in broken states.
+	 */
+	@PostMapping("/login")
+	public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+				user.getUsername(), user.getPassword());
 
-        try {
-            //AuthenticationManager(default ProviderManager) #authenticate check Authentication
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            //bind authentication to securityContext
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            //create token
-            String token = jwtTokenUtils.createToken(authentication);
+		try {
+			//AuthenticationManager(default ProviderManager) #authenticate check Authentication
+			Authentication authentication = authenticationManager.authenticate(authenticationToken);
+			//bind authentication to securityContext
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			//create token
+			String token = jwtTokenUtils.createToken(authentication);
 
-            String authHeader = WebSecurityConfig.TOKEN_PREFIX + token;
-            //put token into http header
-            response.addHeader(WebSecurityConfig.AUTHORIZATION_HEADER, authHeader);
+			String authHeader = SecurityConstants.TOKEN_PREFIX + token;
+			//put token into http header
+			response.addHeader(SecurityConstants.AUTHORIZATION_HEADER, authHeader);
 
-            return SingleResult.success(authHeader);
-        } catch (BadCredentialsException authentication) {
-            return SingleResult.failure(Code.LOGIN_FAILED);
-        }
-    }
+			return SingleResult.success(authHeader);
+		}
+		catch (BadCredentialsException authentication) {
+			return SingleResult.failure(Code.LOGIN_FAILED);
+		}
+	}
 }

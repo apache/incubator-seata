@@ -192,6 +192,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+            <version>3.2.0</version>
         </dependency>
 
         <dependency>
