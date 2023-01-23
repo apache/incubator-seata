@@ -17,7 +17,6 @@ package io.seata.console.security;
 
 import io.seata.console.filter.JwtAuthenticationTokenFilter;
 import io.seata.console.utils.JwtTokenUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,58 +37,58 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-	@Autowired
-	private JwtAuthenticationEntryPoint unauthorizedHandler;
+    @Autowired
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
 
-	@Autowired
-	private JwtTokenUtils tokenProvider;
+    @Autowired
+    private JwtTokenUtils tokenProvider;
 
-	@Autowired
-	private CustomAuthenticationProvider authenticationProvider;
+    @Autowired
+    private CustomAuthenticationProvider authenticationProvider;
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http
-				.authorizeHttpRequests()
-				// Ignore the static resources URL
-				.requestMatchers(
-						"/",
-						"/*/*.css",
-						"/*/*.js",
-						"/*/*.map",
-						"/*/*.svg",
-						"/*/*.png",
-						"/*/*.html",
-						"/*/*.ico",
-						"/*/*.jpeg",
-						"/console-fe/public/**",
-						"/api/v1/auth/login")
-				.permitAll()
-				.anyRequest()
-				.authenticated()
-				.and()
-				// custom token authorize exception handler
-				.exceptionHandling()
-				.authenticationEntryPoint(unauthorizedHandler)
-				.and()
-				// since we use jwt, session is not necessary
-				.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-				.and()
-				// since we use jwt, csrf is not necessary
-				.csrf()
-				.disable()
-				.authenticationProvider(authenticationProvider)
-				.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
-						UsernamePasswordAuthenticationFilter.class);
+        http
+            .authorizeHttpRequests()
+            // Ignore the static resources URL
+            .requestMatchers(
+                "/",
+                "/*/*.css",
+                "/*/*.js",
+                "/*/*.map",
+                "/*/*.svg",
+                "/*/*.png",
+                "/*/*.html",
+                "/*/*.ico",
+                "/*/*.jpeg",
+                "/console-fe/public/**",
+                "/api/v1/auth/login")
+            .permitAll()
+            .anyRequest()
+            .authenticated()
+            .and()
+            // custom token authorize exception handler
+            .exceptionHandling()
+            .authenticationEntryPoint(unauthorizedHandler)
+            .and()
+            // since we use jwt, session is not necessary
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            // since we use jwt, csrf is not necessary
+            .csrf()
+            .disable()
+            .authenticationProvider(authenticationProvider)
+            .addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
+                UsernamePasswordAuthenticationFilter.class);
 
-		// disable cache
-		http
-				.headers()
-				.cacheControl();
+        // disable cache
+        http
+            .headers()
+            .cacheControl();
 
-		return http.build();
-	}
+        return http.build();
+    }
 
 }

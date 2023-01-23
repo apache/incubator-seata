@@ -15,15 +15,13 @@
  */
 package io.seata.console.filter;
 
-import java.io.IOException;
-
 import io.seata.console.constant.SecurityConstants;
 import io.seata.console.utils.JwtTokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -36,51 +34,51 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-	private final JwtTokenUtils tokenProvider;
+    private final JwtTokenUtils tokenProvider;
 
-	/**
-	 * Instantiates a new Jwt authentication token filter.
-	 *
-	 * @param tokenProvider the token provider
-	 */
-	public JwtAuthenticationTokenFilter(JwtTokenUtils tokenProvider) {
-		this.tokenProvider = tokenProvider;
-	}
+    /**
+     * Instantiates a new Jwt authentication token filter.
+     *
+     * @param tokenProvider the token provider
+     */
+    public JwtAuthenticationTokenFilter(JwtTokenUtils tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-			throws IOException, ServletException, ServletException {
-		String jwt = resolveToken(request);
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws IOException, ServletException, ServletException {
+        String jwt = resolveToken(request);
 
-		if (jwt != null && !"".equals(jwt.trim()) && SecurityContextHolder.getContext().getAuthentication() == null) {
-			if (this.tokenProvider.validateToken(jwt)) {
-				/**
-				 * get auth info
-				 */
-				Authentication authentication = this.tokenProvider.getAuthentication(jwt);
-				/**
-				 * save user info to securityContext
-				 */
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-			}
-		}
+        if (jwt != null && !"".equals(jwt.trim()) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (this.tokenProvider.validateToken(jwt)) {
+                /**
+                 * get auth info
+                 */
+                Authentication authentication = this.tokenProvider.getAuthentication(jwt);
+                /**
+                 * save user info to securityContext
+                 */
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }
 
-		chain.doFilter(request, response);
-	}
+        chain.doFilter(request, response);
+    }
 
-	/**
-	 * Get token from header
-	 */
-	private String resolveToken(HttpServletRequest request) {
-		String bearerToken = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-			return bearerToken.substring(SecurityConstants.TOKEN_PREFIX.length());
-		}
-		String jwt = request.getParameter(SecurityConstants.AUTHORIZATION_TOKEN);
-		if (StringUtils.hasText(jwt)) {
-			return jwt;
-		}
-		return null;
-	}
+    /**
+     * Get token from header
+     */
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            return bearerToken.substring(SecurityConstants.TOKEN_PREFIX.length());
+        }
+        String jwt = request.getParameter(SecurityConstants.AUTHORIZATION_TOKEN);
+        if (StringUtils.hasText(jwt)) {
+            return jwt;
+        }
+        return null;
+    }
 }
 
