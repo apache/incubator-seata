@@ -24,20 +24,20 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
  */
 public interface StoreSnapshotFile {
 
-	/**
-	 * Save a snapshot .
-	 *
-	 * @param writer   snapshot writer
-	 * @return true if save succeed
-	 */
-	Status save(final SnapshotWriter writer);
+    /**
+     * Save a snapshot .
+     *
+     * @param writer snapshot writer
+     * @return true if save succeed
+     */
+    Status save(final SnapshotWriter writer);
 
-	/**
-	 * Load snapshot for the specified region.
-	 *
-	 * @param reader snapshot reader
-	 * @return true if load succeed
-	 */
-	boolean load(final SnapshotReader reader);
+    /**
+     * Load snapshot for the specified region.
+     *
+     * @param reader snapshot reader
+     * @return true if load succeed
+     */
+    boolean load(final SnapshotReader reader);
 
 }
