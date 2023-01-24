@@ -15,9 +15,8 @@
  */
 package io.seata.server.cluster.raft;
 
-import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,21 +30,16 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
-import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.store.StoreMode;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
 import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
 import io.seata.server.cluster.raft.execute.branch.AddBranchSessionExecute;
 import io.seata.server.cluster.raft.execute.branch.RemoveBranchSessionExecute;
@@ -57,13 +51,8 @@ import io.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
-import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
-import io.seata.server.cluster.raft.snapshot.RaftSnapshotFile;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
-import io.seata.server.storage.raft.session.RaftSessionManager;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,9 +80,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     
     private final String group;
 
-    private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
-
-    private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
+    private final List<StoreSnapshotFile> snapshotFiles = new ArrayList<>();
 
     private static final Map<MsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
@@ -155,36 +142,14 @@ public class RaftStateMachine extends StateMachineAdapter {
             done.run(Status.OK());
             return;
         }
-        // gets a record of the session at the moment
-        Map<String, Object> maps = new HashMap<>(2);
-        RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
-        Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        int initialCapacity = sessionMap.size();
-        Map<String, byte[]> globalSessionByteMap = new HashMap<>(initialCapacity);
-        // each transaction is expected to have two branches
-        Map<Long, byte[]> branchSessionByteMap = new HashMap<>(initialCapacity * 2);
-        sessionMap.forEach((k, v) -> {
-            globalSessionByteMap.put(v.getXid(), v.encode());
-            List<BranchSession> branchSessions = Collections.unmodifiableList(v.getBranchSessions());
-            branchSessions.forEach(
-                branchSession -> branchSessionByteMap.put(branchSession.getBranchId(), branchSession.encode()));
-        });
-        maps.put(GLOBAL_SESSION_MAP_KEY, globalSessionByteMap);
-        maps.put(BRANCH_SESSION_MAP_KEY, branchSessionByteMap);
-        RaftSnapshot raftSnapshot = new RaftSnapshot();
-        raftSnapshot.setBody(maps);
-        LOGGER.info("groupId: {}, globalSessionMap size: {}, branchSessionMap map size: {}", group,
-            globalSessionByteMap.size(), branchSessionByteMap.size());
-        String path = new StringBuilder(writer.getPath()).append(File.separator).append("data").toString();
-        if (RaftSnapshotFile.save(raftSnapshot, path)) {
-            if (writer.addFile("data")) {
-                done.run(Status.OK());
-            } else {
-                done.run(new Status(RaftError.EIO, "Fail to add file to writer"));
+        for (StoreSnapshotFile snapshotFile : snapshotFiles) {
+            Status status = snapshotFile.save(writer);
+            if (!status.isOk()) {
+                done.run(status);
+                return;
             }
-        } else {
-            done.run(new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path));
         }
+        done.run(Status.OK());
     }
 
     @Override
@@ -202,58 +167,12 @@ public class RaftStateMachine extends StateMachineAdapter {
             LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
-        String path = new StringBuilder(reader.getPath()).append(File.separator).append("data").toString();
-        try {
-            LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            Map<String, Object> maps = RaftSnapshotFile.load(path);
-            RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
-            Map<String, byte[]> globalSessionByteMap = (Map<String, byte[]>)maps.get(GLOBAL_SESSION_MAP_KEY);
-            Map<Long, byte[]> branchSessionByteMap = (Map<Long, byte[]>)maps.get(BRANCH_SESSION_MAP_KEY);
-            Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
-            // be sure to clear the data before loading it, because this is a full overwrite update
-            LockerManagerFactory.getLockManager().cleanAllLocks();
-            rootSessionMap.clear();
-            if (!globalSessionByteMap.isEmpty()) {
-                Map<String, GlobalSession> sessionMap = new HashMap<>();
-                globalSessionByteMap.forEach((k, v) -> {
-                    GlobalSession session = new GlobalSession();
-                    session.decode(v);
-                    sessionMap.put(k, session);
-                });
-                if (CollectionUtils.isNotEmpty(branchSessionByteMap)) {
-                    branchSessionByteMap.forEach((k, v) -> {
-                        BranchSession branchSession = new BranchSession();
-                        branchSession.decode(v);
-                        Optional.ofNullable(sessionMap.get(branchSession.getXid())).ifPresent(globalSession -> {
-                            if (globalSession.isActive()) {
-                                try {
-                                    branchSession.lock();
-                                } catch (TransactionException e) {
-                                    LOGGER.error(e.getMessage());
-                                }
-                            }
-                            globalSession.add(branchSession);
-                        });
-                    });
-                    sessionMap.values().parallelStream().forEach(globalSession -> {
-                        if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                            || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
-                            globalSession.getBranchSessions().parallelStream()
-                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-                        }
-                    });
-                }
-                rootSessionMap.putAll(sessionMap);
+        for (StoreSnapshotFile snapshotFile : snapshotFiles) {
+            if (!snapshotFile.load(reader)) {
+                return false;
             }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("on snapshot load end index: {}", reader.load().getLastIncludedIndex());
-            }
-            return true;
-        } catch (final Exception e) {
-            LOGGER.error("fail to load snapshot from {}", path);
-            return false;
         }
-
+        return true;
     }
 
     @Override
@@ -327,6 +246,10 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     public AtomicLong getCurrentTerm() {
         return currentTerm;
+    }
+
+    public void registryStoreSnapshotFile(StoreSnapshotFile storeSnapshotFile) {
+        snapshotFiles.add(storeSnapshotFile);
     }
 
 }

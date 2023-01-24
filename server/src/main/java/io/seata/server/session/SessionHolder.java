@@ -36,6 +36,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.cluster.raft.RaftServer;
@@ -114,6 +115,7 @@ public class SessionHolder {
             sessionMode = StoreConfig.getSessionMode();
         }
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+        RaftServerFactory.getInstance().init();
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
@@ -129,11 +131,13 @@ public class SessionHolder {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
+                RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine()
+                    .registryStoreSnapshotFile(new SessionSnapshotFile(group));
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
-                        new Object[] {ROOT_SESSION_MANAGER_NAME});
+                    new Object[] {ROOT_SESSION_MANAGER_NAME});
             } else {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                        new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                    new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
             ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
@@ -153,7 +157,6 @@ public class SessionHolder {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        RaftServerFactory.getInstance().init();
         if (RaftServerFactory.getInstance().getRaftServer(group) != null) {
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
         } else {
