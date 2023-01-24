@@ -327,7 +327,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(BranchSession branchSession) throws TransactionException {
+    public void unlockBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked in 'DefaultCore.commit()'
         if (this.status != Committing && this.status != CommitRetrying && this.status != AsyncCommitting) {
@@ -336,6 +336,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                     "Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
+    }
+
+    @Override
+    public void removeBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
@@ -344,6 +348,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.remove(branchSession);
         }
 
+    }
+
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
     }
 
     /**
