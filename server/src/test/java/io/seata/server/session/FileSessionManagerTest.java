@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;

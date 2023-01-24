@@ -15,18 +15,6 @@
  */
 package io.seata.server.console.impl.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
-import javax.annotation.Resource;
-import javax.sql.DataSource;
-
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -43,6 +31,16 @@ import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.vo.GlobalSessionVO;
+import jakarta.annotation.Resource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import javax.sql.DataSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -95,7 +93,6 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
         List<GlobalSessionVO> list = new ArrayList<>();
         int count = 0;
-
 
         ResultSet rs = null;
         ResultSet countRs = null;

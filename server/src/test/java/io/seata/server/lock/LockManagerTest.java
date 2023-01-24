@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
