@@ -17,7 +17,6 @@ package io.seata.server.storage.file.session;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +26,7 @@ import java.util.Set;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -148,49 +148,36 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
-        List<GlobalSession> found = new ArrayList<>();
-
         List<GlobalStatus> globalStatuses = null;
         if (null != condition.getStatuses() && condition.getStatuses().length > 0) {
             globalStatuses = Arrays.asList(condition.getStatuses());
         }
-        for (GlobalSession globalSession : sessionMap.values()) {
+        Collection<GlobalSession> list = sessionMap.values();
+        List<GlobalStatus> finalGlobalStatuses = globalStatuses;
+        return list.parallelStream().filter(globalSession -> {
+
             if (null != condition.getOverTimeAliveMills() && condition.getOverTimeAliveMills() > 0) {
                 if (System.currentTimeMillis() - globalSession.getBeginTime() <= condition.getOverTimeAliveMills()) {
-                    continue;
+                    return false;
                 }
             }
 
             if (!StringUtils.isEmpty(condition.getXid())) {
-                if (Objects.equals(condition.getXid(), globalSession.getXid())) {
-                    // Only one will be found, just add and return
-                    found.add(globalSession);
-                    return found;
-                } else {
-                    continue;
-                }
+                // Only one will be found, just add and return
+                return Objects.equals(condition.getXid(), globalSession.getXid());
             }
 
             if (null != condition.getTransactionId() && condition.getTransactionId() > 0) {
-                if (Objects.equals(condition.getTransactionId(), globalSession.getTransactionId())) {
-                    // Only one will be found, just add and return
-                    found.add(globalSession);
-                    return found;
-                } else {
-                    continue;
-                }
+                // Only one will be found, just add and return
+                return Objects.equals(condition.getTransactionId(), globalSession.getTransactionId());
             }
 
-            if (null != globalStatuses) {
-                if (!globalStatuses.contains(globalSession.getStatus())) {
-                    continue;
-                }
+            if (null != finalGlobalStatuses) {
+                return finalGlobalStatuses.contains(globalSession.getStatus());
             }
-
             // All test pass, add to resp
-            found.add(globalSession);
-        }
-        return found;
+            return true;
+        }).collect(Collectors.toList());
     }
 
     @Override
