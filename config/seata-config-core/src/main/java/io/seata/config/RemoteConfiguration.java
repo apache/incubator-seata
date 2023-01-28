@@ -34,4 +34,9 @@ public interface RemoteConfiguration extends Configuration {
      * @return the remote config
      */
     String getRemoteConfig(String dataId, long timeoutMills);
+
+
+    Configuration getLocalConfiguration();
+
+    void setLocalConfiguration(Configuration localConfiguration);
 }

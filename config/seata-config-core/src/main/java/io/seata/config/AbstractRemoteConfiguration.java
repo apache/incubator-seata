@@ -28,21 +28,14 @@ public abstract class AbstractRemoteConfiguration extends AbstractConfiguration 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteConfiguration.class);
 
 
-    private Configuration fileConfiguration;
+    private Configuration localConfiguration;
 
     private volatile boolean warned = false;
 
 
-    /**
-     * Override for not get config from the system property.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the config
-     */
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        // Override for not get config from the system property.
         return getLatestConfig(dataId, defaultValue, timeoutMills);
     }
 
@@ -53,24 +46,26 @@ public abstract class AbstractRemoteConfiguration extends AbstractConfiguration 
             return value;
         }
 
-        if (fileConfiguration != null) {
-            LOGGER.debug("the remote config '{}' is null, load from the fileConfiguration", dataId);
-            return fileConfiguration.getLatestConfig(dataId, defaultValue, timeoutMills);
+        if (localConfiguration != null) {
+            LOGGER.debug("the remote config '{}' is null, get config from the localConfiguration", dataId);
+            return localConfiguration.getLatestConfig(dataId, defaultValue, timeoutMills);
         } else {
             if (!warned && LOGGER.isWarnEnabled()) {
                 warned = true;
-                LOGGER.warn("This remote configuration '{}' has no fileConfiguration, Please confirm whether it is a remote configuration.", dataId);
+                LOGGER.warn("This remote configuration '{}' has no localConfiguration, Please confirm whether it is a remote configuration.", dataId);
             }
             return defaultValue;
         }
     }
 
 
-    public Configuration getFileConfiguration() {
-        return fileConfiguration;
+    @Override
+    public Configuration getLocalConfiguration() {
+        return localConfiguration;
     }
 
-    public void setFileConfiguration(Configuration fileConfig) {
-        this.fileConfiguration = fileConfig;
+    @Override
+    public void setLocalConfiguration(Configuration localConfiguration) {
+        this.localConfiguration = localConfiguration;
     }
 }

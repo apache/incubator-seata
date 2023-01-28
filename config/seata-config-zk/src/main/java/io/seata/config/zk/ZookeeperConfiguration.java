@@ -128,7 +128,7 @@ public class ZookeeperConfiguration extends AbstractRemoteConfiguration {
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
             if (!zkClient.exists(path)) {
-                LOGGER.warn("config {} is not existed", dataId);
+                LOGGER.warn("config '{}' is not existed", dataId);
                 return null;
             }
             return zkClient.readData(path);

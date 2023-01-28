@@ -110,7 +110,7 @@ public final class ConfigurationFactory {
             // Set fileConfiguration, when is remote configuration
             if (configuration instanceof AbstractRemoteConfiguration) {
                 Configuration fileConfiguration = buildFileConfiguration();
-                ((AbstractRemoteConfiguration)configuration).setFileConfiguration(fileConfiguration);
+                ((AbstractRemoteConfiguration)configuration).setLocalConfiguration(fileConfiguration);
             }
         }
 
