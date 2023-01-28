@@ -29,11 +29,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
+import io.seata.config.AbstractRemoteConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -56,7 +57,7 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  *
  * @author crazier.huang
  */
-public class ZookeeperConfiguration extends AbstractConfiguration {
+public class ZookeeperConfiguration extends AbstractRemoteConfiguration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
     private static final String CONFIG_TYPE = "zk";
@@ -119,7 +120,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getRemoteConfig(String dataId, long timeoutMills) {
         String value = seataConfig.getProperty(dataId);
         if (value != null) {
             return value;
@@ -127,20 +128,17 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
             if (!zkClient.exists(path)) {
-                LOGGER.warn("config {} is not existed, return defaultValue {} ",
-                        dataId, defaultValue);
-                return defaultValue;
+                LOGGER.warn("config {} is not existed", dataId);
+                return null;
             }
-            String value1 = zkClient.readData(path);
-            return StringUtils.isNullOrEmpty(value1) ? defaultValue : value1;
+            return zkClient.readData(path);
         });
         CONFIG_EXECUTOR.execute(future);
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("getConfig {} error or timeout, return defaultValue {}, exception:{} ",
-                    dataId, defaultValue, e.getMessage());
-            return defaultValue;
+            LOGGER.error("getConfig '{}' error or timeout, exception: {}", dataId, e.getMessage());
+            throw new FrameworkException(e, "getConfig '" + dataId + "' error or timeout");
         }
     }
 

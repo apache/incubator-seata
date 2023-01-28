@@ -29,6 +29,16 @@ import io.seata.common.util.StringUtils;
 public interface Configuration {
 
     Map<String, String> ENV_MAP = System.getenv();
+
+    /**
+     * Whether remote configuration
+     *
+     * @return the boolean
+     */
+    default boolean isRemoteConfiguration() {
+        return false;
+    }
+
     /**
      * Gets short.
      *

@@ -32,7 +32,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
+import io.seata.config.AbstractRemoteConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -48,7 +48,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author kl @kailing.pub
  */
-public class ApolloConfiguration extends AbstractConfiguration {
+public class ApolloConfiguration extends AbstractRemoteConfiguration {
 
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "appId";
@@ -116,11 +116,11 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+    public String getRemoteConfig(String dataId, long timeoutMills) {
+        ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.GET,
                 timeoutMills);
         configOperateExecutor.submit(() -> {
-            String result = config.getProperty(dataId, defaultValue);
+            String result = config.getProperty(dataId, null);
             configFuture.setResult(result);
         });
         return (String) configFuture.get();

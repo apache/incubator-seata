@@ -18,14 +18,13 @@ package io.seata.config.springcloud;
 import java.util.Set;
 
 import io.seata.common.holder.ObjectHolder;
-import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
+import io.seata.config.AbstractRemoteConfiguration;
 import io.seata.config.ConfigurationChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-public class SpringCloudConfiguration extends AbstractConfiguration {
+public class SpringCloudConfiguration extends AbstractRemoteConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudConfiguration.class);
     private static final String CONFIG_TYPE = "SpringCloudConfig";
     private static volatile SpringCloudConfiguration instance;
@@ -52,13 +51,12 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getRemoteConfig(String dataId, long timeoutMills) {
         ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
         if (applicationContext == null || applicationContext.getEnvironment() == null) {
-            return defaultValue;
+            return null;
         }
-        String conf = applicationContext.getEnvironment().getProperty(PREFIX + dataId);
-        return StringUtils.isNotBlank(conf) ? conf : defaultValue;
+        return applicationContext.getEnvironment().getProperty(PREFIX + dataId);
     }
 
     @Override

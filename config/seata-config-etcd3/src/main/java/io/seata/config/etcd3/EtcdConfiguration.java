@@ -50,7 +50,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
+import io.seata.config.AbstractRemoteConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -69,7 +69,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author xingfudeshi @gmail.com
  */
-public class EtcdConfiguration extends AbstractConfiguration {
+public class EtcdConfiguration extends AbstractRemoteConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfiguration.class);
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
@@ -119,12 +119,12 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getRemoteConfig(String dataId, long timeoutMills) {
         String value = seataConfig.getProperty(dataId);
         if (value != null) {
             return value;
         }
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+        ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.GET,
             timeoutMills);
         etcdConfigExecutor.execute(
             () -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));

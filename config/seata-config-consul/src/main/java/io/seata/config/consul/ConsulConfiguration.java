@@ -38,7 +38,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractConfiguration;
+import io.seata.config.AbstractRemoteConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -56,7 +56,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author xingfudeshi @gmail.com
  */
-public class ConsulConfiguration extends AbstractConfiguration {
+public class ConsulConfiguration extends AbstractRemoteConfiguration {
     private volatile static ConsulConfiguration instance;
     private volatile static ConsulClient client;
 
@@ -106,11 +106,11 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+    public String getRemoteConfig(String dataId, long timeoutMills) {
         String value = seataConfig.getProperty(dataId);
 
         if (value == null) {
-            ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+            ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.GET,
                     timeoutMills);
             consulNotifierExecutor.execute(() -> complete(getConsulClient().getKVValue(dataId, getAclToken()), configFuture));
             value = (String) configFuture.get();
