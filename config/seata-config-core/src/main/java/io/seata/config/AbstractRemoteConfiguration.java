@@ -23,39 +23,47 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractRemoteConfiguration extends AbstractConfiguration {
+public abstract class AbstractRemoteConfiguration extends AbstractConfiguration implements RemoteConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteConfiguration.class);
 
 
     private Configuration fileConfiguration;
 
+    private volatile boolean warned = false;
 
+
+    /**
+     * Override for not get config from the system property.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the config
+     */
     @Override
-    public boolean isRemoteConfiguration() {
-        return true;
+    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        return getLatestConfig(dataId, defaultValue, timeoutMills);
     }
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value = getRemoteConfig(dataId, timeoutMills);
+        if (value != null) {
+            return value;
+        }
 
-        if (value == null && fileConfiguration != null) {
-            LOGGER.debug("the remote config '{}' is null, load from the file configuration", dataId);
+        if (fileConfiguration != null) {
+            LOGGER.debug("the remote config '{}' is null, load from the fileConfiguration", dataId);
             return fileConfiguration.getLatestConfig(dataId, defaultValue, timeoutMills);
         } else {
-            return value == null ? defaultValue : value;
+            if (!warned && LOGGER.isWarnEnabled()) {
+                warned = true;
+                LOGGER.warn("This remote configuration '{}' has no fileConfiguration, Please confirm whether it is a remote configuration.", dataId);
+            }
+            return defaultValue;
         }
     }
-
-    /**
-     * Get remote config
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the remote config
-     */
-    protected abstract String getRemoteConfig(String dataId, long timeoutMills);
 
 
     public Configuration getFileConfiguration() {

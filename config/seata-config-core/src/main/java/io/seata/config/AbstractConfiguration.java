@@ -133,12 +133,12 @@ public abstract class AbstractConfiguration implements Configuration {
     }
 
     @Override
-    public String getConfig(String dataId, String content, long timeoutMills) {
+    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String value = getConfigFromSys(dataId);
         if (value != null) {
             return value;
         }
-        return getLatestConfig(dataId, content, timeoutMills);
+        return getLatestConfig(dataId, defaultValue, timeoutMills);
     }
 
     @Override
