@@ -17,14 +17,15 @@ package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
@@ -55,7 +56,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
-    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new HashMap<>(64);
+    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new ConcurrentHashMap<>(64);
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
@@ -125,7 +126,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
 
         // Instantiate the property object
-        Object propertyObj = PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
+        Object propertyObj = CollectionUtils.computeIfAbsent(PROPERTY_BEAN_INSTANCE_MAP, propertyPrefix, k -> {
             try {
                 return propertyClass.newInstance();
             } catch (InstantiationException | IllegalAccessException e) {
