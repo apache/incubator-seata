@@ -248,12 +248,12 @@ public interface DefaultValues {
     /**
      * the const DEFAULT_MAX_COMMIT_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE

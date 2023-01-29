@@ -542,7 +542,7 @@ public class EnhancedServiceLoader {
                                     }
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("Load [{}] class fail. ", line, e);
+                                    LOGGER.warn("Load [{}] class fail.", line, e);
                                 } catch (ClassCastException e) {
                                     LOGGER.error("Load [{}] class fail, please make sure the extension" +
                                             " config in {} implements {}.", line, fileName, type.getName());
