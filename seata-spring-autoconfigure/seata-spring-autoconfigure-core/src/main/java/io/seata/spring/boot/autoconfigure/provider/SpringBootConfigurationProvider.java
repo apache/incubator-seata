@@ -65,19 +65,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     String rawDataId = (String)args[0];
                     Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
 
-                    // Get config value from the system property
+                    // 1. Get config value from the system property
                     result = originalConfiguration.getConfigFromSys(rawDataId);
 
                     if (result == null) {
                         String dataId = convertDataId(rawDataId);
 
-                        // Get config value from the springboot environment
+                        // 2. Get config value from the springboot environment
                         result = getConfigFromEnvironment(dataId, dataType);
                         if (result != null) {
                             return result;
                         }
 
-                        // Get config defaultValue from the arguments
+                        // 3. Get config defaultValue from the arguments
                         if (args.length > 1) {
                             result = args[1];
 
@@ -91,7 +91,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                             }
                         }
 
-                        // Get config defaultValue from the property object
+                        // 4. Get config defaultValue from the property object
                         try {
                             result = getDefaultValueFromPropertyObject(dataId);
                         } catch (Throwable t) {
@@ -214,8 +214,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     /**
      * get spring config
      *
-     * @param dataId       data id
-     * @param dataType     data type
+     * @param dataId   data id
+     * @param dataType data type
      * @return object
      */
     @Nullable
