@@ -120,7 +120,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
 
         // Get the property class
-        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        final Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         if (propertyClass == null) {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
@@ -134,7 +134,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             }
             return null;
         });
-        Objects.requireNonNull(propertyObj, "Instantiate the property object fail: " + propertyClass.getName());
+        Objects.requireNonNull(propertyObj, () -> "Instantiate the property object fail: " + propertyClass.getName());
 
         // Get defaultValue from the property object
         return getDefaultValueFromPropertyObject(propertyObj, propertySuffix);
