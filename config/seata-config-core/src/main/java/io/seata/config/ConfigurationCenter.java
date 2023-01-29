@@ -16,15 +16,11 @@
 package io.seata.config;
 
 /**
- * The interface RemoteConfiguration.
+ * The interface ConfigurationCenter.
  *
  * @author wang.liang
  */
-public interface RemoteConfiguration extends Configuration {
-
-    default boolean isRemoteConfiguration() {
-        return true;
-    }
+public interface ConfigurationCenter extends Configuration {
 
     /**
      * Get remote config

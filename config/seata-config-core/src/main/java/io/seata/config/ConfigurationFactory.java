@@ -107,10 +107,10 @@ public final class ConfigurationFactory {
             ConfigurationProvider configurationProvider = EnhancedServiceLoader.load(ConfigurationProvider.class, configTypeName);
             configuration = configurationProvider.provide();
 
-            // Set fileConfiguration, when is remote configuration
-            if (configuration instanceof AbstractRemoteConfiguration) {
+            // Set localConfiguration, when it's configuration center
+            if (configuration instanceof AbstractConfigurationCenter) {
                 Configuration fileConfiguration = buildFileConfiguration();
-                ((AbstractRemoteConfiguration)configuration).setLocalConfiguration(fileConfiguration);
+                ((AbstractConfigurationCenter)configuration).setLocalConfiguration(fileConfiguration);
             }
         }
 

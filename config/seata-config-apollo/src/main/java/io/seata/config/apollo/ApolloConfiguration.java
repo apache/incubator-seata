@@ -32,7 +32,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractRemoteConfiguration;
+import io.seata.config.AbstractConfigurationCenter;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -48,7 +48,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author kl @kailing.pub
  */
-public class ApolloConfiguration extends AbstractRemoteConfiguration {
+public class ApolloConfiguration extends AbstractConfigurationCenter {
 
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "appId";

@@ -18,13 +18,13 @@ package io.seata.config.springcloud;
 import java.util.Set;
 
 import io.seata.common.holder.ObjectHolder;
-import io.seata.config.AbstractRemoteConfiguration;
+import io.seata.config.AbstractConfigurationCenter;
 import io.seata.config.ConfigurationChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-public class SpringCloudConfiguration extends AbstractRemoteConfiguration {
+public class SpringCloudConfiguration extends AbstractConfigurationCenter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudConfiguration.class);
     private static final String CONFIG_TYPE = "SpringCloudConfig";
     private static volatile SpringCloudConfiguration instance;

@@ -38,7 +38,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractRemoteConfiguration;
+import io.seata.config.AbstractConfigurationCenter;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
@@ -56,7 +56,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author xingfudeshi @gmail.com
  */
-public class ConsulConfiguration extends AbstractRemoteConfiguration {
+public class ConsulConfiguration extends AbstractConfigurationCenter {
     private volatile static ConsulConfiguration instance;
     private volatile static ConsulClient client;
 

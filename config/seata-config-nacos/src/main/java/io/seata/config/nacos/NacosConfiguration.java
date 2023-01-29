@@ -31,7 +31,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.AbstractRemoteConfiguration;
+import io.seata.config.AbstractConfigurationCenter;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  * @author xingfudeshi@gmail.com
  */
-public class NacosConfiguration extends AbstractRemoteConfiguration {
+public class NacosConfiguration extends AbstractConfigurationCenter {
     private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);

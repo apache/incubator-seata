@@ -31,15 +31,6 @@ public interface Configuration {
     Map<String, String> ENV_MAP = System.getenv();
 
     /**
-     * Whether remote configuration
-     *
-     * @return the boolean
-     */
-    default boolean isRemoteConfiguration() {
-        return false;
-    }
-
-    /**
      * Gets short.
      *
      * @param dataId       the data id

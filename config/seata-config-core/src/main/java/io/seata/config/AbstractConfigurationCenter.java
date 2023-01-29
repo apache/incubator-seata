@@ -19,13 +19,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Abstract remote configuration.
+ * The type Abstract configuration center.
  *
  * @author wang.liang
  */
-public abstract class AbstractRemoteConfiguration extends AbstractConfiguration implements RemoteConfiguration {
+public abstract class AbstractConfigurationCenter extends AbstractConfiguration implements ConfigurationCenter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRemoteConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfigurationCenter.class);
 
 
     private Configuration localConfiguration;
