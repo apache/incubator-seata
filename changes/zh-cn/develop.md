@@ -11,6 +11,7 @@
 - [[#5023](https://github.com/seata/seata/pull/5203)] 修复 `seata-core` 模块传递依赖冲突
 - [[#5224](https://github.com/seata/seata/pull/5224)] 修复 oracle初始化脚本索引名重复的问题
 - [[#5233](https://github.com/seata/seata/pull/5233)] 修复LoadBalance相关配置不一致的问题
+- [[#5245](https://github.com/seata/seata/pull/5245)] 修复不完整的distribution模块依赖
 
 
 ### optimize:
