@@ -12,8 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
 - [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
-
-
+- [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use jdk proxy, and optimize some log
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -24,7 +23,6 @@ Add changes here for all PR submitted to the develop branch.
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
-
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -40,5 +38,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
+- [wangliang181230](https://github.com/wangliang181230)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
