@@ -15,7 +15,6 @@
  */
 package io.seata.core.serializer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -80,7 +79,6 @@ public class SerializerClassRegistry {
         registerClass(Date.class);
         registerClass(Calendar.class);
         registerClass(ConcurrentHashMap.class);
-        registerClass(SimpleDateFormat.class);
         registerClass(GregorianCalendar.class);
         registerClass(Vector.class);
         registerClass(BitSet.class);
