@@ -19,6 +19,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 - [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5243](https://github.com/seata/seata/pull/5243)] optimize kryo 5.4.0 optimize compatibility with jdk17
 - [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
 - [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
 
@@ -37,8 +38,10 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
