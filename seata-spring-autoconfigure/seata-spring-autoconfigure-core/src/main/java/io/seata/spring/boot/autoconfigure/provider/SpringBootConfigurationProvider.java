@@ -215,8 +215,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     /**
      * get spring config
      *
-     * @param dataId       data id
-     * @param dataType     data type
+     * @param dataId   data id
+     * @param dataType data type
      * @return object
      */
     @Nullable
