@@ -8,11 +8,23 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
+- [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
 - [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
+- [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
+- [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
+
+
 
 ### optimize:
+- [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 - [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
+- [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
+
+### security:
+- [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
+
 
 ### test:
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
@@ -25,5 +37,8 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
+- [xingfudeshi](https://github.com/xingfudeshi)
+- [Bughue](https://github.com/Bughue)
+- [pengten](https://github.com/pengten)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
