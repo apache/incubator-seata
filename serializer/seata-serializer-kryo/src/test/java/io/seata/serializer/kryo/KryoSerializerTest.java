@@ -15,7 +15,14 @@
  */
 package io.seata.serializer.kryo;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -93,6 +100,33 @@ public class KryoSerializerTest {
         assertThat(t.getMsg()).isEqualTo(branchCommitResponse.getMsg());
         assertThat(t.getResultCode()).isEqualTo(branchCommitResponse.getResultCode());
 
+    }
+
+    @Test
+    public void testKryoBasic() {
+        Kryo kryo = new Kryo();
+        kryo.setReferences(true);
+        kryo.setRegistrationRequired(false);
+        //kryo.register(HashMap.class);
+
+        long beginMills=System.currentTimeMillis();
+        for (int i = 0; i < 1; i++) {
+            Map<String, String> map = new HashMap<>();
+            map.put(String.valueOf(i), "test");
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            Output output = new Output(outputStream);
+            kryo.writeClassAndObject(output, map);
+            output.close();
+            byte[] outByte = outputStream.toByteArray();
+
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(outByte);
+            Input input = new Input(inputStream);
+            input.close();
+            Map result = (HashMap)kryo.readClassAndObject(input);
+            assertThat(result).isEqualTo(map);
+        }
+        //System.out.println(System.currentTimeMillis()-beginMills);
     }
 
 }
