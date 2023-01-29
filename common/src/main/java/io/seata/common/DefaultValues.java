@@ -226,7 +226,7 @@ public interface DefaultValues {
     int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
 
     /**
-     *the constant DEFAULT_PROMETHEUS_PORT
+     * the constant DEFAULT_PROMETHEUS_PORT
      */
     int DEFAULT_PROMETHEUS_PORT = 9898;
 
@@ -248,12 +248,12 @@ public interface DefaultValues {
     /**
      * the const DEFAULT_MAX_COMMIT_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE
@@ -281,4 +281,9 @@ public interface DefaultValues {
     int DEFAULT_REDIS_MIN_IDLE = 10;
 
     int DEFAULT_QUERY_LIMIT = 1000;
+
+    /**
+     * Default druid location in classpath
+     */
+    String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 }

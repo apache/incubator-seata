@@ -22,14 +22,12 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.security.CodeSource;
 
+import static io.seata.common.DefaultValues.DRUID_LOCATION;
+
 /**
  * @author ggndnn
  */
 class DefaultDruidLoader implements DruidLoader {
-    /**
-     * Default druid location in classpath
-     */
-    private final static String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 
     private final static DefaultDruidLoader DRUID_LOADER = new DefaultDruidLoader(DRUID_LOCATION);
 

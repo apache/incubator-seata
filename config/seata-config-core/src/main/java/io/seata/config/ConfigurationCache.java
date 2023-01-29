@@ -104,18 +104,18 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         return new ByteBuddy().subclass(Configuration.class).method(ElementMatchers.any())
             .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
                 String methodName = method.getName();
-                if (methodName.startsWith(METHOD_PREFIX) && !method.getName().equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                if (methodName.startsWith(METHOD_PREFIX) && !methodName.equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type =
-                        ObjectWrapper.getTypeByName(method.getName().substring(METHOD_PREFIX.length()));
+                        ObjectWrapper.getTypeByName(methodName.substring(METHOD_PREFIX.length()));
                     Object defaultValue = null;
                     if (args.length > 1
-                        && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
+                            && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
                         defaultValue = args[1];
                     }
                     if (null == wrapper
-                        || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                            || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
                         Object result = method.invoke(originalConfiguration, args);
                         // The wrapper.data only exists in the cache when it is not null.
                         if (result != null) {
