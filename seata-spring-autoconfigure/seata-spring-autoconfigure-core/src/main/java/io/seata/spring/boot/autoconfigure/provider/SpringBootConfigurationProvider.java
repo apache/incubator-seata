@@ -134,7 +134,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             }
             return null;
         });
-        Objects.requireNonNull(propertyObj, "Instantiate the property fail");
+        Objects.requireNonNull(propertyObj, "Instantiate the property object fail: " + propertyClass.getName());
 
         // Get defaultValue from the property object
         return getDefaultValueFromPropertyObject(propertyObj, propertySuffix);
