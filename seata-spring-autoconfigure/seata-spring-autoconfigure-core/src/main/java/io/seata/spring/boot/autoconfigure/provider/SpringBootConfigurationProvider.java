@@ -64,13 +64,13 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result;
                     String rawDataId = (String)args[0];
+                    Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
 
                     // Get config value from the system property
                     result = originalConfiguration.getConfigFromSys(rawDataId);
 
                     if (result == null) {
                         String dataId = convertDataId(rawDataId);
-                        Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
 
                         // Get config value from the springboot environment
                         result = getConfigFromEnvironment(dataId, dataType);
@@ -96,13 +96,17 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         try {
                             result = getDefaultValueFromPropertyObject(dataId);
                         } catch (Throwable t) {
-                            LOGGER.error("Get default value of the config '{}' failed:", dataId, t);
+                            LOGGER.error("Get config '{}' default value from the property object failed:", dataId, t);
                         }
                     }
 
                     if (result != null) {
-                        result = this.convertType(result, method.getReturnType());
-                        return result;
+                        if (dataType.isAssignableFrom(result.getClass())) {
+                            return result;
+                        }
+
+                        // Convert type
+                        return this.convertType(result, dataType);
                     }
                 }
 
@@ -229,16 +233,16 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (String.class.equals(dataType)) {
             return String.valueOf(configValue);
         }
-        if (long.class.equals(dataType)) {
+        if (Long.class.equals(dataType)) {
             return Long.parseLong(String.valueOf(configValue));
         }
-        if (int.class.equals(dataType)) {
+        if (Integer.class.equals(dataType)) {
             return Integer.parseInt(String.valueOf(configValue));
         }
-        if (short.class.equals(dataType)) {
+        if (Short.class.equals(dataType)) {
             return Short.parseShort(String.valueOf(configValue));
         }
-        if (boolean.class.equals(dataType)) {
+        if (Boolean.class.equals(dataType)) {
             return Boolean.parseBoolean(String.valueOf(configValue));
         }
         if (Duration.class.equals(dataType)) {
