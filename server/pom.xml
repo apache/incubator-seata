@@ -35,6 +35,15 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- spring-framework-->
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -361,7 +370,7 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>

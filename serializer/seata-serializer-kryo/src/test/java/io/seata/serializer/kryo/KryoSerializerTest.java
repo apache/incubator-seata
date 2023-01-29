@@ -46,6 +46,18 @@ public class KryoSerializerTest {
         kryoCodec = new KryoSerializer();
     }
 
+    /**
+     * 测试jdk版本对内置对象序列化的兼容性
+     */
+    @Test
+    public void testSerializerFactory() {
+        KryoSerializerFactory factory = KryoSerializerFactory.getInstance();
+        KryoInnerSerializer kryoInnerSerializer = factory.get();
+        Kryo kryo = kryoInnerSerializer.getKryo();
+        assertThat(kryo).isNotNull();
+        factory.returnKryo(kryoInnerSerializer);
+    }
+
     @Test
     public void testBranchCommitRequest() {
 

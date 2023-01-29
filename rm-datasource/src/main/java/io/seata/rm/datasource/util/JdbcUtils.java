@@ -104,7 +104,7 @@ public final class JdbcUtils {
     }
 
     public static Driver loadDriver(String driverClassName) throws SQLException {
-        Class clazz = null;
+        Class<?> clazz = null;
         try {
             ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
             if (contextLoader != null) {
@@ -124,9 +124,7 @@ public final class JdbcUtils {
 
         try {
             return (Driver)clazz.newInstance();
-        } catch (IllegalAccessException e) {
-            throw new SQLException(e.getMessage(), e);
-        } catch (InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             throw new SQLException(e.getMessage(), e);
         }
     }
