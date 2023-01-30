@@ -222,7 +222,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @throws SQLException the sql exception
      */
     public Connection getSeataConnection() throws SQLException {
-        return seataDataSource != null ? seataDataSource.getConnection() : getPlainConnection();
+        return seataDataSource != null ? seataDataSource.getConnection() : null;
     }
 
     /**
