@@ -461,9 +461,15 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        Connection connection = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() != null
-            ? statementProxy.getConnectionProxy().getDataSourceProxy().getSeataConnection()
-            : statementProxy.getConnectionProxy();
+        Connection connection;
+        boolean seataDatasource = statementProxy.getConnectionProxy().getDataSourceProxy() != null
+            && statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() != null;
+        if (seataDatasource) {
+            connection = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataConnection();
+        } else {
+            connection = statementProxy.getConnectionProxy();
+            selectSQL = selectSQL + " FOR UPDATE";
+        }
         try (
             PreparedStatement ps = connection.prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
@@ -477,7 +483,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            if (statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() != null) {
+            if (seataDatasource) {
                 IOUtil.close(connection);
             }
             IOUtil.close(rs);
