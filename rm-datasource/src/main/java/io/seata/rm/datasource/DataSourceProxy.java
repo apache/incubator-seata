@@ -15,8 +15,12 @@
  */
 package io.seata.rm.datasource;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -31,6 +35,7 @@ import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.common.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -69,6 +74,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String dbType;
 
     private String userName;
+
+    private String version;
 
     /**
      * Enable the table meta checker
@@ -112,34 +119,59 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initSeataDataSource(DataSource targetDataSource) {
-        String className = targetDataSource.getClass().getSimpleName();
-        if (className.startsWith("Druid") && targetDataSource instanceof DruidDataSource) {
-            DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
-            Driver driver = druidDataSource.getDriver();
-            if (!(driver instanceof MockDriver)) {
-                DruidDataSource seataDataSource = new DruidDataSource();
-                seataDataSource.setDriver(driver);
-                seataDataSource.setDriverClassName(druidDataSource.getDriverClassName());
-                seataDataSource.setDriverClassLoader(druidDataSource.getDriverClassLoader());
-                seataDataSource.setMaxActive(druidDataSource.getMaxActive());
-                seataDataSource.setPassword(druidDataSource.getPassword());
-                seataDataSource.setUsername(druidDataSource.getUsername());
-                seataDataSource.setMinIdle(druidDataSource.getMinIdle());
-                seataDataSource.setMaxWait(druidDataSource.getMaxWait());
-                seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
-                seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
-                seataDataSource.setDbType(druidDataSource.getDbType());
-                seataDataSource.setUrl(druidDataSource.getUrl());
-                try {
-                    seataDataSource.init();
-                } catch (SQLException e) {
-                    LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
-                    seataDataSource.close();
+        try {
+            Class.forName("com.alibaba.druid.pool.DruidDataSource");
+            if (targetDataSource instanceof DruidDataSource) {
+                DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
+                Driver driver = druidDataSource.getDriver();
+                if (!(driver instanceof MockDriver)) {
+                    DruidDataSource seataDataSource = new DruidDataSource();
+                    seataDataSource.setDriver(driver);
+                    seataDataSource.setDriverClassName(druidDataSource.getDriverClassName());
+                    seataDataSource.setDriverClassLoader(druidDataSource.getDriverClassLoader());
+                    int maxActive =
+                        Math.max(druidDataSource.getMaxActive(), BigDecimal.valueOf(druidDataSource.getMaxActive())
+                            .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
+                    seataDataSource.setMaxActive(maxActive);
+                    seataDataSource.setPassword(druidDataSource.getPassword());
+                    seataDataSource.setUsername(druidDataSource.getUsername());
+                    int minIdle =
+                        Math.max(druidDataSource.getMinIdle(), BigDecimal.valueOf(druidDataSource.getMinIdle())
+                            .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
+                    seataDataSource.setMinIdle(minIdle);
+                    seataDataSource.setMaxWait(druidDataSource.getMaxWait());
+                    seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
+                    seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
+                    seataDataSource.setDbType(druidDataSource.getDbType());
+                    seataDataSource.setUrl(druidDataSource.getUrl());
+                    try {
+                        seataDataSource.init();
+                    } catch (SQLException e) {
+                        LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
+                        seataDataSource.close();
+                    }
+                    this.seataDataSource = seataDataSource;
                 }
-                this.seataDataSource = seataDataSource;
             }
-        } else if (className.startsWith("Hikari") && targetDataSource instanceof HikariConfig) {
-            this.seataDataSource = new HikariDataSource((HikariConfig)targetDataSource);
+            return;
+        } catch (ClassNotFoundException ignored) {
+        }
+        try {
+            Class.forName("com.zaxxer.hikari.HikariDataSource");
+            if (targetDataSource instanceof HikariConfig) {
+                HikariConfig hikariConfig = new HikariConfig();
+                hikariConfig.copyStateTo((HikariConfig)targetDataSource);
+                int maxActive =
+                    Math.max(hikariConfig.getMaximumPoolSize(), BigDecimal.valueOf(hikariConfig.getMaximumPoolSize())
+                        .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
+                hikariConfig.setMaximumPoolSize(maxActive);
+                int minIdle =
+                    Math.max(hikariConfig.getMinimumIdle(), BigDecimal.valueOf(hikariConfig.getMinimumIdle())
+                        .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
+                hikariConfig.setMinimumIdle(minIdle);
+                this.seataDataSource = new HikariDataSource(hikariConfig);
+            }
+        } catch (ClassNotFoundException ignored) {
         }
     }
 
@@ -153,6 +185,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             } else if (JdbcConstants.MARIADB.equals(dbType)) {
                 dbType = JdbcConstants.MYSQL;
             }
+            version = selectDbVersion(connection);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -329,6 +362,24 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     public void setSeataDataSource(DataSource seataDataSource) {
         this.seataDataSource = seataDataSource;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    private String selectDbVersion(Connection connection) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                 ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    return versionResult.getString("VERSION()");
+                }
+            } catch (Exception e) {
+                LOGGER.error("get mysql version fail error: {}", e.getMessage());
+            }
+        }
+        return "";
     }
 
 }

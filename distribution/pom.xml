@@ -37,6 +37,11 @@
                     <artifactId>seata-server</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>io.seata</groupId>
+                    <artifactId>apm-seata-skywalking-plugin</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
             </dependencies>
             <build>
                 <finalName>seata</finalName>
