@@ -18,6 +18,7 @@ package io.seata.server.lock;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -215,7 +216,7 @@ public class LockManagerTest {
 
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
-    public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+    public void fileLockNormalQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
         SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
@@ -230,7 +231,16 @@ public class LockManagerTest {
         try {
             sessionManager.addGlobalSession(globalSessions1);
             sessionManager.addGlobalSession(globalSessions2);
-
+            LockManager lockManager = new FileLockManagerForTest();
+            List<BranchSession> branchSessionsForGlobalTx1 = globalSessions1.getBranchSessions();
+            for (BranchSession branchSession : branchSessionsForGlobalTx1) {
+                //branch lock for different table
+                lockManager.acquireLock(branchSession);
+            }
+            List<BranchSession> branchSessionsForGlobalTx2 = globalSessions2.getBranchSessions();
+            for (BranchSession branchSession : branchSessionsForGlobalTx2) {
+                lockManager.acquireLock(branchSession);
+            }
             final GlobalLockParam param = new GlobalLockParam();
 
 
@@ -318,6 +328,59 @@ public class LockManagerTest {
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
             Assertions.assertEquals(4, timeTestResult4.getTotal());
 
+        } finally {
+            sessionManager.removeGlobalSession(globalSessions1);
+            sessionManager.removeGlobalSession(globalSessions2);
+            sessionManager.destroy();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void fileLockQueryAfterLockReleased(GlobalSession globalSessions1, GlobalSession globalSessions2)
+        throws TransactionException {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init(SessionMode.FILE);
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        //make sure sessionMaanager is empty
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            //FileSessionManager use ConcurrentHashMap is thread safe
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            sessionManager.addGlobalSession(globalSessions1);
+            sessionManager.addGlobalSession(globalSessions2);
+            LockManager lockManager = new FileLockManagerForTest();
+            List<BranchSession> branchSessionsForGlobalTx1 = globalSessions1.getBranchSessions();
+            for (BranchSession branchSession : branchSessionsForGlobalTx1) {
+                //branch lock for different table
+                lockManager.acquireLock(branchSession);
+            }
+            List<BranchSession> branchSessionsForGlobalTx2 = globalSessions2.getBranchSessions();
+            for (BranchSession branchSession : branchSessionsForGlobalTx2) {
+                lockManager.acquireLock(branchSession);
+            }
+            final GlobalLockParam param = new GlobalLockParam();
+            param.setPageNum(1);
+            param.setPageSize(10);
+
+            // query all data
+            final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
+            Assertions.assertEquals(1,fullQueryTestResult.getPages());
+            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
+
+            //release lock for global tx1,mock phase2 has completed
+            for (BranchSession branchSession : branchSessionsForGlobalTx1) {
+                lockManager.releaseLock(branchSession);
+            }
+            //query lock after global tx1 phase2 has completed
+            final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param);
+            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
             sessionManager.removeGlobalSession(globalSessions2);
