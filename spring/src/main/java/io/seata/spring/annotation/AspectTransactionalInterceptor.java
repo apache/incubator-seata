@@ -28,7 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
 
 /**
- * Aspect transactional interceptor
+ * Aspect transactional interceptor 
  *
  * @author ruishansun
  */
