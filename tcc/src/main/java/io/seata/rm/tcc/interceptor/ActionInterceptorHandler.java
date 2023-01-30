@@ -17,6 +17,7 @@ package io.seata.rm.tcc.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
@@ -252,6 +254,13 @@ public class ActionInterceptorHandler {
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<>(8);
 
+        // get the parameter names
+        String[] parameterNames = ActionContextUtil.getParameterNames(method);
+        Parameter[] parameters = null;
+        if (parameterNames == null) {
+            parameters = method.getParameters();
+        }
+
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
@@ -268,8 +277,19 @@ public class ActionInterceptorHandler {
                         continue;
                     }
 
+                    // if the parameter names is null, print log and throw exception
+                    String paramName = ActionContextUtil.getParamNameFromAnnotation(annotation);
+                    if (parameterNames == null && StringUtils.isBlank(paramName) && !annotation.isParamInProperty()) {
+                        String errorMsg = String.format("Unable to get parameter names from the method `%s.%s(...)`." +
+                                        " Please execute 'javac -parameters' to re-compile of the method code," +
+                                        " or set the field `paramName` of the `@%s` by yourself",
+                                method.getDeclaringClass().getSimpleName(), method.getName(), BusinessActionContextParameter.class.getSimpleName());
+                        throw new FrameworkException(errorMsg);
+                    }
+
                     // load param by the config of annotation, and then put into the context
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
+                    paramName = parameterNames != null ? parameterNames[i] : parameters[i].getName();
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, paramName, paramObject, annotation, context);
                 }
             }
         }
