@@ -470,8 +470,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             connection = statementProxy.getConnection();
             selectSQL = selectSQL + " FOR UPDATE";
         }
-        try (
-            PreparedStatement ps = connection.prepareStatement(selectSQL)) {
+        try (PreparedStatement ps = connection.prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);

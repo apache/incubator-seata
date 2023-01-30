@@ -111,7 +111,6 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         } else {
             suffix.append(" WHERE ").append(whereCondition);
         }
-        suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {

@@ -132,7 +132,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
-        suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoin.add(needUpdateColumn);
