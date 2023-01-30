@@ -28,14 +28,14 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PR
 @Component
 @ConfigurationProperties(prefix = SERVER_UNDO_PREFIX)
 public class ServerUndoProperties {
-    private int logSaveDays = DEFAULT_SAVE_DAYS;
+    private short logSaveDays = DEFAULT_SAVE_DAYS;
     private long logDeletePeriod = DEFAULT_UNDO_LOG_DELETE_PERIOD;
 
-    public int getLogSaveDays() {
+    public short getLogSaveDays() {
         return logSaveDays;
     }
 
-    public ServerUndoProperties setLogSaveDays(int logSaveDays) {
+    public ServerUndoProperties setLogSaveDays(short logSaveDays) {
         this.logSaveDays = logSaveDays;
         return this;
     }
