@@ -28,6 +28,8 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.util.ClassUtils;
 
 /**
+ * Aspect transactional interceptor
+ *
  * @author ruishansun
  */
 public class AspectTransactionalInterceptor implements MethodInterceptor {
@@ -55,7 +57,7 @@ public class AspectTransactionalInterceptor implements MethodInterceptor {
         this.aspectTransactional = aspectTransactional;
         this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, this.aspectTransactional);
     }
-    
+
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
