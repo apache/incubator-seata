@@ -16,10 +16,12 @@
 package io.seata.server.storage.db.store;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
@@ -36,10 +38,12 @@ import io.seata.core.store.LogStore;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
+import io.seata.server.storage.SessionConverter;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.SessionConverter;
+
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 
 /**
  * The type Database transaction store manager.
@@ -55,11 +59,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    /**
-     * The constant DEFAULT_LOG_QUERY_LIMIT.
-     */
-    protected static final int DEFAULT_LOG_QUERY_LIMIT = 100;
 
     /**
      * The Log store.
@@ -89,7 +88,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * Instantiates a new Database transaction store manager.
      */
     private DataBaseTransactionStoreManager() {
-        logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
+        logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
         DataSource logStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
@@ -167,28 +166,39 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
 
+    @Override
+    public List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions) {
+        return readSession(new GlobalStatus[] {GlobalStatus.Begin}, withBranchSessions);
+    }
+
     /**
      * Read session list.
      *
      * @param statuses the statuses
      * @return the list
      */
-    public List<GlobalSession> readSession(GlobalStatus[] statuses) {
+    @Override
+    public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
         int[] states = new int[statuses.length];
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
         }
         //global transaction
         List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
-        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
-            return null;
+        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = Collections.emptyMap();
+        if (CollectionUtils.isNotEmpty(globalTransactionDOs)) {
+            List<String> xids =
+                globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
+            if (withBranchSessions) {
+                List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
+                branchTransactionDOsMap = branchTransactionDOs.stream().collect(
+                    Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
+            }
         }
-        List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
-        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
-            .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
-        return globalTransactionDOs.stream().map(globalTransactionDO ->
-            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+        Map<String, List<BranchTransactionDO>> finalBranchTransactionDOsMap = branchTransactionDOsMap;
+        return globalTransactionDOs.stream()
+            .map(globalTransactionDO -> getGlobalSession(globalTransactionDO,
+                    finalBranchTransactionDOsMap.get(globalTransactionDO.getXid()), withBranchSessions))
             .collect(Collectors.toList());
     }
 
@@ -209,15 +219,20 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
                 return globalSessions;
             }
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses());
+            return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
         }
         return null;
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
-                                           List<BranchTransactionDO> branchTransactionDOs) {
-        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
-        //branch transactions
+        List<BranchTransactionDO> branchTransactionDOs) {
+        return getGlobalSession(globalTransactionDO, branchTransactionDOs, true);
+    }
+
+    private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
+        List<BranchTransactionDO> branchTransactionDOs, boolean withBranchSessions) {
+        GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO, !withBranchSessions);
+        // branch transactions
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
             for (BranchTransactionDO branchTransactionDO : branchTransactionDOs) {
                 globalSession.add(SessionConverter.convertBranchSession(branchTransactionDO));
@@ -225,7 +240,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         }
         return globalSession;
     }
-
 
     /**
      * Sets log store.

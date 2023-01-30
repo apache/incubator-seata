@@ -36,7 +36,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
@@ -46,7 +45,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
  *
  * @author wang.liang
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty({StarterConstants.SEATA_PREFIX + ".enabled", StarterConstants.SAGA_PREFIX + ".enabled"})
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, SeataAutoConfiguration.class})
 public class SeataSagaAutoConfiguration {
@@ -81,6 +80,7 @@ public class SeataSagaAutoConfiguration {
     }
 
     /**
+     * @param config state machine config
      * Create state machine engine bean.
      */
     @Bean
@@ -95,9 +95,8 @@ public class SeataSagaAutoConfiguration {
     /**
      * The saga async thread pool executor configuration.
      */
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     @ConditionalOnProperty(name = StarterConstants.SAGA_STATE_MACHINE_PREFIX + ".enable-async", havingValue = "true")
-    @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
     static class SagaAsyncThreadPoolExecutorConfiguration {
 
         /**

@@ -23,11 +23,11 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
-import io.seata.server.ServerApplication;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
  *
  * @author zhimo.xiao @gmail.com
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest
 public class DefaultCoreTest {
 
     private static DefaultCore core;
@@ -52,7 +52,7 @@ public class DefaultCoreTest {
 
     private static final String applicationId = "demo-child-app";
 
-    private static final String txServiceGroup = "my_test_tx_group";
+    private static final String txServiceGroup = "default_tx_group";
 
     private static final String txName = "tx-1";
 
@@ -77,7 +77,7 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        SessionHolder.init(null);
+        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
     }
@@ -96,9 +96,23 @@ public class DefaultCoreTest {
      * @throws TransactionException the transaction exception
      */
     @AfterEach
-    public void clean() throws TransactionException {
+    public synchronized void clean() throws TransactionException, InterruptedException {
         if (globalSession != null) {
-            globalSession.end();
+            int n = 10;
+            while (n-- > 0) {
+                try {
+                    globalSession.end();
+                    return;
+                } catch (TransactionException e) {
+                    throw e;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Thread.sleep(100);
+                    if (n == 0) {
+                       throw e;
+                    }
+                }
+            }
             globalSession = null;
         }
     }
@@ -189,14 +203,14 @@ public class DefaultCoreTest {
     @MethodSource("xidProvider")
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.TCC, resourceId,
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.mockCore(BranchType.AT,
+        core.mockCore(BranchType.TCC,
                 new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitFailed);
     }
 
     /**

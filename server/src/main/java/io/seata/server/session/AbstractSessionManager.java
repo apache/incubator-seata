@@ -21,6 +21,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.LockStatus;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
@@ -65,7 +66,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_ADD);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_ADD);
         }
         writeSession(LogOperation.GLOBAL_ADD, session);
     }
@@ -73,7 +74,10 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
+        }
+        if (GlobalStatus.Rollbacking == status) {
+            session.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
         }
         writeSession(LogOperation.GLOBAL_UPDATE, session);
     }
@@ -81,7 +85,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_REMOVE);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_REMOVE);
         }
         writeSession(LogOperation.GLOBAL_REMOVE, session);
     }
@@ -89,7 +93,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void addBranchSession(GlobalSession session, BranchSession branchSession) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_ADD);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_ADD);
         }
         writeSession(LogOperation.BRANCH_ADD, branchSession);
     }
@@ -98,7 +102,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     public void updateBranchSessionStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_UPDATE);
         }
         writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
@@ -107,7 +111,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     public void removeBranchSession(GlobalSession globalSession, BranchSession branchSession)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_REMOVE);
+            LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, branchSession, LogOperation.BRANCH_REMOVE);
         }
         writeSession(LogOperation.BRANCH_REMOVE, branchSession);
     }
@@ -144,8 +148,13 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     }
 
     @Override
-    public void onEnd(GlobalSession globalSession) throws TransactionException {
+    public void onSuccessEnd(GlobalSession globalSession) throws TransactionException {
         removeGlobalSession(globalSession);
+    }
+
+    @Override
+    public void onFailEnd(GlobalSession globalSession) throws TransactionException {
+        LOGGER.info("xid:{} fail end, transaction:{}",globalSession.getXid(),globalSession.toString());
     }
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {

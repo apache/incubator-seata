@@ -26,22 +26,7 @@
     <artifactId>seata-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
     <name>seata-spring-boot-starter ${project.version}</name>
-
-    <properties>
-        <spring-boot.version>1.5.22.RELEASE</spring-boot.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <description>spring-boot-starter for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -54,8 +39,20 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--spring-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>

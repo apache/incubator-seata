@@ -17,137 +17,141 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <groupId>io.seata</groupId>
-    <artifactId>seata-dependencies</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
-
+    <parent>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-build</artifactId>
+        <version>${revision}</version>
+        <relativePath>../build/pom.xml</relativePath>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>seata-dependencies</artifactId>
     <packaging>pom</packaging>
 
     <name>Seata dependencies ${project.version}</name>
-    <description>Seata dependencies</description>
-
-    <url>http://seata.io</url>
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>Seata</id>
-            <name>Seata</name>
-            <url>http://seata.io</url>
-        </developer>
-    </developers>
-
-    <organization>
-        <name>Seata</name>
-        <url>https://github.com/seata</url>
-    </organization>
-
-    <issueManagement>
-        <system>github</system>
-        <url>https://github.com/seata/seata/issues</url>
-    </issueManagement>
-
-    <scm>
-        <url>git@github.com:seata/seata.git</url>
-        <connection>scm:git@github.com:seata/seata.git</connection>
-        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
-    </scm>
+    <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <spring.version>4.3.23.RELEASE</spring.version>
-        <netty4.version>4.1.30.Final</netty4.version>
-        <dubbo.version>2.7.4</dubbo.version>
+        <dubbo-seata.version>1.0.2</dubbo-seata.version>
+        <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
+        <bytebuddy.version>1.12.13</bytebuddy.version>
+        <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
-        <fastjson.version>1.2.73</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
-        <slf4j-api.version>1.7.22</slf4j-api.version>
-        <logback-classic.version>1.2.0</logback-classic.version>
+        <commons-logging.version>1.2</commons-logging.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <commons-pool2.version>2.4.2</commons-pool2.version>
-        <commons-pool.version>1.6</commons-pool.version>
-        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
-        <hikari.version>3.4.3</hikari.version>
-        <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
-        <apache-zookeeper.version>3.4.14</apache-zookeeper.version>
+        <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
-        <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
-        <apollo-client.version>1.6.0</apollo-client.version>
-        <redis-clients.version>3.2.0</redis-clients.version>
-        <mock-jedis.version>0.1.16</mock-jedis.version>
-        <eureka-clients.version>1.10.16</eureka-clients.version>
+        <mock-jedis.version>0.3.0</mock-jedis.version>
+        <apollo-client.version>2.0.1</apollo-client.version>
+        <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.4.2</nacos-client.version>
-        <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
+        <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
-        <guava.version>27.0.1-jre</guava.version>
+        <guava.version>30.1-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
+        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+        <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+        <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
-        <httpclient.version>4.5.8</httpclient.version>
-        <httpcore.version>4.4.11</httpcore.version>
-        <antlr4.version>4.8</antlr4.version>
-        <druid.version>1.2.6</druid.version>
-        <caffeine.version>2.7.0</caffeine.version>
-        <oracle.client.version>10.2.0.3.0</oracle.client.version>
-        <mysql.client.version>5.1.35</mysql.client.version>
-        <postgres.client.version>42.1.4</postgres.client.version>
-        <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
-        <jackson.version>2.9.9</jackson.version>
         <jcommander.version>1.72</jcommander.version>
-        <annotation.api.version>1.2</annotation.api.version>
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.19</commons-compress.version>
-        <ant.version>1.10.6</ant.version>
-        <snakeyaml.version>1.26</snakeyaml.version>
+        <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
 
-        <!-- Compiler settings properties -->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <protobuf.version>3.7.1</protobuf.version>
-        <grpc.version>1.17.1</grpc.version>
-        <junit.version>4.12</junit.version>
-        <kryo.version>4.0.2</kryo.version>
-        <kryo-serializers.version>0.42</kryo-serializers.version>
+        <protobuf.version>3.16.3</protobuf.version>
+        <grpc.version>1.27.1</grpc.version>
+        <kryo.version>5.4.0</kryo.version>
+        <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
-        <mariadb.version>2.7.2</mariadb.version>
         <zstd.version>1.5.0-4</zstd.version>
+        <xstream.version>1.4.19</xstream.version>
+
+        <jwt.version>0.10.5</jwt.version>
+        <jackson.databind.version>2.13.4.1</jackson.databind.version>
+        <prometheus.client.version>0.6.0</prometheus.client.version>
+        <logback.version>1.2.9</logback.version>
+        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+
+        <!-- redis -->
+        <jedis.version>3.2.0</jedis.version>
+
+        <!-- # for database -->
+        <!-- db -->
+        <mysql.version>5.1.42</mysql.version>
+        <ojdbc.version>19.3.0.0</ojdbc.version>
+        <postgresql.version>42.3.3</postgresql.version>
+        <h2.version>1.4.181</h2.version>
+        <mariadb.version>2.7.2</mariadb.version>
+        <!-- db connection pool -->
+        <druid.version>1.2.6</druid.version>
+        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <hikari.version>3.4.3</hikari.version>
+        <!-- sql parser -->
+        <antlr4.version>4.8</antlr4.version>
+        <!-- for jdbc driver when package -->
+        <mysql5.version>${mysql.version}</mysql5.version>
+        <mysql8.version>8.0.27</mysql8.version>
+
+        <!-- # for kotlin -->
+        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
+
+        <!-- # for test -->
+        <mockito.version>2.23.4</mockito.version>
+        <assertj-core.version>3.12.2</assertj-core.version>
+        <jetty-version>9.4.38.v20210224</jetty-version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- spring  -->
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-framework CVE-2022-22965-->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>${spring.version}</version>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-framework-bom</artifactId>
+                    </exclusion>
+                </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
             <!-- the 3rd part -->
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty4.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
@@ -162,6 +166,36 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-dbcp2</artifactId>
+                <version>${commons-dbcp2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -184,19 +218,9 @@
                 <version>${config.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-classic.version}</version>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
@@ -204,24 +228,14 @@
                 <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-pool2</artifactId>
-                <version>${commons-pool2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-pool</groupId>
-                <artifactId>commons-pool</artifactId>
-                <version>${commons-pool.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.dubbo</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
+                <groupId>com.baidu</groupId>
+                <artifactId>brpc-java</artifactId>
+                <version>${brpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -229,14 +243,25 @@
                 <version>${dubbo.alibaba.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.dubbo.extensions</groupId>
+                <artifactId>dubbo-filter-seata</artifactId>
+                <version>${dubbo-seata.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.alibaba.edas</groupId>
                 <artifactId>edas-sdk</artifactId>
                 <version>${hsf.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
-                <groupId>cglib</groupId>
-                <artifactId>cglib</artifactId>
-                <version>${cglib.version}</version>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
             </dependency>
             <dependency>
                 <groupId>aopalliance</groupId>
@@ -253,8 +278,8 @@
                         <groupId>org.slf4j</groupId>
                     </exclusion>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
                     </exclusion>
                     <exclusion>
                         <artifactId>org.apache.zookeeper</artifactId>
@@ -268,8 +293,8 @@
                 <version>${apache-zookeeper.version}</version>
                 <exclusions>
                     <exclusion>
-                        <artifactId>io.netty</artifactId>
-                        <groupId>netty</groupId>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -282,6 +307,12 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>registry-client-all</artifactId>
                 <version>${sofa.registry.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.alipay.sofa.lookout</groupId>
+                        <artifactId>lookout-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -324,17 +355,23 @@
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
-                <version>${redis-clients.version}</version>
+                <version>${jedis.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.fppt</groupId>
-                <artifactId>jedis-mock</artifactId>
+                <groupId>com.github.microwww</groupId>
+                <artifactId>redis-server</artifactId>
                 <version>${mock-jedis.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.netflix.archaius</groupId>
@@ -367,6 +404,10 @@
                         <groupId>io.netty</groupId>
                         <artifactId>netty-handler</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -390,29 +431,19 @@
                 <version>${javax-inject.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation-api.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${httpcore.version}</version>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${javax.servlet-api.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.ben-manes.caffeine</groupId>
-                <artifactId>caffeine</artifactId>
-                <version>${caffeine.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgres.client.version}</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
@@ -436,11 +467,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
             <!--only used for seata-server-->
             <dependency>
                 <groupId>com.beust</groupId>
@@ -451,8 +477,8 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-testing</artifactId>
-                <scope>test</scope>
                 <version>${grpc.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
@@ -490,27 +516,6 @@
                 <version>${fst.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-dbcp2</artifactId>
-                <version>${commons-dbcp2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.zaxxer</groupId>
-                <artifactId>HikariCP</artifactId>
-                <version>${hikari.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>javax.annotation-api</artifactId>
-                <version>${annotation.api.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.tukaani</groupId>
                 <artifactId>xz</artifactId>
                 <version>${xz.version}</version>
@@ -531,6 +536,46 @@
                 <version>${lz4.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-common</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk7</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test-common</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-test</artifactId>
+                <version>${kotlin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-core</artifactId>
+                <version>${kotlin-coroutines.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-core-jvm</artifactId>
+                <version>${kotlin-coroutines.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
@@ -546,104 +591,102 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.mariadb.jdbc</groupId>
-                <artifactId>mariadb-java-client</artifactId>
-                <version>${mariadb.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.github.luben</groupId>
                 <artifactId>zstd-jni</artifactId>
                 <version>${zstd.version}</version>
             </dependency>
+
+            <!--<dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>-->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.databind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_httpserver</artifactId>
+                <version>${prometheus.client.version}</version>
+            </dependency>
+            <!-- logback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <!-- logback appenders -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.danielwegener</groupId>
+                <artifactId>logback-kafka-appender</artifactId>
+                <version>${kafka-appender.version}</version>
+            </dependency>
+
+
+            <!-- test -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>org.glassfish.jersey</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-security</artifactId>
+                <version>${jetty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
-                        <configuration>
-                            <charset>${project.build.sourceEncoding}</charset>
-                            <failOnError>false</failOnError>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- GPG -->
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>oss_seata</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</keyname>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-enforcer-plugin</artifactId>
-                        <version>3.0.0-M3</version>
-                        <executions>
-                            <execution>
-                                <id>enforce-maven</id>
-                                <goals>
-                                    <goal>enforce</goal>
-                                </goals>
-                                <configuration>
-                                    <rules>
-                                        <requireMavenVersion>
-                                            <version>[3.6.0,)</version>
-                                        </requireMavenVersion>
-                                    </rules>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-                <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
-
-        </profile>
-    </profiles>
-
 </project>

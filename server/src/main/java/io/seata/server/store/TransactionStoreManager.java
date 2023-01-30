@@ -15,6 +15,7 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 
@@ -53,6 +54,22 @@ public interface TransactionStoreManager {
      * @return the global session
      */
     GlobalSession readSession(String xid, boolean withBranchSessions);
+
+    /**
+     * Read session global session by sort by timeout begin status.
+     *
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions);
+    /**
+     * Read session global session.
+     *
+     * @param statuses the statuses
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session list
+     */
+    List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions);
 
     /**
      * Read session by status list.

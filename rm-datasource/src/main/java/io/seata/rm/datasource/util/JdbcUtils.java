@@ -16,8 +16,6 @@
 package io.seata.rm.datasource.util;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.sqlparser.SqlParserType;
@@ -42,8 +40,7 @@ public final class JdbcUtils {
         if (dbTypeParser == null) {
             synchronized (JdbcUtils.class) {
                 if (dbTypeParser == null) {
-                    String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
-                    dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, sqlparserType);
+                    dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
                 }
             }
         }
@@ -107,7 +104,7 @@ public final class JdbcUtils {
     }
 
     public static Driver loadDriver(String driverClassName) throws SQLException {
-        Class clazz = null;
+        Class<?> clazz = null;
         try {
             ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
             if (contextLoader != null) {
@@ -127,9 +124,7 @@ public final class JdbcUtils {
 
         try {
             return (Driver)clazz.newInstance();
-        } catch (IllegalAccessException e) {
-            throw new SQLException(e.getMessage(), e);
-        } catch (InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             throw new SQLException(e.getMessage(), e);
         }
     }

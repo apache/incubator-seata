@@ -97,6 +97,12 @@
       "defaultValue": -2147482648
     },
     {
+      "name": "seata.client.rm.sql-parser-type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": "druid"
+    },
+    {
       "name": "seata.client.rm.lock.retry-interval",
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LockProperties",
@@ -208,7 +214,7 @@
       "name": "seata.client.load-balance.type",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
-      "defaultValue": "RandomLoadBalance"
+      "defaultValue": "XID"
     },
     {
       "name": "seata.client.load-balance.virtual-nodes",
@@ -250,7 +256,7 @@
       "type": "java.time.Duration",
       "description": "TCC fence log clean period. only duration type format are supported.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": "1h"
+      "defaultValue": "1d"
     },
     {
       "name": "seata.saga.enabled",
@@ -342,7 +348,7 @@
       "name": "seata.client.load-balance.type",
       "values": [
         {
-          "value": "RandomLoadBalance",
+          "value": "XID",
           "description": "the default load balance."
         },
         {
@@ -353,6 +359,9 @@
         },
         {
           "value": "LeastActiveLoadBalance"
+        },
+        {
+          "value": "RandomLoadBalance"
         }
       ]
     },
@@ -365,6 +374,19 @@
         },
         {
           "value": "jackson"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.sql-parser-type",
+      "values": [
+        {
+          "value": "druid",
+          "description": "the default type."
+        },
+        {
+          "value": "antlr",
+          "description": "'io.seata:seata-sqlparser-antlr' dependency must be referenced manually."
         }
       ]
     },
