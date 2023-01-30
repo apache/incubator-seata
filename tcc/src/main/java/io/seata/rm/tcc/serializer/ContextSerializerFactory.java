@@ -12,8 +12,8 @@
  */
 package io.seata.rm.tcc.serializer;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -28,7 +28,7 @@ public class ContextSerializerFactory {
     private ContextSerializerFactory() {}
 
     // ContextSerializer cache
-    private static final ConcurrentMap<String, ContextSerializer> INSTANCES = new ConcurrentHashMap<>();
+    private static final Map<String, ContextSerializer> INSTANCES = new ConcurrentHashMap<>();
 
     /**
      * Singleton Holder
