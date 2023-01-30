@@ -21,11 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LowerCaseLinkHashMap;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type Table meta.
@@ -141,6 +142,15 @@ public class TableMeta {
             list.add(entry.getKey());
         }
         return list;
+    }
+
+    /**
+     * Gets all the on update columns only name.
+     *
+     * @return all the on update columns only name
+     */
+    public List<String> getOnUpdateColumnsOnlyName() {
+        return allColumns.values().stream().filter(ColumnMeta::isOnUpdate).map(ColumnMeta::getColumnName).collect(Collectors.toList());
     }
 
     /**

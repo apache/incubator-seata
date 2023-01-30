@@ -110,6 +110,10 @@ public interface Constants {
      */
     String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
     /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
+    /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
     String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
@@ -126,11 +130,6 @@ public interface Constants {
      * The constant RETRY_ROLLBACKING
      */
     String RETRY_ROLLBACKING = "RetryRollbacking";
-
-    /**
-     * The constant HANDLE_ALL_SESSION
-     */
-    String HANDLE_ALL_SESSION = "HandleAllSession";
 
     /**
      * The constant RETRY_COMMITTING
@@ -161,5 +160,10 @@ public interface Constants {
      * The constant SKIP_CHECK_LOCK
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
+
+    /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
 
 }

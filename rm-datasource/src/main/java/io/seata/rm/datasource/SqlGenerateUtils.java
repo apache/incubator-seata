@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * generate sql and set value to sql

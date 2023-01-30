@@ -221,7 +221,7 @@
       "name": "seata.client.load-balance.type",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
-      "defaultValue": "RandomLoadBalance"
+      "defaultValue": "XID"
     },
     {
       "name": "seata.client.load-balance.virtual-nodes",
@@ -355,7 +355,7 @@
       "name": "seata.client.load-balance.type",
       "values": [
         {
-          "value": "RandomLoadBalance",
+          "value": "XID",
           "description": "the default load balance."
         },
         {
@@ -366,6 +366,9 @@
         },
         {
           "value": "LeastActiveLoadBalance"
+        },
+        {
+          "value": "RandomLoadBalance"
         }
       ]
     },
