@@ -16,7 +16,6 @@
 package io.seata.server.coordinator;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +23,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import io.netty.channel.Channel;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
@@ -64,6 +63,7 @@ import org.springframework.context.ApplicationContext;
 
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
+
 /**
  * The type DefaultCoordinator test.
  *
@@ -172,7 +172,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
 
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
         globalSession.queueToRetryRollback();
@@ -183,7 +183,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
@@ -199,7 +199,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
 
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
         TimeUnit.MILLISECONDS.sleep(100);
 
@@ -212,7 +212,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 

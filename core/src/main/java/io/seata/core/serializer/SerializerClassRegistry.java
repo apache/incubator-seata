@@ -81,6 +81,7 @@ public class SerializerClassRegistry {
         registerClass(ConcurrentHashMap.class);
         // jdk 17 not support
         // registerClass(SimpleDateFormat.class);
+
         registerClass(GregorianCalendar.class);
         registerClass(Vector.class);
         registerClass(BitSet.class);
