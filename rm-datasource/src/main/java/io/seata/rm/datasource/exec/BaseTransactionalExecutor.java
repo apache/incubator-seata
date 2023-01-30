@@ -467,7 +467,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (seataDatasource) {
             connection = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataConnection();
         } else {
-            connection = statementProxy.getConnectionProxy();
+            connection = statementProxy.getConnection();
             selectSQL = selectSQL + " FOR UPDATE";
         }
         try (
