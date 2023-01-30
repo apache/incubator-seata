@@ -51,7 +51,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         Class<?> serviceInterface = DefaultTargetClassParser.get().findTargetClass(target);
         Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
 
-        if (existsAnnotation(new Class[]{serviceInterface}) || existsAnnotation(interfacesIfJdk)) {
+        if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
             ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
             ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
@@ -60,7 +60,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         return null;
     }
 
-    private boolean existsAnnotation(Class<?>[] classes) {
+    private boolean existsAnnotation(Class<?>... classes) {
         boolean result = false;
         if (CollectionUtils.isNotEmpty(classes)) {
             for (Class<?> clazz : classes) {
