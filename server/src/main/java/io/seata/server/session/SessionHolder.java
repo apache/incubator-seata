@@ -241,7 +241,7 @@ public class SessionHolder {
 
     private static void queueToAsyncCommitting(GlobalSession globalSession) {
         globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code)
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
@@ -256,12 +256,12 @@ public class SessionHolder {
 
     private static void queueToRetryCommit(GlobalSession globalSession) {
         globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code)
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     private static void queueToRetryRollback(GlobalSession globalSession) {
         globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code)
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     //endregion
