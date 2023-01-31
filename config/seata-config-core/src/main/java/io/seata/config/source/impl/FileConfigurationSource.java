@@ -337,7 +337,7 @@ public class FileConfigurationSource implements LocalConfigurationSource
                 } catch (Exception e) {
                     setFailResult(configFuture);
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Could not found property {}, try to use default value instead. exception:{}",
+                        LOGGER.debug("Could not found property '{}', try to use default value instead. exception: {}",
                                 configFuture.getDataId(), e.getMessage());
                     }
                 }

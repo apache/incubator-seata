@@ -53,6 +53,11 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     // The listeners
     protected final Map<String, Set<ConfigurationChangeListener>> listeners = new ConcurrentHashMap<>();
 
+    /**
+     * Whether to print the get success log. Used to avoid printing the log repeatedly.
+     */
+    private boolean printGetSuccessLog = true;
+
 
     protected AbstractConfiguration(String typeName) {
         this.typeName = typeName;
@@ -73,13 +78,16 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
             }
 
             if (ObjectUtils.isNullOrBlank(value)) {
-                LOGGER.debug("Skip config '{}' blank value from the configuration source '{}' by configuration '{}'",
-                        dataId, source.getTypeName(), this.getTypeName());
+                LOGGER.debug("Skip config '{}' blank value '{}' of type [{}] from the configuration source '{}' by configuration '{}'",
+                        dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
                 continue;
             }
 
-            LOGGER.debug("Get config '{}' value '{}' from the configuration source '{}' by configuration '{}'",
-                    dataId, value, source.getTypeName(), this.getTypeName());
+            if (this.printGetSuccessLog) {
+                LOGGER.debug("Get config value ['{}' = '{}'] of type [{}] from the configuration source '{}' by configuration '{}'",
+                        dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
+            }
+
             return value;
         }
 
@@ -190,4 +198,13 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     }
 
     //endregion
+
+
+    public void enablePrintGetSuccessLog() {
+        this.printGetSuccessLog = true;
+    }
+
+    public void disablePrintGetSuccessLog() {
+        this.printGetSuccessLog = false;
+    }
 }

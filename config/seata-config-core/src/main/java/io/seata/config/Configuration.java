@@ -108,16 +108,17 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      * @param timeoutMills the timeout mills
      * @return the short config
      */
-    default short getShort(String dataId, Short defaultValue, long timeoutMills) {
+    default short getShort(String dataId, short defaultValue, long timeoutMills) {
         return getConfig(dataId, defaultValue, timeoutMills, Short.class);
     }
 
-    default short getShort(String dataId, Short defaultValue) {
+    default short getShort(String dataId, short defaultValue) {
         return getShort(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
     }
 
     default short getShort(String dataId) {
-        return getShort(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+        Short config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Short.class);
+        return config == null ? DEFAULT_SHORT : config;
     }
 
 
@@ -129,16 +130,17 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      * @param timeoutMills the timeout mills
      * @return the int config
      */
-    default int getInt(String dataId, Integer defaultValue, long timeoutMills) {
+    default int getInt(String dataId, int defaultValue, long timeoutMills) {
         return getConfig(dataId, defaultValue, timeoutMills, Integer.class);
     }
 
-    default int getInt(String dataId, Integer defaultValue) {
+    default int getInt(String dataId, int defaultValue) {
         return getInt(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
     }
 
     default int getInt(String dataId) {
-        return getInt(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+        Integer config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Integer.class);
+        return config == null ? DEFAULT_INT : config;
     }
 
 
@@ -150,16 +152,17 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      * @param timeoutMills the timeout mills
      * @return the long config
      */
-    default long getLong(String dataId, Long defaultValue, long timeoutMills) {
+    default long getLong(String dataId, long defaultValue, long timeoutMills) {
         return getConfig(dataId, defaultValue, timeoutMills, Long.class);
     }
 
-    default long getLong(String dataId, Long defaultValue) {
+    default long getLong(String dataId, long defaultValue) {
         return getLong(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
     }
 
     default long getLong(String dataId) {
-        return getLong(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+        Long config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Long.class);
+        return config == null ? DEFAULT_LONG : config;
     }
 
 
@@ -171,16 +174,17 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      * @param timeoutMills the timeout mills
      * @return the boolean config
      */
-    default boolean getBoolean(String dataId, Boolean defaultValue, long timeoutMills) {
+    default boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
         return getConfig(dataId, defaultValue, timeoutMills, Boolean.class);
     }
 
-    default boolean getBoolean(String dataId, Boolean defaultValue) {
+    default boolean getBoolean(String dataId, boolean defaultValue) {
         return getBoolean(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
     }
 
     default boolean getBoolean(String dataId) {
-        return getBoolean(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+        Boolean config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Boolean.class);
+        return config == null ? DEFAULT_BOOLEAN : config;
     }
 
 
@@ -201,7 +205,7 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
     }
 
     default Duration getDuration(String dataId) {
-        return getDuration(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+        return getDuration(dataId, DEFAULT_DURATION, DEFAULT_CONFIG_TIMEOUT);
     }
 
     /**

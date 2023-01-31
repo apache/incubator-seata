@@ -37,8 +37,8 @@ public class DefaultConfiguration extends AbstractConfiguration
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConfiguration.class);
 
-    private static final String DEFAULT_CONFIGURATION_TYPE_NAME = "seata-default-configuration";
-    private static final String DEFAULT_CONFIG_MANAGER_TYPE_NAME = "seata-default-config-manager";
+    public static final String DEFAULT_CONFIGURATION_TYPE_NAME = "seata-default-configuration";
+    public static final String DEFAULT_CONFIG_MANAGER_TYPE_NAME = "seata-default-config-manager";
 
 
     // The cache
@@ -77,7 +77,8 @@ public class DefaultConfiguration extends AbstractConfiguration
      * @return the DefaultValueConfiguration
      */
     protected DefaultConfigManager buildDefaultConfigManager() {
-        DefaultConfigManager defaultConfigManager = new DefaultConfiguration(DEFAULT_CONFIG_MANAGER_TYPE_NAME, null);
+        DefaultConfiguration defaultConfigManager = new DefaultConfiguration(DEFAULT_CONFIG_MANAGER_TYPE_NAME, null);
+        defaultConfigManager.disablePrintGetSuccessLog();
 
         // load defaultValue source
         List<DefaultValueConfigurationSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultValueConfigurationSourceProvider.class);
@@ -94,8 +95,8 @@ public class DefaultConfiguration extends AbstractConfiguration
         if (defaultConfigManager != null) {
             defaultValue = defaultConfigManager.getConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT, dataType);
             if (defaultValue != null) {
-                LOGGER.debug("Get config '{}' defaultValue '{}' from the defaultConfigManager '{}'",
-                        dataId, defaultValue, defaultConfigManager.getTypeName());
+                LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from the defaultConfigManager '{}'",
+                        dataId, defaultValue, defaultValue.getClass().getName(), defaultConfigManager.getTypeName());
             }
         }
 

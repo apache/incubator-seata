@@ -19,8 +19,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigurationSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
@@ -37,9 +35,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_SE
  */
 public class SpringEnvironmentConfigurationSource implements ConfigurationSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpringEnvironmentConfigurationSource.class);
-
-
     @Override
     public String getLatestConfig(String rawDataId, long timeoutMills) {
         ConfigurableEnvironment environment = (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
@@ -55,7 +50,6 @@ public class SpringEnvironmentConfigurationSource implements ConfigurationSource
         // 1. get by dataIdLineFormat
         String value = environment.getProperty(dataIdLineFormat);
         if (StringUtils.isNotBlank(value)) {
-            this.log(rawDataId, value, dataIdLineFormat);
             return value;
         }
 
@@ -63,7 +57,6 @@ public class SpringEnvironmentConfigurationSource implements ConfigurationSource
         if (!dataId.equals(dataIdLineFormat)) {
             value = environment.getProperty(dataId);
             if (StringUtils.isNotBlank(value)) {
-                this.log(rawDataId, value, dataId);
                 return value;
             }
         }
@@ -73,7 +66,6 @@ public class SpringEnvironmentConfigurationSource implements ConfigurationSource
             String grouplistDataId = this.changeGrouplistDataIdFormat(rawDataId);
             value = environment.getProperty(grouplistDataId);
             if (StringUtils.isNotBlank(value)) {
-                this.log(rawDataId, value, grouplistDataId);
                 return value;
             }
         }
@@ -92,7 +84,7 @@ public class SpringEnvironmentConfigurationSource implements ConfigurationSource
      * @param rawDataId the rawDataId
      * @return the real dataId for spring environment
      */
-    private String splicePrefixSeataDot(String rawDataId) {
+    public static String splicePrefixSeataDot(String rawDataId) {
         if (rawDataId.startsWith(SEATA_PREFIX + DOT)) {
             return rawDataId;
         }
@@ -123,10 +115,5 @@ public class SpringEnvironmentConfigurationSource implements ConfigurationSource
         );
 
         return SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT + txServiceGroup;
-    }
-
-    private void log(String rawDataId, String value, String dataId) {
-        LOGGER.debug("Get config '{}' value '{}' from spring environment by dataId '{}'",
-                rawDataId, value, dataId);
     }
 }

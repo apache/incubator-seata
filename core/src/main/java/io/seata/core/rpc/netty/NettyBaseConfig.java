@@ -52,20 +52,6 @@ public class NettyBaseConfig {
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-    /**
-     * The constant BOSS_THREAD_PREFIX.
-     */
-    protected static final String BOSS_THREAD_PREFIX = CONFIG.getString(ConfigurationKeys.BOSS_THREAD_PREFIX);
-
-    /**
-     * The constant WORKER_THREAD_PREFIX.
-     */
-    protected static final String WORKER_THREAD_PREFIX = CONFIG.getString(ConfigurationKeys.WORKER_THREAD_PREFIX);
-
-    /**
-     * The constant SHARE_BOSS_WORKER.
-     */
-    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
 
     /**
      * The constant WORKER_THREAD_SIZE.
