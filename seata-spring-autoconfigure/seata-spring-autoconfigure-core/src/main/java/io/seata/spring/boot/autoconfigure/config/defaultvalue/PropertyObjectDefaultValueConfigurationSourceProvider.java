@@ -13,27 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.source.impl;
+package io.seata.spring.boot.autoconfigure.config.defaultvalue;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.DefaultValueManager;
 import io.seata.config.source.DefaultValueConfigurationSourceProvider;
 
-import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_CONF_SOURCE_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER;
 
 /**
+ * The type Property object default value configuration source provider.
+ *
  * @author wang.liang
  */
-@LoadLevel(name = "default-conf-file", order = DEFAULT_CONF_SOURCE_ORDER)
-public class RegistryAndFileDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
-
-    private static final String DEFAULT_REGISTRY_CONFIG_FILE_NAME = "default-registry.conf";
-    private static final String DEFAULT_FILE_CONFIG_FILE_NAME = "default-file.conf";
-
+@LoadLevel(name = "default-value-property-object", order = DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER)
+public class PropertyObjectDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
 
     @Override
     public void provide(DefaultValueManager defaultValueManager) {
-        defaultValueManager.addSourceLast(new FileConfigurationSource(DEFAULT_FILE_CONFIG_FILE_NAME));
-        defaultValueManager.addSourceLast(new FileConfigurationSource(DEFAULT_REGISTRY_CONFIG_FILE_NAME));
+        defaultValueManager.addSourceLast(new PropertyObjectDefaultValueConfigurationSource());
     }
 }

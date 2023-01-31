@@ -22,6 +22,8 @@ package io.seata.config.source;
  */
 public interface ConfigSourceOrdered {
 
+    //region order for source
+
     int SYSTEM_PROPERTY_SOURCE_ORDER = Integer.MAX_VALUE - 100;
     int SYSTEM_ENV_SOURCE_ORDER = Integer.MAX_VALUE - 200;
 
@@ -30,5 +32,13 @@ public interface ConfigSourceOrdered {
     int SPRING_ENVIRONMENT_SOURCE_ORDER = 200;
     int CONFIG_FILE_SOURCE_ORDER = 100;
 
-    int DEFAULT_CONF_SOURCE_ORDER = Integer.MIN_VALUE + 100;
+    //endregion
+
+
+    //region order for source provider
+
+    int DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER = Integer.MIN_VALUE + 200;
+    int DEFAULT_CONF_SOURCE_PROVIDER_ORDER = Integer.MIN_VALUE + 100;
+
+    //endregion
 }
