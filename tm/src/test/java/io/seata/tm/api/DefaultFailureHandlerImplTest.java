@@ -90,7 +90,7 @@ class DefaultFailureHandlerImplTest {
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getDeclaredField("timer");
+        Field field = c.getDeclaredField("TIMER");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
@@ -116,7 +116,7 @@ class DefaultFailureHandlerImplTest {
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getDeclaredField("timer");
+        Field field = c.getDeclaredField("TIMER");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1

@@ -15,7 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.rm.fence.SpringFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -38,7 +38,7 @@ import javax.sql.DataSource;
  */
 @ConditionalOnExpression("${seata.enabled:true}")
 @ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
-@ConditionalOnMissingBean(TCCFenceConfig.class)
+@ConditionalOnMissingBean(SpringFenceConfig.class)
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class, TransactionAutoConfiguration.class})
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataTCCFenceAutoConfiguration {
@@ -48,12 +48,12 @@ public class SeataTCCFenceAutoConfiguration {
 
     @Bean
     @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
-    public TCCFenceConfig tccFenceConfig(
+    public SpringFenceConfig tccFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,
             @Qualifier(TCC_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource tccFenceDataSource,
             @Qualifier(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager tccFenceTransactionManager) {
-        return new TCCFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
+        return new SpringFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
                 tccFenceTransactionManager != null ? tccFenceTransactionManager : transactionManager);
     }
 

@@ -15,9 +15,9 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccActionImpl;
-import io.seata.rm.tcc.remoting.RemotingDesc;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
