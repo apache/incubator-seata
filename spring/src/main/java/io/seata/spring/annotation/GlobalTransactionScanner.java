@@ -241,22 +241,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * The following will be scanned, and added corresponding interceptor:
      * <p>
      * TM:
-     *
-     * @see GlobalTransactional // TM annotation
+     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
      * Corresponding interceptor:
-     * @see GlobalTransactionalInterceptorHandler#handleGlobalTransaction(InvocationWrapper, AspectTransactional) // TM handler
+     * @see io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalTransaction(io.seata.integration.tx.api.interceptor.InvocationWrapper, io.seata.integration.tx.api.annotation.AspectTransactional) // TM handler
      * <p>
      * GlobalLock:
-     * @see GlobalLock // GlobalLock annotation
+     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see GlobalTransactionalInterceptorHandler#handleGlobalLock(InvocationWrapper, io.seata.spring.annotation.GlobalLock)  // GlobalLock handler
+     * @see io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalLock(io.seata.integration.tx.api.interceptor.InvocationWrapper, io.seata.spring.annotation.GlobalLock)  // GlobalLock handler
      * <p>
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
      * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
-     * @see RemotingParser // Remote TCC service parser
+     * @see io.seata.integration.tx.api.remoting.RemotingParser // Remote TCC service parser
      * Corresponding interceptor:
-     * @see TccActionInterceptorHandler // the interceptor of TCC mode
+     * @see io.seata.rm.tcc.interceptor.TccActionInterceptorHandler // the interceptor of TCC mode
      */
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
