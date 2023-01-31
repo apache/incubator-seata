@@ -248,14 +248,14 @@
       "name": "seata.tcc.fence.log-table-name",
       "type": "java.lang.String",
       "description": "TCC fence log table name.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "sourceType": "io.seata.rm.fence.SpringFenceConfig",
       "defaultValue": "tcc_fence_log"
     },
     {
       "name": "seata.tcc.fence.clean-period",
       "type": "java.time.Duration",
       "description": "TCC fence log clean period. only duration type format are supported.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "sourceType": "io.seata.rm.fence.SpringFenceConfig",
       "defaultValue": "1d"
     },
     {
