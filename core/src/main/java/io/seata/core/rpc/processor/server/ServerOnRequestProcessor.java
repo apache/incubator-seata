@@ -102,7 +102,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final String BATCH_RESPONSE_THREAD_PREFIX = "rpcBatchResponse";
     private static final boolean PARALLEL_REQUEST_HANDLE =
-        ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_PARALLEL_REQUEST_HANDLE_KEY, false);
+        ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_PARALLEL_REQUEST_HANDLE_KEY, true);
 
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
