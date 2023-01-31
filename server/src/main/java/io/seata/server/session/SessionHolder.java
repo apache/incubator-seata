@@ -240,13 +240,8 @@ public class SessionHolder {
     }
 
     private static void queueToAsyncCommitting(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-            // [optimize-session-manager-done] add--> root manager.addGlobalSession
-            getRootSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code)
     }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
@@ -260,23 +255,13 @@ public class SessionHolder {
     }
 
     private static void queueToRetryCommit(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-            // [optimize-session-manager-done] add--> root manager.addGlobalSession
-            getRootSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code)
     }
 
     private static void queueToRetryRollback(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-            // [optimize-session-manager-done] add--> root manager.addGlobalSession
-            getRootSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code)
     }
 
     //endregion
