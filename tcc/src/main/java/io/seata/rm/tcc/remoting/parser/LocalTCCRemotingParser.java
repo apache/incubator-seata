@@ -15,14 +15,15 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
-import java.util.Set;
-
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.integration.tx.api.remoting.Protocols;
+import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
 import io.seata.rm.tcc.api.LocalTCC;
-import io.seata.rm.tcc.remoting.Protocols;
-import io.seata.rm.tcc.remoting.RemotingDesc;
 import org.springframework.aop.framework.AopProxyUtils;
+
+import java.util.Set;
 
 /**
  * local tcc bean parsing
@@ -47,7 +48,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
             return null;
         }
         RemotingDesc remotingDesc = new RemotingDesc();
-        remotingDesc.setReference(true);
+        remotingDesc.setReference(this.isReference(bean, beanName));
+        remotingDesc.setService(this.isService(bean, beanName));
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
         // check if LocalTCC annotation is marked on the implementation class

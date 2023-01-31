@@ -240,11 +240,8 @@ public class SessionHolder {
     }
 
     private static void queueToAsyncCommitting(GlobalSession globalSession) {
-        try {
-            getAsyncCommittingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
@@ -258,19 +255,13 @@ public class SessionHolder {
     }
 
     private static void queueToRetryCommit(GlobalSession globalSession) {
-        try {
-            getRetryCommittingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     private static void queueToRetryRollback(GlobalSession globalSession) {
-        try {
-            getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
+        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
+        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
     }
 
     //endregion
