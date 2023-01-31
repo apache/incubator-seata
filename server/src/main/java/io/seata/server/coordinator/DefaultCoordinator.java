@@ -340,9 +340,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
 
                 globalSession.close();
-                globalSession.setStatus(GlobalStatus.TimeoutRollbacking);
-
-                SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+                globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
 
                 // transaction timeout and start rollbacking event
                 MetricsPublisher.postSessionDoingEvent(globalSession, GlobalStatus.TimeoutRollbacking.name(), false, false);
