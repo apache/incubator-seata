@@ -16,9 +16,9 @@
 package io.seata.config;
 
 /**
- * The interface DefaultValueManager.
+ * The interface DefaultConfigManager.
  *
  * @author wang.liang
  */
-public interface DefaultValueManager extends Configuration {
+public interface DefaultConfigManager extends Configuration {
 }

@@ -38,7 +38,7 @@ public interface ConfigSourceOrdered {
     //region order for source provider
 
     int DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER = Integer.MIN_VALUE + 200;
-    int DEFAULT_CONF_SOURCE_PROVIDER_ORDER = Integer.MIN_VALUE + 100;
+    int DEFAULT_CONFIG_SOURCE_PROVIDER_ORDER = Integer.MIN_VALUE + 100;
 
     //endregion
 }

@@ -219,7 +219,7 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
 
         if (list0 != null) {
             for (Object config : list0) {
-                // add the Convert value
+                // add the converted value
                 list.add(ConvertUtils.convert(config, dataType));
             }
         }

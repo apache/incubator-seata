@@ -68,6 +68,10 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
         for (ConfigurationSource source : sources) {
             value = source.getLatestConfig(dataId, timeoutMills);
 
+            if (value == null) {
+                continue;
+            }
+
             if (ObjectUtils.isNullOrBlank(value)) {
                 LOGGER.debug("Skip config '{}' blank value from the configuration source '{}' by configuration '{}'",
                         dataId, source.getTypeName(), this.getTypeName());

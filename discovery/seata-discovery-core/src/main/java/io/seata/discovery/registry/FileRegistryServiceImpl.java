@@ -15,11 +15,10 @@
  */
 package io.seata.discovery.registry;
 
-
-import io.seata.common.util.StringUtils;
-import io.seata.config.listener.ConfigChangeListener;
+import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.listener.ConfigChangeListener;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -34,7 +33,6 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static volatile FileRegistryServiceImpl instance;
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String POSTFIX_GROUPLIST = ".grouplist";
-    private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
 
@@ -83,12 +81,12 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (clusterName == null) {
             return null;
         }
-        String endpointStr = CONFIG.getString(
-                PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
-        if (StringUtils.isNullOrEmpty(endpointStr)) {
+
+        List<String> endpoints = CONFIG.getList(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST, String.class);
+        if (CollectionUtils.isEmpty(endpoints)) {
             throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
         }
-        String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
+
         List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
         for (String endpoint : endpoints) {
             String[] ipAndPort = endpoint.split(IP_PORT_SPLIT_CHAR);
