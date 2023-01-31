@@ -294,4 +294,9 @@ public interface DefaultValues {
      * Default druid location in classpath
      */
     String DRUID_LOCATION = "lib/sqlparser/druid.jar";
+
+    /**
+     * The constant DEFAULT_TCC_CONTEXT_STORE
+     */
+    String DEFAULT_TCC_CONTEXT_STORE = "tc";
 }

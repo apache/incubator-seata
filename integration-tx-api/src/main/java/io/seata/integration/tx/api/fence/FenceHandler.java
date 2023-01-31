@@ -17,6 +17,7 @@ package io.seata.integration.tx.api.fence;
 
 import io.seata.common.executor.Callback;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.Date;
 
@@ -32,5 +33,9 @@ public interface FenceHandler {
     boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, String xid, Long branchId, Object[] args, String actionName);
 
     int deleteFenceByDate(Date datetime);
+
+    DataSource getDataSource();
+
+    void setDataSource(DataSource dataSource);
 
 }

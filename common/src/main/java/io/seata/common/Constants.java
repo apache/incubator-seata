@@ -199,4 +199,9 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
+    /**
+     * where is the tcc actionContext stored
+     */
+    String TCC_ACTION_CONTEXT_STORE_TYPE = "actionContextStoreType";
 }

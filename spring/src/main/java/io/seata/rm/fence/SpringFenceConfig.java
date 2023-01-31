@@ -16,6 +16,7 @@
 package io.seata.rm.fence;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,7 +49,7 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
     public void afterPropertiesSet() {
         if (dataSource != null) {
             // set dataSource
-            SpringFenceHandler.setDataSource(dataSource);
+            DefaultCommonFenceHandler.get().setDataSource(dataSource);
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }

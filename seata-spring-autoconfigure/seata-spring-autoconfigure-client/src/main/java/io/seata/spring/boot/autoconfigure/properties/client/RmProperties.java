@@ -28,6 +28,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MO
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
 import static io.seata.common.DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.common.DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
@@ -52,6 +53,8 @@ public class RmProperties {
     private int branchExecutionTimeoutXA = DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
     private int connectionTwoPhaseHoldTimeoutXA = DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
     private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
+
+    private String tccContextStore = DEFAULT_TCC_CONTEXT_STORE;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -162,6 +165,14 @@ public class RmProperties {
 
     public void setConnectionTwoPhaseHoldTimeoutXA(int connectionTwoPhaseHoldTimeoutXA) {
         this.connectionTwoPhaseHoldTimeoutXA = connectionTwoPhaseHoldTimeoutXA;
+    }
+
+    public String getTccContextStore() {
+        return tccContextStore;
+    }
+
+    public void setTccContextStore(String tccContextStore) {
+        this.tccContextStore = tccContextStore;
     }
 
 }

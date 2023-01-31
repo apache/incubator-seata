@@ -87,4 +87,21 @@ public interface CommonFenceStore {
      */
     void setLogTableName(String logTableName);
 
+    /**
+     * Update application_data
+     * @param conn the Connection
+     * @param xid the global transaction id
+     * @param branchId the branch transaction id
+     * @param applicationData the application_data
+     * @return the boolean
+     */
+    boolean updateApplicationData(Connection conn, String xid, Long branchId, String applicationData);
+
+    /**
+     * query the application_data
+     * @param connection the Connection
+     * @param xid the global transaction id
+     * @param branchId the branch transaction id
+     */
+    String queryApplicationData(Connection connection, String xid, long branchId);
 }

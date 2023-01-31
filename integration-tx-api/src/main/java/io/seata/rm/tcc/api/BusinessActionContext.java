@@ -149,6 +149,10 @@ public class BusinessActionContext implements Serializable {
      */
     public void setActionContext(Map<String, Object> actionContext) {
         this.actionContext = actionContext;
+        if (this.actionContext != actionContext) {
+            this.actionContext = actionContext;
+            this.setUpdated(true);
+        }
     }
 
     /**

@@ -23,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.SkipCallbackWrapperException;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -32,6 +34,9 @@ import io.seata.integration.tx.api.remoting.TwoPhaseResult;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
+import io.seata.rm.tcc.api.context.ContextStoreManager;
+
+import static io.seata.common.ContextStoreConstant.STORE_TYPE_TC;
 
 /**
  * TCC resource manager
@@ -95,8 +100,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         }
         try {
             //BusinessActionContext
-            BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
-                    applicationData);
+            BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             Object ret;
@@ -129,6 +133,22 @@ public class TCCResourceManager extends AbstractResourceManager {
         }
     }
 
+    private BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData) {
+        BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
+                applicationData);
+
+        // get store manager
+        String storeType = businessActionContext.getActionContext(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, String.class);
+        // default use TC if the storeType not found
+        if (StringUtils.isBlank(storeType)) {
+            storeType = STORE_TYPE_TC;
+        }
+        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class, storeType);
+        //use the context that in TC to search from storeManager
+        businessActionContext = contextStoreManager.searchContext(businessActionContext);
+        return businessActionContext;
+    }
+
     /**
      * TCC branch rollback
      *
@@ -154,8 +174,7 @@ public class TCCResourceManager extends AbstractResourceManager {
         }
         try {
             //BusinessActionContext
-            BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
-                    applicationData);
+            BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;

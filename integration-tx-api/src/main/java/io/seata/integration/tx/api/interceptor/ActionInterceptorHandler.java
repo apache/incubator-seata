@@ -24,11 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.seata.common.Constants;
+import io.seata.common.ContextStoreConstant;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import io.seata.integration.tx.api.util.JsonUtil;
@@ -41,6 +43,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import static io.seata.common.ConfigurationKeys.TCC_CONTEXT_STORE;
+import static io.seata.common.DefaultValues.DEFAULT_TCC_CONTEXT_STORE;
+
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  *
@@ -49,6 +54,11 @@ import org.slf4j.MDC;
 public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
+
+    /**
+     * the context store type
+     */
+    private static final String CONTEXT_STORE_TYPE = ConfigurationFactory.getInstance().getConfig(TCC_CONTEXT_STORE, DEFAULT_TCC_CONTEXT_STORE);
 
     /**
      * Handler the Tx Aspect
@@ -72,13 +82,25 @@ public class ActionInterceptorHandler {
         String actionName = businessActionParam.getActionName();
         actionContext.setActionName(actionName);
         //Set the delay report
-        actionContext.setDelayReport(businessActionParam.getDelayReport());
+        boolean isDelayReport = CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_FENCE) && businessActionParam.getUseCommonFence()
+                || businessActionParam.getDelayReport();
+        actionContext.setDelayReport(isDelayReport);
         //Set branch type
         actionContext.setBranchType(businessActionParam.getBranchType());
 
         //Creating Branch Record
         String branchId = doTxActionLogStore(method, arguments, businessActionParam, actionContext);
         actionContext.setBranchId(branchId);
+
+         /*
+            Set the updated attribute to true, otherwise when the "CONTEXT_STORE_TYPE" configuration is not "TC"
+            , the actionContext will not be stored.
+            ActionContext has reported to TC in the method "doTccActionLogStore"
+            , so this is unnecessary in the old version
+            , because CONTEXT_ STORE_ TYPE was only TC in the old version, but it is not now.
+         */
+        actionContext.setUpdated(true);
+
         //MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
@@ -106,7 +128,7 @@ public class ActionInterceptorHandler {
         } finally {
             try {
                 //to report business action context finally if the actionContext.getUpdated() is true
-                BusinessActionContextUtil.reportContext(actionContext);
+                BusinessActionContextUtil.reportContext();
             } finally {
                 if (previousActionContext != null) {
                     // recovery the previous action context
@@ -215,6 +237,7 @@ public class ActionInterceptorHandler {
     protected void initFrameworkContext(Map<String, Object> context) {
         try {
             context.put(Constants.HOST_NAME, NetUtil.getLocalIp());
+            context.put(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, CONTEXT_STORE_TYPE);
         } catch (Throwable t) {
             LOGGER.warn("getLocalIP error", t);
         }

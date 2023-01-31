@@ -896,4 +896,8 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
 
+    /**
+     * The constant TCC_CONTEXT_STORE
+     */
+    String TCC_CONTEXT_STORE = CLIENT_RM_PREFIX + "tccContextStore";
 }

@@ -208,4 +208,43 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
         }
         return false;
     }
+
+    @Override
+    public boolean updateApplicationData(Connection conn, String xid, Long branchId, String applicationData) {
+        PreparedStatement ps = null;
+        try {
+            String sql = CommonFenceStoreSqls.getUpdateApplicationDataByBranchIdAndXid(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, applicationData);
+            ps.setString(2, xid);
+            ps.setLong(3, branchId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps);
+        }
+    }
+
+    @Override
+    public String queryApplicationData(Connection conn, String xid, long branchId) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String sql = CommonFenceStoreSqls.getQueryApplicationDataSql(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("application_data");
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps);
+        }
+    }
 }
