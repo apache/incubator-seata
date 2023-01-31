@@ -121,6 +121,7 @@ public interface SessionManager extends Disposable {
      * @return the value
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException;
 
@@ -130,6 +131,7 @@ public interface SessionManager extends Disposable {
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onBegin(GlobalSession globalSession) throws TransactionException;
 
     /**
@@ -139,6 +141,7 @@ public interface SessionManager extends Disposable {
      * @param status        the status
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException;
 
     /**
@@ -149,6 +152,7 @@ public interface SessionManager extends Disposable {
      * @param status        the status
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
             throws TransactionException;
 
@@ -159,6 +163,7 @@ public interface SessionManager extends Disposable {
      * @param branchSession the branch session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 
     /**
@@ -168,6 +173,7 @@ public interface SessionManager extends Disposable {
      * @param branchSession the branch session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onRemoveBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 
     /**
@@ -176,6 +182,7 @@ public interface SessionManager extends Disposable {
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onClose(GlobalSession globalSession) throws TransactionException;
 
     /**
@@ -184,6 +191,7 @@ public interface SessionManager extends Disposable {
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onSuccessEnd(GlobalSession globalSession) throws TransactionException;
 
     /**
@@ -192,5 +200,6 @@ public interface SessionManager extends Disposable {
      * @param globalSession the global session
      * @throws TransactionException the transaction exception
      */
+    @Deprecated
     void onFailEnd(GlobalSession globalSession) throws TransactionException;
 }
