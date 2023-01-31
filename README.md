@@ -82,11 +82,18 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.4.2</seata.version>
-
+<seata.version>1.6.1</seata.version>
 <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
+    <version>${seata.version}</version>
+</dependency>
+
+<!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
+<!--Notice: `seata-spring-boot-starter` has included `seata-all` dependency-->
+<dependency>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
 </dependency>
 

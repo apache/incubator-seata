@@ -26,14 +26,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-all</artifactId>
-
     <name>Seata All-in-one ${project.version}</name>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.</description>
-
-    <properties>
-        <!-- seata version -->
-        <revision>1.5.0-SNAPSHOT</revision>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -151,12 +145,12 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-dubbo</artifactId>
+            <artifactId>seata-http</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-http</artifactId>
+            <artifactId>seata-http-jakarta</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -403,13 +397,12 @@
             <artifactId>commons-pool</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.dubbo.extensions</groupId>
+            <artifactId>dubbo-filter-seata</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -423,8 +416,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
         </dependency>
         <dependency>
             <groupId>aopalliance</groupId>
@@ -673,6 +666,30 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Easyj -->
+            <plugin>
+                <groupId>icu.easyj.maven.plugins</groupId>
+                <artifactId>easyj-maven-plugin</artifactId>
+                <executions>
+                    <!-- Use this goal to recreate the '.flattened-pom.xml' after shade. -->
+                    <execution>
+                        <id>create-pom-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>create-pom-file</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!-- the config of the 'simplify-pom' plugin -->
+                <configuration>
+                    <keepProvidedDependencies>true</keepProvidedDependencies>
+                    <keepOptionalDependencies>true</keepOptionalDependencies>
+                    <excludeDependencies>
+                        <!-- Exclude dependencies that need to be shaded. -->
+                        <dependency>io.seata:*</dependency>
+                    </excludeDependencies>
+                </configuration>
+            </plugin>
             <!-- Dependency -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -703,6 +720,7 @@
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>
                             </dependencySourceIncludes>
+                            <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                         <executions>
                             <execution>

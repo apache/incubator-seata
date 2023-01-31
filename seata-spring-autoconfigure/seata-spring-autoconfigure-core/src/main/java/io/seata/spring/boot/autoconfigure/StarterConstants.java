@@ -38,6 +38,7 @@ public interface StarterConstants {
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     String LOAD_BALANCE_PREFIX_KEBAB_STYLE = CLIENT_PREFIX + ".load-balance";
     String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";
+    String HTTP_PREFIX = CLIENT_PREFIX + ".http";
     String LOG_PREFIX = SEATA_PREFIX + ".log";
     String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
     String TCC_PREFIX = SEATA_PREFIX + ".tcc";
@@ -92,5 +93,6 @@ public interface StarterConstants {
      * The following special keys need to be normalized.
      */
     String SPECIAL_KEY_GROUPLIST = "grouplist";
+    String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 }

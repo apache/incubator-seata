@@ -16,6 +16,8 @@
 package io.seata.rm.datasource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -25,7 +27,8 @@ import javax.sql.DataSource;
 import io.seata.common.Constants;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -60,6 +63,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String userName;
 
+    private String version;
+
     /**
      * Enable the table meta checker
      */
@@ -72,7 +77,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
             ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
-    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
+    private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
@@ -109,13 +114,14 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             } else if (JdbcConstants.MARIADB.equals(dbType)) {
                 dbType = JdbcConstants.MYSQL;
             }
+            version = selectDbVersion(connection);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExcutor.scheduleAtFixedRate(() -> {
+            tableMetaExecutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
                         .refresh(connection, DataSourceProxy.this.getResourceId());
@@ -176,8 +182,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (JdbcConstants.POSTGRESQL.equals(dbType)) {
             initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-            initDefaultResourceId();
-            resourceId = resourceId + "/" + userName;
+            initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType)) {
             initMysqlResourceId();
         } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
@@ -195,6 +200,17 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
             resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * init the oracle resource id
+     */
+    private void initOracleResourceId() {
+        if (jdbcUrl.contains("?")) {
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
+        } else {
+            resourceId = jdbcUrl + "/" + userName;
         }
     }
 
@@ -232,6 +248,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (jdbcUrl.contains("?")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
             jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
+
             StringBuilder paramsBuilder = new StringBuilder();
             String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
             String[] urlParams = paramUrl.split("&");
@@ -291,5 +308,23 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    private String selectDbVersion(Connection connection) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                 ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    return versionResult.getString("VERSION()");
+                }
+            } catch (Exception e) {
+                LOGGER.error("get mysql version fail error: {}", e.getMessage());
+            }
+        }
+        return "";
     }
 }
