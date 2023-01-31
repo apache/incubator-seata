@@ -18,10 +18,9 @@ package io.seata.rm.datasource.exec;
 import io.seata.common.DefaultValues;
 import io.seata.common.util.NumberUtils;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -37,8 +36,8 @@ public class LockRetryController {
     private static final GlobalConfig LISTENER = new GlobalConfig();
 
     static {
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, LISTENER);
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, LISTENER);
+        ConfigurationFactory.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, LISTENER);
+        ConfigurationFactory.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, LISTENER);
     }
 
     private int lockRetryInterval;

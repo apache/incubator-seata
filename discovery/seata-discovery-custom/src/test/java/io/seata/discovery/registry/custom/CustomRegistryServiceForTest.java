@@ -15,7 +15,7 @@
  */
 package io.seata.discovery.registry.custom;
 
-import io.seata.config.ConfigChangeListener;
+import io.seata.config.listener.ConfigChangeListener;
 import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;

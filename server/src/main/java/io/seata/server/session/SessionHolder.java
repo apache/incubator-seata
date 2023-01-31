@@ -113,7 +113,7 @@ public class SessionHolder {
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.DB.getName());
         } else if (SessionMode.FILE.equals(sessionMode)) {
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+            String sessionStorePath = CONFIG.getString(ConfigurationKeys.STORE_FILE_DIR,
                     DEFAULT_SESSION_STORE_FILE_DIR);
             if (StringUtils.isBlank(sessionStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");

@@ -65,7 +65,7 @@ public class SessionStoreTest {
      */
     @BeforeEach
     public void clean() throws Exception {
-        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        String sessionStorePath = CONFIG.getString(ConfigurationKeys.STORE_FILE_DIR);
         File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
         File rootDataFileHis = new File(
             sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");

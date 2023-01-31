@@ -15,8 +15,6 @@
  */
 package io.seata.common;
 
-import java.time.Duration;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -168,17 +166,17 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = 15 * 1000L;
 
     /**
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = 30 * 1000L;
 
     /**
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = 15 * 1000L;
 
     /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
@@ -198,27 +196,27 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_COMMITING_RETRY_PERIOD
      */
-    int DEFAULT_COMMITING_RETRY_PERIOD = 1000;
+    long DEFAULT_COMMITING_RETRY_PERIOD = 1000L;
 
     /**
      * the constant DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD
      */
-    int DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD = 1000;
+    long DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD = 1000L;
 
     /**
      * the constant DEFAULT_ROLLBACKING_RETRY_PERIOD
      */
-    int DEFAULT_ROLLBACKING_RETRY_PERIOD = 1000;
+    long DEFAULT_ROLLBACKING_RETRY_PERIOD = 1000L;
 
     /**
      * the constant DEFAULT_TIMEOUT_RETRY_PERIOD
      */
-    int DEFAULT_TIMEOUT_RETRY_PERIOD = 1000;
+    long DEFAULT_TIMEOUT_RETRY_PERIOD = 1000L;
 
     /**
      * the constant DEFAULT_UNDO_LOG_DELETE_PERIOD
      */
-    long DEFAULT_UNDO_LOG_DELETE_PERIOD = 24 * 60 * 60 * 1000;
+    long DEFAULT_UNDO_LOG_DELETE_PERIOD = 24 * 60 * 60 * 1000L;
 
     /**
      * the constant DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE
@@ -263,7 +261,7 @@ public interface DefaultValues {
     /**
      * DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME
      */
-    long DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME = 10000;
+    long DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME = 10000L;
 
     /**
      * DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE

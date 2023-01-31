@@ -136,7 +136,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.config.ConfigType"
+            "target": "io.seata.config.source.ConfigSourceType"
           }
         }
       ]

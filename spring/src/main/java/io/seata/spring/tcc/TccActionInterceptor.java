@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;

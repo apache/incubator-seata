@@ -1,0 +1,4 @@
+io.seata.config.processor.impl.SystemPropertyConfigurationProcessor
+io.seata.config.processor.impl.SystemEnvConfigurationProcessor
+io.seata.config.processor.impl.FileConfigurationProcessor
+io.seata.config.processor.impl.ConfigCenterConfigurationProcessor

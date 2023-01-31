@@ -91,11 +91,11 @@ public class LogStoreDataBaseDAO implements LogStore {
      */
     public LogStoreDataBaseDAO(DataSource logStoreDataSource) {
         this.logStoreDataSource = logStoreDataSource;
-        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
+        globalTable = CONFIG.getString(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
             DEFAULT_STORE_DB_GLOBAL_TABLE);
-        branchTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
+        branchTable = CONFIG.getString(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
             DEFAULT_STORE_DB_BRANCH_TABLE);
-        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        dbType = CONFIG.getString(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
         }

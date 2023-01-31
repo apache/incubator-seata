@@ -15,19 +15,14 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author slievrly
@@ -35,16 +30,11 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class FilePropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigFileProperties")
-    public ConfigFileProperties configFileProperties() {
-        return new ConfigFileProperties().setName(STR_TEST_AAA);
-    }
 
     @Test
     public void testConfigFileProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.file.name"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.file.name"));
     }
 }

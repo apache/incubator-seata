@@ -15,10 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.config.springcloud.SpringApplicationContextProvider;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import org.junit.jupiter.api.AfterAll;
@@ -31,7 +29,6 @@ import org.springframework.context.annotation.Import;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author zhangheng
@@ -56,15 +53,13 @@ public class RedisAutoInjectionTypeConvertTest {
 
     @Test
     public void testReadConfigurationItems() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration =
-            EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
         System.setProperty("seata.registry.redis.db","1");
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
         System.setProperty("seata.registry.redis.password","123456");
-        assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
+        assertEquals("123456", currentConfiguration.getString("registry.redis.password"));
         System.setProperty("seata.registry.redis.serverAddr","localhost:123456");
-        assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
+        assertEquals("localhost:123456", currentConfiguration.getString("registry.redis.serverAddr"));
     }
 
     @AfterAll

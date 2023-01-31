@@ -15,20 +15,15 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
-import io.seata.config.apollo.ApolloConfiguration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.apollo.ApolloConfigurationSource;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author slievrly
@@ -37,23 +32,15 @@ import static org.mockito.Mockito.mock;
 @Import(SpringApplicationContextProvider.class)
 class ApolloPropertiesTest extends BasePropertiesTest {
 
-    @Bean("testConfigApolloProperties")
-    public ConfigApolloProperties configApolloProperties() {
-        return new ConfigApolloProperties().setApolloMeta(STR_TEST_AAA).setApolloAccessKeySecret(STR_TEST_BBB).setAppId(
-            STR_TEST_CCC).setNamespace(STR_TEST_DDD).setCluster(STR_TEST_EEE).setApolloConfigService(STR_TEST_FFF);
-    }
-
     @Test
     public void testConfigApolloProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(
-            configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig(ApolloConfiguration.getApolloMetaFileKey()));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig(ApolloConfiguration.getApolloSecretFileKey()));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig(ApolloConfiguration.getApolloAppIdFileKey()));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig(ApolloConfiguration.getApolloNamespaceKey()));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig(ApolloConfiguration.getApolloCluster()));
-        assertEquals(STR_TEST_FFF, currentConfiguration.getConfig(ApolloConfiguration.getApolloConfigService()));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString(ApolloConfigurationSource.getApolloMetaFileKey()));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString(ApolloConfigurationSource.getApolloSecretFileKey()));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString(ApolloConfigurationSource.getApolloAppIdFileKey()));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString(ApolloConfigurationSource.getApolloNamespaceKey()));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getString(ApolloConfigurationSource.getApolloCluster()));
+        assertEquals(STR_TEST_FFF, currentConfiguration.getString(ApolloConfigurationSource.getApolloConfigService()));
     }
 }

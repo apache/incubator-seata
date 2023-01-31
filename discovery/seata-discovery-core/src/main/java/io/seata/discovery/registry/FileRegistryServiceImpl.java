@@ -17,7 +17,7 @@ package io.seata.discovery.registry;
 
 
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigChangeListener;
+import io.seata.config.listener.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 
@@ -83,7 +83,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (clusterName == null) {
             return null;
         }
-        String endpointStr = CONFIG.getConfig(
+        String endpointStr = CONFIG.getString(
                 PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
         if (StringUtils.isNullOrEmpty(endpointStr)) {
             throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");

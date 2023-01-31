@@ -16,299 +16,240 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import io.seata.common.util.StringUtils;
+import io.seata.common.util.ConvertUtils;
+import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.source.ConfigurationSourceManager;
 
 /**
  * The interface Configuration.
  *
  * @author slievrly
  */
-public interface Configuration {
+public interface Configuration extends UpdatableConfiguration, ConfigurationSourceManager
+        , ConfigListenerManager, ConfigurationChangeListener {
 
-    Map<String, String> ENV_MAP = System.getenv();
     /**
-     * Gets short.
+     * The constant DEFAULT_CONFIG_TIMEOUT.
+     */
+    long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
+
+    /**
+     * The constant DEFAULT_XXX.
+     */
+    short DEFAULT_SHORT = (short)0;
+    int DEFAULT_INT = 0;
+    long DEFAULT_LONG = 0L;
+    Duration DEFAULT_DURATION = Duration.ZERO;
+    boolean DEFAULT_BOOLEAN = false;
+
+
+    /**
+     * Get type name
+     *
+     * @return the type name
+     */
+    String getTypeName();
+
+    /**
+     * Get config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the short
-     */
-    short getShort(String dataId, short defaultValue, long timeoutMills);
-
-    /**
-     * Gets short.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the int
-     */
-    short getShort(String dataId, short defaultValue);
-
-    /**
-     * Gets short.
-     *
-     * @param dataId the data id
-     * @return the int
-     */
-    short getShort(String dataId);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the int
-     */
-    int getInt(String dataId, int defaultValue, long timeoutMills);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the int
-     */
-    int getInt(String dataId, int defaultValue);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId the data id
-     * @return the int
-     */
-    int getInt(String dataId);
-
-    /**
-     * Gets long.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the long
-     */
-    long getLong(String dataId, long defaultValue, long timeoutMills);
-
-    /**
-     * Gets long.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the long
-     */
-    long getLong(String dataId, long defaultValue);
-
-    /**
-     * Gets long.
-     *
-     * @param dataId the data id
-     * @return the long
-     */
-    long getLong(String dataId);
-
-    /**
-     * Gets duration.
-     *
-     * @param dataId the data id
-     * @return the duration
-     */
-    Duration getDuration(String dataId);
-
-    /**
-     * Gets duration.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the duration
-     */
-    Duration getDuration(String dataId, Duration defaultValue);
-
-    /**
-     * Gets duration.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the duration
-     */
-    Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
-
-    /**
-     * Gets boolean.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills);
-
-    /**
-     * Gets boolean.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the boolean
-     */
-    boolean getBoolean(String dataId, boolean defaultValue);
-
-    /**
-     * Gets boolean.
-     *
-     * @param dataId the data id
-     * @return the boolean
-     */
-    boolean getBoolean(String dataId);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the config
-     */
-    String getConfig(String dataId, String defaultValue, long timeoutMills);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the config
-     */
-    String getConfig(String dataId, String defaultValue);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the config
-     */
-    String getConfig(String dataId, long timeoutMills);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId the data id
-     * @return the config
-     */
-    String getConfig(String dataId);
-
-    /**
-     * Put config boolean.
-     *
-     * @param dataId       the data id
-     * @param content      the content
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean putConfig(String dataId, String content, long timeoutMills);
-
-    /**
-     * Get latest config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
+     * @param dataType     the data type
+     * @param <T>          the data type
      * @return the Latest config
      */
-    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
+    <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType);
 
-    /**
-     * Put config boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfig(String dataId, String content);
-
-    /**
-     * Put config if absent boolean.
-     *
-     * @param dataId       the data id
-     * @param content      the content
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean putConfigIfAbsent(String dataId, String content, long timeoutMills);
-
-    /**
-     * Put config if absent boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfigIfAbsent(String dataId, String content);
-
-    /**
-     * Remove config boolean.
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean removeConfig(String dataId, long timeoutMills);
-
-    /**
-     * Remove config boolean.
-     *
-     * @param dataId the data id
-     * @return the boolean
-     */
-    boolean removeConfig(String dataId);
-
-    /**
-     * Add config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void addConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Remove config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void removeConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Gets config listeners.
-     *
-     * @param dataId the data id
-     * @return the config listeners
-     */
-    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
-
-    /**
-     * Gets config from sys pro.
-     *
-     * @param dataId the data id
-     * @return the config from sys pro
-     */
-    default String getConfigFromSys(String dataId) {
-        if (StringUtils.isBlank(dataId)) {
-            return null;
-        }
-        String content = ENV_MAP.get(dataId);
-        if (null != content) {
-            return content;
-        }
-        String envDataId = dataId.toUpperCase().replace(".", "_");
-        content = ENV_MAP.get(envDataId);
-        if (null != content) {
-            return content;
-        }
-        return System.getProperty(dataId);
+    default <T> T getConfig(String dataId, long timeoutMills, Class<T> dataType) {
+        return getConfig(dataId, null, timeoutMills, dataType);
     }
+
+
+    /**
+     * Gets string config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the config
+     */
+    default String getString(String dataId, String defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, String.class);
+    }
+
+    default String getString(String dataId, String defaultValue) {
+        return getString(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default String getString(String dataId) {
+        return getString(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets short config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the short config
+     */
+    default short getShort(String dataId, Short defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Short.class);
+    }
+
+    default short getShort(String dataId, Short defaultValue) {
+        return getShort(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default short getShort(String dataId) {
+        return getShort(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets int config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the int config
+     */
+    default int getInt(String dataId, Integer defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Integer.class);
+    }
+
+    default int getInt(String dataId, Integer defaultValue) {
+        return getInt(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default int getInt(String dataId) {
+        return getInt(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets long config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the long config
+     */
+    default long getLong(String dataId, Long defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Long.class);
+    }
+
+    default long getLong(String dataId, Long defaultValue) {
+        return getLong(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default long getLong(String dataId) {
+        return getLong(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets boolean config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the boolean config
+     */
+    default boolean getBoolean(String dataId, Boolean defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Boolean.class);
+    }
+
+    default boolean getBoolean(String dataId, Boolean defaultValue) {
+        return getBoolean(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default boolean getBoolean(String dataId) {
+        return getBoolean(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets duration config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the duration config
+     */
+    default Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Duration.class);
+    }
+
+    default Duration getDuration(String dataId, Duration defaultValue) {
+        return getDuration(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default Duration getDuration(String dataId) {
+        return getDuration(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    /**
+     * Gets List config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the duration config
+     */
+    default <T> List<T> getList(String dataId, List<T> defaultValue, long timeoutMills, Class<T> dataType) {
+        List<?> list0 = getConfig(dataId, defaultValue, timeoutMills, List.class);
+
+        List<T> list = new ArrayList<>();
+
+        if (list0 != null) {
+            for (Object config : list0) {
+                // add the Convert value
+                list.add(ConvertUtils.convert(config, dataType));
+            }
+        }
+
+        return list;
+    }
+
+    default <T> List<T> getList(String dataId, List<T> defaultValue, Class<T> dataType) {
+        return getList(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT, dataType);
+    }
+
+    default <T> List<T> getList(String dataId, Class<T> dataType) {
+        return getList(dataId, null, DEFAULT_CONFIG_TIMEOUT, dataType);
+    }
+
+
+//    Map<String, String> ENV_MAP = System.getenv();
+//
+//    /**
+//     * Gets config from sys pro.
+//     *
+//     * @param dataId the data id
+//     * @return the config from sys pro
+//     */
+//    default String getConfigFromSys(String dataId) {
+//        if (StringUtils.isBlank(dataId)) {
+//            return null;
+//        }
+//        String content = ENV_MAP.get(dataId);
+//        if (null != content) {
+//            return content;
+//        }
+//        String envDataId = dataId.toUpperCase().replace(".", "_");
+//        content = ENV_MAP.get(envDataId);
+//        if (null != content) {
+//            return content;
+//        }
+//        return System.getProperty(dataId);
+//    }
 
 }

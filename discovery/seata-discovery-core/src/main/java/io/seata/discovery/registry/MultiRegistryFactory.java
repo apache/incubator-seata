@@ -44,8 +44,7 @@ public class MultiRegistryFactory {
 
     private static List<RegistryService> buildRegistryServices() {
         List<RegistryService> registryServices = new ArrayList<>();
-        String registryTypeNamesStr =
-            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
+        String registryTypeNamesStr = ConfigurationFactory.getInstance().getString(ConfigurationKeys.FILE_ROOT_REGISTRY
                 + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
         if (StringUtils.isBlank(registryTypeNamesStr)) {
             registryTypeNamesStr = RegistryType.File.name();

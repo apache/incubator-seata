@@ -15,6 +15,14 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.DefaultValues;
@@ -22,10 +30,9 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
@@ -41,14 +48,6 @@ import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -93,7 +92,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
                 ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST));
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
+        ConfigurationFactory.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
                 String dataId = event.getDataId();

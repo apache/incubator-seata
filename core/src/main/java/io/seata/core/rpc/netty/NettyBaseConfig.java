@@ -55,12 +55,12 @@ public class NettyBaseConfig {
     /**
      * The constant BOSS_THREAD_PREFIX.
      */
-    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX);
+    protected static final String BOSS_THREAD_PREFIX = CONFIG.getString(ConfigurationKeys.BOSS_THREAD_PREFIX);
 
     /**
      * The constant WORKER_THREAD_PREFIX.
      */
-    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX);
+    protected static final String WORKER_THREAD_PREFIX = CONFIG.getString(ConfigurationKeys.WORKER_THREAD_PREFIX);
 
     /**
      * The constant SHARE_BOSS_WORKER.
@@ -112,8 +112,8 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
-        String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getString(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
+        String workerThreadSize = CONFIG.getString(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
         } else if (WorkThreadMode.getModeByName(workerThreadSize) != null) {
@@ -121,7 +121,7 @@ public class NettyBaseConfig {
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
+        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getString(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {

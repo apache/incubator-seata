@@ -59,7 +59,7 @@ public class JedisPooledFactory {
 
     /**
      * get the RedisPool instance (singleton)
-     * 
+     *
      * @return redisPool
      */
     public static JedisPoolAbstract getJedisPoolInstance(JedisPoolAbstract... jedisPools) {
@@ -70,11 +70,11 @@ public class JedisPooledFactory {
                     if (jedisPools != null && jedisPools.length > 0) {
                         tempJedisPool = jedisPools[0];
                     } else {
-                        String password = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_PASSWORD);
+                        String password = CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_PASSWORD);
                         if (StringUtils.isBlank(password)) {
                             password = null;
                         } else {
-                            String publicKey = CONFIGURATION.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
+                            String publicKey = CONFIGURATION.getString(ConfigurationKeys.STORE_PUBLIC_KEY);
                             if (StringUtils.isNotBlank(publicKey)) {
                                 try {
                                     password = ConfigTools.publicDecrypt(password, publicKey);
@@ -89,19 +89,19 @@ public class JedisPooledFactory {
                         poolConfig.setMaxIdle(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_CONN,
                             DEFAULT_REDIS_MAX_IDLE));
                         poolConfig.setMaxTotal(CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_MAX_TOTAL, DEFAULT_REDIS_MAX_TOTAL));
-                        String mode = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_MODE,ConfigurationKeys.REDIS_SINGLE_MODE);
+                        String mode = CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_MODE,ConfigurationKeys.REDIS_SINGLE_MODE);
                         if (mode.equals(ConfigurationKeys.REDIS_SENTINEL_MODE)) {
-                            String masterName = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_MASTERNAME);
+                            String masterName = CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_SENTINEL_MASTERNAME);
                             if (StringUtils.isBlank(masterName)) {
                                 throw new RedisException("The masterName is null in redis sentinel mode");
                             }
                             Set<String> sentinels = new HashSet<>(SENTINEL_HOST_NUMBER);
-                            String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
+                            String[] sentinelHosts = CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
                             Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
                             tempJedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
                         } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
-                            String host = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
-                            host = StringUtils.isBlank(host) ? CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
+                            String host = CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
+                            host = StringUtils.isBlank(host) ? CONFIGURATION.getString(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
                             int port = CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_SINGLE_PORT);
                             port = port == 0 ? CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_PORT, PORT) : port;
                             tempJedisPool = new JedisPool(poolConfig, host, port, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE));
@@ -121,7 +121,7 @@ public class JedisPooledFactory {
 
     /**
      * get an instance of Jedis (connection) from the connection pool
-     * 
+     *
      * @return jedis
      */
     public static Jedis getJedisInstance() {

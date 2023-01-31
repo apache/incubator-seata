@@ -21,11 +21,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 
 /**
  * @author <a href="mailto:xyz327@outlook.com">xizhou</a>
@@ -34,7 +32,6 @@ import io.seata.config.ConfigurationFactory;
 public class RegistryHeartBeats {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryHeartBeats.class);
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String HEARTBEAT_KEY = "heartbeat";
@@ -81,15 +78,15 @@ public class RegistryHeartBeats {
 
     private static long getHeartbeatPeriod(String registryType) {
         String propertySuffix = String.join("-", HEARTBEAT_KEY, HEARTBEAT_PERIOD_KEY);
-        //  FILE_CONFIG.getLong("registry.${registryType}.heartbeat-period");
-        return FILE_CONFIG.getLong(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
+        //  ConfigurationFactory.getInstance().getLong("registry.${registryType}.heartbeat-period");
+        return ConfigurationFactory.getInstance().getLong(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
                 DEFAULT_HEARTBEAT_PERIOD);
     }
 
     private static boolean getHeartbeatEnabled(String registryType) {
         String propertySuffix = String.join("-", HEARTBEAT_KEY, HEARTBEAT_ENABLED_KEY);
-        //  FILE_CONFIG.getBoolean("registry.${registryType}.heartbeat-enabled");
-        return FILE_CONFIG.getBoolean(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
+        //  ConfigurationFactory.getInstance().getBoolean("registry.${registryType}.heartbeat-enabled");
+        return ConfigurationFactory.getInstance().getBoolean(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
                 DEFAULT_HEARTBEAT_ENABLED);
     }
 

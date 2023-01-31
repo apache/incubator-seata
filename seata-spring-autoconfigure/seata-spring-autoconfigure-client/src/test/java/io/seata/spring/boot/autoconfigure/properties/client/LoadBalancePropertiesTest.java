@@ -15,10 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.client;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.config.springcloud.SpringApplicationContextProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,7 +28,6 @@ import org.springframework.context.annotation.Import;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -54,13 +51,11 @@ public class LoadBalancePropertiesTest {
 
     @Test
     public void testLoadBalanceProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration =
-            EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
         System.setProperty("seata.client.loadBalance.virtualNodes", "30");
         assertEquals(30, currentConfiguration.getInt("client.loadBalance.virtualNodes"));
         System.setProperty("seata.client.loadBalance.type", "test");
-        assertEquals("test", currentConfiguration.getConfig("client.loadBalance.type"));
+        assertEquals("test", currentConfiguration.getString("client.loadBalance.type"));
     }
 
     @AfterAll

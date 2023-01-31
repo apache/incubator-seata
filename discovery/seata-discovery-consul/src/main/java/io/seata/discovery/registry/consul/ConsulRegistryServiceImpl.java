@@ -28,24 +28,21 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
-
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -56,7 +53,6 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static volatile ConsulClient client;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulRegistryServiceImpl.class);
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "consul";
@@ -188,7 +184,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (client == null) {
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (client == null) {
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
@@ -204,7 +200,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private String getClusterName() {
         String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        return ConfigurationFactory.getInstance().getString(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
     /**
@@ -225,7 +221,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static String getAclToken() {
         String fileConfigKey = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, ACL_TOKEN);
         String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
-                : FILE_CONFIG.getConfig(fileConfigKey);
+                : ConfigurationFactory.getInstance().getString(fileConfigKey);
         return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 

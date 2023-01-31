@@ -15,19 +15,14 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author slievrly
@@ -35,17 +30,12 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class Etcd3PropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigEtcd3Properties")
-    public ConfigEtcd3Properties configEtcd3Properties() {
-        return new ConfigEtcd3Properties().setServerAddr(STR_TEST_AAA).setKey(STR_TEST_BBB);
-    }
 
     @Test
     public void testConfigEtcd3Properties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.etcd3.serverAddr"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.etcd3.key"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.etcd3.serverAddr"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString("config.etcd3.key"));
     }
 }

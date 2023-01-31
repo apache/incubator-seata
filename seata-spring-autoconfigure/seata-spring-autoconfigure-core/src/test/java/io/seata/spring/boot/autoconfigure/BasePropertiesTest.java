@@ -48,18 +48,17 @@ public class BasePropertiesTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        applicationContex = new AnnotationConfigApplicationContext(
-            new String[] {"io.seata.spring.boot.autoconfigure.properties.config.test"});
+        applicationContex = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties.config.test");
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
 
         // set new applicationContex for test cases in extension test classes
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContex);
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContex.getEnvironment());
-        Properties properties=new Properties();
+        Properties properties = new Properties();
         ClassLoader classLoader = getClass().getClassLoader();
         File f = new File(classLoader.getResource("application-test.properties").getFile());
-        try(InputStream in =new FileInputStream(f)) {
+        try (InputStream in = new FileInputStream(f)) {
             properties.load(in);
         }
         applicationContex.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", properties));
@@ -68,7 +67,7 @@ public class BasePropertiesTest {
 
     @AfterEach
     public void closeContext() {
-        if(applicationContex!=null) {
+        if (applicationContex != null) {
             applicationContex.close();
         }
     }

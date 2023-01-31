@@ -45,7 +45,7 @@ public interface ProtocolConstants {
      * HEAD_LENGTH of protocol v1
      */
     int V1_HEAD_LENGTH = 16;
-    
+
     /**
      * Message type: Request
      */
@@ -72,11 +72,11 @@ public interface ProtocolConstants {
 
     /**
      * Configured codec by user, default is SEATA
-     * 
+     *
      * @see SerializerType#SEATA
      */
     byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
+            .getString(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
 
     /**
      * Configured compressor by user, default is NONE
@@ -84,5 +84,5 @@ public interface ProtocolConstants {
      * @see CompressorType#NONE
      */
     byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.COMPRESSOR_FOR_RPC, CompressorType.NONE.name())).getCode();
+            .getString(ConfigurationKeys.COMPRESSOR_FOR_RPC, CompressorType.NONE.name())).getCode();
 }

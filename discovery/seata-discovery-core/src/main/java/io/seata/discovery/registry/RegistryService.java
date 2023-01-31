@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import io.seata.config.ConfigurationCache;
+
 import io.seata.config.ConfigurationFactory;
 
 /**
@@ -51,7 +51,8 @@ public interface RegistryService<T> {
     /**
      * Service node health check
      */
-    Map<String,List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
+    Map<String, List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
+
     /**
      * Register.
      *
@@ -97,6 +98,7 @@ public interface RegistryService<T> {
 
     /**
      * Close.
+     *
      * @throws Exception the exception
      */
     void close() throws Exception;
@@ -110,10 +112,10 @@ public interface RegistryService<T> {
     default String getServiceGroup(String key) {
         key = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
         if (!SERVICE_GROUP_NAME.contains(key)) {
-            ConfigurationCache.addConfigListener(key);
+            //TODO: ConfigurationCache.addConfigListener(key);
             SERVICE_GROUP_NAME.add(key);
         }
-        return ConfigurationFactory.getInstance().getConfig(key);
+        return ConfigurationFactory.getInstance().getString(key);
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
@@ -121,7 +123,7 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+                                                       List<InetSocketAddress> aliveAddress) {
         return CURRENT_ADDRESS_MAP.put(transactionServiceGroup, aliveAddress);
     }
 

@@ -254,7 +254,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getBossThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX, DEFAULT_BOSS_THREAD_PREFIX);
+        return CONFIG.getString(ConfigurationKeys.BOSS_THREAD_PREFIX, DEFAULT_BOSS_THREAD_PREFIX);
     }
 
     /**
@@ -263,7 +263,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getWorkerThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
+        return CONFIG.getString(ConfigurationKeys.WORKER_THREAD_PREFIX,
             enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
@@ -273,7 +273,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getExecutorThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX,
+        return CONFIG.getString(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX,
             DEFAULT_EXECUTOR_THREAD_PREFIX);
     }
 

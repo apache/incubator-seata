@@ -15,15 +15,14 @@
  */
 package io.seata.config.file;
 
+import java.io.File;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.config.FileConfigFactory;
-import io.seata.config.FileConfiguration;
-
-import java.io.File;
+import io.seata.config.source.impl.FileConfigurationSource;
 
 /**
  * @author wangwei-ying
@@ -38,7 +37,7 @@ public class SimpleFileConfig implements FileConfig {
     }
 
     public SimpleFileConfig(File file, String name) {
-        if (name.startsWith(FileConfiguration.SYS_FILE_RESOURCE_PREFIX)) {
+        if (name.startsWith(FileConfigurationSource.SYS_FILE_RESOURCE_PREFIX)) {
             Config appConfig = ConfigFactory.parseFileAnySyntax(file);
             fileConfig = ConfigFactory.load(appConfig);
         } else {

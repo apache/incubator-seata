@@ -17,7 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
-import io.seata.config.ConfigurationKeys;
+import io.seata.common.ConfigurationKeys;
 
 /**
  * @author xingfudeshi@gmail.com

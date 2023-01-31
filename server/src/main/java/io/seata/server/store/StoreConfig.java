@@ -82,7 +82,7 @@ public class StoreConfig {
     }
 
     public static FlushDiskMode getFlushDiskMode() {
-        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getString(STORE_FILE_PREFIX + "flushDiskMode"));
     }
 
     /**
@@ -101,7 +101,7 @@ public class StoreConfig {
             return StoreMode.get(storeModeEnv);
         }
         //config
-        String storeModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+        String storeModeConfig = CONFIGURATION.getString(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
         return StoreMode.get(storeModeConfig);
     }
 
@@ -116,7 +116,7 @@ public class StoreConfig {
             return SessionMode.get(sessionModeEnv);
         }
         //config
-        String sessionModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_SESSION_MODE);
+        String sessionModeConfig = CONFIGURATION.getString(ConfigurationKeys.STORE_SESSION_MODE);
         if (StringUtils.isNotBlank(sessionModeConfig)) {
             return SessionMode.get(sessionModeConfig);
         }
@@ -135,7 +135,7 @@ public class StoreConfig {
             return LockMode.get(lockModeEnv);
         }
         //config
-        String lockModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_LOCK_MODE);
+        String lockModeConfig = CONFIGURATION.getString(ConfigurationKeys.STORE_LOCK_MODE);
         if (StringUtils.isNotBlank(lockModeConfig)) {
             return LockMode.get(lockModeConfig);
         }

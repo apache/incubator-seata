@@ -18,11 +18,10 @@ package io.seata.config;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.seata.config.ConfigProperty.ENV_PROPERTY_KEY;
-import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
+import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 
 /**
  * @author wangwei-ying
@@ -34,13 +33,13 @@ class YamlConfigurationFactoryTest {
         System.setProperty(ENV_PROPERTY_KEY, "test-yaml");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-test-yaml.conf");
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testBlank"), "");
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"), null);
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"), null);
+        Assertions.assertEquals(ConfigurationFactory.getInstance().getString("config.file.name"), "file-test-yaml.conf");
+        Assertions.assertEquals(ConfigurationFactory.getInstance().getString("config.file.testBlank"), "");
+        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testNull"));
+        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testExist"));
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getConfig("service.disableGlobalTransaction"), "true");
-        Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8093");
+        Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"), "true");
+        Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8093");
     }
 
     @AfterAll

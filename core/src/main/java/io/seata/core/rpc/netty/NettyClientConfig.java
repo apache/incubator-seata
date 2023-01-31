@@ -367,7 +367,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientSelectorThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
+        return CONFIG.getString(ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
     }
 
     /**
@@ -376,7 +376,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientWorkerThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
+        return CONFIG.getString(ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
     }
 
     /**

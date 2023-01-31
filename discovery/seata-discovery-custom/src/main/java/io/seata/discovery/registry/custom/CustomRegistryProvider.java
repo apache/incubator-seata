@@ -15,6 +15,8 @@
  */
 package io.seata.discovery.registry.custom;
 
+import java.util.stream.Stream;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -22,8 +24,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.RegistryType;
-
-import java.util.stream.Stream;
 
 /**
  * @author ggndnn
@@ -35,7 +35,7 @@ public class CustomRegistryProvider implements RegistryProvider {
     private final String customName;
 
     public CustomRegistryProvider() {
-        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(FILE_CONFIG_KEY_PREFIX);
+        String name = ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom registry type must not be blank");
         }

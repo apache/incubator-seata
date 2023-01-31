@@ -67,11 +67,11 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             if (configuration != null) {
                 this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
                 this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
-                setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
-                this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
-                this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
-                this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY,null);
-                this.secretKey = configuration.getConfig(ConfigurationKeys.SECRET_KEY,null);
+                setSagaJsonParser(configuration.getString(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
+                this.applicationId = configuration.getString(ConfigurationKeys.APPLICATION_ID);
+                this.txServiceGroup = configuration.getString(ConfigurationKeys.TX_SERVICE_GROUP);
+                this.accessKey = configuration.getString(ConfigurationKeys.ACCESS_KEY,null);
+                this.secretKey = configuration.getString(ConfigurationKeys.SECRET_KEY,null);
                 setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
                     DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
                 setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,

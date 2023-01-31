@@ -63,7 +63,7 @@ public class Server {
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
         } else {
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERED_NETWORKS);
+            String preferredNetworks = ConfigurationFactory.getInstance().getString(REGISTRY_PREFERED_NETWORKS);
             if (StringUtils.isNotBlank(preferredNetworks)) {
                 XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
             } else {

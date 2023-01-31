@@ -15,16 +15,16 @@
  */
 package io.seata.config.custom;
 
+import java.util.stream.Stream;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigType;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import io.seata.config.ConfigurationProvider;
-
-import java.util.stream.Stream;
+import io.seata.config.source.ConfigSourceType;
 
 /**
  * @author ggndnn
@@ -34,13 +34,13 @@ public class CustomConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {
         String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + ConfigType.Custom.name().toLowerCase() + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigSourceType.Custom.name().toLowerCase() + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + "name";
-        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(pathDataId);
+        String name = ConfigurationFactory.getInstance().getString(pathDataId);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom config type must not be blank");
         }
-        if (Stream.of(ConfigType.values())
+        if (Stream.of(ConfigSourceType.values())
                 .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
             throw new IllegalArgumentException(String.format("custom config type name %s is not allowed", name));
         }

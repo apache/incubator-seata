@@ -15,156 +15,170 @@
  */
 package io.seata.config;
 
-import java.time.Duration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import io.seata.common.util.DurationUtil;
-import io.seata.common.util.StringUtils;
+import io.seata.common.Cleanable;
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.ConvertUtils;
+import io.seata.common.util.ObjectUtils;
+import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.UpdatableConfigurationSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The type Abstract configuration.
+ * The type Abstract configuration
  *
- * @author slievrly
+ * @author wang.liang
  */
-public abstract class AbstractConfiguration implements Configuration {
+public abstract class AbstractConfiguration implements Configuration, UpdatableConfiguration, Cleanable {
 
-    /**
-     * The constant DEFAULT_CONFIG_TIMEOUT.
-     */
-    protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
-
-    /**
-     * The constant DEFAULT_XXX.
-     */
-    public static final short DEFAULT_SHORT = (short)0;
-    public static final int DEFAULT_INT = 0;
-    public static final long DEFAULT_LONG = 0L;
-    public static final Duration DEFAULT_DURATION = Duration.ZERO;
-    public static final boolean DEFAULT_BOOLEAN = false;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
 
-    @Override
-    public short getShort(String dataId, short defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : Short.parseShort(result);
+    // The type name
+    private final String typeName;
+
+    // The sources
+    protected ConfigurationSource mainSource;
+    protected List<ConfigurationSource> sources = new CopyOnWriteArrayList<>();
+
+    // The listeners
+    protected final Map<String, Set<ConfigurationChangeListener>> listeners = new ConcurrentHashMap<>();
+
+
+    protected AbstractConfiguration(String typeName) {
+        this.typeName = typeName;
     }
 
-    @Override
-    public short getShort(String dataId, short defaultValue) {
-        return getShort(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
 
-    @Override
-    public short getShort(String dataId) {
-        return getShort(dataId, DEFAULT_SHORT);
-    }
+    protected Object getConfigFromSources(String dataId, long timeoutMills) {
+        Object value;
+        for (ConfigurationSource source : sources) {
+            value = source.getLatestConfig(dataId, timeoutMills);
 
-    @Override
-    public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : Integer.parseInt(result);
-    }
+            if (ObjectUtils.isNullOrBlank(value)) {
+                LOGGER.debug("Skip config '{}' blank value from the configuration source '{}' by configuration '{}'",
+                        dataId, source.getTypeName(), this.getTypeName());
+                continue;
+            }
 
-    @Override
-    public int getInt(String dataId, int defaultValue) {
-        return getInt(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public int getInt(String dataId) {
-        return getInt(dataId, DEFAULT_INT);
-    }
-
-    @Override
-    public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : Long.parseLong(result);
-    }
-
-    @Override
-    public long getLong(String dataId, long defaultValue) {
-        return getLong(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public long getLong(String dataId) {
-        return getLong(dataId, DEFAULT_LONG);
-    }
-
-    @Override
-    public Duration getDuration(String dataId) {
-        return getDuration(dataId, DEFAULT_DURATION);
-    }
-
-    @Override
-    public Duration getDuration(String dataId, Duration defaultValue) {
-        return getDuration(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : DurationUtil.parse(result);
-    }
-
-    @Override
-    public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, timeoutMills);
-        return StringUtils.isBlank(result) ? defaultValue : Boolean.parseBoolean(result);
-    }
-
-    @Override
-    public boolean getBoolean(String dataId, boolean defaultValue) {
-        return getBoolean(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public boolean getBoolean(String dataId) {
-        return getBoolean(dataId, DEFAULT_BOOLEAN);
-    }
-
-    @Override
-    public String getConfig(String dataId, String defaultValue) {
-        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public String getConfig(String dataId, long timeoutMills) {
-        return getConfig(dataId, null, timeoutMills);
-    }
-
-    @Override
-    public String getConfig(String dataId, String content, long timeoutMills) {
-        String value = getConfigFromSys(dataId);
-        if (value != null) {
+            LOGGER.debug("Get config '{}' value '{}' from the configuration source '{}' by configuration '{}'",
+                    dataId, value, source.getTypeName(), this.getTypeName());
             return value;
         }
-        return getLatestConfig(dataId, content, timeoutMills);
+
+        return null;
+    }
+
+    protected <T> T getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
+        Object config = getConfigFromSources(dataId, timeoutMills);
+        return ConvertUtils.convert(config, dataType);
+    }
+
+
+    //region Override Configuration
+
+    @Override
+    public String getTypeName() {
+        return this.typeName;
+    }
+
+
+    @Override
+    public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
+        T value = this.getConfigFromSources(dataId, timeoutMills, dataType);
+        return value == null ? defaultValue : value;
+    }
+
+    //endregion
+
+
+    //region Override UpdatableConfiguration
+
+    @Override
+    public boolean putConfig(String dataId, String content, long timeoutMills) {
+        if (mainSource instanceof UpdatableConfigurationSource) {
+            return ((UpdatableConfigurationSource)mainSource).putConfig(dataId, content, timeoutMills);
+        } else {
+            throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
+                    "not support putConfig");
+        }
     }
 
     @Override
-    public String getConfig(String dataId) {
-        return getConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
+        if (mainSource instanceof UpdatableConfigurationSource) {
+            return ((UpdatableConfigurationSource)mainSource).putConfigIfAbsent(dataId, content, timeoutMills);
+        } else {
+            throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
+                    "not support atomic operation putConfigIfAbsent");
+        }
     }
 
     @Override
-    public boolean putConfig(String dataId, String content) {
-        return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    public boolean removeConfig(String dataId, long timeoutMills) {
+        if (mainSource instanceof UpdatableConfigurationSource) {
+            return ((UpdatableConfigurationSource)mainSource).removeConfig(dataId, timeoutMills);
+        } else {
+            throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
+                    "not support removeConfig");
+        }
+    }
+
+    //endregion
+
+
+    //region Override ConfigurationChangeListenerManager
+
+    @Override
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
+        dataIdListeners.add(listener);
     }
 
     @Override
-    public boolean putConfigIfAbsent(String dataId, String content) {
-        return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
+        dataIdListeners.remove(listener);
     }
 
     @Override
-    public boolean removeConfig(String dataId) {
-        return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
+        return this.listeners.get(dataId);
     }
 
-    /**
-     * Gets type name.
-     *
-     * @return the type name
-     */
-    public abstract String getTypeName();
+    @Override
+    public void clean() {
+        this.listeners.clear();
+    }
+
+    //endregion
+
+
+    //region Override ConfigurationSourceManager
+
+
+    @Override
+    public ConfigurationSource getMainSource() {
+        return this.mainSource;
+    }
+
+    @Override
+    public void setMainSource(ConfigurationSource mainSource) {
+        this.mainSource = mainSource;
+    }
+
+    @Override
+    public List<ConfigurationSource> getSources() {
+        return this.sources;
+    }
+
+    //endregion
 }

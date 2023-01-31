@@ -16,12 +16,14 @@
 package io.seata.config;
 
 /**
- * the interface configuration provider
+ * The interface configuration provider
+ *
  * @author xingfudeshi@gmail.com
  */
 public interface ConfigurationProvider {
     /**
-     * provide a AbstractConfiguration implementation instance
+     * provide a Configuration implementation instance
+     *
      * @return Configuration
      */
     Configuration provide();

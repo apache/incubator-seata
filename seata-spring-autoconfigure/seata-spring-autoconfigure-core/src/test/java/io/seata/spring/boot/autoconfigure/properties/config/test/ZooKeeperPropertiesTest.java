@@ -15,19 +15,14 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
-import io.seata.config.ExtConfigurationProvider;
-import io.seata.config.FileConfiguration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import io.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author slievrly
@@ -35,20 +30,15 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class ZooKeeperPropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigZooKeeperProperties")
-    public ConfigZooKeeperProperties configZooKeeperProperties() {
-        return new ConfigZooKeeperProperties().setNodePath(STR_TEST_AAA).setServerAddr(STR_TEST_BBB).setUsername(STR_TEST_CCC).setPassword(STR_TEST_DDD).setConnectTimeout(LONG_TEST_ONE).setSessionTimeout(LONG_TEST_TWO);
-    }
 
     @Test
     public void testConfigZooKeeperProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.zk.nodePath"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.zk.serverAddr"));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig("config.zk.username"));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.zk.password"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.zk.nodePath"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString("config.zk.serverAddr"));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString("config.zk.username"));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString("config.zk.password"));
         assertEquals(LONG_TEST_ONE, currentConfiguration.getInt("config.zk.connectTimeout"));
         assertEquals(LONG_TEST_TWO, currentConfiguration.getInt("config.zk.sessionTimeout"));
     }
