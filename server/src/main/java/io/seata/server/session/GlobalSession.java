@@ -777,24 +777,28 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void asyncCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
-        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        // [optimize-session-manager] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
         this.setStatus(GlobalStatus.CommitRetrying);
-        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        // [optimize-session-manager] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
+        GlobalStatus newStatus;
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
-            this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
+            newStatus = GlobalStatus.TimeoutRollbackRetrying;
         } else {
-            this.setStatus(GlobalStatus.RollbackRetrying);
+            newStatus = GlobalStatus.RollbackRetrying;
         }
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        // [optimize-session-manager] add--> root manager.update
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, newStatus);
     }
 
     @Override
