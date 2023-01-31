@@ -41,7 +41,7 @@ public class FileConfigurationSourceProvider implements ConfigurationSourceProvi
         String fileNameConfigKey = String.join(FILE_CONFIG_SPLIT_CHAR,
                 FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
 
-        // get configFileName, the value of the config 'config.file.name'
+        // get configFileName from configuration
         String configFileName = configuration.getString(fileNameConfigKey, DEFAULT_FILE_NAME);
 
         // load file sources by configFileName

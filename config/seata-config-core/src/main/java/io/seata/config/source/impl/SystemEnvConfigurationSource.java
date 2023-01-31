@@ -17,6 +17,7 @@ package io.seata.config.source.impl;
 
 import java.util.Map;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigurationSource;
 
 /**
@@ -31,7 +32,20 @@ public class SystemEnvConfigurationSource implements ConfigurationSource {
 
     @Override
     public String getLatestConfig(String dataId, long timeoutMills) {
-        return ENV_MAP.get(dataId);
+        String config = ENV_MAP.get(dataId);
+        if (StringUtils.isNotBlank(config)) {
+            return config;
+        }
+
+        if (dataId.contains(".")) {
+            String envDataId = dataId.toUpperCase().replace(".", "_");
+            config = ENV_MAP.get(envDataId);
+            if (StringUtils.isNotBlank(config)) {
+                return config;
+            }
+        }
+
+        return null;
     }
 
     @Override

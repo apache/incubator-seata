@@ -13,22 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.source;
+package io.seata.config;
 
 /**
- * The interface ConfigurationSourceOrdered.
+ * The interface DefaultValueManager.
  *
  * @author wang.liang
  */
-public interface ConfigSourceOrdered {
-
-    int SYSTEM_PROPERTY_SOURCE_ORDER = Integer.MAX_VALUE - 100;
-    int SYSTEM_ENV_SOURCE_ORDER = Integer.MAX_VALUE - 200;
-
-    int CONFIG_CENTER_SOURCE_ORDER = 1000;
-
-    int SPRING_ENVIRONMENT_SOURCE_ORDER = 200;
-    int CONFIG_FILE_SOURCE_ORDER = 100;
-
-    int DEFAULT_CONF_SOURCE_ORDER = Integer.MIN_VALUE + 100;
+public interface DefaultValueManager extends Configuration {
 }

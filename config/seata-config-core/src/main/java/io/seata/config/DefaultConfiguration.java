@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.Cleanable;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
-import io.seata.config.source.DefaultValueConfigurationSource;
 import io.seata.config.source.DefaultValueConfigurationSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,11 @@ import org.slf4j.LoggerFactory;
  * @author wang.liang
  */
 public class DefaultConfiguration extends AbstractConfiguration
-        implements ConfigurationCacheManager, Cleanable {
+        implements ConfigurationCacheManager, Cleanable, DefaultValueManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConfiguration.class);
 
-    private static final String DEFAULT_TYPE_NAME = "seata-default-configuration";
+    private static final String DEFAULT_CONFIGURATION_TYPE_NAME = "seata-default-configuration";
     private static final String DEFAULT_VALUE_MANAGER_TYPE_NAME = "seata-default-value-manager";
 
 
@@ -45,7 +44,7 @@ public class DefaultConfiguration extends AbstractConfiguration
     protected final Map<String, ObjectWrapper> configCache;
 
     // The defaultValue manager
-    protected final Configuration defaultValueManager;
+    protected final DefaultValueManager defaultValueManager;
 
 
     public DefaultConfiguration() {
@@ -53,16 +52,16 @@ public class DefaultConfiguration extends AbstractConfiguration
     }
 
     public DefaultConfiguration(Map<String, ObjectWrapper> configCache) {
-        super(DEFAULT_TYPE_NAME);
+        super(DEFAULT_CONFIGURATION_TYPE_NAME);
         this.configCache = configCache;
         this.defaultValueManager = this.buildDefaultValueManager();
     }
 
-    public DefaultConfiguration(String typeName, Configuration defaultValueManager) {
+    public DefaultConfiguration(String typeName, DefaultValueManager defaultValueManager) {
         this(typeName, new ConcurrentHashMap<>(), defaultValueManager);
     }
 
-    public DefaultConfiguration(String typeName, Map<String, ObjectWrapper> configCache, Configuration defaultValueManager) {
+    public DefaultConfiguration(String typeName, Map<String, ObjectWrapper> configCache, DefaultValueManager defaultValueManager) {
         super(typeName);
         this.configCache = configCache;
         this.defaultValueManager = defaultValueManager;
@@ -71,14 +70,18 @@ public class DefaultConfiguration extends AbstractConfiguration
 
     //region The default value manager
 
-    protected Configuration buildDefaultValueManager() {
-        Configuration defaultValueManager = new DefaultConfiguration(DEFAULT_VALUE_MANAGER_TYPE_NAME, null);
+    /**
+     * build default value manager
+     *
+     * @return the DefaultValueConfiguration
+     */
+    protected DefaultValueManager buildDefaultValueManager() {
+        DefaultValueManager defaultValueManager = new DefaultConfiguration(DEFAULT_VALUE_MANAGER_TYPE_NAME, null);
 
         // load defaultValue source
         List<DefaultValueConfigurationSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultValueConfigurationSourceProvider.class);
         for (DefaultValueConfigurationSourceProvider provider : providers) {
-            DefaultValueConfigurationSource source = provider.provide();
-            defaultValueManager.addSourceLast(source);
+            provider.provide(defaultValueManager);
         }
 
         return defaultValueManager;

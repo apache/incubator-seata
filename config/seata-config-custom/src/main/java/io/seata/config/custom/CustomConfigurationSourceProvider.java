@@ -23,27 +23,32 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
-import io.seata.config.ConfigurationProvider;
 import io.seata.config.source.ConfigSourceType;
+import io.seata.config.source.ConfigurationSourceProvider;
 
 /**
  * @author ggndnn
  */
 @LoadLevel(name = "Custom")
-public class CustomConfigurationProvider implements ConfigurationProvider {
+public class CustomConfigurationSourceProvider implements ConfigurationSourceProvider {
     @Override
-    public Configuration provide() {
-        String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+    public void provide(Configuration configuration) {
+        String customProviderNameConfigKey = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigSourceType.Custom.name().toLowerCase() + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + "name";
-        String name = ConfigurationFactory.getInstance().getString(pathDataId);
-        if (StringUtils.isBlank(name)) {
-            throw new IllegalArgumentException("name value of custom config type must not be blank");
+        String customProviderName = ConfigurationFactory.getInstance().getString(customProviderNameConfigKey);
+        if (StringUtils.isBlank(customProviderName)) {
+            throw new IllegalArgumentException("Provider name of custom config type must not be blank");
         }
+        if ("Custom".equalsIgnoreCase(customProviderName)) {
+            throw new IllegalArgumentException("Provider name of custom config type can't be equal to 'Custom'");
+        }
+
         if (Stream.of(ConfigSourceType.values())
-                .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
-            throw new IllegalArgumentException(String.format("custom config type name %s is not allowed", name));
+                .anyMatch(ct -> ct.name().equalsIgnoreCase(customProviderName))) {
+            throw new IllegalArgumentException(String.format("custom config type name %s is not allowed", customProviderName));
         }
-        return EnhancedServiceLoader.load(ConfigurationProvider.class, name).provide();
+
+        EnhancedServiceLoader.load(ConfigurationSourceProvider.class, customProviderName).provide(configuration);
     }
 }

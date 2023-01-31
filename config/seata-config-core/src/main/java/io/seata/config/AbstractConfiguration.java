@@ -26,6 +26,7 @@ import io.seata.common.Cleanable;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.source.ConfigurationSource;
 import io.seata.config.source.UpdatableConfigurationSource;
@@ -59,6 +60,10 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
 
     protected Object getConfigFromSources(String dataId, long timeoutMills) {
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
+
         Object value;
         for (ConfigurationSource source : sources) {
             value = source.getLatestConfig(dataId, timeoutMills);

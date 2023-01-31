@@ -16,14 +16,15 @@
 package io.seata.config;
 
 /**
- * the type DefaultConfigurationProvider
+ * The interface configuration builder
  *
  * @author wang.liang
  */
-public class DefaultConfigurationProvider implements ConfigurationProvider {
-
-    @Override
-    public Configuration provide() {
-        return new DefaultConfiguration();
-    }
+public interface ConfigurationBuilder {
+    /**
+     * build a Configuration implementation instance
+     *
+     * @return Configuration
+     */
+    Configuration build();
 }

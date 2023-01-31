@@ -21,6 +21,8 @@ import io.seata.config.source.ConfigSourceType;
 import io.seata.config.source.ConfigurationSource;
 import io.seata.config.source.impl.FileConfigurationSource;
 
+import static io.seata.common.util.StringFormatUtils.DOT;
+
 /**
  * The type Configuration utils.
  *
@@ -126,7 +128,16 @@ public final class ConfigurationUtils {
 
         // load envSource with env
         if (envName != null) {
-            String envConfigFileName = configFileName + "-" + envName;
+            // create envConfigFileName
+            String envConfigFileName;
+            int dotIndex = configFileName.indexOf(DOT);
+            if (dotIndex > 0) {
+                envConfigFileName = configFileName.substring(0, dotIndex) + "-" + envName + configFileName.substring(dotIndex);
+            } else {
+                envConfigFileName = configFileName + "-" + envName;
+            }
+
+            // build envSource
             ConfigurationSource envSource = new FileConfigurationSource(envConfigFileName);
 
             // add envSource before commonSource

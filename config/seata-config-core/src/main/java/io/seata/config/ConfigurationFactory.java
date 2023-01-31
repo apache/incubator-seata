@@ -70,8 +70,8 @@ public final class ConfigurationFactory {
 
 
     private static Configuration buildConfiguration() {
-        ConfigurationProvider configurationProvider = EnhancedServiceLoader.load(ConfigurationProvider.class);
-        return configurationProvider.provide();
+        ConfigurationBuilder configurationBuilder = EnhancedServiceLoader.load(ConfigurationBuilder.class);
+        return configurationBuilder.build();
     }
 
     private static void initConfiguration() {

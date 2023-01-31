@@ -15,8 +15,6 @@
  */
 package io.seata.config.source;
 
-import io.seata.config.Configuration;
-
 /**
  * The interface ConfigurationSource.
  *
@@ -33,10 +31,6 @@ public interface ConfigurationSource {
      * @return the Latest config
      */
     Object getLatestConfig(String dataId, long timeoutMills);
-
-    default Object getLatestConfig(String dataId) {
-        return getLatestConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT);
-    }
 
     /**
      * Get the type name

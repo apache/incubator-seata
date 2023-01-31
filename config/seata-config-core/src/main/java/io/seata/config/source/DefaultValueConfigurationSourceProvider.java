@@ -15,17 +15,17 @@
  */
 package io.seata.config.source;
 
+import io.seata.config.DefaultValueManager;
+
 /**
- * the interface DefaultValueConfiguration source provider
+ * the interface DefaultValueConfigurationSourceProvider
  *
- * @author xingfudeshi@gmail.com
+ * @author wang.liang
  */
 public interface DefaultValueConfigurationSourceProvider {
 
     /**
-     * provide a DefaultValueConfigurationSource implementation instance
-     *
-     * @return the DefaultValueConfigurationSource
+     * provide one or more DefaultValueConfigurationSource implementation instance
      */
-    DefaultValueConfigurationSource provide();
+    void provide(DefaultValueManager defaultValueManager);
 }

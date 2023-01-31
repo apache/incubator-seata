@@ -327,7 +327,7 @@ public class StringUtils {
 
     /**
      * hump to Line or line to hump, only spring environment use
-     * 
+     *
      * @param str str
      * @return string string
      */

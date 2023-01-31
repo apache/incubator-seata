@@ -66,8 +66,16 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      */
     <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType);
 
+    default <T> T getConfig(String dataId, T defaultValue, Class<T> dataType) {
+        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT, dataType);
+    }
+
     default <T> T getConfig(String dataId, long timeoutMills, Class<T> dataType) {
         return getConfig(dataId, null, timeoutMills, dataType);
+    }
+
+    default <T> T getConfig(String dataId, Class<T> dataType) {
+        return getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, dataType);
     }
 
 
@@ -226,30 +234,5 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
     default <T> List<T> getList(String dataId, Class<T> dataType) {
         return getList(dataId, null, DEFAULT_CONFIG_TIMEOUT, dataType);
     }
-
-
-//    Map<String, String> ENV_MAP = System.getenv();
-//
-//    /**
-//     * Gets config from sys pro.
-//     *
-//     * @param dataId the data id
-//     * @return the config from sys pro
-//     */
-//    default String getConfigFromSys(String dataId) {
-//        if (StringUtils.isBlank(dataId)) {
-//            return null;
-//        }
-//        String content = ENV_MAP.get(dataId);
-//        if (null != content) {
-//            return content;
-//        }
-//        String envDataId = dataId.toUpperCase().replace(".", "_");
-//        content = ENV_MAP.get(envDataId);
-//        if (null != content) {
-//            return content;
-//        }
-//        return System.getProperty(dataId);
-//    }
 
 }
