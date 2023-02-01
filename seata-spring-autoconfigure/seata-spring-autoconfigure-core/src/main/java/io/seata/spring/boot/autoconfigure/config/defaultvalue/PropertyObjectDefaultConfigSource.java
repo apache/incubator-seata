@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringFormatUtils;
-import io.seata.config.source.DefaultValueConfigurationSource;
+import io.seata.config.defaultconfig.DefaultConfigSource;
 import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigurationSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -38,13 +38,13 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
- * The type Property object default value configuration source.
+ * The type Property object default config source.
  *
  * @author wang.liang
  */
-public class PropertyObjectDefaultValueConfigurationSource implements DefaultValueConfigurationSource {
+public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyObjectDefaultValueConfigurationSource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyObjectDefaultConfigSource.class);
 
     private static final String DOT = String.valueOf(StringFormatUtils.DOT);
 

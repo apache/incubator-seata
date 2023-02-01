@@ -38,7 +38,7 @@ public class CustomConfigurationSourceProvider implements ConfigurationSourcePro
                 + "name";
         String customProviderName = ConfigurationFactory.getInstance().getString(customProviderNameConfigKey);
         if (StringUtils.isBlank(customProviderName)) {
-            throw new IllegalArgumentException("Provider name of custom config type must not be blank");
+            throw new IllegalArgumentException("Provider name of custom config type must be not blank");
         }
         if ("Custom".equalsIgnoreCase(customProviderName)) {
             throw new IllegalArgumentException("Provider name of custom config type can't be equal to 'Custom'");

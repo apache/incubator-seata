@@ -35,10 +35,10 @@ public interface ConfigSourceOrdered {
     //endregion
 
 
-    //region order for DefaultValueConfigurationSource
+    //region order for DefaultConfigSource
 
-    int DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_ORDER = Integer.MIN_VALUE + 100;
-    int DEFAULT_CONFIG_SOURCE_ORDER = Integer.MIN_VALUE + 200;
+    int PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER = Integer.MIN_VALUE + 100;
+    int FILE_DEFAULT_CONFIG_SOURCE_ORDER = Integer.MIN_VALUE + 200;
 
     //endregion
 }

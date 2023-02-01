@@ -13,22 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.source.defaultvalue.impl;
+package io.seata.config.defaultconfig.impl;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.config.DefaultConfigManager;
-import io.seata.config.source.DefaultValueConfigurationSourceProvider;
+import io.seata.config.defaultconfig.DefaultConfigManager;
+import io.seata.config.defaultconfig.DefaultConfigSourceProvider;
 import io.seata.config.source.impl.FileConfigurationSource;
 
-import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_CONFIG_SOURCE_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.FILE_DEFAULT_CONFIG_SOURCE_ORDER;
 
 /**
- * The type Default config file default value configuration source provider.
+ * The type File default config source provider.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "default-config-file", order = DEFAULT_CONFIG_SOURCE_ORDER)
-public class DefaultConfigFileDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
+@LoadLevel(name = "default-config-file", order = FILE_DEFAULT_CONFIG_SOURCE_ORDER)
+public class FileDefaultConfigSourceProvider implements DefaultConfigSourceProvider {
 
     private static final String DEFAULT_CONFIG_COMMON_FILE_NAME = "default-config-common.conf";
     private static final String DEFAULT_CONFIG_CLIENT_FILE_NAME = "default-config-client.conf";

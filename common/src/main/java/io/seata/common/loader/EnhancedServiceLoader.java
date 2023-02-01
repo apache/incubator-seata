@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
@@ -58,6 +59,7 @@ public class EnhancedServiceLoader {
      * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service, ClassLoader loader) throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(loader);
     }
@@ -70,6 +72,7 @@ public class EnhancedServiceLoader {
      * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(findClassLoader());
     }
@@ -83,6 +86,7 @@ public class EnhancedServiceLoader {
      * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
     }
@@ -97,6 +101,7 @@ public class EnhancedServiceLoader {
      * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
             throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, loader);
@@ -112,6 +117,7 @@ public class EnhancedServiceLoader {
      * @return the s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service, String activateName, Object[] args)
             throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args, findClassLoader());
@@ -128,6 +134,7 @@ public class EnhancedServiceLoader {
      * @return the s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
+    @Nonnull
     public static <S> S load(Class<S> service, String activateName, Class<?>[] argsType, Object[] args)
             throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args, findClassLoader());
@@ -140,6 +147,7 @@ public class EnhancedServiceLoader {
      * @param service the service
      * @return list list
      */
+    @Nonnull
     public static <S> List<S> loadAll(Class<S> service) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(findClassLoader());
     }
@@ -153,6 +161,7 @@ public class EnhancedServiceLoader {
      * @param args     the args
      * @return list list
      */
+    @Nonnull
     public static <S> List<S> loadAll(Class<S> service, Class<?>[] argsType, Object[] args) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args, findClassLoader());
     }
@@ -232,10 +241,11 @@ public class EnhancedServiceLoader {
     static <S> List<Class<S>> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass(loader);
     }
+
     /**
      * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
      *
-     * @return
+     * @return the class loader
      */
     private static ClassLoader findClassLoader() {
         return EnhancedServiceLoader.class.getClassLoader();
@@ -294,6 +304,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
+        @Nonnull
         private S load(ClassLoader loader) throws EnhancedServiceNotFoundException {
             return loadExtension(loader, null, null);
         }
@@ -306,6 +317,7 @@ public class EnhancedServiceLoader {
          * @return s s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
+        @Nonnull
         private S load(String activateName, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, loader, null, null);
@@ -320,6 +332,7 @@ public class EnhancedServiceLoader {
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
+        @Nonnull
         private S load(String activateName, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             Class<?>[] argsType = null;
@@ -338,10 +351,11 @@ public class EnhancedServiceLoader {
          * @param activateName the activate name
          * @param argsType     the args type
          * @param args         the args
-         * @param loader  the class loader
+         * @param loader       the class loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
+        @Nonnull
         private S load(String activateName, Class<?>[] argsType, Object[] args, ClassLoader loader)
                 throws EnhancedServiceNotFoundException {
             return loadExtension(activateName, loader, argsType, args);
@@ -349,10 +363,11 @@ public class EnhancedServiceLoader {
 
         /**
          * get all implements
-         * @param loader  the class loader
          *
+         * @param loader the class loader
          * @return list list
          */
+        @Nonnull
         private List<S> loadAll(ClassLoader loader) {
             return loadAll(null, null, loader);
         }
@@ -364,20 +379,24 @@ public class EnhancedServiceLoader {
          * @param args     the args
          * @return list list
          */
+        @Nonnull
         private List<S> loadAll(Class<?>[] argsType, Object[] args, ClassLoader loader) {
             List<S> allInstances = new ArrayList<>();
-            List<Class<S>> allClazzs = getAllExtensionClass(loader);
-            if (CollectionUtils.isEmpty(allClazzs)) {
+
+            List<Class<S>> allClasses = getAllExtensionClass(loader);
+            if (CollectionUtils.isEmpty(allClasses)) {
                 return allInstances;
             }
+
             try {
-                for (Class<S> clazz : allClazzs) {
+                for (Class<S> clazz : allClasses) {
                     ExtensionDefinition<S> definition = classToDefinitionMap.get(clazz);
                     allInstances.add(getExtensionInstance(definition, loader, argsType, args));
                 }
             } catch (Throwable t) {
                 throw new EnhancedServiceNotFoundException(t);
             }
+
             return allInstances;
         }
 
@@ -391,6 +410,7 @@ public class EnhancedServiceLoader {
             return loadAllExtensionClass(loader);
         }
 
+        @Nonnull
         private S loadExtension(ClassLoader loader, Class<?>[] argTypes,
                                 Object[] args) {
             try {
@@ -407,6 +427,7 @@ public class EnhancedServiceLoader {
         }
 
         @SuppressWarnings("rawtypes")
+        @Nonnull
         private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
                                 Object[] args) {
             if (io.seata.common.util.StringUtils.isEmpty(activateName)) {
@@ -416,17 +437,16 @@ public class EnhancedServiceLoader {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition<S> cachedExtensionDefinition = getCachedExtensionDefinition(activateName);
                 return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException)e;
-                } else {
-                    throw new EnhancedServiceNotFoundException(
-                            "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                                    .getFullStackTrace(e));
-                }
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + type.getName()
+                        + " caused by " + ExceptionUtils.getFullStackTrace(e));
             }
         }
 
+        @Nonnull
         private S getExtensionInstance(ExtensionDefinition<S> definition, ClassLoader loader, Class<?>[] argTypes,
                                        Object[] args) {
             if (definition == null) {
@@ -451,6 +471,7 @@ public class EnhancedServiceLoader {
             }
         }
 
+        @Nonnull
         private S createNewExtension(ExtensionDefinition<S> definition, ClassLoader loader, Class<?>[] argTypes, Object[] args) {
             Class<S> clazz = definition.getServiceClass();
             try {
@@ -633,9 +654,10 @@ public class EnhancedServiceLoader {
          * @throws NoSuchMethodException     the no such method exception
          * @throws InvocationTargetException the invocation target exception
          */
+        @Nonnull
         private S initInstance(Class<S> implClazz, Class<?>[] argTypes, Object[] args)
                 throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-            S s = null;
+            S s;
             if (argTypes != null && args != null) {
                 // Constructor with arguments
                 Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);

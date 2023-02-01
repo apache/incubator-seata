@@ -20,10 +20,10 @@ package io.seata.config;
  *
  * @author wang.liang
  */
-public class DefaultConfigurationBuilder implements ConfigurationBuilder {
+public class SeataConfigurationBuilder implements ConfigurationBuilder {
 
     @Override
     public Configuration build() {
-        return new DefaultConfiguration();
+        return new SeataConfiguration();
     }
 }

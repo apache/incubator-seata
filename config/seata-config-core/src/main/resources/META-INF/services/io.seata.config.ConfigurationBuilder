@@ -1,1 +1,1 @@
-io.seata.config.DefaultConfigurationBuilder
+io.seata.config.SeataConfigurationBuilder

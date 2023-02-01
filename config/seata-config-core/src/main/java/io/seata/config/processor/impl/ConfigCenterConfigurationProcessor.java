@@ -24,7 +24,6 @@ import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.source.ConfigurationSourceProvider;
 import io.seata.config.util.ConfigurationUtils;
 
-import static io.seata.common.exception.FrameworkErrorCode.ConfigInvalidError;
 import static io.seata.common.exception.FrameworkErrorCode.ConfigNotFoundError;
 import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_CENTER_PROCESSOR_ORDER;
 
@@ -44,11 +43,8 @@ public class ConfigCenterConfigurationProcessor implements ConfigurationProcesso
             throw new FrameworkException("Config type name can not be blank", ConfigNotFoundError);
         }
 
-        // load configuration source provider
+        // load configuration source provider by configTypeName
         ConfigurationSourceProvider sourceProvider = EnhancedServiceLoader.load(ConfigurationSourceProvider.class, configTypeName);
-        if (sourceProvider == null) {
-            throw new FrameworkException("The configuration source provider '" + configTypeName + "' is not found", ConfigInvalidError);
-        }
 
         // provide one or more configuration source
         sourceProvider.provide(configuration);

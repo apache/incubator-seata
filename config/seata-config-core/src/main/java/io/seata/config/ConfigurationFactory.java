@@ -110,6 +110,10 @@ public final class ConfigurationFactory {
         getInstance().removeConfigListener(dataId, listener);
     }
 
+    public static Set<String> getListenedConfigDataIds() {
+        return getInstance().getListenedConfigDataIds();
+    }
+
     public static Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return getInstance().getConfigListeners(dataId);
     }

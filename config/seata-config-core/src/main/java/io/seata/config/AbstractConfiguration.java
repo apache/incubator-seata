@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractConfiguration implements Configuration, UpdatableConfiguration
+public abstract class AbstractConfiguration implements Configuration
         , ConfigurationChangeListener, Cleanable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
@@ -80,13 +80,13 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
             }
 
             if (ObjectUtils.isNullOrBlank(value)) {
-                LOGGER.debug("Skip config '{}' blank value '{}' of type [{}] from the configuration source '{}' by configuration '{}'",
+                LOGGER.debug("Skip config '{}' blank value '{}' of type [{}] from source '{}' by configuration '{}'",
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
                 continue;
             }
 
             if (this.printGetSuccessLog) {
-                LOGGER.debug("Get config value ['{}' = '{}'] of type [{}] from the configuration source '{}' by configuration '{}'",
+                LOGGER.debug("Get config value ['{}' = '{}'] of type [{}] from source '{}' by configuration '{}'",
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
             }
 

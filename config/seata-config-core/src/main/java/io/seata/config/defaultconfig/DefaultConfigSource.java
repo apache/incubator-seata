@@ -13,19 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.source;
+package io.seata.config.defaultconfig;
 
-import io.seata.config.DefaultConfigManager;
+import io.seata.config.source.ConfigurationSource;
 
 /**
- * the interface DefaultValueConfigurationSourceProvider
+ * The interface DefaultConfigSource.
  *
  * @author wang.liang
  */
-public interface DefaultValueConfigurationSourceProvider {
-
-    /**
-     * provide one or more DefaultValueConfigurationSource implementation instance
-     */
-    void provide(DefaultConfigManager defaultConfigManager);
+public interface DefaultConfigSource extends ConfigurationSource {
 }

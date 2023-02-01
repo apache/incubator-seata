@@ -15,109 +15,50 @@
  */
 package io.seata.config;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.ValueWrapper;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.source.ConfigurationSource;
-import io.seata.config.source.DefaultValueConfigurationSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Default configuration.
+ * The type Cacheable configuration.
  *
  * @author wang.liang
  */
-public class DefaultConfiguration extends AbstractConfiguration
-        implements ConfigurationCacheManager, DefaultConfigManager {
+public class CacheableConfiguration extends AbstractConfiguration
+        implements ConfigurationCacheManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheableConfiguration.class);
 
-    public static final String DEFAULT_TYPE_NAME = "seata-default";
-    public static final String DEFAULT_CONFIG_MANAGER_TYPE_NAME = "seata-default-config-manager";
+    public static final String CACHEABLE_TYPE_NAME = "cacheable-configuration";
 
 
     // The cache
     protected final Map<String, ValueWrapper> configCache;
 
-    // The default config manager
-    protected final DefaultConfigManager defaultConfigManager;
 
-
-    public DefaultConfiguration() {
-        super(DEFAULT_TYPE_NAME);
-        this.configCache = new ConcurrentHashMap<>();
-        this.defaultConfigManager = this.buildDefaultConfigManager();
+    public CacheableConfiguration(String typeName, Map<String, ValueWrapper> configCache) {
+        super(typeName);
+        this.configCache = configCache;
     }
 
-    public DefaultConfiguration(String typeName) {
+    public CacheableConfiguration(String typeName) {
         this(typeName, new ConcurrentHashMap<>());
     }
 
-    public DefaultConfiguration(String typeName, DefaultConfigManager defaultConfigManager) {
-        this(typeName, new ConcurrentHashMap<>(), defaultConfigManager);
+    public CacheableConfiguration() {
+        this(CACHEABLE_TYPE_NAME);
     }
-
-    public DefaultConfiguration(String typeName, Map<String, ValueWrapper> configCache) {
-        super(typeName);
-        this.configCache = configCache;
-        this.defaultConfigManager = this.buildDefaultConfigManager();
-    }
-
-    public DefaultConfiguration(String typeName, Map<String, ValueWrapper> configCache, DefaultConfigManager defaultConfigManager) {
-        super(typeName);
-        this.configCache = configCache;
-        this.defaultConfigManager = defaultConfigManager;
-    }
-
-
-    //region The default config manager
-
-    /**
-     * build default config manager
-     *
-     * @return the DefaultValueConfiguration
-     */
-    protected DefaultConfigManager buildDefaultConfigManager() {
-        DefaultConfiguration defaultConfigManager = new DefaultConfiguration(DEFAULT_CONFIG_MANAGER_TYPE_NAME, (DefaultConfigManager)null);
-        defaultConfigManager.disablePrintGetSuccessLog();
-
-        // load defaultValue source
-        List<DefaultValueConfigurationSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultValueConfigurationSourceProvider.class);
-        for (DefaultValueConfigurationSourceProvider provider : providers) {
-            provider.provide(defaultConfigManager);
-        }
-
-        return defaultConfigManager;
-    }
-
-    protected <T> T getDefaultValueFromDefaultConfigManager(String dataId, Class<T> dataType) {
-        if (defaultConfigManager != null) {
-            T defaultValue = defaultConfigManager.getConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT, dataType);
-
-            if (defaultValue != null) {
-                LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from the defaultConfigManager '{}' by configuration '{}'",
-                        dataId, defaultValue, defaultValue.getClass().getName(), defaultConfigManager.getTypeName(), this.getTypeName());
-                return defaultValue;
-            }
-        } else {
-            LOGGER.debug("The defaultConfigManager is null, do not get config '{}' defaultValue. (Current is '{}'.)", dataId, this.getTypeName());
-        }
-
-        return null;
-    }
-
-    //endregion
 
 
     //region Override Configuration
 
     /**
-     * Override to use cache and defaultConfigManager
+     * Override to use cache
      */
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
@@ -139,7 +80,7 @@ public class DefaultConfiguration extends AbstractConfiguration
             configInfo = this.getConfigFromSources(dataId, timeoutMills, dataType);
         }
 
-        if (configInfo != null && configInfo.getValue() != null) {
+        if (configInfo != null) {
             return configInfo.getValue();
         }
 
@@ -148,10 +89,9 @@ public class DefaultConfiguration extends AbstractConfiguration
             LOGGER.debug("Config '{}' not found, returned the defaultValue '{}' of type [{}] from the parameter by the configuration '{}'.",
                     dataId, defaultValue, defaultValue.getClass().getName(), this.getTypeName());
             return defaultValue;
-        } else {
-            // Get config defaultValue from defaultConfigManager
-            return getDefaultValueFromDefaultConfigManager(dataId, dataType);
         }
+
+        return null;
     }
 
     //endregion

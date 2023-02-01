@@ -197,7 +197,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
      */
     public RemotingServer getServerMessageSender() {
         if (remotingServer == null) {
-            throw new IllegalArgumentException("serverMessageSender must not be null");
+            throw new IllegalArgumentException("serverMessageSender must be not null");
         }
         return remotingServer;
     }

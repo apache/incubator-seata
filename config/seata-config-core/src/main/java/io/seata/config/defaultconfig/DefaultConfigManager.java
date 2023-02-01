@@ -13,20 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
+package io.seata.config.defaultconfig;
+
+import io.seata.config.Configuration;
 
 /**
- * The interface configuration builder
+ * The interface DefaultConfigManager.
  *
  * @author wang.liang
  */
-public interface ConfigurationBuilder {
-
-    /**
-     * build a Configuration implementation instance
-     *
-     * @return Configuration
-     */
-    Configuration build();
-
+public interface DefaultConfigManager extends Configuration {
 }

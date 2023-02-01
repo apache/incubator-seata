@@ -40,7 +40,7 @@ public class ConfigInfo<T> {
 
     public ConfigInfo(T value, ConfigurationSource fromSource) {
         if (ObjectUtils.isNullOrBlank(value)) {
-            throw new IllegalArgumentException("The config value must not be null or blank.");
+            throw new IllegalArgumentException("The config value must be not null or blank.");
         }
 
         this.value = value;

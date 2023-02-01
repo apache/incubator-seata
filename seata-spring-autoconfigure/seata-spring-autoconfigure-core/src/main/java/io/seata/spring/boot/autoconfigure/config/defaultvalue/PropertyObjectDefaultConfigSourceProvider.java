@@ -16,21 +16,21 @@
 package io.seata.spring.boot.autoconfigure.config.defaultvalue;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.config.DefaultConfigManager;
-import io.seata.config.source.DefaultValueConfigurationSourceProvider;
+import io.seata.config.defaultconfig.DefaultConfigManager;
+import io.seata.config.defaultconfig.DefaultConfigSourceProvider;
 
-import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
 
 /**
- * The type Property object default value configuration source provider.
+ * The type Property object default config source provider.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "default-value-property-object", order = DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_ORDER)
-public class PropertyObjectDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
+@LoadLevel(name = "property-object-default-config", order = PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER)
+public class PropertyObjectDefaultConfigSourceProvider implements DefaultConfigSourceProvider {
 
     @Override
     public void provide(DefaultConfigManager defaultConfigManager) {
-        defaultConfigManager.addSourceLast(new PropertyObjectDefaultValueConfigurationSource());
+        defaultConfigManager.addSourceLast(new PropertyObjectDefaultConfigSource());
     }
 }
