@@ -31,8 +31,12 @@ import io.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.store.StoreConfig;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -45,7 +49,14 @@ public class RaftSyncMsgTest {
     private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
 
     private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
-
+    @BeforeAll
+    public static void init(){
+        SessionHolder.init(StoreConfig.SessionMode.FILE);
+    }
+    @AfterAll
+    public static void destroy(){
+        SessionHolder.destroy();
+    }
     @Test
     public void testMsgSerialize() throws IOException {
         RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
