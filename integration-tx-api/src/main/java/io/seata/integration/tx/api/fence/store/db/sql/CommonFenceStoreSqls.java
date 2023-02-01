@@ -25,15 +25,6 @@ import io.seata.integration.tx.api.fence.constant.CommonFenceConstant;
 public class CommonFenceStoreSqls {
 
     /**
-     * The constant QUERY_END_STATUS_BY_DATE.
-     */
-    protected static final String QUERY_END_STATUS_BY_DATE = "select xid, branch_id, status, gmt_create, gmt_modified "
-            + "from " + LOCAL_TCC_LOG_PLACEHOLD
-            + " where  gmt_modified < ? "
-            + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")"
-            + " limit ?";
-
-    /**
      * The constant LOCAL_TCC_LOG_PLACEHOLD.
      */
     public static final String LOCAL_TCC_LOG_PLACEHOLD = " #local_tcc_log# ";
@@ -50,6 +41,15 @@ public class CommonFenceStoreSqls {
     protected static final String INSERT_LOCAL_TCC_LOG = "insert into " + LOCAL_TCC_LOG_PLACEHOLD
             + " (xid, branch_id, action_name, status, gmt_create, gmt_modified) "
             + " values (?, ?, ?, ?, ?, ?) ";
+
+    /**
+     * The constant QUERY_END_STATUS_BY_DATE.
+     */
+    protected static final String QUERY_END_STATUS_BY_DATE = "select xid, branch_id, status, gmt_create, gmt_modified "
+        + "from " + LOCAL_TCC_LOG_PLACEHOLD
+        + " where  gmt_modified < ? "
+        + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")"
+        + " limit ?";
 
     /**
      * The constant QUERY_BY_BRANCH_ID_AND_XID.
