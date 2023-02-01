@@ -76,7 +76,7 @@ public class LockRetryControllerTest {
     @Test
     void testLockConfigListener() {
         LockRetryController.GlobalConfig config = new LockRetryController.GlobalConfig();
-        ConfigurationChangeEvent event = new ConfigurationChangeEvent();
+        ConfigurationChangeEvent event = new ConfigurationChangeEvent(null);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL);
         int retryInterval = 100;

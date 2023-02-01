@@ -19,14 +19,14 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.config.DefaultConfigManager;
 import io.seata.config.source.DefaultValueConfigurationSourceProvider;
 
-import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_ORDER;
 
 /**
  * The type Property object default value configuration source provider.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "default-value-property-object", order = DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_PROVIDER_ORDER)
+@LoadLevel(name = "default-value-property-object", order = DEFAULT_VALUE_PROPERTY_OBJECT_SOURCE_ORDER)
 public class PropertyObjectDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
 
     @Override

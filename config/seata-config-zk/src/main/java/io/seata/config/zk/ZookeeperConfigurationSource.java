@@ -36,13 +36,14 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.listener.ConfigurationChangeListener;
-import io.seata.config.listener.ConfigListenerManager;
 import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.source.RemoteConfigurationSource;
 import io.seata.config.UpdatableConfiguration;
+import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
+import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.RemoteConfigurationSource;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
@@ -207,7 +208,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
         }
 
         if (!seataConfig.isEmpty()) {
-            ZKListener zkListener = new ZKListener(dataId, listener);
+            ZKListener zkListener = new ZKListener(dataId, listener, this);
             CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                     .put(listener, zkListener);
             return;
@@ -215,7 +216,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
 
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
         if (zkClient.exists(path)) {
-            ZKListener zkListener = new ZKListener(path, listener);
+            ZKListener zkListener = new ZKListener(path, listener, this);
             CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                     .put(listener, zkListener);
             zkClient.subscribeDataChanges(path, zkListener);
@@ -250,6 +251,11 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
     }
 
     @Override
+    public Set<String> getListenedConfigDataIds() {
+        return CONFIG_LISTENERS_MAP.keySet();
+    }
+
+    @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         ConcurrentMap<ConfigurationChangeListener, ZKListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
@@ -268,7 +274,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
             } catch (IOException e) {
                 LOGGER.error("init config properties error", e);
             }
-            ZKListener zkListener = new ZKListener(configPath, null);
+            ZKListener zkListener = new ZKListener(configPath, null, this);
             zkClient.subscribeDataChanges(configPath, zkListener);
         }
     }
@@ -301,6 +307,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
 
         private String path;
         private ConfigurationChangeListener listener;
+        private ConfigurationSource source;
 
         /**
          * Instantiates a new Zk listener.
@@ -308,9 +315,10 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
          * @param path     the path
          * @param listener the listener
          */
-        public ZKListener(String path, ConfigurationChangeListener listener) {
+        public ZKListener(String path, ConfigurationChangeListener listener, ConfigurationSource source) {
             this.path = path;
             this.listener = listener;
+            this.source = source;
         }
 
         @Override
@@ -332,7 +340,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
                     if (!propertyOld.equals(propertyNew)) {
-                        ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                        ConfigurationChangeEvent event = new ConfigurationChangeEvent(source)
                                 .setDataId(listenedDataId)
                                 .setNewValue(propertyNew)
                                 .setChangeType(ConfigurationChangeType.MODIFY);
@@ -348,7 +356,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
                 return;
             }
             String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent(source).setDataId(dataId).setNewValue(o.toString())
                     .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
         }
@@ -356,7 +364,7 @@ public class ZookeeperConfigurationSource implements RemoteConfigurationSource, 
         @Override
         public void handleDataDeleted(String s) {
             String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setChangeType(
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent(source).setDataId(dataId).setChangeType(
                     ConfigurationChangeType.DELETE);
             listener.onProcessEvent(event);
         }

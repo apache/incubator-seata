@@ -35,8 +35,8 @@ import io.seata.config.ConfigFuture;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.source.RemoteConfigurationSource;
 
 import static io.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
@@ -87,7 +87,7 @@ public class ApolloConfigurationSource implements RemoteConfigurationSource, Con
                             }
                             ConfigChange change = changeEvent.getChange(key);
                             ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
-                                    change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
+                                    change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()), this);
                             LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
@@ -141,6 +141,11 @@ public class ApolloConfigurationSource implements RemoteConfigurationSource, Con
         if (CollectionUtils.isNotEmpty(configListeners)) {
             configListeners.remove(listener);
         }
+    }
+
+    @Override
+    public Set<String> getListenedConfigDataIds() {
+        return LISTENER_SERVICE_MAP.keySet();
     }
 
     @Override

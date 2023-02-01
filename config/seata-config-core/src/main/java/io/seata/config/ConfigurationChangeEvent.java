@@ -15,6 +15,8 @@
  */
 package io.seata.config;
 
+import io.seata.config.source.ConfigurationSource;
+
 /**
  * The type Configuration change event.
  *
@@ -22,30 +24,35 @@ package io.seata.config;
  */
 public class ConfigurationChangeEvent {
 
+    private static final String DEFAULT_NAMESPACE = "DEFAULT";
+
+
     private String dataId;
     private String oldValue;
     private String newValue;
     private String namespace;
     private ConfigurationChangeType changeType;
-    private static final String DEFAULT_NAMESPACE = "DEFAULT";
+    private ConfigurationSource changeEventSource;
 
 
-    public ConfigurationChangeEvent(){
-
+    public ConfigurationChangeEvent(ConfigurationSource changeEventSource) {
+        this.changeEventSource = changeEventSource;
     }
 
-    public ConfigurationChangeEvent(String dataId, String newValue) {
-        this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY);
+    public ConfigurationChangeEvent(String dataId, String newValue, ConfigurationSource changeEventSource) {
+        this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY, changeEventSource);
     }
 
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
-                                    ConfigurationChangeType type) {
+                                    ConfigurationChangeType type, ConfigurationSource changeEventSource) {
         this.dataId = dataId;
         this.namespace = namespace;
         this.oldValue = oldValue;
         this.newValue = newValue;
         this.changeType = type;
+        this.changeEventSource = changeEventSource;
     }
+
 
     /**
      * Gets data id.
@@ -140,5 +147,23 @@ public class ConfigurationChangeEvent {
     public ConfigurationChangeEvent setNamespace(String namespace) {
         this.namespace = namespace;
         return this;
+    }
+
+    /**
+     * Gets change event source
+     *
+     * @return the change event source
+     */
+    public ConfigurationSource getChangeEventSource() {
+        return changeEventSource;
+    }
+
+    /**
+     * Gets type name of change event source
+     *
+     * @return the type name
+     */
+    public String getChangeEventSourceTypeName() {
+        return changeEventSource != null ? changeEventSource.getTypeName() : null;
     }
 }

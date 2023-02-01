@@ -21,7 +21,6 @@ import java.util.List;
 
 import io.seata.common.util.ConvertUtils;
 import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.source.ConfigurationSourceManager;
 
 /**
@@ -30,7 +29,7 @@ import io.seata.config.source.ConfigurationSourceManager;
  * @author slievrly
  */
 public interface Configuration extends UpdatableConfiguration, ConfigurationSourceManager
-        , ConfigListenerManager, ConfigurationChangeListener {
+        , ConfigListenerManager {
 
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
@@ -217,18 +216,18 @@ public interface Configuration extends UpdatableConfiguration, ConfigurationSour
      * @return the duration config
      */
     default <T> List<T> getList(String dataId, List<T> defaultValue, long timeoutMills, Class<T> dataType) {
-        List<?> list0 = getConfig(dataId, defaultValue, timeoutMills, List.class);
+        List<?> configList = getConfig(dataId, defaultValue, timeoutMills, List.class);
 
-        List<T> list = new ArrayList<>();
+        List<T> resultList = new ArrayList<>();
 
-        if (list0 != null) {
-            for (Object config : list0) {
+        if (configList != null) {
+            for (Object config : configList) {
                 // add the converted value
-                list.add(ConvertUtils.convert(config, dataType));
+                resultList.add(ConvertUtils.convert(config, dataType));
             }
         }
 
-        return list;
+        return resultList;
     }
 
     default <T> List<T> getList(String dataId, List<T> defaultValue, Class<T> dataType) {

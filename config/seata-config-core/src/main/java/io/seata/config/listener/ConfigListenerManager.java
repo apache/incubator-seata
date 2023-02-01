@@ -42,6 +42,13 @@ public interface ConfigListenerManager {
     void removeConfigListener(String dataId, ConfigurationChangeListener listener);
 
     /**
+     * Gets set of listened config dataId
+     *
+     * @return the set listened config dataId
+     */
+    Set<String> getListenedConfigDataIds();
+
+    /**
      * Gets config listeners.
      *
      * @param dataId the data id

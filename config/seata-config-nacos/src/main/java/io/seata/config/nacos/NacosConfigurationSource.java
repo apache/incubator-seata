@@ -35,9 +35,10 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.UpdatableConfiguration;
-import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
+import io.seata.config.source.ConfigurationSource;
 import io.seata.config.source.RemoteConfigurationSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,14 +97,8 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
      * Instantiates a new Nacos configuration.
      */
     private NacosConfigurationSource() {
-        if (configService == null) {
-            try {
-                configService = NacosFactory.createConfigService(getConfigProperties());
-                initSeataConfig();
-            } catch (NacosException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        buildConfigService();
+        this.initSeataConfig();
     }
 
     @Override
@@ -166,7 +161,7 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
             return;
         }
         try {
-            NacosListener nacosListener = new NacosListener(dataId, listener);
+            NacosListener nacosListener = new NacosListener(dataId, listener, this);
             CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                     .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
@@ -197,6 +192,11 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
                 }
             }
         }
+    }
+
+    @Override
+    public Set<String> getListenedConfigDataIds() {
+        return CONFIG_LISTENERS_MAP.keySet();
     }
 
     @Override
@@ -322,14 +322,28 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
     }
 
-    private static void initSeataConfig() {
+    private static void buildConfigService() {
+        if (configService == null) {
+            synchronized (NacosConfigurationSource.class) {
+                if (configService == null) {
+                    try {
+                        configService = NacosFactory.createConfigService(getConfigProperties());
+                    } catch (NacosException e) {
+                        throw new RuntimeException("Create config service failed:", e);
+                    }
+                }
+            }
+        }
+    }
+
+    private void initSeataConfig() {
         try {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
             if (StringUtils.isNotBlank(config)) {
                 seataConfig = ConfigProcessor.processConfig(config, getNacosDataType());
 
-                NacosListener nacosListener = new NacosListener(nacosDataId, null);
+                NacosListener nacosListener = new NacosListener(nacosDataId, null, this);
                 configService.addListener(nacosDataId, getNacosGroup(), nacosListener);
             }
         } catch (NacosException | IOException e) {
@@ -349,16 +363,19 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
     public static class NacosListener extends AbstractSharedListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
+        private final ConfigurationSource source;
 
         /**
          * Instantiates a new Nacos listener.
          *
          * @param dataId   the data id
          * @param listener the listener
+         * @param source   the source
          */
-        public NacosListener(String dataId, ConfigurationChangeListener listener) {
+        public NacosListener(String dataId, ConfigurationChangeListener listener, ConfigurationSource source) {
             this.dataId = dataId;
             this.listener = listener;
+            this.source = source;
         }
 
         /**
@@ -390,7 +407,7 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
                     if (!propertyOld.equals(propertyNew)) {
-                        ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                        ConfigurationChangeEvent event = new ConfigurationChangeEvent(source)
                                 .setDataId(listenedDataId)
                                 .setNewValue(propertyNew)
                                 .setNamespace(group);
@@ -407,7 +424,7 @@ public class NacosConfigurationSource implements RemoteConfigurationSource
             }
 
             //Compatible with old writing
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent(source).setDataId(dataId).setNewValue(configInfo)
                     .setNamespace(group);
             listener.onProcessEvent(event);
         }

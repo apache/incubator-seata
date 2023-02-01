@@ -20,14 +20,14 @@ import io.seata.config.DefaultConfigManager;
 import io.seata.config.source.DefaultValueConfigurationSourceProvider;
 import io.seata.config.source.impl.FileConfigurationSource;
 
-import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_CONFIG_SOURCE_PROVIDER_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.DEFAULT_CONFIG_SOURCE_ORDER;
 
 /**
  * The type Default config file default value configuration source provider.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "default-config-file", order = DEFAULT_CONFIG_SOURCE_PROVIDER_ORDER)
+@LoadLevel(name = "default-config-file", order = DEFAULT_CONFIG_SOURCE_ORDER)
 public class DefaultConfigFileDefaultValueConfigurationSourceProvider implements DefaultValueConfigurationSourceProvider {
 
     private static final String DEFAULT_CONFIG_COMMON_FILE_NAME = "default-config-common.conf";

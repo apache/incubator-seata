@@ -44,6 +44,7 @@ import io.seata.config.UpdatableConfiguration;
 import io.seata.config.file.FileConfig;
 import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.source.ConfigurationSource;
 import io.seata.config.source.LocalConfigurationSource;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public class FileConfigurationSource implements LocalConfigurationSource
 
     private final String name;
 
-    private final FileListener fileListener = new FileListener();
+    private final FileListener fileListener = new FileListener(this);
 
     private final boolean allowDynamicRefresh;
 
@@ -278,6 +279,11 @@ public class FileConfigurationSource implements LocalConfigurationSource
     }
 
     @Override
+    public Set<String> getListenedConfigDataIds() {
+        return configListenersMap.keySet();
+    }
+
+    @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
     }
@@ -360,6 +366,8 @@ public class FileConfigurationSource implements LocalConfigurationSource
      */
     class FileListener implements ConfigurationChangeListener {
 
+        private final ConfigurationSource source;
+
         private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new HashMap<>();
 
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
@@ -369,13 +377,14 @@ public class FileConfigurationSource implements LocalConfigurationSource
         /**
          * Instantiates a new FileListener.
          */
-        FileListener() {
+        FileListener(ConfigurationSource source) {
+            this.source = source;
         }
 
         public synchronized void addListener(String dataId, ConfigurationChangeListener listener) {
             // only the first time add listener will trigger on process event
             if (dataIdMap.isEmpty()) {
-                fileListener.onProcessEvent(new ConfigurationChangeEvent());
+                fileListener.onProcessEvent(new ConfigurationChangeEvent(source));
             }
 
             dataIdMap.computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);

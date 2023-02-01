@@ -54,7 +54,7 @@ public interface ConfigurationSourceManager {
      */
     default void addSourceFirst(ConfigurationSource source) {
         this.getSources().add(0, source);
-        this.afterAddSource();
+        this.afterAddSource(source);
     }
 
     /**
@@ -64,7 +64,7 @@ public interface ConfigurationSourceManager {
      */
     default void addSourceLast(ConfigurationSource source) {
         this.getSources().add(source);
-        this.afterAddSource();
+        this.afterAddSource(source);
     }
 
     /**
@@ -99,7 +99,7 @@ public interface ConfigurationSourceManager {
             this.addSourceLast(source);
         }
 
-        this.afterAddSource();
+        this.afterAddSource(source);
     }
 
     /**
@@ -141,7 +141,7 @@ public interface ConfigurationSourceManager {
     /**
      * After add source, trigger this method.
      */
-    default void afterAddSource() {
+    default void afterAddSource(ConfigurationSource source) {
     }
 
 }

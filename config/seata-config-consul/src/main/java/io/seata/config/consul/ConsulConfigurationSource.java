@@ -179,7 +179,7 @@ public class ConsulConfigurationSource implements RemoteConfigurationSource
                 .add(consulListener);
 
         // Start config change listener for the dataId.
-        consulListener.onProcessEvent(new ConfigurationChangeEvent());
+        consulListener.onProcessEvent(new ConfigurationChangeEvent(this));
     }
 
     @Override
@@ -199,6 +199,11 @@ public class ConsulConfigurationSource implements RemoteConfigurationSource
                 }
             }
         }
+    }
+
+    @Override
+    public Set<String> getListenedConfigDataIds() {
+        return CONFIG_LISTENERS_MAP.keySet();
     }
 
     @Override
@@ -272,7 +277,7 @@ public class ConsulConfigurationSource implements RemoteConfigurationSource
         }
         // Start config change listener for the ConsulConfigKey,default value is "seata.properties".
         ConsulListener consulListener = new ConsulListener(getConsulConfigKey(), null);
-        consulListener.onProcessEvent(new ConfigurationChangeEvent());
+        consulListener.onProcessEvent(new ConfigurationChangeEvent(this));
     }
 
     private static String getConsulDataType() {

@@ -39,7 +39,7 @@ public class CustomConfigurationSourceForTest implements ConfigurationSource {
     }
 
     @Override
-    public Object getLatestConfig(String dataId, long timeoutMills) {
+    public String getLatestConfig(String dataId, long timeoutMills) {
         return properties.getProperty(dataId);
     }
 }

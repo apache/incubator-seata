@@ -27,6 +27,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.listener.ConfigListenerManager;
 import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.source.ConfigurationSource;
 import io.seata.config.source.UpdatableConfigurationSource;
@@ -38,7 +39,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractConfiguration implements Configuration, UpdatableConfiguration, Cleanable {
+public abstract class AbstractConfiguration implements Configuration, UpdatableConfiguration
+        , ConfigurationChangeListener, Cleanable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
@@ -47,8 +49,8 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     private final String typeName;
 
     // The sources
-    protected ConfigurationSource mainSource;
-    protected List<ConfigurationSource> sources = new CopyOnWriteArrayList<>();
+    protected volatile ConfigurationSource mainSource;
+    protected final List<ConfigurationSource> sources = new CopyOnWriteArrayList<>();
 
     // The listeners
     protected final Map<String, Set<ConfigurationChangeListener>> listeners = new ConcurrentHashMap<>();
@@ -56,7 +58,7 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     /**
      * Whether to print the get success log. Used to avoid printing the log repeatedly.
      */
-    private boolean printGetSuccessLog = true;
+    private volatile boolean printGetSuccessLog = true;
 
 
     protected AbstractConfiguration(String typeName) {
@@ -64,13 +66,13 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     }
 
 
-    protected Object getConfigFromSources(String dataId, long timeoutMills) {
+    protected ConfigValue<?> getConfigFromSources(String dataId, long timeoutMills) {
         if (StringUtils.isBlank(dataId)) {
             return null;
         }
 
         Object value;
-        for (ConfigurationSource source : sources) {
+        for (ConfigurationSource source : this.sources) {
             value = source.getLatestConfig(dataId, timeoutMills);
 
             if (value == null) {
@@ -88,19 +90,24 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
             }
 
-            return value;
+            return new ConfigValue(value, source);
         }
 
         return null;
     }
 
-    protected <T> T getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
-        Object config = getConfigFromSources(dataId, timeoutMills);
-        return ConvertUtils.convert(config, dataType);
+    protected <T> ConfigValue<T> getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
+        ConfigValue<?> configValue = getConfigFromSources(dataId, timeoutMills);
+        T value = ConvertUtils.convert(configValue, dataType);
+        return new ConfigValue<>(value, configValue.getFromSource());
+    }
+
+    protected ConfigValue<?> getConfigFromSources(String dataId) {
+        return getConfigFromSources(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
 
-    //region Override Configuration
+    //region # Override Configuration
 
     @Override
     public String getTypeName() {
@@ -110,14 +117,14 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
-        T value = this.getConfigFromSources(dataId, timeoutMills, dataType);
-        return value == null ? defaultValue : value;
+        ConfigValue<T> configValue = this.getConfigFromSources(dataId, timeoutMills, dataType);
+        return configValue == null ? defaultValue : configValue.getValue();
     }
 
     //endregion
 
 
-    //region Override UpdatableConfiguration
+    //region # Override UpdatableConfiguration
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
@@ -152,18 +159,66 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     //endregion
 
 
-    //region Override ConfigurationChangeListenerManager
+    //region # Override ConfigurationChangeListenerManager
+
+    //region ## add config listener
 
     @Override
-    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+    public synchronized void addConfigListener(String dataId, ConfigurationChangeListener listener) {
         Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
         dataIdListeners.add(listener);
+        this.addConfigListenerToSources(dataId);
     }
 
+    protected synchronized void addConfigListenerToSource(String dataId, ConfigurationSource source) {
+        if (source instanceof ConfigListenerManager) {
+            ConfigListenerManager manager = (ConfigListenerManager)source;
+            manager.addConfigListener(dataId, this);
+        }
+    }
+
+    protected synchronized void addConfigListenerToSources(String dataId) {
+        this.sources.forEach(s -> this.addConfigListenerToSource(dataId, s));
+    }
+
+    protected synchronized void addConfigListenerToSource(ConfigurationSource source) {
+        this.listeners.keySet().forEach(dataId -> {
+            this.addConfigListenerToSource(dataId, source);
+        });
+    }
+
+    //endregion
+
+    //region ## remove config listener
+
     @Override
-    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
+    public synchronized void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> dataIdListeners = this.listeners.computeIfAbsent(dataId, key -> new HashSet<>());
         dataIdListeners.remove(listener);
+
+        if (dataIdListeners.isEmpty()) {
+            this.removeConfigListenerFromSources(dataId);
+            this.listeners.remove(dataId);
+        }
+    }
+
+    protected synchronized void removeConfigListenerFromSources(String dataId) {
+        this.sources.forEach(s -> {
+            if (s instanceof ConfigListenerManager) {
+                ((ConfigListenerManager)s).removeConfigListener(dataId, this);
+            }
+        });
+    }
+
+    protected synchronized void removeConfigListenerFromSources() {
+        this.listeners.keySet().forEach(this::removeConfigListenerFromSources);
+    }
+
+    //endregion
+
+    @Override
+    public Set<String> getListenedConfigDataIds() {
+        return this.listeners.keySet();
     }
 
     @Override
@@ -173,13 +228,41 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
     @Override
     public void clean() {
+        this.removeConfigListenerFromSources();
         this.listeners.clear();
     }
 
     //endregion
 
 
-    //region Override ConfigurationSourceManager
+    //region # Override ConfigurationSourceManager
+
+    @Override
+    public void afterAddSource(ConfigurationSource source) {
+        this.addConfigListenerToSource(source);
+    }
+
+    //endregion
+
+    //region # Override ConfigurationChangeListener
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {
+        this.logChangeEvent(event);
+
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(event.getDataId());
+        configListeners.forEach(listener -> listener.onChangeEvent(event));
+    }
+
+    protected void logChangeEvent(ConfigurationChangeEvent event) {
+        LOGGER.debug("The config '{}' has changed (value from '{}' to '{}') by the source '{}'.",
+                event.getDataId(), event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName());
+    }
+
+    //endregion
+
+
+    //region # Override ConfigurationSourceManager
 
 
     @Override

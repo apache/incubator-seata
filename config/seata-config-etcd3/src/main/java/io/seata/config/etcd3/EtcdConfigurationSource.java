@@ -53,8 +53,8 @@ import io.seata.config.ConfigFuture;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.UpdatableConfiguration;
-import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.listener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
 import io.seata.config.source.RemoteConfigurationSource;
 import org.slf4j.Logger;
@@ -79,16 +79,17 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
     private static final String ETCD_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "etcd3";
     private static final String DEFAULT_ETCD_CONFIG_KEY_VALUE = "seata.properties";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private ExecutorService etcdConfigExecutor;
-    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(
-            MAP_INITIAL_CAPACITY);
-    private static volatile Properties seataConfig = new Properties();
+    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     private static final long VERSION_NOT_EXIST = 0;
+
+
+    private ExecutorService etcdConfigExecutor;
+    private volatile Properties seataConfig = new Properties();
+
 
     private EtcdConfigurationSource() {
         etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
@@ -198,10 +199,10 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        EtcdListener etcdListener = new EtcdListener(dataId, listener);
+        EtcdListener etcdListener = new EtcdListener(dataId, listener, this);
         CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(etcdListener);
-        etcdListener.onProcessEvent(new ConfigurationChangeEvent());
+        etcdListener.onProcessEvent(new ConfigurationChangeEvent(this));
     }
 
     @Override
@@ -221,6 +222,11 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
                 }
             }
         }
+    }
+
+    @Override
+    public Set<String> getListenedConfigDataIds() {
+        return CONFIG_LISTENERS_MAP.keySet();
     }
 
     @Override
@@ -277,11 +283,11 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
                 throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
+            LOGGER.error("error occurred while completing the future:", e);
         }
     }
 
-    private static void initSeataConfig() {
+    private void initSeataConfig() {
         String etcdConfigKey = getEtcdConfigKey();
         CompletableFuture<GetResponse> future = getClient().getKVClient().get(ByteSequence.from(etcdConfigKey, UTF_8));
         try {
@@ -290,10 +296,10 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
             if (!kvs.isEmpty()) {
                 seataConfig = ConfigProcessor.processConfig(new String(kvs.get(0).getValue().getBytes(), StandardCharsets.UTF_8), getEtcdDataType());
 
-                EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null);
+                EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null, this);
                 CONFIG_LISTENERS_MAP.computeIfAbsent(etcdConfigKey, key -> new ConcurrentSet<>())
                         .add(etcdListener);
-                etcdListener.onProcessEvent(new ConfigurationChangeEvent());
+                etcdListener.onProcessEvent(new ConfigurationChangeEvent(this));
             }
         } catch (Exception e) {
             LOGGER.error("init config properties error", e);
@@ -303,10 +309,12 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
     private static String getEtcdConfigKey() {
         return ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
     }
+
     private static String getEtcdDataType() {
         return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
     }
-    private static String getSeataConfigStr() {
+
+    private String getSeataConfigStr() {
         StringBuilder sb = new StringBuilder();
 
         Enumeration<?> enumeration = seataConfig.propertyNames();
@@ -329,6 +337,8 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
             TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("etcdListener", MAX_LISTENER_THREAD));
+        private final EtcdConfigurationSource source;
+
 
         /**
          * Instantiates a new Etcd listener.
@@ -336,9 +346,10 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
          * @param dataId   the data id
          * @param listener the listener
          */
-        public EtcdListener(String dataId, ConfigurationChangeListener listener) {
+        public EtcdListener(String dataId, ConfigurationChangeListener listener, EtcdConfigurationSource source) {
             this.dataId = dataId;
             this.listener = listener;
+            this.source = source;
         }
 
         /**
@@ -366,7 +377,7 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
                     if (dataId.equals(getEtcdConfigKey())) {
                         byte[] bytes = watchResponse.getEvents().get(0).getKeyValue().getValue().getBytes();
                         Properties seataConfigNew;
-                        try  {
+                        try {
                             seataConfigNew = ConfigProcessor.processConfig(new String(bytes, StandardCharsets.UTF_8), getEtcdDataType());
                         } catch (IOException e) {
                             LOGGER.error("load config properties error", e);
@@ -375,17 +386,17 @@ public class EtcdConfigurationSource implements RemoteConfigurationSource
 
                         for (Map.Entry<String, Set<ConfigurationChangeListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
                             String key = entry.getKey();
-                            String valueOld = seataConfig.getProperty(key, "");
+                            String valueOld = source.seataConfig.getProperty(key, "");
                             String valueNew = seataConfigNew.getProperty(key, "");
                             if (!valueOld.equals(valueNew)) {
                                 for (ConfigurationChangeListener changeListener : entry.getValue()) {
                                     event.setDataId(key).setNewValue(valueNew);
-                                    ConfigurationChangeListener listener = ((EtcdListener) changeListener).getTargetListener();
+                                    ConfigurationChangeListener listener = ((EtcdListener)changeListener).getTargetListener();
                                     listener.onProcessEvent(event);
                                 }
                             }
                         }
-                        seataConfig = seataConfigNew;
+                        source.seataConfig = seataConfigNew;
                         return;
                     }
 
