@@ -22,6 +22,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5243](https://github.com/seata/seata/pull/5243)] optimize kryo 5.4.0 optimize compatibility with jdk17
 - [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
 - [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
+- [[#5273](https://github.com/seata/seata/pull/5273)] Optimize the compilation configuration of the `protobuf-maven-plugin` plug-in to solve the problem of too long command lines in higher versions.
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
@@ -42,6 +43,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
+- [GoodBoyCoder](https://github.com/GoodBoyCoder)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
