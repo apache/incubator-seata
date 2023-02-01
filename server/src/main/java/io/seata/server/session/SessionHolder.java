@@ -172,11 +172,8 @@ public class SessionHolder {
                             removeInErrorState(globalSession);
                             break;
                         case AsyncCommitting:
-                            queueToAsyncCommitting(globalSession);
-                            break;
                         case Committing:
                         case CommitRetrying:
-                            queueToRetryCommit(globalSession);
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());
@@ -187,7 +184,6 @@ public class SessionHolder {
                                 case TimeoutRollbackRetrying:
                                     globalSession.getBranchSessions().parallelStream()
                                         .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-                                    queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
@@ -239,10 +235,6 @@ public class SessionHolder {
         }
     }
 
-    private static void queueToAsyncCommitting(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         branchSessions.forEach(branchSession -> {
@@ -254,15 +246,7 @@ public class SessionHolder {
         });
     }
 
-    private static void queueToRetryCommit(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
-    private static void queueToRetryRollback(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
     //endregion
 
@@ -278,45 +262,6 @@ public class SessionHolder {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return ROOT_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets async committing session manager.
-     *
-     * @return the async committing session manager
-     */
-    @Deprecated
-    public static SessionManager getAsyncCommittingSessionManager() {
-        if (ASYNC_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return ASYNC_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry committing session manager.
-     *
-     * @return the retry committing session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryCommittingSessionManager() {
-        if (RETRY_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry rollbacking session manager.
-     *
-     * @return the retry rollbacking session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryRollbackingSessionManager() {
-        if (RETRY_ROLLBACKING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_ROLLBACKING_SESSION_MANAGER;
     }
 
     //endregion
