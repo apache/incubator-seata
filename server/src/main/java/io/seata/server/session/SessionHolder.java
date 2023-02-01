@@ -36,6 +36,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
@@ -191,7 +192,6 @@ public class SessionHolder {
             && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
-                globalSession.addSessionLifecycleListener(getRootSessionManager());
                 switch (globalStatus) {
                     case TimeoutRollbacked:
                     case Rollbacked:
@@ -218,11 +218,9 @@ public class SessionHolder {
                         removeInErrorState(globalSession);
                         break;
                     case AsyncCommitting:
-                        queueToAsyncCommitting(globalSession);
                         break;
                     case Committing:
                     case CommitRetrying:
-                        queueToRetryCommit(globalSession);
                         break;
                     default: {
                         if (acquireLock) {
@@ -238,7 +236,6 @@ public class SessionHolder {
                             case RollbackRetrying:
                             case TimeoutRollbacking:
                             case TimeoutRollbackRetrying:
-                                queueToRetryRollback(globalSession);
                                 break;
                             case Begin:
                                 if (storeMode == SessionMode.RAFT) {
@@ -305,10 +302,6 @@ public class SessionHolder {
         }
     }
 
-    private static void queueToAsyncCommitting(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         FileLockManager fileLockManager =
@@ -324,15 +317,7 @@ public class SessionHolder {
         });
     }
 
-    private static void queueToRetryCommit(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
-    private static void queueToRetryRollback(GlobalSession globalSession) {
-        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-        // [optimize-session-manager] add--> x (duplicated code,already reloaded)
-    }
 
     //endregion
 
@@ -344,14 +329,12 @@ public class SessionHolder {
      * @return the root session manager
      */
     public static SessionManager getRootSessionManager() {
-        if (ROOT_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return ROOT_SESSION_MANAGER;
+        return getRootSessionManager(RaftClusterContext.getGroup());
     }
 
     public static SessionManager getRootSessionManager(String group) {
-        return SESSION_MANAGER_MAP.get(group);
+        SessionManager sessionManager = SESSION_MANAGER_MAP.get(group);
+        return sessionManager != null ? sessionManager : ROOT_SESSION_MANAGER;
     }
 
     /**

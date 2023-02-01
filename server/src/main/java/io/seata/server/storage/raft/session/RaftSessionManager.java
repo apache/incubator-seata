@@ -52,11 +52,7 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void addGlobalSession(GlobalSession globalSession) throws TransactionException {
-        if (!getSessionMap().containsKey(globalSession.getXid())) {
-            super.addGlobalSession(globalSession);
-        } else {
-            onStatusChange(globalSession, globalSession.getStatus());
-        }
+        super.addGlobalSession(globalSession);
     }
 
     @Override
@@ -119,6 +115,7 @@ public class RaftSessionManager extends FileSessionManager {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = closureStatus -> {
             if (closureStatus.isOk()) {
+                branchSession.setStatus(branchStatus);
                 completableFuture.complete(true);
             } else {
                 completableFuture.completeExceptionally(

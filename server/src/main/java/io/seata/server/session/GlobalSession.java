@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -204,6 +204,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.status = GlobalStatus.Begin;
         this.beginTime = System.currentTimeMillis();
         this.active = true;
+        SessionHolder.getRootSessionManager().onBegin(this);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBegin(this);
         }
@@ -214,6 +215,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (GlobalStatus.Rollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
+        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, status);
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
@@ -222,9 +224,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
-        if (!RaftServerFactory.getInstance().isRaftMode()) {
-            branchSession.setStatus(status);
-        }
+        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
@@ -238,6 +238,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void close() throws TransactionException {
         if (active) {
+            SessionHolder.getRootSessionManager().onClose(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onClose(this);
             }
@@ -249,10 +250,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (isSuccessEnd()) {
             // Clean locks first
             clean();
+            SessionHolder.getRootSessionManager().onSuccessEnd(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onSuccessEnd(this);
             }
         } else {
+            SessionHolder.getRootSessionManager().onFailEnd(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onFailEnd(this);
             }
@@ -305,6 +308,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void addBranch(BranchSession branchSession) throws TransactionException {
+        SessionHolder.getRootSessionManager().onAddBranch(this, branchSession);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
         }
@@ -340,6 +344,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void removeBranch(BranchSession branchSession) throws TransactionException {
+        SessionHolder.getRootSessionManager().onRemoveBranch(this, branchSession);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
@@ -775,21 +780,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
         this.setStatus(GlobalStatus.AsyncCommitting);
         // [optimize-session-manager] add--> root manager.update
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
         this.setStatus(GlobalStatus.CommitRetrying);
         // [optimize-session-manager] add--> root manager.update
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
         GlobalStatus newStatus;
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {

@@ -33,7 +33,6 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
             (RaftSessionManager)SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());
         raftSessionManager.addGlobalSession(globalSession);
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         if (logger.isDebugEnabled()) {
             logger.debug("add session xid: {}", globalSession.getXid());
         }
