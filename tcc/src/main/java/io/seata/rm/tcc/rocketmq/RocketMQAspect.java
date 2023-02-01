@@ -22,6 +22,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 public class RocketMQAspect implements BeanPostProcessor {
+
     public static Logger LOGGER = LoggerFactory.getLogger(RocketMQAspect.class);
 
     private final TCCRocketMQ tccRocketMQ;

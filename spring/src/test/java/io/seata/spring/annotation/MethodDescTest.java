@@ -17,14 +17,15 @@ package io.seata.spring.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import io.seata.common.exception.FrameworkException;
+
 import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkException;
 import io.seata.core.context.RootContext;
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.aop.framework.ProxyFactory;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +47,7 @@ public class MethodDescTest {
 
     @Test
     public void testGetAnnotation() throws NoSuchMethodException {
-        GlobalTransactionalInterceptor globalTransactionalInterceptor = new GlobalTransactionalInterceptor(null);
+        GlobalTransactionalInterceptorHandler globalTransactionalInterceptor = new GlobalTransactionalInterceptorHandler(null, null, null);
         Method method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         targetClass = Mockito.mock(MockBusiness.class).getClass();
         transactional = globalTransactionalInterceptor.getAnnotation(method, targetClass, GlobalTransactional.class);
@@ -74,7 +75,7 @@ public class MethodDescTest {
         MockClassAnnotation mockClassAnnotation = new MockClassAnnotation();
         ProxyFactory proxyFactory = new ProxyFactory();
         proxyFactory.setTarget(mockClassAnnotation);
-        proxyFactory.addAdvice(new GlobalTransactionalInterceptor(null));
+        proxyFactory.addAdvice(new AspectTransactionalInterceptor());
         Object proxy = proxyFactory.getProxy();
         mockClassAnnotation = (MockClassAnnotation)proxy;
         mockClassAnnotation.toString();

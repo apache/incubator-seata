@@ -217,7 +217,7 @@ public class DefaultCoordinatorTest {
     public static void afterClass() throws Exception {
 
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getRootSessionManager().allSessions();
         for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
             asyncGlobalSession.closeAndClean();
         }
