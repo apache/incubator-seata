@@ -80,6 +80,9 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
      * @return the RowLock list
      */
     private Stream<RowLock> filterAndMap(GlobalLockParam param, BranchSession branchSession) {
+        if (CollectionUtils.isEmpty(branchSession.getLockHolder())) {
+            return Stream.empty();
+        }
 
         final String tableName = param.getTableName();
 
