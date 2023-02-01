@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
 - [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
 - [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
+- [[#5266](https://github.com/seata/seata/pull/5265)] fix server console has queried the released lock
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
 - [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
 
