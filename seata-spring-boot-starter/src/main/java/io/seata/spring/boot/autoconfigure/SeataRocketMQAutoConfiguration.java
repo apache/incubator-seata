@@ -25,10 +25,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
-@ConditionalOnClass(DefaultMQProducer.class)
+@ConditionalOnClass(name = "org.apache.rocketmq.client.producer.DefaultMQProducer")
 @ConditionalOnBean(DefaultMQProducer.class)
 @ConditionalOnExpression("${seata.enabled:true} && ${seata.rocketmq-enabled:false}")
-public class RocketMQAutoConfiguration {
+public class SeataRocketMQAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
