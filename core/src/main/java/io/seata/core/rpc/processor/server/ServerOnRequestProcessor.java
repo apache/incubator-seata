@@ -179,18 +179,16 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     }
                 }
             } else {
-                List<AbstractResultMessage> results = new CopyOnWriteArrayList<>();
-                List<CompletableFuture<Void>> completableFutures = null;
+                List<AbstractResultMessage> results = new ArrayList<>();
+                List<CompletableFuture<AbstractResultMessage>> completableFutures = null;
                 for (int i = 0; i < ((MergedWarpMessage)message).msgs.size(); i++) {
                     if (PARALLEL_REQUEST_HANDLE) {
                         if (completableFutures == null) {
                             completableFutures = new ArrayList<>();
                         }
                         int finalI = i;
-                        completableFutures.add(CompletableFuture.runAsync(() -> {
-                            results.add(finalI, handleRequestsByMergedWarpMessage(
-                                ((MergedWarpMessage)message).msgs.get(finalI), rpcContext));
-                        }));
+                        completableFutures.add(CompletableFuture.supplyAsync(() -> handleRequestsByMergedWarpMessage(
+                            ((MergedWarpMessage)message).msgs.get(finalI), rpcContext)));
                     } else {
                         results.add(i,
                             handleRequestsByMergedWarpMessage(((MergedWarpMessage)message).msgs.get(i), rpcContext));
@@ -198,7 +196,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                 }
                 if (CollectionUtils.isNotEmpty(completableFutures)) {
                     try {
-                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get();
+                        for (CompletableFuture<AbstractResultMessage> completableFuture : completableFutures) {
+                            results.add(completableFuture.get());
+                        }
                     } catch (InterruptedException | ExecutionException e) {
                         LOGGER.error("handle request error: {}", e.getMessage(), e);
                     }
