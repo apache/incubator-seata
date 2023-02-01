@@ -95,6 +95,7 @@ public class RaftSessionManager extends FileSessionManager {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = closureStatus -> {
             if (closureStatus.isOk()) {
+                globalSession.setStatus(globalStatus);
                 completableFuture.complete(true);
             } else {
                 completableFuture.completeExceptionally(

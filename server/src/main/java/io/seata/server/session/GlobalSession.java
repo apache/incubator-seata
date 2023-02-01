@@ -215,19 +215,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (GlobalStatus.Rollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
-        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, status);
-        this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
+        SessionHolder.getRootSessionManager().onStatusChange(this, status);
     }
 
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
-        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
+        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
     }
 
     @Override
@@ -780,15 +779,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-        this.setStatus(GlobalStatus.AsyncCommitting);
-        // [optimize-session-manager] add--> root manager.update
-        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
+       changeGlobalStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
-        this.setStatus(GlobalStatus.CommitRetrying);
-        // [optimize-session-manager] add--> root manager.update
-        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
+        changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
@@ -799,8 +794,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         } else {
             newStatus = GlobalStatus.RollbackRetrying;
         }
-        // [optimize-session-manager] add--> root manager.update
-        SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, newStatus);
+        changeGlobalStatus(newStatus);
     }
 
     @Override
