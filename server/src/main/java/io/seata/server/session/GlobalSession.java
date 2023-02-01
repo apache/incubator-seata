@@ -779,7 +779,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-       changeGlobalStatus(GlobalStatus.AsyncCommitting);
+        changeGlobalStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
