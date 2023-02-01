@@ -86,7 +86,7 @@ public abstract class AbstractConfiguration implements Configuration
             }
 
             if (this.printGetSuccessLog) {
-                LOGGER.debug("Get config value ['{}' = '{}'] of type [{}] from source '{}' by configuration '{}'",
+                LOGGER.debug("Get config ['{}' = '{}'] of type [{}] from source '{}' by configuration '{}'",
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
             }
 

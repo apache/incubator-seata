@@ -122,7 +122,7 @@ public class SeataConfiguration extends CacheableConfiguration {
         T defaultValue = defaultConfigManager.getConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT, dataType);
 
         if (defaultValue != null) {
-            LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from the defaultConfigManager '{}' by configuration '{}'",
+            LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from defaultConfigManager '{}' by configuration '{}'",
                     dataId, defaultValue, defaultValue.getClass().getName(), defaultConfigManager.getTypeName(), this.getTypeName());
             return defaultValue;
         }
