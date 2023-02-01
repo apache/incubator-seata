@@ -2,11 +2,29 @@ name: "build"
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
   pull_request:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
 
 jobs:
+  build_arm64-binary: 
+     runs-on: ubuntu-latest
+     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/2.x') }}
+     strategy:
+      fail-fast: false
+     steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      - name: Build arm-binary
+        run: |
+               docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+               arm64v8/ubuntu:20.04 \
+               bash -exc 'apt-get update -y && \
+                apt-get install maven -y && \
+                mvn -Prelease-seata -Dmaven.test.skip=true clean install -U'
+
   build:
     name: "build"
     runs-on: ubuntu-latest

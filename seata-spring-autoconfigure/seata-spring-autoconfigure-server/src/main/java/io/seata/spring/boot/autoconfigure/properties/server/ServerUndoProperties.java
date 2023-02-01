@@ -18,6 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.server;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
+import static io.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
 
 /**
@@ -26,23 +28,23 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PR
 @Component
 @ConfigurationProperties(prefix = SERVER_UNDO_PREFIX)
 public class ServerUndoProperties {
-    private Integer logSaveDays = 7;
-    private Long logDeletePeriod = 86400000L;
+    private short logSaveDays = DEFAULT_SAVE_DAYS;
+    private long logDeletePeriod = DEFAULT_UNDO_LOG_DELETE_PERIOD;
 
-    public Integer getLogSaveDays() {
+    public short getLogSaveDays() {
         return logSaveDays;
     }
 
-    public ServerUndoProperties setLogSaveDays(Integer logSaveDays) {
+    public ServerUndoProperties setLogSaveDays(short logSaveDays) {
         this.logSaveDays = logSaveDays;
         return this;
     }
 
-    public Long getLogDeletePeriod() {
+    public long getLogDeletePeriod() {
         return logDeletePeriod;
     }
 
-    public ServerUndoProperties setLogDeletePeriod(Long logDeletePeriod) {
+    public ServerUndoProperties setLogDeletePeriod(long logDeletePeriod) {
         this.logDeletePeriod = logDeletePeriod;
         return this;
     }

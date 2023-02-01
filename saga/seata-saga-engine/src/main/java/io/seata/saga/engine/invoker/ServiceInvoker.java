@@ -26,10 +26,10 @@ public interface ServiceInvoker {
 
     /**
      * invoke service
-     * @param serviceTaskState
-     * @param input
-     * @return
-     * @throws Throwable
+     * @param serviceTaskState the service task state
+     * @param input optional params
+     * @return the invoker result
+     * @throws Throwable the throwable
      */
     Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable;
 }

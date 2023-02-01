@@ -27,7 +27,7 @@ import io.seata.core.rpc.Disposable;
  *
  * @author sharajava
  */
-public interface SessionManager extends SessionLifecycleListener, Disposable {
+public interface SessionManager extends Disposable {
 
     /**
      * Add global session.
@@ -119,7 +119,87 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param globalSession the global session
      * @param lockCallable the lock Callable
      * @return the value
+     * @throws TransactionException the transaction exception
      */
+    @Deprecated
     <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException;
+
+    /**
+     * On begin.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onBegin(GlobalSession globalSession) throws TransactionException;
+
+    /**
+     * On status change.
+     *
+     * @param globalSession the global session
+     * @param status        the status
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onStatusChange(GlobalSession globalSession, GlobalStatus status) throws TransactionException;
+
+    /**
+     * On branch status change.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @param status        the status
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
+            throws TransactionException;
+
+    /**
+     * On add branch.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
+
+    /**
+     * On remove branch.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onRemoveBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
+
+    /**
+     * On close.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onClose(GlobalSession globalSession) throws TransactionException;
+
+    /**
+     * On end.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onSuccessEnd(GlobalSession globalSession) throws TransactionException;
+
+    /**
+     * On fail end.
+     *
+     * @param globalSession the global session
+     * @throws TransactionException the transaction exception
+     */
+    @Deprecated
+    void onFailEnd(GlobalSession globalSession) throws TransactionException;
 }
