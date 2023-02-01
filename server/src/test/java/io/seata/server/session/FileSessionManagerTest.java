@@ -289,7 +289,6 @@ public class FileSessionManagerTest {
 
         try {
             for (GlobalSession globalSession : globalSessions) {
-                globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.begin();
             }
             final GlobalSessionParam globalSessionParam = new GlobalSessionParam();

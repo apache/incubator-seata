@@ -344,7 +344,7 @@ public class DefaultCoreTest {
     @AfterEach
     public void releaseSessionManager() throws Exception {
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getRootSessionManager().allSessions();
         for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
             asyncGlobalSession.closeAndClean();
         }
