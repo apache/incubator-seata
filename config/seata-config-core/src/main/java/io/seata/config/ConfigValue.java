@@ -18,7 +18,6 @@ package io.seata.config;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.sun.istack.internal.NotNull;
 import io.seata.common.util.ObjectUtils;
 import io.seata.config.source.ConfigurationSource;
 
@@ -46,12 +45,10 @@ public class ConfigValue<T> {
     }
 
 
-    @NotNull
     public T getValue() {
         return value;
     }
 
-    @NotNull
     public String getStringValue() {
         return stringValue;
     }
