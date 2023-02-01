@@ -99,6 +99,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
+    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
     /**
      * Add boolean.
@@ -134,8 +135,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public boolean remove(Long branchId) {
         return this.remove(this.getBranch(branchId));
     }
-
-    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
 
     /**
      * Can be committed async boolean.
