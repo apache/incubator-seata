@@ -66,7 +66,7 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     }
 
 
-    protected ConfigValue<?> getConfigFromSources(String dataId, long timeoutMills) {
+    protected ConfigInfo<?> getConfigFromSources(String dataId, long timeoutMills) {
         if (StringUtils.isBlank(dataId)) {
             return null;
         }
@@ -90,19 +90,22 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getTypeName());
             }
 
-            return new ConfigValue(value, source);
+            return new ConfigInfo<>(value, source);
         }
 
         return null;
     }
 
-    protected <T> ConfigValue<T> getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
-        ConfigValue<?> configValue = getConfigFromSources(dataId, timeoutMills);
-        T value = ConvertUtils.convert(configValue, dataType);
-        return new ConfigValue<>(value, configValue.getFromSource());
+    protected <T> ConfigInfo<T> getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
+        ConfigInfo<?> configInfo = getConfigFromSources(dataId, timeoutMills);
+        if (configInfo == null) {
+            return null;
+        }
+        T value = ConvertUtils.convert(configInfo.getValue(), dataType);
+        return new ConfigInfo<>(value, configInfo.getFromSource());
     }
 
-    protected ConfigValue<?> getConfigFromSources(String dataId) {
+    protected ConfigInfo<?> getConfigFromSources(String dataId) {
         return getConfigFromSources(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
@@ -117,8 +120,8 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
-        ConfigValue<T> configValue = this.getConfigFromSources(dataId, timeoutMills, dataType);
-        return configValue == null ? defaultValue : configValue.getValue();
+        ConfigInfo<T> configInfo = this.getConfigFromSources(dataId, timeoutMills, dataType);
+        return configInfo == null ? defaultValue : configInfo.getValue();
     }
 
     //endregion
@@ -165,6 +168,8 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
     @Override
     public synchronized void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        LOGGER.debug("Add config listener: dataId = {}, listener = {}", dataId, listener);
+
         Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
         dataIdListeners.add(listener);
         this.addConfigListenerToSources(dataId);
@@ -174,6 +179,7 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
         if (source instanceof ConfigListenerManager) {
             ConfigListenerManager manager = (ConfigListenerManager)source;
             manager.addConfigListener(dataId, this);
+            LOGGER.debug("Add config listener to source: dataId = {}, source = {}", dataId, source.getTypeName());
         }
     }
 
@@ -193,6 +199,8 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
 
     @Override
     public synchronized void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        LOGGER.debug("Remove config listener: dataId = {}, listener = {}", dataId, listener);
+
         Set<ConfigurationChangeListener> dataIdListeners = this.listeners.computeIfAbsent(dataId, key -> new HashSet<>());
         dataIdListeners.remove(listener);
 
@@ -203,9 +211,10 @@ public abstract class AbstractConfiguration implements Configuration, UpdatableC
     }
 
     protected synchronized void removeConfigListenerFromSources(String dataId) {
-        this.sources.forEach(s -> {
-            if (s instanceof ConfigListenerManager) {
-                ((ConfigListenerManager)s).removeConfigListener(dataId, this);
+        this.sources.forEach(source -> {
+            if (source instanceof ConfigListenerManager) {
+                ((ConfigListenerManager)source).removeConfigListener(dataId, this);
+                LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getTypeName());
             }
         });
     }

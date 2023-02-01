@@ -37,7 +37,7 @@ public class DefaultConfiguration extends AbstractConfiguration
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConfiguration.class);
 
-    public static final String DEFAULT_CONFIGURATION_TYPE_NAME = "seata-default-configuration";
+    public static final String DEFAULT_TYPE_NAME = "seata-default";
     public static final String DEFAULT_CONFIG_MANAGER_TYPE_NAME = "seata-default-config-manager";
 
 
@@ -49,17 +49,23 @@ public class DefaultConfiguration extends AbstractConfiguration
 
 
     public DefaultConfiguration() {
-        this(new ConcurrentHashMap<>());
+        super(DEFAULT_TYPE_NAME);
+        this.configCache = new ConcurrentHashMap<>();
+        this.defaultConfigManager = this.buildDefaultConfigManager();
     }
 
-    public DefaultConfiguration(Map<String, ValueWrapper> configCache) {
-        super(DEFAULT_CONFIGURATION_TYPE_NAME);
-        this.configCache = configCache;
-        this.defaultConfigManager = this.buildDefaultConfigManager();
+    public DefaultConfiguration(String typeName) {
+        this(typeName, new ConcurrentHashMap<>());
     }
 
     public DefaultConfiguration(String typeName, DefaultConfigManager defaultConfigManager) {
         this(typeName, new ConcurrentHashMap<>(), defaultConfigManager);
+    }
+
+    public DefaultConfiguration(String typeName, Map<String, ValueWrapper> configCache) {
+        super(typeName);
+        this.configCache = configCache;
+        this.defaultConfigManager = this.buildDefaultConfigManager();
     }
 
     public DefaultConfiguration(String typeName, Map<String, ValueWrapper> configCache, DefaultConfigManager defaultConfigManager) {
@@ -77,7 +83,7 @@ public class DefaultConfiguration extends AbstractConfiguration
      * @return the DefaultValueConfiguration
      */
     protected DefaultConfigManager buildDefaultConfigManager() {
-        DefaultConfiguration defaultConfigManager = new DefaultConfiguration(DEFAULT_CONFIG_MANAGER_TYPE_NAME, null);
+        DefaultConfiguration defaultConfigManager = new DefaultConfiguration(DEFAULT_CONFIG_MANAGER_TYPE_NAME, (DefaultConfigManager)null);
         defaultConfigManager.disablePrintGetSuccessLog();
 
         // load defaultValue source
@@ -90,17 +96,19 @@ public class DefaultConfiguration extends AbstractConfiguration
     }
 
     protected <T> T getDefaultValueFromDefaultConfigManager(String dataId, Class<T> dataType) {
-        T defaultValue = null;
-
         if (defaultConfigManager != null) {
-            defaultValue = defaultConfigManager.getConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT, dataType);
+            T defaultValue = defaultConfigManager.getConfig(dataId, Configuration.DEFAULT_CONFIG_TIMEOUT, dataType);
+
             if (defaultValue != null) {
-                LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from the defaultConfigManager '{}'",
-                        dataId, defaultValue, defaultValue.getClass().getName(), defaultConfigManager.getTypeName());
+                LOGGER.debug("Get config defaultValue ['{}' = '{}'] of type [{}] from the defaultConfigManager '{}' by configuration '{}'",
+                        dataId, defaultValue, defaultValue.getClass().getName(), defaultConfigManager.getTypeName(), this.getTypeName());
+                return defaultValue;
             }
+        } else {
+            LOGGER.debug("The defaultConfigManager is null, do not get config '{}' defaultValue. (Current is '{}'.)", dataId, this.getTypeName());
         }
 
-        return defaultValue;
+        return null;
     }
 
     //endregion
@@ -113,26 +121,26 @@ public class DefaultConfiguration extends AbstractConfiguration
      */
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
-        ConfigValue<T> configValue;
+        ConfigInfo<T> configInfo;
 
         if (configCache != null) {
             // Get config from cache
             ValueWrapper cache = CollectionUtils.computeIfAbsent(configCache, dataId, key -> {
                 // Get config from sources
-                ConfigValue<T> config = this.getConfigFromSources(dataId, timeoutMills, dataType);
+                ConfigInfo<T> config = this.getConfigFromSources(dataId, timeoutMills, dataType);
 
                 // Wrap config, also when config is null
                 return ValueWrapper.create(config);
             });
 
-            configValue = (ConfigValue)cache.getValue();
+            configInfo = (ConfigInfo)cache.getValue();
         } else {
             // Get config from sources
-            configValue = this.getConfigFromSources(dataId, timeoutMills, dataType);
+            configInfo = this.getConfigFromSources(dataId, timeoutMills, dataType);
         }
 
-        if (configValue != null) {
-            return configValue.getValue();
+        if (configInfo != null && configInfo.getValue() != null) {
+            return configInfo.getValue();
         }
 
         // Return default value
@@ -175,7 +183,7 @@ public class DefaultConfiguration extends AbstractConfiguration
         if (this.configCache != null && this.configCache.containsKey(dataId)) {
             ValueWrapper cache = this.configCache.get(dataId);
             if (cache != null) {
-                ConfigValue<?> configFromCache = (ConfigValue)cache.getValue();
+                ConfigInfo<?> configFromCache = (ConfigInfo)cache.getValue();
 
                 if (configFromCache != null && configFromCache.getStringValue().equals(event.getNewValue())) {
                     super.logChangeEvent(event);
@@ -211,4 +219,15 @@ public class DefaultConfiguration extends AbstractConfiguration
     }
 
     //endregion
+
+
+    @Override
+    public String toString() {
+        return '[' +
+                "name='" + getTypeName() + '\'' +
+                ", mainSource=" + (getMainSource() != null ? getMainSource().getTypeName() : null) +
+                ", cache.size=" + (configCache != null ? configCache.size() : null) +
+                ", sources.size=" + getSources().size() +
+                ']';
+    }
 }

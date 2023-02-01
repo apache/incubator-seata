@@ -77,4 +77,13 @@ public class ValueWrapper implements Serializable {
     }
 
     //endregion
+
+
+    @Override
+    public String toString() {
+        return '[' +
+                "value=" + value +
+                ", type=" + type +
+                ']';
+    }
 }

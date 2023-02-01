@@ -17,24 +17,28 @@ package io.seata.config;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.annotation.Nonnull;
 
 import io.seata.common.util.ObjectUtils;
 import io.seata.config.source.ConfigurationSource;
 
 /**
- * The type ConfigValue.
+ * The type ConfigInfo.
  *
  * @author wang.liang
  */
-public class ConfigValue<T> {
+public class ConfigInfo<T> {
 
     private final T value;
     private final String stringValue;
+
     private final ConfigurationSource fromSource;
+
     private final Date time = new Date();
+    private String timeStr;
 
 
-    public ConfigValue(T value, ConfigurationSource fromSource) {
+    public ConfigInfo(T value, ConfigurationSource fromSource) {
         if (ObjectUtils.isNullOrBlank(value)) {
             throw new IllegalArgumentException("The config value must not be null or blank.");
         }
@@ -45,10 +49,12 @@ public class ConfigValue<T> {
     }
 
 
+    @Nonnull
     public T getValue() {
         return value;
     }
 
+    @Nonnull
     public String getStringValue() {
         return stringValue;
     }
@@ -61,11 +67,27 @@ public class ConfigValue<T> {
         return fromSource != null ? fromSource.getTypeName() : null;
     }
 
+    @Nonnull
     public Date getTime() {
         return time;
     }
 
+    @Nonnull
     public String getStringTime() {
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+        if (timeStr == null) {
+            timeStr = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").format(new Date());
+        }
+
+        return timeStr;
+    }
+
+
+    @Override
+    public String toString() {
+        return '{' +
+                "v=" + stringValue +
+                ", s=" + getFromSourceTypeName() +
+                ", t=" + getStringTime() +
+                '}';
     }
 }
