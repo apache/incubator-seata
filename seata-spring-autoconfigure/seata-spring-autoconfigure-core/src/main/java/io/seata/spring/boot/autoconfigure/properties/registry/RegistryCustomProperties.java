@@ -26,7 +26,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTO
 @Component
 @ConfigurationProperties(prefix = REGISTRY_CUSTOM_PREFIX)
 public class RegistryCustomProperties {
-    private String name = "";
+    private String name;
 
     public String getName() {
         return name;
