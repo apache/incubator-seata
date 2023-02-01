@@ -130,6 +130,7 @@ public abstract class AbstractSessionManager implements SessionManager {
     @Override
     public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
         throws TransactionException {
+        branchSession.setStatus(status);
         updateBranchSessionStatus(branchSession, status);
     }
 
