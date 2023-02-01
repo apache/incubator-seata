@@ -130,13 +130,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                     seataDataSource.setDriverClassName(druidDataSource.getDriverClassName());
                     seataDataSource.setDriverClassLoader(druidDataSource.getDriverClassLoader());
                     int maxActive =
-                        Math.max(druidDataSource.getMaxActive(), BigDecimal.valueOf(druidDataSource.getMaxActive())
+                        Math.max(5, BigDecimal.valueOf(druidDataSource.getMaxActive())
                             .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
                     seataDataSource.setMaxActive(maxActive);
                     seataDataSource.setPassword(druidDataSource.getPassword());
                     seataDataSource.setUsername(druidDataSource.getUsername());
                     int minIdle =
-                        Math.max(druidDataSource.getMinIdle(), BigDecimal.valueOf(druidDataSource.getMinIdle())
+                        Math.max(2, BigDecimal.valueOf(druidDataSource.getMinIdle())
                             .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
                     seataDataSource.setMinIdle(minIdle);
                     seataDataSource.setMaxWait(druidDataSource.getMaxWait());
@@ -162,11 +162,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 HikariConfig hikariConfig = new HikariConfig();
                 hikariConfig.copyStateTo((HikariConfig)targetDataSource);
                 int maxActive =
-                    Math.max(hikariConfig.getMaximumPoolSize(), BigDecimal.valueOf(hikariConfig.getMaximumPoolSize())
+                    Math.max(5, BigDecimal.valueOf(hikariConfig.getMaximumPoolSize())
                         .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
                 hikariConfig.setMaximumPoolSize(maxActive);
                 int minIdle =
-                    Math.max(hikariConfig.getMinimumIdle(), BigDecimal.valueOf(hikariConfig.getMinimumIdle())
+                    Math.max(2, BigDecimal.valueOf(hikariConfig.getMinimumIdle())
                         .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
                 hikariConfig.setMinimumIdle(minIdle);
                 this.seataDataSource = new HikariDataSource(hikariConfig);
