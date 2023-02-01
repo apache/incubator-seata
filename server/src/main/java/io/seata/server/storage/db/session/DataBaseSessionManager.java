@@ -53,6 +53,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
      * The Task name.
      */
     protected String taskName;
+    private volatile boolean initialized = false;
 
     /**
      * Instantiates a new Data base session manager.
@@ -74,6 +75,12 @@ public class DataBaseSessionManager extends AbstractSessionManager
     @Override
     public void init() {
         transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

@@ -20,6 +20,9 @@ spring:
     name: seata-server
 
 logging:
+  level:
+    io.seata.config: DEBUG
+    io.seata.config.source.impl.FileConfigSource: INFO
   config: classpath:logback-spring.xml
   file:
     path: ${user.home}/logs/seata

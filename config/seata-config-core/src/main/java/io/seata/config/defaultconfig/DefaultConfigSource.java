@@ -15,12 +15,12 @@
  */
 package io.seata.config.defaultconfig;
 
-import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.ConfigSource;
 
 /**
  * The interface DefaultConfigSource.
  *
  * @author wang.liang
  */
-public interface DefaultConfigSource extends ConfigurationSource {
+public interface DefaultConfigSource extends ConfigSource {
 }

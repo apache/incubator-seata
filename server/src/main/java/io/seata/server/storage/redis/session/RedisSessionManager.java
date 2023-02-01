@@ -51,6 +51,7 @@ public class RedisSessionManager extends AbstractSessionManager
      * The Task name.
      */
     protected String taskName;
+    private volatile boolean initialized = false;
 
     /**
      * Instantiates a new Data base session manager.
@@ -73,6 +74,12 @@ public class RedisSessionManager extends AbstractSessionManager
     @Override
     public void init() {
         transactionStoreManager = RedisTransactionStoreManager.getInstance();
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

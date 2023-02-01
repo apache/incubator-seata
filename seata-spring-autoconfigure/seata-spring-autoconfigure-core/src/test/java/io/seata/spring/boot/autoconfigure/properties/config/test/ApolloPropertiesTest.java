@@ -17,7 +17,7 @@ package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.apollo.ApolloConfigurationSource;
+import io.seata.config.apollo.ApolloConfigSource;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
@@ -36,11 +36,11 @@ class ApolloPropertiesTest extends BasePropertiesTest {
     public void testConfigApolloProperties() {
         Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getString(ApolloConfigurationSource.getApolloMetaFileKey()));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getString(ApolloConfigurationSource.getApolloSecretFileKey()));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getString(ApolloConfigurationSource.getApolloAppIdFileKey()));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getString(ApolloConfigurationSource.getApolloNamespaceKey()));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getString(ApolloConfigurationSource.getApolloCluster()));
-        assertEquals(STR_TEST_FFF, currentConfiguration.getString(ApolloConfigurationSource.getApolloConfigService()));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString(ApolloConfigSource.getApolloMetaFileKey()));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString(ApolloConfigSource.getApolloSecretFileKey()));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString(ApolloConfigSource.getApolloAppIdFileKey()));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString(ApolloConfigSource.getApolloNamespaceKey()));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getString(ApolloConfigSource.getApolloCluster()));
+        assertEquals(STR_TEST_FFF, currentConfiguration.getString(ApolloConfigSource.getApolloConfigService()));
     }
 }

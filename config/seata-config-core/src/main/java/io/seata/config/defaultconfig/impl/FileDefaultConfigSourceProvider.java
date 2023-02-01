@@ -18,7 +18,7 @@ package io.seata.config.defaultconfig.impl;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.defaultconfig.DefaultConfigManager;
 import io.seata.config.defaultconfig.DefaultConfigSourceProvider;
-import io.seata.config.source.impl.FileConfigurationSource;
+import io.seata.config.source.impl.FileConfigSource;
 
 import static io.seata.config.source.ConfigSourceOrdered.FILE_DEFAULT_CONFIG_SOURCE_ORDER;
 
@@ -37,8 +37,8 @@ public class FileDefaultConfigSourceProvider implements DefaultConfigSourceProvi
     @Override
     public void provide(DefaultConfigManager defaultConfigManager) {
         // common
-        defaultConfigManager.addSourceLast(new FileConfigurationSource(DEFAULT_CONFIG_COMMON_FILE_NAME));
+        defaultConfigManager.addSourceLast(new FileConfigSource(DEFAULT_CONFIG_COMMON_FILE_NAME));
         // client
-        defaultConfigManager.addSourceLast(new FileConfigurationSource(DEFAULT_CONFIG_CLIENT_FILE_NAME));
+        defaultConfigManager.addSourceLast(new FileConfigSource(DEFAULT_CONFIG_CLIENT_FILE_NAME));
     }
 }

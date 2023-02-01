@@ -27,4 +27,11 @@ public interface Initialize {
      */
     void init();
 
+    /**
+     * whether initialized
+     *
+     * @return the boolean
+     */
+    boolean isInitialized();
+
 }

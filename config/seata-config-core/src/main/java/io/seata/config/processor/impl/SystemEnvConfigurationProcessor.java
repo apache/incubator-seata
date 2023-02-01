@@ -18,7 +18,7 @@ package io.seata.config.processor.impl;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.processor.ConfigurationProcessor;
-import io.seata.config.source.impl.SystemEnvConfigurationSource;
+import io.seata.config.source.impl.SystemEnvConfigSource;
 
 import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_ENV_PROCESSOR_ORDER;
 
@@ -32,6 +32,6 @@ public class SystemEnvConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
     public void process(Configuration configuration) {
-        configuration.addSourceLast(new SystemEnvConfigurationSource());
+        configuration.addSourceLast(new SystemEnvConfigSource());
     }
 }

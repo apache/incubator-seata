@@ -40,6 +40,7 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
      * The locker.
      */
     private Locker locker;
+    private volatile boolean initialized = false;
 
     @Override
     public void init() {
@@ -47,6 +48,12 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
         String datasourceType = ConfigurationFactory.getInstance().getString(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         DataSource lockStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
         locker = new DataBaseLocker(lockStoreDataSource);
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

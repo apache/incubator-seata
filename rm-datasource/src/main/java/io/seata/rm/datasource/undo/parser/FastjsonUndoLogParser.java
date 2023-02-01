@@ -35,10 +35,17 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
     public static final String NAME = "fastjson";
 
     private final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    private volatile boolean initialized = false;
 
     @Override
     public void init() {
         filter.getExcludes().add("tableMeta");
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

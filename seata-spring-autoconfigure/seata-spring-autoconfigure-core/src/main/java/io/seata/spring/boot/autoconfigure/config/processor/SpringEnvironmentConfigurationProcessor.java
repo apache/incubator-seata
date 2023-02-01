@@ -18,7 +18,7 @@ package io.seata.spring.boot.autoconfigure.config.processor;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.processor.ConfigurationProcessor;
-import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigurationSource;
+import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigSource;
 
 import static io.seata.config.processor.ConfigProcessorOrdered.SPRING_ENVIRONMENT_PROCESSOR_ORDER;
 
@@ -32,6 +32,6 @@ public class SpringEnvironmentConfigurationProcessor implements ConfigurationPro
 
     @Override
     public void process(Configuration configuration) {
-        configuration.addSourceLast(new SpringEnvironmentConfigurationSource());
+        configuration.addSourceLast(new SpringEnvironmentConfigSource());
     }
 }

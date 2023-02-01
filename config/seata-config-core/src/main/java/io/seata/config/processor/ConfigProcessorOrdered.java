@@ -16,7 +16,7 @@
 package io.seata.config.processor;
 
 /**
- * The interface ConfigurationSourceOrdered.
+ * The interface ConfigProcessorOrdered.
  *
  * @author wang.liang
  */

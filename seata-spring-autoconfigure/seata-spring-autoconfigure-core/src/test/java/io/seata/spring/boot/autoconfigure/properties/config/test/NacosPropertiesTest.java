@@ -17,7 +17,7 @@ package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.nacos.NacosConfigurationSource;
+import io.seata.config.nacos.NacosConfigSource;
 import io.seata.spring.boot.autoconfigure.BasePropertiesTest;
 import io.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
@@ -36,11 +36,11 @@ public class NacosPropertiesTest extends BasePropertiesTest {
     public void testConfigNacosProperties() {
         Configuration currentConfiguration = ConfigurationFactory.getInstance();
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getString(NacosConfigurationSource.getNacosAddrFileKey()));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getString(NacosConfigurationSource.getNacosDataIdKey()));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getString(NacosConfigurationSource.getNacosGroupKey()));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getString(NacosConfigurationSource.getNacosNameSpaceFileKey()));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getString(NacosConfigurationSource.getNacosUserName()));
-        assertEquals(STR_TEST_FFF, currentConfiguration.getString(NacosConfigurationSource.getNacosPassword()));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString(NacosConfigSource.getNacosAddrFileKey()));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString(NacosConfigSource.getNacosDataIdKey()));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString(NacosConfigSource.getNacosGroupKey()));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString(NacosConfigSource.getNacosNameSpaceFileKey()));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getString(NacosConfigSource.getNacosUserName()));
+        assertEquals(STR_TEST_FFF, currentConfiguration.getString(NacosConfigSource.getNacosPassword()));
     }
 }

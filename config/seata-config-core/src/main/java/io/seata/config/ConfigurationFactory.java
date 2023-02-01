@@ -15,13 +15,14 @@
  */
 package io.seata.config;
 
-import java.util.List;
 import java.util.Set;
 
 import io.seata.common.Cleanable;
+import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.listener.ConfigurationChangeListener;
-import io.seata.config.processor.ConfigurationProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Configuration factory.
@@ -32,18 +33,21 @@ import io.seata.config.processor.ConfigurationProcessor;
  */
 public final class ConfigurationFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
+
+
     //region Configuration instance related
 
     private static volatile Configuration instance = null;
-    private static volatile boolean initialized = false;
+
+    private static volatile boolean initializationStarted = false;
 
     /**
      * Gets instance.
      *
-     * @param waitInit whether wait init
      * @return the instance
      */
-    public static Configuration getInstance(boolean waitInit) {
+    public static Configuration getInstance() {
         if (instance == null) {
             synchronized (Configuration.class) {
                 if (instance == null) {
@@ -52,35 +56,29 @@ public final class ConfigurationFactory {
             }
         }
 
-        if (!initialized && waitInit) {
-            synchronized (Configuration.class) {
-                if (!initialized) {
-                    initConfiguration();
-                    initialized = true;
+        if (instance instanceof Initialize) {
+            Initialize initialize = (Initialize)instance;
+
+            if (!initializationStarted) {
+                synchronized (Configuration.class) {
+                    if (!initializationStarted) {
+                        initializationStarted = true;
+                        initialize.init();
+                    }
                 }
+            } else if (!initialize.isInitialized()) {
+                LOGGER.warn("Current configuration '{}' has not been fully initialized. Some config source may not be available.",
+                        instance.getTypeName());
             }
         }
 
         return instance;
     }
 
-    public static Configuration getInstance() {
-        return getInstance(true);
-    }
-
-
     private static Configuration buildConfiguration() {
         ConfigurationBuilder configurationBuilder = EnhancedServiceLoader.load(ConfigurationBuilder.class);
         return configurationBuilder.build();
     }
-
-    private static void initConfiguration() {
-        List<ConfigurationProcessor> processors = EnhancedServiceLoader.loadAll(ConfigurationProcessor.class);
-        for (ConfigurationProcessor processor : processors) {
-            processor.process(instance);
-        }
-    }
-
 
     public static void clean() {
         if (instance instanceof Cleanable) {

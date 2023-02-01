@@ -16,13 +16,13 @@
 package io.seata.config.source;
 
 /**
- * The interface ConfigurationSourceOrdered.
+ * The interface ConfigSourceOrdered.
  *
  * @author wang.liang
  */
 public interface ConfigSourceOrdered {
 
-    //region order for ConfigurationSource
+    //region order for ConfigSource
 
     int SYSTEM_PROPERTY_SOURCE_ORDER = Integer.MIN_VALUE + 100;
     int SYSTEM_ENV_SOURCE_ORDER = Integer.MIN_VALUE + 200;

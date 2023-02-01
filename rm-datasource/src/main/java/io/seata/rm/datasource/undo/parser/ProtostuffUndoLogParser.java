@@ -58,6 +58,9 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
 
     private final Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class, idStrategy);
 
+    private volatile boolean initialized = false;
+
+
     @Override
     public void init() {
         try {
@@ -76,6 +79,13 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
         idStrategy.registerDelegate(new TimestampDelegate());
         idStrategy.registerDelegate(new SqlDateDelegate());
         idStrategy.registerDelegate(new TimeDelegate());
+
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

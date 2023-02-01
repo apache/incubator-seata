@@ -24,13 +24,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.seata.common.Cleanable;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.listener.ConfigListenerManager;
 import io.seata.config.listener.ConfigurationChangeListener;
-import io.seata.config.source.ConfigurationSource;
-import io.seata.config.source.UpdatableConfigurationSource;
+import io.seata.config.processor.ConfigurationProcessor;
+import io.seata.config.source.ConfigSource;
+import io.seata.config.source.UpdatableConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author wang.liang
  */
 public abstract class AbstractConfiguration implements Configuration
-        , ConfigurationChangeListener, Cleanable {
+        , ConfigurationChangeListener, Cleanable, Initialize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
@@ -49,11 +52,13 @@ public abstract class AbstractConfiguration implements Configuration
     private final String typeName;
 
     // The sources
-    protected volatile ConfigurationSource mainSource;
-    protected final List<ConfigurationSource> sources = new CopyOnWriteArrayList<>();
+    protected volatile ConfigSource mainSource;
+    protected final List<ConfigSource> sources = new CopyOnWriteArrayList<>();
 
     // The listeners
     protected final Map<String, Set<ConfigurationChangeListener>> listeners = new ConcurrentHashMap<>();
+
+    private volatile boolean initialized = false;
 
     /**
      * Whether to print the get success log. Used to avoid printing the log repeatedly.
@@ -72,7 +77,7 @@ public abstract class AbstractConfiguration implements Configuration
         }
 
         Object value;
-        for (ConfigurationSource source : this.sources) {
+        for (ConfigSource source : this.sources) {
             value = source.getLatestConfig(dataId, timeoutMills);
 
             if (value == null) {
@@ -126,13 +131,30 @@ public abstract class AbstractConfiguration implements Configuration
 
     //endregion
 
+    //region # Override Initialize
+
+    @Override
+    public void init() {
+        List<ConfigurationProcessor> processors = EnhancedServiceLoader.loadAll(ConfigurationProcessor.class);
+        for (ConfigurationProcessor processor : processors) {
+            processor.process(this);
+        }
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    //endregion
+
 
     //region # Override UpdatableConfiguration
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
-        if (mainSource instanceof UpdatableConfigurationSource) {
-            return ((UpdatableConfigurationSource)mainSource).putConfig(dataId, content, timeoutMills);
+        if (mainSource instanceof UpdatableConfigSource) {
+            return ((UpdatableConfigSource)mainSource).putConfig(dataId, content, timeoutMills);
         } else {
             throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
                     "not support putConfig");
@@ -141,8 +163,8 @@ public abstract class AbstractConfiguration implements Configuration
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        if (mainSource instanceof UpdatableConfigurationSource) {
-            return ((UpdatableConfigurationSource)mainSource).putConfigIfAbsent(dataId, content, timeoutMills);
+        if (mainSource instanceof UpdatableConfigSource) {
+            return ((UpdatableConfigSource)mainSource).putConfigIfAbsent(dataId, content, timeoutMills);
         } else {
             throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
                     "not support atomic operation putConfigIfAbsent");
@@ -151,8 +173,8 @@ public abstract class AbstractConfiguration implements Configuration
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
-        if (mainSource instanceof UpdatableConfigurationSource) {
-            return ((UpdatableConfigurationSource)mainSource).removeConfig(dataId, timeoutMills);
+        if (mainSource instanceof UpdatableConfigSource) {
+            return ((UpdatableConfigSource)mainSource).removeConfig(dataId, timeoutMills);
         } else {
             throw new NotSupportYetException("Configuration '" + this.getClass().getSimpleName() + "(" + this.getTypeName() + ")' " +
                     "not support removeConfig");
@@ -175,7 +197,7 @@ public abstract class AbstractConfiguration implements Configuration
         this.addConfigListenerToSources(dataId);
     }
 
-    protected synchronized void addConfigListenerToSource(String dataId, ConfigurationSource source) {
+    protected synchronized void addConfigListenerToSource(String dataId, ConfigSource source) {
         if (source instanceof ConfigListenerManager) {
             ConfigListenerManager manager = (ConfigListenerManager)source;
             manager.addConfigListener(dataId, this);
@@ -187,7 +209,7 @@ public abstract class AbstractConfiguration implements Configuration
         this.sources.forEach(s -> this.addConfigListenerToSource(dataId, s));
     }
 
-    protected synchronized void addConfigListenerToSource(ConfigurationSource source) {
+    protected synchronized void addConfigListenerToSource(ConfigSource source) {
         this.listeners.keySet().forEach(dataId -> {
             this.addConfigListenerToSource(dataId, source);
         });
@@ -244,10 +266,10 @@ public abstract class AbstractConfiguration implements Configuration
     //endregion
 
 
-    //region # Override ConfigurationSourceManager
+    //region # Override ConfigSourceManager
 
     @Override
-    public void afterAddSource(ConfigurationSource source) {
+    public void afterAddSource(ConfigSource source) {
         this.addConfigListenerToSource(source);
     }
 
@@ -271,21 +293,21 @@ public abstract class AbstractConfiguration implements Configuration
     //endregion
 
 
-    //region # Override ConfigurationSourceManager
+    //region # Override ConfigSourceManager
 
 
     @Override
-    public ConfigurationSource getMainSource() {
+    public ConfigSource getMainSource() {
         return this.mainSource;
     }
 
     @Override
-    public void setMainSource(ConfigurationSource mainSource) {
+    public void setMainSource(ConfigSource mainSource) {
         this.mainSource = mainSource;
     }
 
     @Override
-    public List<ConfigurationSource> getSources() {
+    public List<ConfigSource> getSources() {
         return this.sources;
     }
 

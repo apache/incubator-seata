@@ -15,7 +15,7 @@
  */
 package io.seata.config;
 
-import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.ConfigSource;
 
 /**
  * The type Configuration change event.
@@ -32,19 +32,19 @@ public class ConfigurationChangeEvent {
     private String newValue;
     private String namespace;
     private ConfigurationChangeType changeType;
-    private ConfigurationSource changeEventSource;
+    private ConfigSource changeEventSource;
 
 
-    public ConfigurationChangeEvent(ConfigurationSource changeEventSource) {
+    public ConfigurationChangeEvent(ConfigSource changeEventSource) {
         this.changeEventSource = changeEventSource;
     }
 
-    public ConfigurationChangeEvent(String dataId, String newValue, ConfigurationSource changeEventSource) {
+    public ConfigurationChangeEvent(String dataId, String newValue, ConfigSource changeEventSource) {
         this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY, changeEventSource);
     }
 
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
-                                    ConfigurationChangeType type, ConfigurationSource changeEventSource) {
+                                    ConfigurationChangeType type, ConfigSource changeEventSource) {
         this.dataId = dataId;
         this.namespace = namespace;
         this.oldValue = oldValue;
@@ -154,7 +154,7 @@ public class ConfigurationChangeEvent {
      *
      * @return the change event source
      */
-    public ConfigurationSource getChangeEventSource() {
+    public ConfigSource getChangeEventSource() {
         return changeEventSource;
     }
 

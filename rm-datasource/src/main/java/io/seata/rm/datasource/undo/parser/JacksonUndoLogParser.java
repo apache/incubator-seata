@@ -119,6 +119,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
      * customize deserializer of java.time.LocalDateTime
      */
     private final JsonDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer();
+    private volatile boolean initialized = false;
 
     @Override
     public void init() {
@@ -156,6 +157,13 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         mapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
+
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

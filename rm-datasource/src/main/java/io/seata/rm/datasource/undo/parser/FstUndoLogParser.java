@@ -41,6 +41,7 @@ public class FstUndoLogParser implements UndoLogParser, Initialize {
     public static final String NAME = "fst";
 
     private FstSerializerFactory fstFactory = FstSerializerFactory.getDefaultFactory();
+    private volatile boolean initialized = false;
 
     @Override
     public void init() {
@@ -62,6 +63,12 @@ public class FstUndoLogParser implements UndoLogParser, Initialize {
         } catch (EnhancedServiceNotFoundException e) {
             LOGGER.warn("FstSerializer not found children class.", e);
         }
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

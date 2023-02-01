@@ -1,1 +1,1 @@
-io.seata.config.custom.CustomConfigurationSourceProvider
+io.seata.config.custom.CustomConfigSourceProvider

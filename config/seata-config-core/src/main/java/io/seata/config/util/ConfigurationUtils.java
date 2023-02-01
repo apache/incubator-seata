@@ -18,8 +18,8 @@ package io.seata.config.util;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.source.ConfigSourceType;
-import io.seata.config.source.ConfigurationSource;
-import io.seata.config.source.impl.FileConfigurationSource;
+import io.seata.config.source.ConfigSource;
+import io.seata.config.source.impl.FileConfigSource;
 
 import static io.seata.common.util.StringFormatUtils.DOT;
 
@@ -115,12 +115,12 @@ public final class ConfigurationUtils {
      */
     public static void loadFileSources(Configuration configuration, String configFileName, boolean doSetMainSource) {
         // load commonSource without env
-        ConfigurationSource commonSource = new FileConfigurationSource(configFileName);
+        ConfigSource commonSource = new FileConfigSource(configFileName);
         configuration.addSourceLast(commonSource);
 
 
-        // the main file configuration source
-        ConfigurationSource mainSource = commonSource;
+        // the main file config source
+        ConfigSource mainSource = commonSource;
 
 
         // get envName from configuration
@@ -138,7 +138,7 @@ public final class ConfigurationUtils {
             }
 
             // build envSource
-            ConfigurationSource envSource = new FileConfigurationSource(envConfigFileName);
+            ConfigSource envSource = new FileConfigSource(envConfigFileName);
 
             // add envSource before commonSource
             // The priority of envSource is higher than commonSource

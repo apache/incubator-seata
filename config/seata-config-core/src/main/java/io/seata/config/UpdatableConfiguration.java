@@ -15,12 +15,12 @@
  */
 package io.seata.config;
 
-import io.seata.config.source.UpdatableConfigurationSource;
+import io.seata.config.source.UpdatableConfigSource;
 
 /**
  * The interface UpdatableConfiguration.
  *
  * @author wang.liang
  */
-public interface UpdatableConfiguration extends UpdatableConfigurationSource {
+public interface UpdatableConfiguration extends UpdatableConfigSource {
 }

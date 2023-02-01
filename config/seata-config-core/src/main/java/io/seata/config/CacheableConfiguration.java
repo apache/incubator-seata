@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.ValueWrapper;
 import io.seata.common.util.CollectionUtils;
-import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class CacheableConfiguration extends AbstractConfiguration
 
 
     // The cache
-    protected final Map<String, ValueWrapper> configCache;
+    private final Map<String, ValueWrapper> configCache;
 
 
     public CacheableConfiguration(String typeName, Map<String, ValueWrapper> configCache) {
@@ -97,10 +97,10 @@ public class CacheableConfiguration extends AbstractConfiguration
     //endregion
 
 
-    //region Override ConfigurationSourceManager
+    //region Override ConfigSourceManager
 
     @Override
-    public void afterAddSource(ConfigurationSource source) {
+    public void afterAddSource(ConfigSource source) {
         super.afterAddSource(source);
 
         // clean

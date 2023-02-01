@@ -59,6 +59,11 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
         LOGGER.info("ResourceManagerXA init ...");
     }
 
+    @Override
+    public boolean isInitialized() {
+        return true;
+    }
+
     public void initXaTwoPhaseTimeoutChecker() {
         if (xaTwoPhaseTimeoutChecker == null) {
             synchronized (this) {

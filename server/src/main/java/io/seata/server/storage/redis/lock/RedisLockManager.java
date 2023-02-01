@@ -33,10 +33,17 @@ public class RedisLockManager extends AbstractLockManager implements Initialize 
      * The locker.
      */
     private Locker locker;
+    private volatile boolean initialized = false;
 
     @Override
     public void init() {
         locker = new RedisLocker();
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

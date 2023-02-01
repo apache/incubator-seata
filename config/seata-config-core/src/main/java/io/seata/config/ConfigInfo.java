@@ -20,7 +20,7 @@ import java.util.Date;
 import javax.annotation.Nonnull;
 
 import io.seata.common.util.ObjectUtils;
-import io.seata.config.source.ConfigurationSource;
+import io.seata.config.source.ConfigSource;
 
 /**
  * The type ConfigInfo.
@@ -32,13 +32,13 @@ public class ConfigInfo<T> {
     private final T value;
     private final String stringValue;
 
-    private final ConfigurationSource fromSource;
+    private final ConfigSource fromSource;
 
     private final Date time = new Date();
     private String timeStr;
 
 
-    public ConfigInfo(T value, ConfigurationSource fromSource) {
+    public ConfigInfo(T value, ConfigSource fromSource) {
         if (ObjectUtils.isNullOrBlank(value)) {
             throw new IllegalArgumentException("The config value must be not null or blank.");
         }
@@ -59,7 +59,7 @@ public class ConfigInfo<T> {
         return stringValue;
     }
 
-    public ConfigurationSource getFromSource() {
+    public ConfigSource getFromSource() {
         return fromSource;
     }
 

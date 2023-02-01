@@ -26,7 +26,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringFormatUtils;
 import io.seata.config.defaultconfig.DefaultConfigSource;
-import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigurationSource;
+import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
     @Override
     public Object getLatestConfig(final String rawDataId, long timeoutMills) {
         // Splice the prefix 'seata.'
-        String dataId = SpringEnvironmentConfigurationSource.splicePrefixSeataDot(rawDataId);
+        String dataId = SpringEnvironmentConfigSource.splicePrefixSeataDot(rawDataId);
 
         try {
             return getDefaultValueFromPropertyObject(dataId);

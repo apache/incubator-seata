@@ -49,6 +49,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDataSourceProvider.class);
 
     private DataSource dataSource;
+    private volatile boolean initialized = false;
 
     /**
      * The constant CONFIG.
@@ -72,6 +73,12 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     @Override
     public void init() {
         this.dataSource = generate();
+        this.initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

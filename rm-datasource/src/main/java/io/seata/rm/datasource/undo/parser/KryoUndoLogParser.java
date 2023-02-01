@@ -40,6 +40,10 @@ public class KryoUndoLogParser implements UndoLogParser, Initialize {
 
     public static final String NAME = "kryo";
 
+
+    private volatile boolean initialized = false;
+
+
     @Override
     public void init() {
         try {
@@ -59,6 +63,13 @@ public class KryoUndoLogParser implements UndoLogParser, Initialize {
         } catch (EnhancedServiceNotFoundException e) {
             LOGGER.warn("KryoTypeSerializer not found children class.", e);
         }
+
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return initialized;
     }
 
     @Override

@@ -19,16 +19,17 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.seata.common.executor.Initialize;
 import io.seata.common.util.ConvertUtils;
 import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.source.ConfigurationSourceManager;
+import io.seata.config.source.ConfigSourceManager;
 
 /**
  * The interface Configuration.
  *
  * @author slievrly
  */
-public interface Configuration extends UpdatableConfiguration, ConfigurationSourceManager
+public interface Configuration extends UpdatableConfiguration, ConfigSourceManager
         , ConfigListenerManager {
 
     /**
