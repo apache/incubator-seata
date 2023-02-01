@@ -14,6 +14,7 @@
 - [[#5266](https://github.com/seata/seata/pull/5265)] 修复控制台全局锁查询接口查到了已释放的锁
 - [[#5245](https://github.com/seata/seata/pull/5245)] 修复不完整的distribution模块依赖
 - [[#5239](https://github.com/seata/seata/pull/5239)] 修复当使用JDK代理时，`getConfig` 方法获取部分配置时抛出 `ClassCastException` 异常的问题
+- [[#5281](https://github.com/seata/seata/pull/5281)] 修复并行rm请求处理时数组索引越界问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -44,6 +45,7 @@
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
 - [GoodBoyCoder](https://github.com/GoodBoyCoder)
+- [a364176773](https://github.com/a364176773)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
