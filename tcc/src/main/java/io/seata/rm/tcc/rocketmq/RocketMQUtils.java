@@ -41,15 +41,13 @@ public class RocketMQUtils {
 
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, defaultMQProducer.getProducerGroup());
-        DefaultMQProducerImpl defaultMQProducerImpl = defaultMQProducer.getDefaultMQProducerImpl();
-        SendResult sendResult = null;
+        SendResult sendResult;
         try {
-            sendResult = defaultMQProducerImpl.send(msg);
+            sendResult = defaultMQProducer.send(msg);
         } catch (Exception e) {
             throw new MQClientException("send message Exception", e);
         }
 
-        LocalTransactionState localTransactionState = LocalTransactionState.UNKNOW;
         switch (sendResult.getSendStatus()) {
             case SEND_OK: {
                 if (sendResult.getTransactionId() != null) {
