@@ -52,7 +52,7 @@ public final class TransactionHookManager {
      */
     public static void registerHook(TransactionHook transactionHook) {
         if (transactionHook == null) {
-            throw new NullPointerException("transactionHook must be not null");
+            throw new NullPointerException("transactionHook must not be null");
         }
         List<TransactionHook> transactionHooks = LOCAL_HOOKS.get();
         if (transactionHooks == null) {
