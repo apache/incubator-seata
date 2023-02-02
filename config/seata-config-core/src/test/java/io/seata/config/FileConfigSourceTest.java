@@ -38,22 +38,25 @@ class FileConfigSourceTest {
 
     @Test
     void addConfigListener() throws InterruptedException {
+        String dataId = "mockDataId";
+        System.setProperty(dataId, "false");
+
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        ConfigurationFactory.addConfigListener("service.disableGlobalTransaction", (event) -> {
+        boolean value = fileConfig.getBoolean(dataId);
+        ConfigurationFactory.addConfigListener(dataId, (event) -> {
             Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
             countDownLatch.countDown();
         });
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        ConfigurationFactory.removeCache("service.disableGlobalTransaction");
+        System.setProperty(dataId, String.valueOf(!value));
+        ConfigurationFactory.removeCache(dataId);
         countDownLatch.await(5, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
+        System.setProperty(dataId, String.valueOf(value));
         Thread.sleep(2000);
-        boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
+        boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        System.setProperty(dataId, String.valueOf(!value));
     }
 
     @Test
