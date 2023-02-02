@@ -17,8 +17,8 @@ package io.seata.config.util;
 
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
-import io.seata.config.source.ConfigSourceType;
 import io.seata.config.source.ConfigSource;
+import io.seata.config.source.ConfigSourceType;
 import io.seata.config.source.impl.FileConfigSource;
 
 import static io.seata.common.util.StringFormatUtils.DOT;
@@ -109,13 +109,14 @@ public final class ConfigurationUtils {
     /**
      * load file sources
      *
-     * @param configuration   the configuration
-     * @param configFileName  the configFileName
-     * @param doSetMainSource if true, do set mainSource
+     * @param configuration       the configuration
+     * @param configFileName      the configFileName
+     * @param allowDynamicRefresh the allow dynamic refresh
+     * @param doSetMainSource     if true, do set mainSource
      */
-    public static void loadFileSources(Configuration configuration, String configFileName, boolean doSetMainSource) {
+    public static void loadFileSources(Configuration configuration, String configFileName, boolean allowDynamicRefresh, boolean doSetMainSource) {
         // load commonSource without env
-        ConfigSource commonSource = new FileConfigSource(configFileName);
+        ConfigSource commonSource = new FileConfigSource(configFileName, allowDynamicRefresh);
         configuration.addSourceLast(commonSource);
 
 
@@ -138,7 +139,7 @@ public final class ConfigurationUtils {
             }
 
             // build envSource
-            ConfigSource envSource = new FileConfigSource(envConfigFileName);
+            ConfigSource envSource = new FileConfigSource(envConfigFileName, allowDynamicRefresh);
 
             // add envSource before commonSource
             // The priority of envSource is higher than commonSource
