@@ -48,11 +48,14 @@ class FileConfigSourceTest {
             Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
             countDownLatch.countDown();
         });
+
         System.setProperty(dataId, String.valueOf(!value));
         ConfigurationFactory.removeCache(dataId);
         countDownLatch.await(5, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
+
         System.setProperty(dataId, String.valueOf(value));
+        ConfigurationFactory.removeCache(dataId);
         Thread.sleep(2000);
         boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
