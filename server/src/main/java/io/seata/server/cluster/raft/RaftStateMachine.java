@@ -38,6 +38,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
@@ -102,6 +103,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.group = group;
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
+            registryStoreSnapshotFile(new SessionSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
             EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
             EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
