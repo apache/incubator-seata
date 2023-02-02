@@ -182,7 +182,6 @@ public class SessionHolder {
                         removeInErrorState(globalSession);
                         break;
                     case AsyncCommitting:
-                        break;
                     case Committing:
                     case CommitRetrying:
                         break;
