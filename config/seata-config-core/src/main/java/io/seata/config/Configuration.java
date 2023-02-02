@@ -19,18 +19,16 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.executor.Initialize;
 import io.seata.common.util.ConvertUtils;
-import io.seata.config.listener.ConfigListenerManager;
 import io.seata.config.source.ConfigSourceManager;
 
 /**
  * The interface Configuration.
  *
  * @author slievrly
+ * @author wang.liang
  */
-public interface Configuration extends UpdatableConfiguration, ConfigSourceManager
-        , ConfigListenerManager {
+public interface Configuration extends ConfigSourceManager {
 
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.

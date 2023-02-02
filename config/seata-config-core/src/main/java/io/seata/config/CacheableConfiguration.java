@@ -19,7 +19,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.ValueWrapper;
+import io.seata.common.executor.Cacheable;
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public class CacheableConfiguration extends AbstractConfiguration
-        implements ConfigurationCacheManager {
+public class CacheableConfiguration extends AbstractConfiguration implements Cacheable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheableConfiguration.class);
 
@@ -100,11 +101,11 @@ public class CacheableConfiguration extends AbstractConfiguration
     //region Override ConfigSourceManager
 
     @Override
-    public void afterAddSource(ConfigSource source) {
-        super.afterAddSource(source);
+    public void afterAddingSource(ConfigSource newSource) {
+        super.afterAddingSource(newSource);
 
-        // clean
-        this.clean();
+        // clean cache
+        this.cleanCache();
     }
 
     //endregion
@@ -147,12 +148,16 @@ public class CacheableConfiguration extends AbstractConfiguration
     //endregion
 
 
-    //region Override Cleanable
+    //region Override Cleanable、Cacheable
 
     @Override
     public void clean() {
         super.clean();
+        this.cleanCache();
+    }
 
+    @Override
+    public void cleanCache() {
         if (this.configCache != null) {
             this.configCache.clear();
         }

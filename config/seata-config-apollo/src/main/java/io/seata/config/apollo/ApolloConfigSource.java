@@ -32,11 +32,11 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
+import io.seata.config.changelistener.ConfigurationChangeType;
 import io.seata.config.source.RemoteConfigSource;
 
 import static io.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
@@ -47,7 +47,7 @@ import static io.seata.common.ConfigurationKeys.FILE_ROOT_CONFIG;
  *
  * @author kl @kailing.pub
  */
-public class ApolloConfigSource implements RemoteConfigSource, ConfigListenerManager {
+public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChangeListenerManager {
 
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "appId";

@@ -35,15 +35,15 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.UpdatableConfiguration;
-import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
+import io.seata.config.changelistener.ConfigurationChangeType;
 import io.seata.config.processor.ConfigProcessor;
 import io.seata.config.source.ConfigSource;
 import io.seata.config.source.RemoteConfigSource;
+import io.seata.config.source.UpdatableConfigSource;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
@@ -60,7 +60,8 @@ import static io.seata.common.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  *
  * @author crazier.huang
  */
-public class ZookeeperConfigSource implements RemoteConfigSource, UpdatableConfiguration, ConfigListenerManager {
+public class ZookeeperConfigSource implements RemoteConfigSource,
+        UpdatableConfigSource, ConfigurationChangeListenerManager {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfigSource.class);
 
     private static final String CONFIG_TYPE = "zk";

@@ -17,10 +17,13 @@ package io.seata.config;
 
 import java.util.Set;
 
-import io.seata.common.Cleanable;
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.executor.Cacheable;
+import io.seata.common.executor.Cleanable;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,7 @@ public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
 
 
-    //region Configuration instance related
+    //region Configuration
 
     private static volatile Configuration instance = null;
 
@@ -86,6 +89,12 @@ public final class ConfigurationFactory {
         }
     }
 
+    public static void cleanCache() {
+        if (instance instanceof Cacheable) {
+            ((Cacheable)instance).cleanCache();
+        }
+    }
+
     /**
      * Reload the instance.
      */
@@ -98,22 +107,74 @@ public final class ConfigurationFactory {
     //endregion
 
 
-    //region Config listener related
+    //region UpdatableConfiguration
+
+    public static UpdatableConfiguration getUpdatableConfiguration() {
+        Configuration instance = getInstance();
+        if (instance instanceof UpdatableConfiguration) {
+            return (UpdatableConfiguration)instance;
+        } else {
+            throw new NotSupportYetException("Current configuration is not a " + UpdatableConfiguration.class.getSimpleName() + ".");
+        }
+    }
+
+
+    // putConfig
+    public static boolean putConfig(String dataId, String content, long timeoutMills) {
+        return getUpdatableConfiguration().putConfig(dataId, content, timeoutMills);
+    }
+
+    public static boolean putConfig(String dataId, String content) {
+        return getUpdatableConfiguration().putConfig(dataId, content);
+    }
+
+    // putConfigIfAbsent
+    public static boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
+        return getUpdatableConfiguration().putConfigIfAbsent(dataId, content, timeoutMills);
+    }
+
+    public static boolean putConfigIfAbsent(String dataId, String content) {
+        return getUpdatableConfiguration().putConfigIfAbsent(dataId, content);
+    }
+
+    // removeConfig
+    public static boolean removeConfig(String dataId, long timeoutMills) {
+        return getUpdatableConfiguration().removeConfig(dataId, timeoutMills);
+    }
+
+    public static boolean removeConfig(String dataId) {
+        return getUpdatableConfiguration().removeConfig(dataId);
+    }
+
+    //endregion
+
+
+    //region ConfigurationChangeListenerManager
+
+    public static ConfigurationChangeListenerManager getConfigChangeListenerManager() {
+        Configuration instance = getInstance();
+        if (instance instanceof ConfigurationChangeListenerManager) {
+            return (ConfigurationChangeListenerManager)instance;
+        } else {
+            throw new NotSupportYetException("Current configuration is not a " + ConfigurationChangeListenerManager.class.getSimpleName() + ".");
+        }
+    }
+
 
     public static void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        getInstance().addConfigListener(dataId, listener);
+        getConfigChangeListenerManager().addConfigListener(dataId, listener);
     }
 
     public static void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        getInstance().removeConfigListener(dataId, listener);
+        getConfigChangeListenerManager().removeConfigListener(dataId, listener);
     }
 
     public static Set<String> getListenedConfigDataIds() {
-        return getInstance().getListenedConfigDataIds();
+        return getConfigChangeListenerManager().getListenedConfigDataIds();
     }
 
     public static Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        return getInstance().getConfigListeners(dataId);
+        return getConfigChangeListenerManager().getConfigListeners(dataId);
     }
 
     //endregion

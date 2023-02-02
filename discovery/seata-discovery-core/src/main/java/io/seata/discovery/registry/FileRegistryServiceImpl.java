@@ -18,7 +18,7 @@ package io.seata.discovery.registry;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.listener.ConfigChangeListener;
+import io.seata.config.changelistener.ConfigChangeListener;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;

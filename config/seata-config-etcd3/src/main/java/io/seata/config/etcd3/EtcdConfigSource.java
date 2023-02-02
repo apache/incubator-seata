@@ -50,13 +50,13 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
-import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.UpdatableConfiguration;
-import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import io.seata.config.processor.ConfigProcessor;
 import io.seata.config.source.RemoteConfigSource;
+import io.seata.config.source.UpdatableConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ import static io.seata.common.ConfigurationKeys.FILE_ROOT_CONFIG;
  * @author xingfudeshi @gmail.com
  */
 public class EtcdConfigSource implements RemoteConfigSource
-        , UpdatableConfiguration, ConfigListenerManager {
+        , UpdatableConfigSource, ConfigurationChangeListenerManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfigSource.class);
     private static volatile EtcdConfigSource instance;
     private static volatile Client client;

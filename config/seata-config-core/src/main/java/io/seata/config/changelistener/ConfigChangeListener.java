@@ -13,24 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
+package io.seata.config.changelistener;
+
+import java.util.concurrent.ExecutorService;
 
 /**
- * The enum Configuration change type.
+ * The interface Config change listener.
  *
  * @author slievrly
  */
-public enum ConfigurationChangeType {
+public interface ConfigChangeListener {
+
     /**
-     * Add configuration change type.
+     * Gets executor.
+     *
+     * @return the executor
      */
-    ADD,
+    ExecutorService getExecutor();
+
     /**
-     * Modify configuration change type.
+     * Receive config info.
+     *
+     * @param configInfo the config info
      */
-    MODIFY,
-    /**
-     * Delete configuration change type.
-     */
-    DELETE
+    void receiveConfigInfo(final String configInfo);
 }

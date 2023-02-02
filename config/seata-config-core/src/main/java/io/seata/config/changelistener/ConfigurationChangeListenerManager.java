@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.listener;
+package io.seata.config.changelistener;
 
 import java.util.Set;
 
@@ -23,7 +23,7 @@ import java.util.Set;
  * @author slievrly
  * @author wang.liang
  */
-public interface ConfigListenerManager {
+public interface ConfigurationChangeListenerManager {
 
     /**
      * Add config listener.

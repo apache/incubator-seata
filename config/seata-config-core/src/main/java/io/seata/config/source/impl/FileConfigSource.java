@@ -37,15 +37,15 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
 import io.seata.config.ConfigFuture.ConfigOperation;
-import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.FileConfigFactory;
-import io.seata.config.UpdatableConfiguration;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import io.seata.config.file.FileConfig;
-import io.seata.config.listener.ConfigurationChangeListener;
-import io.seata.config.listener.ConfigListenerManager;
+import io.seata.config.file.FileConfigFactory;
 import io.seata.config.source.ConfigSource;
 import io.seata.config.source.LocalConfigSource;
+import io.seata.config.source.UpdatableConfigSource;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author slievrly
  */
 public class FileConfigSource implements LocalConfigSource
-        , UpdatableConfiguration, ConfigListenerManager {
+        , UpdatableConfigSource, ConfigurationChangeListenerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfigSource.class);
 

@@ -13,15 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common;
+package io.seata.config.changelistener;
 
 /**
- * The interface Cleanable
+ * The enum Configuration change type.
  *
- * @author wang.liang
+ * @author slievrly
  */
-public interface Cleanable {
-
-    void clean();
-
+public enum ConfigurationChangeType {
+    /**
+     * Add configuration change type.
+     */
+    ADD,
+    /**
+     * Modify configuration change type.
+     */
+    MODIFY,
+    /**
+     * Delete configuration change type.
+     */
+    DELETE
 }

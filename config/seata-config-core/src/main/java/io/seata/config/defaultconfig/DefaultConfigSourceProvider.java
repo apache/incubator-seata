@@ -15,8 +15,6 @@
  */
 package io.seata.config.defaultconfig;
 
-import io.seata.config.defaultconfig.DefaultConfigManager;
-
 /**
  * the interface DefaultConfigSourceProvider
  *

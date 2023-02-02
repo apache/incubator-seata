@@ -22,15 +22,16 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import io.seata.common.Cleanable;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.executor.Cleanable;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.source.ConfigSource;
 import io.seata.config.source.UpdatableConfigSource;
@@ -42,8 +43,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractConfiguration implements Configuration
-        , ConfigurationChangeListener, Cleanable, Initialize {
+public abstract class AbstractConfiguration implements Configuration, Initialize
+        , UpdatableConfiguration, ConfigurationChangeListenerManager
+        , ConfigurationChangeListener, Cleanable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
@@ -131,6 +133,7 @@ public abstract class AbstractConfiguration implements Configuration
 
     //endregion
 
+
     //region # Override Initialize
 
     @Override
@@ -139,11 +142,37 @@ public abstract class AbstractConfiguration implements Configuration
         for (ConfigurationProcessor processor : processors) {
             processor.process(this);
         }
+        initialized = true;
     }
 
     @Override
     public boolean isInitialized() {
         return initialized;
+    }
+
+    //endregion
+
+
+    //region # Override ConfigSourceManager
+
+    @Override
+    public ConfigSource getMainSource() {
+        return this.mainSource;
+    }
+
+    @Override
+    public void setMainSource(ConfigSource mainSource) {
+        this.mainSource = mainSource;
+    }
+
+    @Override
+    public List<ConfigSource> getSources() {
+        return this.sources;
+    }
+
+    @Override
+    public void afterAddingSource(ConfigSource newSource) {
+        this.addConfigListenerToSource(newSource);
     }
 
     //endregion
@@ -198,8 +227,8 @@ public abstract class AbstractConfiguration implements Configuration
     }
 
     protected synchronized void addConfigListenerToSource(String dataId, ConfigSource source) {
-        if (source instanceof ConfigListenerManager) {
-            ConfigListenerManager manager = (ConfigListenerManager)source;
+        if (source instanceof ConfigurationChangeListenerManager) {
+            ConfigurationChangeListenerManager manager = (ConfigurationChangeListenerManager)source;
             manager.addConfigListener(dataId, this);
             LOGGER.debug("Add config listener to source: dataId = {}, source = {}", dataId, source.getTypeName());
         }
@@ -215,7 +244,7 @@ public abstract class AbstractConfiguration implements Configuration
         });
     }
 
-    //endregion
+    //endregion ##
 
     //region ## remove config listener
 
@@ -234,8 +263,8 @@ public abstract class AbstractConfiguration implements Configuration
 
     protected synchronized void removeConfigListenerFromSources(String dataId) {
         this.sources.forEach(source -> {
-            if (source instanceof ConfigListenerManager) {
-                ((ConfigListenerManager)source).removeConfigListener(dataId, this);
+            if (source instanceof ConfigurationChangeListenerManager) {
+                ((ConfigurationChangeListenerManager)source).removeConfigListener(dataId, this);
                 LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getTypeName());
             }
         });
@@ -245,7 +274,7 @@ public abstract class AbstractConfiguration implements Configuration
         this.listeners.keySet().forEach(this::removeConfigListenerFromSources);
     }
 
-    //endregion
+    //endregion ##
 
     @Override
     public Set<String> getListenedConfigDataIds() {
@@ -263,17 +292,8 @@ public abstract class AbstractConfiguration implements Configuration
         this.listeners.clear();
     }
 
-    //endregion
+    //endregion #
 
-
-    //region # Override ConfigSourceManager
-
-    @Override
-    public void afterAddSource(ConfigSource source) {
-        this.addConfigListenerToSource(source);
-    }
-
-    //endregion
 
     //region # Override ConfigurationChangeListener
 
@@ -288,27 +308,6 @@ public abstract class AbstractConfiguration implements Configuration
     protected void logChangeEvent(ConfigurationChangeEvent event) {
         LOGGER.debug("The config '{}' has changed (value from '{}' to '{}') by the source '{}'.",
                 event.getDataId(), event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName());
-    }
-
-    //endregion
-
-
-    //region # Override ConfigSourceManager
-
-
-    @Override
-    public ConfigSource getMainSource() {
-        return this.mainSource;
-    }
-
-    @Override
-    public void setMainSource(ConfigSource mainSource) {
-        this.mainSource = mainSource;
-    }
-
-    @Override
-    public List<ConfigSource> getSources() {
-        return this.sources;
     }
 
     //endregion

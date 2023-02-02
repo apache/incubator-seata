@@ -17,7 +17,6 @@ package io.seata.config.file;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.config.FileConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;

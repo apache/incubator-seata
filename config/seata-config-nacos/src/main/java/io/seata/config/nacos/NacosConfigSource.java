@@ -33,14 +33,14 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationFactory;
-import io.seata.config.UpdatableConfiguration;
-import io.seata.config.listener.ConfigListenerManager;
-import io.seata.config.listener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import io.seata.config.processor.ConfigProcessor;
 import io.seata.config.source.ConfigSource;
 import io.seata.config.source.RemoteConfigSource;
+import io.seata.config.source.UpdatableConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +53,7 @@ import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
  * @author xingfudeshi@gmail.com
  */
 public class NacosConfigSource implements RemoteConfigSource
-        , UpdatableConfiguration, ConfigListenerManager {
+        , UpdatableConfigSource, ConfigurationChangeListenerManager {
 
     private static volatile NacosConfigSource instance;
 

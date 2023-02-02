@@ -13,12 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
-
-import io.seata.common.Cleanable;
+package io.seata.common.executor;
 
 /**
+ * The interface Cleanable
+ *
  * @author wang.liang
  */
-public interface ConfigurationCacheManager extends Cleanable {
+public interface Cleanable {
+
+    void clean();
+
 }

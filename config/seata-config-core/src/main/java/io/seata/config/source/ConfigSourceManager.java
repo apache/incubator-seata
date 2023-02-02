@@ -25,19 +25,23 @@ import java.util.function.Predicate;
  */
 public interface ConfigSourceManager {
 
+    //region main source
+
     /**
-     * Get main config source
+     * Get main source
      *
-     * @return the main config source
+     * @return the main source
      */
     ConfigSource getMainSource();
 
     /**
-     * Sets main config source.
+     * Sets main source.
      *
-     * @param mainSource the main config source
+     * @param mainSource the main source
      */
     void setMainSource(ConfigSource mainSource);
+
+    //endregion
 
 
     /**
@@ -48,33 +52,33 @@ public interface ConfigSourceManager {
     List<ConfigSource> getSources();
 
     /**
-     * add config source to first position
+     * add source to first position
      *
-     * @param source the config source
+     * @param newSource the new source
      */
-    default void addSourceFirst(ConfigSource source) {
-        this.getSources().add(0, source);
-        this.afterAddSource(source);
+    default void addSourceFirst(ConfigSource newSource) {
+        this.getSources().add(0, newSource);
+        this.afterAddingSource(newSource);
     }
 
     /**
-     * add config source to last position
+     * add source to last position
      *
-     * @param source the config source
+     * @param newSource the new source
      */
-    default void addSourceLast(ConfigSource source) {
-        this.getSources().add(source);
-        this.afterAddSource(source);
+    default void addSourceLast(ConfigSource newSource) {
+        this.getSources().add(newSource);
+        this.afterAddingSource(newSource);
     }
 
     /**
-     * add config source
+     * add source
      *
-     * @param source    the config source
+     * @param newSource the new source
      * @param predicate the predicate
      * @param addBefore the boolean, true=before | false=after
      */
-    default void addSource(ConfigSource source, Predicate<ConfigSource> predicate, boolean addBefore) {
+    default void addSource(ConfigSource newSource, Predicate<ConfigSource> predicate, boolean addBefore) {
         boolean added = false;
 
         // add before the target source, if exist
@@ -84,10 +88,10 @@ public interface ConfigSourceManager {
             targetSource = sources.get(i);
             if (predicate.test(targetSource)) {
                 if (addBefore) {
-                    sources.add(i, source);
+                    sources.add(i, newSource);
                     added = true;
                 } else if (i < sources.size() - 1) {
-                    sources.add(i + 1, source);
+                    sources.add(i + 1, newSource);
                     added = true;
                 }
                 break;
@@ -96,52 +100,53 @@ public interface ConfigSourceManager {
 
         // if not added, add to the last of the sources
         if (!added) {
-            this.addSourceLast(source);
+            this.addSourceLast(newSource);
         }
 
-        this.afterAddSource(source);
+        this.afterAddingSource(newSource);
     }
 
     /**
-     * add config source before
+     * add source before
      *
-     * @param source the config source
+     * @param newSource    the new source
+     * @param targetSource the target source
      */
-    default void addSourceBefore(ConfigSource source, final ConfigSource targetSource) {
-        addSource(source, s -> s == targetSource, true);
+    default void addSourceBefore(ConfigSource newSource, final ConfigSource targetSource) {
+        addSource(newSource, s -> s == targetSource, true);
     }
 
     /**
-     * add config source before
+     * add source before
      *
-     * @param source the config source
+     * @param source the source
      */
     default void addSourceBefore(ConfigSource source, final String targetSourceName) {
         addSource(source, s -> s.getTypeName().equals(targetSourceName), true);
     }
 
     /**
-     * add config source after
+     * add new source after
      *
-     * @param source the config source
+     * @param newSource the new source
      */
-    default void addSourceAfter(ConfigSource source, final ConfigSource targetSource) {
-        addSource(source, s -> s == targetSource, false);
+    default void addSourceAfter(ConfigSource newSource, final ConfigSource targetSource) {
+        addSource(newSource, s -> s == targetSource, false);
     }
 
     /**
-     * add config source after
+     * add new source after
      *
-     * @param source the config source
+     * @param newSource the new source
      */
-    default void addSourceAfter(ConfigSource source, final String targetSourceName) {
-        addSource(source, s -> s.getTypeName().equals(targetSourceName), false);
+    default void addSourceAfter(ConfigSource newSource, final String targetSourceName) {
+        addSource(newSource, s -> s.getTypeName().equals(targetSourceName), false);
     }
 
     /**
-     * After add source, trigger this method.
+     * After adding new source, trigger this method.
      */
-    default void afterAddSource(ConfigSource source) {
+    default void afterAddingSource(ConfigSource newSource) {
     }
 
 }

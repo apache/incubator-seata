@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.listener;
+package io.seata.config.changelistener;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -21,7 +21,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.ConfigurationChangeEvent;
 
 /**
  * The interface Configuration change listener.

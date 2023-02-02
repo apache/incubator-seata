@@ -13,28 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.listener;
-
-import java.util.concurrent.ExecutorService;
+package io.seata.common.executor;
 
 /**
- * The interface Config change listener.
+ * The interface Cacheable.
  *
- * @author slievrly
+ * @author wang.liang
  */
-public interface ConfigChangeListener {
+public interface Cacheable {
 
     /**
-     * Gets executor.
-     *
-     * @return the executor
+     * Clean the cache.
      */
-    ExecutorService getExecutor();
-
-    /**
-     * Receive config info.
-     *
-     * @param configInfo the config info
-     */
-    void receiveConfigInfo(final String configInfo);
+    void cleanCache();
 }
+
