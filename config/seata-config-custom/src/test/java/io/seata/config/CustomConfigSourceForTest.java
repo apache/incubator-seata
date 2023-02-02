@@ -34,7 +34,7 @@ public class CustomConfigSourceForTest implements ConfigSource {
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return "forTest";
     }
 

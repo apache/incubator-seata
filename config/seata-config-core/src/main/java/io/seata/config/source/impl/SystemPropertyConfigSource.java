@@ -32,20 +32,20 @@ public class SystemPropertyConfigSource implements ConfigSource {
 
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return "system-property";
     }
 
     @Override
-    public Object getLatestConfig(String dataId, long timeoutMills) {
-        Object config1 = properties.get(dataId);
+    public String getLatestConfig(String dataId, long timeoutMills) {
+        String config1 = properties.getProperty(dataId);
         if (!ObjectUtils.isNullOrBlank(config1)) {
             return config1;
         }
 
         String propertyDataId = StringUtils.hump2Line(dataId);
         if (!propertyDataId.equals(dataId)) {
-            Object config2 = properties.get(propertyDataId);
+            String config2 = properties.getProperty(propertyDataId);
             if (!ObjectUtils.isNullOrBlank(config2)) {
                 return config2;
             }

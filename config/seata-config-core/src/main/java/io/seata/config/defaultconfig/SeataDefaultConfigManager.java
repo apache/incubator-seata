@@ -18,9 +18,9 @@ package io.seata.config.defaultconfig;
 import java.util.List;
 import java.util.Map;
 
-import io.seata.common.ValueWrapper;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.CacheableConfiguration;
+import io.seata.config.ConfigCache;
 
 /**
  * The type Seata default config manager.
@@ -33,8 +33,8 @@ public class SeataDefaultConfigManager extends CacheableConfiguration
     public static final String DEFAULT_NAME = "seata-default-config-manager";
 
 
-    public SeataDefaultConfigManager(String name, Map<String, ValueWrapper> configCache) {
-        super(name, configCache);
+    public SeataDefaultConfigManager(String name, Map<String, ConfigCache> configCacheMap) {
+        super(name, configCacheMap);
     }
 
     public SeataDefaultConfigManager(String name) {

@@ -362,7 +362,7 @@ public class NacosConfigSource implements RemoteConfigSource
 
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return CONFIG_TYPE;
     }
 

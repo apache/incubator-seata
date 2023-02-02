@@ -172,6 +172,6 @@ public class ConfigurationChangeEvent {
      */
     @Nonnull
     public String getChangeEventSourceTypeName() {
-        return getChangeEventSource().getTypeName();
+        return getChangeEventSource().getName();
     }
 }

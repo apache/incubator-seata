@@ -18,6 +18,7 @@ package io.seata.common.util;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
+import javax.annotation.Nonnull;
 
 /**
  * The type Object utils.
@@ -35,6 +36,10 @@ public class ObjectUtils {
             return true;
         }
 
+        return isBlank(obj);
+    }
+
+    public static boolean isBlank(@Nonnull Object obj) {
         Class<?> clazz = obj.getClass();
 
         if (CharSequence.class.isAssignableFrom(clazz)) {
@@ -54,5 +59,9 @@ public class ObjectUtils {
         }
 
         return StringUtils.isBlank(String.valueOf(obj));
+    }
+
+    public static boolean isNotBlank(@Nonnull Object obj) {
+        return !isBlank(obj);
     }
 }

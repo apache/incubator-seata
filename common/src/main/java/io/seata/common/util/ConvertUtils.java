@@ -33,6 +33,7 @@ public class ConvertUtils {
     }
 
 
+    @SuppressWarnings("unchecked")
     public static <T> T convert(Object value, Class<T> targetType) {
         if (value == null) {
             return null;

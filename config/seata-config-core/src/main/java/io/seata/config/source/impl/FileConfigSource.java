@@ -290,7 +290,7 @@ public class FileConfigSource implements LocalConfigSource
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return CONFIG_TYPE + ":" + name;
     }
 

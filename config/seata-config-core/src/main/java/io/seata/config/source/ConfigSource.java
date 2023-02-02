@@ -30,12 +30,12 @@ public interface ConfigSource {
      * @param timeoutMills the timeout mills
      * @return the Latest config
      */
-    Object getLatestConfig(String dataId, long timeoutMills);
+    String getLatestConfig(String dataId, long timeoutMills);
 
     /**
-     * Get the type name
+     * Get the name
      *
-     * @return the type name
+     * @return the name
      */
-    String getTypeName();
+    String getName();
 }

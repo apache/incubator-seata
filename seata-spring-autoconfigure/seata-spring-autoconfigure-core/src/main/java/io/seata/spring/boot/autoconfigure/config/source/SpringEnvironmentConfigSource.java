@@ -74,7 +74,7 @@ public class SpringEnvironmentConfigSource implements ConfigSource {
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return "spring-environment";
     }
 

@@ -50,7 +50,7 @@ public class SystemEnvConfigSource implements ConfigSource {
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return "system-env";
     }
 }

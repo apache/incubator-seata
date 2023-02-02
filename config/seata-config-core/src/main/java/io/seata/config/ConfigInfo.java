@@ -15,8 +15,7 @@
  */
 package io.seata.config;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 
 import io.seata.config.source.ConfigSource;
@@ -26,27 +25,20 @@ import io.seata.config.source.ConfigSource;
  *
  * @author wang.liang
  */
-public class ConfigInfo<T> {
+public class ConfigInfo {
 
     private final String dataId;
-    private final T value;
-    private final String stringValue;
-
-    private final ConfigSource fromSource;
-
-    private final Date time = new Date();
-    private String timeStr;
+    private final String value;
+    private final ConfigSource source;
 
 
-    public ConfigInfo(String dataId, T value, ConfigSource fromSource) {
-        if (value == null) {
-            throw new IllegalArgumentException("The config value must not be null.");
-        }
+    public ConfigInfo(String dataId, String value, ConfigSource source) {
+        Objects.requireNonNull(value, "The config value must not be null.");
+        Objects.requireNonNull(source, "The source must not be null.");
 
         this.dataId = dataId;
         this.value = value;
-        this.stringValue = String.valueOf(value);
-        this.fromSource = fromSource;
+        this.source = source;
     }
 
     public String getDataId() {
@@ -54,44 +46,25 @@ public class ConfigInfo<T> {
     }
 
     @Nonnull
-    public T getValue() {
+    public String getValue() {
         return value;
     }
 
     @Nonnull
-    public String getStringValue() {
-        return stringValue;
+    public ConfigSource getSource() {
+        return source;
     }
 
-    public ConfigSource getFromSource() {
-        return fromSource;
-    }
-
-    public String getFromSourceTypeName() {
-        return fromSource != null ? fromSource.getTypeName() : null;
-    }
-
-    @Nonnull
-    public Date getTime() {
-        return time;
-    }
-
-    @Nonnull
-    public String getStringTime() {
-        if (timeStr == null) {
-            timeStr = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS").format(new Date());
-        }
-
-        return timeStr;
+    public String getSourceName() {
+        return source.getName();
     }
 
 
     @Override
     public String toString() {
         return '{' +
-                "v=" + stringValue +
-                ", s=" + getFromSourceTypeName() +
-                ", t=" + getStringTime() +
+                "v=" + value +
+                ", s=" + getSourceName() +
                 '}';
     }
 }

@@ -18,11 +18,10 @@ package io.seata.config;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.seata.common.executor.AbstractInitialize;
-import io.seata.common.executor.Initialize;
 import io.seata.common.util.ConvertUtils;
-import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public abstract class AbstractConfiguration extends AbstractInitialize implements Configuration, Initialize {
+public abstract class AbstractConfiguration extends AbstractInitialize implements Configuration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
@@ -52,7 +51,8 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
 
     //region # Get config from sources
 
-    protected ConfigInfo<?> getConfigFromSources(String dataId, long timeoutMills) {
+    @Nullable
+    protected ConfigInfo getConfigFromSources(String dataId, long timeoutMills) {
         if (StringUtils.isBlank(dataId)) {
             return null;
         }
@@ -64,10 +64,10 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
             return null;
         }
 
-        Object blankValue = null;
+        String blankValue = null;
         ConfigSource blankValueFromSource = null;
 
-        Object value;
+        String value;
         for (ConfigSource source : sources) {
             value = source.getLatestConfig(dataId, timeoutMills);
 
@@ -75,43 +75,36 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
                 continue;
             }
 
-            if (ObjectUtils.isNullOrBlank(value)) {
+            if (StringUtils.isBlank(value)) {
                 if (blankValue == null) {
                     blankValue = value;
                     blankValueFromSource = source;
                 }
                 LOGGER.debug("Skip config '{}' blank value '{}' of type [{}] from source '{}' by configuration '{}'.",
-                        dataId, value, value.getClass().getName(), source.getTypeName(), this.getName());
+                        dataId, value, value.getClass().getName(), source.getName(), this.getName());
                 continue;
             }
 
             if (this.printGetSuccessLog) {
                 LOGGER.debug("Get config ['{}' = '{}'] of type [{}] from source '{}' by configuration '{}'.",
-                        dataId, value, value.getClass().getName(), source.getTypeName(), this.getName());
+                        dataId, value, value.getClass().getName(), source.getName(), this.getName());
             }
 
-            return new ConfigInfo<>(dataId, value, source);
+            // 1. Not blank value.
+            return new ConfigInfo(dataId, value, source);
         }
 
-        // May be null or blank.
-        return blankValue != null ? new ConfigInfo<>(dataId, blankValue, blankValueFromSource) : null;
+        if (blankValue != null) {
+            // 2. Is blank value.
+            return new ConfigInfo(dataId, blankValue, blankValueFromSource);
+        }
+
+        // 3. null
+        return null;
     }
 
-    protected <T> ConfigInfo<T> getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
-        ConfigInfo<?> configInfo = this.getConfigFromSources(dataId, timeoutMills);
-        if (configInfo == null) {
-            return null;
-        }
-
-        if (dataType.isAssignableFrom(configInfo.getValue().getClass())) {
-            return (ConfigInfo<T>)configInfo;
-        }
-
-        T value = ConvertUtils.convert(configInfo.getValue(), dataType);
-        return new ConfigInfo<>(dataId, value, configInfo.getFromSource());
-    }
-
-    protected ConfigInfo<?> getConfigFromSources(String dataId) {
+    @Nullable
+    protected ConfigInfo getConfigFromSources(String dataId) {
         return this.getConfigFromSources(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
@@ -122,8 +115,19 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
 
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
-        ConfigInfo<T> configInfo = this.getConfigFromSources(dataId, timeoutMills, dataType);
-        return configInfo == null ? defaultValue : configInfo.getValue();
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
+
+        ConfigInfo configInfo = this.getConfigFromSources(dataId, timeoutMills);
+
+        if (configInfo != null
+                && (StringUtils.isNotBlank(configInfo.getValue()) || defaultValue == null)) {
+            // May be null or blank.
+            return ConvertUtils.convert(configInfo.getValue(), dataType);
+        }
+
+        return defaultValue;
     }
 
     @Nonnull

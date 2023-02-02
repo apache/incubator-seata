@@ -17,14 +17,15 @@ package io.seata.config;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nullable;
 
-import io.seata.common.ValueWrapper;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.ObjectUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.changelistener.ConfigurationChangeListenerManager;
@@ -62,7 +63,7 @@ public class SeataConfiguration extends CacheableConfiguration
 
     //region # Constructor
 
-    public SeataConfiguration(String name, Map<String, ValueWrapper> configCache, DefaultConfigManager defaultConfigManager) {
+    public SeataConfiguration(String name, Map<String, ConfigCache> configCache, DefaultConfigManager defaultConfigManager) {
         super(name, configCache);
         this.defaultConfigManager = defaultConfigManager;
     }
@@ -72,7 +73,7 @@ public class SeataConfiguration extends CacheableConfiguration
         this.defaultConfigManager = defaultConfigManager;
     }
 
-    public SeataConfiguration(String name, Map<String, ValueWrapper> configCache) {
+    public SeataConfiguration(String name, Map<String, ConfigCache> configCache) {
         super(name, configCache);
         this.defaultConfigManager = this.buildDefaultConfigManager();
     }
@@ -195,6 +196,10 @@ public class SeataConfiguration extends CacheableConfiguration
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
+            return;
+        }
+
         LOGGER.debug("Add config listener: dataId = {}, listener = {}", dataId, listener);
 
         Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
@@ -208,7 +213,7 @@ public class SeataConfiguration extends CacheableConfiguration
         if (source instanceof ConfigurationChangeListenerManager) {
             ConfigurationChangeListenerManager manager = (ConfigurationChangeListenerManager)source;
             manager.addConfigListener(dataId, this);
-            LOGGER.debug("Add config listener to source: dataId = {}, source = {}", dataId, source.getTypeName());
+            LOGGER.debug("Add config listener to source: dataId = {}, source = {}", dataId, source.getName());
         }
     }
 
@@ -244,7 +249,7 @@ public class SeataConfiguration extends CacheableConfiguration
         this.sources.forEach(source -> {
             if (source instanceof ConfigurationChangeListenerManager) {
                 ((ConfigurationChangeListenerManager)source).removeConfigListener(dataId, this);
-                LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getTypeName());
+                LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getName());
             }
         });
     }
@@ -278,17 +283,69 @@ public class SeataConfiguration extends CacheableConfiguration
 
     //region ## Override ConfigurationChangeListener
 
+    /**
+     * This method will be called by the {@link ConfigSource}.
+     *
+     * @see this#addSelfConfigListenerToSource(String dataId, ConfigSource source)
+     */
     @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        this.logChangeEvent(event);
+    public synchronized void onChangeEvent(ConfigurationChangeEvent event) {
+        // If the new value is equals to the cache value, do not trigger the event.
+        if (this.newValueEqualsToCacheValue(event)) {
+            return;
+        }
 
+        LOGGER.info("The config '{}' has changed (from '{}' to '{}') by the source '{}'.",
+                event.getDataId(), event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName());
+
+        this.doConfigListenersChangeEvent(event);
+    }
+
+    private void doConfigListenersChangeEvent(ConfigurationChangeEvent event) {
         Set<ConfigurationChangeListener> configListeners = getConfigListeners(event.getDataId());
         configListeners.forEach(listener -> listener.onChangeEvent(event));
     }
 
-    protected void logChangeEvent(ConfigurationChangeEvent event) {
-        LOGGER.debug("The config '{}' has changed (value from '{}' to '{}') by the source '{}'.",
-                event.getDataId(), event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName());
+    private boolean newValueEqualsToCacheValue(ConfigurationChangeEvent event) {
+        String dataId = event.getDataId();
+
+        // Get config cache
+        ConfigCache configCache = this.getCache(dataId);
+        if (configCache != null) {
+            String cacheValue = configCache.getStringValue();
+
+            // Compare cache with the new value
+            if (cacheValue != null && cacheValue.equals(event.getNewValue())) {
+                LOGGER.info("Ignore current change. Although the config '{}' has changed (from '{}' to '{}') by source '{}'," +
+                                " but it does not affect the final config value, because the new value is equals to the cache value '{}' from source '{}'. (Cache time '{}')",
+                        dataId, event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName(),
+                        cacheValue, configCache.getSourceName(), configCache.getTimeStr());
+                return true;
+            }
+
+            // Get config from the sources
+            ConfigInfo configInfoFromSources = this.getConfigFromSources(dataId);
+            String configFromSources = configInfoFromSources != null ? configInfoFromSources.getValue() : null;
+            ConfigSource fromSource = configInfoFromSources != null ? configInfoFromSources.getSource() : null;
+            if (Objects.equals(configFromSources, cacheValue) && fromSource != configCache.getSource()) {
+                String fromSourceName = fromSource != null ? fromSource.getName() : null;
+                LOGGER.info("Ignore current change. Although the config '{}' has changed (from '{}' to '{}') by source '{}'," +
+                                " but it does not affect the final config value. The config value '{}' from source '{}'.",
+                        dataId, event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName(),
+                        configFromSources, fromSourceName
+                );
+                return true;
+            }
+
+            // Remove cache
+            LOGGER.info("Remove cache of config '{}', because the config has changed (from '{}' to '{}') by source '{}'," +
+                            " and newValue is not equals to cacheValue '{}'. It may affect the final value of the config.",
+                    dataId, event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName(), cacheValue
+            );
+            this.removeCache(dataId);
+        }
+
+        return false;
     }
 
     //endregion ## Override ConfigurationChangeListener

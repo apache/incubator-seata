@@ -195,7 +195,7 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return CONFIG_TYPE;
     }
 

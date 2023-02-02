@@ -122,7 +122,7 @@ public interface ConfigSourceManager {
      * @param source the source
      */
     default void addSourceBefore(ConfigSource source, final String targetSourceName) {
-        addSource(source, s -> s.getTypeName().equals(targetSourceName), true);
+        addSource(source, s -> s.getName().equals(targetSourceName), true);
     }
 
     /**
@@ -140,7 +140,7 @@ public interface ConfigSourceManager {
      * @param newSource the new source
      */
     default void addSourceAfter(ConfigSource newSource, final String targetSourceName) {
-        addSource(newSource, s -> s.getTypeName().equals(targetSourceName), false);
+        addSource(newSource, s -> s.getName().equals(targetSourceName), false);
     }
 
     /**

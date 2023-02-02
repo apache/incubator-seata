@@ -19,13 +19,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-import io.seata.common.ValueWrapper;
 import io.seata.common.executor.Cacheable;
 import io.seata.common.executor.Cleanable;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +48,14 @@ public class CacheableConfiguration extends SimpleConfiguration
      * The cache map.
      */
     @Nonnull
-    private final Map<String, ValueWrapper> configCache;
+    private final Map<String, ConfigCache> configCacheMap;
 
 
-    public CacheableConfiguration(String name, @Nonnull Map<String, ValueWrapper> configCache) {
+    public CacheableConfiguration(String name, @Nonnull Map<String, ConfigCache> configCacheMap) {
         super(name);
 
-        Objects.requireNonNull(configCache, "The 'configCache' must not be null.");
-        this.configCache = configCache;
+        Objects.requireNonNull(configCacheMap, "The 'configCacheMap' must not be null.");
+        this.configCacheMap = configCacheMap;
     }
 
     public CacheableConfiguration(String name) {
@@ -73,20 +74,20 @@ public class CacheableConfiguration extends SimpleConfiguration
      */
     @Override
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
-        // Get config from cache
-        ValueWrapper cache = CollectionUtils.computeIfAbsent(configCache, dataId, key -> {
-            // Get config from sources
-            ConfigInfo<T> config = this.getConfigFromSources(dataId, timeoutMills, dataType);
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
 
+        // Get config from cache
+        ConfigCache cache = CollectionUtils.computeIfAbsent(configCacheMap, dataId, key -> {
+            // Get config from sources
+            ConfigInfo config = this.getConfigFromSources(dataId, timeoutMills);
             // Wrap config, also when config is null or blank
-            return ValueWrapper.create(config);
+            return ConfigCache.fromConfigInfo(dataId, config, dataType);
         });
 
-        ConfigInfo<T> configInfo = (ConfigInfo)cache.getValue();
-        T value = null;
-        if (configInfo != null) {
-            value = configInfo.getValue();
-
+        T value = cache.getConfig();
+        if (value != null) {
             // If the same config is obtained from cache with different types multiple times,
             // The dataType will be inconsistent with the class of the value.
             if (!dataType.isAssignableFrom(value.getClass())) {
@@ -97,10 +98,10 @@ public class CacheableConfiguration extends SimpleConfiguration
                 // Convert to the targetType
                 value = ConvertUtils.convert(value, dataType);
             }
-        }
 
-        if (value != null && !ObjectUtils.isNullOrBlank(value)) {
-            return value;
+            if (ObjectUtils.isNotBlank(value)) {
+                return value;
+            }
         }
 
         // Return default value
@@ -135,13 +136,13 @@ public class CacheableConfiguration extends SimpleConfiguration
 
 
     @Override
-    public ValueWrapper removeCache(String key) {
-        return this.configCache.remove(key);
+    public ConfigCache removeCache(String key) {
+        return this.configCacheMap.remove(key);
     }
 
     @Override
     public void cleanCaches() {
-        this.configCache.clear();
+        this.configCacheMap.clear();
     }
 
     @Override
@@ -150,8 +151,19 @@ public class CacheableConfiguration extends SimpleConfiguration
     }
 
     @Nonnull
-    protected Map<String, ValueWrapper> getCacheMap() {
-        return this.configCache;
+    protected Map<String, ConfigCache> getCacheMap() {
+        return this.configCacheMap;
+    }
+
+    @Nullable
+    protected ConfigCache getCache(String dataId) {
+        return this.configCacheMap.get(dataId);
+    }
+
+    @Nullable
+    protected Object getCacheValue(String dataId) {
+        ConfigCache configCache = this.getCache(dataId);
+        return configCache != null ? configCache.getValue() : null;
     }
 
     //endregion # Override Cacheable, Cleanable

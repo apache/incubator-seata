@@ -52,7 +52,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
 
 
     @Override
-    public Object getLatestConfig(final String rawDataId, long timeoutMills) {
+    public String getLatestConfig(final String rawDataId, long timeoutMills) {
         // Splice the prefix 'seata.'
         String dataId = SpringEnvironmentConfigSource.splicePrefixSeataDot(rawDataId);
 
@@ -64,7 +64,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
         }
     }
 
-    private Object getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException {
+    private String getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException {
         // property name
         String propertyName = getPropertyPrefix(dataId);
 
@@ -100,7 +100,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
      * @author xingfudeshi@gmail.com
      */
     @Nullable
-    private Object getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException {
+    private String getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException {
         Optional<Field> fieldOptional = Stream.of(propertyObj.getClass().getDeclaredFields())
                 .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
 
@@ -109,7 +109,8 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
             Field field = fieldOptional.get();
             if (!Map.class.isAssignableFrom(field.getType())) {
                 field.setAccessible(true);
-                return field.get(propertyObj);
+                Object value = field.get(propertyObj);
+                return value != null ? String.valueOf(value) : null;
             }
         }
 
@@ -150,7 +151,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
 
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return "default-value-from-property-object";
     }
 }

@@ -46,6 +46,7 @@ class FileConfigSourceTest {
             countDownLatch.countDown();
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        ConfigurationFactory.removeCache("service.disableGlobalTransaction");
         countDownLatch.await(5, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
         System.setProperty("service.disableGlobalTransaction", String.valueOf(value));

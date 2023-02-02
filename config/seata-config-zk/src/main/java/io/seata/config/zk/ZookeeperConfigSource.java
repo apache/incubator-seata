@@ -119,7 +119,7 @@ public class ZookeeperConfigSource implements RemoteConfigSource,
     }
 
     @Override
-    public String getTypeName() {
+    public String getName() {
         return CONFIG_TYPE;
     }
 
