@@ -38,6 +38,8 @@ class FileConfigSourceTest {
 
     @Test
     void addConfigListener() throws InterruptedException {
+        ConfigurationFactory.cleanCaches();
+
         String dataId = "mockDataId";
         System.setProperty(dataId, "false");
 
@@ -60,10 +62,14 @@ class FileConfigSourceTest {
         boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
         System.setProperty(dataId, String.valueOf(!value));
+
+        ConfigurationFactory.cleanCaches();
     }
 
     @Test
     void testDiffDefaultValue() {
+        ConfigurationFactory.cleanCaches();
+
         Configuration fileConfig = ConfigurationFactory.getInstance();
         int intValue1 = fileConfig.getInt("int.not.exist", 100);
         int intValue2 = fileConfig.getInt("int.not.exist", 200);
@@ -95,6 +101,8 @@ class FileConfigSourceTest {
         System.setProperty("mockDataId3", value);
         Assertions.assertEquals(fileConfig.getString("mockDataId3"), value);
         Assertions.assertNotEquals(fileConfig.getString("mockDataId3", "1"), value);
+
+        ConfigurationFactory.cleanCaches();
     }
 
 }

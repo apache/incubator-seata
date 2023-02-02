@@ -30,6 +30,7 @@ class ProConfigurationFactoryTest {
 
     @Test
     void getInstance() {
+        ConfigurationFactory.cleanCaches();
         System.setProperty(ENV_PROPERTY_KEY, "test-pro");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
