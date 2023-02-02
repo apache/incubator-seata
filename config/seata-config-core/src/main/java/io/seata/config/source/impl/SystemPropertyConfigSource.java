@@ -15,8 +15,6 @@
  */
 package io.seata.config.source.impl;
 
-import java.util.Properties;
-
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigSource;
@@ -28,9 +26,6 @@ import io.seata.config.source.ConfigSource;
  */
 public class SystemPropertyConfigSource implements ConfigSource {
 
-    private final Properties properties = System.getProperties();
-
-
     @Override
     public String getName() {
         return "system-property";
@@ -38,14 +33,14 @@ public class SystemPropertyConfigSource implements ConfigSource {
 
     @Override
     public String getLatestConfig(String dataId, long timeoutMills) {
-        String config1 = properties.getProperty(dataId);
+        String config1 = System.getProperty(dataId);
         if (!ObjectUtils.isNullOrBlank(config1)) {
             return config1;
         }
 
         String propertyDataId = StringUtils.hump2Line(dataId);
         if (!propertyDataId.equals(dataId)) {
-            String config2 = properties.getProperty(propertyDataId);
+            String config2 = System.getProperty(propertyDataId);
             if (!ObjectUtils.isNullOrBlank(config2)) {
                 return config2;
             }
