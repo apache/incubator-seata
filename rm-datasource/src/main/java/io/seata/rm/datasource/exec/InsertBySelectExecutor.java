@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -32,6 +33,7 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 
@@ -88,6 +90,7 @@ public class InsertBySelectExecutor<T, S extends Statement> extends BaseInsertEx
             for (int i = 1; i <= columnCount; i++) {
                 //select a,b,c from t select a1,b1,c1 from t1
                 String colName = insertColumns.get(i - 1);
+                checkDataType(tmeta,resultSetMetaData,i,colName);
                 fields.add(TableRecords.parseResultSetField(tmeta,resultSet,i,colName));
             }
 
@@ -96,6 +99,13 @@ public class InsertBySelectExecutor<T, S extends Statement> extends BaseInsertEx
             records.add(row);
         }
         return records;
+    }
+
+    private void checkDataType(TableMeta tmeta, ResultSetMetaData resultSetMetaData, int i, String colName) throws SQLException {
+        ColumnMeta col = tmeta.getColumnMeta(colName);
+        if (col.getDataType() != resultSetMetaData.getColumnType(i)) {
+            throw new NotSupportYetException("the col[" + colName + "] data type is not consistent with source table");
+        }
     }
 
     @Override
