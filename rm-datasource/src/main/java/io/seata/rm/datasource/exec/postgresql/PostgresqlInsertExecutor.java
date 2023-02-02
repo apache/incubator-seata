@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,9 +61,35 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
+    /**
+     * 1. If the insert columns are not empty and do not contain any pk columns,
+     * it means that there is no pk value in the insert rows, then all the pk values should come from auto-increment.
+     * <p>
+     * 2. The pk value exists in insert rows. The possible situations are:
+     * <ul>
+     *     <li>The insert columns are empty: all pk values can be obtained from insert rows</li>
+     *     <li>The insert columns contain at least one pk column: first obtain the existing pk value from the insert rows, and other from auto-increment</li>
+     * </ul>
+     *
+     * @return {@link Map}<{@link String}, {@link List}<{@link Object}>>
+     * @throws SQLException the sql exception
+     */
     @Override
     public Map<String, List<Object>> getPkValues() throws SQLException {
-        return getPkValuesByColumn();
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        Map<String, List<Object>> pkValuesMap = new HashMap<>(pkColumnNameList.size());
+
+        // first obtain the existing pk value from the insert rows (if exists)
+        if (!containsColumns() || containsAnyPk()) {
+            pkValuesMap.putAll(getPkValuesByColumn());
+        }
+        // other from auto-increment
+        for (String columnName : pkColumnNameList) {
+            if (!pkValuesMap.containsKey(columnName)) {
+                pkValuesMap.put(columnName, getGeneratedKeys(columnName));
+            }
+        }
+        return pkValuesMap;
     }
 
     @Override

@@ -93,6 +93,25 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
     }
 
     /**
+     * Whether the insert columns contain any pk columns
+     *
+     * @return true: contain at least one pk column. false: do not contain any pk columns
+     */
+    protected boolean containsAnyPk() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (CollectionUtils.isEmpty(insertColumns)) {
+            return false;
+        }
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        if (CollectionUtils.isEmpty(pkColumnNameList)) {
+            return false;
+        }
+        return pkColumnNameList.stream().anyMatch(pkColumn -> insertColumns.contains(pkColumn)
+            || CollectionUtils.toUpperList(insertColumns).contains(pkColumn.toUpperCase()));
+    }
+
+    /**
      * judge sql specify column
      * @return true: contains column. false: not contains column.
      */
