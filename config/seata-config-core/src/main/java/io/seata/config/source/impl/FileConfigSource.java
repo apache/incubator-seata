@@ -171,16 +171,17 @@ public class FileConfigSource implements LocalConfigSource
         String[] tryPaths;
         if (resourceUrl != null) {
             tryPaths = new String[]{
-                    // first: project dir
-                    resourceUrl.getPath() + decodedPath,
-                    // second: system path
-                    decodedPath
+                // first: project dir
+                resourceUrl.getPath() + decodedPath,
+                // second: system path
+                decodedPath
             };
         } else {
             tryPaths = new String[]{
-                    decodedPath
+                decodedPath
             };
         }
+
 
         for (String tryPath : tryPaths) {
             File targetFile = new File(tryPath);
@@ -232,21 +233,21 @@ public class FileConfigSource implements LocalConfigSource
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override

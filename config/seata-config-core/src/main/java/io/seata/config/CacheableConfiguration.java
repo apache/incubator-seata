@@ -120,7 +120,7 @@ public class CacheableConfiguration extends SimpleConfiguration
     //endregion # Override ConfigSourceManager
 
 
-    //region # Override Cacheable、Cleanable
+    //region # Override Cacheable, Cleanable
 
     @Override
     public void cleanCache() {
@@ -139,5 +139,5 @@ public class CacheableConfiguration extends SimpleConfiguration
         return this.configCache;
     }
 
-    //endregion # Override Cacheable、Cleanable
+    //endregion # Override Cacheable, Cleanable
 }
