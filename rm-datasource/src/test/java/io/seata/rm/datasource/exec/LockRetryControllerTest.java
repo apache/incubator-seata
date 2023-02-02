@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
@@ -76,7 +77,7 @@ public class LockRetryControllerTest {
     @Test
     void testLockConfigListener() {
         LockRetryController.GlobalConfig config = new LockRetryController.GlobalConfig();
-        ConfigurationChangeEvent event = new ConfigurationChangeEvent(null);
+        ConfigurationChangeEvent event = new ConfigurationChangeEvent(ConfigurationFactory.getInstance().getMainSource());
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL);
         int retryInterval = 100;

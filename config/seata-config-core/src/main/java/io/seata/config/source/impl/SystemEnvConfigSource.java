@@ -27,25 +27,26 @@ import io.seata.config.source.ConfigSource;
  */
 public class SystemEnvConfigSource implements ConfigSource {
 
-    private static final Map<String, String> ENV_MAP = System.getenv();
+    private final Map<String, String> env = System.getenv();
 
 
     @Override
     public String getLatestConfig(String dataId, long timeoutMills) {
-        String config = ENV_MAP.get(dataId);
-        if (StringUtils.isNotBlank(config)) {
-            return config;
+        String config1 = env.get(dataId);
+        if (!StringUtils.isNotBlank(config1)) {
+            return config1;
         }
 
         if (dataId.contains(".")) {
             String envDataId = dataId.toUpperCase().replace(".", "_");
-            config = ENV_MAP.get(envDataId);
-            if (StringUtils.isNotBlank(config)) {
-                return config;
+            String config2 = env.get(envDataId);
+            if (!StringUtils.isNotBlank(config2)) {
+                return config2;
             }
         }
 
-        return null;
+        // May be null or blank.
+        return config1;
     }
 
     @Override

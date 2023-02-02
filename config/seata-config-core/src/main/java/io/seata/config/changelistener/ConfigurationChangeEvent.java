@@ -15,6 +15,9 @@
  */
 package io.seata.config.changelistener;
 
+import java.util.Objects;
+import javax.annotation.Nonnull;
+
 import io.seata.config.source.ConfigSource;
 
 /**
@@ -32,10 +35,13 @@ public class ConfigurationChangeEvent {
     private String newValue;
     private String namespace;
     private ConfigurationChangeType changeType;
+
+    @Nonnull
     private ConfigSource changeEventSource;
 
 
     public ConfigurationChangeEvent(ConfigSource changeEventSource) {
+        Objects.requireNonNull(changeEventSource, "The 'changeEventSource' must not be null.");
         this.changeEventSource = changeEventSource;
     }
 
@@ -154,6 +160,7 @@ public class ConfigurationChangeEvent {
      *
      * @return the change event source
      */
+    @Nonnull
     public ConfigSource getChangeEventSource() {
         return changeEventSource;
     }
@@ -163,7 +170,8 @@ public class ConfigurationChangeEvent {
      *
      * @return the type name
      */
+    @Nonnull
     public String getChangeEventSourceTypeName() {
-        return changeEventSource != null ? changeEventSource.getTypeName() : null;
+        return getChangeEventSource().getTypeName();
     }
 }

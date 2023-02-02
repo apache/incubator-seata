@@ -90,11 +90,11 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
                         dataId, value, value.getClass().getName(), source.getTypeName(), this.getName());
             }
 
-            return new ConfigInfo<>(value, source);
+            return new ConfigInfo<>(dataId, value, source);
         }
 
-        // Return null or blank value.
-        return blankValue != null ? new ConfigInfo<>(blankValue, blankValueFromSource) : null;
+        // May be null or blank.
+        return blankValue != null ? new ConfigInfo<>(dataId, blankValue, blankValueFromSource) : null;
     }
 
     protected <T> ConfigInfo<T> getConfigFromSources(String dataId, long timeoutMills, Class<T> dataType) {
@@ -108,7 +108,7 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
         }
 
         T value = ConvertUtils.convert(configInfo.getValue(), dataType);
-        return new ConfigInfo<>(value, configInfo.getFromSource());
+        return new ConfigInfo<>(dataId, value, configInfo.getFromSource());
     }
 
     protected ConfigInfo<?> getConfigFromSources(String dataId) {

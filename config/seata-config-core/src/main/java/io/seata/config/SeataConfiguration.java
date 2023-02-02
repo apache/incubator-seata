@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.Nullable;
 
 import io.seata.common.ValueWrapper;
@@ -104,10 +103,13 @@ public class SeataConfiguration extends CacheableConfiguration
 
         if (ObjectUtils.isNullOrBlank(config)) {
             // Get default value from defaultConfigManager.
-            return this.getDefaultValueFromDefaultConfigManager(dataId, dataType);
+            defaultValue = this.getDefaultValueFromDefaultConfigManager(dataId, dataType);
+            if (defaultValue != null) {
+                return defaultValue;
+            }
         }
 
-        // The config may be null or blank value.
+        // May be null or blank.
         return config;
     }
 
@@ -197,6 +199,8 @@ public class SeataConfiguration extends CacheableConfiguration
 
         Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
         dataIdListeners.add(listener);
+
+        // add self (self is a ConfigurationChangeListener) to sources
         this.addSelfConfigListenerToSources(dataId);
     }
 

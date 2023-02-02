@@ -89,9 +89,15 @@ public final class ConfigurationFactory {
         }
     }
 
-    public static void cleanCache() {
+    public static void removeCache(String dataId) {
         if (instance instanceof Cacheable) {
-            ((Cacheable)instance).cleanCache();
+            ((Cacheable)instance).removeCache(dataId);
+        }
+    }
+
+    public static void cleanCaches() {
+        if (instance instanceof Cacheable) {
+            ((Cacheable)instance).cleanCaches();
         }
     }
 

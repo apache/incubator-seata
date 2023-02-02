@@ -80,8 +80,14 @@ class FileConfigSourceTest {
         String content4 = fileConfig.getString("mockDataId2", value);
         Assertions.assertEquals(content4, value);
         String content5 = fileConfig.getString("mockDataId2");
-        Assertions.assertEquals(content5, value);
+        Assertions.assertNull(content5);
 
+
+        // test blank value
+        value = "";
+        System.setProperty("mockDataId3", value);
+        Assertions.assertEquals(fileConfig.getString("mockDataId3"), value);
+        Assertions.assertNotEquals(fileConfig.getString("mockDataId3", "1"), value);
     }
 
 }

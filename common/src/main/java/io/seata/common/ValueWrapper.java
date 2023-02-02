@@ -16,6 +16,7 @@
 package io.seata.common;
 
 import java.io.Serializable;
+import javax.annotation.Nonnull;
 
 /**
  * The type ValueWrapper.
@@ -23,7 +24,6 @@ import java.io.Serializable;
  * @author wang.liang
  */
 public class ValueWrapper implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     public static final ValueWrapper NULL_VALUE_WRAPPER = new ValueWrapper(null);
@@ -32,14 +32,12 @@ public class ValueWrapper implements Serializable {
     //region Class
 
     private final Object value;
-    private final Serializable serializableValue;
     private final Class<?> type;
 
 
     private ValueWrapper(Object value) {
         this.value = value;
         this.type = value != null ? value.getClass() : null;
-        this.serializableValue = value instanceof Serializable ? (Serializable)value : null;
     }
 
 
@@ -51,15 +49,12 @@ public class ValueWrapper implements Serializable {
         return type;
     }
 
-    public Serializable getSerializableValue() {
-        return serializableValue;
-    }
-
-    //endregion
+    //endregion Class
 
 
     //region static
 
+    @Nonnull
     public static ValueWrapper create(Object value) {
         if (value instanceof ValueWrapper) {
             return (ValueWrapper)value;
@@ -76,7 +71,7 @@ public class ValueWrapper implements Serializable {
         return NULL_VALUE_WRAPPER == valueWrapper;
     }
 
-    //endregion
+    //endregion static
 
 
     @Override

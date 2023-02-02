@@ -23,8 +23,16 @@ package io.seata.common.executor;
 public interface Cacheable {
 
     /**
-     * Clean the cache.
+     * Remove cache by key.
+     *
+     * @param key the cache key
+     * @return the removed cache.
      */
-    void cleanCache();
+    Object removeCache(String key);
+
+    /**
+     * Clean the caches.
+     */
+    void cleanCaches();
 }
 

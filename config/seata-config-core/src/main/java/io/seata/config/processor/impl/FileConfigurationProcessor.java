@@ -32,7 +32,7 @@ public class FileConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
     public void process(Configuration configuration) {
-        // get configFileName from configuration
+        // get registry configFileName from configuration
         String configFileName = ConfigurationUtils.getConfigFileName(configuration);
 
         // load file sources by configFileName

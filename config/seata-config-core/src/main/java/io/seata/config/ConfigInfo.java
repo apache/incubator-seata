@@ -28,6 +28,7 @@ import io.seata.config.source.ConfigSource;
  */
 public class ConfigInfo<T> {
 
+    private final String dataId;
     private final T value;
     private final String stringValue;
 
@@ -37,16 +38,20 @@ public class ConfigInfo<T> {
     private String timeStr;
 
 
-    public ConfigInfo(T value, ConfigSource fromSource) {
+    public ConfigInfo(String dataId, T value, ConfigSource fromSource) {
         if (value == null) {
             throw new IllegalArgumentException("The config value must not be null.");
         }
 
+        this.dataId = dataId;
         this.value = value;
         this.stringValue = String.valueOf(value);
         this.fromSource = fromSource;
     }
 
+    public String getDataId() {
+        return dataId;
+    }
 
     @Nonnull
     public T getValue() {
