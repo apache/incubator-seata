@@ -227,17 +227,17 @@ public enum FrameworkErrorCode {
     /**
      * TCC fence datasource need injected
      */
-    DateSourceNeedInjected("0501", "TCC fence datasource need injected", "TCC fence datasource need injected"),
+    DateSourceNeedInjected("0501","TCC fence datasource need injected","TCC fence datasource need injected"),
 
     /**
      * TCC fence record not exists
      */
-    RecordNotExists("0502", "TCC fence record not exists", "TCC fence record not exists"),
+    RecordNotExists("0502","TCC fence record not exists","TCC fence record not exists"),
 
     /**
      * Insert tcc fence record error
      */
-    InsertRecordError("0503", "Insert tcc fence record error", "Insert tcc fence record error"),
+    InsertRecordError("0503","Insert tcc fence record error","Insert tcc fence record error"),
 
     /**
      * Insert tcc fence record duplicate key exception
@@ -247,7 +247,7 @@ public enum FrameworkErrorCode {
     /**
      * TCC fence transactionManager need injected
      */
-    TransactionManagerNeedInjected("0505", "TCC fence transactionManager need injected", "TCC fence transactionManager need injected"),
+    TransactionManagerNeedInjected("0505","TCC fence transactionManager need injected","TCC fence transactionManager need injected"),
 
     /**
      * Undefined error

@@ -15,23 +15,6 @@
  */
 package io.seata.discovery.registry.etcd3;
 
-
-import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.Lease;
@@ -47,11 +30,29 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static io.netty.util.CharsetUtil.UTF_8;
 
@@ -61,6 +62,8 @@ import static io.netty.util.CharsetUtil.UTF_8;
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "etcd3";
@@ -262,7 +265,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                     if (StringUtils.isNotBlank(testEndpoint)) {
                         client = Client.builder().endpoints(testEndpoint).build();
                     } else {
-                        client = Client.builder().endpoints(ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
+                        client = Client.builder().endpoints(CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
                     }
                 }
             }
@@ -277,7 +280,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private String getClusterName() {
         String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return ConfigurationFactory.getInstance().getString(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        return CONFIG.getString(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
     /**

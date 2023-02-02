@@ -36,6 +36,7 @@ import io.seata.common.exception.EurekaRegistryException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int EUREKA_REFRESH_INTERVAL = 5;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final ConcurrentMap<String, List<EurekaEventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, Object> CLUSTER_LOCK = new ConcurrentHashMap<>();
@@ -171,13 +173,13 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         Properties eurekaProperties = new Properties();
         eurekaProperties.setProperty(EUREKA_CONFIG_REFRESH_KEY, String.valueOf(EUREKA_REFRESH_INTERVAL));
 
-        String url = ConfigurationFactory.getInstance().getString(getEurekaServerUrlFileKey());
+        String url = CONFIG.getString(getEurekaServerUrlFileKey());
         if (StringUtils.isBlank(url)) {
             throw new EurekaRegistryException("eureka server url can not be null!");
         }
         eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
 
-        String weight = ConfigurationFactory.getInstance().getString(getEurekaInstanceWeightFileKey());
+        String weight = CONFIG.getString(getEurekaInstanceWeightFileKey());
         if (StringUtils.isNotBlank(weight)) {
             eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, weight);
         } else {
@@ -192,7 +194,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private String getApplicationName() {
-        String application = ConfigurationFactory.getInstance().getString(getEurekaApplicationFileKey());
+        String application = CONFIG.getString(getEurekaApplicationFileKey());
         if (application == null) {
             application = DEFAULT_APPLICATION;
         }

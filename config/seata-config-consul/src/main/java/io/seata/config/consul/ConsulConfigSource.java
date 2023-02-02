@@ -39,6 +39,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
@@ -63,6 +64,7 @@ public class ConsulConfigSource implements RemoteConfigSource
     private volatile static ConsulClient client;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulConfigSource.class);
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONSUL_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "consul";
@@ -225,7 +227,7 @@ public class ConsulConfigSource implements RemoteConfigSource
         if (client == null) {
             synchronized (ConsulConfigSource.class) {
                 if (client == null) {
-                    String serverAddr = ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
@@ -241,7 +243,7 @@ public class ConsulConfigSource implements RemoteConfigSource
      */
     private static String getAclToken() {
         String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
-                : ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+                : CONFIG.getString(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
         return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 
@@ -285,7 +287,7 @@ public class ConsulConfigSource implements RemoteConfigSource
     }
 
     private static String getConsulConfigKey() {
-        return ConfigurationFactory.getInstance().getString(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
+        return CONFIG.getString(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
     }
 
     private static String getSeataConfigStr() {

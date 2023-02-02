@@ -67,6 +67,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     private static final String DEFAULT_CLUSTER = "default";
     private static final String DEFAULT_ADDRESS_WAIT_TIME = "3000";
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     private static final String HOST_SEPERATOR = ":";
     private static final String REGISTRY_TYPE = "sofa";
 
@@ -200,13 +202,11 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private static Properties getNamingProperties() {
-        Configuration seataConfig = ConfigurationFactory.getInstance();
-
         Properties properties = new Properties();
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_SERVER_ADDR_KEY));
         } else {
-            String address = seataConfig.getString(getSofaAddrFileKey());
+            String address = CONFIG.getString(getSofaAddrFileKey());
             if (address != null) {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
@@ -214,7 +214,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY) != null) {
             properties.setProperty(PRO_REGION_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_REGION_KEY));
         } else {
-            String region = seataConfig.getString(getSofaRegionFileKey());
+            String region = CONFIG.getString(getSofaRegionFileKey());
             if (region == null) {
                 region = DEFAULT_LOCAL_REGION;
             }
@@ -224,7 +224,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY) != null) {
             properties.setProperty(PRO_DATACENTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_DATACENTER_KEY));
         } else {
-            String datacenter = seataConfig.getString(getSofaDataCenterFileKey());
+            String datacenter = CONFIG.getString(getSofaDataCenterFileKey());
             if (datacenter == null) {
                 datacenter = DEFAULT_LOCAL_DATACENTER;
             }
@@ -234,7 +234,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY) != null) {
             properties.setProperty(PRO_GROUP_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_GROUP_KEY));
         } else {
-            String group = seataConfig.getString(getSofaGroupFileKey());
+            String group = CONFIG.getString(getSofaGroupFileKey());
             if (group == null) {
                 group = DEFAULT_GROUP;
             }
@@ -244,7 +244,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY) != null) {
             properties.setProperty(PRO_CLUSTER_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_CLUSTER_KEY));
         } else {
-            String cluster = seataConfig.getString(getSofaClusterFileKey());
+            String cluster = CONFIG.getString(getSofaClusterFileKey());
             if (cluster == null) {
                 cluster = DEFAULT_CLUSTER;
             }
@@ -254,7 +254,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY) != null) {
             properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY));
         } else {
-            String group = seataConfig.getString(getSofaAddressWaitTimeFileKey());
+            String group = CONFIG.getString(getSofaAddressWaitTimeFileKey());
             if (group == null) {
                 group = DEFAULT_ADDRESS_WAIT_TIME;
             }
@@ -293,7 +293,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private String getApplicationName() {
-        String application = ConfigurationFactory.getInstance().getString(getApplicationFileKey());
+        String application = CONFIG.getString(getApplicationFileKey());
         if (application == null) {
             application = DEFAULT_APPLICATION;
         }

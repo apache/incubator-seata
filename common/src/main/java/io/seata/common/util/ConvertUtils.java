@@ -16,6 +16,7 @@
 package io.seata.common.util;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,35 +33,45 @@ public class ConvertUtils {
     }
 
 
-    public static <T> T convert(Object source, Class<T> targetType) {
-        if (source == null) {
+    public static <T> T convert(Object value, Class<T> targetType) {
+        if (value == null) {
             return null;
         }
 
-        if (targetType.isAssignableFrom(source.getClass())) {
-            return (T)source;
+        if (targetType.isAssignableFrom(value.getClass())) {
+            return (T)value;
         }
 
         if (String.class.equals(targetType)) {
-            return (T)String.valueOf(source);
+            return (T)String.valueOf(value);
         }
+
+        if (ObjectUtils.isNullOrBlank(value)) {
+            // Keep the blank value for List.
+            if (List.class.equals(targetType)) {
+                return (T)new ArrayList<>();
+            }
+
+            return null;
+        }
+
         if (Long.class.equals(targetType)) {
-            return (T)Long.valueOf(String.valueOf(source));
+            return (T)Long.valueOf(String.valueOf(value));
         }
         if (Integer.class.equals(targetType)) {
-            return (T)Integer.valueOf(String.valueOf(source));
+            return (T)Integer.valueOf(String.valueOf(value));
         }
         if (Short.class.equals(targetType)) {
-            return (T)Short.valueOf(String.valueOf(source));
+            return (T)Short.valueOf(String.valueOf(value));
         }
         if (Boolean.class.equals(targetType)) {
-            return (T)Boolean.valueOf(String.valueOf(source));
+            return (T)Boolean.valueOf(String.valueOf(value));
         }
         if (Duration.class.equals(targetType)) {
-            return (T)Duration.parse(String.valueOf(source));
+            return (T)Duration.parse(String.valueOf(value));
         }
         if (List.class.equals(targetType)) {
-            String str = String.valueOf(source);
+            String str = String.valueOf(value);
             String regex = ",";
             if (str.contains(";")) {
                 regex = ";";

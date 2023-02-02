@@ -57,31 +57,31 @@ class ConfigurationTest {
         //short
         dataId = "short";
         assertThat(configuration.getShort(dataId)).isEqualTo(SHORT_VALUE);
-        assertThat(configuration.getShort(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_SHORT);
+        assertThat(configuration.getShort(dataId + NULL_POSTFIX)).isEqualTo(Configuration.DEFAULT_SHORT);
         assertThat(configuration.getShort(dataId + DEFAULT_POSTFIX, DEFAULT_SHORT_VALUE)).isEqualTo(DEFAULT_SHORT_VALUE);
 
         //int
         dataId = "int";
         assertThat(configuration.getInt(dataId)).isEqualTo(INT_VALUE);
-        assertThat(configuration.getInt(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_INT);
+        assertThat(configuration.getInt(dataId + NULL_POSTFIX)).isEqualTo(Configuration.DEFAULT_INT);
         assertThat(configuration.getInt(dataId + DEFAULT_POSTFIX, DEFAULT_INT_VALUE)).isEqualTo(DEFAULT_INT_VALUE);
 
         //long
         dataId = "long";
         assertThat(configuration.getLong(dataId)).isEqualTo(LONG_VALUE);
-        assertThat(configuration.getLong(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_LONG);
+        assertThat(configuration.getLong(dataId + NULL_POSTFIX)).isEqualTo(Configuration.DEFAULT_LONG);
         assertThat(configuration.getLong(dataId + DEFAULT_POSTFIX, DEFAULT_LONG_VALUE)).isEqualTo(DEFAULT_LONG_VALUE);
 
         //duration
         dataId = "duration";
         assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
-        assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_DURATION);
+        assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(Configuration.DEFAULT_DURATION);
         assertThat(configuration.getDuration(dataId + DEFAULT_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
 
         //boolean
         dataId = "boolean";
         assertThat(configuration.getBoolean(dataId)).isEqualTo(BOOLEAN_VALUE);
-        assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_BOOLEAN);
+        assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isEqualTo(Configuration.DEFAULT_BOOLEAN);
         assertThat(configuration.getBoolean(dataId + DEFAULT_POSTFIX, DEFAULT_BOOLEAN_VALUE)).isEqualTo(DEFAULT_BOOLEAN_VALUE);
     }
 }

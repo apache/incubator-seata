@@ -32,6 +32,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
@@ -49,7 +50,7 @@ import static io.seata.common.ConfigurationKeys.FILE_ROOT_CONFIG;
  */
 public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChangeListenerManager {
 
-    private static final String REGISTRY_TYPE = "apollo";
+    private static final String CONFIG_TYPE = "apollo";
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
     private static final String APOLLO_SECRET = "apolloAccessKeySecret";
@@ -62,10 +63,12 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
     private static final String PROP_APOLLO_CLUSTER = "apollo.cluster";
     private static final String NAMESPACE = "namespace";
     private static final String DEFAULT_NAMESPACE = "application";
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
-    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP
+            = new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfigSource instance;
 
@@ -75,7 +78,7 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
         if (config == null) {
             synchronized (ApolloConfigSource.class) {
                 if (config == null) {
-                    config = ConfigService.getConfig(ConfigurationFactory.getInstance().getString(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
+                    config = ConfigService.getConfig(CONFIG.getString(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                             MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                             new LinkedBlockingQueue<>(),
@@ -156,31 +159,31 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
     private void readyApolloConfig() {
         Properties properties = System.getProperties();
         if (!properties.containsKey(PROP_APP_ID)) {
-            String appId = ConfigurationFactory.getInstance().getString(getApolloAppIdFileKey());
+            String appId = CONFIG.getString(getApolloAppIdFileKey());
             if (StringUtils.isNotBlank(appId)) {
                 System.setProperty(PROP_APP_ID, appId);
             }
         }
         if (!properties.containsKey(PROP_APOLLO_META)) {
-            String apolloMeta = ConfigurationFactory.getInstance().getString(getApolloMetaFileKey());
+            String apolloMeta = CONFIG.getString(getApolloMetaFileKey());
             if (StringUtils.isNotBlank(apolloMeta)) {
                 System.setProperty(PROP_APOLLO_META, apolloMeta);
             }
         }
         if (!properties.containsKey(PROP_APOLLO_SECRET)) {
-            String apolloAccesskeySecret = ConfigurationFactory.getInstance().getString(getApolloSecretFileKey());
+            String apolloAccesskeySecret = CONFIG.getString(getApolloSecretFileKey());
             if (StringUtils.isNotBlank(apolloAccesskeySecret)) {
                 System.setProperty(PROP_APOLLO_SECRET, apolloAccesskeySecret);
             }
         }
         if (!properties.containsKey(APOLLO_CLUSTER)) {
-            String apolloCluster = ConfigurationFactory.getInstance().getString(getApolloCluster());
+            String apolloCluster = CONFIG.getString(getApolloCluster());
             if (StringUtils.isNotBlank(apolloCluster)) {
                 System.setProperty(PROP_APOLLO_CLUSTER, apolloCluster);
             }
         }
         if (!properties.containsKey(APOLLO_CONFIG_SERVICE)) {
-            String apolloConfigService = ConfigurationFactory.getInstance().getString(getApolloConfigService());
+            String apolloConfigService = CONFIG.getString(getApolloConfigService());
             if (StringUtils.isNotBlank(apolloConfigService)) {
                 System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
             } else {
@@ -193,31 +196,31 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 
     public static String getApolloMetaFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_META);
     }
 
     public static String getApolloSecretFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_SECRET);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_SECRET);
     }
 
     public static String getApolloAppIdFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APP_ID);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APP_ID);
     }
 
     public static String getApolloNamespaceKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, NAMESPACE);
     }
 
     public static String getApolloCluster() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CLUSTER);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_CLUSTER);
     }
 
     public static String getApolloConfigService() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_CONFIG_SERVICE);
     }
 
 

@@ -237,4 +237,16 @@ public interface Configuration extends ConfigSourceManager {
         return getList(dataId, null, DEFAULT_CONFIG_TIMEOUT, dataType);
     }
 
+    default List<String> getList(String dataId, List<String> defaultValue, long timeoutMills) {
+        return getList(dataId, defaultValue, timeoutMills, String.class);
+    }
+
+    default List<String> getList(String dataId, List<String> defaultValue) {
+        return getList(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT, String.class);
+    }
+
+    default List<String> getList(String dataId) {
+        return getList(dataId, null, DEFAULT_CONFIG_TIMEOUT, String.class);
+    }
+
 }

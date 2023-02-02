@@ -16,11 +16,11 @@
 package io.seata.metrics.exporter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
@@ -38,21 +38,23 @@ public class ExporterFactory {
 
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
-        String exporterTypeNameList = ConfigurationFactory.getInstance().getString(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, DEFAULT_METRICS_EXPORTER_LIST);
-        if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
-            String[] exporterTypeNames = exporterTypeNameList.split(",");
-            for (String exporterTypeName : exporterTypeNames) {
+
+        List<String> exporterTypeNameList = ConfigurationFactory.getInstance().getList(
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST
+            , Arrays.asList(DEFAULT_METRICS_EXPORTER_LIST));
+        if (exporterTypeNameList != null) {
+            for (String exporterTypeName : exporterTypeNameList) {
                 ExporterType exporterType;
                 try {
                     exporterType = ExporterType.getType(exporterTypeName);
                     exporters.add(
                         EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName()));
                 } catch (Exception exx) {
-                    LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
+                    LOGGER.error("not support metrics exporter type: {}", exporterTypeName, exx);
                 }
             }
         }
+
         return exporters;
     }
 }

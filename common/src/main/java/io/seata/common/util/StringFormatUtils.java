@@ -103,14 +103,5 @@ public class StringFormatUtils {
         return sb.toString();
     }
 
-    /**
-     * hump to Line or line to hump, only spring environment use
-     *
-     * @param str str
-     * @return string string
-     */
-    public static String camelToLine(String str) {
-        return StringUtils.hump2Line(str);
-    }
 
 }

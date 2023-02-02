@@ -53,6 +53,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private static volatile ZookeeperRegisterServiceImpl instance;
     private static volatile ZkClient zkClient;
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
@@ -66,11 +67,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR;
+        + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
-            + ZK_PATH_SPLIT_CHAR;
+        + ZK_PATH_SPLIT_CHAR;
     private static final String ROOT_PATH_WITHOUT_SUFFIX = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR
-            + REGISTRY_TYPE;
+        + REGISTRY_TYPE;
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, Object> CLUSTER_LOCK = new ConcurrentHashMap<>();
@@ -217,12 +218,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         if (zkClient == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (zkClient == null) {
-                    Configuration seataConfig = ConfigurationFactory.getInstance();
-                    zkClient = buildZkClient(seataConfig.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                            seataConfig.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
-                            seataConfig.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
-                            seataConfig.getString(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
-                            seataConfig.getString(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
+                    zkClient = buildZkClient(CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                            CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
+                            CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
+                            CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
+                            CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
                 }
             }
         }
@@ -312,7 +312,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private String getClusterName() {
         String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return ConfigurationFactory.getInstance().getString(clusterConfigName);
+        return CONFIG.getString(clusterConfigName);
     }
 
     private String getRegisterPathByPath(InetSocketAddress address) {
