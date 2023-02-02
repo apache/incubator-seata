@@ -129,6 +129,7 @@ seata:
       reporter-initial-delay: 60
       serialization: kryo
       compressor: none
+      sync: true # sync log&snapshot to disk
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1

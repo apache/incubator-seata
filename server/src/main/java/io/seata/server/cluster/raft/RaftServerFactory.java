@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -196,6 +197,7 @@ public class RaftServerFactory {
             CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
         raftOptions.setMaxReplicatorInflightMsgs(
             CONFIG.getInt(SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
+        raftOptions.setSync(CONFIG.getBoolean(SERVER_RAFT_SYNC, raftOptions.isSync()));
         return raftOptions;
     }
 
@@ -204,7 +206,7 @@ public class RaftServerFactory {
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
         // snapshot should be made every 30 seconds
-        Integer snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
+        int snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         nodeOptions.setRaftOptions(initRaftOptions());
         // set the election timeout to 2 second

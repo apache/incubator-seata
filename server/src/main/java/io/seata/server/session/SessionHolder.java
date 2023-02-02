@@ -74,30 +74,11 @@ public class SessionHolder {
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
 
     /**
-     * The constant ASYNC_COMMITTING_SESSION_MANAGER_NAME.
-     */
-    public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
-
-    /**
-     * The constant RETRY_COMMITTING_SESSION_MANAGER_NAME.
-     */
-    public static final String RETRY_COMMITTING_SESSION_MANAGER_NAME = "retry.commit.data";
-
-    /**
-     * The constant RETRY_ROLLBACKING_SESSION_MANAGER_NAME.
-     */
-    public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
-
-    /**
      * The redis distributed lock expire time
      */
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
-    private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
-    private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
-    private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
-    
     private static final Map<String, SessionManager> SESSION_MANAGER_MAP = new HashMap<>();
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
@@ -119,12 +100,6 @@ public class SessionHolder {
         RaftServerFactory.getInstance().init();
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
@@ -140,20 +115,9 @@ public class SessionHolder {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             }
-            ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
             SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
@@ -337,44 +301,6 @@ public class SessionHolder {
         return sessionManager != null ? sessionManager : ROOT_SESSION_MANAGER;
     }
 
-    /**
-     * Gets async committing session manager.
-     *
-     * @return the async committing session manager
-     */
-    @Deprecated
-    public static SessionManager getAsyncCommittingSessionManager() {
-        if (ASYNC_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return ASYNC_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry committing session manager.
-     *
-     * @return the retry committing session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryCommittingSessionManager() {
-        if (RETRY_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry rollbacking session manager.
-     *
-     * @return the retry rollbacking session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryRollbackingSessionManager() {
-        if (RETRY_ROLLBACKING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_ROLLBACKING_SESSION_MANAGER;
-    }
 
     //endregion
 

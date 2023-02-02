@@ -148,6 +148,8 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
                 beginTime, retryBranch);
         } else {
+            //contains not AT branch
+            globalSession.setStatus(GlobalStatus.Committed);
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }

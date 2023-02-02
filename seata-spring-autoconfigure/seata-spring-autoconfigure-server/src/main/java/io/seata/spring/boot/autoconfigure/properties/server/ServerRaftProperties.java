@@ -54,6 +54,8 @@ public class ServerRaftProperties {
 
     private String compressor = "none";
 
+    private boolean sync = true;
+
     public String getCluster() {
         return cluster;
     }
@@ -166,6 +168,14 @@ public class ServerRaftProperties {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public boolean isSync() {
+        return sync;
+    }
+
+    public void setSync(boolean sync) {
+        this.sync = sync;
     }
 
 }

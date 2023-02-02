@@ -870,6 +870,11 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS = SERVER_RAFT + "maxReplicatorInflightMsgs";
 
     /**
+     * The constant SERVER_RAFT_SYNC.
+     */
+    String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
      * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
      */
     String SERVER_RAFT_MAX_APPEND_BUFFER_SIZE = SERVER_RAFT + "maxAppendBufferSize";
