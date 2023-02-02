@@ -23,7 +23,7 @@ package io.seata.config.defaultconfig;
 public interface DefaultConfigSourceProvider {
 
     /**
-     * provide one or more DefaultConfigSource implementation instance
+     * provide one or more DefaultConfigSource or ConfigSource implementation instance
      */
     void provide(DefaultConfigManager defaultConfigManager);
 }

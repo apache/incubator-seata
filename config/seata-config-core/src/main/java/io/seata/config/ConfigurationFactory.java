@@ -71,7 +71,7 @@ public final class ConfigurationFactory {
                 }
             } else if (!initialize.isInitialized()) {
                 LOGGER.warn("Current configuration '{}' has not been fully initialized. Some config source may not be available.",
-                        instance.getTypeName());
+                        instance.getName());
             }
         }
 

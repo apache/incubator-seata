@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.annotation.Nonnull;
 
-import io.seata.common.util.ObjectUtils;
 import io.seata.config.source.ConfigSource;
 
 /**
@@ -39,8 +38,8 @@ public class ConfigInfo<T> {
 
 
     public ConfigInfo(T value, ConfigSource fromSource) {
-        if (ObjectUtils.isNullOrBlank(value)) {
-            throw new IllegalArgumentException("The config value must be not null or blank.");
+        if (value == null) {
+            throw new IllegalArgumentException("The config value must be not null.");
         }
 
         this.value = value;

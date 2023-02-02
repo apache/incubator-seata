@@ -45,7 +45,7 @@ public interface ConfigSourceManager {
 
 
     /**
-     * Get sources
+     * Get all the sources, contains the main source.
      *
      * @return the sources
      */
@@ -144,7 +144,7 @@ public interface ConfigSourceManager {
     }
 
     /**
-     * After adding new source, trigger this method.
+     * After adding a new source, trigger this method.
      */
     default void afterAddingSource(ConfigSource newSource) {
     }

@@ -16,12 +16,15 @@
 package io.seata.config;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.Nonnull;
 
 import io.seata.common.ValueWrapper;
 import io.seata.common.executor.Cacheable;
+import io.seata.common.executor.Cleanable;
 import io.seata.common.util.CollectionUtils;
-import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.common.util.ObjectUtils;
 import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,32 +34,37 @@ import org.slf4j.LoggerFactory;
  *
  * @author wang.liang
  */
-public class CacheableConfiguration extends AbstractConfiguration implements Cacheable {
+public class CacheableConfiguration extends SimpleConfiguration
+        implements Cacheable, Cleanable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheableConfiguration.class);
 
-    public static final String CACHEABLE_TYPE_NAME = "cacheable-configuration";
+    public static final String DEFAULT_NAME = "cacheable-configuration";
 
 
-    // The cache
+    /**
+     * The cache map.
+     */
     private final Map<String, ValueWrapper> configCache;
 
 
-    public CacheableConfiguration(String typeName, Map<String, ValueWrapper> configCache) {
-        super(typeName);
+    public CacheableConfiguration(String name, Map<String, ValueWrapper> configCache) {
+        super(name);
+
+        Objects.requireNonNull(configCache, "The 'configCache' must be not null.");
         this.configCache = configCache;
     }
 
-    public CacheableConfiguration(String typeName) {
-        this(typeName, new ConcurrentHashMap<>());
+    public CacheableConfiguration(String name) {
+        this(name, new ConcurrentHashMap<>());
     }
 
     public CacheableConfiguration() {
-        this(CACHEABLE_TYPE_NAME);
+        this(DEFAULT_NAME);
     }
 
 
-    //region Override Configuration
+    //region # Override AbstractConfiguration
 
     /**
      * Override to use cache
@@ -81,24 +89,25 @@ public class CacheableConfiguration extends AbstractConfiguration implements Cac
             configInfo = this.getConfigFromSources(dataId, timeoutMills, dataType);
         }
 
-        if (configInfo != null) {
+        if (configInfo != null && !ObjectUtils.isNullOrBlank(configInfo.getValue())) {
             return configInfo.getValue();
         }
 
         // Return default value
         if (defaultValue != null) {
-            LOGGER.debug("Config '{}' not found, returned the defaultValue '{}' of type [{}] from the parameter by the configuration '{}'.",
-                    dataId, defaultValue, defaultValue.getClass().getName(), this.getTypeName());
+            LOGGER.debug("Config '{}' not found, returned defaultValue '{}' of type [{}] from parameter by configuration '{}'.",
+                    dataId, defaultValue, defaultValue.getClass().getName(), this.getName());
             return defaultValue;
         }
 
-        return null;
+        // Return null or blank value.
+        return configInfo != null ? configInfo.getValue() : null;
     }
 
-    //endregion
+    //endregion # Override AbstractConfiguration
 
 
-    //region Override ConfigSourceManager
+    //region # Override ConfigSourceManager
 
     @Override
     public void afterAddingSource(ConfigSource newSource) {
@@ -108,53 +117,10 @@ public class CacheableConfiguration extends AbstractConfiguration implements Cac
         this.cleanCache();
     }
 
-    //endregion
+    //endregion # Override ConfigSourceManager
 
 
-    //region Override ConfigurationChangeListener
-
-    /**
-     * Override to use cache
-     */
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {
-        String dataId = event.getDataId();
-
-        // Get config from cache
-        if (this.configCache != null && this.configCache.containsKey(dataId)) {
-            ValueWrapper cache = this.configCache.get(dataId);
-            if (cache != null) {
-                ConfigInfo<?> configFromCache = (ConfigInfo)cache.getValue();
-
-                if (configFromCache != null && configFromCache.getStringValue().equals(event.getNewValue())) {
-                    super.logChangeEvent(event);
-
-                    LOGGER.info("Although the config '{}' has changed (from '{}' to '{}') by source '{}', but it does not affect the final config value," +
-                                    " because the new value is equals to the cache value '{}' from source '{}'." +
-                                    " (The obtained at {})",
-                            dataId, event.getOldValue(), event.getNewValue(), event.getChangeEventSourceTypeName(),
-                            configFromCache.getStringValue(), configFromCache.getFromSourceTypeName(), configFromCache.getStringTime());
-                    return;
-                }
-
-                // The new value is not equals to the cache,
-                this.configCache.remove(dataId);
-            }
-        }
-
-        super.onChangeEvent(event);
-    }
-
-    //endregion
-
-
-    //region Override Cleanable、Cacheable
-
-    @Override
-    public void clean() {
-        super.clean();
-        this.cleanCache();
-    }
+    //region # Override Cacheable、Cleanable
 
     @Override
     public void cleanCache() {
@@ -163,16 +129,15 @@ public class CacheableConfiguration extends AbstractConfiguration implements Cac
         }
     }
 
-    //endregion
-
-
     @Override
-    public String toString() {
-        return '[' +
-                "name='" + getTypeName() + '\'' +
-                ", mainSource=" + (getMainSource() != null ? getMainSource().getTypeName() : null) +
-                ", cache.size=" + (configCache != null ? configCache.size() : null) +
-                ", sources.size=" + getSources().size() +
-                ']';
+    public void clean() {
+        this.cleanCache();
     }
+
+    @Nonnull
+    protected Map<String, ValueWrapper> getCacheMap() {
+        return this.configCache;
+    }
+
+    //endregion # Override Cacheable、Cleanable
 }

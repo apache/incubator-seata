@@ -46,11 +46,11 @@ public interface Configuration extends ConfigSourceManager {
 
 
     /**
-     * Get type name
+     * Get name
      *
-     * @return the type name
+     * @return the name
      */
-    String getTypeName();
+    String getName();
 
     /**
      * Get config.

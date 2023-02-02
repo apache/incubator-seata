@@ -70,7 +70,7 @@ public class FileConfigSource implements LocalConfigSource
 
     private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
-    private static final String REGISTRY_TYPE = "file";
+    private static final String CONFIG_TYPE = "file";
 
     public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
@@ -290,7 +290,7 @@ public class FileConfigSource implements LocalConfigSource
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE + ":" + name;
+        return CONFIG_TYPE + ":" + name;
     }
 
     /**

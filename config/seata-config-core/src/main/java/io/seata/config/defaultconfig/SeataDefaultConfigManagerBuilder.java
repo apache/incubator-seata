@@ -15,10 +15,6 @@
  */
 package io.seata.config.defaultconfig;
 
-import java.util.List;
-
-import io.seata.common.loader.EnhancedServiceLoader;
-
 /**
  * the type Seata default config manager builder.
  *
@@ -28,17 +24,11 @@ public class SeataDefaultConfigManagerBuilder implements DefaultConfigManagerBui
 
     @Override
     public DefaultConfigManager build() {
+        // create
         SeataDefaultConfigManager manager = new SeataDefaultConfigManager();
-
-        // load defaultConfigSource
-        List<DefaultConfigSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultConfigSourceProvider.class);
-        for (DefaultConfigSourceProvider provider : providers) {
-            provider.provide(manager);
-        }
-
-        // Avoid print logs repeatedly
-        manager.disablePrintGetSuccessLog();
-
+        // init
+        manager.init();
+        // return
         return manager;
     }
 

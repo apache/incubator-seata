@@ -15,9 +15,11 @@
  */
 package io.seata.config.defaultconfig;
 
+import java.util.List;
 import java.util.Map;
 
 import io.seata.common.ValueWrapper;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.CacheableConfiguration;
 
 /**
@@ -28,19 +30,31 @@ import io.seata.config.CacheableConfiguration;
 public class SeataDefaultConfigManager extends CacheableConfiguration
         implements DefaultConfigManager {
 
-    public static final String DEFAULT_CONFIG_MANAGER_TYPE_NAME = "seata-default-config-manager";
+    public static final String DEFAULT_NAME = "seata-default-config-manager";
 
 
-    public SeataDefaultConfigManager(String typeName, Map<String, ValueWrapper> configCache) {
-        super(typeName, configCache);
+    public SeataDefaultConfigManager(String name, Map<String, ValueWrapper> configCache) {
+        super(name, configCache);
     }
 
-    public SeataDefaultConfigManager(String typeName) {
-        super(typeName);
+    public SeataDefaultConfigManager(String name) {
+        super(name);
     }
 
     public SeataDefaultConfigManager() {
-        this(DEFAULT_CONFIG_MANAGER_TYPE_NAME);
+        this(DEFAULT_NAME);
     }
 
+
+    @Override
+    protected void doInit() {
+        // Avoid print logs repeatedly
+        super.disablePrintGetSuccessLog();
+
+        // load the
+        List<DefaultConfigSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultConfigSourceProvider.class);
+        for (DefaultConfigSourceProvider provider : providers) {
+            provider.provide(this);
+        }
+    }
 }
