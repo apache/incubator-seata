@@ -51,7 +51,7 @@ public class CacheableConfiguration extends SimpleConfiguration
     public CacheableConfiguration(String name, Map<String, ValueWrapper> configCache) {
         super(name);
 
-        Objects.requireNonNull(configCache, "The 'configCache' must be not null.");
+        Objects.requireNonNull(configCache, "The 'configCache' must not be null.");
         this.configCache = configCache;
     }
 

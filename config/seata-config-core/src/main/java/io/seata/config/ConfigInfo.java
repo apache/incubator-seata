@@ -39,7 +39,7 @@ public class ConfigInfo<T> {
 
     public ConfigInfo(T value, ConfigSource fromSource) {
         if (value == null) {
-            throw new IllegalArgumentException("The config value must be not null.");
+            throw new IllegalArgumentException("The config value must not be null.");
         }
 
         this.value = value;

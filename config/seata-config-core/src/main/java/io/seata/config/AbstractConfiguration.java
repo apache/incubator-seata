@@ -45,7 +45,7 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
 
 
     protected AbstractConfiguration(String name) {
-        Objects.requireNonNull(name, "The 'name' must be not null.");
+        Objects.requireNonNull(name, "The 'name' must not be null.");
         this.name = name;
     }
 
