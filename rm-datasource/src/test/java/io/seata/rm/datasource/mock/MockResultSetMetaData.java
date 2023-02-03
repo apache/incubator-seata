@@ -121,7 +121,7 @@ public class MockResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnType(int column) throws SQLException {
-        return 0;
+        return getColumn(column).getDataType();
     }
 
     @Override

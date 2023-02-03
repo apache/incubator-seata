@@ -81,6 +81,7 @@ public class MockResultSet extends ResultSetBase {
             ColumnMeta columnMeta = new ColumnMeta();
             columnMeta.setTableName(meta[2].toString());
             columnMeta.setColumnName(meta[3].toString());
+            columnMeta.setDataType((Integer)meta[4]);
             this.columnMetas.add(columnMeta);
         }
     }

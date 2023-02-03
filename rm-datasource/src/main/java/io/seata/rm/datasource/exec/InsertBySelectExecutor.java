@@ -85,15 +85,14 @@ public class InsertBySelectExecutor<T, S extends Statement> extends BaseInsertEx
         int columnCount = resultSetMetaData.getColumnCount();
         List<String> sqlRecognizerColumns = sqlInsertRecognizer.getInsertColumns();
         List<String> insertColumns = CollectionUtils.isEmpty(sqlRecognizerColumns) ? new ArrayList<>(tmeta.getAllColumns().keySet()) : sqlRecognizerColumns;
+        checkDataType(tmeta, insertColumns, resultSetMetaData);
         while (resultSet.next()) {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 //select a,b,c from t select a1,b1,c1 from t1
                 String colName = insertColumns.get(i - 1);
-                checkDataType(tmeta,resultSetMetaData,i,colName);
                 fields.add(TableRecords.parseResultSetField(tmeta,resultSet,i,colName));
             }
-
             Row row = new Row();
             row.setFields(fields);
             records.add(row);
@@ -101,10 +100,13 @@ public class InsertBySelectExecutor<T, S extends Statement> extends BaseInsertEx
         return records;
     }
 
-    private void checkDataType(TableMeta tmeta, ResultSetMetaData resultSetMetaData, int i, String colName) throws SQLException {
-        ColumnMeta col = tmeta.getColumnMeta(colName);
-        if (col.getDataType() != resultSetMetaData.getColumnType(i)) {
-            throw new NotSupportYetException("the col[" + colName + "] data type is not consistent with source table");
+    private void checkDataType(TableMeta tmeta, List<String> insertColumns, ResultSetMetaData resultSetMetaData) throws SQLException {
+        for (int i = 1; i <= resultSetMetaData.getColumnCount(); i++) {
+            String colName = insertColumns.get(i - 1);
+            ColumnMeta col = tmeta.getColumnMeta(colName);
+            if (col.getDataType() != resultSetMetaData.getColumnType(i)) {
+                throw new NotSupportYetException("the col[" + colName + "] data type is not consistent with source table");
+            }
         }
     }
 
