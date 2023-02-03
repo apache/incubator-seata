@@ -15,7 +15,9 @@
 - [[#5245](https://github.com/seata/seata/pull/5245)] 修复不完整的distribution模块依赖
 - [[#5239](https://github.com/seata/seata/pull/5239)] 修复当使用JDK代理时，`getConfig` 方法获取部分配置时抛出 `ClassCastException` 异常的问题
 - [[#5281](https://github.com/seata/seata/pull/5281)] 修复并行rm请求处理时数组索引越界问题
+- [[#5288](https://github.com/seata/seata/pull/5288)] 修复AT模式下oracle的主键列自增的问题
 - [[#5287](https://github.com/seata/seata/pull/5287)] 修复AT模式下pgsql的主键列自增的问题
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
