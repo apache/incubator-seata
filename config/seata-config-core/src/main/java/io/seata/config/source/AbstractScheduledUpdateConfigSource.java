@@ -15,9 +15,9 @@
  */
 package io.seata.config.source;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -40,9 +40,6 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
     private static final String EXECUTOR_SERVICE_PREFIX = "scheduledUpdateSource";
     private static final long DEFAULT_EXECUTOR_SERVICE_PERIOD = 1000L;
 
-    // TODO: remove
-    private static final long t0 = System.currentTimeMillis();
-
     /**
      * The name
      */
@@ -52,7 +49,7 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
     private final ScheduledThreadPoolExecutor executorService;
     private final long executorServicePeriod;
 
-    private final Map<String, String> configOldValueCacheMap = new HashMap<>();
+    private final Map<String, String> latestConfigCacheMap = new ConcurrentHashMap<>();
 
 
     protected AbstractScheduledUpdateConfigSource(@Nonnull String name, boolean allowAutoUpdate, long executorServicePeriod) {
@@ -88,13 +85,15 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
     }
 
 
+    protected void initLatestConfigCacheMap(Map<String, String> latestConfigCacheMap) {
+        // default: do nothing
+    }
+
+
     /**
      * Check whether the configuration is changed.
      */
     private void checkWhetherConfigChanged() {
-        // TODO: remove
-        System.out.println("time: " + (System.currentTimeMillis() - t0));
-
         // First, reload config source.
         if (this.reloadConfigSource()) {
             // Then, do check whether config changed.
@@ -113,15 +112,20 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
     }
 
     protected void doCheckWhetherConfigChanged(String dataId) {
-        String oldValue = this.configOldValueCacheMap.get(dataId);
-        String newValue = this.getLatestConfig(dataId);
-        if (!Objects.equals(newValue, oldValue)) {
+        String oldValue = this.latestConfigCacheMap.get(dataId);
+        String currentValue = this.getLatestConfig(dataId);
+        if (!Objects.equals(currentValue, oldValue)) {
+            @SuppressWarnings("all")
+            String newValue = currentValue;
+
             // Get change type by oldValue and newValue.
             ConfigurationChangeType type = ConfigChangeListenerUtils.getChangeType(oldValue, newValue);
             // Build change event.
             ConfigurationChangeEvent event = this.buildChangeEvent(dataId, oldValue, newValue, type);
             // Trigger the listener's onChangeEvent.
             getConfigListeners(dataId).forEach(listener -> listener.onChangeEvent(event));
+            // Update the latest config cache.
+            this.latestConfigCacheMap.put(dataId, newValue);
         }
     }
 
@@ -149,7 +153,7 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
 
     @Override
     public void start() {
-        if (this.executorService != null && this.executorService.isShutdown()) {
+        if (this.executorService != null) {
             this.initExecutorService();
         }
     }
@@ -179,6 +183,7 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
 
     @Override
     public void init() {
+        this.initLatestConfigCacheMap(this.latestConfigCacheMap);
         this.start();
         this.setInitialized(true);
     }
@@ -188,6 +193,7 @@ public abstract class AbstractScheduledUpdateConfigSource extends AbstractConfig
         return initialized;
     }
 
+    @SuppressWarnings("all")
     protected void setInitialized(boolean initialized) {
         this.initialized = initialized;
     }

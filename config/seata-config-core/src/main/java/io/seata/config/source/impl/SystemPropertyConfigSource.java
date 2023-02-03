@@ -15,10 +15,10 @@
  */
 package io.seata.config.source.impl;
 
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.annotation.Nonnull;
 
-import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.AbstractScheduledUpdateConfigSource;
 
@@ -27,43 +27,58 @@ import io.seata.config.source.AbstractScheduledUpdateConfigSource;
  *
  * @author wang.liang
  */
-public class SystemPropertyScheduledUpdateConfigSource extends AbstractScheduledUpdateConfigSource {
+public class SystemPropertyConfigSource extends AbstractScheduledUpdateConfigSource {
 
     public static final String DEFAULT_NAME = "system-property";
 
 
-    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, boolean allowAutoUpdate, long executorServicePeriod) {
+    public SystemPropertyConfigSource(@Nonnull String name, boolean allowAutoUpdate, long executorServicePeriod) {
         super(name, allowAutoUpdate, executorServicePeriod);
     }
 
-    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, boolean allowAutoUpdate) {
+    public SystemPropertyConfigSource(@Nonnull String name, boolean allowAutoUpdate) {
         super(name, allowAutoUpdate);
     }
 
-    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, long executorServicePeriod) {
+    public SystemPropertyConfigSource(@Nonnull String name, long executorServicePeriod) {
         super(name, executorServicePeriod);
     }
 
-    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService, long executorServicePeriod) {
+    public SystemPropertyConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService, long executorServicePeriod) {
         super(name, executorService, executorServicePeriod);
     }
 
-    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService) {
+    public SystemPropertyConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService) {
         super(name, executorService);
     }
 
 
+    /**
+     * @see super#init()
+     */
+    @Override
+    protected void initLatestConfigCacheMap(Map<String, String> latestConfigCacheMap) {
+        super.initLatestConfigCacheMap(latestConfigCacheMap);
+
+        System.getProperties().stringPropertyNames().forEach(key -> {
+            latestConfigCacheMap.put(key, System.getProperty(key));
+        });
+    }
+
+    /**
+     * @see super#doCheckWhetherConfigChanged(String)
+     */
     @Override
     public String getLatestConfig(String dataId, long timeoutMills) {
         String config1 = System.getProperty(dataId);
-        if (!ObjectUtils.isNullOrBlank(config1)) {
+        if (StringUtils.isNotBlank(config1)) {
             return config1;
         }
 
         String propertyDataId = StringUtils.hump2Line(dataId);
         if (!propertyDataId.equals(dataId)) {
             String config2 = System.getProperty(propertyDataId);
-            if (!ObjectUtils.isNullOrBlank(config2)) {
+            if (StringUtils.isNotBlank(config2)) {
                 return config2;
             }
         }

@@ -40,6 +40,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture;
 import io.seata.config.ConfigFuture.ConfigOperation;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigChangeListenerUtils;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.changelistener.ConfigurationChangeListenerManager;
@@ -76,8 +77,7 @@ public class FileConfigSource implements LocalConfigSource
 
     public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
-            8);
+    private final Map<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
     private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
@@ -397,12 +397,15 @@ public class FileConfigSource implements LocalConfigSource
             while (enabled) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
-                        String currentConfig = ConfigurationFactory.getInstance().getString(dataId);
+                        String currentConfig = source.getLatestConfig(dataId);
                         if (StringUtils.isNotBlank(currentConfig)) {
                             String oldConfig = listenedConfigMap.get(dataId);
                             if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                                 listenedConfigMap.put(dataId, currentConfig);
-                                event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
+                                event.setDataId(dataId)
+                                        .setOldValue(oldConfig)
+                                        .setNewValue(currentConfig)
+                                        .setChangeType(ConfigChangeListenerUtils.getChangeType(oldConfig, currentConfig));
 
                                 for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
                                     listener.onChangeEvent(event);
