@@ -37,7 +37,7 @@ class FileConfigSourceTest {
     }
 
     @Test
-    void addConfigListener() throws InterruptedException {
+    void testAddConfigListener() throws InterruptedException {
         ConfigurationFactory.cleanCaches();
 
         String dataId = "mockDataId";

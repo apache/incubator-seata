@@ -72,7 +72,7 @@ public final class ConfigurationFactory {
     }
 
     private static void initConfiguration() {
-        if (!(instance instanceof Initialize) || !((Initialize)instance).isInitialized()) {
+        if (!(instance instanceof Initialize) || ((Initialize)instance).isInitialized()) {
             // Instance is not an Initialize, or is initialized.
             return;
         }
