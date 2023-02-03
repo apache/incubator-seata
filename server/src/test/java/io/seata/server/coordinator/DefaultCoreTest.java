@@ -27,6 +27,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -76,7 +77,7 @@ public class DefaultCoreTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        SessionHolder.init(null);
+        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
     }
@@ -262,7 +263,7 @@ public class DefaultCoreTest {
         core.mockCore(BranchType.AT,
                 new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
-        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
 
     /**

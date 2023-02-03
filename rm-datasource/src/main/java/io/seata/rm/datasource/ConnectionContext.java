@@ -24,14 +24,18 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.LockStrategyMode;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import static io.seata.common.Constants.AUTO_COMMIT;
@@ -43,7 +47,7 @@ import static io.seata.common.Constants.SKIP_CHECK_LOCK;
  * @author sharajava
  */
 public class ConnectionContext {
-    private static final Savepoint    DEFAULT_SAVEPOINT = new Savepoint() {
+    private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {
         @Override
         public int getSavepointId() throws SQLException {
             return 0;
@@ -113,6 +117,7 @@ public class ConnectionContext {
 
     /**
      * Append savepoint
+     *
      * @param savepoint the savepoint
      */
     void appendSavepoint(Savepoint savepoint) {
@@ -273,14 +278,23 @@ public class ConnectionContext {
      * @return the application data
      */
     public String getApplicationData() throws TransactionException {
+        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        // lock retry times > 1 & skip first check lock / before image is empty
+        Optional.ofNullable(globalLockConfig).ifPresent(lockConfig -> {
+            if ((lockConfig.getLockRetryTimes() == -1 || lockConfig.getLockRetryTimes() > 1)
+                && (lockConfig.getLockStrategyMode() == LockStrategyMode.OPTIMISTIC || allBeforeImageEmpty())) {
+                if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
+                    this.applicationData.put(SKIP_CHECK_LOCK, true);
+                } else {
+                    this.applicationData.put(SKIP_CHECK_LOCK, false);
+                }
+            }
+        });
+
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false
         if (!autoCommit) {
             this.applicationData.put(AUTO_COMMIT, autoCommit);
-        }
-
-        if (allBeforeImageEmpty()) {
-            this.applicationData.put(SKIP_CHECK_LOCK, true);
         }
 
         if (!this.applicationData.isEmpty()) {
@@ -362,6 +376,7 @@ public class ConnectionContext {
 
     /**
      * Get the savepoints after target savepoint(include the param savepoint)
+     *
      * @param savepoint the target savepoint
      * @return after savepoints
      */
@@ -381,7 +396,7 @@ public class ConnectionContext {
     private boolean allBeforeImageEmpty() {
         for (List<SQLUndoLog> sqlUndoLogs : sqlUndoItemsBuffer.values()) {
             for (SQLUndoLog undoLog : sqlUndoLogs) {
-                if (null == undoLog.getBeforeImage() || undoLog.getBeforeImage().size() != 0) {
+                if (null != undoLog.getBeforeImage() && undoLog.getBeforeImage().size() != 0) {
                     return false;
                 }
             }

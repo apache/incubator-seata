@@ -15,7 +15,6 @@
  */
 package io.seata.core.serializer;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Calendar;
@@ -61,7 +60,7 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 /**
  * Provide a unified serialization registry, this class used for {@code seata-serializer-fst}
- * and {@code seata-serializer-kryo}, it will register some classes at startup time (for example {@link KryoSerializerFactory#create})
+ * and {@code seata-serializer-kryo}, it will register some classes at startup time (for example {@code KryoSerializerFactory#create})
  * @author funkye
  */
 public class SerializerClassRegistry {
@@ -80,7 +79,6 @@ public class SerializerClassRegistry {
         registerClass(Date.class);
         registerClass(Calendar.class);
         registerClass(ConcurrentHashMap.class);
-        registerClass(SimpleDateFormat.class);
         registerClass(GregorianCalendar.class);
         registerClass(Vector.class);
         registerClass(BitSet.class);

@@ -312,7 +312,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(BranchSession branchSession) throws TransactionException {
+    public void unlockBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked in 'DefaultCore.commit()'
         if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
@@ -320,10 +320,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
+    }
+
+    @Override
+    public void removeBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
         remove(branchSession);
+    }
+
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
     }
 
     /**
@@ -756,7 +766,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
-        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
+        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
             this.setStatus(GlobalStatus.RollbackRetrying);

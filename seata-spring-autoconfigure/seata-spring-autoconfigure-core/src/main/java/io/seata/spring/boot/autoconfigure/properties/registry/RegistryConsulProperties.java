@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSU
 public class RegistryConsulProperties {
     private String cluster = "default";
     private String serverAddr = "127.0.0.1:8500";
-    private String aclToken = "";
+    private String aclToken;
 
     public String getCluster() {
         return cluster;

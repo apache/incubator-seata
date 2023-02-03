@@ -38,6 +38,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -216,7 +217,7 @@ public class LockManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init("file");
+        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         //make sure sessionMaanager is empty
         Collection<GlobalSession> sessions = sessionManager.allSessions();
@@ -235,9 +236,18 @@ public class LockManagerTest {
 
             // wrong pageSize or pageNum
             Assertions.assertThrows(
-                    IllegalArgumentException.class,
-                    () -> globalLockService.query(param)
+                IllegalArgumentException.class,
+                () -> globalLockService.query(param)
             );
+
+            LockManager lockManager = new FileLockManagerForTest();
+            for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
+                lockManager.acquireLock(branchSession);
+            }
+
+            for (BranchSession branchSession : globalSessions2.getBranchSessions()) {
+                lockManager.acquireLock(branchSession);
+            }
 
             param.setPageNum(1);
             param.setPageSize(10);
@@ -316,6 +326,20 @@ public class LockManagerTest {
             param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
             Assertions.assertEquals(4, timeTestResult4.getTotal());
+
+            //test release lock
+            for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
+                lockManager.releaseLock(branchSession);
+            }
+
+            final GlobalLockParam param2 = new GlobalLockParam();
+            param2.setPageNum(1);
+            param2.setPageSize(10);
+
+            final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param2);
+            Assertions.assertEquals(1,fullQueryTestResult2.getPages());
+            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
 
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
