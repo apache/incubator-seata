@@ -58,7 +58,6 @@ class SystemPropertyConfigSourceTest {
         // true
         System.setProperty(dataId, "true");
         countDownLatch.await(3, TimeUnit.SECONDS);
-        System.setProperty("file.listener.enabled", "false");
         value = config.getBoolean(dataId);
         Assertions.assertTrue(value);
 
@@ -68,7 +67,9 @@ class SystemPropertyConfigSourceTest {
         value = config.getBoolean(dataId);
         Assertions.assertFalse(value);
 
-        ConfigurationFactory.removeCache(dataId);
+        // clean
+        System.clearProperty(dataId);
+        ConfigurationFactory.reload();
     }
 
     @Test
@@ -107,7 +108,10 @@ class SystemPropertyConfigSourceTest {
         Assertions.assertEquals(config.getString("mockDataId3"), value);
         Assertions.assertNotEquals(config.getString("mockDataId3", "1"), value);
 
-        ConfigurationFactory.cleanCaches();
+
+        System.clearProperty("mockDataId1");
+        System.clearProperty("mockDataId3");
+        ConfigurationFactory.reload();
     }
 
 }

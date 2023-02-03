@@ -24,8 +24,10 @@ import io.seata.config.source.ConfigSource;
 
 public class CustomConfigSourceForTest implements ConfigSource {
     private Properties properties;
+    private String name;
 
     public CustomConfigSourceForTest(String name) {
+        this.name = name;
         try (InputStream input = CustomConfigSourceForTest.class.getClassLoader().getResourceAsStream(name)) {
             properties = new Properties();
             properties.load(input);
@@ -37,7 +39,7 @@ public class CustomConfigSourceForTest implements ConfigSource {
     @Nonnull
     @Override
     public String getName() {
-        return "forTest";
+        return "forTest: " + name;
     }
 
     @Override

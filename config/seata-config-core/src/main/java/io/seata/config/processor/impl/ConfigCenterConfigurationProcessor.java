@@ -15,16 +15,17 @@
  */
 package io.seata.config.processor.impl;
 
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.source.ConfigSourceProvider;
 import io.seata.config.util.ConfigurationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static io.seata.common.exception.FrameworkErrorCode.ConfigNotFoundError;
 import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_CENTER_PROCESSOR_ORDER;
 
 /**
@@ -35,16 +36,27 @@ import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_CENTER_PRO
 @LoadLevel(name = "config-center", order = CONFIG_CENTER_PROCESSOR_ORDER)
 public class ConfigCenterConfigurationProcessor implements ConfigurationProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigCenterConfigurationProcessor.class);
+
+
     @Override
     public void process(Configuration configuration) {
         // get config type name
         String configTypeName = ConfigurationUtils.getConfigTypeName(configuration);
         if (StringUtils.isBlank(configTypeName)) {
-            throw new FrameworkException("Config type name can not be blank", ConfigNotFoundError);
+            LOGGER.warn("Config type name is null or blank: {}, do not load the config center.", configTypeName);
+            return;
         }
 
         // load Config source provider by configTypeName
-        ConfigSourceProvider sourceProvider = EnhancedServiceLoader.load(ConfigSourceProvider.class, configTypeName);
+        ConfigSourceProvider sourceProvider;
+        try {
+            sourceProvider = EnhancedServiceLoader.load(ConfigSourceProvider.class, configTypeName);
+        } catch (EnhancedServiceNotFoundException e) {
+            LOGGER.error("The config source provider for config center '{}' is not found, do not load the config center.",
+                    configTypeName, e);
+            return;
+        }
 
         // provide one or more config source
         sourceProvider.provide(configuration);

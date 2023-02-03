@@ -199,7 +199,7 @@ public class SeataConfiguration extends CacheableConfiguration
             return;
         }
 
-        LOGGER.debug("Add config listener: dataId = {}, listener = {}", dataId, listener);
+        LOGGER.info("Add config listener: dataId = {}, listener = {}", dataId, listener);
 
         listenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(listener);
@@ -212,7 +212,7 @@ public class SeataConfiguration extends CacheableConfiguration
         if (source instanceof ConfigurationChangeListenerManager) {
             ConfigurationChangeListenerManager manager = (ConfigurationChangeListenerManager)source;
             manager.addConfigListener(dataId, this);
-            LOGGER.debug("Add config listener to source: dataId = {}, source = {}", dataId, source.getName());
+            LOGGER.info("Add config listener to source: dataId = {}, source = {}", dataId, source.getName());
         }
     }
 
@@ -233,7 +233,7 @@ public class SeataConfiguration extends CacheableConfiguration
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        LOGGER.debug("Remove config listener: dataId = {}, listener = {}", dataId, listener);
+        LOGGER.info("Remove config listener: dataId = {}, listener = {}", dataId, listener);
 
         Set<ConfigurationChangeListener> listeners = this.listenersMap.get(dataId);
         if (listeners != null) {
@@ -249,7 +249,7 @@ public class SeataConfiguration extends CacheableConfiguration
         this.getSources().forEach(source -> {
             if (source instanceof ConfigurationChangeListenerManager) {
                 ((ConfigurationChangeListenerManager)source).removeConfigListener(dataId, this);
-                LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getName());
+                LOGGER.info("Remove config listener from source: dataId = {}, source = {}", dataId, source.getName());
             }
         });
     }

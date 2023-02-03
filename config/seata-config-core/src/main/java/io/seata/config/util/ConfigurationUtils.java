@@ -45,12 +45,12 @@ public final class ConfigurationUtils {
 
     //region get configFileName
 
-    private static final String DEFAULT_REGISTRY_CONFIG_FILE_NAME = "registry";
+    public static final String DEFAULT_REGISTRY_CONFIG_FILE_NAME = "registry";
 
-    private static final String CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY = "seataConfigName";
-    private static final String CONFIG_FILE_NAME_SYSTEM_ENV_KEY = "SEATA_CONFIG_NAME";
-    private static final String CONFIG_FILE_NAME_KEY1 = "seata.config.name";
-    private static final String CONFIG_FILE_NAME_KEY2 = "config.name";
+    public static final String CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY = "seataConfigName";
+    public static final String CONFIG_FILE_NAME_SYSTEM_ENV_KEY = "SEATA_CONFIG_NAME";
+    public static final String CONFIG_FILE_NAME_KEY1 = "seata.config.name";
+    public static final String CONFIG_FILE_NAME_KEY2 = "config.name";
 
     public static String getConfigFileName(Configuration configuration) {
         return getConfig(configuration, DEFAULT_REGISTRY_CONFIG_FILE_NAME,
@@ -62,9 +62,9 @@ public final class ConfigurationUtils {
     //region get envName
 
     public static final String ENV_SYSTEM_PROPERTY_KEY = "seataEnv";
-    private static final String ENV_SYSTEM_ENV_KEY = "SEATA_ENV";
-    private static final String ENV_KEY1 = "seata.env";
-    private static final String ENV_KEY2 = "env";
+    public static final String ENV_SYSTEM_ENV_KEY = "SEATA_ENV";
+    public static final String ENV_KEY1 = "seata.env";
+    public static final String ENV_KEY2 = "env";
 
     public static String getEnvName(Configuration configuration) {
         return getConfig(configuration, null,
@@ -76,12 +76,12 @@ public final class ConfigurationUtils {
 
     //region get configTypeName and configType
 
-    private static final String DEFAULT_CONFIG_TYPE = "file";
+    public static final String DEFAULT_CONFIG_TYPE = "file";
 
-    private static final String CONFIG_TYPE_SYSTEM_PROPERTY_KEY = "seataConfigType";
-    private static final String CONFIG_TYPE_SYSTEM_ENV_KEY = "SEATA_CONFIG_TYPE";
-    private static final String CONFIG_TYPE_KEY1 = "seata.config.type";
-    private static final String CONFIG_TYPE_KEY2 = "config.type";
+    public static final String CONFIG_TYPE_SYSTEM_PROPERTY_KEY = "seataConfigType";
+    public static final String CONFIG_TYPE_SYSTEM_ENV_KEY = "SEATA_CONFIG_TYPE";
+    public static final String CONFIG_TYPE_KEY1 = "seata.config.type";
+    public static final String CONFIG_TYPE_KEY2 = "config.type";
 
 
     private static String getConfigTypeNameInternal(Configuration configuration) {

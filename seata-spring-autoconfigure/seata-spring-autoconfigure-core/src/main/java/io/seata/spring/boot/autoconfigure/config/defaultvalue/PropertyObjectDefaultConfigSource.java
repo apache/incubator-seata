@@ -16,9 +16,12 @@
 package io.seata.spring.boot.autoconfigure.config.defaultvalue;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -33,6 +36,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
+import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_ENV_KEY;
+import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY;
+import static io.seata.config.util.ConfigurationUtils.CONFIG_TYPE_SYSTEM_ENV_KEY;
+import static io.seata.config.util.ConfigurationUtils.CONFIG_TYPE_SYSTEM_PROPERTY_KEY;
+import static io.seata.config.util.ConfigurationUtils.ENV_KEY1;
+import static io.seata.config.util.ConfigurationUtils.ENV_KEY2;
+import static io.seata.config.util.ConfigurationUtils.ENV_SYSTEM_ENV_KEY;
+import static io.seata.config.util.ConfigurationUtils.ENV_SYSTEM_PROPERTY_KEY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
@@ -51,6 +62,16 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
 
     private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new ConcurrentHashMap<>(64);
 
+    // The excludes dataIds will print the debug log when throw exception, not error log.
+    private static final Set<String> EXCLUDES = new HashSet<>(Arrays.asList(
+            // configFileName keys
+            CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY, CONFIG_FILE_NAME_SYSTEM_ENV_KEY,
+            // env keys
+            ENV_SYSTEM_PROPERTY_KEY, ENV_SYSTEM_ENV_KEY, ENV_KEY1, ENV_KEY2,
+            // configType keys
+            CONFIG_TYPE_SYSTEM_PROPERTY_KEY, CONFIG_TYPE_SYSTEM_ENV_KEY
+    ));
+
 
     @Override
     public String getLatestConfig(final String rawDataId, long timeoutMills) {
@@ -60,7 +81,11 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
         try {
             return getDefaultValueFromPropertyObject(dataId);
         } catch (Throwable t) {
-            LOGGER.error("Get config '{}' defaultValue from the property object failed:", dataId, t);
+            if (!EXCLUDES.contains(rawDataId)) {
+                LOGGER.error("Get config '{}' defaultValue from the property object failed:", dataId, t);
+            } else {
+                LOGGER.debug("Get config '{}' defaultValue from the property object failed:", dataId, t);
+            }
             return null;
         }
     }

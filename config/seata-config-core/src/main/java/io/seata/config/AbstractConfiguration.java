@@ -60,10 +60,6 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
 
         // get sources
         List<ConfigSource> sources = this.getSources();
-        if (sources == null) {
-            LOGGER.debug("The sources is null in configuration '{}'.", this.getName());
-            return null;
-        }
 
         String blankValue = null;
         ConfigSource blankValueFromSource = null;

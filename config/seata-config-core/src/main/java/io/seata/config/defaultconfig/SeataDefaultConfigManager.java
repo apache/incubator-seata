@@ -46,9 +46,13 @@ public class SeataDefaultConfigManager extends CacheableConfiguration
     }
 
 
+    /**
+     * Override for load the DefaultConfigSource list in this method,
+     * not the ConfigSource list in the method {@link super#loadSources()}.
+     */
     @Override
-    protected void doInit() {
-        // Avoid print logs repeatedly
+    protected void loadSources() {
+        // Avoid print logs repeatedly.
         super.disablePrintGetSuccessLog();
 
         // Load the DefaultConfigSourceProvider, and provide some DefaultConfigSource.

@@ -65,20 +65,22 @@ public class SimpleConfiguration extends AbstractConfiguration {
 
     @Override
     public void init() {
-        this.doInit();
+        this.loadSources();
+        this.initSources();
         super.setInitialized(true);
     }
 
     /**
      * Load the processors and process current configuration.
      */
-    protected void doInit() {
+    protected void loadSources() {
         List<ConfigurationProcessor> processors = EnhancedServiceLoader.loadAll(ConfigurationProcessor.class);
         for (ConfigurationProcessor processor : processors) {
             processor.process(this);
         }
+    }
 
-        // init the sources
+    private void initSources() {
         sources.forEach(source -> {
             // If not initialized, do init.
             if (source instanceof Initialize && !((Initialize)source).isInitialized()) {

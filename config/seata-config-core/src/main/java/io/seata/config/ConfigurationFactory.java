@@ -43,7 +43,7 @@ public final class ConfigurationFactory {
 
     private static volatile Configuration instance = null;
 
-    private static volatile boolean initializationStarted = false;
+    private static volatile boolean instanceInitializing = false;
 
     /**
      * Gets instance.
@@ -72,18 +72,23 @@ public final class ConfigurationFactory {
     }
 
     private static void initConfiguration() {
-        if (!(instance instanceof Initialize) || ((Initialize)instance).isInitialized()) {
-            // Instance is not an Initialize, or is initialized.
+        if (!(instance instanceof Initialize)) {
+            // not an Initialize.
             return;
         }
 
         Initialize initialize = (Initialize)instance;
+        if (initialize.isInitialized()) {
+            // instance is initialized.
+            return;
+        }
 
-        if (!initializationStarted) {
+        if (!instanceInitializing) {
             synchronized (Configuration.class) {
-                if (!initializationStarted) {
-                    initializationStarted = true;
+                if (!instanceInitializing && !initialize.isInitialized()) {
+                    instanceInitializing = true;
                     initialize.init();
+                    instanceInitializing = false;
                 }
             }
         } else if (!initialize.isInitialized()) {

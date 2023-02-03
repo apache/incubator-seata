@@ -33,13 +33,13 @@ class YamlConfigurationFactoryTest {
         System.setProperty(ENV_PROPERTY_KEY, "test-yaml");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.getInstance().getString("config.file.name"), "file-test-yaml.conf");
-        Assertions.assertEquals(ConfigurationFactory.getInstance().getString("config.file.testBlank"), "");
-        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testNull"));
-        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testExist"));
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"), "true");
-        Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8093");
+        Assertions.assertEquals("file-test-yaml.conf", instance.getString("config.file.name"));
+        Assertions.assertEquals("", instance.getString("config.file.testBlank"));
+        Assertions.assertNull(instance.getString("config.file.testNull"));
+        Assertions.assertNull(instance.getString("config.file.testExist"));
+        Assertions.assertEquals("true", instance.getString("service.disableGlobalTransaction"));
+        Assertions.assertEquals("127.0.0.1:8093", instance.getString("service.default.grouplist"));
     }
 
     @AfterAll

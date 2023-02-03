@@ -69,7 +69,7 @@ public class ConvertUtils {
             return (T)Boolean.valueOf(String.valueOf(value));
         }
         if (Duration.class.equals(targetType)) {
-            return (T)Duration.parse(String.valueOf(value));
+            return (T)DurationUtil.parse(String.valueOf(value));
         }
         if (List.class.equals(targetType)) {
             String str = String.valueOf(value);

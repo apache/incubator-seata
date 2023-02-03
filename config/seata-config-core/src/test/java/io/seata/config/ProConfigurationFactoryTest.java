@@ -30,18 +30,16 @@ class ProConfigurationFactoryTest {
 
     @Test
     void getInstance() {
-        ConfigurationFactory.cleanCaches();
         System.setProperty(ENV_PROPERTY_KEY, "test-pro");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals("file-test-pro.conf", ConfigurationFactory.getInstance().getString("config.file.name"));
-        Assertions.assertEquals("", ConfigurationFactory.getInstance().getString("config.file.testBlank"));
-        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testNull"));
-        Assertions.assertNull(ConfigurationFactory.getInstance().getString("config.file.testExist"));
         Configuration instance = ConfigurationFactory.getInstance();
+        Assertions.assertEquals("file-test-pro.conf", instance.getString("config.file.name"));
+        Assertions.assertEquals("", instance.getString("config.file.testBlank"));
+        Assertions.assertNull(instance.getString("config.file.testNull"));
+        Assertions.assertNull(instance.getString("config.file.testExist"));
         Assertions.assertEquals("true", instance.getString("service.disableGlobalTransaction"));
         Assertions.assertEquals("127.0.0.1:8092", instance.getString("service.default.grouplist"));
-
     }
 
     @AfterAll

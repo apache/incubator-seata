@@ -27,9 +27,6 @@ import io.seata.config.source.ConfigSource;
  */
 public class ConfigurationChangeEvent {
 
-    private static final String DEFAULT_NAMESPACE = "DEFAULT";
-
-
     private String dataId;
     private String oldValue;
     private String newValue;
@@ -171,5 +168,18 @@ public class ConfigurationChangeEvent {
     @Nonnull
     public String getChangeEventSourceTypeName() {
         return getChangeEventSource().getName();
+    }
+
+
+    @Override
+    public String toString() {
+        return "[" +
+                "dataId='" + dataId + '\'' +
+                ", oldValue='" + oldValue + '\'' +
+                ", newValue='" + newValue + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", changeType=" + changeType +
+                ", changeEventSource=" + changeEventSource.getName() +
+                ']';
     }
 }
