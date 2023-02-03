@@ -15,7 +15,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
 - [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
 - [[#5281](https://github.com/seata/seata/pull/5281)] parallel request handle throw IndexOutOfBoundsException
+- [[#5288](https://github.com/seata/seata/pull/5288)] fix auto-increment of pk columns in Oracle in AT mode
 - [[#5287](https://github.com/seata/seata/pull/5287)] fix auto-increment of pk columns in PostgreSQL in AT mode
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
