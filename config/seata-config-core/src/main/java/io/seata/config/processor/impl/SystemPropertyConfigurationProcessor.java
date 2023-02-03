@@ -19,7 +19,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.source.ConfigSource;
-import io.seata.config.source.impl.SystemPropertyConfigSource;
+import io.seata.config.source.impl.SystemPropertyScheduledUpdateConfigSource;
 
 import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_PROPERTY_PROCESSOR_ORDER;
 
@@ -33,7 +33,7 @@ public class SystemPropertyConfigurationProcessor implements ConfigurationProces
 
     @Override
     public void process(Configuration configuration) {
-        ConfigSource source = new SystemPropertyConfigSource();
+        ConfigSource source = new SystemPropertyScheduledUpdateConfigSource(SystemPropertyScheduledUpdateConfigSource.DEFAULT_NAME, true);
 
         // add this source to the first location, because it has the highest priority
         configuration.addSourceFirst(source);

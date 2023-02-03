@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -114,6 +115,7 @@ public class EtcdConfigSource implements RemoteConfigSource
         return instance;
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

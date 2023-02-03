@@ -15,37 +15,32 @@
  */
 package io.seata.config.source;
 
+import java.util.Objects;
 import javax.annotation.Nonnull;
 
-import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
-
 /**
- * The interface ConfigSource.
+ * The type NamedConfigSource.
  *
  * @author wang.liang
- * @author slievrly
  */
-public interface ConfigSource {
+public abstract class NamedConfigSource implements ScheduledUpdateConfigSource {
 
     /**
-     * Get latest config.
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the Latest config
+     * The name
      */
-    String getLatestConfig(String dataId, long timeoutMills);
+    @Nonnull
+    private final String name;
 
-    default String getLatestConfig(String dataId) {
-        return getLatestConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+
+    protected NamedConfigSource(@Nonnull String name) {
+        Objects.requireNonNull(name, "The 'name' must not be null.");
+        this.name = name;
     }
 
 
-    /**
-     * Get the name
-     *
-     * @return the name
-     */
     @Nonnull
-    String getName();
+    @Override
+    public String getName() {
+        return name;
+    }
 }

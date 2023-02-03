@@ -15,6 +15,8 @@
  */
 package io.seata.config.springcloud;
 
+import javax.annotation.Nonnull;
+
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.RemoteConfigSource;
@@ -47,6 +49,7 @@ public class SpringCloudConfigSource implements RemoteConfigSource {
     }
 
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

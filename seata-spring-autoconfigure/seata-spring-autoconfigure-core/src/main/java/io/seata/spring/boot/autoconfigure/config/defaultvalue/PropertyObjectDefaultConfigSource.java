@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
@@ -150,6 +151,7 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
     }
 
 
+    @Nonnull
     @Override
     public String getName() {
         return "default-value-from-property-object";

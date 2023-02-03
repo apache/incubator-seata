@@ -16,8 +16,12 @@
 package io.seata.config;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.annotation.Nonnull;
 
+import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.source.ConfigSource;
@@ -40,7 +44,12 @@ public class SimpleConfiguration extends AbstractConfiguration {
     /**
      * All the sources, contains the main source.
      */
-    protected final List<ConfigSource> sources = new CopyOnWriteArrayList<>();
+    private final List<ConfigSource> sources = new CopyOnWriteArrayList<>();
+
+    /**
+     * The source map, contains the main source.
+     */
+    private final Map<String, ConfigSource> sourceMap = new ConcurrentHashMap<>(8);
 
 
     public SimpleConfiguration() {
@@ -68,6 +77,14 @@ public class SimpleConfiguration extends AbstractConfiguration {
         for (ConfigurationProcessor processor : processors) {
             processor.process(this);
         }
+
+        // init the sources
+        sources.forEach(source -> {
+            // If not initialized, do init.
+            if (source instanceof Initialize && !((Initialize)source).isInitialized()) {
+                ((Initialize)source).init();
+            }
+        });
     }
 
     //endregion
@@ -85,9 +102,16 @@ public class SimpleConfiguration extends AbstractConfiguration {
         this.mainSource = mainSource;
     }
 
+    @Nonnull
     @Override
     public List<ConfigSource> getSources() {
         return this.sources;
+    }
+
+    @Nonnull
+    @Override
+    public Map<String, ConfigSource> getSourceMap() {
+        return this.sourceMap;
     }
 
     //endregion

@@ -31,6 +31,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nonnull;
+
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -289,6 +291,7 @@ public class FileConfigSource implements LocalConfigSource
         return configListenersMap.get(dataId);
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE + ":" + name;
@@ -321,11 +324,8 @@ public class FileConfigSource implements LocalConfigSource
                     if (allowDynamicRefresh) {
                         long tempLastModified = new File(targetFilePath).lastModified();
                         if (tempLastModified > targetFileLastModified) {
-                            FileConfig tempConfig = FileConfigFactory.load(new File(targetFilePath), name);
-                            if (tempConfig != null) {
-                                fileConfig = tempConfig;
-                                targetFileLastModified = tempLastModified;
-                            }
+                            fileConfig = FileConfigFactory.load(new File(targetFilePath), name);
+                            targetFileLastModified = tempLastModified;
                         }
                     }
                     if (configFuture.getOperation() == ConfigOperation.GET) {

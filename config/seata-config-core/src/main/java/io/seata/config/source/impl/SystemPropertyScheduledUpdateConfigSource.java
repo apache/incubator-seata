@@ -15,21 +15,43 @@
  */
 package io.seata.config.source.impl;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import javax.annotation.Nonnull;
+
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.source.ConfigSource;
+import io.seata.config.source.AbstractScheduledUpdateConfigSource;
 
 /**
  * The type SystemPropertyConfigSource.
  *
  * @author wang.liang
  */
-public class SystemPropertyConfigSource implements ConfigSource {
+public class SystemPropertyScheduledUpdateConfigSource extends AbstractScheduledUpdateConfigSource {
 
-    @Override
-    public String getName() {
-        return "system-property";
+    public static final String DEFAULT_NAME = "system-property";
+
+
+    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, boolean allowAutoUpdate, long executorServicePeriod) {
+        super(name, allowAutoUpdate, executorServicePeriod);
     }
+
+    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, boolean allowAutoUpdate) {
+        super(name, allowAutoUpdate);
+    }
+
+    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, long executorServicePeriod) {
+        super(name, executorServicePeriod);
+    }
+
+    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService, long executorServicePeriod) {
+        super(name, executorService, executorServicePeriod);
+    }
+
+    public SystemPropertyScheduledUpdateConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService) {
+        super(name, executorService);
+    }
+
 
     @Override
     public String getLatestConfig(String dataId, long timeoutMills) {

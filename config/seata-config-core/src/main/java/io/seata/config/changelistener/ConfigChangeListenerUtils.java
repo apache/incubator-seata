@@ -13,39 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.source;
-
-import javax.annotation.Nonnull;
-
-import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
+package io.seata.config.changelistener;
 
 /**
- * The interface ConfigSource.
+ * The type Config change listener utils.
  *
  * @author wang.liang
- * @author slievrly
  */
-public interface ConfigSource {
+public class ConfigChangeListenerUtils {
 
     /**
-     * Get latest config.
+     * Get change type.
      *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the Latest config
+     * @param oldValue the old value
+     * @param newValue the new value
+     * @return the change type
      */
-    String getLatestConfig(String dataId, long timeoutMills);
-
-    default String getLatestConfig(String dataId) {
-        return getLatestConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    public static ConfigurationChangeType getChangeType(String oldValue, String newValue) {
+        if (oldValue == null) {
+            return ConfigurationChangeType.ADD;
+        } else if (newValue == null) {
+            return ConfigurationChangeType.DELETE;
+        } else {
+            return ConfigurationChangeType.MODIFY;
+        }
     }
-
-
-    /**
-     * Get the name
-     *
-     * @return the name
-     */
-    @Nonnull
-    String getName();
 }

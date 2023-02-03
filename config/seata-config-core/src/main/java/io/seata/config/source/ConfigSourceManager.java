@@ -16,7 +16,11 @@
 package io.seata.config.source;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * The interface ConfigSourceManager.
@@ -49,15 +53,38 @@ public interface ConfigSourceManager {
      *
      * @return the sources
      */
+    @Nonnull
     List<ConfigSource> getSources();
+
+    /**
+     * Get source map.
+     *
+     * @return The source map
+     */
+    @Nonnull
+    Map<String, ConfigSource> getSourceMap();
+
+    /**
+     * Get source by name.
+     *
+     * @param sourceName the source name
+     * @return the source
+     */
+    @Nullable
+    default ConfigSource getSource(String sourceName) {
+        return getSourceMap().get(sourceName);
+    }
 
     /**
      * add source to first position
      *
      * @param newSource the new source
      */
-    default void addSourceFirst(ConfigSource newSource) {
+    default void addSourceFirst(@Nonnull ConfigSource newSource) {
+        Objects.requireNonNull(newSource, "The newSource must not be null.");
+
         this.getSources().add(0, newSource);
+        this.getSourceMap().put(newSource.getName(), newSource);
         this.afterAddingSource(newSource);
     }
 
@@ -66,8 +93,11 @@ public interface ConfigSourceManager {
      *
      * @param newSource the new source
      */
-    default void addSourceLast(ConfigSource newSource) {
+    default void addSourceLast(@Nonnull ConfigSource newSource) {
+        Objects.requireNonNull(newSource, "The newSource must not be null.");
+
         this.getSources().add(newSource);
+        this.getSourceMap().put(newSource.getName(), newSource);
         this.afterAddingSource(newSource);
     }
 
@@ -78,7 +108,9 @@ public interface ConfigSourceManager {
      * @param predicate the predicate
      * @param addBefore the boolean, true=before | false=after
      */
-    default void addSource(ConfigSource newSource, Predicate<ConfigSource> predicate, boolean addBefore) {
+    default void addSource(@Nonnull ConfigSource newSource, @Nonnull Predicate<ConfigSource> predicate, boolean addBefore) {
+        Objects.requireNonNull(newSource, "The newSource must not be null.");
+
         boolean added = false;
 
         // add before the target source, if exist
@@ -89,9 +121,11 @@ public interface ConfigSourceManager {
             if (predicate.test(targetSource)) {
                 if (addBefore) {
                     sources.add(i, newSource);
+                    this.getSourceMap().put(newSource.getName(), newSource);
                     added = true;
                 } else if (i < sources.size() - 1) {
                     sources.add(i + 1, newSource);
+                    this.getSourceMap().put(newSource.getName(), newSource);
                     added = true;
                 }
                 break;
@@ -112,7 +146,7 @@ public interface ConfigSourceManager {
      * @param newSource    the new source
      * @param targetSource the target source
      */
-    default void addSourceBefore(ConfigSource newSource, final ConfigSource targetSource) {
+    default void addSourceBefore(@Nonnull ConfigSource newSource, @Nonnull final ConfigSource targetSource) {
         addSource(newSource, s -> s == targetSource, true);
     }
 
@@ -121,7 +155,7 @@ public interface ConfigSourceManager {
      *
      * @param source the source
      */
-    default void addSourceBefore(ConfigSource source, final String targetSourceName) {
+    default void addSourceBefore(@Nonnull ConfigSource source, final String targetSourceName) {
         addSource(source, s -> s.getName().equals(targetSourceName), true);
     }
 

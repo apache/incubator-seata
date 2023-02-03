@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import io.seata.common.util.ConvertUtils;
 import io.seata.config.source.ConfigSourceManager;
 
@@ -50,6 +52,7 @@ public interface Configuration extends ConfigSourceManager {
      *
      * @return the name
      */
+    @Nonnull
     String getName();
 
     /**

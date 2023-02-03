@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
@@ -194,6 +195,7 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
         }
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

@@ -37,20 +37,18 @@ public class ConfigurationChangeEvent {
     private ConfigurationChangeType changeType;
 
     @Nonnull
-    private ConfigSource changeEventSource;
+    private final ConfigSource changeEventSource;
 
 
-    public ConfigurationChangeEvent(ConfigSource changeEventSource) {
+    public ConfigurationChangeEvent(@Nonnull ConfigSource changeEventSource) {
         Objects.requireNonNull(changeEventSource, "The 'changeEventSource' must not be null.");
         this.changeEventSource = changeEventSource;
     }
 
-    public ConfigurationChangeEvent(String dataId, String newValue, ConfigSource changeEventSource) {
-        this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY, changeEventSource);
-    }
-
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
-                                    ConfigurationChangeType type, ConfigSource changeEventSource) {
+                                    ConfigurationChangeType type, @Nonnull ConfigSource changeEventSource) {
+        Objects.requireNonNull(changeEventSource, "The 'changeEventSource' must not be null.");
+
         this.dataId = dataId;
         this.namespace = namespace;
         this.oldValue = oldValue;
