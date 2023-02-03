@@ -37,7 +37,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.cluster.raft.context.RaftClusterContext;
-import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.cluster.raft.RaftServer;
