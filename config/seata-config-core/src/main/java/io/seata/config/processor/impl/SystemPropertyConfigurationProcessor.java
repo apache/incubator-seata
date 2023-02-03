@@ -28,12 +28,12 @@ import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_PROPERTY_P
  *
  * @author wang.liang
  */
-@LoadLevel(name = "system-property", order = SYSTEM_PROPERTY_PROCESSOR_ORDER)
+@LoadLevel(name = SystemPropertyConfigSource.DEFAULT_NAME, order = SYSTEM_PROPERTY_PROCESSOR_ORDER)
 public class SystemPropertyConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
     public void process(Configuration configuration) {
-        ConfigSource source = new SystemPropertyConfigSource();
+        ConfigSource source = new SystemPropertyConfigSource(SystemPropertyConfigSource.DEFAULT_NAME, true);
 
         // add this source to the first location, because it has the highest priority
         configuration.addSourceFirst(source);

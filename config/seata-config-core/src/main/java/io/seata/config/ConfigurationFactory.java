@@ -51,6 +51,7 @@ public final class ConfigurationFactory {
      * @return the instance
      */
     public static Configuration getInstance() {
+        // Build configuration.
         if (instance == null) {
             synchronized (Configuration.class) {
                 if (instance == null) {
@@ -59,21 +60,8 @@ public final class ConfigurationFactory {
             }
         }
 
-        if (instance instanceof Initialize) {
-            Initialize initialize = (Initialize)instance;
-
-            if (!initializationStarted) {
-                synchronized (Configuration.class) {
-                    if (!initializationStarted) {
-                        initializationStarted = true;
-                        initialize.init();
-                    }
-                }
-            } else if (!initialize.isInitialized()) {
-                LOGGER.warn("Current configuration '{}' has not been fully initialized. Some config source may not be available.",
-                        instance.getName());
-            }
-        }
+        // Init configuration.
+        initConfiguration();
 
         return instance;
     }
@@ -81,6 +69,27 @@ public final class ConfigurationFactory {
     private static Configuration buildConfiguration() {
         ConfigurationBuilder configurationBuilder = EnhancedServiceLoader.load(ConfigurationBuilder.class);
         return configurationBuilder.build();
+    }
+
+    private static void initConfiguration() {
+        if (!(instance instanceof Initialize) || ((Initialize)instance).isInitialized()) {
+            // Instance is not an Initialize, or is initialized.
+            return;
+        }
+
+        Initialize initialize = (Initialize)instance;
+
+        if (!initializationStarted) {
+            synchronized (Configuration.class) {
+                if (!initializationStarted) {
+                    initializationStarted = true;
+                    initialize.init();
+                }
+            }
+        } else if (!initialize.isInitialized()) {
+            LOGGER.warn("Current configuration '{}' has not been fully initialized. Some config source may not be available.",
+                    instance.getName());
+        }
     }
 
     public static void clean() {

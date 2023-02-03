@@ -17,6 +17,8 @@ package io.seata.config.source.impl;
 
 import java.util.Map;
 
+import javax.annotation.Nonnull;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigSource;
 
@@ -49,6 +51,7 @@ public class SystemEnvConfigSource implements ConfigSource {
         return config1;
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return "system-env";

@@ -51,7 +51,7 @@ public class SeataDefaultConfigManager extends CacheableConfiguration
         // Avoid print logs repeatedly
         super.disablePrintGetSuccessLog();
 
-        // load the
+        // Load the DefaultConfigSourceProvider, and provide some DefaultConfigSource.
         List<DefaultConfigSourceProvider> providers = EnhancedServiceLoader.loadAll(DefaultConfigSourceProvider.class);
         for (DefaultConfigSourceProvider provider : providers) {
             provider.provide(this);

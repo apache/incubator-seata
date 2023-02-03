@@ -36,6 +36,6 @@ public class FileConfigurationProcessor implements ConfigurationProcessor {
         String configFileName = ConfigurationUtils.getConfigFileName(configuration);
 
         // load file sources by configFileName
-        ConfigurationUtils.loadFileSources(configuration, configFileName, false);
+        ConfigurationUtils.loadFileSources(configuration, configFileName, false, false);
     }
 }

@@ -40,10 +40,11 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
     /**
      * The name
      */
+    @Nonnull
     private final String name;
 
 
-    protected AbstractConfiguration(String name) {
+    protected AbstractConfiguration(@Nonnull String name) {
         Objects.requireNonNull(name, "The 'name' must not be null.");
         this.name = name;
     }
@@ -133,7 +134,7 @@ public abstract class AbstractConfiguration extends AbstractInitialize implement
     @Nonnull
     @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
     //endregion # Override Configuration

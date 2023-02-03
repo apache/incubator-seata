@@ -18,6 +18,7 @@ package io.seata.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import javax.annotation.Nonnull;
 
 import io.seata.config.source.ConfigSource;
 
@@ -33,6 +34,7 @@ public class CustomConfigSourceForTest implements ConfigSource {
         }
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return "forTest";

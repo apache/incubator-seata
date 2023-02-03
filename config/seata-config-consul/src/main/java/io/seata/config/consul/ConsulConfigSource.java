@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
@@ -213,6 +214,7 @@ public class ConsulConfigSource implements RemoteConfigSource
         return CONFIG_LISTENERS_MAP.get(dataId);
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

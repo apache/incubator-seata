@@ -15,7 +15,6 @@
  */
 package io.seata.config;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -58,7 +57,7 @@ public class SeataConfiguration extends CacheableConfiguration
     /**
      * The config change listener map.
      */
-    protected final Map<String, Set<ConfigurationChangeListener>> listeners = new ConcurrentHashMap<>();
+    protected final Map<String, Set<ConfigurationChangeListener>> listenersMap = new ConcurrentHashMap<>();
 
 
     //region # Constructor
@@ -202,8 +201,8 @@ public class SeataConfiguration extends CacheableConfiguration
 
         LOGGER.debug("Add config listener: dataId = {}, listener = {}", dataId, listener);
 
-        Set<ConfigurationChangeListener> dataIdListeners = listeners.computeIfAbsent(dataId, key -> new HashSet<>());
-        dataIdListeners.add(listener);
+        listenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
+                .add(listener);
 
         // add self (self is a ConfigurationChangeListener) to sources
         this.addSelfConfigListenerToSources(dataId);
@@ -218,11 +217,11 @@ public class SeataConfiguration extends CacheableConfiguration
     }
 
     protected void addSelfConfigListenerToSources(String dataId) {
-        this.sources.forEach(s -> this.addSelfConfigListenerToSource(dataId, s));
+        this.getSources().forEach(s -> this.addSelfConfigListenerToSource(dataId, s));
     }
 
     protected void addSelfConfigListenersToSource(ConfigSource source) {
-        this.listeners.keySet().forEach(dataId -> {
+        this.listenersMap.keySet().forEach(dataId -> {
             this.addSelfConfigListenerToSource(dataId, source);
         });
     }
@@ -236,17 +235,18 @@ public class SeataConfiguration extends CacheableConfiguration
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
         LOGGER.debug("Remove config listener: dataId = {}, listener = {}", dataId, listener);
 
-        Set<ConfigurationChangeListener> dataIdListeners = this.listeners.computeIfAbsent(dataId, key -> new HashSet<>());
-        dataIdListeners.remove(listener);
-
-        if (dataIdListeners.isEmpty()) {
-            this.removeSelfConfigListenerFromSources(dataId);
-            this.listeners.remove(dataId);
+        Set<ConfigurationChangeListener> listeners = this.listenersMap.get(dataId);
+        if (listeners != null) {
+            listeners.remove(listener);
+            if (listeners.isEmpty()) {
+                this.removeSelfConfigListenerFromSources(dataId);
+                this.listenersMap.remove(dataId);
+            }
         }
     }
 
     protected void removeSelfConfigListenerFromSources(String dataId) {
-        this.sources.forEach(source -> {
+        this.getSources().forEach(source -> {
             if (source instanceof ConfigurationChangeListenerManager) {
                 ((ConfigurationChangeListenerManager)source).removeConfigListener(dataId, this);
                 LOGGER.debug("Remove config listener from source: dataId = {}, source = {}", dataId, source.getName());
@@ -255,7 +255,7 @@ public class SeataConfiguration extends CacheableConfiguration
     }
 
     protected void removeSelfConfigListenerFromSources() {
-        this.listeners.keySet().forEach(this::removeSelfConfigListenerFromSources);
+        this.listenersMap.keySet().forEach(this::removeSelfConfigListenerFromSources);
     }
 
     //endregion ## remove config listener
@@ -263,12 +263,12 @@ public class SeataConfiguration extends CacheableConfiguration
 
     @Override
     public Set<String> getListenedConfigDataIds() {
-        return this.listeners.keySet();
+        return this.listenersMap.keySet();
     }
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        return this.listeners.get(dataId);
+        return this.listenersMap.get(dataId);
     }
 
 
@@ -277,7 +277,7 @@ public class SeataConfiguration extends CacheableConfiguration
         this.removeSelfConfigListenerFromSources();
 
         // Clear the listener map.
-        this.listeners.clear();
+        this.listenersMap.clear();
     }
 
 

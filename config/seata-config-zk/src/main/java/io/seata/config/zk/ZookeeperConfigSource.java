@@ -28,6 +28,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
@@ -118,6 +119,7 @@ public class ZookeeperConfigSource implements RemoteConfigSource,
         }
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

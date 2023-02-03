@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.annotation.Nonnull;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
@@ -361,6 +362,7 @@ public class NacosConfigSource implements RemoteConfigSource
     }
 
 
+    @Nonnull
     @Override
     public String getName() {
         return CONFIG_TYPE;

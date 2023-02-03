@@ -15,6 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure.config.source;
 
+import javax.annotation.Nonnull;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
@@ -73,6 +75,7 @@ public class SpringEnvironmentConfigSource implements ConfigSource {
         return null;
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return "spring-environment";

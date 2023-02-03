@@ -159,6 +159,7 @@ public class ConfigCache implements Serializable {
             return null;
         }
 
+        @Nonnull
         @Override
         public String getName() {
             return "non";
