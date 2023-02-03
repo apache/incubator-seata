@@ -31,6 +31,7 @@ import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,8 +110,9 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         if (CollectionUtils.isEmpty(pkColumnNameList)) {
             return false;
         }
-        return pkColumnNameList.stream().anyMatch(pkColumn -> insertColumns.contains(pkColumn)
-            || CollectionUtils.toUpperList(insertColumns).contains(pkColumn.toUpperCase()));
+        List<String> newColumns = ColumnUtils.delEscape(insertColumns, getDbType());
+        return pkColumnNameList.stream().anyMatch(pkColumn -> newColumns.contains(pkColumn)
+            || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
     }
 
     @Override
