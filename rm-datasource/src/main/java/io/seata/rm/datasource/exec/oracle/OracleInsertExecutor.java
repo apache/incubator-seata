@@ -17,19 +17,23 @@ package io.seata.rm.datasource.exec.oracle;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,9 +60,55 @@ public class OracleInsertExecutor extends BaseInsertExecutor implements Sequence
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
+    /**
+     * 1. If the insert columns are not empty and do not contain any pk columns,
+     * it means that there is no pk value in the insert rows, then all the pk values should come from auto-increment.
+     * <p>
+     * 2. The pk value exists in insert rows. The possible situations are:
+     * <ul>
+     *     <li>The insert columns are empty: all pk values can be obtained from insert rows</li>
+     *     <li>The insert columns contain at least one pk column: first obtain the existing pk value from the insert rows, and other from auto-increment</li>
+     * </ul>
+     *
+     * @return {@link Map}<{@link String}, {@link List}<{@link Object}>>
+     * @throws SQLException the sql exception
+     */
     @Override
     public Map<String, List<Object>> getPkValues() throws SQLException {
-        return getPkValuesByColumn();
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        Map<String, List<Object>> pkValuesMap = new HashMap<>(pkColumnNameList.size());
+
+        // first obtain the existing pk value from the insert rows (if exists)
+        if (!containsColumns() || containsAnyPk()) {
+            pkValuesMap.putAll(getPkValuesByColumn());
+        }
+        // other from auto-increment
+        for (String columnName : pkColumnNameList) {
+            if (!pkValuesMap.containsKey(columnName)) {
+                pkValuesMap.put(columnName, getGeneratedKeys(columnName));
+            }
+        }
+        return pkValuesMap;
+    }
+
+    /**
+     * Whether the insert columns contain any pk columns
+     *
+     * @return true: contain at least one pk column. false: do not contain any pk columns
+     */
+    public boolean containsAnyPk() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (CollectionUtils.isEmpty(insertColumns)) {
+            return false;
+        }
+        List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
+        if (CollectionUtils.isEmpty(pkColumnNameList)) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(insertColumns, getDbType());
+        return pkColumnNameList.stream().anyMatch(pkColumn -> newColumns.contains(pkColumn)
+            || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
     }
 
     @Override
