@@ -38,6 +38,8 @@ public enum BranchType {
      */
     SAGA,
 
+    SAGA_ANNOTATION,
+
     /**
      * The XA.
      */

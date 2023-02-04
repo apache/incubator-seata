@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.Resource;
 import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
 import org.apache.seata.integration.tx.api.interceptor.parser.RegisterResourceParser;
 import org.apache.seata.rm.DefaultResourceManager;
@@ -53,31 +54,11 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
 
     private void executeRegisterResource(Object target, Set<Method> methods, Class<?> targetServiceClass) throws NoSuchMethodException {
         for (Method m : methods) {
-            TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
-            if (twoPhaseBusinessAction != null) {
-                TCCResource tccResource = new TCCResource();
-                if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
-                    throw new FrameworkException("TCC bean name cannot be null or empty");
-                }
-                tccResource.setActionName(twoPhaseBusinessAction.name());
-                tccResource.setTargetBean(target);
-                tccResource.setPrepareMethod(m);
-                tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                tccResource.setCommitMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
-                        twoPhaseBusinessAction.commitArgsClasses()));
-                tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                tccResource.setRollbackMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
-                        twoPhaseBusinessAction.rollbackArgsClasses()));
-                // set argsClasses
-                tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
-                tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
-                // set phase two method's keys
-                tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
-                        twoPhaseBusinessAction.commitArgsClasses()));
-                tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
-                        twoPhaseBusinessAction.rollbackArgsClasses()));
-                //registry tcc resource
-                DefaultResourceManager.get().registerResource(tccResource);
+            Annotation annotation = m.getAnnotation(getAnnotationClass());
+            if (annotation != null) {
+                Resource resource = createResource(target, targetServiceClass, m, annotation);
+                //registry resource
+                DefaultResourceManager.get().registerResource(resource);
             }
         }
     }
@@ -106,6 +87,37 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
             }
         }
         return keys;
+    }
+
+
+    protected Resource createResource(Object target, Class<?> targetServiceClass, Method method, Annotation annotation) throws NoSuchMethodException {
+        TwoPhaseBusinessAction twoPhaseBusinessAction = (TwoPhaseBusinessAction) annotation;
+        if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
+            throw new FrameworkException("TCC bean name cannot be null or empty");
+        }
+        TCCResource tccResource = new TCCResource();
+        tccResource.setActionName(twoPhaseBusinessAction.name());
+        tccResource.setTargetBean(target);
+        tccResource.setPrepareMethod(method);
+        tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
+        tccResource.setCommitMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
+        tccResource.setRollbackMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        // set argsClasses
+        tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
+        tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
+        // set phase two method's keys
+        tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        return tccResource;
+    }
+
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return TwoPhaseBusinessAction.class;
     }
 
 }
