@@ -311,7 +311,7 @@ public class SpringFenceHandler implements FenceHandler {
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {
-                Connection conn = DataSourceUtils.getConnection(DefaultCommonFenceHandler.get().getDataSource());
+                Connection conn = DataSourceUtils.getConnection(this.getDataSource());
                 ret = COMMON_FENCE_DAO.deleteCommonFenceDO(conn, xid, branchId);
             } catch (RuntimeException e) {
                 status.setRollbackOnly();
