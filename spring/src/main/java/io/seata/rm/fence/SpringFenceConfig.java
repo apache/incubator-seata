@@ -47,15 +47,18 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
 
     @Override
     public void afterPropertiesSet() {
+        SpringFenceHandler springFenceHandler = SpringFenceHandler.get();
         if (dataSource != null) {
             // set dataSource
-            DefaultCommonFenceHandler.get().setDataSource(dataSource);
+            springFenceHandler.setDataSource(dataSource);
+            springFenceHandler.init();
+            init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
         if (transactionManager != null) {
             // set transaction template
-            SpringFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
+            springFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
         } else {
             throw new CommonFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
         }

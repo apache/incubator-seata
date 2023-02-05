@@ -33,6 +33,9 @@ public class DefaultCommonFenceHandler implements FenceHandler {
         private static final DefaultCommonFenceHandler INSTANCE = new DefaultCommonFenceHandler();
     }
 
+    private DefaultCommonFenceHandler() {
+    }
+
     public static DefaultCommonFenceHandler get() {
         return DefaultCommonFenceHandler.SingletonHolder.INSTANCE;
     }
