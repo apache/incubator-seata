@@ -43,6 +43,7 @@ import static io.seata.common.ContextStoreConstant.STORE_TYPE_TC;
  *
  * @author zhangsen
  * @author Yujianfei
+ * @author yangwenpeng fence、context
  */
 public class TCCResourceManager extends AbstractResourceManager {
 

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * The type Common Fence store data base dao
  *
  * @author kaka2code
+ * @author yangwenpeng
  */
 public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
 
@@ -220,7 +221,11 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
             ps.setLong(3, branchId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            String errMsg = null;
+            if (e.getMessage() != null && e.getMessage().contains("Unknown column 'application_data'")) {
+                errMsg = "EnableFence is required the column 'application_data' in table 'tcc_fence_log', please check!";
+            }
+            throw new StoreException(e, errMsg);
         } finally {
             IOUtil.close(ps);
         }
@@ -242,7 +247,11 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
                 return null;
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e);
+            String errMsg = null;
+            if (e.getMessage() != null && e.getMessage().contains("Unknown column 'application_data'")) {
+                errMsg = "EnableFence is required the column 'application_data' in table 'tcc_fence_log', please check!";
+            }
+            throw new DataAccessException(e, errMsg);
         } finally {
             IOUtil.close(rs, ps);
         }

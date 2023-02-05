@@ -64,5 +64,12 @@ public class DataAccessException extends StoreException {
         super(cause, msg, errCode);
     }
 
-
+    /**
+     * constructor with cause and msg
+     * @param cause the throwable
+     * @param msg the msg
+     */
+    public DataAccessException(Throwable cause, String msg) {
+        super(cause, msg);
+    }
 }

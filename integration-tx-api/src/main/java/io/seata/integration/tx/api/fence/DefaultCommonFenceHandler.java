@@ -21,7 +21,9 @@ import java.util.Date;
 import io.seata.common.executor.Callback;
 
 /**
+ * the default fenceHandler, the upper layer only uses this class to access FenceHandler.
  * @author leezongjie
+ * @date 2022/12/17
  */
 public class DefaultCommonFenceHandler implements FenceHandler {
 
