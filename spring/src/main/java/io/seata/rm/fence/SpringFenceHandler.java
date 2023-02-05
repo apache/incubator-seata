@@ -157,9 +157,9 @@ public class SpringFenceHandler implements FenceHandler {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
             } finally {
-            // save context in the same transaction
-            BusinessActionContextUtil.reportContext();
-        }
+                // save context in the same transaction
+                BusinessActionContextUtil.reportContext();
+            }
         });
     }
 

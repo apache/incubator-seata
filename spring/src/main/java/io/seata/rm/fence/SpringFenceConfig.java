@@ -16,7 +16,6 @@
 package io.seata.rm.fence;
 
 import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
 import org.springframework.beans.factory.InitializingBean;
