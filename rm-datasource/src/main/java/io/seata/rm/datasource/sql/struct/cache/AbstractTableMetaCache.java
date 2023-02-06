@@ -90,8 +90,12 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         TableMeta tmeta;
         final String key = getCacheKey(connection, tableName, resourceId);
         tmeta = TABLE_META_CACHE.getIfPresent(key);
-        tmeta.addUnrefreshableColumn(colName);
-        TABLE_META_CACHE.put(key, tmeta);
+        if (tmeta == null) {
+            LOGGER.warn("table meta not found, key=" + key);
+        }else {
+            tmeta.addUnrefreshableColumn(colName);
+            TABLE_META_CACHE.put(key, tmeta);
+        }
     }
 
     @Override
