@@ -119,6 +119,7 @@ seata:
     raft:
       group: default
       cluster:
+      auto-join: false
       snapshot-interval: 600
       apply-batch: 32
       max-append-bufferSize: 262144
