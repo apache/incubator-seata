@@ -15,12 +15,12 @@
  */
 package io.seata.config;
 
+import java.time.Duration;
+
 import io.seata.common.util.DurationUtil;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
 
 /**
  * @author jsbxyyx

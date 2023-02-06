@@ -29,7 +29,7 @@ public interface ProtocolConstants {
     /**
      * Magic code
      */
-    byte[] MAGIC_CODE_BYTES = {(byte)0xda, (byte)0xda};
+    byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
 
     /**
      * Protocol version

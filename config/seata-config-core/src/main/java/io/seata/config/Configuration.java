@@ -61,6 +61,7 @@ public interface Configuration extends UpdatableConfiguration
      */
     String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
 
+
     /**
      * Get config.
      *
