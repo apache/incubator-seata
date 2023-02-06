@@ -178,7 +178,7 @@ public class RpcContextTest {
 		Assertions.assertEquals(
 				"RpcContext{" + "applicationId='" + rpcContext.getApplicationId() + '\'' + ", transactionServiceGroup='"
 						+ rpcContext.getTransactionServiceGroup() + '\'' + ", clientId='" + rpcContext.getClientId() + '\''
-						+ ", channel=" + rpcContext.getChannel() + ", resourceSets=" + rpcContext.getResourceSets() + '}',
+						+ ", channel=" + rpcContext.getChannel() + ", resourceSets=" + rpcContext.getResourceSets() + ", beginXidCache=" + rpcContext.getBeginXidCache().asMap() + '}',
 						rpcContext.toString());
 	}
 
