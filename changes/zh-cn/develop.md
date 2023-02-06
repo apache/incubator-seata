@@ -17,7 +17,7 @@
 - [[#5281](https://github.com/seata/seata/pull/5281)] 修复并行rm请求处理时数组索引越界问题
 - [[#5288](https://github.com/seata/seata/pull/5288)] 修复AT模式下oracle的主键列自增的问题
 - [[#5287](https://github.com/seata/seata/pull/5287)] 修复AT模式下pgsql的主键列自增的问题
-
+- [[#5299](https://github.com/seata/seata/pull/5299)] 修复TC端重试回滚或重试提交超时GlobalSession的删除问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
