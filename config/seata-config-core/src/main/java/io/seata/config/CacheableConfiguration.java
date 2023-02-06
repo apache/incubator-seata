@@ -41,7 +41,7 @@ public class CacheableConfiguration extends SimpleConfiguration
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheableConfiguration.class);
 
-    public static final String DEFAULT_NAME = "cacheable-configuration";
+    private static final String NAME_PREFIX = "cache:";
 
 
     /**
@@ -52,18 +52,15 @@ public class CacheableConfiguration extends SimpleConfiguration
 
 
     public CacheableConfiguration(String name, @Nonnull Map<String, ConfigCache> configCacheMap) {
-        super(name);
+        super(NAME_PREFIX + name);
 
         Objects.requireNonNull(configCacheMap, "The 'configCacheMap' must not be null.");
         this.configCacheMap = configCacheMap;
     }
 
     public CacheableConfiguration(String name) {
-        this(name, new ConcurrentHashMap<>());
-    }
-
-    public CacheableConfiguration() {
-        this(DEFAULT_NAME);
+        super(NAME_PREFIX + name);
+        this.configCacheMap = new ConcurrentHashMap<>();
     }
 
 

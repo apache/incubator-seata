@@ -82,7 +82,7 @@ public class SimpleConfiguration extends AbstractConfiguration {
 
     private void initSources() {
         sources.forEach(source -> {
-            // If not initialized, do init.
+            // If not initialized, do init the sources.
             if (source instanceof Initialize && !((Initialize)source).isInitialized()) {
                 ((Initialize)source).init();
             }

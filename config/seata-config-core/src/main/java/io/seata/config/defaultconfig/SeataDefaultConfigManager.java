@@ -30,19 +30,15 @@ import io.seata.config.ConfigCache;
 public class SeataDefaultConfigManager extends CacheableConfiguration
         implements DefaultConfigManager {
 
-    public static final String DEFAULT_NAME = "seata-default-config-manager";
+    private static final String NAME_PREFIX = "seata:";
 
 
     public SeataDefaultConfigManager(String name, Map<String, ConfigCache> configCacheMap) {
-        super(name, configCacheMap);
+        super(NAME_PREFIX + name, configCacheMap);
     }
 
     public SeataDefaultConfigManager(String name) {
-        super(name);
-    }
-
-    public SeataDefaultConfigManager() {
-        this(DEFAULT_NAME);
+        super(NAME_PREFIX + name);
     }
 
 

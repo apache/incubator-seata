@@ -15,12 +15,56 @@
  */
 package io.seata.config;
 
-import io.seata.config.source.UpdatableConfigSource;
+import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
 
 /**
  * The interface UpdatableConfiguration.
  *
  * @author wang.liang
  */
-public interface UpdatableConfiguration extends UpdatableConfigSource {
+public interface UpdatableConfiguration {
+
+    /**
+     * Put config.
+     *
+     * @param dataId       the data id
+     * @param content      the content
+     * @param timeoutMills the timeout mills
+     * @return the boolean
+     */
+    boolean putConfig(String dataId, String content, long timeoutMills);
+
+    default boolean putConfig(String dataId, String content) {
+        return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Put config if absent.
+     *
+     * @param dataId       the data id
+     * @param content      the content
+     * @param timeoutMills the timeout mills
+     * @return the boolean
+     */
+    boolean putConfigIfAbsent(String dataId, String content, long timeoutMills);
+
+    default boolean putConfigIfAbsent(String dataId, String content) {
+        return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Remove config.
+     *
+     * @param dataId       the data id
+     * @param timeoutMills the timeout mills
+     * @return the boolean
+     */
+    boolean removeConfig(String dataId, long timeoutMills);
+
+    default boolean removeConfig(String dataId) {
+        return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    }
+
 }

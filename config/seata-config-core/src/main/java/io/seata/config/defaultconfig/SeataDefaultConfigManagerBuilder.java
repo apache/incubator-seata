@@ -25,7 +25,7 @@ public class SeataDefaultConfigManagerBuilder implements DefaultConfigManagerBui
     @Override
     public DefaultConfigManager build() {
         // create
-        SeataDefaultConfigManager manager = new SeataDefaultConfigManager();
+        SeataDefaultConfigManager manager = new SeataDefaultConfigManager("default-config-manager");
         // init
         manager.init();
         // return

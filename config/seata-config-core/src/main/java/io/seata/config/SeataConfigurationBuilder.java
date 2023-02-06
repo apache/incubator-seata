@@ -24,6 +24,6 @@ public class SeataConfigurationBuilder implements ConfigurationBuilder {
 
     @Override
     public Configuration build() {
-        return new SeataConfiguration();
+        return new SeataConfiguration("default-configuration");
     }
 }

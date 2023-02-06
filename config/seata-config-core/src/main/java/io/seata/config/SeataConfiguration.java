@@ -46,7 +46,7 @@ public class SeataConfiguration extends CacheableConfiguration
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataConfiguration.class);
 
-    public static final String DEFAULT_NAME = "seata-default";
+    private static final String NAME_PREFIX = "seata:";
 
 
     /**
@@ -63,27 +63,22 @@ public class SeataConfiguration extends CacheableConfiguration
     //region # Constructor
 
     public SeataConfiguration(String name, Map<String, ConfigCache> configCache, DefaultConfigManager defaultConfigManager) {
-        super(name, configCache);
+        super(NAME_PREFIX + name, configCache);
         this.defaultConfigManager = defaultConfigManager;
     }
 
     public SeataConfiguration(String name, DefaultConfigManager defaultConfigManager) {
-        super(name);
+        super(NAME_PREFIX + name);
         this.defaultConfigManager = defaultConfigManager;
     }
 
     public SeataConfiguration(String name, Map<String, ConfigCache> configCache) {
-        super(name, configCache);
+        super(NAME_PREFIX + name, configCache);
         this.defaultConfigManager = this.buildDefaultConfigManager();
     }
 
     public SeataConfiguration(String name) {
-        super(name);
-        this.defaultConfigManager = this.buildDefaultConfigManager();
-    }
-
-    public SeataConfiguration() {
-        super(DEFAULT_NAME);
+        super(NAME_PREFIX + name);
         this.defaultConfigManager = this.buildDefaultConfigManager();
     }
 
