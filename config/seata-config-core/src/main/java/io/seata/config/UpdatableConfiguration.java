@@ -15,9 +15,7 @@
  */
 package io.seata.config;
 
-import java.util.Set;
-
-import io.seata.config.changelistener.ConfigurationChangeListener;
+import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
 
 /**
  * The interface UpdatableConfiguration.
@@ -28,7 +26,7 @@ import io.seata.config.changelistener.ConfigurationChangeListener;
 public interface UpdatableConfiguration {
 
     /**
-     * Put config boolean.
+     * Put config.
      *
      * @param dataId       the data id
      * @param content      the content
@@ -37,17 +35,13 @@ public interface UpdatableConfiguration {
      */
     boolean putConfig(String dataId, String content, long timeoutMills);
 
-    /**
-     * Put config boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfig(String dataId, String content);
+    default boolean putConfig(String dataId, String content) {
+        return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    }
+
 
     /**
-     * Put config if absent boolean.
+     * Put config if absent.
      *
      * @param dataId       the data id
      * @param content      the content
@@ -56,17 +50,13 @@ public interface UpdatableConfiguration {
      */
     boolean putConfigIfAbsent(String dataId, String content, long timeoutMills);
 
-    /**
-     * Put config if absent boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfigIfAbsent(String dataId, String content);
+    default boolean putConfigIfAbsent(String dataId, String content) {
+        return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
+    }
+
 
     /**
-     * Remove config boolean.
+     * Remove config.
      *
      * @param dataId       the data id
      * @param timeoutMills the timeout mills
@@ -74,35 +64,8 @@ public interface UpdatableConfiguration {
      */
     boolean removeConfig(String dataId, long timeoutMills);
 
-    /**
-     * Remove config boolean.
-     *
-     * @param dataId the data id
-     * @return the boolean
-     */
-    boolean removeConfig(String dataId);
+    default boolean removeConfig(String dataId) {
+        return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
+    }
 
-    /**
-     * Add config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void addConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Remove config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void removeConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Gets config listeners.
-     *
-     * @param dataId the data id
-     * @return the config listeners
-     */
-    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
 }

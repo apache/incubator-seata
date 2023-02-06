@@ -76,7 +76,14 @@ public interface Configuration extends UpdatableConfiguration
             return null;
         }
 
-        String config = this.getLatestConfig(dataId, null, timeoutMills);
+        // Get config from system property and env
+        String config = getConfigFromSys(dataId);
+        if (StringUtils.isNotBlank(config)) {
+            return ConvertUtils.convert(config, dataType);
+        }
+
+        // Get config
+        config = this.getLatestConfig(dataId, null, timeoutMills);
 
         if (StringUtils.isNotBlank(config) || defaultValue == null) {
             // May be null or blank.
@@ -160,65 +167,61 @@ public interface Configuration extends UpdatableConfiguration
      * @param timeoutMills the timeout mills
      * @return the long config
      */
-    long getLong(String dataId, long defaultValue, long timeoutMills);
+    default long getLong(String dataId, long defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Long.class);
+    }
 
-    long getLong(String dataId, long defaultValue);
+    default long getLong(String dataId, long defaultValue) {
+        return getLong(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
 
-    long getLong(String dataId);
+    default long getLong(String dataId) {
+        Long config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Long.class);
+        return config == null ? DEFAULT_LONG : config;
+    }
 
-    /**
-     * Gets duration.
-     *
-     * @param dataId the data id
-     * @return the duration
-     */
-    Duration getDuration(String dataId);
-
-    /**
-     * Gets duration.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the duration
-     */
-    Duration getDuration(String dataId, Duration defaultValue);
 
     /**
-     * Gets duration.
+     * Gets duration config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the duration
+     * @return the duration config
      */
-    Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
+    default Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Duration.class);
+    }
+
+    default Duration getDuration(String dataId, Duration defaultValue) {
+        return getDuration(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default Duration getDuration(String dataId) {
+        return getDuration(dataId, DEFAULT_DURATION, DEFAULT_CONFIG_TIMEOUT);
+    }
+
 
     /**
-     * Gets boolean.
+     * Gets boolean config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the boolean
+     * @return the boolean config
      */
-    boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills);
+    default boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Boolean.class);
+    }
 
-    /**
-     * Gets boolean.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the boolean
-     */
-    boolean getBoolean(String dataId, boolean defaultValue);
+    default boolean getBoolean(String dataId, boolean defaultValue) {
+        return getBoolean(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
 
-    /**
-     * Gets boolean.
-     *
-     * @param dataId the data id
-     * @return the boolean
-     */
-    boolean getBoolean(String dataId);
+    default boolean getBoolean(String dataId) {
+        Boolean config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Boolean.class);
+        return config == null ? DEFAULT_BOOLEAN : config;
+    }
 
 
     /**
