@@ -13,35 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure;
+package io.seata.integration.http;
 
-import io.seata.integration.http.HttpHandlerExceptionResolver;
-import io.seata.integration.http.TransactionPropagationInterceptor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-
-import java.util.List;
 
 /**
- * Auto bean add for spring context if in springboot env.
+ * The Seata Web Mvc Configurer
  *
  * @author wangxb
+ * @author wang.liang
  */
-@Configuration(proxyBeanMethods = false)
-@ConditionalOnWebApplication
-public class HttpAutoConfiguration extends WebMvcConfigurerAdapter {
+public class SeataWebMvcConfigurer implements WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new TransactionPropagationInterceptor());
     }
-
-    @Override
-    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-        exceptionResolvers.add(new HttpHandlerExceptionResolver());
-    }
-
 }

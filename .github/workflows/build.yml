@@ -2,14 +2,14 @@ name: "build"
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
   pull_request:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
 
 jobs:
   build_arm64-binary: 
      runs-on: ubuntu-latest
-     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}   
+     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/2.x') }}
      strategy:
       fail-fast: false
      steps:

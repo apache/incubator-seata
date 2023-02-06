@@ -87,7 +87,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                                     try {
                                                         connection.closeForce();
                                                     } catch (SQLException e) {
-                                                        LOGGER.info("Force close the xa physical connection fail", e);
+                                                        LOGGER.warn("Force close the xa physical connection fail", e);
                                                     }
                                                 }
                                             }
@@ -151,11 +151,11 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                     }
                 }
                 if (committed) {
-                    LOGGER.info(xaBranchXid + " commit failed since " + sqle.getMessage(), sqle);
+                    LOGGER.error(xaBranchXid + " commit failed since " + sqle.getMessage(), sqle);
                     // FIXME: case of PhaseTwo_CommitFailed_Unretryable
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 } else {
-                    LOGGER.info(xaBranchXid + " rollback failed since " + sqle.getMessage(), sqle);
+                    LOGGER.error(xaBranchXid + " rollback failed since " + sqle.getMessage(), sqle);
                     // FIXME: case of PhaseTwo_RollbackFailed_Unretryable
                     return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
                 }
