@@ -39,6 +39,11 @@ public class ObjectUtils {
         return isBlank(obj);
     }
 
+    public static boolean isNotNullOrBlank(Object obj) {
+        return !isNullOrBlank(obj);
+    }
+
+
     public static boolean isBlank(@Nonnull Object obj) {
         Class<?> clazz = obj.getClass();
 

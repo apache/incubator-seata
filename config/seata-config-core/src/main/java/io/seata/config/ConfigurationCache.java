@@ -228,9 +228,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             SHORT("Short"),
 
             /**
-             * getConfig
+             * getString
              */
-            STRING("Config");
+            STRING("String");
 
             private static final Map<String, ConfigType> CODE_TO_VALUE = new HashMap<>();
 
