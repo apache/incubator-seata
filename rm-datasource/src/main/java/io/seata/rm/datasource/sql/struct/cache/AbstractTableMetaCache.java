@@ -87,9 +87,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        TableMeta tmeta;
         final String key = getCacheKey(connection, tableName, resourceId);
-        tmeta = TABLE_META_CACHE.getIfPresent(key);
+        TableMeta tmeta = TABLE_META_CACHE.getIfPresent(key);
         if (tmeta == null) {
             LOGGER.warn("table meta not found, key=" + key);
         }else {
