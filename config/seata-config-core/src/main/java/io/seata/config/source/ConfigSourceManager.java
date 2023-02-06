@@ -93,7 +93,7 @@ public interface ConfigSourceManager {
         for (int i = 0; i < sources.size(); i++) {
             current = sources.get(i);
 
-            if (newSource.getOrder() > current.getOrder()) {
+            if (newSource.getOrder() < current.getOrder()) {
                 sources.add(i, newSource);
                 newSourceIndex = i;
                 break;

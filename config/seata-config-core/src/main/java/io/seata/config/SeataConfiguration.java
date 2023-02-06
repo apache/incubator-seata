@@ -334,7 +334,9 @@ public class SeataConfiguration extends CacheableConfiguration
         LOGGER.info("The config '{}' has changed by event: {}", event.getDataId(), event);
 
         Set<ConfigurationChangeListener> configListeners = getConfigListeners(event.getDataId());
-        configListeners.forEach(listener -> listener.onChangeEvent(event));
+        if (configListeners != null) {
+            configListeners.forEach(listener -> listener.onChangeEvent(event));
+        }
     }
 
     //endregion ## Override ConfigurationChangeListener

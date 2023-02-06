@@ -128,14 +128,16 @@ public class CacheableConfiguration extends SimpleConfiguration
 
         // Compare the priority of the config in the cache with the value in the newSource
         this.configCacheMap.forEach((dataId, oldCache) -> {
-            if (oldCache.getStringValue() != null && oldCache.getSource().getOrder() > newSource.getOrder()) {
+            String oldValue = oldCache.getStringValue();
+
+            if (oldValue != null && oldCache.getSource().getOrder() > newSource.getOrder()) {
                 // the source in the cache is higher than newSource
                 return;
             }
 
             String newValue = newSource.getLatestConfig(oldCache.getDataId());
-            if (newValue != null && Objects.equals(newValue, oldCache.getStringValue())) {
-                ConfigurationChangeType type = ConfigChangeListenerUtils.getChangeType(oldCache.getStringValue(), newValue);
+            if (newValue != null && !Objects.equals(oldValue, newValue)) {
+                ConfigurationChangeType type = ConfigChangeListenerUtils.getChangeType(oldValue, newValue);
                 this.changeCache(oldCache, newSource, newValue, type, "cacheChanged");
             }
         });
