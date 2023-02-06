@@ -27,6 +27,7 @@
 - [[#5153](https://github.com/seata/seata/pull/5153)] 只允许AT去尝试跨RM获取channel
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
 - [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
+- [[#5303](https://github.com/seata/seata/pull/5303)] 移除启动脚本的-Xmn参数
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -50,6 +51,7 @@
 - [GoodBoyCoder](https://github.com/GoodBoyCoder)
 - [a364176773](https://github.com/a364176773)
 - [isharpever](https://github.com/isharpever)
+- [mxsm](https://github.com/mxsm)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
