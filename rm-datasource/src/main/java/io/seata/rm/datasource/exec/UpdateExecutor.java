@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -91,9 +92,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoin.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
 
@@ -121,9 +120,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoiner.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
 
@@ -137,18 +134,19 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias,pkNameList));
                 }
             }
-            needUpdateColumns.addAll(originUpdateColumns);
+            needUpdateColumns.addAll(originUpdateColumns.parallelStream()
+                .map(originUpdateColumn -> ColumnUtils.addEscape(originUpdateColumn, getDbType()))
+                .collect(Collectors.toList()));
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
             onUpdateColumns.removeAll(originUpdateColumns);
-            for (String onUpdateColumn : onUpdateColumns) {
-                needUpdateColumns.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
-            }
+            needUpdateColumns.addAll(onUpdateColumns.parallelStream()
+                .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType()))
+                .collect(Collectors.toList()));
         } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                needUpdateColumns.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
+            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().parallelStream()
+                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType())).collect(Collectors.toList()));
         }
         return needUpdateColumns;
     }
