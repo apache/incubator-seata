@@ -27,10 +27,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREF
 @ConfigurationProperties(prefix = CONFIG_ZK_PREFIX)
 public class ConfigZooKeeperProperties {
     private String serverAddr;
-    private long sessionTimeout = 6000L;
-    private long connectTimeout = 2000L;
-    private String username = "";
-    private String password = "";
+    private int sessionTimeout = 6000;
+    private int connectTimeout = 2000;
+    private String username;
+    private String password;
     private String nodePath = "/seata/seata.properties";
 
     public String getServerAddr() {
@@ -46,16 +46,16 @@ public class ConfigZooKeeperProperties {
         return sessionTimeout;
     }
 
-    public ConfigZooKeeperProperties setSessionTimeout(long sessionTimeout) {
+    public ConfigZooKeeperProperties setSessionTimeout(int sessionTimeout) {
         this.sessionTimeout = sessionTimeout;
         return this;
     }
 
-    public long getConnectTimeout() {
+    public int getConnectTimeout() {
         return connectTimeout;
     }
 
-    public ConfigZooKeeperProperties setConnectTimeout(long connectTimeout) {
+    public ConfigZooKeeperProperties setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
         return this;
     }

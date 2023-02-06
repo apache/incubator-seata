@@ -15,23 +15,21 @@
  */
 package io.seata.server.storage.redis.store;
 
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.server.session.SessionStatusValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
@@ -39,29 +37,35 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionStatusValidator;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
+
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 
 /**
  * The redis transaction store manager
@@ -85,6 +89,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**the prefix of the global transaction status*/
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
+
+    /**the key of global transaction status for begin*/
+    private static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -121,14 +128,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         super();
         initGlobalMap();
         initBranchMap();
-        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
-        /**
-         * redis mode: if DEFAULT_LOG_QUERY_LIMIT < STORE_REDIS_QUERY_LIMIT get DEFAULT_LOG_QUERY_LIMIT if
-         * DEFAULT_LOG_QUERY_LIMIT >= STORE_REDIS_QUERY_LIMIT get STORE_REDIS_QUERY_LIMIT
-         */
-        if (logQueryLimit > DEFAULT_LOG_QUERY_LIMIT) {
-            logQueryLimit = DEFAULT_LOG_QUERY_LIMIT;
-        }
+        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     /**
@@ -145,7 +145,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init globalMap
      *
-     * @return void
      */
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -160,7 +159,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * init branchMap
      *
-     * @return void
      */
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
@@ -266,7 +264,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             globalTransactionDO.setGmtCreate(now);
             globalTransactionDO.setGmtModified(now);
             pipelined.hmset(globalKey, BeanUtils.objectToMap(globalTransactionDO));
-            pipelined.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), globalTransactionDO.getXid());
+            String xid = globalTransactionDO.getXid();
+            pipelined.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
+            pipelined.zadd(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY,
+                globalTransactionDO.getBeginTime() + globalTransactionDO.getTimeout(), globalKey);
             pipelined.sync();
             return true;
         } catch (Exception ex) {
@@ -295,6 +296,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             try (Pipeline pipelined = jedis.pipelined()) {
                 pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
                 pipelined.del(globalKey);
+                if (GlobalStatus.Begin.getCode() == globalTransactionDO.getStatus()
+                    || GlobalStatus.UnKnown.getCode() == globalTransactionDO.getStatus()) {
+                    pipelined.zrem(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey);
+                }
                 pipelined.sync();
             }
             return true;
@@ -340,9 +345,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             Map<String,String> map = new HashMap<>(2);
             map.put(REDIS_KEY_GLOBAL_STATUS,String.valueOf(globalTransactionDO.getStatus()));
             map.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,String.valueOf((new Date()).getTime()));
-            multi.hmset(globalKey,map);
-            multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)),0, xid);
+            multi.hmset(globalKey, map);
+            multi.lrem(buildGlobalStatus(Integer.valueOf(previousStatus)), 0, xid);
             multi.rpush(buildGlobalStatus(globalTransactionDO.getStatus()), xid);
+            multi.zrem(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey);
             List<Object> exec = multi.exec();
             if (CollectionUtils.isEmpty(exec)) {
                 //The data has changed by another tc, so we still think the modification is successful.
@@ -370,10 +376,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     }
                 }
                 if (lrem > 0) {
-                    jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)),xid);
+                    jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)), xid);
                 }
                 if (rpush > 0) {
-                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()),0,xid);
+                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, xid);
                 }
                 return false;
             }
@@ -428,10 +434,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     @Override
     public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
-
         List<GlobalSession> globalSessions = Collections.synchronizedList(new ArrayList<>());
         List<String> statusKeys = convertStatusKeys(statuses);
-
         Map<String, Integer> targetMap = calculateStatuskeysHasData(statusKeys);
         if (targetMap.size() == 0 || logQueryLimit <= 0) {
             return globalSessions;
@@ -452,6 +456,45 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             });
         }
         return globalSessions;
+    }
+
+    @Override
+    public List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions) {
+        List<GlobalSession> list = Collections.emptyList();
+        List<String> statusKeys = convertStatusKeys(GlobalStatus.Begin);
+        Map<String, Integer> targetMap = calculateStatuskeysHasData(statusKeys);
+        if (targetMap.size() == 0 || logQueryLimit <= 0) {
+            return list;
+        }
+        final long countGlobalSessions = targetMap.values().stream().collect(Collectors.summarizingInt(Integer::intValue)).getSum();
+        // queryCount
+        final long queryCount = Math.min(logQueryLimit, countGlobalSessions);
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            Set<String> values =
+                jedis.zrangeByScore(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, 0, System.currentTimeMillis(), 0,
+                        (int) queryCount);
+            List<Map<String, String>> rep;
+            try (Pipeline pipeline = jedis.pipelined()) {
+                for (String value : values) {
+                    pipeline.hgetAll(value);
+                }
+                rep = (List<Map<String, String>>) (List) pipeline.syncAndReturnAll();
+            }
+            list = rep.stream().map(map -> {
+                GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO) BeanUtils.mapToObject(map,
+                        GlobalTransactionDO.class);
+                if (globalTransactionDO != null) {
+                    String xid = globalTransactionDO.getXid();
+                    List<BranchTransactionDO> branchTransactionDOs = new ArrayList<>();
+                    if (withBranchSessions) {
+                        branchTransactionDOs = this.readBranchSessionByXid(jedis, xid);
+                    }
+                    return getGlobalSession(globalTransactionDO, branchTransactionDOs, withBranchSessions);
+                }
+                return null;
+            }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return list;
     }
 
     /**
@@ -491,9 +534,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
             return globalSessions;
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
-        } else if (sessionCondition.getStatus() != null) {
-            return readSession(new GlobalStatus[] {sessionCondition.getStatus()}, !sessionCondition.isLazyLoadBranch());
+            if (sessionCondition.getStatuses().length == 1 && sessionCondition.getStatuses()[0] == GlobalStatus.Begin) {
+                return this.readSortByTimeoutBeginSessions(!sessionCondition.isLazyLoadBranch());
+            } else {
+                return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
+            }
         }
         return null;
     }
@@ -707,7 +752,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-    private List<String> convertStatusKeys(GlobalStatus[] statuses) {
+    private List<String> convertStatusKeys(GlobalStatus... statuses) {
         List<String> statusKeys = new ArrayList<>();
         for (int i = 0; i < statuses.length; i++) {
             statusKeys.add(buildGlobalStatus(statuses[i].getCode()));
@@ -752,9 +797,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 if (list.size() > 0) {
                     listList.add(list);
                 } else {
-                    if (list.size() == 0) {
-                        iterator.remove();
-                    }
+                    iterator.remove();
                 }
             }
         }

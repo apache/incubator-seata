@@ -15,17 +15,18 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.rm.fence.SpringFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
@@ -37,8 +38,9 @@ import javax.sql.DataSource;
  */
 @ConditionalOnExpression("${seata.enabled:true}")
 @ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
-@ConditionalOnMissingBean(TCCFenceConfig.class)
-@AutoConfigureAfter({SeataCoreAutoConfiguration.class, DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class})
+@ConditionalOnMissingBean(SpringFenceConfig.class)
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class, TransactionAutoConfiguration.class})
+@AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataTCCFenceAutoConfiguration {
 
     public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
@@ -46,12 +48,12 @@ public class SeataTCCFenceAutoConfiguration {
 
     @Bean
     @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
-    public TCCFenceConfig tccFenceConfig(
+    public SpringFenceConfig tccFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,
             @Qualifier(TCC_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource tccFenceDataSource,
             @Qualifier(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager tccFenceTransactionManager) {
-        return new TCCFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
+        return new SpringFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
                 tccFenceTransactionManager != null ? tccFenceTransactionManager : transactionManager);
     }
 

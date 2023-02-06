@@ -52,7 +52,10 @@ public class ServerPropertiesTest {
 
     @Test
     public void testServerRecoveryProperties() {
-        assertEquals(context.getBean(ServerRecoveryProperties.class).getHandleAllSessionPeriod(), 1000);
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getAsyncCommittingRetryPeriod(), 1000);
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getCommittingRetryPeriod(), 1000);
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getRollbackingRetryPeriod(), 1000);
+        assertEquals(context.getBean(ServerRecoveryProperties.class).getTimeoutRetryPeriod(), 1000);
     }
 
     @Test
@@ -92,7 +95,7 @@ public class ServerPropertiesTest {
 
     @Test
     public void testStoreRedisPropertiesSentinel() {
-        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), "");
+        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), null);
     }
 
     @AfterAll

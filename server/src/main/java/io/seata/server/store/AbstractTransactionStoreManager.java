@@ -19,6 +19,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,13 +40,18 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
     }
 
     @Override
+    public List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions) {
+        return Collections.emptyList();
+    }
+
+    @Override
     public List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions) {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
-        return null;
+        return Collections.emptyList();
     }
 
     @Override

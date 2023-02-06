@@ -38,6 +38,7 @@ import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
@@ -284,11 +285,10 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
         SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init("file");
+        SessionHolder.init(SessionMode.FILE);
 
         try {
             for (GlobalSession globalSession : globalSessions) {
-                globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.begin();
             }
             final GlobalSessionParam globalSessionParam = new GlobalSessionParam();
