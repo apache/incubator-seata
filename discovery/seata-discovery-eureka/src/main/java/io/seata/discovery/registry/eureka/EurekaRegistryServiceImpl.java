@@ -173,13 +173,13 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         Properties eurekaProperties = new Properties();
         eurekaProperties.setProperty(EUREKA_CONFIG_REFRESH_KEY, String.valueOf(EUREKA_REFRESH_INTERVAL));
 
-        String url = FILE_CONFIG.getConfig(getEurekaServerUrlFileKey());
+        String url = FILE_CONFIG.getString(getEurekaServerUrlFileKey());
         if (StringUtils.isBlank(url)) {
             throw new EurekaRegistryException("eureka server url can not be null!");
         }
         eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
 
-        String weight = FILE_CONFIG.getConfig(getEurekaInstanceWeightFileKey());
+        String weight = FILE_CONFIG.getString(getEurekaInstanceWeightFileKey());
         if (StringUtils.isNotBlank(weight)) {
             eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, weight);
         } else {
@@ -194,7 +194,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private String getApplicationName() {
-        String application = FILE_CONFIG.getConfig(getEurekaApplicationFileKey());
+        String application = FILE_CONFIG.getString(getEurekaApplicationFileKey());
         if (application == null) {
             application = DEFAULT_APPLICATION;
         }

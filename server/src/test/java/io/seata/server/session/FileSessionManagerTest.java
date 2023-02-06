@@ -67,7 +67,7 @@ public class FileSessionManagerTest {
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
 
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+    private static String sessionStorePath = CONFIG.getString(ConfigurationKeys.STORE_FILE_DIR,
             DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll

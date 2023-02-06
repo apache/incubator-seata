@@ -32,10 +32,10 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,7 +209,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
-            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
+            String address = FILE_CONFIG.getString(getNacosAddrFileKey());
             if (address != null) {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
@@ -218,15 +218,15 @@ public class NacosConfiguration extends AbstractConfiguration {
         if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
             properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
         } else {
-            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            String namespace = FILE_CONFIG.getString(getNacosNameSpaceFileKey());
             if (namespace == null) {
                 namespace = DEFAULT_NAMESPACE;
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getString(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getString(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
@@ -234,10 +234,10 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
         } else {
             String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
-                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getString(getNacosAccessKey());
             if (StringUtils.isNotBlank(accessKey)) {
                 String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
-                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getString(getNacosSecretKey());
                 if (StringUtils.isNotBlank(secretKey)) {
                     properties.put(ACCESS_KEY, accessKey);
                     properties.put(SECRET_KEY, secretKey);
@@ -245,7 +245,7 @@ public class NacosConfiguration extends AbstractConfiguration {
                 }
             }
         }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getString(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
@@ -287,11 +287,11 @@ public class NacosConfiguration extends AbstractConfiguration {
     }
 
     private static String getNacosGroup() {
-        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
+        return FILE_CONFIG.getString(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
     private static String getNacosDataId() {
-        return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+        return FILE_CONFIG.getString(getNacosDataIdKey(), DEFAULT_DATA_ID);
     }
 
     private static String getNacosDataType() {

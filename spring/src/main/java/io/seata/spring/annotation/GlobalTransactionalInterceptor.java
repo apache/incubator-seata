@@ -24,13 +24,14 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.google.common.eventbus.Subscribe;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
@@ -46,8 +47,6 @@ import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
-
-import com.google.common.eventbus.Subscribe;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;

@@ -19,9 +19,9 @@ import java.lang.reflect.Method;
 import javax.annotation.Nullable;
 
 import io.seata.common.DefaultValues;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;

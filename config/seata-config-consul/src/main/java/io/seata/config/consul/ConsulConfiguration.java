@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -41,9 +41,9 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +219,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
         if (client == null) {
             synchronized (ConsulConfiguration.class) {
                 if (client == null) {
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
                     client = new ConsulClient(inetSocketAddress.getHostName(), inetSocketAddress.getPort());
                 }
@@ -235,7 +235,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
      */
     private static String getAclToken() {
         String aclToken = StringUtils.isNotBlank(System.getProperty(ACL_TOKEN)) ? System.getProperty(ACL_TOKEN)
-                : FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
+                : FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + ACL_TOKEN);
         return StringUtils.isNotBlank(aclToken) ? aclToken : null;
     }
 
@@ -279,7 +279,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     }
 
     private static String getConsulConfigKey() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
+        return FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + CONSUL_CONFIG_KEY, DEFAULT_CONSUL_CONFIG_KEY_VALUE);
     }
 
     private static String getSeataConfigStr() {

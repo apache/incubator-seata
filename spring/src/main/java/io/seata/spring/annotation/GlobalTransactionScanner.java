@@ -22,15 +22,14 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;

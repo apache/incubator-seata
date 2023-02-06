@@ -27,7 +27,7 @@ import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_D
 public class StoreUtil {
 
     private static String sessionStorePath =
-        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
+        ConfigurationFactory.getInstance().getString(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
 
     public static void deleteDataFile() {
         try {

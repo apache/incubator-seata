@@ -46,11 +46,11 @@ public class NacosPropertiesTest extends BasePropertiesTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig(NacosConfiguration.getNacosAddrFileKey()));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig(NacosConfiguration.getNacosDataIdKey()));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig(NacosConfiguration.getNacosGroupKey()));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig(NacosConfiguration.getNacosNameSpaceFileKey()));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig(NacosConfiguration.getNacosUserName()));
-        assertEquals(STR_TEST_FFF, currentConfiguration.getConfig(NacosConfiguration.getNacosPassword()));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString(NacosConfiguration.getNacosAddrFileKey()));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString(NacosConfiguration.getNacosDataIdKey()));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString(NacosConfiguration.getNacosGroupKey()));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString(NacosConfiguration.getNacosNameSpaceFileKey()));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getString(NacosConfiguration.getNacosUserName()));
+        assertEquals(STR_TEST_FFF, currentConfiguration.getString(NacosConfiguration.getNacosPassword()));
     }
 }

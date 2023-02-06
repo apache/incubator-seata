@@ -35,10 +35,10 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeType;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -78,7 +78,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (config == null) {
             synchronized (ApolloConfiguration.class) {
                 if (config == null) {
-                    config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
+                    config = ConfigService.getConfig(FILE_CONFIG.getString(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                             MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                             new LinkedBlockingQueue<>(),
@@ -169,31 +169,31 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private void readyApolloConfig() {
         Properties properties = System.getProperties();
         if (!properties.containsKey(PROP_APP_ID)) {
-            String appId = FILE_CONFIG.getConfig(getApolloAppIdFileKey());
+            String appId = FILE_CONFIG.getString(getApolloAppIdFileKey());
             if (StringUtils.isNotBlank(appId)) {
                 System.setProperty(PROP_APP_ID, appId);
             }
         }
         if (!properties.containsKey(PROP_APOLLO_META)) {
-            String apolloMeta = FILE_CONFIG.getConfig(getApolloMetaFileKey());
+            String apolloMeta = FILE_CONFIG.getString(getApolloMetaFileKey());
             if (StringUtils.isNotBlank(apolloMeta)) {
                 System.setProperty(PROP_APOLLO_META, apolloMeta);
             }
         }
         if (!properties.containsKey(PROP_APOLLO_SECRET)) {
-            String apolloAccesskeySecret = FILE_CONFIG.getConfig(getApolloSecretFileKey());
+            String apolloAccesskeySecret = FILE_CONFIG.getString(getApolloSecretFileKey());
             if (StringUtils.isNotBlank(apolloAccesskeySecret)) {
                 System.setProperty(PROP_APOLLO_SECRET, apolloAccesskeySecret);
             }
         }
         if (!properties.containsKey(APOLLO_CLUSTER)) {
-            String apolloCluster = FILE_CONFIG.getConfig(getApolloCluster());
+            String apolloCluster = FILE_CONFIG.getString(getApolloCluster());
             if (StringUtils.isNotBlank(apolloCluster)) {
                 System.setProperty(PROP_APOLLO_CLUSTER, apolloCluster);
             }
         }
         if (!properties.containsKey(APOLLO_CONFIG_SERVICE)) {
-            String apolloConfigService = FILE_CONFIG.getConfig(getApolloConfigService());
+            String apolloConfigService = FILE_CONFIG.getString(getApolloConfigService());
             if (StringUtils.isNotBlank(apolloConfigService)) {
                 System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
             } else {

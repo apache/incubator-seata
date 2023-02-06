@@ -45,10 +45,10 @@ public class ZooKeeperPropertiesTest extends BasePropertiesTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.zk.nodePath"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.zk.serverAddr"));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig("config.zk.username"));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.zk.password"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.zk.nodePath"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString("config.zk.serverAddr"));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString("config.zk.username"));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString("config.zk.password"));
         assertEquals(LONG_TEST_ONE, currentConfiguration.getInt("config.zk.connectTimeout"));
         assertEquals(LONG_TEST_TWO, currentConfiguration.getInt("config.zk.sessionTimeout"));
     }

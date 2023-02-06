@@ -50,9 +50,9 @@ class ConfigurationTest {
 
         //string
         dataId = "string";
-        assertThat(configuration.getConfig(dataId)).isEqualTo(STRING_VALUE);
-        assertThat(configuration.getConfig(dataId + NULL_POSTFIX)).isNull();
-        assertThat(configuration.getConfig(dataId + DEFAULT_POSTFIX, DEFAULT_STRING_VALUE)).isEqualTo(DEFAULT_STRING_VALUE);
+        assertThat(configuration.getString(dataId)).isEqualTo(STRING_VALUE);
+        assertThat(configuration.getString(dataId + NULL_POSTFIX)).isNull();
+        assertThat(configuration.getString(dataId + DEFAULT_POSTFIX, DEFAULT_STRING_VALUE)).isEqualTo(DEFAULT_STRING_VALUE);
 
         //short
         dataId = "short";

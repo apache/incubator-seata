@@ -35,6 +35,8 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture.ConfigOperation;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.file.FileConfig;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
@@ -250,7 +252,7 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         configListenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(listener);
-        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
+        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getString(dataId));
 
         // Start config change listener for the dataId.
         fileListener.addListener(dataId, listener);

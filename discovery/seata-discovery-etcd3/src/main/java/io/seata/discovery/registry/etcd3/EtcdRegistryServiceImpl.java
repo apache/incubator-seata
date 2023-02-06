@@ -265,7 +265,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                     if (StringUtils.isNotBlank(testEndpoint)) {
                         client = Client.builder().endpoints(testEndpoint).build();
                     } else {
-                        client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
+                        client = Client.builder().endpoints(FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
                     }
                 }
             }
@@ -280,7 +280,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private String getClusterName() {
         String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
+        return FILE_CONFIG.getString(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
     /**

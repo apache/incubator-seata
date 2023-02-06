@@ -80,9 +80,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     private RedisRegistryServiceImpl() {
         Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
-        this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
-        String password = seataConfig.getConfig(getRedisPasswordFileKey());
-        String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
+        this.clusterName = seataConfig.getString(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
+        String password = seataConfig.getString(getRedisPasswordFileKey());
+        String serverAddr = seataConfig.getString(getRedisAddrFileKey());
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
         int port = Integer.parseInt(serverArr[1]);

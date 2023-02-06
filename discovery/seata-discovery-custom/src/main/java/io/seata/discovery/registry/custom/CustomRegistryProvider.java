@@ -35,7 +35,7 @@ public class CustomRegistryProvider implements RegistryProvider {
     private final String customName;
 
     public CustomRegistryProvider() {
-        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(FILE_CONFIG_KEY_PREFIX);
+        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getString(FILE_CONFIG_KEY_PREFIX);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom registry type must not be blank");
         }

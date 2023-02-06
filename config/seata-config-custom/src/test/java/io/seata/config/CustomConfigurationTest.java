@@ -17,6 +17,7 @@ package io.seata.config;
 
 import java.io.InputStream;
 import java.util.Properties;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ public class CustomConfigurationTest {
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
             Assertions.assertNotNull(value);
-            Assertions.assertEquals(value, configuration.getConfig(name));
+            Assertions.assertEquals(value, configuration.getString(name));
         }
     }
 }

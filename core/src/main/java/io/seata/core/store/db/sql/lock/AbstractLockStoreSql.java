@@ -132,7 +132,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
 
     @Override
     public String getInsertLockSQL(String lockTable) {
-        throw new NotSupportYetException("unknown dbType:" + CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
+        throw new NotSupportYetException("unknown dbType:" + CONFIG.getString(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     @Override

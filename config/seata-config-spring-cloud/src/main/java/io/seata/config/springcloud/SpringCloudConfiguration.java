@@ -20,7 +20,7 @@ import java.util.Set;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;

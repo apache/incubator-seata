@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
 
+import io.seata.config.changelistener.ConfigurationChangeListener;
+
 public class CustomConfigurationForTest extends AbstractConfiguration {
     private Properties properties;
 

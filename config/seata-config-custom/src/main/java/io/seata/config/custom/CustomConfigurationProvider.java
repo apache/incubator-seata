@@ -20,8 +20,8 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigType;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationKeys;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import io.seata.config.ConfigurationProvider;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ public class CustomConfigurationProvider implements ConfigurationProvider {
         String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigType.Custom.name().toLowerCase() + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + "name";
-        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(pathDataId);
+        String name = ConfigurationFactory.CURRENT_FILE_INSTANCE.getString(pathDataId);
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom config type must not be blank");
         }

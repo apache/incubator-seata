@@ -45,8 +45,8 @@ public class ConsulPropertiesTest extends BasePropertiesTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.consul.serverAddr"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.consul.aclToken"));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig("config.consul.key"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.consul.serverAddr"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString("config.consul.aclToken"));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString("config.consul.key"));
     }
 }

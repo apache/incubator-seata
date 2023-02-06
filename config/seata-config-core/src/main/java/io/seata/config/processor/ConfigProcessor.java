@@ -15,14 +15,14 @@
  */
 package io.seata.config.processor;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
-
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * The Config Processor.
@@ -52,7 +52,7 @@ public class ConfigProcessor {
      * @return data type
      */
     public static String resolverConfigDataType(String dataId) {
-        return resolverConfigDataType(FILE_CONFIG.getConfig(getDataTypeKey()),dataId,DEFAULT_DATA_TYPE);
+        return resolverConfigDataType(FILE_CONFIG.getString(getDataTypeKey()),dataId,DEFAULT_DATA_TYPE);
     }
 
     /**

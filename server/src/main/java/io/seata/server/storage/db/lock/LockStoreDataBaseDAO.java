@@ -84,8 +84,8 @@ public class LockStoreDataBaseDAO implements LockStore {
      */
     public LockStoreDataBaseDAO(DataSource lockStoreDataSource) {
         this.lockStoreDataSource = lockStoreDataSource;
-        lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
-        dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        lockTable = CONFIG.getString(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
+        dbType = CONFIG.getString(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
         }

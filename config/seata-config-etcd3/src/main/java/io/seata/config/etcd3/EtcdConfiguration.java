@@ -16,7 +16,6 @@
 package io.seata.config.etcd3;
 
 import java.io.IOException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.List;
@@ -53,9 +52,9 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -237,7 +236,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
         if (client == null) {
             synchronized (EtcdConfiguration.class) {
                 if (client == null) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
+                    client = Client.builder().endpoints(FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
                         .build();
                 }
             }
@@ -301,7 +300,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     private static String getEtcdConfigKey() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
+        return FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
     }
     private static String getEtcdDataType() {
         return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());

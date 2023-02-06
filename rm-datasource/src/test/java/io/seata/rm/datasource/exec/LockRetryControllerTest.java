@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.DefaultValues;
-import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.model.GlobalLockConfig;

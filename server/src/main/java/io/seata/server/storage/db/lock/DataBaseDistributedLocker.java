@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import javax.sql.DataSource;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
@@ -30,9 +31,9 @@ import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.DistributedLockDO;
@@ -72,9 +73,9 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     public DataBaseDistributedLocker() {
         Configuration configuration = ConfigurationFactory.getInstance();
 
-        distributedLockTable = configuration.getConfig(DISTRIBUTED_LOCK_DB_TABLE);
-        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-        datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        distributedLockTable = configuration.getString(DISTRIBUTED_LOCK_DB_TABLE);
+        dbType = configuration.getString(ConfigurationKeys.STORE_DB_TYPE);
+        datasourceType = configuration.getString(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
 
         if (StringUtils.isBlank(distributedLockTable)) {
             demotion = true;

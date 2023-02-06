@@ -35,10 +35,10 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.changelistener.ConfigurationChangeEvent;
+import io.seata.config.changelistener.ConfigurationChangeListener;
+import io.seata.config.changelistener.ConfigurationChangeType;
 import io.seata.config.processor.ConfigProcessor;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -94,12 +94,12 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             synchronized (ZookeeperConfiguration.class) {
                 if (zkClient == null) {
                     ZkSerializer zkSerializer = getZkSerializer();
-                    String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
+                    String serverAddr = FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
                     int sessionTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
                     int connectTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT);
                     zkClient = new ZkClient(serverAddr, sessionTimeout, connectTimeout, zkSerializer);
-                    String username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
-                    String password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
+                    String username = FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
+                    String password = FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
                     if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
                         StringBuilder auth = new StringBuilder(username).append(":").append(password);
                         zkClient.addAuthInfo("digest", auth.toString().getBytes());
@@ -272,7 +272,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     }
 
     private static String getConfigPath() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+        return FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
     }
 
     private static String getZkDataType() {
@@ -362,7 +362,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     private ZkSerializer getZkSerializer() {
         ZkSerializer zkSerializer = null;
-        String serializer = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
+        String serializer = FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERIALIZER_KEY);
         if (StringUtils.isNotBlank(serializer)) {
             try {
                 Class<?> clazz = Class.forName(serializer);

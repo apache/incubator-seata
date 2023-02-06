@@ -62,9 +62,9 @@ public class RedisAutoInjectionTypeConvertTest {
         System.setProperty("seata.registry.redis.db","1");
         assertEquals(1, currentConfiguration.getInt("registry.redis.db"));
         System.setProperty("seata.registry.redis.password","123456");
-        assertEquals("123456", currentConfiguration.getConfig("registry.redis.password"));
+        assertEquals("123456", currentConfiguration.getString("registry.redis.password"));
         System.setProperty("seata.registry.redis.serverAddr","localhost:123456");
-        assertEquals("localhost:123456", currentConfiguration.getConfig("registry.redis.serverAddr"));
+        assertEquals("localhost:123456", currentConfiguration.getString("registry.redis.serverAddr"));
     }
 
     @AfterAll

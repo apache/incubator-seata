@@ -17,18 +17,48 @@ package io.seata.config;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
 
 import io.seata.common.util.StringUtils;
+import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 
 /**
  * The interface Configuration.
  *
  * @author slievrly
  */
-public interface Configuration {
+public interface Configuration extends UpdatableConfiguration
+        , ConfigurationChangeListenerManager {
 
+    /**
+     * The constant DEFAULT_CONFIG_TIMEOUT.
+     */
+    long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
+
+    /**
+     * The constant DEFAULT_XXX.
+     */
+    short DEFAULT_SHORT = (short)0;
+    int DEFAULT_INT = 0;
+    long DEFAULT_LONG = 0L;
+    Duration DEFAULT_DURATION = Duration.ZERO;
+    boolean DEFAULT_BOOLEAN = false;
+
+    /**
+     * The env map
+     */
     Map<String, String> ENV_MAP = System.getenv();
+
+    /**
+     * Get latest config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the Latest config
+     */
+    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
+
+
     /**
      * Gets short.
      *
@@ -172,7 +202,7 @@ public interface Configuration {
      * @param timeoutMills the timeout mills
      * @return the config
      */
-    String getConfig(String dataId, String defaultValue, long timeoutMills);
+    String getString(String dataId, String defaultValue, long timeoutMills);
 
     /**
      * Gets config.
@@ -181,7 +211,7 @@ public interface Configuration {
      * @param defaultValue the default value
      * @return the config
      */
-    String getConfig(String dataId, String defaultValue);
+    String getString(String dataId, String defaultValue);
 
     /**
      * Gets config.
@@ -190,7 +220,7 @@ public interface Configuration {
      * @param timeoutMills the timeout mills
      * @return the config
      */
-    String getConfig(String dataId, long timeoutMills);
+    String getString(String dataId, long timeoutMills);
 
     /**
      * Gets config.
@@ -198,96 +228,7 @@ public interface Configuration {
      * @param dataId the data id
      * @return the config
      */
-    String getConfig(String dataId);
-
-    /**
-     * Put config boolean.
-     *
-     * @param dataId       the data id
-     * @param content      the content
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean putConfig(String dataId, String content, long timeoutMills);
-
-    /**
-     * Get latest config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the Latest config
-     */
-    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
-
-    /**
-     * Put config boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfig(String dataId, String content);
-
-    /**
-     * Put config if absent boolean.
-     *
-     * @param dataId       the data id
-     * @param content      the content
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean putConfigIfAbsent(String dataId, String content, long timeoutMills);
-
-    /**
-     * Put config if absent boolean.
-     *
-     * @param dataId  the data id
-     * @param content the content
-     * @return the boolean
-     */
-    boolean putConfigIfAbsent(String dataId, String content);
-
-    /**
-     * Remove config boolean.
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the boolean
-     */
-    boolean removeConfig(String dataId, long timeoutMills);
-
-    /**
-     * Remove config boolean.
-     *
-     * @param dataId the data id
-     * @return the boolean
-     */
-    boolean removeConfig(String dataId);
-
-    /**
-     * Add config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void addConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Remove config listener.
-     *
-     * @param dataId   the data id
-     * @param listener the listener
-     */
-    void removeConfigListener(String dataId, ConfigurationChangeListener listener);
-
-    /**
-     * Gets config listeners.
-     *
-     * @param dataId the data id
-     * @return the config listeners
-     */
-    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
+    String getString(String dataId);
 
     /**
      * Gets config from sys pro.

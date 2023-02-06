@@ -33,7 +33,7 @@ import static io.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
 public class RegistryFactory {
     public static Registry getInstance() {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.getInstance().getConfig(
+        String registryTypeName = ConfigurationFactory.getInstance().getString(
             ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, DEFAULT_METRICS_REGISTRY_TYPE);
         if (!StringUtils.isNullOrEmpty(registryTypeName)) {
             try {

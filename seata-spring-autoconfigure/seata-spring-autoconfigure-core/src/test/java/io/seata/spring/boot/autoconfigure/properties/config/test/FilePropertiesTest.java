@@ -45,6 +45,6 @@ public class FilePropertiesTest extends BasePropertiesTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.file.name"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.file.name"));
     }
 }

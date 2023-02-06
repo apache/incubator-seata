@@ -218,11 +218,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         if (zkClient == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (zkClient == null) {
-                    zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                    zkClient = buildZkClient(FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
                         FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
+                        FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
+                        FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
                 }
             }
         }
@@ -312,7 +312,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private String getClusterName() {
         String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-        return FILE_CONFIG.getConfig(clusterConfigName);
+        return FILE_CONFIG.getString(clusterConfigName);
     }
 
     private String getRegisterPathByPath(InetSocketAddress address) {

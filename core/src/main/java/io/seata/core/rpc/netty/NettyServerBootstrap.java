@@ -123,7 +123,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         if (listenPort != 0) {
             return listenPort;
         }
-        String strPort = ConfigurationFactory.getInstance().getConfig(SERVER_SERVICE_PORT_CAMEL);
+        String strPort = ConfigurationFactory.getInstance().getString(SERVER_SERVICE_PORT_CAMEL);
         int port = 0;
         try {
             port = Integer.parseInt(strPort);

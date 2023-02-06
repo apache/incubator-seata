@@ -63,12 +63,12 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
 
     public GlobalLockDBServiceImpl() {
         Configuration configuration = ConfigurationFactory.getInstance();
-        lockTable = configuration.getConfig(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
-        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        lockTable = configuration.getString(ConfigurationKeys.LOCK_DB_TABLE, DEFAULT_LOCK_DB_TABLE);
+        dbType = configuration.getString(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_TYPE + " should not be blank");
         }
-        String dbDataSource = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        String dbDataSource = configuration.getString(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         if (StringUtils.isBlank(dbDataSource)) {
             throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE + " should not be blank");
         }

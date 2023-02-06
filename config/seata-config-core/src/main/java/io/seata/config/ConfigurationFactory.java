@@ -101,7 +101,7 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
+        String configTypeName = CURRENT_FILE_INSTANCE.getString(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                         + ConfigurationKeys.FILE_ROOT_TYPE);
 
@@ -115,7 +115,7 @@ public final class ConfigurationFactory {
         if (ConfigType.File == configType) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                     ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
-            String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
+            String name = CURRENT_FILE_INSTANCE.getString(pathDataId);
             configuration = new FileConfiguration(name);
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);

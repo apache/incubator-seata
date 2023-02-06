@@ -52,7 +52,7 @@ public class LoadBalanceFactory {
      * @return the instance
      */
     public static LoadBalance getInstance() {
-        String config = ConfigurationFactory.getInstance().getConfig(LOAD_BALANCE_TYPE, DEFAULT_LOAD_BALANCE);
+        String config = ConfigurationFactory.getInstance().getString(LOAD_BALANCE_TYPE, DEFAULT_LOAD_BALANCE);
         return EnhancedServiceLoader.load(LoadBalance.class, config);
     }
 }

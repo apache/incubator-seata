@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static io.seata.config.ConfigProperty.ENV_PROPERTY_KEY;
-import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
+import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 
 
 /**
@@ -34,10 +34,10 @@ class RegistryConfigurationFactoryTest {
         System.setProperty(ENV_PROPERTY_KEY,"test");
         System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME,REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"),"file-test.conf");
+        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getString("config.file.name"),"file-test.conf");
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getConfig("service.disableGlobalTransaction"),"true");
-        Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8091");
+        Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"),"true");
+        Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8091");
 
     }
     @AfterAll

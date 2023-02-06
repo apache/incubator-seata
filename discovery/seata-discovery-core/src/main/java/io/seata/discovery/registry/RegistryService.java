@@ -113,7 +113,7 @@ public interface RegistryService<T> {
             ConfigurationCache.addConfigListener(key);
             SERVICE_GROUP_NAME.add(key);
         }
-        return ConfigurationFactory.getInstance().getConfig(key);
+        return ConfigurationFactory.getInstance().getString(key);
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {

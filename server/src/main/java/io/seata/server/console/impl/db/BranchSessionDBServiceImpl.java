@@ -60,12 +60,12 @@ public class BranchSessionDBServiceImpl implements BranchSessionService {
 
     public BranchSessionDBServiceImpl() {
         Configuration configuration = ConfigurationFactory.getInstance();
-        branchTable = configuration.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
-        dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
+        branchTable = configuration.getString(ConfigurationKeys.STORE_DB_BRANCH_TABLE, DEFAULT_STORE_DB_BRANCH_TABLE);
+        dbType = configuration.getString(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_TYPE + " should not be blank");
         }
-        String dbDataSource = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        String dbDataSource = configuration.getString(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         if (StringUtils.isBlank(dbDataSource)) {
             throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE + " should not be blank");
         }

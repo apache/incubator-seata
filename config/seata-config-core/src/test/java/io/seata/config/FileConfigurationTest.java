@@ -17,6 +17,7 @@ package io.seata.config;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,8 +63,8 @@ class FileConfigurationTest {
         int intValue1 = fileConfig.getInt("int.not.exist", 100);
         int intValue2 = fileConfig.getInt("int.not.exist", 200);
         Assertions.assertNotEquals(intValue1, intValue2);
-        String strValue1 = fileConfig.getConfig("str.not.exist", "en");
-        String strValue2 = fileConfig.getConfig("str.not.exist", "us");
+        String strValue1 = fileConfig.getString("str.not.exist", "en");
+        String strValue2 = fileConfig.getString("str.not.exist", "us");
         Assertions.assertNotEquals(strValue1, strValue2);
         boolean bolValue1 = fileConfig.getBoolean("boolean.not.exist", true);
         boolean bolValue2 = fileConfig.getBoolean("boolean.not.exist", false);
@@ -71,16 +72,16 @@ class FileConfigurationTest {
 
         String value = "QWERT";
         System.setProperty("mockDataId1", value);
-        String content1 = fileConfig.getConfig("mockDataId1");
+        String content1 = fileConfig.getString("mockDataId1");
         Assertions.assertEquals(content1, value);
-        String content2 = fileConfig.getConfig("mockDataId1", "hehe");
+        String content2 = fileConfig.getString("mockDataId1", "hehe");
         Assertions.assertEquals(content2, value);
 
-        String content3 = fileConfig.getConfig("mockDataId2");
+        String content3 = fileConfig.getString("mockDataId2");
         Assertions.assertNull(content3);
-        String content4 = fileConfig.getConfig("mockDataId2", value);
+        String content4 = fileConfig.getString("mockDataId2", value);
         Assertions.assertEquals(content4, value);
-        String content5 = fileConfig.getConfig("mockDataId2");
+        String content5 = fileConfig.getString("mockDataId2");
         Assertions.assertEquals(content5, value);
 
     }

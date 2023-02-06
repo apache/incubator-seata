@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.ConfigTools;
@@ -40,7 +41,7 @@ import static io.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 
 /**
  * The abstract datasource provider
- * 
+ *
  * @author zhangsen
  * @author will
  */
@@ -91,7 +92,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db type
      */
     protected DBType getDBType() {
-        return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
+        return DBType.valueof(CONFIG.getString(ConfigurationKeys.STORE_DB_TYPE));
     }
 
     /**
@@ -100,7 +101,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db driver class name
      */
     protected String getDriverClassName() {
-        String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+        String driverClassName = CONFIG.getString(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
             throw new StoreException(
                 String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
@@ -171,7 +172,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getUrl() {
-        String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
+        String url = CONFIG.getString(ConfigurationKeys.STORE_DB_URL);
         if (StringUtils.isBlank(url)) {
             throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_URL));
         }
@@ -184,7 +185,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getUser() {
-        String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
+        String user = CONFIG.getString(ConfigurationKeys.STORE_DB_USER);
         if (StringUtils.isBlank(user)) {
             throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_USER));
         }
@@ -197,7 +198,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPassword() {
-        String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
+        String password = CONFIG.getString(ConfigurationKeys.STORE_DB_PASSWORD);
         String publicKey = getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
             try {
@@ -251,7 +252,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the string
      */
     protected String getPublicKey() {
-        return CONFIG.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
+        return CONFIG.getString(ConfigurationKeys.STORE_PUBLIC_KEY);
     }
 
 }

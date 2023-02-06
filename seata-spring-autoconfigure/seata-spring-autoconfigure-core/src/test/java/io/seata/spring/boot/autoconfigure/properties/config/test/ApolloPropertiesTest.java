@@ -49,11 +49,11 @@ class ApolloPropertiesTest extends BasePropertiesTest {
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(
             configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig(ApolloConfiguration.getApolloMetaFileKey()));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig(ApolloConfiguration.getApolloSecretFileKey()));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig(ApolloConfiguration.getApolloAppIdFileKey()));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig(ApolloConfiguration.getApolloNamespaceKey()));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig(ApolloConfiguration.getApolloCluster()));
-        assertEquals(STR_TEST_FFF, currentConfiguration.getConfig(ApolloConfiguration.getApolloConfigService()));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString(ApolloConfiguration.getApolloMetaFileKey()));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString(ApolloConfiguration.getApolloSecretFileKey()));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getString(ApolloConfiguration.getApolloAppIdFileKey()));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getString(ApolloConfiguration.getApolloNamespaceKey()));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getString(ApolloConfiguration.getApolloCluster()));
+        assertEquals(STR_TEST_FFF, currentConfiguration.getString(ApolloConfiguration.getApolloConfigService()));
     }
 }

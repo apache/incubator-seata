@@ -60,7 +60,7 @@ public class LoadBalancePropertiesTest {
         System.setProperty("seata.client.loadBalance.virtualNodes", "30");
         assertEquals(30, currentConfiguration.getInt("client.loadBalance.virtualNodes"));
         System.setProperty("seata.client.loadBalance.type", "test");
-        assertEquals("test", currentConfiguration.getConfig("client.loadBalance.type"));
+        assertEquals("test", currentConfiguration.getString("client.loadBalance.type"));
     }
 
     @AfterAll

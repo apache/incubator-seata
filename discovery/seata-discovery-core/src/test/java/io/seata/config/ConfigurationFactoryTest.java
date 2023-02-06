@@ -36,7 +36,7 @@ class ConfigurationFactoryTest {
     @Test
     void getLoadBalance() {
         Configuration configuration = ConfigurationFactory.getInstance();
-        String loadBalanceType = configuration.getConfig(LoadBalanceFactory.LOAD_BALANCE_TYPE);
+        String loadBalanceType = configuration.getString(LoadBalanceFactory.LOAD_BALANCE_TYPE);
         int virtualNode = configuration.getInt(ConsistentHashLoadBalance.LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES);
         Assertions.assertEquals("XID", loadBalanceType);
         Assertions.assertEquals(10,virtualNode);

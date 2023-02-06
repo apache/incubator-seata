@@ -45,7 +45,7 @@ public class Etcd3PropertiesTest extends BasePropertiesTest {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.etcd3.serverAddr"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.etcd3.key"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getString("config.etcd3.serverAddr"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getString("config.etcd3.key"));
     }
 }
