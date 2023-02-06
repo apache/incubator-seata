@@ -71,13 +71,6 @@ public class ClusterController {
     @Resource
     private ObjectMapper objectMapper;
 
-    private ServerProperties serverProperties;
-
-    @PostConstruct
-    public void init() {
-        serverProperties = applicationContext.getBean(ServerProperties.class);
-    }
-
     @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
         Result<?> result = new Result<>();
