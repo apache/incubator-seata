@@ -30,7 +30,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.changelistener.ConfigurationChangeListenerManager;
-import io.seata.config.changelistener.ConfigurationChangeType;
 import io.seata.config.defaultconfig.DefaultConfigManager;
 import io.seata.config.defaultconfig.DefaultConfigManagerBuilder;
 import io.seata.config.source.ConfigSource;
@@ -112,15 +111,15 @@ public class SeataConfiguration extends CacheableConfiguration
     }
 
     @Override
-    protected void onCacheChanged(String dataId, ConfigCache oldCache, ConfigCache newCache, ConfigurationChangeType type, String namespace) {
-        super.onCacheChanged(dataId, oldCache, newCache, type, namespace);
+    protected void onCacheChanged(ConfigCacheChangeEvent event) {
+        super.onCacheChanged(event);
 
-        String oldCacheValue = oldCache != null ? oldCache.getStringValue() : null;
+        String oldCacheValue = event.getOldCache() != null ? event.getOldCache().getStringValue() : null;
 
-        ConfigurationChangeEvent event = new ConfigurationChangeEvent(dataId, namespace,
-                oldCacheValue, newCache.getStringValue(), type, newCache.getSource());
+        ConfigurationChangeEvent configChangeEvent = new ConfigurationChangeEvent(event.getDataId(), event.getNamespace(),
+                oldCacheValue, event.getNewCache().getStringValue(), event.getType(), event.getNewCache().getSource());
 
-        this.doConfigListenersChangeEvent(event);
+        this.doConfigListenersChangeEvent(configChangeEvent);
     }
 
     //region ## The default config manager
@@ -208,7 +207,7 @@ public class SeataConfiguration extends CacheableConfiguration
             return;
         }
 
-        LOGGER.info("Add config listener: dataId = {}, listener = {}", dataId, listener);
+        LOGGER.info("Add config listener: dataId = '{}', listener = '{}'.", dataId, listener);
 
         listenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
                 .add(listener);
@@ -242,7 +241,7 @@ public class SeataConfiguration extends CacheableConfiguration
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        LOGGER.info("Remove config listener: dataId = {}, listener = {}", dataId, listener);
+        LOGGER.info("Remove config listener: dataId = '{}', listener = '{}'.", dataId, listener);
 
         Set<ConfigurationChangeListener> listeners = this.listenersMap.get(dataId);
         if (listeners != null) {
@@ -326,7 +325,7 @@ public class SeataConfiguration extends CacheableConfiguration
 
             this.changeCache(oldCache, event.getChangeEventSource(), event.getNewValue(), event.getChangeType(), event.getNamespace());
         } else {
-            // do nothing: There is no cache, which means that the config of the dataId has not been obtained anywhere.
+            // Do nothing: There is no cache, which means that the config of the dataId has not been obtained anywhere.
         }
     }
 

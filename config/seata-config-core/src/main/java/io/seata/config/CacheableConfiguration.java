@@ -138,7 +138,7 @@ public class CacheableConfiguration extends SimpleConfiguration
             String newValue = newSource.getLatestConfig(oldCache.getDataId());
             if (newValue != null && !Objects.equals(oldValue, newValue)) {
                 ConfigurationChangeType type = ConfigChangeListenerUtils.getChangeType(oldValue, newValue);
-                this.changeCache(oldCache, newSource, newValue, type, "cacheChanged");
+                this.changeCache(oldCache, newSource, newValue, type, "addSource_and_cacheChanged");
             }
         });
     }
@@ -148,17 +148,15 @@ public class CacheableConfiguration extends SimpleConfiguration
 
         ConfigCache newCache = ConfigCache.create(dataId, newValue, oldCache.getType(), newSource);
         this.configCacheMap.put(dataId, newCache);
-        this.onCacheChanged(dataId, oldCache, newCache, type, namespace);
+        this.onCacheChanged(new ConfigCacheChangeEvent(dataId, oldCache, newCache, type, namespace));
     }
 
     /**
      * After the cache changed, trigger this method
      *
-     * @param dataId   the data id
-     * @param oldCache the old cache
-     * @param newCache the new cache
+     * @param event the event
      */
-    protected void onCacheChanged(String dataId, ConfigCache oldCache, ConfigCache newCache, ConfigurationChangeType type, String namespace) {
+    protected void onCacheChanged(ConfigCacheChangeEvent event) {
         // default do nothing
     }
 
