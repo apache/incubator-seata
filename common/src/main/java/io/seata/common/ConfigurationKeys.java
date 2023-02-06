@@ -843,8 +843,8 @@ public interface ConfigurationKeys {
      * The constant MAX_ROLLBACK_WHEN_DISCONNECT
      */
     String MAX_ROLLBACK_WHEN_DISCONNECT = SERVER_PREFIX + "enableRollbackWhenDisconnect";
-	
-	/**
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";

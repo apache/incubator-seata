@@ -209,7 +209,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             NettyPoolKey.TransactionRole channelRole = ChannelManager.getRoleFromChannel(ctx.channel());
             if (ENABLE_ROLLBACK_WHEN_DISCONNECT && NettyPoolKey.TransactionRole.TMROLE == channelRole) {
                 Set<String> needRollBackXids = rpcContext.getBeginXidCache().asMap().keySet();
-                needRollBackXids.forEach(xid->doGlobalRollBack(ctx,xid));
+                needRollBackXids.forEach(xid -> doGlobalRollBack(ctx,xid));
             }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(ipAndPort + " to server channel inactive.");
@@ -229,9 +229,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         private void doGlobalRollBack(ChannelHandlerContext ctx, String xid) {
             RpcMessage globalRollBackMessage = buildGlobalRollBackMessage(xid);
             try {
-                processMessage(ctx,globalRollBackMessage);
+                processMessage(ctx, globalRollBackMessage);
             } catch (Exception e) {
-               LOGGER.error("do global rollback for xid:{} error when tm disconnect",xid,e);
+                LOGGER.error("do global rollback for xid:{} error when tm disconnect", xid, e);
             }
         }
 

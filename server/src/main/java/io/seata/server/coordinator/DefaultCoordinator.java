@@ -272,6 +272,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                                     RpcContext rpcContext) throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.rollback(request.getXid()));
+        rpcContext.getBeginXidCache().invalidate(request.getXid());
     }
 
     @Override
@@ -279,6 +280,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             throws TransactionException {
         MDC.put(RootContext.MDC_KEY_XID, request.getXid());
         response.setGlobalStatus(core.getStatus(request.getXid()));
+        rpcContext.getBeginXidCache().invalidate(request.getXid());
     }
 
     @Override
