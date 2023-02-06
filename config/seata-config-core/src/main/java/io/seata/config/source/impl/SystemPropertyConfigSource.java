@@ -17,10 +17,11 @@ package io.seata.config.source.impl;
 
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import javax.annotation.Nonnull;
 
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.AbstractScheduledUpdateConfigSource;
+
+import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_PROPERTY_PROCESSOR_ORDER;
 
 /**
  * The type SystemPropertyConfigSource.
@@ -32,24 +33,24 @@ public class SystemPropertyConfigSource extends AbstractScheduledUpdateConfigSou
     public static final String DEFAULT_NAME = "system-property";
 
 
-    public SystemPropertyConfigSource(@Nonnull String name, boolean allowAutoUpdate, long executorServicePeriod) {
-        super(name, allowAutoUpdate, executorServicePeriod);
+    public SystemPropertyConfigSource(boolean allowAutoUpdate, long executorServicePeriod) {
+        super(DEFAULT_NAME, allowAutoUpdate, executorServicePeriod);
     }
 
-    public SystemPropertyConfigSource(@Nonnull String name, boolean allowAutoUpdate) {
-        super(name, allowAutoUpdate);
+    public SystemPropertyConfigSource(boolean allowAutoUpdate) {
+        super(DEFAULT_NAME, allowAutoUpdate);
     }
 
-    public SystemPropertyConfigSource(@Nonnull String name, long executorServicePeriod) {
-        super(name, executorServicePeriod);
+    public SystemPropertyConfigSource(long executorServicePeriod) {
+        super(DEFAULT_NAME, executorServicePeriod);
     }
 
-    public SystemPropertyConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService, long executorServicePeriod) {
-        super(name, executorService, executorServicePeriod);
+    public SystemPropertyConfigSource(ScheduledThreadPoolExecutor executorService, long executorServicePeriod) {
+        super(DEFAULT_NAME, executorService, executorServicePeriod);
     }
 
-    public SystemPropertyConfigSource(@Nonnull String name, ScheduledThreadPoolExecutor executorService) {
-        super(name, executorService);
+    public SystemPropertyConfigSource(ScheduledThreadPoolExecutor executorService) {
+        super(DEFAULT_NAME, executorService);
     }
 
 
@@ -85,5 +86,10 @@ public class SystemPropertyConfigSource extends AbstractScheduledUpdateConfigSou
 
         // May be null or blank.
         return config1;
+    }
+
+    @Override
+    public int getOrder() {
+        return SYSTEM_PROPERTY_PROCESSOR_ORDER;
     }
 }

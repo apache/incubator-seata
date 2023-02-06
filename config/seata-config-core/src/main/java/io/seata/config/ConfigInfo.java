@@ -33,8 +33,8 @@ public class ConfigInfo {
 
 
     public ConfigInfo(String dataId, String value, ConfigSource source) {
-        Objects.requireNonNull(value, "The config value must not be null.");
-        Objects.requireNonNull(source, "The source must not be null.");
+        Objects.requireNonNull(value, "The 'config' value must not be null.");
+        Objects.requireNonNull(source, "The 'source' must not be null.");
 
         this.dataId = dataId;
         this.value = value;

@@ -40,6 +40,7 @@ import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 import io.seata.config.processor.ConfigProcessor;
 import io.seata.config.source.ConfigSource;
+import io.seata.config.source.ConfigSourceOrdered;
 import io.seata.config.source.RemoteConfigSource;
 import io.seata.config.source.UpdatableConfigSource;
 import org.slf4j.Logger;
@@ -366,6 +367,11 @@ public class NacosConfigSource implements RemoteConfigSource
     @Override
     public String getName() {
         return CONFIG_TYPE;
+    }
+
+    @Override
+    public int getOrder() {
+        return ConfigSourceOrdered.CONFIG_CENTER_SOURCE_ORDER;
     }
 
     /**

@@ -45,6 +45,6 @@ public class FileConfigSourceProvider implements ConfigSourceProvider {
         String configFileName = configuration.getString(fileNameConfigKey, DEFAULT_FILE_NAME);
 
         // load file sources by configFileName
-        ConfigurationUtils.loadFileSources(configuration, configFileName, true,true);
+        ConfigurationUtils.loadFileSources(configuration, configFileName, CONFIG_CENTER_SOURCE_ORDER, true,true);
     }
 }

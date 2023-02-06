@@ -28,6 +28,6 @@ import static io.seata.config.source.ConfigSourceOrdered.CONFIG_CENTER_SOURCE_OR
 public class NacosConfigSourceProvider implements ConfigSourceProvider {
     @Override
     public void provide(Configuration configuration) {
-        configuration.addSourceLast(NacosConfigSource.getInstance());
+        configuration.addSource(NacosConfigSource.getInstance());
     }
 }

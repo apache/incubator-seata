@@ -32,6 +32,6 @@ public class SpringEnvironmentConfigurationProcessor implements ConfigurationPro
 
     @Override
     public void process(Configuration configuration) {
-        configuration.addSourceLast(new SpringEnvironmentConfigSource());
+        configuration.addSource(new SpringEnvironmentConfigSource());
     }
 }

@@ -51,14 +51,15 @@ public class ConfigCache implements Serializable {
     private String timeStr;
 
 
-    private ConfigCache(@Nonnull String dataId, @Nullable Object value, String stringValue, @Nonnull ConfigSource source) {
-        Objects.requireNonNull(dataId, "The dataId must not be null.");
-        Objects.requireNonNull(source, "The source must not be null.");
+    private ConfigCache(@Nonnull String dataId, @Nullable Object value, String stringValue, @Nonnull Class<?> type, @Nonnull ConfigSource source) {
+        Objects.requireNonNull(dataId, "The 'dataId' must not be null.");
+        Objects.requireNonNull(source, "The 'source' must not be null.");
+        Objects.requireNonNull(type, "The 'type' must be not null");
 
         this.dataId = dataId;
         this.value = value;
         this.stringValue = stringValue;
-        this.type = value != null ? value.getClass() : null;
+        this.type = type;
         this.source = source;
     }
 
@@ -81,7 +82,7 @@ public class ConfigCache implements Serializable {
         return stringValue;
     }
 
-    @Nullable
+    @Nonnull
     public Class<?> getType() {
         return type;
     }
@@ -117,12 +118,9 @@ public class ConfigCache implements Serializable {
     //region static
 
     @Nonnull
-    public static ConfigCache create(String dataId, Object value, String stringValue, ConfigSource source) {
-        if (value == null && source == null) {
-            source = NON_CONFIG_SOURCE;
-        }
-
-        return new ConfigCache(dataId, value, stringValue, source);
+    public static ConfigCache create(String dataId, String stringValue, Class<?> type, ConfigSource source) {
+        Object value = ConvertUtils.convert(stringValue, type);
+        return new ConfigCache(dataId, value, stringValue, type, source);
     }
 
     //endregion static
@@ -131,25 +129,25 @@ public class ConfigCache implements Serializable {
     @Override
     public String toString() {
         return '[' +
-                "c=" + value +
-                (type != null ? (", t=" + type.getSimpleName()) : "") +
-                ", s=" + getSourceName() +
+                "c=" + (stringValue != null ? ('\'' + stringValue + '\'') : null) +
+                ", t=" + type.getSimpleName() +
+                ", s='" + getSourceName() + '\'' +
                 ']';
     }
 
 
     public static ConfigCache fromConfigInfo(String dataId, ConfigInfo config, Class<?> dataType) {
-        Object value = null;
         String stringValue = null;
-        ConfigSource source = null;
+        ConfigSource source;
         if (config != null) {
-            value = ConvertUtils.convert(config.getValue(), dataType);
             stringValue = config.getValue();
             source = config.getSource();
+        } else {
+            source = NON_CONFIG_SOURCE;
         }
 
         // Wrap config, also when config is null or blank
-        return create(dataId, value, stringValue, source);
+        return create(dataId, stringValue, dataType, source);
     }
 
 
@@ -163,6 +161,11 @@ public class ConfigCache implements Serializable {
         @Override
         public String getName() {
             return "non";
+        }
+
+        @Override
+        public int getOrder() {
+            return Integer.MAX_VALUE;
         }
     }
 }

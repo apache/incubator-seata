@@ -21,6 +21,7 @@ import java.util.Properties;
 import javax.annotation.Nonnull;
 
 import io.seata.config.source.ConfigSource;
+import io.seata.config.source.ConfigSourceOrdered;
 
 public class CustomConfigSourceForTest implements ConfigSource {
     private Properties properties;
@@ -40,6 +41,11 @@ public class CustomConfigSourceForTest implements ConfigSource {
     @Override
     public String getName() {
         return "forTest: " + name;
+    }
+
+    @Override
+    public int getOrder() {
+        return ConfigSourceOrdered.CONFIG_FILE_SOURCE_ORDER;
     }
 
     @Override

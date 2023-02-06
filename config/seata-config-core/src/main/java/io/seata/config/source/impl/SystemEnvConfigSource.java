@@ -22,6 +22,8 @@ import javax.annotation.Nonnull;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.ConfigSource;
 
+import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_ENV_PROCESSOR_ORDER;
+
 /**
  * The type SystemEnvConfigSource.
  *
@@ -55,5 +57,10 @@ public class SystemEnvConfigSource implements ConfigSource {
     @Override
     public String getName() {
         return "system-env";
+    }
+
+    @Override
+    public int getOrder() {
+        return SYSTEM_ENV_PROCESSOR_ORDER;
     }
 }

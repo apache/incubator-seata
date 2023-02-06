@@ -48,4 +48,13 @@ public interface ConfigSource {
      */
     @Nonnull
     String getName();
+
+    /**
+     * Get the order.
+     * <p>
+     * The lower order, the higher priority.
+     *
+     * @return the order
+     */
+    int getOrder();
 }

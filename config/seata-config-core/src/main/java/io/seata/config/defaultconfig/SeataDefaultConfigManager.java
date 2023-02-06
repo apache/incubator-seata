@@ -16,7 +16,7 @@
 package io.seata.config.defaultconfig;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.CacheableConfiguration;
@@ -33,7 +33,7 @@ public class SeataDefaultConfigManager extends CacheableConfiguration
     private static final String NAME_PREFIX = "seata:";
 
 
-    public SeataDefaultConfigManager(String name, Map<String, ConfigCache> configCacheMap) {
+    public SeataDefaultConfigManager(String name, ConcurrentMap<String, ConfigCache> configCacheMap) {
         super(NAME_PREFIX + name, configCacheMap);
     }
 

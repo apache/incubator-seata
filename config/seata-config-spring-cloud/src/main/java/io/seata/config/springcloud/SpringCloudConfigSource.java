@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.StringUtils;
+import io.seata.config.source.ConfigSourceOrdered;
 import io.seata.config.source.RemoteConfigSource;
 import org.springframework.context.ApplicationContext;
 
@@ -53,6 +54,11 @@ public class SpringCloudConfigSource implements RemoteConfigSource {
     @Override
     public String getName() {
         return CONFIG_TYPE;
+    }
+
+    @Override
+    public int getOrder() {
+        return ConfigSourceOrdered.CONFIG_CENTER_SOURCE_ORDER;
     }
 
     @Override

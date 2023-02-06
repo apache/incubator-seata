@@ -32,6 +32,6 @@ public class SystemEnvConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
     public void process(Configuration configuration) {
-        configuration.addSourceLast(new SystemEnvConfigSource());
+        configuration.addSource(new SystemEnvConfigSource());
     }
 }

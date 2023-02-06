@@ -15,9 +15,11 @@
  */
 package io.seata.config;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -27,6 +29,8 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ObjectUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.changelistener.ConfigChangeListenerUtils;
+import io.seata.config.changelistener.ConfigurationChangeType;
 import io.seata.config.source.ConfigSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +52,10 @@ public class CacheableConfiguration extends SimpleConfiguration
      * The cache map.
      */
     @Nonnull
-    private final Map<String, ConfigCache> configCacheMap;
+    private final ConcurrentMap<String, ConfigCache> configCacheMap;
 
 
-    public CacheableConfiguration(String name, @Nonnull Map<String, ConfigCache> configCacheMap) {
+    public CacheableConfiguration(String name, @Nonnull ConcurrentMap<String, ConfigCache> configCacheMap) {
         super(NAME_PREFIX + name);
 
         Objects.requireNonNull(configCacheMap, "The 'configCacheMap' must not be null.");
@@ -119,11 +123,41 @@ public class CacheableConfiguration extends SimpleConfiguration
     //region # Override ConfigSourceManager
 
     @Override
-    public void afterAddingSource(ConfigSource newSource) {
-        super.afterAddingSource(newSource);
+    public void onAddedSource(ConfigSource newSource, List<ConfigSource> higherSources, List<ConfigSource> lowerSources) {
+        super.onAddedSource(newSource, higherSources, lowerSources);
 
-        // clean cache
-        this.cleanCaches();
+        // Compare the priority of the config in the cache with the value in the newSource
+        this.configCacheMap.forEach((dataId, oldCache) -> {
+            if (oldCache.getStringValue() != null && oldCache.getSource().getOrder() > newSource.getOrder()) {
+                // the source in the cache is higher than newSource
+                return;
+            }
+
+            String newValue = newSource.getLatestConfig(oldCache.getDataId());
+            if (newValue != null && Objects.equals(newValue, oldCache.getStringValue())) {
+                ConfigurationChangeType type = ConfigChangeListenerUtils.getChangeType(oldCache.getStringValue(), newValue);
+                this.changeCache(oldCache, newSource, newValue, type, "cacheChanged");
+            }
+        });
+    }
+
+    protected void changeCache(ConfigCache oldCache, ConfigSource newSource, String newValue, ConfigurationChangeType type, String namespace) {
+        String dataId = oldCache.getDataId();
+
+        ConfigCache newCache = ConfigCache.create(dataId, newValue, oldCache.getType(), newSource);
+        this.configCacheMap.put(dataId, newCache);
+        this.onCacheChanged(dataId, oldCache, newCache, type, namespace);
+    }
+
+    /**
+     * After the cache changed, trigger this method
+     *
+     * @param dataId   the data id
+     * @param oldCache the old cache
+     * @param newCache the new cache
+     */
+    protected void onCacheChanged(String dataId, ConfigCache oldCache, ConfigCache newCache, ConfigurationChangeType type, String namespace) {
+        // default do nothing
     }
 
     //endregion # Override ConfigSourceManager

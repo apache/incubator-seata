@@ -31,6 +31,6 @@ public class PropertyObjectDefaultConfigSourceProvider implements DefaultConfigS
 
     @Override
     public void provide(DefaultConfigManager defaultConfigManager) {
-        defaultConfigManager.addSourceLast(new PropertyObjectDefaultConfigSource());
+        defaultConfigManager.addSource(new PropertyObjectDefaultConfigSource());
     }
 }

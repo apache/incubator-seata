@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
+import static io.seata.config.source.ConfigSourceOrdered.PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_ENV_KEY;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_TYPE_SYSTEM_ENV_KEY;
@@ -180,5 +181,10 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
     @Override
     public String getName() {
         return "default-value-from-property-object";
+    }
+
+    @Override
+    public int getOrder() {
+        return PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
     }
 }

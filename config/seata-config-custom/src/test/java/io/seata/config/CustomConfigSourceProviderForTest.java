@@ -25,6 +25,6 @@ import io.seata.config.source.ConfigSourceProvider;
 public class CustomConfigSourceProviderForTest implements ConfigSourceProvider {
     @Override
     public void provide(Configuration configuration) {
-        configuration.addSourceLast(new CustomConfigSourceForTest("custom_for_test.properties"));
+        configuration.addSource(new CustomConfigSourceForTest("custom_for_test.properties"));
     }
 }

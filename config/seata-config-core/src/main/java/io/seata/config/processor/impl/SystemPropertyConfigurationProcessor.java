@@ -32,12 +32,12 @@ public class SystemPropertyConfigurationProcessor implements ConfigurationProces
 
     @Override
     public void process(Configuration configuration) {
-        SystemPropertyConfigSource source = new SystemPropertyConfigSource(SystemPropertyConfigSource.DEFAULT_NAME, true);
+        SystemPropertyConfigSource source = new SystemPropertyConfigSource(true);
 
         // This source can be initialized first.
         source.init();
 
         // Add this source to the first location, because it has the highest priority
-        configuration.addSourceFirst(source);
+        configuration.addSource(source);
     }
 }

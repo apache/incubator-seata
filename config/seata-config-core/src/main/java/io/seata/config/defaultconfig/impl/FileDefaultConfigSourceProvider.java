@@ -37,8 +37,8 @@ public class FileDefaultConfigSourceProvider implements DefaultConfigSourceProvi
     @Override
     public void provide(DefaultConfigManager defaultConfigManager) {
         // common
-        defaultConfigManager.addSourceLast(new FileConfigSource(DEFAULT_CONFIG_COMMON_FILE_NAME));
+        defaultConfigManager.addSource(new FileConfigSource(DEFAULT_CONFIG_COMMON_FILE_NAME, FILE_DEFAULT_CONFIG_SOURCE_ORDER));
         // client
-        defaultConfigManager.addSourceLast(new FileConfigSource(DEFAULT_CONFIG_CLIENT_FILE_NAME));
+        defaultConfigManager.addSource(new FileConfigSource(DEFAULT_CONFIG_CLIENT_FILE_NAME, FILE_DEFAULT_CONFIG_SOURCE_ORDER));
     }
 }

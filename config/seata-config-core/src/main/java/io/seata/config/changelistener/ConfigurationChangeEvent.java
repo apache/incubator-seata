@@ -175,9 +175,9 @@ public class ConfigurationChangeEvent {
     public String toString() {
         return "[" +
                 "dataId='" + dataId + '\'' +
-                ", oldValue='" + oldValue + '\'' +
-                ", newValue='" + newValue + '\'' +
-                ", namespace='" + namespace + '\'' +
+                ", oldValue=" + (oldValue != null ? ('\'' + oldValue + '\'') : null) +
+                ", newValue=" + (newValue != null ? ('\'' + newValue + '\'') : null) +
+                ", namespace=" + (namespace != null ? ('\'' + namespace + '\'') : null) +
                 ", changeType=" + changeType +
                 ", changeEventSource=" + changeEventSource.getName() +
                 ']';

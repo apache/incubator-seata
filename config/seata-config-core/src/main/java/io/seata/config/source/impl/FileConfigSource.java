@@ -85,6 +85,8 @@ public class FileConfigSource implements LocalConfigSource
 
     private final String name;
 
+    private final int order;
+
     private final FileListener fileListener = new FileListener(this);
 
     private final boolean allowDynamicRefresh;
@@ -95,6 +97,7 @@ public class FileConfigSource implements LocalConfigSource
      */
     public FileConfigSource() {
         this.name = null;
+        this.order = Integer.MAX_VALUE;
         this.targetFilePath = null;
         this.allowDynamicRefresh = false;
     }
@@ -102,10 +105,11 @@ public class FileConfigSource implements LocalConfigSource
     /**
      * Instantiates a new File configuration.
      *
-     * @param name the name
+     * @param name  the name
+     * @param order the order
      */
-    public FileConfigSource(String name) {
-        this(name, true);
+    public FileConfigSource(String name, int order) {
+        this(name, order, true);
     }
 
     /**
@@ -114,9 +118,10 @@ public class FileConfigSource implements LocalConfigSource
      * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
      *
      * @param name                the name
+     * @param order               the order
      * @param allowDynamicRefresh the allow dynamic refresh
      */
-    public FileConfigSource(String name, boolean allowDynamicRefresh) {
+    public FileConfigSource(String name, int order, boolean allowDynamicRefresh) {
         File file = getConfigFile(name);
         if (file == null) {
             targetFilePath = null;
@@ -132,6 +137,7 @@ public class FileConfigSource implements LocalConfigSource
             }
         }
         this.name = name;
+        this.order = order;
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
                 Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                 new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
@@ -293,6 +299,11 @@ public class FileConfigSource implements LocalConfigSource
     @Override
     public String getName() {
         return CONFIG_TYPE + ":" + name;
+    }
+
+    @Override
+    public int getOrder() {
+        return order;
     }
 
     /**

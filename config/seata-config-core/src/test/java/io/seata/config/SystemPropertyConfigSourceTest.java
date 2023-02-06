@@ -17,6 +17,7 @@ package io.seata.config;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -48,9 +49,21 @@ class SystemPropertyConfigSourceTest {
         boolean value = config.getBoolean(dataId);
         Assertions.assertFalse(value);
 
+        AtomicInteger changeCount = new AtomicInteger();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         CountDownLatch countDownLatch2 = new CountDownLatch(2);
         ConfigurationFactory.addConfigListener(dataId, (event) -> {
+            int count = changeCount.addAndGet(1);
+            if (count == 1) {
+                Assertions.assertEquals("false", event.getOldValue());
+                Assertions.assertEquals("true", event.getNewValue());
+            } else if (count == 2) {
+                Assertions.assertEquals("true", event.getOldValue());
+                Assertions.assertEquals("false", event.getNewValue());
+            } else {
+                throw new RuntimeException("Too many changes for the dataId '" + dataId + "'.");
+            }
+
             countDownLatch.countDown();
             countDownLatch2.countDown();
         });

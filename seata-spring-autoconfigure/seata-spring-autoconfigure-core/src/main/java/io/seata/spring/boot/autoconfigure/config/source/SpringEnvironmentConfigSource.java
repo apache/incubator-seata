@@ -25,6 +25,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
+import static io.seata.config.processor.ConfigProcessorOrdered.SPRING_ENVIRONMENT_PROCESSOR_ORDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
@@ -79,6 +80,11 @@ public class SpringEnvironmentConfigSource implements ConfigSource {
     @Override
     public String getName() {
         return "spring-environment";
+    }
+
+    @Override
+    public int getOrder() {
+        return SPRING_ENVIRONMENT_PROCESSOR_ORDER;
     }
 
     /**
