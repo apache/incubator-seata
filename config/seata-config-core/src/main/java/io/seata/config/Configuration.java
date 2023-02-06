@@ -168,6 +168,27 @@ public interface Configuration extends ConfigSourceManager {
 
 
     /**
+     * Gets duration config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the duration config
+     */
+    default Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Duration.class);
+    }
+
+    default Duration getDuration(String dataId, Duration defaultValue) {
+        return getDuration(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default Duration getDuration(String dataId) {
+        return getDuration(dataId, DEFAULT_DURATION, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
      * Gets boolean config.
      *
      * @param dataId       the data id
@@ -188,26 +209,6 @@ public interface Configuration extends ConfigSourceManager {
         return config == null ? DEFAULT_BOOLEAN : config;
     }
 
-
-    /**
-     * Gets duration config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the duration config
-     */
-    default Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        return getConfig(dataId, defaultValue, timeoutMills, Duration.class);
-    }
-
-    default Duration getDuration(String dataId, Duration defaultValue) {
-        return getDuration(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    default Duration getDuration(String dataId) {
-        return getDuration(dataId, DEFAULT_DURATION, DEFAULT_CONFIG_TIMEOUT);
-    }
 
     /**
      * Gets List config.
