@@ -37,7 +37,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**
-     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 in (?) pk2 in (?)
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk1 =? and pk2 =?
      */
     private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s ";
 
