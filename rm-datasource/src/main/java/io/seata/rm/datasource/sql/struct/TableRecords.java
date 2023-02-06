@@ -37,7 +37,7 @@ import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exception.RmTableMetaException;
+import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
@@ -271,7 +271,7 @@ public class TableRecords implements java.io.Serializable {
     private static ColumnMeta checkAndGetColumnMeta(TableMeta tmeta , String colName) {
         ColumnMeta col = tmeta.getColumnMeta(colName);
         if (col == null) {
-            throw new RmTableMetaException(colName,tmeta);
+            throw new TableMetaException(colName,tmeta);
         }
         return col;
     }
@@ -290,7 +290,7 @@ public class TableRecords implements java.io.Serializable {
         throws SQLException {
         try {
             return buildRecords(tmeta, resultSet);
-        } catch (RmTableMetaException e) {
+        } catch (TableMetaException e) {
             if (statementProxy == null) {
                 throw e;
             }

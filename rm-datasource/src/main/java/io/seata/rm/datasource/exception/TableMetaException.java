@@ -22,11 +22,11 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
  *
  * @author Bughue
  */
-public class RmTableMetaException extends RuntimeException {
+public class TableMetaException extends RuntimeException {
     private String columnName;
     private TableMeta tableMeta;
 
-    public RmTableMetaException(String columnName, TableMeta tableMeta) {
+    public TableMetaException(String columnName, TableMeta tableMeta) {
         this.columnName = columnName;
         this.tableMeta = tableMeta;
     }
