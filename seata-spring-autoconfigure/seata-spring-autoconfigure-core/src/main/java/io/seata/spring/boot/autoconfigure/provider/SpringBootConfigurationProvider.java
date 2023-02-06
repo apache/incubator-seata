@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +25,7 @@ import java.util.stream.Stream;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
@@ -107,7 +107,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                         }
 
                         // Convert type
-                        return this.convertType(result, dataType);
+                        return ConvertUtils.convert(result, dataType);
                     }
                 }
 
@@ -228,28 +228,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), dataType);
         }
         return value;
-    }
-
-    private Object convertType(Object configValue, Class<?> dataType) {
-        if (String.class.equals(dataType)) {
-            return String.valueOf(configValue);
-        }
-        if (Long.class.equals(dataType)) {
-            return Long.parseLong(String.valueOf(configValue));
-        }
-        if (Integer.class.equals(dataType)) {
-            return Integer.parseInt(String.valueOf(configValue));
-        }
-        if (Short.class.equals(dataType)) {
-            return Short.parseShort(String.valueOf(configValue));
-        }
-        if (Boolean.class.equals(dataType)) {
-            return Boolean.parseBoolean(String.valueOf(configValue));
-        }
-        if (Duration.class.equals(dataType)) {
-            return Duration.parse(String.valueOf(configValue));
-        }
-        return configValue;
     }
 
 }
