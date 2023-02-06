@@ -15,12 +15,28 @@
  */
 package io.seata.spring.annotation;
 
+import java.lang.reflect.Method;
+
+import io.seata.integration.tx.api.annotation.AspectTransactional;
+import io.seata.integration.tx.api.interceptor.DefaultInvocationWrapper;
+import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.tm.api.FailureHandler;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.util.ClassUtils;
 
 /**
- * @author funkye
+ * Aspect transactional interceptor. 
+ *
+ * @author ruishansun
  */
-public class AspectTransactionalInterceptor extends GlobalTransactionalInterceptor {
+public class AspectTransactionalInterceptor implements MethodInterceptor {
+
+    private final FailureHandler failureHandler;
+    private final AspectTransactional aspectTransactional;
+    private final GlobalTransactionalInterceptorHandler globalTransactionalInterceptorHandler;
 
     private static final AspectTransactional DEFAULT_ASPECT_TRANSACTIONAL = new AspectTransactional();
 
@@ -37,8 +53,16 @@ public class AspectTransactionalInterceptor extends GlobalTransactionalIntercept
     }
 
     public AspectTransactionalInterceptor(FailureHandler failureHandler, AspectTransactional aspectTransactional) {
-        super(failureHandler);
+        this.failureHandler = failureHandler;
         this.aspectTransactional = aspectTransactional;
+        this.globalTransactionalInterceptorHandler = new GlobalTransactionalInterceptorHandler(this.failureHandler, null, this.aspectTransactional);
     }
 
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        Class<?> targetClass = invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null;
+        Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+        InvocationWrapper invocationWrapper = new DefaultInvocationWrapper(null, invocation.getThis(), specificMethod, invocation.getArguments());
+        return this.globalTransactionalInterceptorHandler.invoke(invocationWrapper);
+    }
 }
