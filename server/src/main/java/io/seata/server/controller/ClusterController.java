@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +41,6 @@ import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,9 +61,6 @@ public class ClusterController {
 
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
-
-    @Resource
-    private ApplicationContext applicationContext;
 
     @Resource
     private ObjectMapper objectMapper;
