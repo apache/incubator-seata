@@ -18,6 +18,7 @@ package io.seata.config;
 import java.time.Duration;
 import java.util.Map;
 
+import io.seata.common.util.ConvertUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.changelistener.ConfigurationChangeListenerManager;
 
@@ -25,6 +26,7 @@ import io.seata.config.changelistener.ConfigurationChangeListenerManager;
  * The interface Configuration.
  *
  * @author slievrly
+ * @author wang.liang
  */
 public interface Configuration extends UpdatableConfiguration
         , ConfigurationChangeListenerManager {
@@ -48,6 +50,7 @@ public interface Configuration extends UpdatableConfiguration
      */
     Map<String, String> ENV_MAP = System.getenv();
 
+
     /**
      * Get latest config.
      *
@@ -58,86 +61,109 @@ public interface Configuration extends UpdatableConfiguration
      */
     String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
 
-
     /**
-     * Gets short.
+     * Get config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the short
+     * @param dataType     the data type
+     * @param <T>          the data type
+     * @return the Latest config
      */
-    short getShort(String dataId, short defaultValue, long timeoutMills);
+    default <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
+
+        String config = this.getLatestConfig(dataId, null, timeoutMills);
+
+        if (StringUtils.isNotBlank(config) || defaultValue == null) {
+            // May be null or blank.
+            return ConvertUtils.convert(config, dataType);
+        }
+
+        return defaultValue;
+    }
+
 
     /**
-     * Gets short.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the int
-     */
-    short getShort(String dataId, short defaultValue);
-
-    /**
-     * Gets short.
-     *
-     * @param dataId the data id
-     * @return the int
-     */
-    short getShort(String dataId);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the int
-     */
-    int getInt(String dataId, int defaultValue, long timeoutMills);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the int
-     */
-    int getInt(String dataId, int defaultValue);
-
-    /**
-     * Gets int.
-     *
-     * @param dataId the data id
-     * @return the int
-     */
-    int getInt(String dataId);
-
-    /**
-     * Gets long.
+     * Gets string config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return the long
+     * @return the config
+     */
+    default String getString(String dataId, String defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, String.class);
+    }
+
+    default String getString(String dataId, String defaultValue) {
+        return getString(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default String getString(String dataId) {
+        return getString(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+
+    /**
+     * Gets short config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the short config
+     */
+    default short getShort(String dataId, short defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Short.class);
+    }
+
+    default short getShort(String dataId, short defaultValue) {
+        return getShort(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default short getShort(String dataId) {
+        Short config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Short.class);
+        return config == null ? DEFAULT_SHORT : config;
+    }
+
+
+    /**
+     * Gets int config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the int config
+     */
+    default int getInt(String dataId, int defaultValue, long timeoutMills) {
+        return getConfig(dataId, defaultValue, timeoutMills, Integer.class);
+    }
+
+    default int getInt(String dataId, int defaultValue) {
+        return getInt(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    default int getInt(String dataId) {
+        Integer config = getConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT, Integer.class);
+        return config == null ? DEFAULT_INT : config;
+    }
+
+
+    /**
+     * Gets long config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the long config
      */
     long getLong(String dataId, long defaultValue, long timeoutMills);
 
-    /**
-     * Gets long.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the long
-     */
     long getLong(String dataId, long defaultValue);
 
-    /**
-     * Gets long.
-     *
-     * @param dataId the data id
-     * @return the long
-     */
     long getLong(String dataId);
 
     /**
@@ -194,41 +220,6 @@ public interface Configuration extends UpdatableConfiguration
      */
     boolean getBoolean(String dataId);
 
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @param timeoutMills the timeout mills
-     * @return the config
-     */
-    String getString(String dataId, String defaultValue, long timeoutMills);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param defaultValue the default value
-     * @return the config
-     */
-    String getString(String dataId, String defaultValue);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId       the data id
-     * @param timeoutMills the timeout mills
-     * @return the config
-     */
-    String getString(String dataId, long timeoutMills);
-
-    /**
-     * Gets config.
-     *
-     * @param dataId the data id
-     * @return the config
-     */
-    String getString(String dataId);
 
     /**
      * Gets config from sys pro.
