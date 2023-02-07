@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
+package io.seata.config.file;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.file.FileConfig;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Set;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * @author wangwei-ying

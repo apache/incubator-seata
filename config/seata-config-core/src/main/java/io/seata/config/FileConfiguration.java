@@ -38,6 +38,7 @@ import io.seata.config.ConfigFuture.ConfigOperation;
 import io.seata.config.changelistener.ConfigurationChangeEvent;
 import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.config.file.FileConfig;
+import io.seata.config.file.FileConfigFactory;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

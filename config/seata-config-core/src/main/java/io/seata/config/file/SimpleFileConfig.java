@@ -15,15 +15,13 @@
  */
 package io.seata.config.file;
 
+import java.io.File;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.config.FileConfigFactory;
 import io.seata.config.FileConfiguration;
-
-import java.io.File;
 
 /**
  * @author wangwei-ying

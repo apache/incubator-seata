@@ -50,7 +50,7 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  */
 public class ApolloConfiguration extends AbstractConfiguration {
 
-    private static final String REGISTRY_TYPE = "apollo";
+    private static final String CONFIG_TYPE = "apollo";
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
     private static final String APOLLO_SECRET = "apolloAccessKeySecret";
@@ -206,31 +206,31 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 
     public static String getApolloMetaFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_META);
     }
 
     public static String getApolloSecretFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_SECRET);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_SECRET);
     }
 
     public static String getApolloAppIdFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APP_ID);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APP_ID);
     }
 
     public static String getApolloNamespaceKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, NAMESPACE);
     }
 
     public static String getApolloCluster() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CLUSTER);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_CLUSTER);
     }
 
     public static String getApolloConfigService() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, CONFIG_TYPE, APOLLO_CONFIG_SERVICE);
     }
 
 
