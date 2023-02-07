@@ -23,20 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import io.seata.common.DefaultValues;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Update executor.
