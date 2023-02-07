@@ -196,7 +196,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 }
             });
         }
-        DefaultCoordinator.getInstance().setPrevent(group, true);
+        DefaultCoordinator.getInstance().setPrevent(group, false);
         // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, term));
@@ -206,7 +206,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         LOGGER.info("groupId: {}, onLeaderStop: status={}.", group, status);
-        DefaultCoordinator.getInstance().setPrevent(group, false);
+        DefaultCoordinator.getInstance().setPrevent(group, true);
     }
 
     @Override
@@ -218,7 +218,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
-        DefaultCoordinator.getInstance().setPrevent(group, false);
+        DefaultCoordinator.getInstance().setPrevent(group, true);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm()));
     }

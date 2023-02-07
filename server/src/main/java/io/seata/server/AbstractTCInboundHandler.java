@@ -16,6 +16,7 @@
 package io.seata.server;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.StoreException;
@@ -366,7 +367,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         String group = request.getGroupId();
         RaftClusterContext.bindGroup(group);
         try {
-            if (!isPrevent(group)) {
+            if (isPrevent(group)) {
                 throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing !");
             }
@@ -381,8 +382,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     public boolean isPrevent(String group) {
         // Non-raft mode always allows requests
-        return GROUP_PREVENT.computeIfAbsent(group,
-            value -> StoreConfig.getSessionMode() != StoreConfig.SessionMode.RAFT);
+        return Optional.ofNullable(GROUP_PREVENT.get(group)).orElse(true);
     }
 
     public void setPrevent(String group, boolean prevent) {
