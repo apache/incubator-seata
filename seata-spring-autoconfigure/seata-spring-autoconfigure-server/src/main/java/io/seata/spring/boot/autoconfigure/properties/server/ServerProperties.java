@@ -15,10 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.server;
 
-import java.time.Duration;
-
 import io.seata.common.DefaultValues;
-import io.seata.common.util.DurationUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
