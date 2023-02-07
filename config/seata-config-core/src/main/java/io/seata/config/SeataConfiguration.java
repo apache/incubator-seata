@@ -98,7 +98,7 @@ public class SeataConfiguration extends CacheableConfiguration
     public <T> T getConfig(String dataId, T defaultValue, long timeoutMills, Class<T> dataType) {
         T config = super.getConfig(dataId, defaultValue, timeoutMills, dataType);
 
-        if (ObjectUtils.isNullOrBlank(config)) {
+        if (ObjectUtils.isBlank(config)) {
             // Get default value from defaultConfigManager.
             defaultValue = this.getDefaultValueFromDefaultConfigManager(dataId, dataType);
             if (defaultValue != null) {
