@@ -42,6 +42,20 @@ public class ReflectionUtilTest {
     }
 
     @Test
+    public void testGetWrappedClass() {
+        Assertions.assertEquals(Byte.class, ReflectionUtil.getWrappedClass(byte.class));
+        Assertions.assertEquals(Boolean.class, ReflectionUtil.getWrappedClass(boolean.class));
+        Assertions.assertEquals(Character.class, ReflectionUtil.getWrappedClass(char.class));
+        Assertions.assertEquals(Short.class, ReflectionUtil.getWrappedClass(short.class));
+        Assertions.assertEquals(Integer.class, ReflectionUtil.getWrappedClass(int.class));
+        Assertions.assertEquals(Long.class, ReflectionUtil.getWrappedClass(long.class));
+        Assertions.assertEquals(Float.class, ReflectionUtil.getWrappedClass(float.class));
+        Assertions.assertEquals(Double.class, ReflectionUtil.getWrappedClass(double.class));
+        Assertions.assertEquals(Void.class, ReflectionUtil.getWrappedClass(void.class));
+        Assertions.assertEquals(Object.class, ReflectionUtil.getWrappedClass(Object.class));
+    }
+
+    @Test
     public void testGetFieldValue() throws NoSuchFieldException {
         Assertions.assertEquals("d",
                 ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
