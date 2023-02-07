@@ -30,12 +30,12 @@ class RegistryConfigurationFactoryTest {
 
     @Test
     void getInstance() {
-        System.setProperty(ENV_PROPERTY_KEY,"test");
-        System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME,REGISTRY_CONF_DEFAULT);
+        System.setProperty(ENV_PROPERTY_KEY, "test");
+        System.setProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME, REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getString("config.file.name"),"file-test.conf");
+        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getString("config.file.name"), "file-test.conf");
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"),"true");
+        Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"), "true");
         Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8091");
     }
 
