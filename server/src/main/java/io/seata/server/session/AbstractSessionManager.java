@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract session manager.
  */
-public abstract class AbstractSessionManager implements SessionManager, SessionLifecycleListener {
+public abstract class AbstractSessionManager implements SessionManager {
 
     /**
      * The constant LOGGER.
@@ -76,6 +76,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[{}] SESSION[{}] {}", name, session, LogOperation.GLOBAL_UPDATE);
         }
+        session.setStatus(status);
         if (GlobalStatus.Rollbacking == status) {
             session.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
         }
@@ -129,6 +130,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
         throws TransactionException {
+        branchSession.setStatus(status);
         updateBranchSessionStatus(branchSession, status);
     }
 
