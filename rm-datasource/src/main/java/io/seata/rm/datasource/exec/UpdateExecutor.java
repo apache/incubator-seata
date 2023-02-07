@@ -124,23 +124,23 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return selectSQLJoiner.toString();
     }
 
-    protected List<String> getNeedUpdateColumns(String table, String tableAlias, List<String> originUpdateColumns) {
+    protected List<String> getNeedUpdateColumns(String table, String tableAlias, List<String> unescapeUpdateColumns) {
         List<String> needUpdateColumns = new ArrayList<>();
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS) {
-            if (!containsPK(table, originUpdateColumns)) {
+            if (!containsPK(table, unescapeUpdateColumns)) {
                 List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
                 if (CollectionUtils.isNotEmpty(pkNameList)) {
                     needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias,pkNameList));
                 }
             }
-            needUpdateColumns.addAll(originUpdateColumns.parallelStream()
+            needUpdateColumns.addAll(unescapeUpdateColumns.parallelStream()
                 .map(originUpdateColumn -> ColumnUtils.addEscape(originUpdateColumn, getDbType()))
                 .collect(Collectors.toList()));
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
-            onUpdateColumns.removeAll(originUpdateColumns);
+            onUpdateColumns.removeAll(unescapeUpdateColumns);
             needUpdateColumns.addAll(onUpdateColumns.parallelStream()
                 .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType()))
                 .collect(Collectors.toList()));
