@@ -16,6 +16,7 @@
 
 package io.seata.common.holder;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,13 +38,16 @@ public class ObjectHolderTest {
 
     @Test
     public void testGetObjectByName() {
-        Object object = ObjectHolder.INSTANCE.getObject("objectHolderTest");
-        Assertions.assertNotNull(object);
+        Assertions.assertNotNull(ObjectHolder.INSTANCE.getObject("objectHolderTest"));
+        // object not exist in ObjectHolder.INSTANCE
+        Assertions.assertNull(ObjectHolder.INSTANCE.getObject("objectHolder"));
     }
 
     @Test
     public void testGetObjectByClass() {
-        Object object = ObjectHolder.INSTANCE.getObject(ObjectHolderTest.class);
-        Assertions.assertNotNull(object);
+        Assertions.assertNotNull(ObjectHolder.INSTANCE.getObject(ObjectHolderTest.class));
+        // object not exist in ObjectHolder.INSTANCE
+        Assertions.assertThrows(ShouldNeverHappenException.class,
+            () -> ObjectHolder.INSTANCE.getObject(ObjectHolder.class));
     }
 }
