@@ -674,7 +674,8 @@ public class EnhancedServiceLoader {
 
         /**
          * Helper Class for hold a value.
-         * @param <T>
+         *
+         * @param <T> the type
          */
         private static class Holder<T> {
             private volatile T value;
@@ -688,6 +689,5 @@ public class EnhancedServiceLoader {
             }
         }
     }
-
 
 }
