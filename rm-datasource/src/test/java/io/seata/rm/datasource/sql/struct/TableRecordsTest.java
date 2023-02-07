@@ -146,9 +146,9 @@ public class TableRecordsTest {
                 "table_records_test", proxy.getResourceId());
 
 
+        //  模拟新字段增加
         MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
         ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
-        //  模拟新字段增加
         Assertions.assertThrows(TableMetaException.class, () -> TableRecords.buildRecords(tableMeta, resultSet, null));
     }
 

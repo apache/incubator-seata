@@ -18,7 +18,6 @@ package io.seata.rm.datasource.sql.struct;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.Ref;
 import java.sql.ResultSet;
@@ -295,7 +294,7 @@ public class TableRecords implements java.io.Serializable {
                 throw e;
             }
             refreshTableMeta(statementProxy.getConnectionProxy(), e.getTableMeta(), e.getColumnName());
-            // try to build again after refresh table meta success
+            // try to build again after refresh table meta successfully
             return buildRecords(getCacheTableMeta(statementProxy.getConnectionProxy(), tmeta.getTableName()), resultSet);
         }
     }
@@ -306,13 +305,9 @@ public class TableRecords implements java.io.Serializable {
         if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
             synchronized (TableRecords.class) {
                 if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
-                    try {
-                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
-                            connectionProxy.getTargetConnection(),
-                            connectionProxy.getDataSourceProxy().getResourceId());
-                    } catch (Exception exp) {
-                        throw exp;
-                    }
+                    TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
+                        connectionProxy.getTargetConnection(), connectionProxy.getDataSourceProxy().getResourceId());
+                    
                     // still empty after refreshed
                     if (getCacheTableMeta(connectionProxy, tmeta.getTableName()).getColumnMeta(columnName) == null) {
                         throw new TableMetaException(columnName, tmeta, false);
