@@ -40,7 +40,6 @@ class ProConfigurationFactoryTest {
         Configuration instance = ConfigurationFactory.getInstance();
         Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"), "true");
         Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8092");
-
     }
 
     @AfterAll

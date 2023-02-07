@@ -38,6 +38,7 @@ public class ExporterFactory {
 
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
+
         String exporterTypeNameList = ConfigurationFactory.getInstance().getString(
             ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, DEFAULT_METRICS_EXPORTER_LIST);
         if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
@@ -49,10 +50,11 @@ public class ExporterFactory {
                     exporters.add(
                         EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName()));
                 } catch (Exception exx) {
-                    LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
+                    LOGGER.error("not support metrics exporter type: {}", exporterTypeName, exx);
                 }
             }
         }
+
         return exporters;
     }
 }

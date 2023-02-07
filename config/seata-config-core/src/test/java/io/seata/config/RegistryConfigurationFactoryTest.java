@@ -23,7 +23,6 @@ import static io.seata.config.ConfigProperty.ENV_PROPERTY_KEY;
 import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
 import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 
-
 /**
  * @author wangwei-ying
  */
@@ -38,10 +37,10 @@ class RegistryConfigurationFactoryTest {
         Configuration instance = ConfigurationFactory.getInstance();
         Assertions.assertEquals(instance.getString("service.disableGlobalTransaction"),"true");
         Assertions.assertEquals(instance.getString("service.default.grouplist"), "127.0.0.1:8091");
-
     }
+
     @AfterAll
-    public static void afterAll(){
+    public static void afterAll() {
         System.clearProperty(ENV_PROPERTY_KEY);
         System.clearProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         ConfigurationFactory.reload();

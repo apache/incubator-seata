@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -62,12 +61,11 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
-    private static final String REGISTRY_TYPE = "file";
+    private static final String CONFIG_TYPE = "file";
 
     public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
-            8);
+    private final Map<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
     private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
@@ -104,6 +102,7 @@ public class FileConfiguration extends AbstractConfiguration {
      * Instantiates a new File configuration.
      * For seata-server side the conf file should always exists.
      * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
+     *
      * @param name                the name
      * @param allowDynamicRefresh the allow dynamic refresh
      */
@@ -157,10 +156,9 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     private File getFileFromFileSystem(String decodedPath) {
-
         // run with jar file and not package third lib into jar file, this.getClass().getClassLoader() will be null
         URL resourceUrl = this.getClass().getClassLoader().getResource("");
-        String[] tryPaths = null;
+        String[] tryPaths;
         if (resourceUrl != null) {
             tryPaths = new String[]{
                 // first: project dir
@@ -282,7 +280,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 
     /**
@@ -290,7 +288,7 @@ public class FileConfiguration extends AbstractConfiguration {
      */
     class ConfigOperateRunnable implements Runnable {
 
-        private ConfigFuture configFuture;
+        private final ConfigFuture configFuture;
 
         /**
          * Instantiates a new Config operate runnable.
@@ -312,11 +310,8 @@ public class FileConfiguration extends AbstractConfiguration {
                     if (allowDynamicRefresh) {
                         long tempLastModified = new File(targetFilePath).lastModified();
                         if (tempLastModified > targetFileLastModified) {
-                            FileConfig tempConfig = FileConfigFactory.load(new File(targetFilePath), name);
-                            if (tempConfig != null) {
-                                fileConfig = tempConfig;
-                                targetFileLastModified = tempLastModified;
-                            }
+                            fileConfig = FileConfigFactory.load(new File(targetFilePath), name);
+                            targetFileLastModified = tempLastModified;
                         }
                     }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
@@ -353,6 +348,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     }
 
+
     /**
      * The type FileListener.
      */
@@ -380,12 +376,11 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            Boolean enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
+            boolean enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
             while (enabled) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
-                        String currentConfig =
-                                ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+                        String currentConfig = ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
                         if (StringUtils.isNotBlank(currentConfig)) {
                             String oldConfig = listenedConfigMap.get(dataId);
                             if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
@@ -406,7 +401,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
-                enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
+                enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
             }
         }
 

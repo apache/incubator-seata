@@ -15,6 +15,8 @@
  */
 package io.seata.discovery.registry.custom;
 
+import java.util.stream.Stream;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
@@ -22,8 +24,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.RegistryType;
-
-import java.util.stream.Stream;
 
 /**
  * @author ggndnn

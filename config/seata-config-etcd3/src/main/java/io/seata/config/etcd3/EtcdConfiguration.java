@@ -276,7 +276,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
+            LOGGER.error("error occurred while completing the future:", e);
         }
     }
 
@@ -302,9 +302,11 @@ public class EtcdConfiguration extends AbstractConfiguration {
     private static String getEtcdConfigKey() {
         return FILE_CONFIG.getString(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
     }
+
     private static String getEtcdDataType() {
         return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
     }
+
     private static String getSeataConfigStr() {
         StringBuilder sb = new StringBuilder();
 
@@ -365,7 +367,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                     if (dataId.equals(getEtcdConfigKey())) {
                         byte[] bytes = watchResponse.getEvents().get(0).getKeyValue().getValue().getBytes();
                         Properties seataConfigNew;
-                        try  {
+                        try {
                             seataConfigNew = ConfigProcessor.processConfig(new String(bytes, StandardCharsets.UTF_8), getEtcdDataType());
                         } catch (IOException e) {
                             LOGGER.error("load config properties error", e);
