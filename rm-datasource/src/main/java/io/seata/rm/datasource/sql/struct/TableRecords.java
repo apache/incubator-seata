@@ -264,6 +264,7 @@ public class TableRecords implements java.io.Serializable {
 
     /**
      * check if the column is null and return
+     *
      * @param tmeta the table meta
      * @param colName the column nmae
      */
