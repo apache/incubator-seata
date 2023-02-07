@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.exception;
 
 import io.seata.rm.datasource.sql.struct.TableMeta;
-
 import java.sql.SQLException;
 
 /**
