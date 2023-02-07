@@ -17,6 +17,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5281](https://github.com/seata/seata/pull/5281)] parallel request handle throw IndexOutOfBoundsException
 - [[#5288](https://github.com/seata/seata/pull/5288)] fix auto-increment of pk columns in Oracle in AT mode
 - [[#5287](https://github.com/seata/seata/pull/5287)] fix auto-increment of pk columns in PostgreSQL in AT mode
+- [[#5299](https://github.com/seata/seata/pull/5299)] fix GlobalSession deletion when retry rollback or retry commit timeout
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
 
 
@@ -52,6 +53,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [GoodBoyCoder](https://github.com/GoodBoyCoder)
 - [a364176773](https://github.com/a364176773)
 - [isharpever](https://github.com/isharpever)
+- [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
 - [mxsm](https://github.com/mxsm)
 
 

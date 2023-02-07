@@ -17,6 +17,7 @@
 - [[#5281](https://github.com/seata/seata/pull/5281)] 修复并行rm请求处理时数组索引越界问题
 - [[#5288](https://github.com/seata/seata/pull/5288)] 修复AT模式下oracle的主键列自增的问题
 - [[#5287](https://github.com/seata/seata/pull/5287)] 修复AT模式下pgsql的主键列自增的问题
+- [[#5299](https://github.com/seata/seata/pull/5299)] 修复TC端重试回滚或重试提交超时GlobalSession的删除问题
 - [[#5307](https://github.com/seata/seata/pull/5307)] 修复生成update前后镜像sql不对关键字转义的bug
 
 ### optimize:
@@ -51,6 +52,7 @@
 - [GoodBoyCoder](https://github.com/GoodBoyCoder)
 - [a364176773](https://github.com/a364176773)
 - [isharpever](https://github.com/isharpever)
+- [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
 - [mxsm](https://github.com/mxsm)
 
 
