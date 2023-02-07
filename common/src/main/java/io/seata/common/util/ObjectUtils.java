@@ -30,7 +30,7 @@ public class ObjectUtils {
     }
 
 
-    public static boolean isNullOrBlank(Object obj) {
+    public static boolean isBlank(Object obj) {
         if (obj == null) {
             return true;
         }
@@ -56,7 +56,7 @@ public class ObjectUtils {
         return StringUtils.isBlank(String.valueOf(obj));
     }
 
-    public static boolean isNotNullOrBlank(Object obj) {
-        return !isNullOrBlank(obj);
+    public static boolean isNotBlank(Object obj) {
+        return !isBlank(obj);
     }
 }

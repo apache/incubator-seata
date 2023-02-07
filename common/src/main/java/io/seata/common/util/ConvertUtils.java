@@ -47,8 +47,8 @@ public class ConvertUtils {
             return (T)String.valueOf(value);
         }
 
-        if (ObjectUtils.isNullOrBlank(value)) {
-            // Keep the blank value for List.
+        if (ObjectUtils.isBlank(value)) {
+            // Keep the empty list for List.
             if (List.class.equals(targetType)) {
                 return (T)new ArrayList<>();
             }
