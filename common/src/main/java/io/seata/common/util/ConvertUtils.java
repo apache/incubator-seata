@@ -80,6 +80,6 @@ public class ConvertUtils {
             return (T)Arrays.asList(str.split(regex));
         }
 
-        throw new NotSupportYetException("Not support convert to the type: " + targetType.getName());
+        throw new NotSupportYetException("Not support convert type from '" + value.getClass().getName() + "' to '" + targetType.getName() + "'.");
     }
 }
