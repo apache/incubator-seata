@@ -19,6 +19,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5287](https://github.com/seata/seata/pull/5287)] fix auto-increment of pk columns in PostgreSQL in AT mode
 - [[#5299](https://github.com/seata/seata/pull/5299)] fix GlobalSession deletion when retry rollback or retry commit timeout
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
+- [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
 
 
 ### optimize:
