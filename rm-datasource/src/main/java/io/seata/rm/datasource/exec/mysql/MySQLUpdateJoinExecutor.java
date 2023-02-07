@@ -134,7 +134,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        needUpdateColumns.forEach(selectSQLJoin::add);
+        for (String needUpdateColumn : needUpdateColumns) {
+            selectSQLJoin.add(needUpdateColumn);
+        }
         return selectSQLJoin.toString();
     }
 
@@ -201,9 +203,11 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
-        suffix += buildGroupBy(pkColumns, needUpdateColumns);
+        suffix += buildGroupBy(pkColumns,needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        needUpdateColumns.forEach(selectSQLJoiner::add);
+        for (String needUpdateColumn : needUpdateColumns) {
+            selectSQLJoiner.add(needUpdateColumn);
+        }
         return selectSQLJoiner.toString();
     }
 
