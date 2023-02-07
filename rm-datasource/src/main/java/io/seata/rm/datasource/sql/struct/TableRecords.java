@@ -268,10 +268,10 @@ public class TableRecords implements java.io.Serializable {
      * @param tmeta the table meta
      * @param colName the column nmae
      */
-    private static ColumnMeta checkAndGetColumnMeta(TableMeta tmeta , String colName) {
+    private static ColumnMeta checkAndGetColumnMeta(TableMeta tmeta , String colName) throws SQLException {
         ColumnMeta col = tmeta.getColumnMeta(colName);
         if (col == null) {
-            throw new TableMetaException(colName,tmeta);
+            throw new TableMetaException(colName, tmeta, true);
         }
         return col;
     }
@@ -291,50 +291,45 @@ public class TableRecords implements java.io.Serializable {
         try {
             return buildRecords(tmeta, resultSet);
         } catch (TableMetaException e) {
-            if (statementProxy == null) {
+            if (statementProxy == null || !e.isRefreshable()) {
                 throw e;
             }
-            refreshTableMeta(statementProxy, e.getTableMeta(), e.getColumnName());
+            refreshTableMeta(statementProxy.getConnectionProxy(), e.getTableMeta(), e.getColumnName());
             // try to build again after refresh table meta success
-            return buildRecords(getCacheTableMeta(statementProxy, tmeta.getTableName()), resultSet);
+            return buildRecords(getCacheTableMeta(statementProxy.getConnectionProxy(), tmeta.getTableName()), resultSet);
         }
     }
 
 
-    private static void refreshTableMeta(StatementProxy statementProxy, TableMeta tmeta, String columnName)
+    private static void refreshTableMeta(ConnectionProxy connectionProxy, TableMeta tmeta, String columnName)
         throws SQLException {
-        if (columnEmptyAndRefreshable(statementProxy, tmeta, columnName)) {
+        if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
             synchronized (TableRecords.class) {
-                if (columnEmptyAndRefreshable(statementProxy, tmeta, columnName)) {
-                    ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+                if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
                     try {
-                        Connection connection = statementProxy.getConnection();
-                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(connection,
+                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
+                            connectionProxy.getTargetConnection(),
                             connectionProxy.getDataSourceProxy().getResourceId());
                     } catch (Exception exp) {
                         throw exp;
                     }
                     // still empty after refreshed
-                    if (getCacheTableMeta(statementProxy, tmeta.getTableName()).getColumnMeta(columnName) == null) {
-                        TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).addUnrefreshableCol(
-                            connectionProxy.getTargetConnection(), tmeta.getTableName(),
-                            connectionProxy.getDataSourceProxy().getResourceId(), columnName);
+                    if (getCacheTableMeta(connectionProxy, tmeta.getTableName()).getColumnMeta(columnName) == null) {
+                        throw new TableMetaException(columnName, tmeta, false);
                     }
                 }
             }
         }
     }
 
-    private static boolean columnEmptyAndRefreshable(StatementProxy statementProxy, TableMeta tmeta,
+    private static boolean columnEmptyAndRefreshable(ConnectionProxy connectionProxy, TableMeta tmeta,
         String columnName) {
-        TableMeta cacheTableMeta = getCacheTableMeta(statementProxy, tmeta.getTableName());
-        return cacheTableMeta.getColumnMeta(columnName) == null
-            && !cacheTableMeta.getUnrefreshableColumns().contains(columnName);
+        TableMeta cacheTableMeta = getCacheTableMeta(connectionProxy, tmeta.getTableName());
+        return cacheTableMeta.getColumnMeta(columnName) == null;
     }
 
 
-    private static TableMeta getCacheTableMeta(StatementProxy statementProxy, String tableName) {
-        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+    private static TableMeta getCacheTableMeta(ConnectionProxy connectionProxy, String tableName) {
         TableMeta tmeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).getTableMeta(
             connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tmeta;

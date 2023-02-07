@@ -17,18 +17,22 @@ package io.seata.rm.datasource.exception;
 
 import io.seata.rm.datasource.sql.struct.TableMeta;
 
+import java.sql.SQLException;
+
 /**
  * The type RmTableMetaException exception.
  *
  * @author Bughue
  */
-public class TableMetaException extends RuntimeException {
+public class TableMetaException extends SQLException {
     private String columnName;
     private TableMeta tableMeta;
+    private boolean refreshable;
 
-    public TableMetaException(String columnName, TableMeta tableMeta) {
+    public TableMetaException(String columnName, TableMeta tableMeta,boolean refreshable) {
         this.columnName = columnName;
         this.tableMeta = tableMeta;
+        this.refreshable = refreshable;
     }
 
     public TableMeta getTableMeta() {
@@ -37,5 +41,9 @@ public class TableMetaException extends RuntimeException {
 
     public String getColumnName() {
         return columnName;
+    }
+
+    public boolean isRefreshable() {
+        return refreshable;
     }
 }

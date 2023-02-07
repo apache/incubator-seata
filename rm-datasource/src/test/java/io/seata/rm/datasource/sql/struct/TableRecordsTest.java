@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
+import io.seata.rm.datasource.exception.TableMetaException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,26 +133,24 @@ public class TableRecordsTest {
         Assertions.assertNotNull(tableRecords);
     }
 
-//    @Test
-//    public void testBuildRecordsNewFeild() throws SQLException {
-//        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
-//        DruidDataSource dataSource = new DruidDataSource();
-//        dataSource.setUrl("jdbc:mock:xxx");
-//        dataSource.setDriver(mockDriver);
-//        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-//        DataSourceProxy proxy = new DataSourceProxy(dataSource);
-//
-//        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy.getPlainConnection(),
-//                "table_records_test", proxy.getResourceId());
-//
-//
-//        MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
-//        ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
-//        // todo todo_4572 模拟新字段增加，现在可以得到npe效果
-//        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
-//
-//        Assertions.assertNotNull(tableRecords);
-//    }
+    @Test
+    public void testBuildRecordsNewFeild() throws SQLException {
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setDriver(mockDriver);
+        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(proxy.getPlainConnection(),
+                "table_records_test", proxy.getResourceId());
+
+
+        MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
+        ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
+        //  模拟新字段增加
+        Assertions.assertThrows(TableMetaException.class, () -> TableRecords.buildRecords(tableMeta, resultSet, null));
+    }
 
     @Test
     public void testEmpty() {
