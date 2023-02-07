@@ -15,10 +15,14 @@
  */
 package io.seata.common.util;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyPair;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.seata.common.io.FileLoader;
 
 /**
  * @author funkye
@@ -38,5 +42,30 @@ public class ConfigToolsTest {
         String pw = ConfigTools.publicDecrypt(byte2Base64, publicKeyStr);
         Assertions.assertEquals(pw, password);
     }
-    
+
+    @Test
+    public void testPublicEncryptAndPrivateDecrypt() throws Exception {
+        KeyPair keyPair = ConfigTools.getKeyPair();
+        String publicKeyStr = ConfigTools.getPublicKey(keyPair);
+        String privateKeyStr = ConfigTools.getPrivateKey(keyPair);
+        System.out.println("publicKeyStr:" + publicKeyStr);
+        System.out.println("privateKeyStr:" + privateKeyStr);
+        String password = "123456";
+        String byte2Base64 = ConfigTools.publicEncrypt(password, publicKeyStr);
+        System.out.println("byte2Base64：" + byte2Base64);
+        String pw = ConfigTools.privateDecrypt(byte2Base64, privateKeyStr);
+        Assertions.assertEquals(pw, password);
+    }
+
+    @Test
+    public void testMain() throws Exception {
+        String[] args = null;
+        final InputStream original = System.in;
+        try (final FileInputStream fis = new FileInputStream(FileLoader.load("util/ConfigToolsTest.txt"))) {
+            System.setIn(fis);
+            ConfigTools.main(args);
+            System.setIn(original);
+        }
+    }
+
 }
