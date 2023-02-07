@@ -15,18 +15,17 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import io.seata.common.holder.ObjectHolder;
-import org.springframework.core.env.PropertiesPropertySource;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import io.seata.common.holder.ObjectHolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.PropertiesPropertySource;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;

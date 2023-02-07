@@ -15,11 +15,11 @@
  */
 package io.seata.discovery.registry.custom;
 
-import io.seata.config.changelistener.ConfigChangeListener;
-import io.seata.discovery.registry.RegistryService;
-
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import io.seata.config.changelistener.ConfigChangeListener;
+import io.seata.discovery.registry.RegistryService;
 
 public class CustomRegistryServiceForTest implements RegistryService<ConfigChangeListener> {
     @Override

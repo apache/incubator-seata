@@ -15,14 +15,14 @@
  */
 package io.seata.discovery.registry;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.changelistener.ConfigChangeListener;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type File registry service.

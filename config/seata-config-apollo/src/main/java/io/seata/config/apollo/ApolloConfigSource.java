@@ -125,7 +125,7 @@ public class ApolloConfigSource implements RemoteConfigSource, ConfigurationChan
             String result = config.getProperty(dataId, null);
             configFuture.setResult(result);
         });
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override

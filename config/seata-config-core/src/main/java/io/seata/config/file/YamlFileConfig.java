@@ -15,18 +15,18 @@
  */
 package io.seata.config.file;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * @author wangwei-ying

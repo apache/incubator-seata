@@ -371,6 +371,7 @@ public class FileConfigSource implements LocalConfigSource
 
     }
 
+
     /**
      * The type FileListener.
      */
@@ -402,7 +403,7 @@ public class FileConfigSource implements LocalConfigSource
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            boolean enabled = "true".equalsIgnoreCase(System.getProperty("file.listener.enabled", "true"));
+            boolean enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
             while (enabled) {
                 for (String dataId : dataIdMap.keySet()) {
                     try {
@@ -430,7 +431,7 @@ public class FileConfigSource implements LocalConfigSource
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
-                enabled = "true".equalsIgnoreCase(System.getProperty("file.listener.enabled", "true"));
+                enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
             }
         }
 

@@ -28,8 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Abstract configuration
+ * The type Abstract configuration.
  *
+ * @author slievrly
  * @author wang.liang
  */
 public abstract class AbstractConfiguration extends AbstractInitialize implements Configuration {

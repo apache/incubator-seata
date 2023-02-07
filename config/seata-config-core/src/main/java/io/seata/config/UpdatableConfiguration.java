@@ -20,6 +20,7 @@ import static io.seata.config.Configuration.DEFAULT_CONFIG_TIMEOUT;
 /**
  * The interface UpdatableConfiguration.
  *
+ * @author slievrly
  * @author wang.liang
  */
 public interface UpdatableConfiguration {

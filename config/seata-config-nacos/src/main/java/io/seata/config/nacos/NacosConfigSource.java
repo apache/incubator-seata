@@ -249,10 +249,10 @@ public class NacosConfigSource implements RemoteConfigSource
             }
         } else {
             String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
-                    System.getProperty(ACCESS_KEY) : CONFIG.getString(getNacosAccessKey());
+                System.getProperty(ACCESS_KEY) : CONFIG.getString(getNacosAccessKey());
             if (StringUtils.isNotBlank(accessKey)) {
                 String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
-                        System.getProperty(SECRET_KEY) : CONFIG.getString(getNacosSecretKey());
+                    System.getProperty(SECRET_KEY) : CONFIG.getString(getNacosSecretKey());
                 if (StringUtils.isNotBlank(secretKey)) {
                     properties.put(ACCESS_KEY, accessKey);
                     properties.put(SECRET_KEY, secretKey);
@@ -318,7 +318,7 @@ public class NacosConfigSource implements RemoteConfigSource
 
         Enumeration<?> enumeration = seataConfig.propertyNames();
         while (enumeration.hasMoreElements()) {
-            String key = (String)enumeration.nextElement();
+            String key = (String) enumeration.nextElement();
             String property = seataConfig.getProperty(key);
             sb.append(key).append("=").append(property).append("\n");
         }

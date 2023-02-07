@@ -15,11 +15,12 @@
  */
 package io.seata.config.file;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import javax.annotation.Nonnull;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * @author wangwei-ying
@@ -38,11 +39,12 @@ public class FileConfigFactory {
         }
     };
 
-
+    @Nonnull
     public static FileConfig load() {
         return loadService(DEFAULT_TYPE, null, null);
     }
 
+    @Nonnull
     public static FileConfig load(File targetFile, String name) {
         String fileName = targetFile.getName();
         String configType = getConfigType(fileName);
@@ -59,7 +61,8 @@ public class FileConfigFactory {
         return configType;
     }
 
-    private static FileConfig loadService(String name, Class[] argsType, Object[] args) {
+    @Nonnull
+    private static FileConfig loadService(String name, Class<?>[] argsType, Object[] args) {
         FileConfig fileConfig = EnhancedServiceLoader.load(FileConfig.class, name, argsType, args);
         return fileConfig;
     }

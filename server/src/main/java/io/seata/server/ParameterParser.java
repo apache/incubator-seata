@@ -34,7 +34,7 @@ import static io.seata.config.util.ConfigurationUtils.ENV_SYSTEM_PROPERTY_KEY;
 public class ParameterParser {
 
     private static final String PROGRAM_NAME
-            = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
@@ -49,10 +49,10 @@ public class ParameterParser {
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
     private Long serverNode;
     @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
-            order = 5)
+        order = 5)
     private String seataEnv;
     @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "session log store mode : file, db, redis",
-            order = 6)
+        order = 6)
     private String sessionStoreMode;
     @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "lock log store mode : file, db, redis", order = 7)
     private String lockStoreMode;

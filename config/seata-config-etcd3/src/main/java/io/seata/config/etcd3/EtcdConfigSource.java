@@ -81,7 +81,8 @@ public class EtcdConfigSource implements RemoteConfigSource
     private static final String ETCD_CONFIG_KEY = "key";
     private static final String CONFIG_TYPE = "etcd3";
     private static final String DEFAULT_ETCD_CONFIG_KEY_VALUE = "seata.properties";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
+        + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);

@@ -18,7 +18,6 @@ package io.seata.config;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Nonnull;
 
 import io.seata.common.util.ConvertUtils;
@@ -211,7 +210,7 @@ public interface Configuration extends ConfigSourceManager {
 
 
     /**
-     * Gets List config.
+     * Gets list config.
      *
      * @param dataId       the data id
      * @param defaultValue the default value

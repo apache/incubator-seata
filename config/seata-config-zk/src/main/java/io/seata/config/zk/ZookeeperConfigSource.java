@@ -301,7 +301,7 @@ public class ZookeeperConfigSource implements RemoteConfigSource,
 
         Enumeration<?> enumeration = seataConfig.propertyNames();
         while (enumeration.hasMoreElements()) {
-            String key = (String)enumeration.nextElement();
+            String key = (String) enumeration.nextElement();
             String property = seataConfig.getProperty(key);
             sb.append(key).append("=").append(property).append("\n");
         }
@@ -366,7 +366,7 @@ public class ZookeeperConfigSource implements RemoteConfigSource,
             }
             String dataId = s.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
             ConfigurationChangeEvent event = new ConfigurationChangeEvent(source).setDataId(dataId).setNewValue(o.toString())
-                    .setChangeType(ConfigurationChangeType.MODIFY);
+                .setChangeType(ConfigurationChangeType.MODIFY);
             listener.onProcessEvent(event);
         }
 
@@ -387,7 +387,7 @@ public class ZookeeperConfigSource implements RemoteConfigSource,
                 Class<?> clazz = Class.forName(serializer);
                 Constructor<?> constructor = clazz.getDeclaredConstructor();
                 constructor.setAccessible(true);
-                zkSerializer = (ZkSerializer)constructor.newInstance();
+                zkSerializer = (ZkSerializer) constructor.newInstance();
             } catch (ClassNotFoundException cfe) {
                 LOGGER.warn("No zk serializer class found, serializer:{}", serializer, cfe);
             } catch (Throwable cause) {

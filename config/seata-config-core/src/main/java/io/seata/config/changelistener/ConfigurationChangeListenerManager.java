@@ -18,7 +18,7 @@ package io.seata.config.changelistener;
 import java.util.Set;
 
 /**
- * The interface ConfigListenerManager.
+ * The interface ConfigurationChangeListenerManager.
  *
  * @author slievrly
  * @author wang.liang
