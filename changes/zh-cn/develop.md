@@ -15,6 +15,9 @@
 - [[#5245](https://github.com/seata/seata/pull/5245)] 修复不完整的distribution模块依赖
 - [[#5239](https://github.com/seata/seata/pull/5239)] 修复当使用JDK代理时，`getConfig` 方法获取部分配置时抛出 `ClassCastException` 异常的问题
 - [[#5281](https://github.com/seata/seata/pull/5281)] 修复并行rm请求处理时数组索引越界问题
+- [[#5288](https://github.com/seata/seata/pull/5288)] 修复AT模式下oracle的主键列自增的问题
+- [[#5287](https://github.com/seata/seata/pull/5287)] 修复AT模式下pgsql的主键列自增的问题
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -24,6 +27,7 @@
 - [[#5153](https://github.com/seata/seata/pull/5153)] 只允许AT去尝试跨RM获取channel
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
 - [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
+- [[#5303](https://github.com/seata/seata/pull/5303)] 移除启动脚本的-Xmn参数
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -46,6 +50,8 @@
 - [wangliang181230](https://github.com/wangliang181230)
 - [GoodBoyCoder](https://github.com/GoodBoyCoder)
 - [a364176773](https://github.com/a364176773)
+- [isharpever](https://github.com/isharpever)
+- [mxsm](https://github.com/mxsm)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
