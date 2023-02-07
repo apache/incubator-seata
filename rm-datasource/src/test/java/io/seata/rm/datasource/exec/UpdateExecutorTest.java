@@ -49,7 +49,7 @@ public class UpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
-        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
+        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom", "keyword"},
             new Object[] {2, "Jack", "keyword"},
