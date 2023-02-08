@@ -80,7 +80,7 @@ public class GlobalSessionTest {
     @ParameterizedTest
     @MethodSource("globalSessionProvider")
     public void changeStatusTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatus(GlobalStatus.Committed);
+        globalSession.changeGlobalStatus(GlobalStatus.Committed);
     }
 
     /**
@@ -144,7 +144,7 @@ public class GlobalSessionTest {
     @MethodSource("branchSessionProvider")
     public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
-        globalSession.removeBranch(branchSession);
+        globalSession.removeAndUnlockBranch(branchSession);
     }
 
     /**
