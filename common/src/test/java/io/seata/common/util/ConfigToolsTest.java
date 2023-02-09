@@ -38,5 +38,19 @@ public class ConfigToolsTest {
         String pw = ConfigTools.publicDecrypt(byte2Base64, publicKeyStr);
         Assertions.assertEquals(pw, password);
     }
-    
+
+    @Test
+    public void testPublicEncryptAndPrivateDecrypt() throws Exception {
+        KeyPair keyPair = ConfigTools.getKeyPair();
+        String publicKeyStr = ConfigTools.getPublicKey(keyPair);
+        String privateKeyStr = ConfigTools.getPrivateKey(keyPair);
+        System.out.println("publicKeyStr:" + publicKeyStr);
+        System.out.println("privateKeyStr:" + privateKeyStr);
+        String password = "123456";
+        String byte2Base64 = ConfigTools.publicEncrypt(password, publicKeyStr);
+        System.out.println("byte2Base64：" + byte2Base64);
+        String pw = ConfigTools.privateDecrypt(byte2Base64, privateKeyStr);
+        Assertions.assertEquals(pw, password);
+    }
+
 }
