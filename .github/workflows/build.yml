@@ -62,7 +62,7 @@ jobs:
      runs-on: ubuntu-latest
      if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == '2.x') }}
      strategy:
-      fail-fast: false
+       fail-fast: false
      steps:
        # step 1
        - uses: actions/checkout@v2
