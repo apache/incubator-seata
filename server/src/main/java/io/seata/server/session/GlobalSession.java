@@ -64,7 +64,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
 
-    private static ThreadLocal<GlobalStatus> expectedStatusThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<GlobalStatus> expectedStatusThreadLocal = new ThreadLocal<>();
 
     /**
      * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
