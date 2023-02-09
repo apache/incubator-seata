@@ -85,7 +85,7 @@ public interface ConfigProcessorOrdered {
     int CONFIG_FILES_PROCESSOR_ORDER = 200;
 
     /**
-     * 3.3、Config center processor.
+     * 3.3. Config center processor.
      * <p>
      * It will be processed finally, because it needs other config sources to provide config related to the config-center.<br/>
      * For example: the address of the config-center
