@@ -104,7 +104,6 @@ public class RaftServerFactory {
                 throw new IllegalArgumentException(
                     "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_CLUSTER);
             }
-            LOGGER.info("raft mode is not enabled");
             return;
         } else {
             LOGGER.warn("raft mode and raft cluster is an experimental feature");

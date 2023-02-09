@@ -37,6 +37,7 @@ import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
@@ -196,7 +197,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 }
             });
         }
-        DefaultCoordinator.getInstance().setPrevent(group, false);
+        AbstractTCInboundHandler.setPrevent(group, false);
         // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, term));
@@ -206,7 +207,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         LOGGER.info("groupId: {}, onLeaderStop: status={}.", group, status);
-        DefaultCoordinator.getInstance().setPrevent(group, true);
+        AbstractTCInboundHandler.setPrevent(group, true);
     }
 
     @Override

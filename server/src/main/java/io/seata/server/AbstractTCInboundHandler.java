@@ -382,10 +382,10 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
 
     public boolean isPrevent(String group) {
         // Non-raft mode always allows requests
-        return Optional.ofNullable(GROUP_PREVENT.get(group)).orElse(true);
+        return Optional.ofNullable(GROUP_PREVENT.get(group)).orElse(false);
     }
 
-    public void setPrevent(String group, boolean prevent) {
+    public static void setPrevent(String group, boolean prevent) {
         if (StoreConfig.getSessionMode() == StoreConfig.SessionMode.RAFT) {
             GROUP_PREVENT.put(group, prevent);
         }
