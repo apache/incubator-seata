@@ -156,7 +156,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo          the transaction info
+     * @param txInfo    the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -241,7 +241,7 @@ public class TransactionalTemplate {
 
         //# fix #5231
         TransactionalExecutor.Code code;
-        switch(tx.getLocalStatus()) {
+        switch (tx.getLocalStatus()) {
             case RollbackFailed:
             case TimeoutRollbackFailed:
                 code = TransactionalExecutor.Code.RollbackFailure;
