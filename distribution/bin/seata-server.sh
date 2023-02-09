@@ -138,7 +138,7 @@ if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
 elif [[ "$JAVA_MAJOR_VERSION" -ge "17" ]] ; then
   JAVA_OPT="${JAVA_OPT} -Xlog:gc=trace:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=10M"
 else
-  JAVA_OPT="${JAVA_OPT} -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UseG1GC"
+  JAVA_OPT="${JAVA_OPT} -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 fi
 
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
