@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -283,7 +284,6 @@ public class EnhancedServiceLoader {
         }
 
         private static void removeAllServiceLoader() {
-
             SERVICE_LOADERS.clear();
         }
 
@@ -391,8 +391,7 @@ public class EnhancedServiceLoader {
             return loadAllExtensionClass(loader);
         }
 
-        private S loadExtension(ClassLoader loader, Class<?>[] argTypes,
-                                Object[] args) {
+        private S loadExtension(ClassLoader loader, Class<?>[] argTypes, Object[] args) {
             try {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition<S> defaultExtensionDefinition = getDefaultExtensionDefinition();
@@ -409,7 +408,7 @@ public class EnhancedServiceLoader {
         @SuppressWarnings("rawtypes")
         private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
                                 Object[] args) {
-            if (io.seata.common.util.StringUtils.isEmpty(activateName)) {
+            if (StringUtils.isEmpty(activateName)) {
                 throw new IllegalArgumentException("the name of service provider for [" + type.getName() + "] name is null");
             }
             try {
@@ -496,9 +495,9 @@ public class EnhancedServiceLoader {
             }
 
             if (!extensionDefinitions.isEmpty()) {
-                extensionDefinitions.sort((definition1, definition2) -> {
-                    int o1 = definition1.getOrder();
-                    int o2 = definition2.getOrder();
+                extensionDefinitions.sort((def1, def2) -> {
+                    int o1 = def1.getOrder();
+                    int o2 = def2.getOrder();
                     return Integer.compare(o1, o2);
                 });
             }
@@ -542,7 +541,7 @@ public class EnhancedServiceLoader {
                                     }
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("Load [{}] class fail.", line, e);
+                                    LOGGER.warn("Load [{}] class fail: {}", line, e.getMessage());
                                 } catch (ClassCastException e) {
                                     LOGGER.error("Load [{}] class fail, please make sure the extension" +
                                             " config in {} implements {}.", line, fileName, type.getName());
