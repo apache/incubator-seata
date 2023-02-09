@@ -21,6 +21,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
 - [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
 - [[#4734](https://github.com/seata/seata/pull/4734)] check if table meta cache should be refreshed in AT mode
+- [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
 
 
 ### optimize:
