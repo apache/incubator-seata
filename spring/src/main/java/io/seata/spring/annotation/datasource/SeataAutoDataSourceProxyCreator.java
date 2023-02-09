@@ -88,6 +88,7 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
             DataSource origin = (DataSource) bean;
             SeataDataSourceProxy proxy = buildProxy(origin, dataSourceProxyMode);
             DataSourceProxyHolder.put(origin, proxy);
+            LOGGER.info("Auto proxy data source '{}' by '{}' mode.", beanName, dataSourceProxyMode);
             return enhancer;
         }
 
