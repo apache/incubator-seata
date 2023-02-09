@@ -13,24 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.config.defaultvalue;
+package io.seata.spring.boot.autoconfigure.config.processor;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.config.defaultconfig.DefaultConfigManager;
-import io.seata.config.defaultconfig.DefaultConfigSourceProvider;
+import io.seata.config.Configuration;
+import io.seata.config.processor.ConfigurationProcessor;
+import io.seata.spring.boot.autoconfigure.config.source.PropertyObjectDefaultValueConfigSource;
 
-import static io.seata.config.source.ConfigSourceOrdered.PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
+import static io.seata.config.processor.ConfigProcessorOrdered.PROPERTY_OBJECT_DEFAULT_VALUE_PROCESSOR_ORDER;
 
 /**
  * The type Property object default config source provider.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "property-object-default-config", order = PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER)
-public class PropertyObjectDefaultConfigSourceProvider implements DefaultConfigSourceProvider {
+@LoadLevel(name = "property-object-default-value-processor", order = PROPERTY_OBJECT_DEFAULT_VALUE_PROCESSOR_ORDER)
+public class PropertyObjectDefaultValueConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
-    public void provide(DefaultConfigManager defaultConfigManager) {
-        defaultConfigManager.addSource(new PropertyObjectDefaultConfigSource());
+    public void process(Configuration configuration) {
+        configuration.addSource(new PropertyObjectDefaultValueConfigSource());
     }
 }

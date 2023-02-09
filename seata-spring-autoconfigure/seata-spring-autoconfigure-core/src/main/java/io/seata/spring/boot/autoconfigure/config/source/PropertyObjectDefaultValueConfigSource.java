@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.config.defaultvalue;
+package io.seata.spring.boot.autoconfigure.config.source;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -29,14 +29,13 @@ import javax.annotation.Nonnull;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringFormatUtils;
-import io.seata.config.defaultconfig.DefaultConfigSource;
-import io.seata.spring.boot.autoconfigure.config.source.SpringEnvironmentConfigSource;
+import io.seata.config.source.ConfigSource;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
 
-import static io.seata.config.source.ConfigSourceOrdered.PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.PROPERTY_OBJECT_DEFAULT_VALUE_CONFIG_SOURCE_ORDER;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_ENV_KEY;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_FILE_NAME_SYSTEM_PROPERTY_KEY;
 import static io.seata.config.util.ConfigurationUtils.CONFIG_TYPE_SYSTEM_ENV_KEY;
@@ -51,13 +50,13 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GR
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
- * The type Property object default config source.
+ * The type Property object default value ConfigSource.
  *
  * @author wang.liang
  */
-public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
+public class PropertyObjectDefaultValueConfigSource implements ConfigSource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyObjectDefaultConfigSource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyObjectDefaultValueConfigSource.class);
 
     private static final String DOT = String.valueOf(StringFormatUtils.DOT);
 
@@ -185,6 +184,6 @@ public class PropertyObjectDefaultConfigSource implements DefaultConfigSource {
 
     @Override
     public int getOrder() {
-        return PROPERTY_OBJECT_DEFAULT_CONFIG_SOURCE_ORDER;
+        return PROPERTY_OBJECT_DEFAULT_VALUE_CONFIG_SOURCE_ORDER;
     }
 }

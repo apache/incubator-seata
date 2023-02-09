@@ -1,1 +1,2 @@
+io.seata.spring.boot.autoconfigure.config.processor.PropertyObjectDefaultValueConfigurationProcessor
 io.seata.spring.boot.autoconfigure.config.processor.SpringEnvironmentConfigurationProcessor

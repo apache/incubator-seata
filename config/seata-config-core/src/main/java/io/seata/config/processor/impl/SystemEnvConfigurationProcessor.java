@@ -27,7 +27,7 @@ import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_ENV_PROCES
  *
  * @author wang.liang
  */
-@LoadLevel(name = "system-env", order = SYSTEM_ENV_PROCESSOR_ORDER)
+@LoadLevel(name = "system-env-processor", order = SYSTEM_ENV_PROCESSOR_ORDER)
 public class SystemEnvConfigurationProcessor implements ConfigurationProcessor {
 
     @Override

@@ -27,7 +27,7 @@ import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_PROPERTY_P
  *
  * @author wang.liang
  */
-@LoadLevel(name = SystemPropertyConfigSource.DEFAULT_NAME, order = SYSTEM_PROPERTY_PROCESSOR_ORDER)
+@LoadLevel(name = "system-property-processor", order = SYSTEM_PROPERTY_PROCESSOR_ORDER)
 public class SystemPropertyConfigurationProcessor implements ConfigurationProcessor {
 
     @Override

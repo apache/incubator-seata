@@ -33,7 +33,7 @@ import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_CENTER_PRO
  *
  * @author wang.liang
  */
-@LoadLevel(name = "config-center", order = CONFIG_CENTER_PROCESSOR_ORDER)
+@LoadLevel(name = "config-center-processor", order = CONFIG_CENTER_PROCESSOR_ORDER)
 public class ConfigCenterConfigurationProcessor implements ConfigurationProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigCenterConfigurationProcessor.class);

@@ -114,7 +114,8 @@ public final class ConfigurationUtils {
      * @param allowDynamicRefresh the allow dynamic refresh
      * @param doSetMainSource     if true, do set mainSource
      */
-    public static void loadFileSources(Configuration configuration, String configFileName, int order, boolean allowDynamicRefresh, boolean doSetMainSource) {
+    public static void loadFileSources(Configuration configuration, String configFileName, int order, int envSourceOrder,
+                                       boolean allowDynamicRefresh, boolean doSetMainSource) {
         // load commonSource without env
         ConfigSource commonSource = new FileConfigSource(configFileName, order, allowDynamicRefresh);
         configuration.addSource(commonSource);
@@ -139,7 +140,6 @@ public final class ConfigurationUtils {
             }
 
             // build envSource, and higher than commonSource
-            int envSourceOrder = order - 10;
             ConfigSource envSource = new FileConfigSource(envConfigFileName, envSourceOrder, allowDynamicRefresh);
 
             // add envSource before commonSource

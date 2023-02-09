@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import io.seata.common.util.StringUtils;
 import io.seata.config.source.AbstractScheduledUpdateConfigSource;
 
-import static io.seata.config.processor.ConfigProcessorOrdered.SYSTEM_PROPERTY_PROCESSOR_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.SYSTEM_PROPERTY_SOURCE_ORDER;
 
 /**
  * The type SystemPropertyConfigSource.
@@ -90,6 +90,6 @@ public class SystemPropertyConfigSource extends AbstractScheduledUpdateConfigSou
 
     @Override
     public int getOrder() {
-        return SYSTEM_PROPERTY_PROCESSOR_ORDER;
+        return SYSTEM_PROPERTY_SOURCE_ORDER;
     }
 }

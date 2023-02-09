@@ -20,15 +20,17 @@ import io.seata.config.Configuration;
 import io.seata.config.processor.ConfigurationProcessor;
 import io.seata.config.util.ConfigurationUtils;
 
-import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_FILE_PROCESSOR_ORDER;
+import static io.seata.config.processor.ConfigProcessorOrdered.CONFIG_FILES_PROCESSOR_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.COMMON_CONFIG_FILES_SOURCE_ORDER;
+import static io.seata.config.source.ConfigSourceOrdered.ENV_CONFIG_FILES_SOURCE_ORDER;
 
 /**
- * The type FileConfigurationProcessor.
+ * The type ConfigFilesConfigurationProcessor.
  *
  * @author wang.liang
  */
-@LoadLevel(name = "file", order = CONFIG_FILE_PROCESSOR_ORDER)
-public class FileConfigurationProcessor implements ConfigurationProcessor {
+@LoadLevel(name = "config-files-processor", order = CONFIG_FILES_PROCESSOR_ORDER)
+public class ConfigFilesConfigurationProcessor implements ConfigurationProcessor {
 
     @Override
     public void process(Configuration configuration) {
@@ -36,6 +38,8 @@ public class FileConfigurationProcessor implements ConfigurationProcessor {
         String configFileName = ConfigurationUtils.getConfigFileName(configuration);
 
         // load file sources by configFileName
-        ConfigurationUtils.loadFileSources(configuration, configFileName, CONFIG_FILE_PROCESSOR_ORDER, true, false);
+        ConfigurationUtils.loadFileSources(configuration, configFileName,
+                COMMON_CONFIG_FILES_SOURCE_ORDER, ENV_CONFIG_FILES_SOURCE_ORDER,
+                true, false);
     }
 }

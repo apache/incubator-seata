@@ -27,7 +27,7 @@ import static io.seata.config.source.ConfigSourceOrdered.CONFIG_CENTER_SOURCE_OR
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "File", order = CONFIG_CENTER_SOURCE_ORDER)
+@LoadLevel(name = "File", order = 1)
 public class FileConfigSourceProvider implements ConfigSourceProvider {
 
     private static final String DEFAULT_FILE_NAME = "file.conf";
@@ -45,6 +45,8 @@ public class FileConfigSourceProvider implements ConfigSourceProvider {
         String configFileName = configuration.getString(fileNameConfigKey, DEFAULT_FILE_NAME);
 
         // load file sources by configFileName
-        ConfigurationUtils.loadFileSources(configuration, configFileName, CONFIG_CENTER_SOURCE_ORDER, true,true);
+        ConfigurationUtils.loadFileSources(configuration, configFileName,
+            CONFIG_CENTER_SOURCE_ORDER, CONFIG_CENTER_SOURCE_ORDER - 100,
+            true, true);
     }
 }

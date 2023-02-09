@@ -19,12 +19,10 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.source.ConfigSourceProvider;
 
-import static io.seata.config.source.ConfigSourceOrdered.CONFIG_CENTER_SOURCE_ORDER;
-
 /**
  * @author xingfudeshi@gmail.com
  */
-@LoadLevel(name = "Consul", order = CONFIG_CENTER_SOURCE_ORDER)
+@LoadLevel(name = "Consul", order = 1)
 public class ConsulConfigSourceProvider implements ConfigSourceProvider {
     @Override
     public void provide(Configuration configuration) {

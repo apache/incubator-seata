@@ -27,7 +27,7 @@ import static io.seata.config.processor.ConfigProcessorOrdered.SPRING_ENVIRONMEN
  *
  * @author wang.liang
  */
-@LoadLevel(name = "spring-environment", order = SPRING_ENVIRONMENT_PROCESSOR_ORDER)
+@LoadLevel(name = "spring-environment-processor", order = SPRING_ENVIRONMENT_PROCESSOR_ORDER)
 public class SpringEnvironmentConfigurationProcessor implements ConfigurationProcessor {
 
     @Override

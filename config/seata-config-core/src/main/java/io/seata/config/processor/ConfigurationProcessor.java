@@ -22,7 +22,6 @@ import io.seata.config.Configuration;
  *
  * @author wang.liang
  */
-
 public interface ConfigurationProcessor {
 
     /**
