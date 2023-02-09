@@ -42,6 +42,11 @@ public class MultiRegistryFactory {
         return MultiRegistryFactoryHolder.INSTANCES;
     }
 
+    public static String getRegistryType() {
+        return ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+    }
+
     private static List<RegistryService> buildRegistryServices() {
         List<RegistryService> registryServices = new ArrayList<>();
         String registryTypeNamesStr =

@@ -100,6 +100,12 @@ public final class ConfigurationFactory {
         return instance;
     }
 
+    public static String getConfigType() {
+        return CURRENT_FILE_INSTANCE.getConfig(
+            ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE);
+    }
+
     private static Configuration buildConfiguration() {
         String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR

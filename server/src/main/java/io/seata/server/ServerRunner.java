@@ -18,8 +18,11 @@ package io.seata.server;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.Disposable;
 
+import io.seata.discovery.registry.MultiRegistryFactory;
+import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -47,6 +50,8 @@ public class ServerRunner implements CommandLineRunner, DisposableBean {
     public void run(String... args) {
         try {
             long start = System.currentTimeMillis();
+            LOGGER.info("seata server starting in config type:{},registry type:{},session store mode:{},lock store mode:{}",
+                ConfigurationFactory.getConfigType(), MultiRegistryFactory.getRegistryType(), StoreConfig.getSessionMode(), StoreConfig.getLockMode());
             Server.start(args);
             started = true;
 
