@@ -32,6 +32,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
 - [[#5273](https://github.com/seata/seata/pull/5273)] Optimize the compilation configuration of the `protobuf-maven-plugin` plug-in to solve the problem of too long command lines in higher versions.
 - [[#5303](https://github.com/seata/seata/pull/5303)] remove startup script the -Xmn configuration
+- [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
