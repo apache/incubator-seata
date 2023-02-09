@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author zhangsen
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
-public class DataBaseSessionManager extends AbstractSessionManager
-    implements Initialize {
+public class DataBaseSessionManager extends AbstractSessionManager implements Initialize {
 
     /**
      * The constant LOGGER.
@@ -49,25 +48,10 @@ public class DataBaseSessionManager extends AbstractSessionManager
     protected static final Logger LOGGER = LoggerFactory.getLogger(DataBaseSessionManager.class);
 
     /**
-     * The Task name.
-     */
-    protected String taskName;
-
-    /**
      * Instantiates a new Data base session manager.
      */
     public DataBaseSessionManager() {
         super();
-    }
-
-    /**
-     * Instantiates a new Data base session manager.
-     *
-     * @param name the name
-     */
-    public DataBaseSessionManager(String name) {
-        super();
-        this.taskName = name;
     }
 
     @Override
@@ -77,24 +61,15 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
-        if (StringUtils.isBlank(taskName)) {
-            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
-            if (!ret) {
-                throw new StoreException("addGlobalSession failed.");
-            }
-        } else {
-            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
-            if (!ret) {
-                throw new StoreException("addGlobalSession failed.");
-            }
+        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
+        if (!ret) {
+            throw new StoreException("addGlobalSession failed.");
         }
+
     }
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         try {
             //  set expected status threadlocal
             session.setExpectedStatusFromCurrent();
@@ -110,9 +85,9 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     /**
-     * remove globalSession
-     * 1. rootSessionManager remove normal globalSession
-     * 2. retryCommitSessionManager and retryRollbackSessionManager remove retry expired globalSession
+     * remove globalSession 1. rootSessionManager remove normal globalSession 2. retryCommitSessionManager and
+     * retryRollbackSessionManager remove retry expired globalSession
+     *
      * @param session the session
      * @throws TransactionException the transaction exception
      */
@@ -126,9 +101,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, session);
         if (!ret) {
             throw new StoreException("addBranchSession failed.");
@@ -137,9 +109,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, session);
         if (!ret) {
             throw new StoreException("updateBranchSessionStatus failed.");
@@ -148,9 +117,6 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeBranchSession failed.");
@@ -184,7 +150,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException {
+        throws TransactionException {
         return lockCallable.call();
     }
 }
