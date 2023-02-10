@@ -68,7 +68,7 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public boolean containsValue(Object o) {
-        return targetMap.containsKey(o);
+        return targetMap.containsValue(o);
     }
 
     @Override
