@@ -69,7 +69,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
      * key filename
      * value LOCK_SHA_SCRIPT_ID
      */
-    private static final Map<String, String> LOCK_SHA_MAP = new HashMap<>(5);
+    private static final Map<String, String> LOCK_SHA_MAP = new HashMap<>();
 
     /**
      * load redis lua script

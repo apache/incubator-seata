@@ -15,7 +15,6 @@
  */
 package io.seata.server.console.impl.redis;
 
-import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
