@@ -50,8 +50,7 @@ public class ServerRunner implements CommandLineRunner, DisposableBean {
     public void run(String... args) {
         try {
             long start = System.currentTimeMillis();
-            LOGGER.info("seata server starting in config type:{},registry type:{},session store mode:{},lock store mode:{}",
-                ConfigurationFactory.getConfigType(), MultiRegistryFactory.getRegistryType(), StoreConfig.getSessionMode(), StoreConfig.getLockMode());
+            LOGGER.info("seata server starting in session store mode:{},lock store mode:{}", StoreConfig.getSessionMode(), StoreConfig.getLockMode());
             Server.start(args);
             started = true;
 
