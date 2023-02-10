@@ -1,0 +1,9 @@
+[
+  {
+    "name": "com.thoughtworks.xstream.XStream",
+    "condition": {
+      "typeReachable": "com.thoughtworks.xstream.XStream"
+    },
+    "allPublicMethods": true
+  }
+]
