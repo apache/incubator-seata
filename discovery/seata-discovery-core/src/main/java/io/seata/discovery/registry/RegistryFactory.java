@@ -47,7 +47,7 @@ public class RegistryFactory {
         String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
             ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
-        LOGGER.info("use registry center type:{}", registryTypeName);
+        LOGGER.info("use registry center type: {}", registryTypeName);
         try {
             registryType = RegistryType.getType(registryTypeName);
         } catch (Exception exx) {

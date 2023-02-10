@@ -31,7 +31,7 @@
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
 - [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
 - [[#5303](https://github.com/seata/seata/pull/5303)] 移除启动脚本的-Xmn参数
-- [[#5325](https://github.com/seata/seata/pull/5325)] 当Server启动时添加配置中心、注册中心类型以及存储模式日志信息
+- [[#5325](https://github.com/seata/seata/pull/5325)] 添加配置中心、注册中心类型以及存储模式日志信息
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
 
