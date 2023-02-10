@@ -244,6 +244,7 @@ public class TransactionalTemplate {
         switch (tx.getLocalStatus()) {
             case RollbackFailed:
             case TimeoutRollbackFailed:
+            case RollbackRetryTimeout:
                 code = TransactionalExecutor.Code.RollbackFailure;
                 break;
             case Rollbacking:
@@ -253,7 +254,6 @@ public class TransactionalTemplate {
             case TimeoutRollbacking:
             case TimeoutRollbackRetrying:
             case TimeoutRollbacked:
-            case RollbackRetryTimeout:
                 code = TransactionalExecutor.Code.TimeoutRollback;
                 break;
             case Rollbacked:
