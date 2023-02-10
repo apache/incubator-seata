@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableMap;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
 import io.seata.common.exception.StoreException;
@@ -51,7 +52,6 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -59,7 +59,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
 
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
@@ -142,7 +142,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     protected void initLogQueryLimit() {
-        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
+        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     /**
