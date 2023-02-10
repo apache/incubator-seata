@@ -15,27 +15,26 @@
  */
 package io.seata.rm.datasource.exception;
 
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import java.sql.SQLException;
 
 /**
- * The type RmTableMetaException exception.
+ * The type TableMetaException exception.
  *
  * @author Bughue
  */
 public class TableMetaException extends SQLException {
     private String columnName;
-    private TableMeta tableMeta;
+    private String tableName;
     private boolean refreshable;
 
-    public TableMetaException(String columnName, TableMeta tableMeta,boolean refreshable) {
+    public TableMetaException(String columnName, String tableName,boolean refreshable) {
         this.columnName = columnName;
-        this.tableMeta = tableMeta;
+        this.tableName = tableName;
         this.refreshable = refreshable;
     }
 
-    public TableMeta getTableMeta() {
-        return tableMeta;
+    public String getTableName() {
+        return tableName;
     }
 
     public String getColumnName() {
