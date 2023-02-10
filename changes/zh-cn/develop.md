@@ -13,6 +13,7 @@
 - [[#5233](https://github.com/seata/seata/pull/5233)] 修复LoadBalance相关配置不一致的问题
 - [[#5245](https://github.com/seata/seata/pull/5245)] 修复不完整的distribution模块依赖
 - [[#5239](https://github.com/seata/seata/pull/5239)] 修复当使用JDK代理时，`getConfig` 方法获取部分配置时抛出 `ClassCastException` 异常的问题
+- [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -41,6 +42,7 @@
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
+- [liuqiufeng](https://github.com/liuqiufeng)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

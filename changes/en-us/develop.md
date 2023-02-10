@@ -13,6 +13,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
 - [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
+- [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -41,6 +42,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
+- [liuqiufeng](https://github.com/liuqiufeng)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
