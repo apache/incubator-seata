@@ -33,6 +33,9 @@ import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
+
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -57,6 +60,8 @@ public class TableRecords implements java.io.Serializable {
     private String tableName;
 
     private List<Row> rows = new ArrayList<Row>();
+
+    private static final Interner<String> TABLE_NAME_POOL = Interners.newWeakInterner();
 
     /**
      * Gets table name.
@@ -199,7 +204,7 @@ public class TableRecords implements java.io.Serializable {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = checkAndGetColumnMeta(tmeta,colName);
+                ColumnMeta col = getColumnMeta(tmeta,colName);
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
@@ -268,10 +273,10 @@ public class TableRecords implements java.io.Serializable {
      * @param tmeta the table meta
      * @param colName the column nmae
      */
-    private static ColumnMeta checkAndGetColumnMeta(TableMeta tmeta , String colName) throws SQLException {
+    private static ColumnMeta getColumnMeta(TableMeta tmeta , String colName) throws SQLException {
         ColumnMeta col = tmeta.getColumnMeta(colName);
         if (col == null) {
-            throw new TableMetaException(colName, tmeta, true);
+            throw new TableMetaException(colName, tmeta.getTableName(), true);
         }
         return col;
     }
@@ -294,33 +299,32 @@ public class TableRecords implements java.io.Serializable {
             if (statementProxy == null || !e.isRefreshable()) {
                 throw e;
             }
-            refreshTableMeta(statementProxy.getConnectionProxy(), e.getTableMeta(), e.getColumnName());
+            refreshTableMeta(statementProxy.getConnectionProxy(), e.getTableName(), e.getColumnName());
             // try to build again after refresh table meta successfully
             return buildRecords(getCacheTableMeta(statementProxy.getConnectionProxy(), tmeta.getTableName()), resultSet);
         }
     }
 
 
-    private static void refreshTableMeta(ConnectionProxy connectionProxy, TableMeta tmeta, String columnName)
+    private static void refreshTableMeta(ConnectionProxy connectionProxy, String tableName, String columnName)
         throws SQLException {
-        if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
-            synchronized (TableRecords.class) {
-                if (columnEmptyAndRefreshable(connectionProxy, tmeta, columnName)) {
+        if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
+            synchronized (TABLE_NAME_POOL.intern(tableName)) {
+                if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
                     TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
                         connectionProxy.getTargetConnection(), connectionProxy.getDataSourceProxy().getResourceId());
                     
                     // still empty after refreshed
-                    if (getCacheTableMeta(connectionProxy, tmeta.getTableName()).getColumnMeta(columnName) == null) {
-                        throw new TableMetaException(columnName, tmeta, false);
+                    if (getCacheTableMeta(connectionProxy, tableName).getColumnMeta(columnName) == null) {
+                        throw new TableMetaException(columnName, tableName, false);
                     }
                 }
             }
         }
     }
 
-    private static boolean columnEmptyAndRefreshable(ConnectionProxy connectionProxy, TableMeta tmeta,
-        String columnName) {
-        TableMeta cacheTableMeta = getCacheTableMeta(connectionProxy, tmeta.getTableName());
+    private static boolean shouldBeRefreshed(ConnectionProxy connectionProxy, String tableName, String columnName) {
+        TableMeta cacheTableMeta = getCacheTableMeta(connectionProxy, tableName);
         return cacheTableMeta.getColumnMeta(columnName) == null;
     }
 
