@@ -18,11 +18,8 @@ package io.seata.server;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.Disposable;
 
-import io.seata.discovery.registry.MultiRegistryFactory;
-import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
