@@ -308,9 +308,9 @@ public class TableRecords implements java.io.Serializable {
 
     private static void refreshTableMeta(ConnectionProxy connectionProxy, String tableName, String columnName)
         throws SQLException {
-        if (shouldBeRefresh(connectionProxy, tableName, columnName)) {
+        if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
             synchronized (TABLE_NAME_POOL.intern(tableName)) {
-                if (shouldBeRefresh(connectionProxy, tableName, columnName)) {
+                if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
                     TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
                         connectionProxy.getTargetConnection(), connectionProxy.getDataSourceProxy().getResourceId());
                     
@@ -323,7 +323,7 @@ public class TableRecords implements java.io.Serializable {
         }
     }
 
-    private static boolean shouldBeRefresh(ConnectionProxy connectionProxy, String tableName, String columnName) {
+    private static boolean shouldBeRefreshed(ConnectionProxy connectionProxy, String tableName, String columnName) {
         TableMeta cacheTableMeta = getCacheTableMeta(connectionProxy, tableName);
         return cacheTableMeta.getColumnMeta(columnName) == null;
     }
