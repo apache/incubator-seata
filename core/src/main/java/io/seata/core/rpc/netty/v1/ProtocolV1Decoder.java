@@ -106,6 +106,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
             throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
         }
+        byte version = frame.readByte();
         // TODO  check version compatible here
 
         int fullLength = frame.readInt();
@@ -148,3 +149,4 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         return rpcMessage;
     }
 }
+
