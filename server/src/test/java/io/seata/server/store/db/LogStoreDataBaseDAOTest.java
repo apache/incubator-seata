@@ -599,7 +599,6 @@ public class LogStoreDataBaseDAOTest {
 
 
         String sql = "select * from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
-        String delSql = "delete from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
         Connection conn = null;
         try{
             conn = dataSource.getConnection();

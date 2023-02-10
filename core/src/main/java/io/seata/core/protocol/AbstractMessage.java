@@ -15,14 +15,9 @@
  */
 package io.seata.core.protocol;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.Constants;
 import io.seata.common.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 /**
  * The type Abstract message.
@@ -31,18 +26,7 @@ import java.nio.charset.Charset;
  */
 public abstract class AbstractMessage implements MessageTypeAware, Serializable {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractMessage.class);
-
     protected static final long serialVersionUID = -1441020418526899889L;
-
-    /**
-     * The constant UTF8.
-     */
-    protected static final Charset UTF8 = Constants.DEFAULT_CHARSET;
-    /**
-     * The Ctx.
-     */
-    protected ChannelHandlerContext ctx;
 
     /**
      * Bytes to int int.

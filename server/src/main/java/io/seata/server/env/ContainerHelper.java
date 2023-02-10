@@ -26,10 +26,6 @@ import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
  */
 public class ContainerHelper {
 
-    private static final String C_GROUP_PATH = "/proc/1/cgroup";
-    private static final String DOCKER_PATH = "/docker";
-    private static final String KUBEPODS_PATH = "/kubepods";
-
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_SEATA_IP_KEY = "SEATA_IP";
     private static final String ENV_SERVER_NODE_KEY = "SERVER_NODE";

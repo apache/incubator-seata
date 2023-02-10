@@ -50,8 +50,6 @@ import java.util.Set;
 @LoadLevel(name = JdbcConstants.POSTGRESQL, scope = Scope.PROTOTYPE)
 public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlInsertExecutor.class);
-
     /**
      * Instantiates a new Abstract dml base executor.
      *

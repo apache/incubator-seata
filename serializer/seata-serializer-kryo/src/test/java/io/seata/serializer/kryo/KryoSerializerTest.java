@@ -109,7 +109,6 @@ public class KryoSerializerTest {
         kryo.setRegistrationRequired(false);
         //kryo.register(HashMap.class);
 
-        long beginMills=System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {
             Map<String, String> map = new HashMap<>();
             map.put(String.valueOf(i), "test");

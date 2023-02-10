@@ -48,20 +48,11 @@ public class AbstractLockStoreSql implements LockStoreSql {
      * The constant WHERE_PLACE_HOLD
      */
     protected static final String WHERE_PLACE_HOLD = " #where# ";
-    /**
-     * The constant IN_PARAMS_PLACE_HOLD.
-     */
-    protected static final String IN_PARAMS_PLACE_HOLD = " #in_params# ";
 
     /**
      * The constant LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD.
      */
     protected static final String LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD = " #lock_table_pk_where_condition# ";
-
-    /**
-     * The constant LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD.
-     */
-    protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD = " #lock_table_branch_id_where_condition# ";
 
 
     /**

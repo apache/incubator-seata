@@ -30,7 +30,6 @@ class NettyBaseConfigTest {
      */
     @Test
     void name() {
-        NettyBaseConfig nettyBaseConfig = new NettyBaseConfig();
         System.out.print("test static .");
     }
 

@@ -32,8 +32,6 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The Data base session manager.
@@ -43,11 +41,6 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
     implements Initialize {
-
-    /**
-     * The constant LOGGER.
-     */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(DataBaseSessionManager.class);
 
     /**
      * The Task name.

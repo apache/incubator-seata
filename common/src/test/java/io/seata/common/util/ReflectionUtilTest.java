@@ -46,7 +46,7 @@ public class ReflectionUtilTest {
         Assertions.assertEquals("d",
                 ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
         Assertions.assertThrows(ClassCastException.class, () -> {
-            Integer var = ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT");
+            ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class,

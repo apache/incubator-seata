@@ -78,7 +78,7 @@ public class RedisQueryConsolTest {
         param.setPageNum(1);
         param.setXid("_192.168.158.80:8091:37621364385185792");
         try {
-            PageResult<GlobalLockVO> query = globalLockService.query(param);
+            globalLockService.query(param);
         } catch (Exception e) {
             System.out.print(e.getMessage());
         }

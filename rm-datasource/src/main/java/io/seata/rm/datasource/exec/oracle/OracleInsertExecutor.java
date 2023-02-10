@@ -46,8 +46,6 @@ import java.util.Set;
 @LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleInsertExecutor extends BaseInsertExecutor implements Sequenceable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OracleInsertExecutor.class);
-
     /**
      * Instantiates a new Abstract dml base executor.
      *

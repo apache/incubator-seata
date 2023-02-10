@@ -121,7 +121,7 @@ public class RedisDistributedLockerTest {
         Assertions.assertTrue(e);
 
         //clear
-        boolean f = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue + 2,null));
+        distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue + 2,null));
     }
 
     @Test

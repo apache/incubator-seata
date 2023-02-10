@@ -28,8 +28,6 @@ import io.seata.server.store.StoreConfig.LockMode;
  */
 public class LockerManagerFactory {
 
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
     /**
      * the lock manager
      */

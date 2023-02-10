@@ -87,8 +87,6 @@ public class MySQLUndoLogManagerTest {
     public static void setup(){
         EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.MYSQL,
             SQLOperateRecognizerHolderFactory.class.getClassLoader());
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
-            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @BeforeEach

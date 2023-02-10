@@ -71,8 +71,6 @@ public class DataCompareUtilsTest {
 
         List<Row> rows = new ArrayList<>();
         Row row = new Row();
-        Field field01 = addField(row,"pk", 1, "12345");
-        Field field02 = addField(row,"age", 1, "18");
         rows.add(row);
         beforeImage.setRows(rows);
 

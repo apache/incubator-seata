@@ -169,12 +169,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         List<Row> beforeRows = new ArrayList<>();
         Row row0 = new Row();
-        Field field01 = addField(row0, "id", 1, "12345");
-        Field field02 = addField(row0, "age", 1, "2");
         beforeRows.add(row0);
         Row row1 = new Row();
-        Field field11 = addField(row1, "id", 1, "12346");
-        Field field12 = addField(row1, "age", 1, "2");
         beforeRows.add(row1);
         beforeImage.setRows(beforeRows);
 

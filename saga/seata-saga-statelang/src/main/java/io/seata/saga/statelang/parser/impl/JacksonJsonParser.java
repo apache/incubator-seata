@@ -38,8 +38,6 @@ import java.util.List;
 @LoadLevel(name = JacksonJsonParser.NAME)
 public class JacksonJsonParser implements JsonParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
-
     private ObjectMapper objectMapperWithAutoType = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")

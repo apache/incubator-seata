@@ -80,7 +80,7 @@ public class StateMachineTests {
             Map<String, Object> paramMap = new HashMap<>(1);
             paramMap.put("a", 1);
 
-            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            stateMachineEngine.start(stateMachineName, null, paramMap);
         });
 
         SagaCostPrint.executeAndPrint("1-4", () -> {

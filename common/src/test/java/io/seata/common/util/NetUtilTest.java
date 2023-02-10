@@ -50,7 +50,7 @@ public class NetUtilTest {
     @Test
     public void testToStringAddress() {
         try {
-            String stringAddress = NetUtil.toStringAddress(InetSocketAddress.createUnresolved("127.0.0.1", 9828));
+            NetUtil.toStringAddress(InetSocketAddress.createUnresolved("127.0.0.1", 9828));
         } catch (Exception e) {
             assertThat(e).isInstanceOf(NullPointerException.class);
         }

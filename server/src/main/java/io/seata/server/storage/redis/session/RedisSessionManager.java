@@ -42,10 +42,6 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
     implements Initialize {
-    /**
-     * The constant LOGGER.
-     */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManager.class);
 
     /**
      * The Task name.

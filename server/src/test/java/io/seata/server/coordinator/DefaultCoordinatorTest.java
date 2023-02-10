@@ -90,8 +90,6 @@ public class DefaultCoordinatorTest {
 
     private static DefaultCore core;
 
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
     @BeforeAll
     public static void beforeClass(ApplicationContext context) throws Exception {
         EnhancedServiceLoader.unload(AbstractCore.class);

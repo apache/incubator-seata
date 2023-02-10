@@ -134,9 +134,6 @@ public class MysqlTableMetaCacheTest {
         druidDataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(druidDataSource);
-
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(dataSourceProxy.getPlainConnection(), "t1",
-            dataSourceProxy.getResourceId());
         //change the columns meta
         columnMetas =
             new Object[][] {

@@ -56,7 +56,6 @@ public class PostgresqlDeleteRecognizerTest {
     @Test
     public void testGetTableName() {
         String sql = "delete from t where id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
         List<SQLRecognizer> sqlRecognizers = SQLVisitorFactory.get(sql, DB_TYPE);
         SQLDeleteRecognizer recognizer = (SQLDeleteRecognizer) sqlRecognizers.get(0);
         Assertions.assertEquals(recognizer.getTableName(), "t");

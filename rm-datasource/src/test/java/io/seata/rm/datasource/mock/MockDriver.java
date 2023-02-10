@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockDriver.class);
-
     /**
      * the mock column labels of return value
      */

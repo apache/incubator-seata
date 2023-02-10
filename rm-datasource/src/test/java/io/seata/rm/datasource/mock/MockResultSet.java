@@ -49,8 +49,6 @@ public class MockResultSet extends ResultSetBase {
      */
     private List<Object[]> rows;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockResultSet.class);
-
     /**
      * Instantiates a new Mock result set.
      * @param statement

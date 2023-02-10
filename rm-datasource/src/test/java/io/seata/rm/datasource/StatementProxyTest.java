@@ -92,8 +92,6 @@ public class StatementProxyTest {
         statementProxy = new StatementProxy(connectionProxy, statement);
         EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.MYSQL,
             SQLOperateRecognizerHolderFactory.class.getClassLoader());
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
-            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @AfterEach
