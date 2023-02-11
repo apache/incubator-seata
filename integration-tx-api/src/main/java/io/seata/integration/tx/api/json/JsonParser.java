@@ -17,7 +17,6 @@ package io.seata.integration.tx.api.json;
 
 /**
  * @author leezongjie
- * @date 2023/1/13
  */
 public interface JsonParser {
 

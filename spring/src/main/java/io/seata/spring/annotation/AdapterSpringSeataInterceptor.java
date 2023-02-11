@@ -26,7 +26,6 @@ import org.springframework.util.Assert;
 
 /**
  * @author leezongjie
- * @date 2023/2/11
  */
 public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor {
 

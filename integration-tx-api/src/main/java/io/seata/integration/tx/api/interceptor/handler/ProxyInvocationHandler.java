@@ -22,7 +22,6 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public interface ProxyInvocationHandler {
 

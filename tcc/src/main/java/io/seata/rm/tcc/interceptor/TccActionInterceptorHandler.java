@@ -40,7 +40,6 @@ import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 

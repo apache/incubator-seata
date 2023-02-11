@@ -22,7 +22,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author leezongjie
- * @date 2023/2/11
  */
 public class AdapterInvocationWrapper implements InvocationWrapper {
 
