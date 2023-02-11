@@ -441,38 +441,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     //endregion the methods about findAddSeataAdvisorPosition  END
 
-
-    private boolean existsAnnotation(Class<?>... classes) {
-        if (CollectionUtils.isNotEmpty(classes)) {
-            for (Class<?> clazz : classes) {
-                if (clazz == null) {
-                    continue;
-                }
-                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
-                if (trxAnno != null) {
-                    return true;
-                }
-                Method[] methods = clazz.getMethods();
-                for (Method method : methods) {
-                    trxAnno = method.getAnnotation(GlobalTransactional.class);
-                    if (trxAnno != null) {
-                        return true;
-                    }
-
-                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
-                    if (lockAnno != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
-        return new MethodDesc(anno, method);
-    }
-
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
             throws BeansException {
