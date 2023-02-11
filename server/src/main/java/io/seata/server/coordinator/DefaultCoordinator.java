@@ -337,7 +337,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return false;
                 }
 
-                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+                LOGGER.warn("Global transaction[{}] is timeout and will be rollback,transaction begin time:{} and now:{}", globalSession.getXid(), globalSession.getBeginTime(), System.currentTimeMillis());
 
                 globalSession.close();
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
@@ -379,9 +379,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
-                    // Prevent thread safety issues
-                    SessionHolder.getRootSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
                     SessionHelper.endRollbackFailed(rollbackingSession, true, true);
 
@@ -416,9 +413,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
-                    // Prevent thread safety issues
-                    SessionHolder.getRootSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
                     SessionHelper.endCommitFailed(committingSession, true, true);
