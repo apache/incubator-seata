@@ -132,7 +132,7 @@ public class RaftServerFactory {
         }
         boolean autoJoinCluster = CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false);
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-            + separator + serverId.getPort();
+            + separator + "raft" + separator + serverId.getPort();
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         try {
             // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
