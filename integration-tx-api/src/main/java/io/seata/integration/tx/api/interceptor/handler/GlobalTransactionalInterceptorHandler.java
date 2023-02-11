@@ -136,16 +136,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
     @Override
-    public Set<String> getMethodsToProxy() {
-        return methodsToProxy;
-    }
-
-    @Override
-    public SeataInterceptorPosition getPosition() {
-        return SeataInterceptorPosition.AfterTransaction;
-    }
-
-    @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         Class<?> targetClass = invocation.getTarget().getClass();
         Method specificMethod = invocation.getMethod();
@@ -352,4 +342,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
+
+    @Override
+    public Set<String> getMethodsToProxy() {
+        return methodsToProxy;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
+    }
+
 }
