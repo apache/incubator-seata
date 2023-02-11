@@ -67,7 +67,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
-import static io.seata.common.DefaultValues.*;
+import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 
 /**
  * The type Global transaction scanner.
@@ -440,6 +442,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     //endregion the methods about findAddSeataAdvisorPosition  END
+
+    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
+        return new MethodDesc(anno, method);
+    }
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
