@@ -31,6 +31,8 @@
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
 - [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
 - [[#5303](https://github.com/seata/seata/pull/5303)] 移除启动脚本的-Xmn参数
+- [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
+- [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -56,6 +58,7 @@
 - [isharpever](https://github.com/isharpever)
 - [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
 - [mxsm](https://github.com/mxsm)
+- [l81893521](https://github.com/l81893521)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
