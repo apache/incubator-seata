@@ -83,17 +83,25 @@ public class LowerCaseLinkHashMapTest {
 
     @Test
     void testPutAndRemove() {
-        Assertions.assertNull(lowerCaseLinkHashMap.get("keyPut"));
-        lowerCaseLinkHashMap.put("keyPut", "valuePut");
-        Assertions.assertEquals("valuePut", lowerCaseLinkHashMap.get("keyPut"));
-        Assertions.assertEquals("valuePut", lowerCaseLinkHashMap.remove("keyPut"));
-        Assertions.assertNull(lowerCaseLinkHashMap.get("keyPut"));
-        Assertions.assertNull(lowerCaseLinkHashMap.remove(123));
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Assertions.assertNull(map.get("keyPut"));
+        map.put("keyPut", "valuePut");
+        Assertions.assertEquals("valuePut", map.get("keyPut"));
+        Assertions.assertEquals("valuePut", map.remove("keyPut"));
+        Assertions.assertNull(map.get("keyPut"));
+        Assertions.assertNull(map.remove(123));
+        map.put("keyPut", "valuePut");
+        Assertions.assertEquals("valuePut", map.get("keyPut"));
+        Assertions.assertFalse( map.remove("keyPut","VALUEPUT"));
+        Assertions.assertEquals("valuePut", map.get("keyPut"));
+        Assertions.assertTrue(map.remove("keyPut","valuePut"));
+        Assertions.assertNull(map.get("keyPut"));
+        Assertions.assertFalse(map.remove(123, 123));
     }
 
     @Test
     void testPutAllAndClear() {
-        Map<String, Object> map = new LowerCaseLinkHashMap<>();
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
         map.putAll(lowerCaseLinkHashMap);
         Assertions.assertEquals(map, lowerCaseLinkHashMap);
         map.clear();
@@ -106,7 +114,6 @@ public class LowerCaseLinkHashMapTest {
         keySet.add("Key");
         keySet.add("Key2");
         Assertions.assertEquals(keySet, lowerCaseLinkHashMap.keySet());
-        // TODO: 2023/2/7 待确认
     }
 
     @Test
@@ -118,63 +125,140 @@ public class LowerCaseLinkHashMapTest {
     }
 
     @Test
-    void entrySet() {
-        // TODO: 2023/2/7
-    }
-
-    @Test
     void getOrDefault() {
+        Assertions.assertEquals("Value", lowerCaseLinkHashMap.getOrDefault("Key", "abc"));
+        Assertions.assertEquals("Value", lowerCaseLinkHashMap.getOrDefault("key", "abc"));
+        Assertions.assertEquals("abc", lowerCaseLinkHashMap.getOrDefault("default", "abc"));
     }
 
     @Test
     void replaceAll() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        // replace all values with key
+        map.replaceAll((key, value) -> key);
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            Assertions.assertEquals(entry.getKey(), entry.getValue());
+        }
     }
 
     @Test
     void putIfAbsent() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object obj = map.putIfAbsent("putIfAbsent", "putIfAbsent");
+        Assertions.assertNull(obj);
+        Assertions.assertEquals("putIfAbsent", map.get("putIfAbsent"));
+        obj = map.putIfAbsent("key", "putIfAbsent");
+        Assertions.assertEquals("Value", obj);
+        Assertions.assertEquals("Value", map.get("key"));
     }
 
     @Test
     void testRemove() {
-    }
-
-    @Test
-    void replace() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object value = map.remove("key");
+        Assertions.assertEquals("Value", value);
+        Assertions.assertFalse(map.containsKey("key"));
+        Assertions.assertTrue(map.containsKey("key2"));
     }
 
     @Test
     void testReplace() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object replace = map.replace("key", "replace");
+        Assertions.assertEquals("Value", replace);
+        Assertions.assertEquals("replace",map.get("key"));
+
+        boolean result = map.replace("key2", "value2", "replace");
+        Assertions.assertFalse(result);
+        Assertions.assertEquals("Value2", map.get("key2"));
+        
+        result = map.replace("key2", "Value2", "replace");
+        Assertions.assertTrue(result);
+        Assertions.assertEquals("replace", map.get("key2"));
     }
 
     @Test
     void computeIfAbsent() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object result = map.computeIfAbsent("key", String::toUpperCase);
+        Assertions.assertEquals("Value", result);
+        Assertions.assertEquals("Value", map.get("key"));
+
+        result = map.computeIfAbsent("computeIfAbsent", String::toUpperCase);
+        Assertions.assertEquals("COMPUTEIFABSENT", result);
+        Assertions.assertEquals("COMPUTEIFABSENT", map.get("computeIfAbsent"));
     }
 
     @Test
     void computeIfPresent() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object result = map.computeIfPresent("key", (key,value)-> key.toUpperCase());
+        Assertions.assertEquals("KEY", result);
+        Assertions.assertEquals("KEY", map.get("key"));
+
+        result = map.computeIfPresent("key", (key, value) -> null);
+        Assertions.assertNull(result);
+        Assertions.assertFalse(map.containsKey("key"));
+        
+        result = map.computeIfPresent("computeIfPresent", (key,value)-> key.toUpperCase());
+        Assertions.assertNull(result);
+        Assertions.assertFalse(map.containsKey("computeIfPresent"));
     }
 
     @Test
     void compute() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object result = map.compute("key", (key,value)-> key.toUpperCase());
+        Assertions.assertEquals("KEY", result);
+        Assertions.assertEquals("KEY", map.get("key"));
+
+        result = map.compute("key", (key, value) -> null);
+        Assertions.assertNull(result);
+        Assertions.assertFalse(map.containsKey("key"));
+
+        result = map.compute("compute", (key,value)-> key.toUpperCase());
+        Assertions.assertEquals("COMPUTE", result);
+        Assertions.assertEquals("COMPUTE", map.get("compute"));
     }
 
     @Test
     void merge() {
-    }
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Object result = map.merge("key", "merge",(oldValue,value)-> oldValue.toString().toUpperCase());
+        Assertions.assertEquals("VALUE", result);
+        Assertions.assertEquals("VALUE", map.get("key"));
 
-    @Test
-    void testClone() {
+        result = map.merge("key", "merge", (oldValue, value) -> null);
+        Assertions.assertNull(result);
+        Assertions.assertFalse(map.containsKey("key"));
+
+        result = map.merge("compute", "merge", (oldValue, value) -> oldValue.toString().toUpperCase());
+        Assertions.assertEquals("merge", result);
+        Assertions.assertEquals("merge", map.get("compute"));
     }
 
     @Test
     void testEquals() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Assertions.assertTrue(map.equals(lowerCaseLinkHashMap));
+        map.put("equals", "equals");
+        Assertions.assertFalse(map.equals(lowerCaseLinkHashMap));
     }
 
     @Test
     void testHashCode() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Assertions.assertEquals(lowerCaseLinkHashMap.hashCode(), map.hashCode());
+        map.put("equals", "equals2");
+        Assertions.assertNotEquals(lowerCaseLinkHashMap.hashCode(), map.hashCode());
     }
 
     @Test
     void testToString() {
+        Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Assertions.assertEquals(lowerCaseLinkHashMap.toString(), map.toString());
+        map.put("toString", "toString2");
+        Assertions.assertNotEquals(lowerCaseLinkHashMap.toString(), map.toString());
     }
+    
 }
