@@ -21,6 +21,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import io.seata.integration.tx.api.remoting.RemotingDesc;
@@ -54,6 +55,11 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     @Override
     public Set<String> getMethodsToProxy() {
         return methodsToProxy;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.AfterTransaction;
     }
 
     @Override

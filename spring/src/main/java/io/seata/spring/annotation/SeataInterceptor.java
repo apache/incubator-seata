@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.springframework.core.Ordered;
 
 /**

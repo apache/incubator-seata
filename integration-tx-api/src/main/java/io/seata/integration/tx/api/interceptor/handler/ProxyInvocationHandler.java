@@ -18,6 +18,7 @@ package io.seata.integration.tx.api.interceptor.handler;
 import java.util.Set;
 
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 
 /**
  * @author leezongjie
@@ -28,5 +29,11 @@ public interface ProxyInvocationHandler {
     Set<String> getMethodsToProxy();
 
     Object invoke(InvocationWrapper invocation) throws Throwable;
+
+    SeataInterceptorPosition getPosition();
+
+    default int getOrder() {
+        return 0;
+    }
 
 }
