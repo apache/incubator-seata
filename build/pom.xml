@@ -74,7 +74,7 @@
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
         <spring-boot.version>2.7.8</spring-boot.version>
-        <spring-framework.version>5.3.20</spring-framework.version>
+        <spring-framework.version>5.3.25</spring-framework.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
