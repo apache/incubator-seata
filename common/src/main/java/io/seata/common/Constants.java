@@ -171,4 +171,9 @@ public interface Constants {
      */
     String COMPENSATION_METHOD = "sys::compensation";
 
+    /**
+     * phase STORE_REDIS_TYPE_PIPELINE
+     */
+    String STORE_REDIS_TYPE_PIPELINE = "pipeline";
+
 }
