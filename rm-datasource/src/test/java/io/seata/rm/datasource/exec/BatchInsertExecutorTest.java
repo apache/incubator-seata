@@ -189,7 +189,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters_with_null_and_insertRows_with_placeholder_null() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>();
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
@@ -214,7 +214,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters_with_number_and_insertRows_with_placeholde_null() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>();
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
