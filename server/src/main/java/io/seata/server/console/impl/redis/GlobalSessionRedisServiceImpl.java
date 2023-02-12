@@ -27,6 +27,7 @@ import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -60,7 +61,7 @@ public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
         }
         List<GlobalSession> globalSessions = new ArrayList<>();
 
-        RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+        RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
 
         checkPage(param);
 

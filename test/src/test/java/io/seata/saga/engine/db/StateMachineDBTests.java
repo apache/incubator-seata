@@ -322,7 +322,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
         SagaCostPrint.executeAndPrint("3-14", () -> {
-            Map<String, Object> paramMap = new HashMap<>(5);
+            Map<String, Object> paramMap = new HashMap<>();
             paramMap.put("a", 1);
             paramMap.put("fooThrowExceptionRandomly", "true");
             paramMap.put("barThrowExceptionRandomly", "true");
