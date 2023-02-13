@@ -350,7 +350,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
     @Override
     public SeataInterceptorPosition getPosition() {
-        return SeataInterceptorPosition.AfterTransaction;
+        return SeataInterceptorPosition.BeforeTransaction;
     }
 
 }
