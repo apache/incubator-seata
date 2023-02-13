@@ -1,0 +1,9 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.netflix.discovery.DiscoveryClient"
+    },
+    "name": "com.thoughtworks.xstream.XStream",
+    "allPublicMethods": true
+  }
+]

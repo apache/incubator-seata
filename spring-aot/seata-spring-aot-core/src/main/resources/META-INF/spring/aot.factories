@@ -1,0 +1,3 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar= \
+io.seata.spring.aot.SeataCoreRuntimeHints,\
+io.seata.spring.aot.SeataServicesRuntimeHints

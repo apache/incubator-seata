@@ -36,5 +36,19 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-spring-framework-fake-for-java8</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- During development, replace `seata-spring-framework-fake-for-java8` with the following dependency. -->
+        <!--<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>6.0.4</version>
+            <scope>provided</scope>
+        </dependency>-->
     </dependencies>
 </project>

@@ -16,6 +16,7 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
@@ -32,8 +33,6 @@ import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
 
@@ -60,8 +59,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(originalConfiguration.getClass(),
-            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
+            , (proxy, method, args) -> {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result;
                     String rawDataId = (String)args[0];
