@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 

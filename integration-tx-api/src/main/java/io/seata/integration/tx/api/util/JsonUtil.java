@@ -19,7 +19,6 @@ import io.seata.integration.tx.api.json.DefaultJsonParser;
 
 /**
  * @author leezongjie
- * @date 2023/1/13
  */
 public class JsonUtil {
 

@@ -22,7 +22,6 @@ import java.util.Date;
 
 /**
  * @author leezongjie
- * @date 2022/12/17
  */
 public interface FenceHandler {
 

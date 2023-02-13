@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nullable;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -33,18 +34,30 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
-import io.seata.integration.tx.api.util.ProxyUtil;
+import io.seata.integration.tx.api.annotation.AspectTransactional;
+import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptor;
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
+import io.seata.spring.util.OrderUtil;
+import io.seata.spring.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.FailureHandlerHolder;
+import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -53,6 +66,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
@@ -76,6 +90,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
+    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME = "org.springframework.transaction.interceptor.TransactionInterceptor";
+
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_BEAN_NAME_SET = new HashSet<>();
     private static final Set<ScannerChecker> SCANNER_CHECKER_SET = new LinkedHashSet<>();
@@ -83,11 +99,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static ConfigurableListableBeanFactory beanFactory;
 
     private MethodInterceptor interceptor;
-    private MethodInterceptor globalTransactionalInterceptor;
 
     private final String applicationId;
     private final String txServiceGroup;
-    private final int mode;
     private static String accessKey;
     private static String secretKey;
     private volatile boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
@@ -164,7 +178,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         setProxyTargetClass(true);
         this.applicationId = applicationId;
         this.txServiceGroup = txServiceGroup;
-        this.mode = mode;
         this.failureHandlerHook = failureHandlerHook;
         FailureHandlerHolder.setFailureHandler(this.failureHandlerHook);
     }
@@ -236,14 +249,15 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * The following will be scanned, and added corresponding interceptor:
      * <p>
      * TM:
+     *
      * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
-     * Corresponding interceptor:
-     * @see io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalTransaction(io.seata.integration.tx.api.interceptor.InvocationWrapper, io.seata.integration.tx.api.annotation.AspectTransactional) // TM handler
+     * Corresponding interceptor:io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler
+     * @see GlobalTransactionalInterceptorHandler#handleGlobalTransaction(InvocationWrapper, AspectTransactional) // TM handler
      * <p>
      * GlobalLock:
      * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
      * Corresponding interceptor:
-     * @see io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler#handleGlobalLock(io.seata.integration.tx.api.interceptor.InvocationWrapper, io.seata.spring.annotation.GlobalLock)  // GlobalLock handler
+     * @see GlobalTransactionalInterceptorHandler#handleGlobalLock(InvocationWrapper, GlobalLock)  // GlobalLock handler
      * <p>
      * TCC mode:
      * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
@@ -264,11 +278,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                Object resultBean = ProxyUtil.createProxy(bean);
-                if (bean != resultBean) {
-                    PROXYED_SET.add(beanName);
+                interceptor = null;
+                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean);
+                if (proxyInvocationHandler == null) {
+                    return bean;
                 }
-                return resultBean;
+
+                interceptor = new AdapterSpringSeataInterceptor(proxyInvocationHandler);
+
+                LOGGER.info("Bean [{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.toString());
+                if (!AopUtils.isAopProxy(bean)) {
+                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                } else {
+                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                    int pos;
+                    for (Advisor avr : advisor) {
+                        // Find the position based on the advisor's order, and add to advisors by pos
+                        pos = findAddSeataAdvisorPosition(advised, avr);
+                        advised.addAdvisor(pos, avr);
+                    }
+                }
+                PROXYED_SET.add(beanName);
+                return bean;
             }
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -297,6 +329,120 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         return true;
     }
+
+
+    //region the methods about findAddSeataAdvisorPosition  START
+
+    /**
+     * Find pos for `advised.addAdvisor(pos, avr);`
+     *
+     * @param advised      the advised
+     * @param seataAdvisor the seata advisor
+     * @return the pos
+     */
+    private int findAddSeataAdvisorPosition(AdvisedSupport advised, Advisor seataAdvisor) {
+        // Get seataAdvisor's order and interceptorPosition
+        int seataOrder = OrderUtil.getOrder(seataAdvisor);
+        SeataInterceptorPosition seataInterceptorPosition = getSeataInterceptorPosition(seataAdvisor);
+
+        // If the interceptorPosition is any, check lowest or highest.
+        if (SeataInterceptorPosition.Any == seataInterceptorPosition) {
+            if (seataOrder == Ordered.LOWEST_PRECEDENCE) {
+                // the last position
+                return advised.getAdvisors().length;
+            } else if (seataOrder == Ordered.HIGHEST_PRECEDENCE) {
+                // the first position
+                return 0;
+            }
+        } else {
+            // If the interceptorPosition is not any, compute position if has TransactionInterceptor.
+            Integer position = computePositionIfHasTransactionInterceptor(advised, seataAdvisor, seataInterceptorPosition, seataOrder);
+            if (position != null) {
+                // the position before or after TransactionInterceptor
+                return position;
+            }
+        }
+
+        // Find position
+        return this.findPositionInAdvisors(advised.getAdvisors(), seataAdvisor);
+    }
+
+    @Nullable
+    private Integer computePositionIfHasTransactionInterceptor(AdvisedSupport advised, Advisor seataAdvisor, SeataInterceptorPosition seataInterceptorPosition, int seataOrder) {
+        // Find the TransactionInterceptor's advisor, order and position
+        Advisor otherAdvisor = null;
+        Integer transactionInterceptorPosition = null;
+        Integer transactionInterceptorOrder = null;
+        for (int i = 0, l = advised.getAdvisors().length; i < l; ++i) {
+            otherAdvisor = advised.getAdvisors()[i];
+            if (isTransactionInterceptor(otherAdvisor)) {
+                transactionInterceptorPosition = i;
+                transactionInterceptorOrder = OrderUtil.getOrder(otherAdvisor);
+                break;
+            }
+        }
+        // If the TransactionInterceptor does not exist, return null
+        if (transactionInterceptorPosition == null) {
+            return null;
+        }
+
+        // Reset seataOrder if the seataOrder is not match the position
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherOrEquals(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
+            ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position after the TransactionInterceptor's advisor
+            return transactionInterceptorPosition + 1;
+        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerOrEquals(seataOrder, transactionInterceptorOrder)) {
+            int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
+            ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
+                        seataAdvice.getClass().getSimpleName(), seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+            }
+            // the position before the TransactionInterceptor's advisor
+            return transactionInterceptorPosition;
+        }
+
+        return null;
+    }
+
+    private int findPositionInAdvisors(Advisor[] advisors, Advisor seataAdvisor) {
+        Advisor advisor;
+        for (int i = 0, l = advisors.length; i < l; ++i) {
+            advisor = advisors[i];
+            if (OrderUtil.higherOrEquals(seataAdvisor, advisor)) {
+                // the position before the current advisor
+                return i;
+            }
+        }
+
+        // the last position, after all the advisors
+        return advisors.length;
+    }
+
+    private SeataInterceptorPosition getSeataInterceptorPosition(Advisor seataAdvisor) {
+        Advice seataAdvice = seataAdvisor.getAdvice();
+        if (seataAdvice instanceof SeataInterceptor) {
+            return ((SeataInterceptor) seataAdvice).getPosition();
+        } else {
+            return SeataInterceptorPosition.Any;
+        }
+    }
+
+    private boolean isTransactionInterceptor(Advisor advisor) {
+        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(advisor.getAdvice().getClass().getName());
+    }
+
+    //endregion the methods about findAddSeataAdvisorPosition  END
 
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
         return new MethodDesc(anno, method);

@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 
 /**
  * @author leezongjie
- * @date 2022/12/17
  */
 public class SpringFenceConfig extends CommonFenceConfig implements InitializingBean {
 

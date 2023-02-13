@@ -13,29 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.integration.tx.api.interceptor;
 
 /**
- * The enum Seata interceptor position.
+ * The interface Seata interceptor.
  *
  * @author wang.liang
  */
-public enum SeataInterceptorPosition {
+public interface SeataInterceptor {
 
     /**
-     * Any position.
+     * Sets order.
+     *
+     * @param order the order
      */
-    Any,
+    void setOrder(int order);
+
+    int getOrder();
 
     /**
-     * Must be before/higherThan/outsideOf TransactionInterceptor.</br>
-     * The SeataInterceptor's order must be smaller than TransactionInterceptor's order.
+     * Get position.
+     *
+     * @return the position
      */
-    BeforeTransaction,
-
-    /**
-     * Must be after/lowerThan/insideOf TransactionInterceptor.</br>
-     * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
-     */
-    AfterTransaction
+    SeataInterceptorPosition getPosition();
 }

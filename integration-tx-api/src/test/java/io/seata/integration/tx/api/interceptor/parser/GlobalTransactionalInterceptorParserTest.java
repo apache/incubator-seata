@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author leezongjie
- * @date 2022/12/15
  */
 class GlobalTransactionalInterceptorParserTest {
 

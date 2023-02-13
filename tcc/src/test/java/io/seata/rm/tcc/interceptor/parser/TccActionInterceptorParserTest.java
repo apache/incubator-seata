@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author leezongjie
- * @date 2022/12/8
  */
 class TccActionInterceptorParserTest {
 

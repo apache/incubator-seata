@@ -19,7 +19,6 @@ import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public interface InterfaceParser {
 

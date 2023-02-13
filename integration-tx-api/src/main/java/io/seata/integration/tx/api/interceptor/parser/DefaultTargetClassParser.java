@@ -23,7 +23,6 @@ import java.util.List;
 
 /**
  * @author leezongjie
- * @date 2022/12/17
  */
 public class DefaultTargetClassParser implements TargetClassParser {
 

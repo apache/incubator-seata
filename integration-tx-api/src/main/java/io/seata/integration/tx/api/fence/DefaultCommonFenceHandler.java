@@ -15,14 +15,13 @@
  */
 package io.seata.integration.tx.api.fence;
 
-import io.seata.common.executor.Callback;
-
 import java.lang.reflect.Method;
 import java.util.Date;
 
+import io.seata.common.executor.Callback;
+
 /**
  * @author leezongjie
- * @date 2022/12/17
  */
 public class DefaultCommonFenceHandler implements FenceHandler {
 
