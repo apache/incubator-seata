@@ -32,7 +32,7 @@ public interface ProxyInvocationHandler {
     SeataInterceptorPosition getPosition();
 
     default int getOrder() {
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
 }
