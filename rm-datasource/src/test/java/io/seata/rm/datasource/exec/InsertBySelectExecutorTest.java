@@ -60,7 +60,8 @@ public class InsertBySelectExecutorTest {
     private final String COLUMN_A = "a";
     private final String COLUMN_B = "b";
 
-    @BeforeAll public static void init() {
+    @BeforeAll
+    public static void init() {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "a", "b");
         Object[][] returnValue = new Object[][] {new Object[] {1, 1, 1}, new Object[] {2, 2, 2},};
         Object[][] columnMetas = new Object[][] {
