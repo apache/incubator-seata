@@ -15,29 +15,36 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import io.seata.common.Constants;
-import io.seata.common.util.ReflectionUtil;
-import io.seata.core.context.RootContext;
-import io.seata.core.model.BranchType;
-import io.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
-import io.seata.integration.tx.api.interceptor.InvocationWrapper;
-import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
-import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import io.seata.integration.tx.api.remoting.RemotingDesc;
-import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import org.slf4j.MDC;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
+import io.seata.common.util.ReflectionUtil;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
+import io.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
+import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
+import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
+import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.slf4j.MDC;
+
+import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
+
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
+
+    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
+            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
@@ -49,11 +56,6 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     public TccActionInterceptorHandler(RemotingDesc remotingDesc, Set<String> methodsToProxy) {
         this.remotingDesc = remotingDesc;
         this.methodsToProxy = methodsToProxy;
-    }
-
-    @Override
-    public Set<String> getMethodsToProxy() {
-        return methodsToProxy;
     }
 
     @Override
@@ -127,6 +129,21 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             return businessAction;
         });
         return result;
+    }
+
+    @Override
+    public Set<String> getMethodsToProxy() {
+        return methodsToProxy;
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER_NUM;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.Any;
     }
 
 }

@@ -22,7 +22,6 @@ import java.util.List;
 
 /**
  * @author leezongjie
- * @date 2022/12/9
  */
 public class NormalTccActionImpl implements NormalTccAction {
 

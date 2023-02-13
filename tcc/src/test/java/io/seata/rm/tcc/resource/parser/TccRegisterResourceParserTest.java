@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 
 /**
  * @author leezongjie
- * @date 2022/12/23
  */
 class TccRegisterResourceParserTest {
 

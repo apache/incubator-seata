@@ -20,7 +20,6 @@ import io.seata.spring.util.SpringProxyUtils;
 
 /**
  * @author leezongjie
- * @date 2022/12/17
  */
 public class SpringTargetClassParser implements TargetClassParser {
     @Override

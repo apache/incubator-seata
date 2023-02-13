@@ -20,11 +20,12 @@ import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
+
+    protected int order = Integer.MAX_VALUE;
 
     @Override
     public Object invoke(InvocationWrapper invocation) throws Throwable {
@@ -32,6 +33,16 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
             return invocation.proceed();
         }
         return doInvoke(invocation);
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
     }
 
 }

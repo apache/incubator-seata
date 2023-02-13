@@ -20,7 +20,6 @@ import io.seata.integration.tx.api.json.JsonParser;
 
 /**
  * @author leezongjie
- * @date 2023/1/13
  */
 public class FastJsonParser implements JsonParser {
 
