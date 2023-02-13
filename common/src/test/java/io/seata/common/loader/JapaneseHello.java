@@ -14,32 +14,17 @@
  *  limitations under the License.
  */
 
-package io.seata.common.io;
-
-import java.io.File;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+package io.seata.common.loader;
 
 /**
  * @author liuqiufeng
  */
-public class FileLoaderTest {
+@LoadLevel(name = "JapaneseHello", order = Integer.MAX_VALUE)
+public class JapaneseHello implements Hello2{
 
-    @Test
-    public void testLoadExistFile() {
-        File file = FileLoader.load("io/TestFile.txt");
-        Assertions.assertTrue(file != null && file.exists());
-    }
+    private final String msg;
 
-    @Test
-    public void testLoadNotExistFile() {
-        File file = FileLoader.load("io/NotExistFile.txt");
-        Assertions.assertTrue(file == null || !file.exists());
-    }
-
-    @Test
-    public void testLoadException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> FileLoader.load(null));
+    public JapaneseHello(String msg) {
+        this.msg = msg;
     }
 }
