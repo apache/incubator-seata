@@ -144,7 +144,7 @@ public class GlobalSessionTest {
     @MethodSource("branchSessionProvider")
     public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
-        globalSession.removeBranch(branchSession);
+        globalSession.removeAndUnlockBranch(branchSession);
     }
 
     /**

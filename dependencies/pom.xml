@@ -32,11 +32,11 @@
     <description>dependencies for Seata built with Maven</description>
 
     <properties>
-        <dubbo-seata.version>1.0.0</dubbo-seata.version>
+        <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
         <bytebuddy.version>1.12.13</bytebuddy.version>
-        <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
+        <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
@@ -55,8 +55,11 @@
         <nacos-client.version>1.4.2</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
-        <guava.version>27.0.1-jre</guava.version>
+        <guava.version>30.1-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
+        <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+        <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+        <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
@@ -66,9 +69,9 @@
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
 
-        <protobuf.version>3.11.4</protobuf.version>
+        <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
-        <kryo.version>5.3.0</kryo.version>
+        <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fst.version>2.57</fst.version>
@@ -77,6 +80,7 @@
         <xstream.version>1.4.19</xstream.version>
 
         <jwt.version>0.10.5</jwt.version>
+        <jackson.databind.version>2.13.4.1</jackson.databind.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.2.9</logback.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
@@ -87,9 +91,9 @@
 
         <!-- # for database -->
         <!-- db -->
-        <mysql.version>5.1.35</mysql.version>
+        <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
-        <postgresql.version>42.1.4</postgresql.version>
+        <postgresql.version>42.3.3</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
@@ -107,8 +111,6 @@
         <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
         <!-- # for test -->
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <junit-platform.version>1.8.2</junit-platform.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
@@ -116,6 +118,15 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- spring-framework CVE-2022-22965-->
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -360,10 +371,6 @@
                         <groupId>javax.servlet</groupId>
                         <artifactId>servlet-api</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>com.github.andrewoma.dexx</groupId>
-                        <artifactId>dexx-collections</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -422,6 +429,21 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax-inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${javax.annotation-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${javax.servlet-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
@@ -595,6 +617,11 @@
                 <version>${jwt.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.databind.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
                 <version>${prometheus.client.version}</version>
@@ -624,48 +651,6 @@
 
 
             <!-- test -->
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit-jupiter.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-commons</artifactId>
-                <version>${junit-platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-engine</artifactId>
-                <version>${junit-platform.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-launcher</artifactId>
-                <version>${junit-platform.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>

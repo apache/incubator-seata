@@ -141,7 +141,7 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
@@ -173,7 +173,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
@@ -183,7 +183,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
@@ -231,7 +231,7 @@ public interface DefaultValues {
     int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
 
     /**
-     *the constant DEFAULT_PROMETHEUS_PORT
+     * the constant DEFAULT_PROMETHEUS_PORT
      */
     int DEFAULT_PROMETHEUS_PORT = 9898;
 
@@ -253,12 +253,12 @@ public interface DefaultValues {
     /**
      * the const DEFAULT_MAX_COMMIT_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT
      */
-    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = 100;
+    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = -1L;
 
     /**
      * the const DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE
@@ -274,4 +274,21 @@ public interface DefaultValues {
      * DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE
      */
     boolean DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE = false;
+
+    int DEFAULT_DB_MAX_CONN = 100;
+
+    int DEFAULT_DB_MIN_CONN = 10;
+
+    int DEFAULT_REDIS_MAX_IDLE = 100;
+
+    int DEFAULT_REDIS_MAX_TOTAL = 100;
+
+    int DEFAULT_REDIS_MIN_IDLE = 10;
+
+    int DEFAULT_QUERY_LIMIT = 1000;
+
+    /**
+     * Default druid location in classpath
+     */
+    String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 }
