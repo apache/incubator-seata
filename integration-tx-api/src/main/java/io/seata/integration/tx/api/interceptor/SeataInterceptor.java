@@ -13,17 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
-
-import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
-import org.springframework.core.Ordered;
+package io.seata.integration.tx.api.interceptor;
 
 /**
  * The interface Seata interceptor.
  *
  * @author wang.liang
  */
-public interface SeataInterceptor extends Ordered {
+public interface SeataInterceptor {
 
     /**
      * Sets order.
@@ -31,6 +28,8 @@ public interface SeataInterceptor extends Ordered {
      * @param order the order
      */
     void setOrder(int order);
+
+    int getOrder();
 
     /**
      * Get position.

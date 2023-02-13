@@ -18,19 +18,20 @@ package io.seata.spring.annotation;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.seata.integration.tx.api.interceptor.SeataInterceptor;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
  * @author leezongjie
  */
-public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor {
+public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor, Ordered {
 
     private ProxyInvocationHandler proxyInvocationHandler;
-    private int order;
 
     public AdapterSpringSeataInterceptor(ProxyInvocationHandler proxyInvocationHandler) {
         Assert.notNull(proxyInvocationHandler, "proxyInvocationHandler must not be null");
@@ -47,15 +48,12 @@ public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataIn
 
     @Override
     public int getOrder() {
-        if (SeataInterceptorPosition.Any == proxyInvocationHandler.getPosition()) {
-            return proxyInvocationHandler.getOrder();
-        }
-        return order;
+        return proxyInvocationHandler.getOrder();
     }
 
     @Override
     public void setOrder(int order) {
-        this.order = order;
+        proxyInvocationHandler.setOrder(order);
     }
 
     @Override

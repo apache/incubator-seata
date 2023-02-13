@@ -25,12 +25,24 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
 
+    protected int order = Integer.MAX_VALUE;
+
     @Override
     public Object invoke(InvocationWrapper invocation) throws Throwable {
         if (CollectionUtils.isNotEmpty(getMethodsToProxy()) && !getMethodsToProxy().contains(invocation.getMethod().getName())) {
             return invocation.proceed();
         }
         return doInvoke(invocation);
+    }
+
+    @Override
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
     }
 
 }

@@ -36,6 +36,7 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.integration.tx.api.annotation.AspectTransactional;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptor;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
@@ -387,7 +388,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         // Reset seataOrder if the seataOrder is not match the position
         Advice seataAdvice = seataAdvisor.getAdvice();
-        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherThan(seataOrder, transactionInterceptorOrder)) {
+        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherOrEquals(seataOrder, transactionInterceptorOrder)) {
             int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
             ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
             if (LOGGER.isWarnEnabled()) {
@@ -398,7 +399,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             }
             // the position after the TransactionInterceptor's advisor
             return transactionInterceptorPosition + 1;
-        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerThan(seataOrder, transactionInterceptorOrder)) {
+        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerOrEquals(seataOrder, transactionInterceptorOrder)) {
             int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
             ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
             if (LOGGER.isWarnEnabled()) {
