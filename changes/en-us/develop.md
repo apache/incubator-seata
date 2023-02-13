@@ -20,7 +20,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5299](https://github.com/seata/seata/pull/5299)] fix GlobalSession deletion when retry rollback or retry commit timeout
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
 - [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
-
+- [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
+- [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -31,6 +32,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
 - [[#5273](https://github.com/seata/seata/pull/5273)] Optimize the compilation configuration of the `protobuf-maven-plugin` plug-in to solve the problem of too long command lines in higher versions.
 - [[#5303](https://github.com/seata/seata/pull/5303)] remove startup script the -Xmn configuration
+- [[#5315](https://github.com/seata/seata/pull/5315)] optimize the log of SPI
+- [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
@@ -56,6 +59,8 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [isharpever](https://github.com/isharpever)
 - [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
 - [mxsm](https://github.com/mxsm)
+- [l81893521](https://github.com/l81893521)
+- [liuqiufeng](https://github.com/liuqiufeng)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
