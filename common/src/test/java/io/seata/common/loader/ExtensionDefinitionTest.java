@@ -14,9 +14,7 @@
  *  limitations under the License.
  */
 
-package io.seata.common.io;
-
-import java.io.File;
+package io.seata.common.loader;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,22 +22,14 @@ import org.junit.jupiter.api.Test;
 /**
  * @author liuqiufeng
  */
-public class FileLoaderTest {
+public class ExtensionDefinitionTest {
 
     @Test
-    public void testLoadExistFile() {
-        File file = FileLoader.load("io/TestFile.txt");
-        Assertions.assertTrue(file != null && file.exists());
-    }
-
-    @Test
-    public void testLoadNotExistFile() {
-        File file = FileLoader.load("io/NotExistFile.txt");
-        Assertions.assertTrue(file == null || !file.exists());
-    }
-
-    @Test
-    public void testLoadException() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> FileLoader.load(null));
+    public void testEquals() {
+        ExtensionDefinition<ChineseHello> definition
+                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2
+                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals(definition2, definition);
     }
 }
