@@ -24,7 +24,6 @@ import java.util.List;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 

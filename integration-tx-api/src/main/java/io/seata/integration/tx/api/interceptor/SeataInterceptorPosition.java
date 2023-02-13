@@ -13,28 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
-
-import org.springframework.core.Ordered;
+package io.seata.integration.tx.api.interceptor;
 
 /**
- * The interface Seata interceptor.
+ * The enum Seata interceptor position.
  *
  * @author wang.liang
  */
-public interface SeataInterceptor extends Ordered {
+public enum SeataInterceptorPosition {
 
     /**
-     * Sets order.
-     *
-     * @param order the order
+     * Any position.
      */
-    void setOrder(int order);
+    Any,
 
     /**
-     * Get position.
-     *
-     * @return the position
+     * Must be before/higherThan/outsideOf TransactionInterceptor.</br>
+     * The SeataInterceptor's order must be smaller than TransactionInterceptor's order.
      */
-    SeataInterceptorPosition getPosition();
+    BeforeTransaction,
+
+    /**
+     * Must be after/lowerThan/insideOf TransactionInterceptor.</br>
+     * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
+     */
+    AfterTransaction
 }

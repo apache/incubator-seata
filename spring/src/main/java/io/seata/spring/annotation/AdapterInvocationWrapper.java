@@ -13,52 +13,50 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.tx.api.interceptor;
+package io.seata.spring.annotation;
 
 import java.lang.reflect.Method;
+
+import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * @author leezongjie
  */
-public class DefaultInvocationWrapper implements InvocationWrapper {
-    private Object proxy;
-    private Object delegate;
-    private Method method;
-    private Object[] args;
+public class AdapterInvocationWrapper implements InvocationWrapper {
 
-    public DefaultInvocationWrapper(Object proxy, Object delegate, Method method, Object[] args) {
-        this.proxy = proxy;
-        this.delegate = delegate;
-        this.method = method;
-        this.args = args;
+    private MethodInvocation invocation;
+
+    public AdapterInvocationWrapper(MethodInvocation invocation) {
+        this.invocation = invocation;
     }
 
     @Override
     public Method getMethod() {
-        return method;
+        return invocation.getMethod();
     }
 
     @Override
     public Object getProxy() {
-        return proxy;
+        return null;
     }
 
     @Override
     public Object getTarget() {
-        return delegate;
+        return invocation.getThis();
     }
 
     @Override
     public Object[] getArguments() {
-        return args;
+        return invocation.getArguments();
     }
 
     @Override
     public Object proceed() {
         try {
-            return method.invoke(delegate, args);
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
+            return invocation.proceed();
+        } catch (Throwable throwable) {
+            throw new RuntimeException("try to proceed invocation error", throwable);
         }
     }
 }
