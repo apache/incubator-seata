@@ -78,10 +78,7 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     private void cleanContext() {
         if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
             RootContext.unbind();
-            BranchType branchType = RootContext.getBranchType();
-            if (BranchType.TCC == branchType) {
-                RootContext.unbindBranchType();
-            }
+            RootContext.unbindBranchType();
         }
     }
 }
