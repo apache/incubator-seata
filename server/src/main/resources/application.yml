@@ -14,9 +14,6 @@
 
 server:
   port: 7091
-  tomcat:
-    threads:
-      max: 8
 
 spring:
   application:
