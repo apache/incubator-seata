@@ -83,6 +83,7 @@ public class CommonFenceConfig implements Disposable {
         try {
             // disable clear task when cleanPeriod <= 0
             if (cleanPeriod.isZero() || cleanPeriod.isNegative()) {
+                LOGGER.info("TCC fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
                 return;
             }
             // convert to second level. maximum interval is 68 years
