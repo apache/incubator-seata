@@ -15,14 +15,13 @@
  */
 package io.seata.integration.tx.api.annotation;
 
+import java.lang.annotation.Annotation;
+
 import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
-import java.lang.annotation.Annotation;
-
 /**
  * @author leezongjie
- * @date 2022/12/23
  */
 public class BusinessActionContextParameterDesc {
     private String paramName;

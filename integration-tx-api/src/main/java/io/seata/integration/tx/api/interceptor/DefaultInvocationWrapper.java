@@ -19,7 +19,6 @@ import java.lang.reflect.Method;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class DefaultInvocationWrapper implements InvocationWrapper {
     private Object proxy;

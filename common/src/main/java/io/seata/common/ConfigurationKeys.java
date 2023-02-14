@@ -642,6 +642,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
+     * The constant STORE_REDIS_TYPE. lua pipeline
+     */
+    String STORE_REDIS_TYPE = STORE_REDIS_PREFIX + "type";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";

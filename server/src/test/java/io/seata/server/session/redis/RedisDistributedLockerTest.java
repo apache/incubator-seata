@@ -59,6 +59,14 @@ public class RedisDistributedLockerTest {
         jedis = JedisPooledFactory.getJedisInstance();
     }
 
+    @AfterAll
+    public static void after() throws IOException {
+        EnhancedServiceLoader.unload(DistributedLocker.class);
+        DistributedLockerFactory.cleanLocker();
+        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
+        jedis.close();
+    }
+
     @Test
     public void test_acquireScheduledLock_success() {
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000L));
@@ -130,14 +138,6 @@ public class RedisDistributedLockerTest {
         Assertions.assertEquals("OK",set);
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
         Assertions.assertFalse(acquire);
-    }
-
-    @AfterAll
-    public static void after() throws IOException {
-        EnhancedServiceLoader.unload(DistributedLocker.class);
-        DistributedLockerFactory.cleanLocker();
-        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
-        jedis.close();
     }
 
 }

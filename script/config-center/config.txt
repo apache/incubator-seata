@@ -100,6 +100,7 @@ store.db.maxWait=5000
 
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single
+store.redis.type=pipeline
 store.redis.single.host=127.0.0.1
 store.redis.single.port=6379
 store.redis.sentinel.masterName=

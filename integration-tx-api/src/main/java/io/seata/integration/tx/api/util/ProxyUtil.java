@@ -28,7 +28,6 @@ import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class ProxyUtil {
 
