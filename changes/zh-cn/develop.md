@@ -46,6 +46,7 @@
 - [[#5438](https://github.com/seata/seata/pull/5438)] 优化code style检测属性
 
 
+
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
