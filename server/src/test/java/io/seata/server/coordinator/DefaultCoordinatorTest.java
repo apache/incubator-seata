@@ -61,9 +61,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static java.io.File.separator;
-
 /**
  * The type DefaultCoordinator test.
  *
