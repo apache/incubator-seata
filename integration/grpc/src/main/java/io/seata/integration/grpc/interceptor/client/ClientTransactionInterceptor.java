@@ -43,7 +43,8 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
                 if (xid != null) {
-                    headers.put(GrpcHeaderKey.HEADER_KEY, xid);
+                    headers.put(GrpcHeaderKey.XID_HEADER_KEY, xid);
+                    headers.put(GrpcHeaderKey.BRANCH_HEADER_KEY, RootContext.getBranchType().name());
                 }
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
                     @Override
