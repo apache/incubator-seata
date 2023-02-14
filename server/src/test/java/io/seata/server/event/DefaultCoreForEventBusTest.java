@@ -23,7 +23,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.ws.rs.HEAD;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
@@ -65,7 +64,6 @@ public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
-
             private final Map<String, AtomicInteger> eventCounters;
             private CountDownLatch downLatch;
 
