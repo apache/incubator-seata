@@ -21,7 +21,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
 - [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
 - [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
-
+- [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -61,6 +61,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
 - [mxsm](https://github.com/mxsm)
 - [l81893521](https://github.com/l81893521)
+- [liuqiufeng](https://github.com/liuqiufeng)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
