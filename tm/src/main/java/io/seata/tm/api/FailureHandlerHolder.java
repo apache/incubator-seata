@@ -17,7 +17,6 @@ package io.seata.tm.api;
 
 /**
  * @author leezongjie
- * @date 2023/1/13
  */
 public class FailureHandlerHolder {
 

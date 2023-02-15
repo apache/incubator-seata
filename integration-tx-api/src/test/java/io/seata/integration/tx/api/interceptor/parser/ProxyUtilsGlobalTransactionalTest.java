@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author leezongjie
- * @date 2022/12/14
  */
 public class ProxyUtilsGlobalTransactionalTest {
 

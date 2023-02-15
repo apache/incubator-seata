@@ -38,6 +38,7 @@ import io.seata.core.model.GlobalLockConfig;
 import io.seata.integration.tx.api.annotation.AspectTransactional;
 import io.seata.integration.tx.api.event.DegradeCheckEvent;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
+import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
@@ -132,11 +133,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy, AspectTransactional aspectTransactional) {
         this(failureHandler, methodsToProxy);
         this.aspectTransactional = aspectTransactional;
-    }
-
-    @Override
-    public Set<String> getMethodsToProxy() {
-        return methodsToProxy;
     }
 
     @Override
@@ -346,4 +342,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
+
+    @Override
+    public Set<String> getMethodsToProxy() {
+        return methodsToProxy;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.BeforeTransaction;
+    }
+
 }
