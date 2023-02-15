@@ -109,7 +109,7 @@ public class TableRecordsTest {
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
 
         Assertions.assertEquals(returnValue.length, tableRecords.pkRows().size());
     }
@@ -128,7 +128,7 @@ public class TableRecordsTest {
 
         ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet, null);
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
 
         Assertions.assertNotNull(tableRecords);
     }
@@ -149,7 +149,7 @@ public class TableRecordsTest {
         //  模拟新字段增加
         MockDriver mockDriverNewField = new MockDriver(returnValueColumnLabelsNewField, returnValueNewField, columnMetasNewField, indexMetas);
         ResultSet resultSet = mockDriverNewField.executeQuery(mockStatement, "select * from table_records_test");
-        Assertions.assertThrows(TableMetaException.class, () -> TableRecords.buildRecords(tableMeta, resultSet, null));
+        Assertions.assertThrows(TableMetaException.class, () -> TableRecords.buildRecords(tableMeta, resultSet));
     }
 
     @Test
