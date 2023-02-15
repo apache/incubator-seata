@@ -289,7 +289,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             }
 
             rs = ps.executeQuery();
-            return TableRecords.buildRecords(tableMeta, rs, statementProxy);
+            return TableRecords.buildRecords(tableMeta, rs);
         } finally {
             IOUtil.close(rs);
         }

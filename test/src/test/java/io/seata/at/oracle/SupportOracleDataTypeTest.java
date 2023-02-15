@@ -155,7 +155,7 @@ public class SupportOracleDataTypeTest {
         LOGGER.info("the helperRes is:[{}]", helperRes);
         TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(io.seata.sqlparser.util.JdbcConstants.ORACLE)
             .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
-        TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes, null);
+        TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
 
         // if not throw exception update record
         Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
@@ -175,7 +175,7 @@ public class SupportOracleDataTypeTest {
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
             helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
-            TableRecords currentImage = TableRecords.buildRecords(tableMeta, helperRes, null);
+            TableRecords currentImage = TableRecords.buildRecords(tableMeta, helperRes);
             LOGGER.info("the currentImage Rows is:[{}]", currentImage.getRows());
             Assertions.assertTrue(DataCompareUtils.isRecordsEquals(beforeImage, currentImage).getResult());
             helperRes.close();

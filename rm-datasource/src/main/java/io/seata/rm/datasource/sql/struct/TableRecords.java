@@ -194,7 +194,7 @@ public class TableRecords implements java.io.Serializable {
      * @return the table records
      * @throws SQLException the sql exception
      */
-    private static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
+    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
@@ -276,63 +276,9 @@ public class TableRecords implements java.io.Serializable {
     private static ColumnMeta getColumnMeta(TableMeta tmeta , String colName) throws SQLException {
         ColumnMeta col = tmeta.getColumnMeta(colName);
         if (col == null) {
-            throw new TableMetaException(colName, tmeta.getTableName(), true);
+            throw new TableMetaException(tmeta.getTableName(), colName);
         }
         return col;
-    }
-
-
-    /**
-     * Build records table records.
-     *
-     * @param tmeta     the tmeta
-     * @param resultSet the result set
-     * @param statementProxy the statement proxy
-     * @return the table records
-     * @throws SQLException the sql exception
-     */
-    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet, StatementProxy statementProxy)
-        throws SQLException {
-        try {
-            return buildRecords(tmeta, resultSet);
-        } catch (TableMetaException e) {
-            if (statementProxy == null || !e.isRefreshable()) {
-                throw e;
-            }
-            refreshTableMeta(statementProxy.getConnectionProxy(), e.getTableName(), e.getColumnName());
-            // try to build again after refresh table meta successfully
-            return buildRecords(getCacheTableMeta(statementProxy.getConnectionProxy(), tmeta.getTableName()), resultSet);
-        }
-    }
-
-
-    private static void refreshTableMeta(ConnectionProxy connectionProxy, String tableName, String columnName)
-        throws SQLException {
-        if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
-            synchronized (TABLE_NAME_POOL.intern(tableName)) {
-                if (shouldBeRefreshed(connectionProxy, tableName, columnName)) {
-                    TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).refresh(
-                        connectionProxy.getTargetConnection(), connectionProxy.getDataSourceProxy().getResourceId());
-                    
-                    // still empty after refreshed
-                    if (getCacheTableMeta(connectionProxy, tableName).getColumnMeta(columnName) == null) {
-                        throw new TableMetaException(columnName, tableName, false);
-                    }
-                }
-            }
-        }
-    }
-
-    private static boolean shouldBeRefreshed(ConnectionProxy connectionProxy, String tableName, String columnName) {
-        TableMeta cacheTableMeta = getCacheTableMeta(connectionProxy, tableName);
-        return cacheTableMeta.getColumnMeta(columnName) == null;
-    }
-
-
-    private static TableMeta getCacheTableMeta(ConnectionProxy connectionProxy, String tableName) {
-        TableMeta tmeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType()).getTableMeta(
-            connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
-        return tmeta;
     }
 
     /**

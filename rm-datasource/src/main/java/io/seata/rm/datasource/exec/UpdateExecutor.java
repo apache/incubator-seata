@@ -107,7 +107,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
-            return TableRecords.buildRecords(tmeta, rs, statementProxy);
+            return TableRecords.buildRecords(tmeta, rs);
         } finally {
             IOUtil.close(rs);
         }

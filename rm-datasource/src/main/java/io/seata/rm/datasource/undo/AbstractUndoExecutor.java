@@ -321,7 +321,7 @@ public abstract class AbstractUndoExecutor {
             }
 
             checkSet = statement.executeQuery();
-            currentRecords = TableRecords.buildRecords(tableMeta, checkSet, null);
+            currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
             IOUtil.close(checkSet, statement);
         }
