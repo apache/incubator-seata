@@ -165,9 +165,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * public tableMeta refresh event
      */
-    public void tableMetaRefreshEvent(){
+    public void tableMetaRefreshEvent() {
         boolean offer = tableMetaRefreshQueue.offer(System.currentTimeMillis());
-        if(!offer){
+        if (!offer) {
             LOGGER.error("table refresh event offer error:{}", resourceId);
         }
     }

@@ -94,15 +94,15 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        try{
+        try {
             TableRecords beforeImage = beforeImage();
             T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
             TableRecords afterImage = afterImage(beforeImage);
             prepareUndoLog(beforeImage, afterImage);
             return result;
-        }catch (TableMetaException e){
-            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}", e.getTableName(),
-                e.getColumnName());
+        } catch (TableMetaException e) {
+            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}",
+                e.getTableName(), e.getColumnName());
             statementProxy.getConnectionProxy().getDataSourceProxy().tableMetaRefreshEvent();
             throw e;
         }
