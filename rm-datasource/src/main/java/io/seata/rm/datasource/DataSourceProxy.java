@@ -58,7 +58,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
 
-    private long TABLE_META_REFRESH_INTERVAL_TIME = 1000L;
+    private static final long TABLE_META_REFRESH_INTERVAL_TIME = 1000L;
     
     private BlockingQueue<Long> tableMetaRefreshQueue;
 
@@ -123,6 +123,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
+        this.tableMetaRefreshQueue = new LinkedBlockingQueue<>();
+        this.lastRefreshTime = System.currentTimeMillis() - TABLE_META_REFRESH_INTERVAL_TIME;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl);
@@ -145,7 +147,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             while (true) {
                 try {
                     Long eventTime = tableMetaRefreshQueue.take();
-                    if (System.currentTimeMillis() - eventTime > TABLE_META_REFRESH_INTERVAL_TIME) {
+                    if (eventTime - lastRefreshTime > TABLE_META_REFRESH_INTERVAL_TIME) {
                         try (Connection connection = dataSource.getConnection()) {
                             TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType());
                             tableMetaCache.refresh(connection, DataSourceProxy.this.getResourceId());
