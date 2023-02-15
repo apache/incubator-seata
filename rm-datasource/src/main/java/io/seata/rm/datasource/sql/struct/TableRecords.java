@@ -37,8 +37,6 @@ import javax.sql.rowset.serial.SerialRef;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;

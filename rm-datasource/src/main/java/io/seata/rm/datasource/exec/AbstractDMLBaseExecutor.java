@@ -26,10 +26,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.*;
+import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.ConnectionContext;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exception.TableMetaException;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import org.slf4j.Logger;
@@ -100,7 +101,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             prepareUndoLog(beforeImage, afterImage);
             return result;
         }catch (TableMetaException e){
-            LOGGER.error("table meta will be refresh, due to TableMetaException, table:{}, column:{}", e.getTableName(),
+            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}", e.getTableName(),
                 e.getColumnName());
             statementProxy.getConnectionProxy().getDataSourceProxy().tableMetaRefreshEvent();
             throw e;
