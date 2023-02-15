@@ -64,7 +64,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private long lastRefreshTime;
 
-
     private String resourceGroupId;
 
     private String jdbcUrl;
@@ -152,6 +151,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                             TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType());
                             tableMetaCache.refresh(connection, DataSourceProxy.this.getResourceId());
                         }
+                        lastRefreshTime = System.currentTimeMillis();
                     }
                 } catch (Exception exx) {
                     LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
@@ -162,6 +162,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         RootContext.setDefaultBranchType(this.getBranchType());
     }
 
+    /**
+     * public tableMeta refresh event
+     */
     public void tableMetaRefreshEvent(){
         boolean offer = tableMetaRefreshQueue.offer(System.currentTimeMillis());
         if(!offer){
