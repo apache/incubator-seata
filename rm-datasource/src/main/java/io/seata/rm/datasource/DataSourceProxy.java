@@ -146,6 +146,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             while (true) {
                 try {
                     Long eventTime = tableMetaRefreshQueue.take();
+                    // if it has bean refreshed not long ago, skip
                     if (eventTime - lastRefreshTime > TABLE_META_REFRESH_INTERVAL_TIME) {
                         try (Connection connection = dataSource.getConnection()) {
                             TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType());
