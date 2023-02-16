@@ -138,5 +138,217 @@
         "parameterTypes": []
       }
     ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.util.XAUtils"
+    },
+    "name": "oracle.jdbc.driver.T4CXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.sql.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.util.XAUtils"
+    },
+    "name": "oracle.jdbc.xa.client.OracleXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.sql.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.Util",
+    "methods": [
+      {
+        "name": "isJdbc4",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.Connection",
+    "methods": [
+      {
+        "name": "getPinGlobalTxToPhysicalConnection",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.JDBC4SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.MysqlXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.JdbcConnection",
+    "methods": [
+      {
+        "name": "getPropertySet",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.PropertySet",
+    "methods": [
+      {
+        "name": "getBooleanReadableProperty",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.ReadableProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.RuntimeProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.api.jdbc.JdbcConnection",
+    "methods": [
+      {
+        "name": "getPropertySet",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.api.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.api.conf.PropertySet",
+    "methods": [
+      {
+        "name": "getBooleanReadableProperty",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.api.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.api.conf.ReadableProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "getInstance",
+        "parameterTypes": [
+          "com.mysql.cj.jdbc.JdbcConnection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.MysqlXAConnection",
+    "methods": [
+      {
+        "name": "getInstance",
+        "parameterTypes": [
+          "com.mysql.cj.jdbc.JdbcConnection",
+          "boolean"
+        ]
+      }
+    ]
   }
 ]
