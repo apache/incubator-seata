@@ -13,29 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+
+package io.seata.common.loader;
 
 /**
- * The enum Seata interceptor position.
- *
- * @author wang.liang
+ * @author liuqiufeng
  */
-public enum SeataInterceptorPosition {
+@LoadLevel(name = "JapaneseHello", order = Integer.MAX_VALUE)
+public class JapaneseHello implements Hello2{
 
-    /**
-     * Any position.
-     */
-    Any,
+    private final String msg;
 
-    /**
-     * Must be before/higherThan/outsideOf TransactionInterceptor.</br>
-     * The SeataInterceptor's order must be smaller than TransactionInterceptor's order.
-     */
-    BeforeTransaction,
-
-    /**
-     * Must be after/lowerThan/insideOf TransactionInterceptor.</br>
-     * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
-     */
-    AfterTransaction
+    public JapaneseHello(String msg) {
+        this.msg = msg;
+    }
 }
