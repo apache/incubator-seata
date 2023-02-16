@@ -23,6 +23,8 @@ import io.seata.integration.tx.api.json.JsonParser;
  */
 public class FastJsonParser implements JsonParser {
 
+    private static final String NAME = "fastjson";
+
     @Override
     public String toJSONString(Object object) {
         return JSON.toJSONString(object);
@@ -31,5 +33,10 @@ public class FastJsonParser implements JsonParser {
     @Override
     public <T> T parseObject(String text, Class<T> clazz) {
         return JSON.parseObject(text, clazz);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

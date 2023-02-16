@@ -35,6 +35,8 @@ public class JacksonJsonParser implements JsonParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
 
+    private static final String NAME = "jackson";
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     public JacksonJsonParser() {
@@ -64,5 +66,10 @@ public class JacksonJsonParser implements JsonParser {
             LOGGER.error("jackson parseObject exception, {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

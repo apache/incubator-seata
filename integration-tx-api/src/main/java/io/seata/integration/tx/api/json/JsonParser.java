@@ -24,8 +24,5 @@ public interface JsonParser {
 
     <T> T parseObject(String text, Class<T> clazz);
 
-    default int order() {
-        return 0;
-    }
-
+    String getName();
 }

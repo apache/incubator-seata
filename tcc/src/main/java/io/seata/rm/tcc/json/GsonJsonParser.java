@@ -30,6 +30,8 @@ import io.seata.integration.tx.api.json.JsonParser;
  */
 public class GsonJsonParser implements JsonParser {
 
+    private static final String NAME = "gson";
+
     private final Gson gson =
         new GsonBuilder().excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT).create();
 
@@ -41,5 +43,10 @@ public class GsonJsonParser implements JsonParser {
     @Override
     public <T> T parseObject(String text, Class<T> clazz) {
         return gson.fromJson(text, clazz);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }
