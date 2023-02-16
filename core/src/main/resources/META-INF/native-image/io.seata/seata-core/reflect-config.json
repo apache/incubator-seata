@@ -1,0 +1,20 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.constants.DubboConstants"
+    },
+    "name": "org.apache.dubbo.rpc.RpcContext"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.serializer.SerializerServiceLoader"
+    },
+    "name": "io.seata.serializer.protobuf.ProtobufSerializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]
