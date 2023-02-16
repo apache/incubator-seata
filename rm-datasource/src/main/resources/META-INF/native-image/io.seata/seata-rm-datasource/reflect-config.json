@@ -350,5 +350,305 @@
         ]
       }
     ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.rm.datasource.DataSourceManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.rm.datasource.xa.ResourceManagerXA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.rm.RMHandlerAT",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.rm.RMHandlerXA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.oracle.OracleInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.PostgresqlTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.MySQLUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.OracleUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.PostgresqlUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.OracleUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.PostgresqlUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.JacksonUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.KryoUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.FstUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.keyword.PostgresqlKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
   }
 ]

@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.compressor.Compressor"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.core.compressor.Compressor\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.compressor.Compressor"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.core.compressor.Compressor\\E"
+      }
+    ]
+  }
+}

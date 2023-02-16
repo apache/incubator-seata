@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.discovery.registry.RegistryProvider"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.discovery.registry.RegistryProvider\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.discovery.registry.RegistryProvider"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.discovery.registry.RegistryProvider\\E"
+      }
+    ]
+  }
+}

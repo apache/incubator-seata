@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "com.weibo.api.motan.filter.Filter"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.weibo.api.motan.filter.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "com.weibo.api.motan.filter.Filter"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.weibo.api.motan.filter.Filter\\E"
+      }
+    ]
+  }
+}

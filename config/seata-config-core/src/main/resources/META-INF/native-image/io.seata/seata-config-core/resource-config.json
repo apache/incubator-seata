@@ -1,0 +1,30 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.file.FileConfig"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.config.file.FileConfig\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.file.FileConfig"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.config.file.FileConfig\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.processor.Processor"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.config.processor.Processor\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.processor.Processor"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.config.processor.Processor\\E"
+      }
+    ]
+  }
+}

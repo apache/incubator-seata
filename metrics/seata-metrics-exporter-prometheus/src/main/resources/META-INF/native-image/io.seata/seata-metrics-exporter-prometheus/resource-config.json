@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.metrics.exporter.Exporter"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.metrics.exporter.Exporter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.metrics.exporter.Exporter"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.metrics.exporter.Exporter\\E"
+      }
+    ]
+  }
+}

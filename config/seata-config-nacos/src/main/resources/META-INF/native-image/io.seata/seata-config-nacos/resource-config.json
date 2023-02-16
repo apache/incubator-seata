@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.ConfigurationProvider"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.config.ConfigurationProvider\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.config.ConfigurationProvider"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.config.ConfigurationProvider\\E"
+      }
+    ]
+  }
+}

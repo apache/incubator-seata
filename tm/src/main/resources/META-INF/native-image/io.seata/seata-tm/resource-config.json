@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.model.TransactionManager"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.core.model.TransactionManager\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.model.TransactionManager"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.core.model.TransactionManager\\E"
+      }
+    ]
+  }
+}

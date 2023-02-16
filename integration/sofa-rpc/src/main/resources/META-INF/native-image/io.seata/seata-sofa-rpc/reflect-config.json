@@ -1,0 +1,26 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.alipay.sofa.rpc.filter.Filter"
+    },
+    "name": "io.seata.integration.sofa.rpc.TransactionContextProviderFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alipay.sofa.rpc.filter.Filter"
+    },
+    "name": "io.seata.integration.sofa.rpc.TransactionContextConsumerFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.serializer.Serializer"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.core.serializer.Serializer\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.core.serializer.Serializer"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.core.serializer.Serializer\\E"
+      }
+    ]
+  }
+}

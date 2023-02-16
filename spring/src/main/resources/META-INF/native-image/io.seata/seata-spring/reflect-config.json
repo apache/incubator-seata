@@ -17,5 +17,41 @@
       "typeReachable": "io.seata.spring.tcc.TccAnnotationProcessor"
     },
     "name": "com.alipay.sofa.runtime.api.annotation.SofaReference"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.annotation.ScannerChecker"
+    },
+    "name": "io.seata.spring.annotation.scannercheckers.PackageScannerChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.annotation.ScannerChecker"
+    },
+    "name": "io.seata.spring.annotation.scannercheckers.ConfigBeansScannerChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.annotation.ScannerChecker"
+    },
+    "name": "io.seata.spring.annotation.scannercheckers.ScopeBeansScannerChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
   }
 ]

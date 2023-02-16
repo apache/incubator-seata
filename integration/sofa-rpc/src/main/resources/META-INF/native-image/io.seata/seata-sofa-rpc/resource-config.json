@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "com.alipay.sofa.rpc.filter.Filter"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.alipay.sofa.rpc.filter.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "com.alipay.sofa.rpc.filter.Filter"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.alipay.sofa.rpc.filter.Filter\\E"
+      }
+    ]
+  }
+}

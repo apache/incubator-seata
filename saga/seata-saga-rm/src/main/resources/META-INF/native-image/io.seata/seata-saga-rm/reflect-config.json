@@ -1,0 +1,26 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.saga.rm.SagaResourceManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.saga.rm.RMHandlerSaga",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

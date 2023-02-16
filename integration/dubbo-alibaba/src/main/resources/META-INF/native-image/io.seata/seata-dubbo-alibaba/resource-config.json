@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "com.alibaba.dubbo.rpc.Filter"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.alibaba.dubbo.rpc.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "com.alibaba.dubbo.rpc.Filter"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.alibaba.dubbo.rpc.Filter\\E"
+      }
+    ]
+  }
+}

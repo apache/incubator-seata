@@ -1,0 +1,18 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.metrics.registry.Registry"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.metrics.registry.Registry\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.metrics.registry.Registry"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.metrics.registry.Registry\\E"
+      }
+    ]
+  }
+}
