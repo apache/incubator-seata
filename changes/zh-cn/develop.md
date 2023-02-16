@@ -27,13 +27,16 @@
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5089](https://github.com/seata/seata/pull/5089)] 优化 TCC fence log 清理定时任务的 delay 参数值检查
 - [[#5243](https://github.com/seata/seata/pull/5243)] 升级 kryo 5.4.0 优化对jdk17的兼容性
 - [[#5153](https://github.com/seata/seata/pull/5153)] 只允许AT去尝试跨RM获取channel
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
 - [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
 - [[#5303](https://github.com/seata/seata/pull/5303)] 移除启动脚本的-Xmn参数
+- [[#5325](https://github.com/seata/seata/pull/5325)] 添加配置中心、注册中心类型以及存储模式日志信息
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
+
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -49,6 +52,7 @@
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
 - [yuruixin](https://github.com/yuruixin)
+- [dmego](https://github.com/dmego)
 - [CrazyLionLi](https://github.com/JavaLionLi)
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [Bughue](https://github.com/Bughue)
