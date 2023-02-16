@@ -138,19 +138,5 @@
         "parameterTypes": []
       }
     ]
-  },
-  {
-    "condition": {
-      "typeReachable": "io.seata.rm.datasource.util.XAUtils"
-    },
-    "name": "io.seata.rm.datasource.util.XAUtils",
-    "allPublicMethods": true
-  },
-  {
-    "condition": {
-      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
-    },
-    "name": "com.alibaba.druid.util.MySqlUtils",
-    "allPublicMethods": true
   }
 ]
