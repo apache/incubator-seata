@@ -280,7 +280,7 @@ public class CollectionUtils {
     }
 
     /**
-     * To upper list list.
+     * To upper list.
      *
      * @param sourceList the source list
      * @return the list

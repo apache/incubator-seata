@@ -28,6 +28,7 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     private long branchId;
 
+
     /**
      * Gets branch id.
      *

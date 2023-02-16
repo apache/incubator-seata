@@ -29,24 +29,24 @@ public interface EventBus<E> {
     /**
      * insert add element into bus
      *
-     * @param e
-     * @return
-     * @throws FrameworkException
+     * @param e the event
+     * @return is success
+     * @throws FrameworkException the framework exception
      */
     boolean offer(E e) throws FrameworkException;
 
     /**
      * get event consumers
      *
-     * @param clazz
-     * @return
+     * @param clazz the event class
+     * @return event consumer list
      */
     List<EventConsumer> getEventConsumers(Class<?> clazz);
 
     /**
      * register event consumer
      *
-     * @param eventConsumer
+     * @param eventConsumer the event consumer
      */
     void registerEventConsumer(EventConsumer eventConsumer);
 }

@@ -26,6 +26,9 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type SofaRegistryServiceImpl test.
  *
@@ -66,7 +69,7 @@ public class SofaRegistryServiceImplTest {
 
         List<InetSocketAddress> result = new ArrayList<>();
         try {
-            result = instance.lookup("my_test_tx_group");
+            result = instance.lookup(DEFAULT_TX_GROUP);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -87,7 +90,7 @@ public class SofaRegistryServiceImplTest {
         }
 
         try {
-            result = instance.lookup("my_test_tx_group");
+            result = instance.lookup(DEFAULT_TX_GROUP);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }

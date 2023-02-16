@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -141,6 +140,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // applicationDataBytes.length
                 + 4 // xidBytes.size
                 + 1 // statusCode
+                + 1 // lockstatus
                 + 1; //branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
@@ -163,6 +163,7 @@ public class FileTransactionStoreManagerTest {
         } else {
             byteBuffer.putInt(0);
         }
+        byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.flip();

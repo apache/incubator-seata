@@ -131,12 +131,16 @@ function publishConfig() {
 }
 
 count=0
+COMMENT_START="#"
 for line in $(cat $(dirname "$PWD")/config.txt | sed s/[[:space:]]//g); do
-	(( count++ ))
-	key=${line%%=*}
-	value=${line#*=}
-	body="{\"key\":\"${key}\",\"value\":\"${value}\",\"comment\":\"\",\"dataChangeCreatedBy\":\"${dataChangeCreatedBy}\"}"
-	addConfig ${contentType} "${authorization}" "${body}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}" "${key}" "${value}"
+  if [[ "$line" =~ ^"${COMMENT_START}".*  ]]; then
+      continue
+  fi
+  (( count++ ))
+  key=${line%%=*}
+  value=${line#*=}
+  body="{\"key\":\"${key}\",\"value\":\"${value}\",\"comment\":\"\",\"dataChangeCreatedBy\":\"${dataChangeCreatedBy}\"}"
+  addConfig ${contentType} "${authorization}" "${body}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}" "${key}" "${value}"
 done
 
 echo "========================================================================="

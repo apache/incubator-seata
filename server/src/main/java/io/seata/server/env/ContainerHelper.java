@@ -15,12 +15,6 @@
  */
 package io.seata.server.env;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
-
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 
@@ -42,24 +36,6 @@ public class ContainerHelper {
     private static final String ENV_STORE_MODE_KEY = "STORE_MODE";
     private static final String ENV_LOCK_STORE_MODE_KEY = "LOCK_STORE_MODE";
     private static final String ENV_SESSION_STORE_MODE_KEY = "SESSION_STORE_MODE";
-
-    /**
-     * Judge if application is run in container.
-     *
-     * @return If application is run in container
-     */
-    public static boolean isRunningInContainer() {
-        Path path = Paths.get(C_GROUP_PATH);
-        if (Files.exists(path)) {
-            try (Stream<String> stream = Files.lines(path)) {
-                return stream.anyMatch(line -> line.contains(DOCKER_PATH) || line.contains(KUBEPODS_PATH));
-            } catch (IOException e) {
-                System.err.println("Judge if running in container failed: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
 
     /**
      * Gets env from container.

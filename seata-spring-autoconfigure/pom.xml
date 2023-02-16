@@ -26,28 +26,13 @@
     <artifactId>seata-spring-autoconfigure</artifactId>
     <packaging>pom</packaging>
     <name>seata-spring-autoconfigure ${project.version}</name>
+    <description>spring-autoconfigure top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-spring-autoconfigure-core</module>
         <module>seata-spring-autoconfigure-client</module>
         <module>seata-spring-autoconfigure-server</module>
     </modules>
-
-    <properties>
-        <spring-boot.version>1.5.22.RELEASE</spring-boot.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!--seata-->

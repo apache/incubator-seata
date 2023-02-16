@@ -16,7 +16,7 @@
 package io.seata.core.store;
 
 /**
- * @description Distributed locker
+ * Distributed locker
  * @author zhongxiang.wang 
  * @author chd
  */
@@ -24,7 +24,7 @@ public interface DistributedLocker {
     /**
      * Acquire the distributed lock
      *
-     * @param distributedLockDO
+     * @param distributedLockDO the distributed lock info
      * @return the boolean
      */
     boolean acquireLock(DistributedLockDO distributedLockDO);
@@ -32,7 +32,7 @@ public interface DistributedLocker {
     /**
      * Release the distributed lock
      *
-     * @param distributedLockDO
+     * @param distributedLockDO the distributed lock info
      * @return the boolean
      */
     boolean releaseLock(DistributedLockDO distributedLockDO);

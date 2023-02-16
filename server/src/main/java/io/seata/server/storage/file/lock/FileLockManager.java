@@ -15,7 +15,7 @@
  */
 package io.seata.server.storage.file.lock;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
@@ -42,7 +42,7 @@ public class FileLockManager extends AbstractLockManager {
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
+        List<BranchSession> branchSessions = globalSession.getBranchSessions();
         boolean releaseLockResult = true;
         for (BranchSession branchSession : branchSessions) {
             try {

@@ -18,7 +18,6 @@ package io.seata.config.nacos;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +27,6 @@ import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -47,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * The type Nacos configuration.
  *
  * @author slievrly
+ * @author xingfudeshi@gmail.com
  */
 public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
@@ -57,7 +56,6 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String GROUP_KEY = "group";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String NACOS_DATA_ID_KEY = "dataId";
-    private static final String ENDPOINT_KEY = "endpoint";
     private static final String CONFIG_TYPE = "nacos";
     private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
@@ -65,6 +63,8 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
+    private static final String USE_PARSE_RULE = "false";
+    private static final String CONTEXT_PATH = "contextPath";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -204,11 +204,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     private static Properties getConfigProperties() {
         Properties properties = new Properties();
-        if (System.getProperty(ENDPOINT_KEY) != null) {
-            properties.setProperty(ENDPOINT_KEY, System.getProperty(ENDPOINT_KEY));
-            properties.put(ACCESS_KEY, Objects.toString(System.getProperty(ACCESS_KEY), ""));
-            properties.put(SECRET_KEY, Objects.toString(System.getProperty(SECRET_KEY), ""));
-        } else if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
+        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
             String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
@@ -226,15 +224,30 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME)
-                : FILE_CONFIG.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD)
-                    : FILE_CONFIG.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 properties.setProperty(USER_NAME, userName);
                 properties.setProperty(PASSWORD, password);
+                LOGGER.info("Nacos check auth with userName/password.");
             }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
+                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
+                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    properties.put(ACCESS_KEY, accessKey);
+                    properties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                }
+            }
+        }
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        if (StringUtils.isNotBlank(contextPath)) {
+            properties.setProperty(CONTEXT_PATH, contextPath);
         }
         return properties;
     }
@@ -265,6 +278,14 @@ public class NacosConfiguration extends AbstractConfiguration {
                 PASSWORD);
     }
 
+    public static String getNacosAccessKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, ACCESS_KEY);
+    }
+
+    public static String getNacosSecretKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
+    }
+
     private static String getNacosGroup() {
         return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
@@ -288,6 +309,10 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
 
         return sb.toString();
+    }
+
+    private static String getNacosContextPathKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
     }
 
     private static void initSeataConfig() {

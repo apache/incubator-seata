@@ -15,13 +15,20 @@
  */
 package io.seata.core.exception;
 
+import java.util.Objects;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.LockStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Abstract exception handler.
@@ -124,7 +131,15 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
-            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            if (Objects.equals(LockKeyConflict, tex.getCode())) {
+                LOGGER.error("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
+                        ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, request);
+            } else if (Objects.equals(LockKeyConflictFailFast, tex.getCode())) {
+                LOGGER.error("this request cannot acquire global lock, decide fail-fast because LockStatus is {}. request: {}",
+                        LockStatus.Rollbacking, request);
+            } else {
+                LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
+            }
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
             LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);

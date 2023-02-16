@@ -75,13 +75,21 @@ public class RegistryHeartBeats {
         }, period, period, TimeUnit.MILLISECONDS);
     }
 
+    public static void close() {
+        HEARTBEAT_SCHEDULED.shutdown();
+    }
+
     private static long getHeartbeatPeriod(String registryType) {
-        return FILE_CONFIG.getLong(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, HEARTBEAT_KEY, HEARTBEAT_PERIOD_KEY),
+        String propertySuffix = String.join("-", HEARTBEAT_KEY, HEARTBEAT_PERIOD_KEY);
+        //  FILE_CONFIG.getLong("registry.${registryType}.heartbeat-period");
+        return FILE_CONFIG.getLong(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
                 DEFAULT_HEARTBEAT_PERIOD);
     }
 
     private static boolean getHeartbeatEnabled(String registryType) {
-        return FILE_CONFIG.getBoolean(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, HEARTBEAT_KEY, HEARTBEAT_ENABLED_KEY),
+        String propertySuffix = String.join("-", HEARTBEAT_KEY, HEARTBEAT_ENABLED_KEY);
+        //  FILE_CONFIG.getBoolean("registry.${registryType}.heartbeat-enabled");
+        return FILE_CONFIG.getBoolean(String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, registryType, propertySuffix),
                 DEFAULT_HEARTBEAT_ENABLED);
     }
 
@@ -91,8 +99,8 @@ public class RegistryHeartBeats {
         /**
          * do re-register
          *
-         * @param serverAddress
-         * @throws Exception
+         * @param serverAddress the server address
+         * @throws Exception the exception
          */
         void register(InetSocketAddress serverAddress) throws Exception;
     }

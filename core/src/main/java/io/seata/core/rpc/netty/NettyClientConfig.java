@@ -20,6 +20,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
 import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
@@ -39,7 +41,8 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
+    private static final long RPC_RM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
+    private static final long RPC_TM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
@@ -215,12 +218,21 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Gets rpc sendAsyncRequestWithResponse time out.
+     * Gets rpc RM sendAsyncRequestWithResponse time out.
      *
-     * @return the rpc sendAsyncRequestWithResponse time out
+     * @return the rpc RM sendAsyncRequestWithResponse time out
      */
-    public static int getRpcRequestTimeout() {
-        return RPC_REQUEST_TIMEOUT;
+    public static long getRpcRmRequestTimeout() {
+        return RPC_RM_REQUEST_TIMEOUT;
+    }
+
+    /**
+     * Gets rpc TM sendAsyncRequestWithResponse time out.
+     *
+     * @return the rpc TM sendAsyncRequestWithResponse time out
+     */
+    public static long getRpcTmRequestTimeout() {
+        return RPC_TM_REQUEST_TIMEOUT;
     }
 
     /**
@@ -439,6 +451,7 @@ public class NettyClientConfig extends NettyBaseConfig {
         return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.RMROLE.name();
     }
 
+    @Deprecated
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }

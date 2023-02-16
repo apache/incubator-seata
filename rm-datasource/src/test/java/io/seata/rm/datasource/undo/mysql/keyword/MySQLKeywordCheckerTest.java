@@ -15,11 +15,10 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import java.sql.SQLException;
 import java.sql.Types;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.KeywordChecker;
+import io.seata.sqlparser.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;

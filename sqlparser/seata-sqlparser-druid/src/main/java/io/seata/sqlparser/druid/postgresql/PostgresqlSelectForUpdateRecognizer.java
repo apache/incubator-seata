@@ -129,4 +129,9 @@ public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognize
         SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.global_table
     CONSTRAINT pk_global_table PRIMARY KEY (xid)
 );
 
-CREATE INDEX idx_gmt_modified_status ON public.global_table (gmt_modified, status);
+CREATE INDEX idx_status_gmt_modified ON public.global_table (status, gmt_modified);
 CREATE INDEX idx_transaction_id ON public.global_table (transaction_id);
 
 -- the table to store BranchSession data
@@ -48,12 +48,16 @@ CREATE TABLE IF NOT EXISTS public.lock_table
     resource_id    VARCHAR(256),
     table_name     VARCHAR(32),
     pk             VARCHAR(36),
+    status         SMALLINT     NOT NULL DEFAULT 0,
     gmt_create     TIMESTAMP(0),
     gmt_modified   TIMESTAMP(0),
     CONSTRAINT pk_lock_table PRIMARY KEY (row_key)
 );
 
+comment on column public.lock_table.status is '0:locked ,1:rollbacking';
 CREATE INDEX idx_branch_id ON public.lock_table (branch_id);
+CREATE INDEX idx_xid ON public.lock_table (xid);
+CREATE INDEX idx_status ON public.lock_table (status);
 
 CREATE TABLE distributed_lock (
     lock_key     VARCHAR(20)  NOT NULL,

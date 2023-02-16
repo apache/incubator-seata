@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Lists;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.IOUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.model.BranchStatus;
 import io.seata.rm.datasource.undo.UndoLogManager;
@@ -40,8 +42,8 @@ import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
@@ -94,6 +96,12 @@ public class AsyncWorker {
                 .thenRun(() -> addToCommitQueue(context));
     }
 
+    private void addAllToCommitQueue(List<Phase2Context> contexts) {
+        for (Phase2Context context : contexts) {
+            addToCommitQueue(context);
+        }
+    }
+
     void doBranchCommitSafely() {
         try {
             doBranchCommit();
@@ -120,6 +128,10 @@ public class AsyncWorker {
     Map<String, List<Phase2Context>> groupedByResourceId(List<Phase2Context> contexts) {
         Map<String, List<Phase2Context>> groupedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         contexts.forEach(context -> {
+            if (StringUtils.isBlank(context.resourceId)) {
+                LOGGER.warn("resourceId is empty, resource:{}", context);
+                return;
+            }
             List<Phase2Context> group = groupedContexts.computeIfAbsent(context.resourceId, key -> new LinkedList<>());
             group.add(context);
         });
@@ -127,28 +139,38 @@ public class AsyncWorker {
     }
 
     private void dealWithGroupedContexts(String resourceId, List<Phase2Context> contexts) {
+        if (StringUtils.isBlank(resourceId)) {
+            //ConcurrentHashMap required notNull key
+            LOGGER.warn("resourceId is empty and will skip.");
+            return;
+        }
         DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
-            LOGGER.warn("Failed to find resource for {}", resourceId);
+            LOGGER.warn("failed to find resource for {} and requeue", resourceId);
+            addAllToCommitQueue(contexts);
             return;
         }
 
-        Connection conn;
+        Connection conn = null;
         try {
             conn = dataSourceProxy.getPlainConnection();
-        } catch (SQLException sqle) {
-            LOGGER.error("Failed to get connection for async committing on {}", resourceId, sqle);
-            return;
+            UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
+
+            // split contexts into several lists, with each list contain no more element than limit size
+            List<List<Phase2Context>> splitByLimit = Lists.partition(contexts, UNDOLOG_DELETE_LIMIT_SIZE);
+            for (List<Phase2Context> partition : splitByLimit) {
+                deleteUndoLog(conn, undoLogManager, partition);
+            }
+        } catch (SQLException sqlExx) {
+            addAllToCommitQueue(contexts);
+            LOGGER.error("failed to get connection for async committing on {} and requeue", resourceId, sqlExx);
+        } finally {
+            IOUtil.close(conn);
         }
 
-        UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
-
-        // split contexts into several lists, with each list contain no more element than limit size
-        List<List<Phase2Context>> splitByLimit = Lists.partition(contexts, UNDOLOG_DELETE_LIMIT_SIZE);
-        splitByLimit.forEach(partition -> deleteUndoLog(conn, undoLogManager, partition));
     }
 
-    private void deleteUndoLog(Connection conn, UndoLogManager undoLogManager, List<Phase2Context> contexts) {
+    private void deleteUndoLog(final Connection conn, UndoLogManager undoLogManager, List<Phase2Context> contexts) {
         Set<String> xids = new LinkedHashSet<>(contexts.size());
         Set<Long> branchIds = new LinkedHashSet<>(contexts.size());
         contexts.forEach(context -> {
@@ -165,14 +187,9 @@ public class AsyncWorker {
             LOGGER.error("Failed to batch delete undo log", e);
             try {
                 conn.rollback();
+                addAllToCommitQueue(contexts);
             } catch (SQLException rollbackEx) {
                 LOGGER.error("Failed to rollback JDBC resource after deleting undo log failed", rollbackEx);
-            }
-        } finally {
-            try {
-                conn.close();
-            } catch (SQLException closeEx) {
-                LOGGER.error("Failed to close JDBC resource after deleting undo log", closeEx);
             }
         }
     }
@@ -203,5 +220,11 @@ public class AsyncWorker {
          * The Resource id.
          */
         String resourceId;
+
+        @Override
+        public String toString() {
+            return "Phase2Context{" + "xid='" + xid + '\'' + ", branchId=" + branchId + ", resourceId='" + resourceId
+                + '\'' + '}';
+        }
     }
 }

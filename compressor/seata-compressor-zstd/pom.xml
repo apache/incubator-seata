@@ -26,6 +26,7 @@
     <artifactId>seata-compressor-zstd</artifactId>
     <packaging>jar</packaging>
     <name>seata-compressor-zstd ${project.version}</name>
+    <description>compressor-zstd for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

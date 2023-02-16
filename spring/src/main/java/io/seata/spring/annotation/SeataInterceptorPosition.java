@@ -28,13 +28,13 @@ public enum SeataInterceptorPosition {
     Any,
 
     /**
-     * Must be before/higherThan/outsideOf TransactionInterceptor.<br/>
+     * Must be before/higherThan/outsideOf TransactionInterceptor.</br>
      * The SeataInterceptor's order must be smaller than TransactionInterceptor's order.
      */
     BeforeTransaction,
 
     /**
-     * Must be after/lowerThan/insideOf TransactionInterceptor.<br/>
+     * Must be after/lowerThan/insideOf TransactionInterceptor.</br>
      * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
      */
     AfterTransaction

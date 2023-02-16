@@ -50,6 +50,7 @@ public class TCCResourceManager extends AbstractResourceManager {
      * Instantiates a new Tcc resource manager.
      */
     public TCCResourceManager() {
+        // not do anything
     }
 
     /**
@@ -102,7 +103,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, businessActionContext, xid, branchId, args);
+                    result = TCCFenceHandler.commitFence(commitMethod, targetTCCBean, xid, branchId, args);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -160,7 +161,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_TCC_FENCE))) {
                 try {
-                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, businessActionContext, xid, branchId,
+                    result = TCCFenceHandler.rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
                             args, tccResource.getActionName());
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();

@@ -133,7 +133,7 @@ public interface Configuration {
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return he duration
+     * @return the duration
      */
     Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
 
@@ -300,6 +300,11 @@ public interface Configuration {
             return null;
         }
         String content = ENV_MAP.get(dataId);
+        if (null != content) {
+            return content;
+        }
+        String envDataId = dataId.toUpperCase().replace(".", "_");
+        content = ENV_MAP.get(envDataId);
         if (null != content) {
             return content;
         }

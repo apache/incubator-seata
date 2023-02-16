@@ -90,6 +90,46 @@ public final class ReflectionUtil {
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
 
+    /**
+     * Get the wrapped class
+     *
+     * @param clazz the class
+     * @return the wrapped class
+     */
+    public static Class<?> getWrappedClass(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (clazz.equals(byte.class)) {
+                return Byte.class;
+            }
+            if (clazz.equals(boolean.class)) {
+                return Boolean.class;
+            }
+            if (clazz.equals(char.class)) {
+                return Character.class;
+            }
+            if (clazz.equals(short.class)) {
+                return Short.class;
+            }
+            if (clazz.equals(int.class)) {
+                return Integer.class;
+            }
+            if (clazz.equals(long.class)) {
+                return Long.class;
+            }
+            if (clazz.equals(float.class)) {
+                return Float.class;
+            }
+            if (clazz.equals(double.class)) {
+                return Double.class;
+            }
+            if (clazz.equals(void.class)) {
+                return Void.class;
+            }
+        }
+
+        return clazz;
+    }
+
     //endregion
 
 
@@ -306,6 +346,8 @@ public final class ReflectionUtil {
 
     /**
      * modify `static` or `static final` field value
+     * <p>
+     * In java17, this method cannot be used for final fields.
      *
      * @param staticField the static field
      * @param newValue    the new value
@@ -326,6 +368,7 @@ public final class ReflectionUtil {
 
         // remove the `final` keyword from the field
         if (Modifier.isFinal(staticField.getModifiers())) {
+            // In java17, can't get the field `modifiers` from class `java.lang.reflect.Field`.
             Field modifiers = staticField.getClass().getDeclaredField("modifiers");
             modifiers.setAccessible(true);
             modifiers.setInt(staticField, staticField.getModifiers() & ~Modifier.FINAL);

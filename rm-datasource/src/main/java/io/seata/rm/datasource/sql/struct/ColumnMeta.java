@@ -41,6 +41,7 @@ public class ColumnMeta {
     private int ordinalPosition;
     private String isNullAble;
     private String isAutoincrement;
+    private boolean isOnUpdate;
 
     /**
      * Instantiates a new Column meta.
@@ -69,6 +70,7 @@ public class ColumnMeta {
                 ", ordinalPosition=" + ordinalPosition +
                 ", isNullAble='" + isNullAble + '\'' +
                 ", isAutoincrement='" + isAutoincrement + '\'' +
+                ", isOnUpdate=" + isOnUpdate +
                 '}';
     }
 
@@ -405,6 +407,14 @@ public class ColumnMeta {
         this.isAutoincrement = isAutoincrement;
     }
 
+    public boolean isOnUpdate() {
+        return isOnUpdate;
+    }
+
+    public void setOnUpdate(boolean onUpdate) {
+        isOnUpdate = onUpdate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -468,6 +478,9 @@ public class ColumnMeta {
         if (!Objects.equals(columnMeta.isAutoincrement, this.isAutoincrement)) {
             return false;
         }
+        if (!Objects.equals(columnMeta.isOnUpdate, this.isOnUpdate)) {
+            return false;
+        }
         return true;
     }
 
@@ -491,6 +504,7 @@ public class ColumnMeta {
         hash += Objects.hashCode(ordinalPosition);
         hash += Objects.hashCode(isNullAble);
         hash += Objects.hashCode(isAutoincrement);
+        hash += Objects.hashCode(isOnUpdate);
         return hash;
     }
 }

@@ -76,14 +76,14 @@
 
 3. **设置远程** 将上游设置为 `git@github.com:seata/seata.git` 使用以下两个命令：
 
-```
+```bash
 git remote add upstream git@github.com:seata/seata.git
 git remote set-url --push upstream no-pushing
 ```
 
 使用此远程设置，您可以像这样检查您的 git 远程配置：
 
-```
+```shell
 $ git remote -v
 origin     git@github.com:<your-username>/seata.git (fetch)
 origin     git@github.com:<your-username>/seata.git (push)
@@ -140,7 +140,13 @@ upstream   no-pushing (push)
 
 * 避免在提交中进行非常大的更改；
 * 每次提交都完整且可审查。
-* 提交时检查 git config(`user.name`, `user.email`) 以确保它与您的 github ID 相关联。
+* 提交时检查 git config(`user.name`, `user.email`) 以确保它与您的 GitHub ID 相关联。
+
+```bash
+git config --get user.name
+git config --get user.email
+```
+
 * 提交pr时，请在'changes/'文件夹下的XXXmd文件中添加当前更改的简要说明
 
 

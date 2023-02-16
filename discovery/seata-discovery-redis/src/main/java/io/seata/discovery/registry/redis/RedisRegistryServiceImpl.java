@@ -19,8 +19,8 @@ import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -45,6 +45,8 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 
 /**
  * The type Redis registry service.
@@ -67,8 +69,14 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static volatile RedisRegistryServiceImpl instance;
     private static volatile JedisPool jedisPool;
 
-    private ScheduledExecutorService threadPoolExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RedisRegistryService", 1));
+    // redis registry key live 5 seconds, auto refresh key every 2 seconds
+    private static final int KEY_TTL = 5;
+    private static final long KEY_REFRESH_PERIOD = 2000L;
+
+    private ScheduledExecutorService threadPoolExecutorForSubscribe = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("RedisRegistryService-subscribe", 1));
+    private ScheduledExecutorService threadPoolExecutorForUpdateMap = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("RedisRegistryService-updateClusterAddrMap", 1));
 
     private RedisRegistryServiceImpl() {
         Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -80,41 +88,41 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
-        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
-        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
-        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
-        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
+        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-on-borrow", true));
+        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-on-return", false));
+        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test-while-idle", false));
+        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-idle", 0);
         if (maxIdle > 0) {
             redisConfig.setMaxIdle(maxIdle);
         }
-        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
+        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min-idle", 0);
         if (minIdle > 0) {
             redisConfig.setMinIdle(minIdle);
         }
-        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
+        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-active", 0);
         if (maxActive > 0) {
             redisConfig.setMaxTotal(maxActive);
         }
-        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
+        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-total", 0);
         if (maxTotal > 0) {
             redisConfig.setMaxTotal(maxTotal);
         }
-        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
-            seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max-wait",
+                seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
-        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
+        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num-tests-per-eviction-run", 0);
         if (numTestsPerEvictionRun > 0) {
             redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
         int timeBetweenEvictionRunsMillis = seataConfig.getInt(
-            REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
+                REDIS_FILEKEY_PREFIX + "time-between-eviction-runs-millis", 0);
         if (timeBetweenEvictionRunsMillis > 0) {
             redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
-            0);
+        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min-evictable-idle-time-millis",
+                0);
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         }
@@ -144,15 +152,22 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public void register(InetSocketAddress address) {
         NetUtil.validAddress(address);
-        doRegister(address);
-        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
+        doRegisterOrExpire(address, true);
+        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, KEY_REFRESH_PERIOD, this::doRegisterOrExpire);
     }
 
-    private void doRegister(InetSocketAddress address) {
+    private void doRegisterOrExpire(InetSocketAddress address) {
+        doRegisterOrExpire(address, false);
+    }
+
+    private void doRegisterOrExpire(InetSocketAddress address, boolean publish) {
         String serverAddr = NetUtil.toStringAddress(address);
+        String key = getRedisRegistryKey() + "_" + serverAddr;  // key = registry.redis.${cluster}_ip:port
         try (Jedis jedis = jedisPool.getResource(); Pipeline pipelined = jedis.pipelined()) {
-            pipelined.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
-            pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            pipelined.setex(key, KEY_TTL, ManagementFactory.getRuntimeMXBean().getName());
+            if (publish) {
+                pipelined.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            }
             pipelined.sync();
         }
     }
@@ -173,10 +188,22 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         String redisRegistryKey = REDIS_FILEKEY_PREFIX + cluster;
         LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
                 .add(listener);
-        threadPoolExecutor.scheduleAtFixedRate(() -> {
+
+
+        threadPoolExecutorForUpdateMap.scheduleAtFixedRate(() -> {
             try {
                 try (Jedis jedis = jedisPool.getResource()) {
+                    // try update Map every 2s
                     updateClusterAddressMap(jedis, redisRegistryKey);
+                }
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }, 0, KEY_REFRESH_PERIOD, TimeUnit.MILLISECONDS);
+
+        threadPoolExecutorForSubscribe.scheduleAtFixedRate(() -> {
+            try {
+                try (Jedis jedis = jedisPool.getResource()) {
                     jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), redisRegistryKey);
                 }
             } catch (Exception e) {
@@ -197,6 +224,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
         return lookupByCluster(clusterName);
     }
+
     // default visible for test
     List<InetSocketAddress> lookupByCluster(String clusterName) {
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
@@ -224,7 +252,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
+        threadPoolExecutorForSubscribe.shutdown();
+        threadPoolExecutorForUpdateMap.shutdown();
+        RegistryHeartBeats.close();
         jedisPool.destroy();
     }
 
@@ -247,18 +278,34 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 try {
                     listener.onEvent(msg);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
     }
 
     private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey) {
-        Map<String, String> instances = jedis.hgetAll(redisRegistryKey);
-        if (instances != null && !instances.isEmpty()) {
-            Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
-                    .map(NetUtil::toInetSocketAddress)
-                    .collect(Collectors.toSet());
+        ScanParams scanParams = new ScanParams();
+        scanParams.count(10);
+        scanParams.match(redisRegistryKey + "_*");
+        String cursor = ScanParams.SCAN_POINTER_START;
+        Set<InetSocketAddress> newAddressSet = new HashSet<>();
+        do {
+            ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
+            cursor = scanResult.getCursor();
+            List<String> instances = scanResult.getResult();
+            if (instances != null && !instances.isEmpty()) {
+                // key = registry.redis.${cluster}_ip:port
+                Set<InetSocketAddress> part = instances.stream().map(key -> {
+                    String[] split = key.split("_");
+                    return NetUtil.toInetSocketAddress(split[1]);
+                }).collect(Collectors.toSet());
+
+                newAddressSet.addAll(part);
+            }
+        } while (!cursor.equals(ScanParams.SCAN_POINTER_START));
+
+        if (!newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
         }
     }

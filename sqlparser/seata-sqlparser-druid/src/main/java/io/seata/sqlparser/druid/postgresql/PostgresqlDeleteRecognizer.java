@@ -126,4 +126,9 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
         //postgre does not have order by condition in delete statement
         return null;
     }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

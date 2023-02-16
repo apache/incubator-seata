@@ -15,6 +15,18 @@
  */
 package io.seata.rm.datasource.exec.mysql;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
@@ -32,18 +44,6 @@ import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type My sql insert executor.
@@ -128,10 +128,11 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             }
         }
         if (StringUtils.isBlank(autoColumnName)) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("auto increment column not exist");
         }
 
-        ResultSet genKeys;
+        ResultSet genKeys = null;
+        boolean isManualCloseResultSet = false;
         try {
             genKeys = statementProxy.getGeneratedKeys();
         } catch (SQLException e) {
@@ -141,19 +142,21 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
                 LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
-                ResultSet rsFirstId = null;
                 try {
-                    rsFirstId = genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-
+                    genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
                     // If there is batch insert
                     // do auto increment base LAST_INSERT_ID and variable `auto_increment_increment`
                     if (updateCount > 1 && canAutoIncrement(pkMetaMap)) {
-                        rsFirstId.next();
-                        BigDecimal firstId = new BigDecimal(rsFirstId.getString(1));
+                        genKeys.next();
+                        BigDecimal firstId = new BigDecimal(genKeys.getString(1));
                         return autoGeneratePks(firstId, autoColumnName, updateCount);
+                    } else {
+                        isManualCloseResultSet = true;
                     }
                 } finally {
-                    IOUtil.close(rsFirstId);
+                    if (!isManualCloseResultSet) {
+                        IOUtil.close(genKeys);
+                    }
                 }
             } else {
                 throw e;
@@ -168,8 +171,12 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             genKeys.beforeFirst();
         } catch (SQLException e) {
             LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        } finally {
+            if (isManualCloseResultSet) {
+                IOUtil.close(genKeys);
+            }
         }
-        pkValuesMap.put(autoColumnName,pkValues);
+        pkValuesMap.put(autoColumnName, pkValues);
         return pkValuesMap;
     }
 
@@ -192,9 +199,17 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         return pkValuesMap;
     }
 
+    @Deprecated
     @SuppressWarnings("lgtm[java/database-resource-leak]")
     @Override
     public List<Object> getPkValuesByDefault() throws SQLException {
+        // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
+        throw new NotSupportYetException();
+    }
+
+    @SuppressWarnings("lgtm[java/database-resource-leak]")
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
         // mysql default keyword the logic not support. (sample: insert into test(id, name) values(default, 'xx'))
         throw new NotSupportYetException();
     }
@@ -238,4 +253,5 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         }
         return false;
     }
+
 }

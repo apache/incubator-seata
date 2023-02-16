@@ -119,6 +119,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @param globalSession the global session
      * @param lockCallable the lock Callable
      * @return the value
+     * @throws TransactionException the transaction exception
      */
     <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
             throws TransactionException;

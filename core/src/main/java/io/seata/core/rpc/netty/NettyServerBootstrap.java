@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,7 +37,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingBootstrap;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
-import io.seata.discovery.registry.RegistryFactory;
+import io.seata.discovery.registry.MultiRegistryFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +63,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public NettyServerBootstrap(NettyServerConfig nettyServerConfig) {
-
         this.nettyServerConfig = nettyServerConfig;
         if (NettyServerConfig.enableEpoll()) {
             this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
@@ -107,7 +108,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
      * @param listenPort the listen port
      */
     public void setListenPort(int listenPort) {
-
         if (listenPort <= 0) {
             throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
         }
@@ -167,25 +167,31 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
         try {
             this.serverBootstrap.bind(getListenPort()).sync();
-            XID.setPort(getListenPort());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
-            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+                registryService.register(address);
+            }
             initialized.set(true);
+        } catch (SocketException se) {
+            throw new RuntimeException("Server start failed, the listen port: " + getListenPort(), se);
         } catch (Exception exx) {
-            throw new RuntimeException(exx);
+            throw new RuntimeException("Server start failed", exx);
         }
-
     }
 
     @Override
     public void shutdown() {
         try {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Shutting server down. ");
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
             }
             if (initialized.get()) {
-                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
-                RegistryFactory.getInstance().close();
+                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+                for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+                    registryService.unregister(address);
+                    registryService.close();
+                }
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }
@@ -193,7 +199,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
-            LOGGER.error("shutdown execute error:{}",exx.getMessage(),exx);
+            LOGGER.error("shutdown execute error: {}", exx.getMessage(), exx);
         }
     }
 }

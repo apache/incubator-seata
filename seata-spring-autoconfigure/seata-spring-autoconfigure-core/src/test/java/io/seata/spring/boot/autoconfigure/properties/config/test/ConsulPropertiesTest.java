@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class ConsulPropertiesTest extends BasePropertiesTest {
-    @Bean
+    @Bean("testConfigConsulProperties")
     public ConfigConsulProperties configConsulProperties() {
         return new ConfigConsulProperties().setServerAddr(STR_TEST_AAA).setAclToken(STR_TEST_BBB).setKey(STR_TEST_CCC);
     }

@@ -116,12 +116,12 @@ public class DataSourceManager extends AbstractResourceManager {
                                        String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
         }
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
-            StackTraceLogger.info(LOGGER, te,
+            StackTraceLogger.error(LOGGER, te,
                 "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
                 new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {

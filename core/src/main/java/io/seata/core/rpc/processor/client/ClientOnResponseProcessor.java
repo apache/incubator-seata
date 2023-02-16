@@ -15,8 +15,13 @@
  */
 package io.seata.core.rpc.processor.client;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
@@ -35,10 +40,6 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * process TC response message.
@@ -73,12 +74,12 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     /**
      * The Futures from io.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
-    private ConcurrentMap<Integer, MessageFuture> futures;
+    private final ConcurrentMap<Integer, MessageFuture> futures;
 
     /**
      * To handle the received RPC message on upper level.
      */
-    private TransactionMessageHandler transactionMessageHandler;
+    private final TransactionMessageHandler transactionMessageHandler;
 
     public ClientOnResponseProcessor(Map<Integer, MergeMessage> mergeMsgMap,
                                      ConcurrentHashMap<Integer, MessageFuture> futures,
@@ -97,12 +98,28 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("msg: {} is not found in futures.", msgId);
-                    }
+                    LOGGER.error("msg: {} is not found in futures, result message: {}", msgId,results.getMsgs()[i]);
                 } else {
                     future.setResultMessage(results.getMsgs()[i]);
                 }
+            }
+        } else if (rpcMessage.getBody() instanceof BatchResultMessage) {
+            try {
+                BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
+                for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
+                    int msgId = batchResultMessage.getMsgIds().get(i);
+                    MessageFuture future = futures.remove(msgId);
+                    if (future == null) {
+                        LOGGER.error("msg: {} is not found in futures, result message: {}", msgId, batchResultMessage.getResultMessages().get(i));
+                    } else {
+                        future.setResultMessage(batchResultMessage.getResultMessages().get(i));
+                    }
+                }
+            } finally {
+                // In order to be compatible with the old version, in the batch sending of version 1.5.0,
+                // batch messages will also be placed in the local cache of mergeMsgMap,
+                // but version 1.5.0 no longer needs to obtain batch messages from mergeMsgMap
+                mergeMsgMap.clear();
             }
         } else {
             MessageFuture messageFuture = futures.remove(rpcMessage.getId());

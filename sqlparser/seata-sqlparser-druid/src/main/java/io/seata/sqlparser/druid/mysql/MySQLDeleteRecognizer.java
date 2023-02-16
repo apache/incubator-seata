@@ -136,4 +136,8 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
         return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

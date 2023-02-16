@@ -15,30 +15,29 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.Map;
-
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.RmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
-import io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
-import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.util.Map;
+
 import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
-
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -56,7 +55,7 @@ public class ClientPropertiesTest {
     public void testSeataProperties() {
         assertTrue(context.getBean(SeataProperties.class).isEnabled());
         assertNull(context.getBean(SeataProperties.class).getApplicationId());
-        assertEquals("null-seata-service-group", context.getBean(SeataProperties.class).getTxServiceGroup());
+        assertEquals(DEFAULT_TX_GROUP, context.getBean(SeataProperties.class).getTxServiceGroup());
         assertTrue(context.getBean(SeataProperties.class).isEnableAutoDataSourceProxy());
         assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
@@ -74,7 +73,7 @@ public class ClientPropertiesTest {
     public void testRmProperties() {
         assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
-        assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
+        assertTrue(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
         assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
         assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
@@ -86,7 +85,7 @@ public class ClientPropertiesTest {
         ServiceProperties serviceProperties = context.getBean(ServiceProperties.class);
         Map<String, String> vgroupMapping = serviceProperties.getVgroupMapping();
         Map<String, String> grouplist = serviceProperties.getGrouplist();
-        assertEquals("default", vgroupMapping.get("my_test_tx_group"));
+        assertEquals("default", vgroupMapping.get(DEFAULT_TX_GROUP));
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
         assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
@@ -109,7 +108,7 @@ public class ClientPropertiesTest {
 
     @Test
     public void testLoadBalanceProperties() {
-        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals("XID", context.getBean(LoadBalanceProperties.class).getType());
         assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
 

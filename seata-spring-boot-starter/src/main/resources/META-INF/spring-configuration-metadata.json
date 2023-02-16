@@ -1,0 +1,13 @@
+{
+  "groups": [],
+  "properties": [
+    {
+      "name": "seata.client.http.interceptor-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether to enable the seata TransactionPropagationInterceptor",
+      "sourceType": "io.seata.spring.boot.autoconfigure.SeataHttpAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": []
+}

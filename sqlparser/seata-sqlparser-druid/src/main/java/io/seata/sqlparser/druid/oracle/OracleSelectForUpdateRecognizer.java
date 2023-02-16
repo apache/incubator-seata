@@ -133,4 +133,8 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
         return sb.toString();
     }
 
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
+    }
 }

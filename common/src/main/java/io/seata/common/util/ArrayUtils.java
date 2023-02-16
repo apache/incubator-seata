@@ -15,6 +15,8 @@
  */
 package io.seata.common.util;
 
+import java.lang.reflect.Array;
+
 /**
  * The type Array utils.
  *
@@ -23,6 +25,31 @@ package io.seata.common.util;
 public class ArrayUtils {
 
     private ArrayUtils() {
+    }
+
+    /**
+     * arrayObj cast to Object[]
+     *
+     * @param arrayObj the array obj
+     * @return array
+     */
+    public static Object[] toArray(Object arrayObj) {
+        if (arrayObj == null) {
+            return null;
+        }
+
+        if (!arrayObj.getClass().isArray()) {
+            throw new ClassCastException("'arrayObj' is not an array, can't cast to Object[]");
+        }
+
+        int length = Array.getLength(arrayObj);
+        Object[] array = new Object[length];
+        if (length > 0) {
+            for (int i = 0; i < length; ++i) {
+                array[i] = Array.get(arrayObj, i);
+            }
+        }
+        return array;
     }
 
     /**
@@ -55,5 +82,30 @@ public class ArrayUtils {
             sb.append("]");
             return sb.toString();
         });
+    }
+
+    /**
+     * Array To String.
+     *
+     * @param arrayObj the array obj
+     * @return str the string
+     */
+    public static String toString(final Object arrayObj) {
+        if (arrayObj == null) {
+            return "null";
+        }
+        if (!arrayObj.getClass().isArray()) {
+            return StringUtils.toString(arrayObj);
+        }
+
+        if (Array.getLength(arrayObj) == 0) {
+            return "[]";
+        }
+
+        if (arrayObj.getClass().getComponentType().isPrimitive()) {
+            return toString(toArray(arrayObj));
+        } else {
+            return toString((Object[])arrayObj);
+        }
     }
 }

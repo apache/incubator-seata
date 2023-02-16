@@ -65,6 +65,16 @@ public class SeataProperties {
      */
     private String[] excludesForAutoProxying = {};
 
+    /**
+     * used for aliyun accessKey
+     */
+    private String accessKey;
+
+    /**
+     * used for aliyun secretKey
+     */
+    private String secretKey;
+
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
 
@@ -91,7 +101,7 @@ public class SeataProperties {
 
     public String getTxServiceGroup() {
         if (txServiceGroup == null) {
-            txServiceGroup = springCloudAlibabaConfiguration.getTxServiceGroup();
+            txServiceGroup = DefaultValues.DEFAULT_TX_GROUP;
         }
         return txServiceGroup;
     }
@@ -151,6 +161,24 @@ public class SeataProperties {
 
     public SeataProperties setExcludesForScanning(String[] excludesForScanning) {
         this.excludesForScanning = excludesForScanning;
+        return this;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public SeataProperties setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+        return this;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public SeataProperties setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
         return this;
     }
 }

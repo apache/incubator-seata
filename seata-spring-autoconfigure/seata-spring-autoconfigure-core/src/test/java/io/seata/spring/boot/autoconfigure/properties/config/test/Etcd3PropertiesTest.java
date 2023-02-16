@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class Etcd3PropertiesTest extends BasePropertiesTest {
-    @Bean
+    @Bean("testConfigEtcd3Properties")
     public ConfigEtcd3Properties configEtcd3Properties() {
         return new ConfigEtcd3Properties().setServerAddr(STR_TEST_AAA).setKey(STR_TEST_BBB);
     }

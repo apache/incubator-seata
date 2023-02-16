@@ -35,6 +35,10 @@ import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
 
 /**
  * The type Table records.
@@ -110,7 +114,7 @@ public class TableRecords implements java.io.Serializable {
      */
     public void setTableMeta(TableMeta tableMeta) {
         if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("tableMeta has already been set");
         }
         this.tableMeta = tableMeta;
         this.tableName = tableMeta.getTableName();
@@ -237,9 +241,11 @@ public class TableRecords implements java.io.Serializable {
                     if (object != null) {
                         field.setValue(new SerialJavaObject(object));
                     }
+                } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
+                    field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
                 } else {
                     // JDBCType.DISTINCT, JDBCType.STRUCT etc...
-                    field.setValue(resultSet.getObject(i));
+                    field.setValue(holdSerialDataType(resultSet.getObject(i)));
                 }
 
                 fields.add(field);
@@ -251,6 +257,36 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * since there is no parameterless constructor for Blob, Clob and NClob just like mysql,
+     * it needs to be converted to Serial_ type
+     *
+     * @param data the sql data
+     * @return Serializable Data
+     * @throws SQLException the sql exception
+     */
+    public static Object holdSerialDataType(Object data) throws SQLException {
+        if (null == data) {
+            return null;
+        }
+
+        if (data instanceof Blob) {
+            Blob blob = (Blob) data;
+            return new SerialBlob(blob);
+        }
+
+        if (data instanceof NClob) {
+            NClob nClob = (NClob) data;
+            return new SerialClob(nClob);
+        }
+
+        if (data instanceof Clob) {
+            Clob clob = (Clob) data;
+            return new SerialClob(clob);
+        }
+        return data;
     }
 
     public static class EmptyTableRecords extends TableRecords {

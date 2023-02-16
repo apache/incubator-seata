@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.boot.autoconfigure.properties.config.test;
 
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.mock;
 @Import(SpringApplicationContextProvider.class)
 class ApolloPropertiesTest extends BasePropertiesTest {
 
-    @Bean
+    @Bean("testConfigApolloProperties")
     public ConfigApolloProperties configApolloProperties() {
         return new ConfigApolloProperties().setApolloMeta(STR_TEST_AAA).setApolloAccessKeySecret(STR_TEST_BBB).setAppId(
             STR_TEST_CCC).setNamespace(STR_TEST_DDD).setCluster(STR_TEST_EEE).setApolloConfigService(STR_TEST_FFF);

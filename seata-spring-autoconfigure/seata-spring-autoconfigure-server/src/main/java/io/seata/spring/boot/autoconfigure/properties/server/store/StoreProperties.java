@@ -33,7 +33,7 @@ public class StoreProperties {
      */
     private String mode = "file";
 
-    private String publicKey = "";
+    private String publicKey;
 
     public String getMode() {
         return mode;

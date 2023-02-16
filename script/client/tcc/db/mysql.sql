@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS `tcc_fence_log`
     KEY `idx_gmt_modified` (`gmt_modified`),
     KEY `idx_status` (`status`)
 ) ENGINE = InnoDB
-DEFAULT CHARSET = utf8;
+DEFAULT CHARSET = utf8mb4;
