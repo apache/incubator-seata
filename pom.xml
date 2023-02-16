@@ -53,6 +53,7 @@
         <module>rm</module>
         <module>rm-datasource</module>
         <module>spring</module>
+        <module>spring-framework-fake-for-java8</module>
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
