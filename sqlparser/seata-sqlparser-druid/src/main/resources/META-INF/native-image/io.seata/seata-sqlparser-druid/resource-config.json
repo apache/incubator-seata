@@ -6,42 +6,6 @@
           "typeReachable": "io.seata.sqlparser.druid.DefaultDruidLoader"
         },
         "pattern": "\\Qlib\/sqlparser\/druid.jar\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.druid.SQLOperateRecognizerHolder"
-        },
-        "pattern": "\\QMETA-INF\/services\/io.seata.sqlparser.druid.SQLOperateRecognizerHolder\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.druid.SQLOperateRecognizerHolder"
-        },
-        "pattern": "\\QMETA-INF\/seata\/io.seata.sqlparser.druid.SQLOperateRecognizerHolder\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.SQLRecognizerFactory"
-        },
-        "pattern": "\\QMETA-INF\/services\/io.seata.sqlparser.SQLRecognizerFactory\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.SQLRecognizerFactory"
-        },
-        "pattern": "\\QMETA-INF\/seata\/io.seata.sqlparser.SQLRecognizerFactory\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.util.DbTypeParser"
-        },
-        "pattern": "\\QMETA-INF\/services\/io.seata.sqlparser.util.DbTypeParser\\E"
-      },
-      {
-        "condition": {
-          "typeReachable": "io.seata.sqlparser.util.DbTypeParser"
-        },
-        "pattern": "\\QMETA-INF\/seata\/io.seata.sqlparser.util.DbTypeParser\\E"
       }
     ]
   }
