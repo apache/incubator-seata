@@ -1,0 +1,26 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.api.util.HSFApiConsumerBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.api.util.HSFApiProviderBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.spring.util.HSFSpringProviderBean"
+  }
+]

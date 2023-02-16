@@ -5,5 +5,17 @@
     },
     "name": "javax.sql.DataSource",
     "allDeclaredMethods": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.tcc.TccAnnotationProcessor"
+    },
+    "name": "org.apache.dubbo.config.annotation.Reference"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.tcc.TccAnnotationProcessor"
+    },
+    "name": "com.alipay.sofa.runtime.api.annotation.SofaReference"
   }
 ]
