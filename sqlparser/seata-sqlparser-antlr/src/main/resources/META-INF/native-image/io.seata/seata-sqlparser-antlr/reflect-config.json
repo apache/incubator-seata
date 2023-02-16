@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.antlr.AntlrDelegatingSQLRecognizerFactory"
+    },
+    "name": "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

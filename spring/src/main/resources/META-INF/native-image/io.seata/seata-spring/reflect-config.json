@@ -1,0 +1,9 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice"
+    },
+    "name": "javax.sql.DataSource",
+    "allDeclaredMethods": true
+  }
+]

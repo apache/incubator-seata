@@ -1,0 +1,142 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.mysql.jdbc.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "oracle.jdbc.driver.OracleDriver"
+    },
+    "name": "io.seata.rm.datasource.exec.oracle.OracleInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "org.postgresql.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.BranchUndoLog"
+    },
+    "name": "io.seata.rm.datasource.undo.BranchUndoLog",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.Row"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.Row",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableRecords"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.TableRecords",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.Field"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.Field",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableRecords$EmptyTableRecords"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.TableRecords$EmptyTableRecords",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.SQLUndoLog"
+    },
+    "name": "io.seata.rm.datasource.undo.SQLUndoLog",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache"
+    },
+    "name": "com.github.benmanes.caffeine.cache.SIMSW",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.github.benmanes.caffeine.cache.Caffeine",
+          "com.github.benmanes.caffeine.cache.AsyncCacheLoader",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache"
+    },
+    "name": "com.github.benmanes.caffeine.cache.PDWMS",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]
