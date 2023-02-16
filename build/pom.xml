@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.7.0-SNAPSHOT</revision>
+        <revision>1.7.0-native-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -103,7 +103,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
         <jib-maven-plugin.version>3.2.0</jib-maven-plugin.version>
