@@ -22,11 +22,14 @@ import io.grpc.ServerCall;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author eddyxu1213@126.com
  */
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);
 
     private ServerCall.Listener<ReqT> target;
     private final String xid;
@@ -77,8 +80,19 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     private void cleanContext() {
         if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            RootContext.unbind();
-            RootContext.unbindBranchType();
+            String unbindXid = RootContext.unbind();
+            BranchType previousBranchType = RootContext.getBranchType();
+            if (BranchType.TCC == previousBranchType) {
+                RootContext.unbindBranchType();
+            }
+            if (!xid.equalsIgnoreCase(unbindXid)) {
+                RootContext.bind(unbindXid);
+                LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
+                if (BranchType.TCC == previousBranchType) {
+                    RootContext.bindBranchType(previousBranchType);
+                    LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
+                }
+            }
         }
     }
 }
