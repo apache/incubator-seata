@@ -30,17 +30,6 @@ public class JsonParserFactory {
 
     private static final Map<String, JsonParser> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
 
-    private enum SingletonHolder {
-        INSTANCE {
-            @Override
-            JsonParser getInstance() {
-                return JsonParserFactory.getInstance(DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
-            }
-        };
-
-        abstract JsonParser getInstance();
-    }
-
     public static JsonParser getInstance(String jsonParserName) {
         final String name =
             Optional.ofNullable(jsonParserName).orElse(DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
