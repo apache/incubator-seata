@@ -13,28 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
 
-import org.springframework.core.Ordered;
+package io.seata.common.loader;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The interface Seata interceptor.
- *
- * @author wang.liang
+ * @author liuqiufeng
  */
-public interface SeataInterceptor extends Ordered {
+public class ExtensionDefinitionTest {
 
-    /**
-     * Sets order.
-     *
-     * @param order the order
-     */
-    void setOrder(int order);
-
-    /**
-     * Get position.
-     *
-     * @return the position
-     */
-    SeataInterceptorPosition getPosition();
+    @Test
+    public void testEquals() {
+        ExtensionDefinition<ChineseHello> definition
+                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2
+                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals(definition2, definition);
+    }
 }

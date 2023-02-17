@@ -33,7 +33,6 @@ import java.util.Set;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class TccActionInterceptorParser implements InterfaceParser {
 

@@ -37,4 +37,9 @@ public class FileLoaderTest {
         File file = FileLoader.load("io/NotExistFile.txt");
         Assertions.assertTrue(file == null || !file.exists());
     }
+
+    @Test
+    public void testLoadException() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> FileLoader.load(null));
+    }
 }

@@ -29,8 +29,8 @@ import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
-import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public class RedisSessionManager extends AbstractSessionManager
 
     @Override
     public void init() {
-        transactionStoreManager = RedisTransactionStoreManager.getInstance();
+        transactionStoreManager = RedisTransactionStoreManagerFactory.getInstance();
     }
 
     @Override

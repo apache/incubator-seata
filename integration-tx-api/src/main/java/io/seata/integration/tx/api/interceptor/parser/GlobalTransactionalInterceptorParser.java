@@ -31,7 +31,6 @@ import io.seata.tm.api.FailureHandlerHolder;
 
 /**
  * @author leezongjie
- * @date 2022/11/26
  */
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
