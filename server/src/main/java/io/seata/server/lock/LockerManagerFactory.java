@@ -20,6 +20,8 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.LockMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Lock manager factory.
@@ -28,6 +30,7 @@ import io.seata.server.store.StoreConfig.LockMode;
  */
 public class LockerManagerFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LockerManagerFactory.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
@@ -58,6 +61,7 @@ public class LockerManagerFactory {
                     if (null == lockMode) {
                         lockMode = StoreConfig.getLockMode();
                     }
+                    LOGGER.info("use lock store mode: {}", lockMode.getName());
                     //if not exist the lock mode, throw exception
                     if (null != StoreConfig.StoreMode.get(lockMode.name())) {
                         LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
