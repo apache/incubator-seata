@@ -21,7 +21,9 @@
 - [[#5307](https://github.com/seata/seata/pull/5307)] 修复生成update前后镜像sql不对关键字转义的bug
 - [[#5311](https://github.com/seata/seata/pull/5311)] 移除基于文件存储恢复时的RollbackRetryTimeout事务
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
+- [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
