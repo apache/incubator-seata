@@ -817,7 +817,7 @@ public interface ConfigurationKeys {
     /**
      * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
      */
-    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "businessActionContextJsonParserName";
+    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
 
     /**
      * The constant rpcRmRequestTimeout

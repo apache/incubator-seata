@@ -28,7 +28,7 @@ import io.seata.common.util.CollectionUtils;
  */
 public class JsonParserFactory {
 
-    private static Map<String, JsonParser> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
+    private static final Map<String, JsonParser> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
 
     private enum SingletonHolder {
         INSTANCE {
@@ -39,12 +39,6 @@ public class JsonParserFactory {
         };
 
         abstract JsonParser getInstance();
-    }
-
-    private JsonParserFactory() {}
-
-    public static JsonParser getInstance() {
-        return SingletonHolder.INSTANCE.getInstance();
     }
 
     public static JsonParser getInstance(String jsonParserName) {
