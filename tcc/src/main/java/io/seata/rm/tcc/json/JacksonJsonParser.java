@@ -15,9 +15,6 @@
  */
 package io.seata.rm.tcc.json;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JacksonException;
@@ -27,6 +24,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.seata.common.Constants;
+import io.seata.common.exception.JsonParseException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
@@ -35,8 +33,6 @@ import io.seata.integration.tx.api.json.JsonParser;
  */
 @LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -54,8 +50,7 @@ public class JacksonJsonParser implements JsonParser {
         try {
             return this.mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            LOGGER.error("jackson toJSONString exception, {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new JsonParseException(e);
         }
     }
 
@@ -64,8 +59,7 @@ public class JacksonJsonParser implements JsonParser {
         try {
             return this.mapper.readValue(text, clazz);
         } catch (JacksonException e) {
-            LOGGER.error("jackson parseObject exception, {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+            throw new JsonParseException(e);
         }
     }
 

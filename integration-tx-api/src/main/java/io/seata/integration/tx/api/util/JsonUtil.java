@@ -20,7 +20,6 @@ import java.util.Objects;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.integration.tx.api.json.JsonParserFactory;
 
@@ -42,13 +41,8 @@ public class JsonUtil {
         if (Objects.isNull(text) || Objects.isNull(clazz)) {
             return null;
         }
-        String jsonParseName;
-        if (text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX)) {
-            jsonParseName = Constants.JACKSON_JSON_PARSER_NAME;
-        } else {
-            jsonParseName = StringUtils.equalsIgnoreCase(CONFIG_JSON_PARSER_NAME, Constants.JACKSON_JSON_PARSER_NAME)
-                ? Constants.FASTJSON_JSON_PARSER_NAME : CONFIG_JSON_PARSER_NAME;
-        }
+        String jsonParseName = text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX) ? Constants.JACKSON_JSON_PARSER_NAME
+            : CONFIG_JSON_PARSER_NAME;
         return JsonParserFactory.getInstance(jsonParseName).parseObject(text, clazz);
     }
 }
