@@ -15,12 +15,13 @@
  */
 package io.seata.integration.tx.api.util;
 
+import java.util.Objects;
+
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationFactory;
 import io.seata.integration.tx.api.json.JsonParserFactory;
-
-import java.util.Objects;
 
 /**
  * @author zouwei
@@ -39,8 +40,8 @@ public class JsonUtil {
             return null;
         }
         String jsonParseName;
-        if (text.startsWith("{\"@class\":")) {
-            jsonParseName = "jackson";
+        if (text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX)) {
+            jsonParseName = Constants.JACKSON_JSON_PARSER_NAME;
         } else {
             jsonParseName = ConfigurationFactory.getInstance().getConfig(
                 ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,

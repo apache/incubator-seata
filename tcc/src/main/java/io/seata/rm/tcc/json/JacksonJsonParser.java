@@ -15,17 +15,18 @@
  */
 package io.seata.rm.tcc.json;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JacksonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.seata.common.Constants;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
@@ -34,8 +35,6 @@ import io.seata.integration.tx.api.json.JsonParser;
 public class JacksonJsonParser implements JsonParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
-
-    private static final String NAME = "jackson";
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -70,6 +69,6 @@ public class JacksonJsonParser implements JsonParser {
 
     @Override
     public String getName() {
-        return NAME;
+        return Constants.JACKSON_JSON_PARSER_NAME;
     }
 }

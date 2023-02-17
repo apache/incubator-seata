@@ -20,6 +20,7 @@ import java.lang.reflect.Modifier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import io.seata.common.Constants;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
@@ -29,8 +30,6 @@ import io.seata.integration.tx.api.json.JsonParser;
  * @description:
  */
 public class GsonJsonParser implements JsonParser {
-
-    private static final String NAME = "gson";
 
     private final Gson gson =
         new GsonBuilder().excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT).create();
@@ -47,6 +46,6 @@ public class GsonJsonParser implements JsonParser {
 
     @Override
     public String getName() {
-        return NAME;
+        return Constants.GSON_JSON_PARSER_NAME;
     }
 }
