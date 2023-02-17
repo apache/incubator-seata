@@ -21,14 +21,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import io.seata.common.Constants;
+import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
  * @author zouwei
- * @className GsonJsonParser
- * @date: 2023/2/16 17:03
- * @description:
  */
+@LoadLevel(name = Constants.GSON_JSON_PARSER_NAME)
 public class GsonJsonParser implements JsonParser {
 
     private final Gson gson =

@@ -27,11 +27,13 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.seata.common.Constants;
+import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
  * @author zouwei
  */
+@LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
