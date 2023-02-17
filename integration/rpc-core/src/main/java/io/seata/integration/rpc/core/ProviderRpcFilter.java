@@ -28,7 +28,7 @@ import io.seata.core.model.BranchType;
  */
 public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
 
-    String[] trxContextKeys = new String[] {RootContext.KEY_XID, RootContext.KEY_XID.toLowerCase(),
+    String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_XID.toLowerCase(),
         RootContext.KEY_BRANCH_TYPE};
 
     String LOW_KEY_XID = "tx_xid";
@@ -41,10 +41,10 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
      */
     default Map<String, String> getRpcContexts(T rpcRequest) {
         Map<String, String> contextMap = new HashMap<>();
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            String contextValue = getRpcContext(rpcRequest, trxContextKeys[i]);
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            String contextValue = getRpcContext(rpcRequest, TRX_CONTEXT_KEYS[i]);
             if (StringUtils.isNotBlank(contextValue)) {
-                contextMap.put(trxContextKeys[i], contextValue);
+                contextMap.put(TRX_CONTEXT_KEYS[i], contextValue);
             }
         }
         return contextMap;
@@ -61,10 +61,10 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
     }
 
     default void bindRequestToContexts(Map<String, String> contextMap) {
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            String contextValue = contextMap.get(trxContextKeys[i]);
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            String contextValue = contextMap.get(TRX_CONTEXT_KEYS[i]);
             if (StringUtils.isNotBlank(contextValue)) {
-                switch (trxContextKeys[i]) {
+                switch (TRX_CONTEXT_KEYS[i]) {
                     case RootContext.KEY_XID:
                     case LOW_KEY_XID:
                         RootContext.bind(contextValue);
@@ -75,7 +75,7 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
                         }
                         break;
                     default:
-                        throw new IllegalArgumentException("wrong context:" + trxContextKeys[i]);
+                        throw new IllegalArgumentException("wrong context:" + TRX_CONTEXT_KEYS[i]);
                 }
 
             }
@@ -84,8 +84,8 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
 
     default Map<String, String> cleanRootContexts() {
         Map<String, String> contextMap = new HashMap<>();
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            switch (trxContextKeys[i]) {
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            switch (TRX_CONTEXT_KEYS[i]) {
                 case RootContext.KEY_XID:
                     String xid = RootContext.unbind();
                     contextMap.put(RootContext.KEY_XID, xid);
@@ -102,7 +102,7 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
                     }
                     break;
                 default:
-                    throw new IllegalArgumentException("wrong context:" + trxContextKeys[i]);
+                    throw new IllegalArgumentException("wrong context:" + TRX_CONTEXT_KEYS[i]);
             }
 
         }

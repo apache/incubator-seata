@@ -32,17 +32,25 @@ public interface ConsumerRpcFilter<T> extends BaseRpcFilter<T> {
     default Map<String, String> getRootContexts() {
         Map<String, String> contextMap = new HashMap<>();
         if (RootContext.inGlobalTransaction()) {
-            assertNotNull(RootContext.getXID(), "xid is null");
-            contextMap.put(RootContext.KEY_XID, RootContext.getXID());
-            contextMap.put(RootContext.KEY_BRANCH_TYPE, RootContext.getBranchType().name());
-        }
-        return contextMap;
+            for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+                switch (TRX_CONTEXT_KEYS[i]) {
+                    case RootContext.KEY_XID:
+                        assertNotNull(RootContext.getXID(), "xid is null");
+                        contextMap.put(RootContext.KEY_XID, RootContext.getXID());
+                        break;
+                    case RootContext.KEY_BRANCH_TYPE:
+                        contextMap.put(RootContext.KEY_BRANCH_TYPE, RootContext.getBranchType().name());
+                        break;
+                    default:
+                        throw new IllegalArgumentException("wrong context: " + TRX_CONTEXT_KEYS[i]);
+                }
+            }
+        } return contextMap;
     }
 
     default String getXidFromRootContexts(Map<String, String> rootContextMap) {
         return getValueFromMap(rootContextMap, RootContext.KEY_XID);
     }
-
 
     /**
      * bind contexts to RpcRequest
@@ -51,10 +59,10 @@ public interface ConsumerRpcFilter<T> extends BaseRpcFilter<T> {
      * @param contextMap
      */
     default void bindContextsToRequest(T rpcRequest, Map<String, String> contextMap) {
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            String contextValue = contextMap.get(trxContextKeys[i]);
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            String contextValue = contextMap.get(TRX_CONTEXT_KEYS[i]);
             if (StringUtils.isNotBlank(contextValue)) {
-                bindContextToRequest(rpcRequest, trxContextKeys[i], contextValue);
+                bindContextToRequest(rpcRequest, TRX_CONTEXT_KEYS[i], contextValue);
             }
         }
     }
@@ -68,10 +76,10 @@ public interface ConsumerRpcFilter<T> extends BaseRpcFilter<T> {
      * @param contextMap
      */
     default void cleanRequestContexts(T rpcRequest, Map<String, String> contextMap) {
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            String contextValue = contextMap.get(trxContextKeys[i]);
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            String contextValue = contextMap.get(TRX_CONTEXT_KEYS[i]);
             if (StringUtils.isNotBlank(contextValue)) {
-                cleanRequestContext(rpcRequest, trxContextKeys[i]);
+                cleanRequestContext(rpcRequest, TRX_CONTEXT_KEYS[i]);
             }
         }
     }

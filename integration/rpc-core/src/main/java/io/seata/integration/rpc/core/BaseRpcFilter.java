@@ -26,7 +26,7 @@ import io.seata.core.context.RootContext;
  * @author slievrly
  */
 public interface BaseRpcFilter<T> {
-    String[] trxContextKeys = new String[] {RootContext.KEY_XID, RootContext.KEY_BRANCH_TYPE};
+    String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_BRANCH_TYPE};
 
     default String getValueFromMap(Map<String, String> rpcContextMap, String key) {
         return rpcContextMap.get(key);
@@ -42,12 +42,12 @@ public interface BaseRpcFilter<T> {
             return StringUtils.EMPTY;
         }
         StringBuilder sb = new StringBuilder("{");
-        for (int i = 0; i < trxContextKeys.length; i++) {
-            String contextValue = contextMap.get(trxContextKeys[i]);
+        for (int i = 0; i < TRX_CONTEXT_KEYS.length; i++) {
+            String contextValue = contextMap.get(TRX_CONTEXT_KEYS[i]);
             if (i > 0) {
                 sb.append(",");
             }
-            sb.append("\"").append(trxContextKeys[i]).append("\"");
+            sb.append("\"").append(TRX_CONTEXT_KEYS[i]).append("\"");
             sb.append(":");
             if (null == contextValue) {
                 sb.append("null");
