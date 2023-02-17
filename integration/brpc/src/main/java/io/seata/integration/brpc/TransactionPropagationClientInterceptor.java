@@ -15,6 +15,9 @@
  */
 package io.seata.integration.brpc;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.baidu.brpc.RpcContext;
 import com.baidu.brpc.interceptor.AbstractInterceptor;
 import com.baidu.brpc.interceptor.InterceptorChain;
@@ -23,9 +26,6 @@ import com.baidu.brpc.protocol.Response;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * load SEATA xid for brpc request
@@ -74,6 +74,10 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
         if (null == requestKvAttachmentMap) {
             return null;
         }
-        return (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
+        String xid = (String)requestKvAttachmentMap.get(RootContext.KEY_XID);
+        if (null != xid) {
+            return xid;
+        }
+        return (String)requestKvAttachmentMap.get(RootContext.KEY_XID.toLowerCase());
     }
 }
