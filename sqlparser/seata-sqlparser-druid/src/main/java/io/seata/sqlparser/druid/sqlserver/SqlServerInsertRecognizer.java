@@ -40,6 +40,7 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type SqlServer insert recognizer.
@@ -142,6 +143,12 @@ public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implement
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

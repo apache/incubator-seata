@@ -17,6 +17,7 @@ package io.seata.rm.datasource.exec.sqlserver;
 
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.loader.LoadLevel;
@@ -25,6 +26,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.exec.UpdateExecutor;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -46,8 +48,9 @@ public class SqlServerUpdateExecutor<T, S extends Statement> extends UpdateExecu
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
+
     @Override
-    protected StringJoiner buildStringJoinerSql(ArrayList paramAppenderList) {
+    protected String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ")
@@ -57,6 +60,11 @@ public class SqlServerUpdateExecutor<T, S extends Statement> extends UpdateExecu
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        return new StringJoiner(", ", prefix.toString(), suffix.toString());
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
+        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
+        for (String needUpdateColumn : needUpdateColumns) {
+            selectSQLJoin.add(needUpdateColumn);
+        }
+        return selectSQLJoin.toString();
     }
 }

@@ -42,6 +42,7 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type SqlServer update recognizer.
@@ -154,6 +155,17 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
             }
         }
         return list;
+    }
+
+    @Override
+    public String getTableAlias(String tableName) {
+        return SQLUpdateRecognizer.super.getTableAlias(tableName);
+    }
+
+    @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

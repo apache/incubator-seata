@@ -28,6 +28,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author GoodBoyCoder
@@ -94,5 +95,9 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
      */
     public void dealTop(SQLStatement ast) {
         throw new NotSupportYetException("Top expr is not supported");
+    }
+
+    public String getDbType() {
+        return JdbcConstants.SQLSERVER;
     }
 }

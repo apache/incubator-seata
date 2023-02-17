@@ -23,8 +23,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import io.seata.sqlparser.util.JdbcConstants;
-
 /**
  * The type Abstract statement proxy.
  *

@@ -23,7 +23,6 @@ import java.util.StringJoiner;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.MultiDeleteExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
@@ -31,6 +30,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type SqlServer MultiSql executor.

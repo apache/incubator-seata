@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**

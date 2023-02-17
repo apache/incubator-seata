@@ -124,6 +124,11 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
     }
 
     @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
+        throw new NotSupportYetException("Default value with multi pkKey is not yet supported");
+    }
+
+    @Override
     public List<Object> getGeneratedKeys() throws SQLException {
         // PK is just auto generated
         ResultSet genKeys = statementProxy.getGeneratedKeys();
