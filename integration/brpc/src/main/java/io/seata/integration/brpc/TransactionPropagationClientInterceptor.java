@@ -74,7 +74,7 @@ public class TransactionPropagationClientInterceptor extends AbstractInterceptor
         if (null == requestKvAttachmentMap) {
             return null;
         }
-        String xid= (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
+        String xid = (String)requestKvAttachmentMap.get(RootContext.KEY_XID);
         if (null != xid) {
             return xid;
         }
