@@ -27,8 +27,8 @@ public interface StateMachineParser {
     /**
      * Parse an object (such as Json) into a State Machine model
      *
-     * @param json
-     * @return
+     * @param json an object json
+     * @return the state machine
      */
     StateMachine parse(String json);
 }

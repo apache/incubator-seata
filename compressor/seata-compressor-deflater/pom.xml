@@ -26,6 +26,7 @@
     <artifactId>seata-compressor-deflater</artifactId>
     <packaging>jar</packaging>
     <name>seata-compressor-deflater ${project.version}</name>
+    <description>compressor-deflater for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

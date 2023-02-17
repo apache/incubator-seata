@@ -30,7 +30,7 @@ public interface DefaultValues {
     int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
     int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
-    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = true;
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
@@ -114,7 +114,7 @@ public interface DefaultValues {
 
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
     /**
@@ -168,7 +168,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
      * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
@@ -178,7 +178,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
      */
-    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
@@ -195,4 +195,90 @@ public interface DefaultValues {
      */
     int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
 
+    /**
+     * the constant DEFAULT_COMMITING_RETRY_PERIOD
+     */
+    int DEFAULT_COMMITING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD
+     */
+    int DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_ROLLBACKING_RETRY_PERIOD
+     */
+    int DEFAULT_ROLLBACKING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_TIMEOUT_RETRY_PERIOD
+     */
+    int DEFAULT_TIMEOUT_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_UNDO_LOG_DELETE_PERIOD
+     */
+    long DEFAULT_UNDO_LOG_DELETE_PERIOD = 24 * 60 * 60 * 1000;
+
+    /**
+     * the constant DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE
+     */
+    int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
+
+    /**
+     *the constant DEFAULT_PROMETHEUS_PORT
+     */
+    int DEFAULT_PROMETHEUS_PORT = 9898;
+
+    /**
+     * the const DEFAULT_METRICS_ENABLED
+     */
+    boolean DEFAULT_METRICS_ENABLED = false;
+
+    /**
+     * the const DEFAULT_METRICS_REGISTRY_TYPE
+     */
+    String DEFAULT_METRICS_REGISTRY_TYPE = "compact";
+
+    /**
+     * the const DEFAULT_METRICS_EXPORTER_LIST
+     */
+    String DEFAULT_METRICS_EXPORTER_LIST = "prometheus";
+
+    /**
+     * the const DEFAULT_MAX_COMMIT_RETRY_TIMEOUT
+     */
+    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = 100;
+
+    /**
+     * the const DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT
+     */
+    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = 100;
+
+    /**
+     * the const DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE
+     */
+    boolean DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = false;
+
+    /**
+     * DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    long DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME = 10000;
+
+    /**
+     * DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE
+     */
+    boolean DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE = false;
+
+    int DEFAULT_DB_MAX_CONN = 100;
+
+    int DEFAULT_DB_MIN_CONN = 10;
+
+    int DEFAULT_REDIS_MAX_IDLE = 100;
+
+    int DEFAULT_REDIS_MAX_TOTAL = 100;
+
+    int DEFAULT_REDIS_MIN_IDLE = 10;
+
+    int DEFAULT_QUERY_LIMIT = 1000;
 }

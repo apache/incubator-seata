@@ -350,8 +350,39 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
+    @Test
+    public void testUpdateJoinSql() {
+        String sql = "update t1 inner join t2 on t1.id = t2.id set name = ?, age = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        String tableName = recognizer.getTableName();
+        Assertions.assertEquals("t1 INNER JOIN t2 ON t1.id = t2.id#t1#t2",tableName);
+    }
+
     @Override
     public String getDbType() {
         return JdbcConstants.MYSQL;
+    }
+
+    @Test
+    public void testGetUpdateColumns_2() {
+        String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<String> updateColumns = recognizer.getUpdateColumns();
+        for (String updateColumn : updateColumns) {
+            Assertions.assertTrue(updateColumn.contains("`"));
+        }
+    }
+
+    @Test
+    public void testGetUpdateColumnsIsSimplified() {
+        String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
+        for (String updateColumn : updateColumns) {
+            Assertions.assertFalse(updateColumn.contains("`"));
+        }
     }
 }

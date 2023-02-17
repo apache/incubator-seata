@@ -24,7 +24,7 @@ import io.seata.common.util.CollectionUtils;
 /**
  * The SQLOperateRecognizerHolderFactory
  *
- * @author: Zhibei Hao
+ * @author Zhibei Hao
  */
 public class SQLOperateRecognizerHolderFactory {
 

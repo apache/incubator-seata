@@ -17,6 +17,7 @@ package io.seata.server.event;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,11 +29,16 @@ import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.metrics.registry.Registry;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.coordinator.DefaultCoordinatorTest;
 import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.StoreConfig.SessionMode;
+import io.seata.server.util.StoreUtil;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,10 +53,12 @@ import org.springframework.context.ApplicationContext;
 @SpringBootTest
 public class DefaultCoreForEventBusTest {
 
+    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() != SessionMode.FILE;
+
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
+        StoreUtil.deleteDataFile();
         Thread.sleep(5000);
-        MetricsManager.get().getRegistry().clearUp();
     }
 
     @Test
@@ -94,19 +102,18 @@ public class DefaultCoreForEventBusTest {
             }
         }
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
-        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(null);
-        coordinator.setRemotingServer(remotingServer);
-        SessionHolder.init(null);
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
+        coordinator.init();
         GlobalTransactionEventSubscriber subscriber = null;
         try {
             DefaultCore core = new DefaultCore(remotingServer);
-
+            SessionHolder.init(null);
             subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().unregisterAll();
             EventBusManager.get().register(subscriber);
 
             //start and commit a transaction
-            subscriber.setDownLatch(new CountDownLatch(4));
+            subscriber.setDownLatch(new CountDownLatch(DELAY_HANDLE_SESSION ? 3 : 4));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
             core.commit(xid);
 
@@ -116,7 +123,8 @@ public class DefaultCoreForEventBusTest {
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
             Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
             // after event and sync event
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
+            Assertions.assertEquals(DELAY_HANDLE_SESSION ? 1 : 2,
+                subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
 
             //start and rollback transaction
             subscriber.setDownLatch(new CountDownLatch(3));
@@ -148,4 +156,11 @@ public class DefaultCoreForEventBusTest {
             }
         }
     }
+
+    @AfterAll
+    public static void setDown() throws InterruptedException {
+        Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
+        Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
+    }
+
 }

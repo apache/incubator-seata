@@ -52,8 +52,8 @@ public interface WhereRecognizer extends SQLRecognizer {
 
     /**
      * Gets limit condition
-     * @param parametersHolder
-     * @param paramAppenderList
+     * @param parametersHolder the parameters holder
+     * @param paramAppenderList the param appender list
      * @return the limit condition
      */
     default String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
@@ -71,8 +71,8 @@ public interface WhereRecognizer extends SQLRecognizer {
 
     /**
      * Gets order by condition.
-     * @param parametersHolder
-     * @param paramAppenderList
+     * @param parametersHolder the parameters holder
+     * @param paramAppenderList the param appender list
      * @return the order by condition
      */
     default String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {

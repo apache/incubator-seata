@@ -99,8 +99,8 @@ public class RegistryHeartBeats {
         /**
          * do re-register
          *
-         * @param serverAddress
-         * @throws Exception
+         * @param serverAddress the server address
+         * @throws Exception the exception
          */
         void register(InetSocketAddress serverAddress) throws Exception;
     }

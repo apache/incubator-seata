@@ -44,8 +44,8 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
 /**
  * Branch Session DataBase ServiceImpl
  *
- * @author: zhongxiang.wang
- * @author: lvekee 734843455@qq.com
+ * @author zhongxiang.wang
+ * @author lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration

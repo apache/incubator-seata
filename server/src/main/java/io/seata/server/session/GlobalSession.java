@@ -756,7 +756,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void queueToRetryRollback() throws TransactionException {
         this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
-        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
+        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
             this.setStatus(GlobalStatus.RollbackRetrying);

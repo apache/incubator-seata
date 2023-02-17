@@ -30,8 +30,8 @@ public class RegistryZooKeeperProperties {
     private String serverAddr = "127.0.0.1:2181";
     private long sessionTimeout = 6000L;
     private long connectTimeout = 2000L;
-    private String username = "";
-    private String password = "";
+    private String username;
+    private String password;
 
     public String getCluster() {
         return cluster;

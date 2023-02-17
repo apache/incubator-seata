@@ -27,7 +27,7 @@ import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.SetParams;
 
 /**
- * @description Redis distributed lock
+ * Redis distributed lock
  * @author  zhongxiang.wang
  */
 @LoadLevel(name = "redis", scope = Scope.SINGLETON)
@@ -39,18 +39,15 @@ public class RedisDistributedLocker implements DistributedLocker {
     /**
      * Acquire the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO the distributed lock info
+     * @return the distributed lock info
      */
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             //Don't need retry,if can't acquire the lock,let the other get the lock
             String result = jedis.set(distributedLockDO.getLockKey(), distributedLockDO.getLockValue(), SetParams.setParams().nx().px(distributedLockDO.getExpireTime()));
-            if (SUCCESS.equalsIgnoreCase(result)) {
-                return true;
-            }
-            return false;
+            return SUCCESS.equalsIgnoreCase(result);
         } catch (Exception ex) {
             LOGGER.error("The {} acquired the {} distributed lock failed.", distributedLockDO.getLockValue(), distributedLockDO.getLockKey(), ex);
             return false;
@@ -61,8 +58,8 @@ public class RedisDistributedLocker implements DistributedLocker {
     /**
      * Release the distributed lock
      *
-     * @param distributedLockDO
-     * @return
+     * @param distributedLockDO the distributed lock info
+     * @return the boolean
      */
     @Override
     public boolean releaseLock(DistributedLockDO distributedLockDO) {

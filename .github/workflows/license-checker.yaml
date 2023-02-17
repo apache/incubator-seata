@@ -1,0 +1,27 @@
+name: License checker
+
+on:
+  pull_request:
+      branches: [ develop, master ]
+
+jobs:
+  check-license:
+    runs-on: ubuntu-latest
+    steps:
+      # step 1
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+      # step 2
+      - name: Check License Header
+        uses: apache/skywalking-eyes/header@25edfc2fd8d52fb266653fb5f6c42da633d85c07
+        with:
+          log: info
+          config: .licenserc.yaml
+          mode: check
+      # step 3
+      - name: Check Dependencies' License
+        uses: apache/skywalking-eyes/dependency@25edfc2fd8d52fb266653fb5f6c42da633d85c07
+        with:
+          log: info
+          config: .licenserc.yaml
+          mode: check

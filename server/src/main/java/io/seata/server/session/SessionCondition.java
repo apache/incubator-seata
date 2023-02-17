@@ -89,6 +89,7 @@ public class SessionCondition {
      */
     public void setStatus(GlobalStatus status) {
         this.status = status;
+        this.statuses = new GlobalStatus[] {status};
     }
 
     /**

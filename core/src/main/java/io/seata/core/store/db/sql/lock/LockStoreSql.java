@@ -63,7 +63,7 @@ public interface LockStoreSql {
      * @param lockTable the lock table
      * @return the string
      */
-    String getBatchDeleteLockSqlByBranch(String lockTable);
+    String getBatchDeleteLockSqlByBranchId(String lockTable);
 
     /**
      * Get batch delete lock sql string.

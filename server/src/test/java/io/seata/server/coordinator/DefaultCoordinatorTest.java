@@ -42,10 +42,10 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig.SessionMode;
 import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -97,7 +97,7 @@ public class DefaultCoordinatorTest {
         EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator =DefaultCoordinator.getInstance(null);
+        defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
@@ -172,7 +172,7 @@ public class DefaultCoordinatorTest {
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
@@ -200,7 +200,7 @@ public class DefaultCoordinatorTest {
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
         TimeUnit.MILLISECONDS.sleep(100);
 
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
@@ -228,7 +228,7 @@ public class DefaultCoordinatorTest {
 
     private static void deleteAndCreateDataFile() throws IOException {
         StoreUtil.deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
+        SessionHolder.init(SessionMode.FILE);
     }
 
     @AfterEach

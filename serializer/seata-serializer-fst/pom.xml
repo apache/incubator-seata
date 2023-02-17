@@ -26,6 +26,8 @@
     <artifactId>seata-serializer-fst</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-fst ${project.version}</name>
+    <description>serializer-fst for Seata built with Maven</description>
+
     <dependencies>
         <dependency>
             <groupId>de.ruedigermoeller</groupId>

@@ -57,6 +57,7 @@ public class ActionInterceptorHandler {
      *
      * @param method         the method
      * @param arguments      the arguments
+     * @param xid            the xid
      * @param businessAction the business action
      * @param targetCallback the target callback
      * @return the business result
@@ -121,6 +122,7 @@ public class ActionInterceptorHandler {
     /**
      * Get or create action context, and reset to arguments
      *
+     * @param parameterTypes the par
      * @param arguments the arguments
      * @return the action context
      * @since above 1.4.2

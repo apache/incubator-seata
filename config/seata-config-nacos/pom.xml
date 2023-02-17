@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-nacos</artifactId>
     <name>seata-config-nacos ${project.version}</name>
+    <description>config-nacos for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

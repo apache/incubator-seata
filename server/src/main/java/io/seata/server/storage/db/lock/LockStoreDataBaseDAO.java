@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -240,27 +241,6 @@ public class LockStoreDataBaseDAO implements LockStore {
     }
 
     @Override
-    public boolean unLock(String xid, Long branchId) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = lockStoreDataSource.getConnection();
-            conn.setAutoCommit(true);
-            //batch release lock by branch
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranch(lockTable);
-            ps = conn.prepareStatement(batchDeleteSQL);
-            ps.setString(1, xid);
-            ps.setLong(2, branchId);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps, conn);
-        }
-        return true;
-    }
-
-    @Override
     public boolean unLock(String xid) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -271,6 +251,26 @@ public class LockStoreDataBaseDAO implements LockStore {
             String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByXid(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(Long branchId) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = lockStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            //batch release lock by branchId
+            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchId(lockTable);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setLong(1, branchId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -335,6 +335,9 @@ public class LockStoreDataBaseDAO implements LockStore {
             ps.setInt(8, LockStatus.Locked.getCode());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
+            if (e instanceof SQLIntegrityConstraintViolationException) {
+                return false;
+            }
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps);
@@ -348,7 +351,7 @@ public class LockStoreDataBaseDAO implements LockStore {
      * @param lockDOs the lock do list
      * @return the boolean
      */
-    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) {
+    protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) throws SQLException {
         PreparedStatement ps = null;
         try {
             //insert
@@ -366,10 +369,12 @@ public class LockStoreDataBaseDAO implements LockStore {
                 ps.addBatch();
             }
             return ps.executeBatch().length == lockDOs.size();
-        } catch (SQLException e) {
+        } catch (SQLIntegrityConstraintViolationException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
             //return false,let the caller go to conn.rollabck()
             return false;
+        } catch (SQLException e) {
+            throw e;
         } finally {
             IOUtil.close(ps);
         }

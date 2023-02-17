@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -18,12 +18,23 @@ package io.seata.sqlparser.druid.postgresql;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
+import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitor;
+import com.alibaba.druid.sql.dialect.postgresql.visitor.PGASTVisitorAdapter;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +74,62 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
             }
         };
         return visitor;
+    }
+
+    @Override
+    public boolean isSqlSyntaxSupports() {
+        PGASTVisitor visitor = new PGASTVisitorAdapter() {
+
+            @Override
+            public boolean visit(SQLSubqueryTableSource x) {
+                //just like: select * from (select * from t) for update
+                throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(PGUpdateStatement x) {
+                if (x.getFrom() != null) {
+                    //just like: update a set id = b.pid from b where a.id = b.id
+                    throw new NotSupportYetException("not support the sql syntax with join table:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                }
+                return true;
+            }
+
+            @Override
+            public boolean visit(SQLInSubQueryExpr x) {
+                //just like: ...where id in (select id from t)
+                throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLReplaceStatement x) {
+                //just like: replace into t (id,dr) values (1,'2'), (2,'3')
+                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLMergeStatement x) {
+                //just like: merge into ... WHEN MATCHED THEN ...
+                throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
+                    + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(PGInsertStatement x) {
+                if (null != x.getQuery()) {
+                    //just like: insert into t select * from t1
+                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                }
+                return true;
+            }
+        };
+        getAst().accept(visitor);
+        return true;
     }
 
     public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
@@ -128,5 +195,9 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         StringBuilder sb = new StringBuilder();
         executeOrderBy(sqlOrderBy, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 }

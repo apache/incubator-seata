@@ -196,7 +196,7 @@ public class FileLocker extends AbstractLocker {
 
     /**
      * Because bucket lock map will be key of HashMap(lockHolder), however {@link ConcurrentHashMap} overwrites
-     * {@link Object##hashCode()} and {@link Object##equals(Object)}, that leads to hash key conflict in lockHolder.
+     * {@link Object#hashCode()} and {@link Object#equals(Object)}, that leads to hash key conflict in lockHolder.
      * We define a {@link BucketLockMap} to hold the ConcurrentHashMap(bucketLockMap) and replace it as key of
      * HashMap(lockHolder).
      */

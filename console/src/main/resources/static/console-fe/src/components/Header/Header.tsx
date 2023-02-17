@@ -80,14 +80,16 @@ class Header extends React.Component<PropsType, StateType> {
       language = enUsKey,
       location: { pathname },
     } = this.props;
-    console.log('xxx:', this.props);
-    const { home, docs, blog, community, languageSwitchButton } = locale;
+    console.log('props:', this.props);
+    const { home, cloud, docs, blog, community, download, languageSwitchButton } = locale;
     const BASE_URL = `https://seata.io/${language.toLocaleLowerCase()}/`;
     const NAV_MENU = [
       {id: 1, title: home, link: BASE_URL},
-      {id: 2, title: docs, link: `${BASE_URL}docs/overview/what-is-seata.html`},
-      {id: 3, title: blog, link: `${BASE_URL}blog/index.html`},
-      {id: 4, title: community, link: `${BASE_URL}community/index.html`},
+      {id: 2, title: cloud, link: `https://www.aliyun.com/product/aliware/mse?spm=seata-website.topbar.0.0.0`},
+      {id: 3, title: docs, link: `${BASE_URL}docs/overview/what-is-seata.html`},
+      {id: 4, title: blog, link: `${BASE_URL}blog/index.html`},
+      {id: 5, title: community, link: `${BASE_URL}community/index.html`},
+      {id: 6, title: download, link: `${BASE_URL}blog/download.html`},
     ];
     return (
       <header className="header-container header-container-primary">

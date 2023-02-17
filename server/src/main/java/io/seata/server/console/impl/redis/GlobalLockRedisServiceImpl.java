@@ -39,8 +39,8 @@ import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 
 /**
  * Global Lock Redis Service Impl
- * @author: zhongxiang.wang
- * @author: doubleDimple
+ * @author zhongxiang.wang
+ * @author doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration

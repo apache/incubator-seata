@@ -18,8 +18,8 @@ package io.seata.console.result;
 import java.io.Serializable;
 
 /**
- * @description: The basic result
- * @author: zhongxiang.wang
+ * The basic result
+ * @author zhongxiang.wang
  */
 public class Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;

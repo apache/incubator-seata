@@ -26,14 +26,14 @@ public interface SubStateMachine extends TaskState {
     /**
      * state machine name
      *
-     * @return
+     * @return the state machine name
      */
     String getStateMachineName();
 
     /**
      * Get compensate state object
      *
-     * @return
+     * @return the compensate state object
      */
     TaskState getCompensateStateObject();
 }

@@ -34,9 +34,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The type Postgresql insert executor.
@@ -61,43 +61,37 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     }
 
     @Override
-    public Map<String,List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
-        boolean isContainsPk = containsPK();
-        //when there is only one pk in the table
-        if (isContainsPk) {
-            pkValuesMap = getPkValuesByColumn();
-        } else if (containsColumns()) {
-            String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
-            pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
-        } else {
-            pkValuesMap = getPkValuesByColumn();
-        }
-        return pkValuesMap;
+    public Map<String, List<Object>> getPkValues() throws SQLException {
+        return getPkValuesByColumn();
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = parsePkValuesFromStatement();
-        String pkKey = pkValuesMap.keySet().iterator().next();
-        List<Object> pkValues = pkValuesMap.get(pkKey);
-        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
-        } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValuesMap.put(pkKey, getGeneratedKeys());
-        } else if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlDefaultExpr) {
-            pkValuesMap.put(pkKey, getPkValuesByDefault());
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
+        Set<String> keySet = pkValuesMap.keySet();
+        for (String pkKey : keySet) {
+            List<Object> pkValues = pkValuesMap.get(pkKey);
+            for (int i = 0; i < pkValues.size(); i++) {
+                if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlSequenceExpr) {
+                    pkValues.set(i, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey).get(0));
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlMethodExpr) {
+                    pkValues.set(i, getGeneratedKeys(pkKey).get(0));
+                } else if (!pkValues.isEmpty() && pkValues.get(i) instanceof SqlDefaultExpr) {
+                    pkValues.set(i, getPkValuesByDefault(pkKey).get(0));
+                }
+            }
+            pkValuesMap.put(pkKey, pkValues);
         }
-
         return pkValuesMap;
     }
 
     /**
      * get primary key values by default
-     * @return
-     * @throws SQLException
+     * @return the pk values
+     * @throws SQLException the sql exception
      */
     @Override
+    @Deprecated
     public List<Object> getPkValuesByDefault() throws SQLException {
         // current version 1.2 only support postgresql.
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
@@ -112,8 +106,31 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
         return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
     }
 
+    /**
+     * get primary key values by default
+     *
+     * @param pkKey the pk key
+     * @return the primary values
+     * @throws SQLException the sql exception
+     */
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
+        // current version 1.2 only support postgresql.
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
+        String columnDef = pkMeta.getColumnDef();
+        // sample: nextval('test_id_seq'::regclass)
+        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
+        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
+        if (StringUtils.isBlank(seq)) {
+            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
+        }
+        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function), pkKey);
+    }
+
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT currval(" + expr.getSequence() + ")";
     }
+
 }
