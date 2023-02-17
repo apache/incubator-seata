@@ -28,12 +28,12 @@ import io.seata.common.util.CollectionUtils;
  */
 public class JsonParserFactory {
 
-    private static final Map<String, JsonParser> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
+    private static final Map<String, JsonParserWrap> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
 
-    public static JsonParser getInstance(String jsonParserName) {
+    public static JsonParserWrap getInstance(String jsonParserName) {
         final String name =
             Optional.ofNullable(jsonParserName).orElse(DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
         return CollectionUtils.computeIfAbsent(JSON_PARSER_INSTANCES, name,
-            key -> EnhancedServiceLoader.load(JsonParser.class, name));
+            key -> new JsonParserWrap(EnhancedServiceLoader.load(JsonParser.class, name)));
     }
 }

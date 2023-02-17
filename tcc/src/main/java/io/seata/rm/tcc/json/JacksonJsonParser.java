@@ -15,16 +15,15 @@
  */
 package io.seata.rm.tcc.json;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.seata.common.Constants;
-import io.seata.common.exception.JsonParseException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
@@ -46,21 +45,13 @@ public class JacksonJsonParser implements JsonParser {
     }
 
     @Override
-    public String toJSONString(Object object) {
-        try {
-            return this.mapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new JsonParseException(e);
-        }
+    public String toJSONString(Object object) throws IOException {
+        return this.mapper.writeValueAsString(object);
     }
 
     @Override
-    public <T> T parseObject(String text, Class<T> clazz) {
-        try {
-            return this.mapper.readValue(text, clazz);
-        } catch (JacksonException e) {
-            throw new JsonParseException(e);
-        }
+    public <T> T parseObject(String text, Class<T> clazz) throws IOException {
+        return this.mapper.readValue(text, clazz);
     }
 
     @Override
