@@ -212,7 +212,7 @@ public interface DefaultValues {
     /**
      * the constant DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS
      */
-    int DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS = 3000;
+    int DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS = 1000;
     /**
      * the constant DEFAULT_COMMITING_RETRY_PERIOD
      */

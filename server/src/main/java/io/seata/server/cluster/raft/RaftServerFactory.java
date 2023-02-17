@@ -204,11 +204,11 @@ public class RaftServerFactory {
         NodeOptions nodeOptions = new NodeOptions();
         // enable the CLI service.
         nodeOptions.setDisableCli(false);
-        // snapshot should be made every 30 seconds
+        // snapshot should be made every 600 seconds
         int snapshotInterval = CONFIG.getInt(SERVER_RAFT_SNAPSHOT_INTERVAL, 60 * 10);
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         nodeOptions.setRaftOptions(initRaftOptions());
-        // set the election timeout to 2 second
+        // set the election timeout to 1 second
         nodeOptions
             .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS));
         // set up the initial cluster configuration
