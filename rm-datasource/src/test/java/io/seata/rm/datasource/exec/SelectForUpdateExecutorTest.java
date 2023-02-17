@@ -35,6 +35,7 @@ import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
 import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -42,14 +43,14 @@ import org.junit.jupiter.api.Test;
  */
 public class SelectForUpdateExecutorTest {
 
-    private static SelectForUpdateExecutor selectForUpdateExecutor;
+    private SelectForUpdateExecutor selectForUpdateExecutor;
 
-    private static ConnectionProxy connectionProxy;
+    private ConnectionProxy connectionProxy;
 
-    private static StatementProxy statementProxy;
+    private StatementProxy statementProxy;
 
-    @BeforeAll
-    public static void init() {
+    @BeforeEach
+    public void init() {
         RootContext.unbind();
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {

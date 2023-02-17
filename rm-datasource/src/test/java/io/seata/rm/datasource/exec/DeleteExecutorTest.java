@@ -35,6 +35,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -42,12 +43,12 @@ import org.junit.jupiter.api.Test;
  */
 public class DeleteExecutorTest {
 
-    private static DeleteExecutor deleteExecutor;
+    private DeleteExecutor deleteExecutor;
 
-    private static StatementProxy statementProxy;
+    private StatementProxy statementProxy;
 
-    @BeforeAll
-    public static void init() {
+    @BeforeEach
+    public void init() {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom"},

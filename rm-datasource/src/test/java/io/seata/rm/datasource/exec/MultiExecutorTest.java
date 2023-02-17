@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.alibaba.druid.mock.MockStatement;
@@ -47,14 +48,14 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 public class MultiExecutorTest {
 
-    private static MultiExecutor executor;
+    private MultiExecutor executor;
 
-    private static StatementProxy statementProxy;
-    private static MockDriver mockDriver;
-    private static ConnectionProxy connectionProxy;
+    private StatementProxy statementProxy;
+    private MockDriver mockDriver;
+    private ConnectionProxy connectionProxy;
 
-    @BeforeAll
-    public static void init() throws Throwable {
+    @BeforeEach
+    public void init() throws Throwable {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][]{
                 new Object[]{1, "Tom"},
