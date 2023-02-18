@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    sagaStatemachineDesigner: 'SagaStatemachineDesigner',
   },
   Header: {
     home: 'HOME',
@@ -29,7 +30,6 @@ const enUs: ILocale = {
     blog: 'BLOG',
     community: 'COMMUNITY',
     download: 'DOWNLOAD',
-    sagaStatemachineDesigner: 'SAGA-STATEMACHINE-DESIGNER',
     languageSwitchButton: '中',
     logout: 'logout',
     passwordRequired: 'password should not be empty',

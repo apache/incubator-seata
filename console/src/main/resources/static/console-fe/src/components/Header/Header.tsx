@@ -111,11 +111,6 @@ class Header extends React.Component<PropsType, StateType> {
       { id: 4, title: blog, link: `${BASE_URL}blog/index.html` },
       { id: 5, title: community, link: `${BASE_URL}community/index.html` },
       { id: 6, title: download, link: `${BASE_URL}blog/download.html` },
-      {
-        id: 7,
-        title: sagaStatemachineDesigner,
-        link: `./saga-statemachine-designer/designer.html`,
-      },
     ];
     return (
       <header className="header-container header-container-primary">
