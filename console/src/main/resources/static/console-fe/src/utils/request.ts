@@ -43,7 +43,7 @@ const codeMessage = {
 
 const request = () => {
   const instance: AxiosInstance = axios.create({
-    baseURL: '/api/v1',
+    baseURL: 'api/v1',
     method: 'get',
   });
 
