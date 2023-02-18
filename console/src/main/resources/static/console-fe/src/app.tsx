@@ -76,15 +76,15 @@ class App extends React.Component<AppPropsType, AppStateType> {
         //     label: overview,
         // },
         {
-          key: '/TransactionInfo',
+          key: '/transactioninfo',
           label: transactionInfo,
         },
         {
-          key: '/GlobalLockInfo',
+          key: '/globallockinfo',
           label: globalLockInfo,
         },
         {
-          key: '/SagaStatemachineDesigner',
+          key: '/sagastatemachinedesigner',
           label: sagaStatemachineDesigner,
         },
       ],
@@ -103,9 +103,9 @@ class App extends React.Component<AppPropsType, AppStateType> {
               <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
             )}
           >
-            <Route path={'/'} exact render={() => <Redirect to="/TransactionInfo" />} />
+            <Route path={'/'} exact render={() => <Redirect to="/transactioninfo" />} />
             <Route
-              path={'/SagaStatemachineDesigner'}
+              path={'/sagastatemachinedesigner'}
               render={() => (
                 <Iframe title={'Seata'} src={'./saga-statemachine-designer/designer.html'} />
               )}
