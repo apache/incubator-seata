@@ -29,6 +29,7 @@ const zhCn: ILocale = {
     blog: '博客',
     community: '社区',
     download: '下载',
+    sagaStatemachineDesigner: 'SAGA状态机设计器',
     languageSwitchButton: 'En',
     logout: '登出',
   },
