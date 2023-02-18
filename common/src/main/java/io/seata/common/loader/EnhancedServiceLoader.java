@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -283,7 +284,6 @@ public class EnhancedServiceLoader {
         }
 
         private static void removeAllServiceLoader() {
-
             SERVICE_LOADERS.clear();
         }
 
@@ -391,27 +391,24 @@ public class EnhancedServiceLoader {
             return loadAllExtensionClass(loader);
         }
 
-        private S loadExtension(ClassLoader loader, Class<?>[] argTypes,
-                                Object[] args) {
+        private S loadExtension(ClassLoader loader, Class<?>[] argTypes, Object[] args) {
             try {
                 loadAllExtensionClass(loader);
                 ExtensionDefinition<S> defaultExtensionDefinition = getDefaultExtensionDefinition();
                 return getExtensionInstance(defaultExtensionDefinition, loader, argTypes, args);
+            } catch (EnhancedServiceNotFoundException e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException)e;
-                } else {
-                    throw new EnhancedServiceNotFoundException(
-                        "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
-                            .getFullStackTrace(e));
-                }
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + type.getName()
+                        + " caused by " + ExceptionUtils.getFullStackTrace(e));
             }
         }
 
         @SuppressWarnings("rawtypes")
         private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
                                 Object[] args) {
-            if (io.seata.common.util.StringUtils.isEmpty(activateName)) {
+            if (StringUtils.isEmpty(activateName)) {
                 throw new IllegalArgumentException("the name of service provider for [" + type.getName() + "] name is null");
             }
             try {
@@ -498,9 +495,9 @@ public class EnhancedServiceLoader {
             }
 
             if (!extensionDefinitions.isEmpty()) {
-                extensionDefinitions.sort((definition1, definition2) -> {
-                    int o1 = definition1.getOrder();
-                    int o2 = definition2.getOrder();
+                extensionDefinitions.sort((def1, def2) -> {
+                    int o1 = def1.getOrder();
+                    int o2 = def2.getOrder();
                     return Integer.compare(o1, o2);
                 });
             }
@@ -519,7 +516,10 @@ public class EnhancedServiceLoader {
                 urls = ClassLoader.getSystemResources(fileName);
             }
             if (urls != null) {
+                boolean hasServiceFile = false;
+                boolean hasClasses = false;
                 while (urls.hasMoreElements()) {
+                    hasServiceFile = true;
                     java.net.URL url = urls.nextElement();
                     try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
                         String line;
@@ -530,6 +530,7 @@ public class EnhancedServiceLoader {
                             }
                             line = line.trim();
                             if (line.length() > 0) {
+                                hasClasses = true;
                                 try {
                                     ExtensionDefinition<S> extensionDefinition = getUnloadedExtensionDefinition(line, loader);
                                     if (extensionDefinition == null) {
@@ -540,7 +541,7 @@ public class EnhancedServiceLoader {
                                     }
                                     extensions.add(extensionDefinition);
                                 } catch (LinkageError | ClassNotFoundException e) {
-                                    LOGGER.warn("Load [{}] class fail. ", line, e);
+                                    LOGGER.warn("Load [{}] class fail: {}", line, e.getMessage());
                                 } catch (ClassCastException e) {
                                     LOGGER.error("Load [{}] class fail, please make sure the extension" +
                                             " config in {} implements {}.", line, fileName, type.getName());
@@ -548,8 +549,20 @@ public class EnhancedServiceLoader {
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("load clazz instance error: ", e);
+                        LOGGER.warn("load class instance error:", e);
                     }
+                }
+
+                if (LOGGER.isDebugEnabled()) {
+                    if (!hasServiceFile) {
+                        LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
+                    } else if (!hasClasses) {
+                        LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
+                    }
+                }
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.warn("Load [{}] class fail: no urls found in '{}'.", type.getName(), dir);
                 }
             }
         }
