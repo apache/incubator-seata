@@ -36,7 +36,7 @@ class ConfigFutureTest {
     
     @Test
     void testGet() throws NoSuchFieldException, IllegalAccessException, ExecutionException, InterruptedException, TimeoutException {
-        // mainly testing exception scene
+        // mainly test exception scene
         ConfigFuture configFuture = Mockito.spy(new ConfigFuture("file.conf", "defaultValue", ConfigFuture.ConfigOperation.GET));
 
         Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
