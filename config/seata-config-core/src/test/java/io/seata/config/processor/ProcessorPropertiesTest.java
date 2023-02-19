@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author liuqiufeng
  */
