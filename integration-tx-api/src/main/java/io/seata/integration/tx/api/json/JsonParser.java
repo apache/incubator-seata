@@ -15,17 +15,17 @@
  */
 package io.seata.integration.tx.api.json;
 
+import java.io.IOException;
+
 /**
  * @author leezongjie
+ * @author zouwei
  */
 public interface JsonParser {
 
-    String toJSONString(Object object);
+    String toJSONString(Object object) throws IOException;
 
-    <T> T parseObject(String text, Class<T> clazz);
+    <T> T parseObject(String text, Class<T> clazz) throws IOException;
 
-    default int order() {
-        return 0;
-    }
-
+    String getName();
 }
