@@ -42,6 +42,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5659](https://github.com/seata/seata/pull/5659)] fix the issue of case sensitivity enforcement on the database after adding escape characters to keywords
 - [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
 - [[#5675](https://github.com/seata/seata/pull/5675)] bugfix: fix compatibility between xxx.grouplist and grouplist.xxx configuration items
+- [[#5690](https://github.com/seata/seata/pull/5690)] fix console print `unauthorized error`
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -96,6 +97,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yixia](https://github.com/wt-better)
+- [jumtp](https://github.com/jumtp)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

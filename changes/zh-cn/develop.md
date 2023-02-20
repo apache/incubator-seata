@@ -42,6 +42,7 @@
 - [[#5659](https://github.com/seata/seata/pull/5659)] 修复后镜像查询时增加关键字转义符导致数据库强制开启大小写校验引起的sql异常
 - [[#5663](https://github.com/seata/seata/pull/5663)] 修复connectionProxyXA连接复用时timeout为null
 - [[#5675](https://github.com/seata/seata/pull/5675)] 修复 xxx.grouplist 和 grouplist.xxx 配置项兼容问题
+- [[#5690](https://github.com/seata/seata/pull/5690)] 修复控制台打印 `unauthorized error` 问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -96,6 +97,7 @@
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yixia](https://github.com/wt-better)
+- [jumtp](https://github.com/jumtp)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
