@@ -15,31 +15,36 @@
  */
 package io.seata.rm.tcc.json;
 
-import com.alibaba.fastjson.JSON;
+import java.lang.reflect.Modifier;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
- * @author leezongjie
  * @author zouwei
  */
-@LoadLevel(name = Constants.FASTJSON_JSON_PARSER_NAME)
-public class FastJsonParser implements JsonParser {
+@LoadLevel(name = Constants.GSON_JSON_PARSER_NAME)
+public class GsonJsonParser implements JsonParser {
+
+    private final Gson gson =
+        new GsonBuilder().excludeFieldsWithModifiers(Modifier.STATIC, Modifier.TRANSIENT).create();
 
     @Override
     public String toJSONString(Object object) {
-        return JSON.toJSONString(object);
+        return gson.toJson(object);
     }
 
     @Override
     public <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+        return gson.fromJson(text, clazz);
     }
 
     @Override
     public String getName() {
-        return Constants.FASTJSON_JSON_PARSER_NAME;
+        return Constants.GSON_JSON_PARSER_NAME;
     }
 }

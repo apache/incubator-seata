@@ -13,33 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.json;
-
-import com.alibaba.fastjson.JSON;
-
-import io.seata.common.Constants;
-import io.seata.common.loader.LoadLevel;
-import io.seata.integration.tx.api.json.JsonParser;
+package io.seata.common.exception;
 
 /**
- * @author leezongjie
  * @author zouwei
  */
-@LoadLevel(name = Constants.FASTJSON_JSON_PARSER_NAME)
-public class FastJsonParser implements JsonParser {
+public class JsonParseException extends RuntimeException {
 
-    @Override
-    public String toJSONString(Object object) {
-        return JSON.toJSONString(object);
+    public JsonParseException(String message) {
+        super(message);
     }
 
-    @Override
-    public <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+    public JsonParseException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public String getName() {
-        return Constants.FASTJSON_JSON_PARSER_NAME;
+    public JsonParseException(Throwable cause) {
+        super(cause);
     }
 }

@@ -815,6 +815,11 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
+     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
+     */
+    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
+
+    /**
      * The constant rpcRmRequestTimeout
      */
     String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";

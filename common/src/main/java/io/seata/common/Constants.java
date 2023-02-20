@@ -176,4 +176,23 @@ public interface Constants {
      */
     String STORE_REDIS_TYPE_PIPELINE = "pipeline";
 
+    /**
+     * The constant FASTJSON_JSON_PARSER_NAME
+     */
+    String FASTJSON_JSON_PARSER_NAME = "fastjson";
+
+    /**
+     * The constant JACKSON_JSON_PARSER_NAME
+     */
+    String JACKSON_JSON_PARSER_NAME = "jackson";
+
+    /**
+     * The constant GSON_JSON_PARSER_NAME
+     */
+    String GSON_JSON_PARSER_NAME = "gson";
+
+    /**
+     * The constant JACKSON_JSON_TEXT_PREFIX
+     */
+    String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
 }
