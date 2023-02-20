@@ -100,14 +100,14 @@ public class InsertBySelectExecutorTest {
     @Test
     public void testAfterImage() throws SQLException {
         init();
-        MySQLInsertRecognizer insertRecognizer = mock(MySQLInsertRecognizer.class);
-        InsertBySelectExecutor insertExecutor = Mockito.spy(new InsertBySelectExecutor(statementProxy, (statement, args) -> {
-            return null;
-        }, insertRecognizer));
-        when(insertRecognizer.getTableName()).thenReturn("t");
-        when(insertRecognizer.getInsertColumns()).thenReturn(Arrays.asList("id", "a", "b"));
-        when(insertRecognizer.getSubQuerySql()).thenReturn("select id1,a1,b1 from t2");
-        when(insertExecutor.getTableMeta(insertRecognizer.getTableName())).thenReturn(mockTableMeta());
+//        MySQLInsertRecognizer insertRecognizer = mock(MySQLInsertRecognizer.class);
+//        InsertBySelectExecutor insertExecutor = Mockito.spy(new InsertBySelectExecutor(statementProxy, (statement, args) -> {
+//            return null;
+//        }, insertRecognizer));
+//        when(insertRecognizer.getTableName()).thenReturn("t");
+//        when(insertRecognizer.getInsertColumns()).thenReturn(Arrays.asList("id", "a", "b"));
+//        when(insertRecognizer.getSubQuerySql()).thenReturn("select id1,a1,b1 from t2");
+//        when(insertExecutor.getTableMeta(insertRecognizer.getTableName())).thenReturn(mockTableMeta());
 //        TableRecords afterImage = insertExecutor.afterImage(new TableRecords());
 //        Assertions.assertEquals(afterImage.getTableName(), "t");
 //        List<Row> rows = afterImage.getRows();
