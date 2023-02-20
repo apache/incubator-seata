@@ -62,10 +62,10 @@ public class InsertBySelectExecutorTest {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "a", "b");
         Object[][] returnValue = new Object[][] {new Object[] {1, 1, 1}, new Object[] {2, 2, 2},};
         Object[][] columnMetas = new Object[][] {
-            new Object[] {"", "", "t2", "id1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO",
+            new Object[] {"", "", "insert_select_t2", "id1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO",
                 "YES"},
-            new Object[] {"", "", "t2", "a1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "YES"},
-            new Object[] {"", "", "t2", "b1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO",
+            new Object[] {"", "", "insert_select_t2", "a1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "YES"},
+            new Object[] {"", "", "insert_select_t2", "b1", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO",
                 "YES"}};
         Object[][] indexMetas = new Object[][] {new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},};
 
@@ -90,7 +90,7 @@ public class InsertBySelectExecutorTest {
 
     @Test
     public void testRecognizer() {
-        String sql = "insert into t select id1,a1,b1 from t2";
+        String sql = "insert into insert_select_t select id1,a1,b1 from insert_select_t2";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         SQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         Assertions.assertEquals(SQLType.INSERT_SELECT, recognizer.getSQLType());
@@ -100,35 +100,35 @@ public class InsertBySelectExecutorTest {
     @Test
     public void testAfterImage() throws SQLException {
         init();
-//        MySQLInsertRecognizer insertRecognizer = mock(MySQLInsertRecognizer.class);
-//        InsertBySelectExecutor insertExecutor = Mockito.spy(new InsertBySelectExecutor(statementProxy, (statement, args) -> {
-//            return null;
-//        }, insertRecognizer));
-//        when(insertRecognizer.getTableName()).thenReturn("t");
-//        when(insertRecognizer.getInsertColumns()).thenReturn(Arrays.asList("id", "a", "b"));
-//        when(insertRecognizer.getSubQuerySql()).thenReturn("select id1,a1,b1 from t2");
-//        when(insertExecutor.getTableMeta(insertRecognizer.getTableName())).thenReturn(mockTableMeta());
-//        TableRecords afterImage = insertExecutor.afterImage(new TableRecords());
-//        Assertions.assertEquals(afterImage.getTableName(), "t");
-//        List<Row> rows = afterImage.getRows();
-//        Assertions.assertEquals(2, rows.size());
+        MySQLInsertRecognizer insertRecognizer = mock(MySQLInsertRecognizer.class);
+        InsertBySelectExecutor insertExecutor = Mockito.spy(new InsertBySelectExecutor(statementProxy, (statement, args) -> {
+            return null;
+        }, insertRecognizer));
+        when(insertRecognizer.getTableName()).thenReturn("insert_select_t");
+        when(insertRecognizer.getInsertColumns()).thenReturn(Arrays.asList("id", "a", "b"));
+        when(insertRecognizer.getSubQuerySql()).thenReturn("select id1,a1,b1 from insert_select_t2");
+        when(insertExecutor.getTableMeta(insertRecognizer.getTableName())).thenReturn(mockTableMeta());
+        TableRecords afterImage = insertExecutor.afterImage(new TableRecords());
+        Assertions.assertEquals(afterImage.getTableName(), "insert_select_t");
+        List<Row> rows = afterImage.getRows();
+        Assertions.assertEquals(2, rows.size());
     }
 
     private TableMeta mockTableMeta() {
         TableMeta tableMeta = new TableMeta();
-        tableMeta.setTableName("t");
+        tableMeta.setTableName("insert_select_t");
         ColumnMeta columnIdMeta = new ColumnMeta();
-        columnIdMeta.setTableName("t");
+        columnIdMeta.setTableName("insert_select_t");
         columnIdMeta.setColumnName(COLUMN_ID);
         columnIdMeta.setDataType(Types.INTEGER);
         tableMeta.getAllColumns().put(COLUMN_ID, columnIdMeta);
 
-        columnIdMeta.setTableName("t");
+        columnIdMeta.setTableName("insert_select_t");
         columnIdMeta.setColumnName(COLUMN_A);
         columnIdMeta.setDataType(Types.INTEGER);
         tableMeta.getAllColumns().put(COLUMN_A, columnIdMeta);
 
-        columnIdMeta.setTableName("t");
+        columnIdMeta.setTableName("insert_select_t");
         columnIdMeta.setColumnName(COLUMN_B);
         columnIdMeta.setDataType(Types.INTEGER);
         tableMeta.getAllColumns().put(COLUMN_B, columnIdMeta);
