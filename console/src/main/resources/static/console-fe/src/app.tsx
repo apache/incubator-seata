@@ -76,11 +76,11 @@ class App extends React.Component<AppPropsType, AppStateType> {
         //     label: overview,
         // },
         {
-          key: '/transactioninfo',
+          key: '/transaction/list',
           label: transactionInfo,
         },
         {
-          key: '/globallockinfo',
+          key: '/globallock/list',
           label: globalLockInfo,
         },
         {
@@ -103,7 +103,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
               <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
             )}
           >
-            <Route path={'/'} exact render={() => <Redirect to="/transactioninfo" />} />
+            <Route path={'/'} exact render={() => <Redirect to="/transaction/list" />} />
             <Route
               path={'/sagastatemachinedesigner'}
               render={() => (
