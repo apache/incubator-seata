@@ -15,21 +15,19 @@
  */
 package io.seata.tm.api;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
+import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
-import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,13 +210,20 @@ public class TransactionalTemplate {
         try {
             triggerBeforeCommit();
             tx.commit();
-
-            if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
-                throw new TransactionalExecutor.ExecutionException(tx,
-                        new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
-                        TransactionalExecutor.Code.TimeoutRollback);
+            TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
+            switch (tx.getLocalStatus()) {
+                case TimeoutRollbacking:
+                    code = TransactionalExecutor.Code.Rollbacking;
+                    break;
+                case TimeoutRollbacked:
+                    code = TransactionalExecutor.Code.RollbackDone;
+                    break;
+                default:
             }
-
+            if (code != TransactionalExecutor.Code.Unknown) {
+                Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout, String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
+                throw new TransactionalExecutor.ExecutionException(tx, exx, code);
+            }
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
@@ -239,9 +244,32 @@ public class TransactionalTemplate {
                     TransactionalExecutor.Code.RollbackFailure, originalException);
         }
 
-        // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+        //# fix #5231
+        TransactionalExecutor.Code code;
+        switch (tx.getLocalStatus()) {
+            case RollbackFailed:
+            case TimeoutRollbackFailed:
+            case RollbackRetryTimeout:
+                code = TransactionalExecutor.Code.RollbackFailure;
+                break;
+            case Rollbacking:
+            case RollbackRetrying:
+            case TimeoutRollbacking:
+            case TimeoutRollbackRetrying:
+                code = TransactionalExecutor.Code.Rollbacking;
+                break;
+            case TimeoutRollbacked:
+            case Rollbacked:
+                //rollback transactions but do not exist are usually considered completed
+            case Finished:
+                code = TransactionalExecutor.Code.RollbackDone;
+                break;
+            default:
+                code = TransactionalExecutor.Code.Unknown;
+                LOGGER.warn("{} rollback in the state {}", tx.getXid(), tx.getLocalStatus());
+        }
+        throw new TransactionalExecutor.ExecutionException(tx, code, originalException);
+
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
