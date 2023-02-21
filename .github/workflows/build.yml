@@ -2,9 +2,9 @@ name: "build"
 
 on:
   push:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, 2.x_UT_temp ]
   pull_request:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, 2.x_UT_temp ]
 
 jobs:
   build_arm64-binary: 
