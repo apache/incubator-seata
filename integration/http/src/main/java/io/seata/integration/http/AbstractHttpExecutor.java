@@ -77,6 +77,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         return wrapHttpExecute(returnType, httpClient, httpPut, headers);
     }
 
+
     private <T> StringEntity execute(String host, String path, T paramObject) {
         Args.notNull(host, "host");
         Args.notNull(path, "path");
