@@ -61,8 +61,8 @@ public class MultiExecutorTest {
                 new Object[]{2, "Jack"},
         };
         Object[][] columnMetas = new Object[][]{
-                new Object[]{"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                new Object[]{"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[]{"", "", "table_multi_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[]{"", "", "table_multi_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
         Object[][] indexMetas = new Object[][]{
                 new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
@@ -91,8 +91,8 @@ public class MultiExecutorTest {
     @Test
     public void testBeforeImageAndAfterImages() throws SQLException {
         //same table and same type
-        String sql = "update table_update_executor_test set name = 'WILL' where id = 1;" +
-                "update table_update_executor_test set name = 'WILL2' where id = 2";
+        String sql = "update table_multi_executor_test set name = 'WILL' where id = 1;" +
+                "update table_multi_executor_test set name = 'WILL2' where id = 2";
         List<SQLRecognizer> multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -106,14 +106,14 @@ public class MultiExecutorTest {
         Assertions.assertEquals(executor.getAfterImagesMap().size(), 1);
         executor.prepareUndoLog(beforeImage, afterImage);
         List<SQLUndoLog> items = connectionProxy.getContext().getUndoItems();
-        Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_update_executor_test")));
+        Assertions.assertTrue(items.stream().allMatch(t -> Objects.equals(t.getSqlType(), SQLType.UPDATE) && Objects.equals(t.getTableName(), "table_multi_executor_test")));
         Assertions.assertEquals(items.size(), 1);
         connectionProxy.getContext().reset();
 
 
         //same table delete
-        sql = "delete from table_update_executor_test where id = 2;" +
-                "delete from table_update_executor_test where id = 3";
+        sql = "delete from table_multi_executor_test where id = 2;" +
+                "delete from table_multi_executor_test where id = 3";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -128,13 +128,13 @@ public class MultiExecutorTest {
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         Set<String> itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
-        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
+        Assertions.assertTrue(itemSet.contains("table_multi_executor_test"));
         Assertions.assertEquals(items.size(), 1);
         connectionProxy.getContext().reset();
 
 
         //multi table update
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 1;update table_update_executor_test2 set name = 'WILL' where id = 3;";
+        sql = "update table_multi_executor_test set name = 'WILL' where id = 1;update table_multi_executor_test2 set name = 'WILL' where id = 1;update table_multi_executor_test2 set name = 'WILL' where id = 3;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -149,14 +149,14 @@ public class MultiExecutorTest {
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
-        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
-        Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
+        Assertions.assertTrue(itemSet.contains("table_multi_executor_test"));
+        Assertions.assertTrue(itemSet.contains("table_multi_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
         connectionProxy.getContext().reset();
 
 
         // multi table delete
-        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test where id = 3;delete from table_update_executor_test where id = 4;delete from table_update_executor_test";
+        sql = "delete from table_multi_executor_test2 where id = 2;delete from table_multi_executor_test where id = 3;delete from table_multi_executor_test where id = 4;delete from table_multi_executor_test";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -171,12 +171,12 @@ public class MultiExecutorTest {
         executor.prepareUndoLog(beforeImage, afterImage);
         items = connectionProxy.getContext().getUndoItems();
         itemSet = items.stream().map(t -> t.getTableName()).collect(Collectors.toSet());
-        Assertions.assertTrue(itemSet.contains("table_update_executor_test"));
-        Assertions.assertTrue(itemSet.contains("table_update_executor_test2"));
+        Assertions.assertTrue(itemSet.contains("table_multi_executor_test"));
+        Assertions.assertTrue(itemSet.contains("table_multi_executor_test2"));
         Assertions.assertEquals(items.size(), 2);
 
         // contains limit delete
-        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 limit 1;";
+        sql = "delete from table_multi_executor_test2 where id = 2;delete from table_multi_executor_test2 where id = 2 limit 1;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -184,7 +184,7 @@ public class MultiExecutorTest {
         Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
         // contains order by and limit delete
-        sql = "delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 2 order by id desc limit 1;";
+        sql = "delete from table_multi_executor_test2 where id = 2;delete from table_multi_executor_test2 where id = 2 order by id desc limit 1;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -193,7 +193,7 @@ public class MultiExecutorTest {
 
 
         //contains order by update
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc;";
+        sql = "update table_multi_executor_test set name = 'WILL' where id = 1;update table_multi_executor_test set name = 'WILL' where id = 1 order by id desc;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
@@ -201,7 +201,7 @@ public class MultiExecutorTest {
         Assertions.assertThrows(NotSupportYetException.class, executor::beforeImage);
 
         //contains order by and limit update
-        sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL' where id = 1 order by id desc limit 1;";
+        sql = "update table_multi_executor_test set name = 'WILL' where id = 1;update table_multi_executor_test set name = 'WILL' where id = 1 order by id desc limit 1;";
         multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
