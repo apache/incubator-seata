@@ -102,6 +102,7 @@ public class SessionHolder {
         if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
+        LOGGER.info("use session store mode: {}", sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
