@@ -22,7 +22,9 @@
 - [[#5311](https://github.com/seata/seata/pull/5311)] 移除基于文件存储恢复时的RollbackRetryTimeout事务
 - [[#4734](https://github.com/seata/seata/pull/4734)] 修复AT模式下新增字段产生的字段找不到
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
+- [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
