@@ -70,15 +70,10 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
-    public void onRollbackRetrying(GlobalTransaction tx, Throwable originalException) {
+    public void onRollbacking(GlobalTransaction tx, Throwable originalException) {
         StackTraceLogger.warn(LOGGER, originalException, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
         TIMER.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
             TimeUnit.SECONDS);
-    }
-
-    @Override
-    public void onTimeoutRollback(GlobalTransaction tx, Throwable originalException) {
-        StackTraceLogger.warn(LOGGER, originalException, "Transaction timeout rollback[{}]", new String[] {tx.getXid()});
     }
 
     protected class CheckTimerTask implements TimerTask {

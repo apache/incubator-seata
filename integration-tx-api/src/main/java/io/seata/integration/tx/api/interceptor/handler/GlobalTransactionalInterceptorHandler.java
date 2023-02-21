@@ -34,6 +34,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
+import io.seata.core.exception.TmTransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.integration.tx.api.annotation.AspectTransactional;
 import io.seata.integration.tx.api.event.DegradeCheckEvent;
@@ -240,9 +242,14 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
             Throwable cause = e.getCause();
+            boolean timeout = isTimeoutException(cause);
             switch (code) {
                 case RollbackDone:
-                    throw e.getOriginalException();
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 case BeginFailure:
                     succeed = false;
                     failureHandler.onBeginFailure(e.getTransaction(), cause);
@@ -254,12 +261,13 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
-                case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
-                case TimeoutRollback:
-                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
-                    throw cause;
+                case Rollbacking:
+                    failureHandler.onRollbacking(e.getTransaction(), e.getOriginalException());
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
@@ -341,6 +349,19 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                 }
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isTimeoutException(Throwable th) {
+        if (null == th) {
+            return false;
+        }
+        if (th instanceof TmTransactionException) {
+            TmTransactionException exx = (TmTransactionException)th;
+            if (TransactionExceptionCode.TransactionTimeout == exx.getCode()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
