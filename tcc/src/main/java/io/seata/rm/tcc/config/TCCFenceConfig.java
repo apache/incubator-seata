@@ -109,6 +109,11 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
      */
     public void initCleanTask() {
         try {
+            // disable clear task when cleanPeriod <= 0
+            if (cleanPeriod.isZero() || cleanPeriod.isNegative()) {
+                LOGGER.info("TCC fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
+                return;
+            }
             // convert to second level. maximum interval is 68 years
             long periodSeconds = cleanPeriod.compareTo(MAX_PERIOD) >= 0 ? Integer.MAX_VALUE : cleanPeriod.toMillis() / 1000;
             // start tcc fence clean schedule

@@ -15,9 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.server;
 
-import java.time.Duration;
-
-import io.seata.common.util.DurationUtil;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +26,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 @Component
 @ConfigurationProperties(prefix = SERVER_PREFIX)
 public class ServerProperties {
-    private Duration maxCommitRetryTimeout = DurationUtil.DEFAULT_DURATION;
-    private Duration maxRollbackRetryTimeout = DurationUtil.DEFAULT_DURATION;
+    private long maxCommitRetryTimeout = -1L;
+    private long maxRollbackRetryTimeout = -1L;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
     private Boolean enableCheckAuth = true;
     private Boolean enableParallelRequestHandle = false;
@@ -38,20 +35,20 @@ public class ServerProperties {
     private Integer servicePort;
     private Integer xaerNotaRetryTimeout = 60000;
 
-    public Duration getMaxCommitRetryTimeout() {
+    public long getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
     }
 
-    public ServerProperties setMaxCommitRetryTimeout(Duration maxCommitRetryTimeout) {
+    public ServerProperties setMaxCommitRetryTimeout(long maxCommitRetryTimeout) {
         this.maxCommitRetryTimeout = maxCommitRetryTimeout;
         return this;
     }
 
-    public Duration getMaxRollbackRetryTimeout() {
+    public long getMaxRollbackRetryTimeout() {
         return maxRollbackRetryTimeout;
     }
 
-    public ServerProperties setMaxRollbackRetryTimeout(Duration maxRollbackRetryTimeout) {
+    public ServerProperties setMaxRollbackRetryTimeout(long maxRollbackRetryTimeout) {
         this.maxRollbackRetryTimeout = maxRollbackRetryTimeout;
         return this;
     }

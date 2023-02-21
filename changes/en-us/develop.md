@@ -3,112 +3,69 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature:
-- [[#4802](https://github.com/seata/seata/pull/4802)] dockerfile support arm64
-- [[#4863](https://github.com/seata/seata/pull/4863)] support oracle and postgresql multi primary key
-- [[#4649](https://github.com/seata/seata/pull/4649)] seata-server support multiple registry
-- [[#4479](https://github.com/seata/seata/pull/4479)] TCC mode supports tcc annotation marked on both interface and implementation class
-- [[#4877](https://github.com/seata/seata/pull/4877)] seata client support jdk17
-- [[#4468](https://github.com/seata/seata/pull/4968)] support kryo 5.3.0
-- [[#4914](https://github.com/seata/seata/pull/4914)] support mysql update join sql
-- [[#5111](https://github.com/seata/seata/pull/5111)] support passing contextPath parameter to Nacos client
-
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
-- [[#4780](https://github.com/seata/seata/pull/4780)] fix can't post TimeoutRollbacked event after a successful timeout rollback
-- [[#4954](https://github.com/seata/seata/pull/4954)] fix output expression incorrectly throws npe
-- [[#4817](https://github.com/seata/seata/pull/4817)] fix in high version springboot property not Standard
-- [[#4838](https://github.com/seata/seata/pull/4838)] fix when use Statement.executeBatch() can not generate undo log
-- [[#4533](https://github.com/seata/seata/pull/4533)] fix rollback event repeated and some event status not correct
-- [[#4779](https://github.com/seata/seata/pull/4779)] fix and support Apache Dubbo 3
-- [[#4912](https://github.com/seata/seata/pull/4912)] fix mysql InsertOnDuplicateUpdate column case is different and cannot be matched
-- [[#4543](https://github.com/seata/seata/pull/4543)] fix support Oracle nclob types
-- [[#4915](https://github.com/seata/seata/pull/4915)] fix failed to get server recovery properties
-- [[#4919](https://github.com/seata/seata/pull/4919)] fix XID port  and  address null:0 before coordinator.init
-- [[#4928](https://github.com/seata/seata/pull/4928)] fix rpcContext.getClientRMHolderMap NPE 
-- [[#4953](https://github.com/seata/seata/pull/4953)] fix InsertOnDuplicateUpdate bypass modify pk
-- [[#4978](https://github.com/seata/seata/pull/4978)] fix kryo support circular reference
-- [[#4874](https://github.com/seata/seata/pull/4874)] fix startup failure of Server1.5.2 by using OpenJDK 11 
-- [[#5018](https://github.com/seata/seata/pull/5018)] fix loader path in startup scripts
-- [[#5004](https://github.com/seata/seata/pull/5004)] fix duplicate image row for update join
-- [[#5032](https://github.com/seata/seata/pull/5032)] fix mysql InsertOnDuplicateUpdate sql query error caused by placeholder index calculation error
-- [[#5033](https://github.com/seata/seata/pull/5033)] fix null exception when sql columns is empty for insert on duplicate
-- [[#5033](https://github.com/seata/seata/pull/5023)] fix mysql InsertOnDuplicateUpdate insert value type recognize error
-- [[#5038](https://github.com/seata/seata/pull/5038)] remove @EnableConfigurationProperties({SagaAsyncThreadPoolProperties.class})
-- [[#5050](https://github.com/seata/seata/pull/5050)] fix global session is not change to Committed in saga mode
-- [[#5052](https://github.com/seata/seata/pull/5052)] fix update join condition placeholder param error
-- [[#5031](https://github.com/seata/seata/pull/5031)] fix mysql InsertOnDuplicateUpdate should not use null index value as image sql query condition
-- [[#5075](https://github.com/seata/seata/pull/5075)] fix InsertOnDuplicateUpdateExecutor could not intercept the sql which has no primary and unique key
-- [[#5093](https://github.com/seata/seata/pull/5093)] fix access key loss after seata server restart
-- [[#5092](https://github.com/seata/seata/pull/5092)] fix when seata and jpa are used together, their AutoConfiguration order is incorrect
-- [[#5109](https://github.com/seata/seata/pull/5109)] fix NPE caused when there is no @GlobalTransactional annotation on the RM side
-- [[#5131](https://github.com/seata/seata/pull/5131)] rollback active xa connection fail
-- [[#5134](https://github.com/seata/seata/pull/5134)] hikari datasource auto proxy fail
+- [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
+- [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
+- [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
+- [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
+- [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
+- [[#5266](https://github.com/seata/seata/pull/5265)] fix server console has queried the released lock
+- [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
+- [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
+- [[#5281](https://github.com/seata/seata/pull/5281)] parallel request handle throw IndexOutOfBoundsException
+- [[#5288](https://github.com/seata/seata/pull/5288)] fix auto-increment of pk columns in Oracle in AT mode
+- [[#5287](https://github.com/seata/seata/pull/5287)] fix auto-increment of pk columns in PostgreSQL in AT mode
+- [[#5299](https://github.com/seata/seata/pull/5299)] fix GlobalSession deletion when retry rollback or retry commit timeout
+- [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
+- [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
+- [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
+- [[#5321](https://github.com/seata/seata/pull/5321)] fix When the rollback logic on the TC side returns RollbackFailed, the custom FailureHandler is not executed
+- [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
+
 
 ### optimize:
-- [[#4774](https://github.com/seata/seata/pull/4774)] optimize mysql8 dependencies for seataio/seata-server image
-- [[#4790](https://github.com/seata/seata/pull/4790)] Add a github action to publish Seata to OSSRH
-- [[#4765](https://github.com/seata/seata/pull/4765)] mysql 8.0.29 not should be hold for connection
-- [[#4750](https://github.com/seata/seata/pull/4750)] optimize unBranchLock romove xid
-- [[#4797](https://github.com/seata/seata/pull/4797)] optimize the github actions
-- [[#4800](https://github.com/seata/seata/pull/4800)] Add NOTICE as Apache License V2
-- [[#4681](https://github.com/seata/seata/pull/4681)] optimize the check lock during global transaction
-- [[#4761](https://github.com/seata/seata/pull/4761)] use hget replace hmget because only one field
-- [[#4414](https://github.com/seata/seata/pull/4414)] exclude log4j dependencies
-- [[#4836](https://github.com/seata/seata/pull/4836)] optimize BaseTransactionalExecutor#buildLockKey(TableRecords rowsIncludingPK) method more readable
-- [[#4865](https://github.com/seata/seata/pull/4865)] fix some security vulnerabilities in GGEditor
-- [[#4590](https://github.com/seata/seata/pull/4590)] auto degrade enable to dynamic configure
-- [[#4490](https://github.com/seata/seata/pull/4490)] tccfence log table delete by index
-- [[#4911](https://github.com/seata/seata/pull/4911)] add license checker workflow
-- [[#4917](https://github.com/seata/seata/pull/4917)] upgrade package-lock.json fix vulnerabilities
-- [[#4924](https://github.com/seata/seata/pull/4924)] optimize pom dependencies
-- [[#4932](https://github.com/seata/seata/pull/4932)] extract the default values for some properties
-- [[#4925](https://github.com/seata/seata/pull/4925)] optimize java doc warning
-- [[#4921](https://github.com/seata/seata/pull/4921)] fix some vulnerabilities in console and upgrade skywalking-eyes
-- [[#4936](https://github.com/seata/seata/pull/4936)] optimize read of storage configuration
-- [[#4946](https://github.com/seata/seata/pull/4946)] pass the sqlexception to client when get lock
-- [[#4962](https://github.com/seata/seata/pull/4962)] optimize build and fix the base image
-- [[#4974](https://github.com/seata/seata/pull/4974)] optimize cancel the limit on the number of globalStatus queries in Redis mode
-- [[#4981](https://github.com/seata/seata/pull/4981)] optimize tcc fence record not exists errMessage
-- [[#4985](https://github.com/seata/seata/pull/4985)] fix undo_log id repeat
-- [[#4995](https://github.com/seata/seata/pull/4995)] fix mysql InsertOnDuplicateUpdate duplicate pk condition in after image query sql
-- [[#5047](https://github.com/seata/seata/pull/5047)] remove useless code
-- [[#5051](https://github.com/seata/seata/pull/5051)] undo log dirty throw BranchRollbackFailed_Unretriable
-- [[#5075](https://github.com/seata/seata/pull/5075)] intercept the InsertOnDuplicateUpdate statement which has no primary key and unique index value
-- [[#5104](https://github.com/seata/seata/pull/5104)] remove the druid dependency in ConnectionProxy
-- [[#5124](https://github.com/seata/seata/pull/5124)] support oracle on delete tccfence logs
+- [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
+- [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
+- [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
+- [[#5089](https://github.com/seata/seata/pull/5089)] optimize the check of the delay value of the TCC fence log clean task
+- [[#5243](https://github.com/seata/seata/pull/5243)] optimize kryo 5.4.0 optimize compatibility with jdk17
+- [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
+- [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
+- [[#5273](https://github.com/seata/seata/pull/5273)] Optimize the compilation configuration of the `protobuf-maven-plugin` plug-in to solve the problem of too long command lines in higher versions.
+- [[#5303](https://github.com/seata/seata/pull/5303)] remove startup script the -Xmn configuration
+- [[#5325](https://github.com/seata/seata/pull/5325)] add store mode,config type and registry type log info
+- [[#5315](https://github.com/seata/seata/pull/5315)] optimize the log of SPI
+- [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
 
+### security:
+- [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
 
 ### test:
-- [[#4411](https://github.com/seata/seata/pull/4411)] add UT for oracle in AT mode
-- [[#4794](https://github.com/seata/seata/pull/4794)] try to fix the test `DataSourceProxyTest.getResourceIdTest()`
-- [[#5101](https://github.com/seata/seata/pull/5101)] fix ClassNotFoundException during the zk unit test
+- [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
-- [tuwenlin](https://github.com/tuwenlin)
-- [lcmvs](https://github.com/lcmvs)
-- [wangliang181230](https://github.com/wangliang181230)
-- [a364176773](https://github.com/a364176773)
-- [AlexStocks](https://github.com/AlexStocks)
-- [liujunlin5168](https://github.com/liujunlin5168)
-- [pengten](https://github.com/pengten)
-- [liuqiufeng](https://github.com/liuqiufeng)
-- [yujianfei1986](https://github.com/yujianfei1986)
-- [Bughue](https://github.com/Bughue)
-- [AlbumenJ](https://github.com/AlbumenJ)
-- [doubleDimple](https://github.com/doubleDimple)
-- [jsbxyyx](https://github.com/jsbxyyx)
-- [tuwenlin](https://github.com/tuwenlin)
+- [xssdpgy](https://github.com/xssdpgy)
+- [albumenj](https://github.com/albumenj)
+- [PeppaO](https://github.com/PeppaO)
+- [yuruixin](https://github.com/yuruixin)
+- [dmego](https://github.com/dmego)
 - [CrazyLionLi](https://github.com/JavaLionLi)
-- [whxxxxx](https://github.com/whxxxxx)
-- [renliangyu857](https://github.com/renliangyu857)
-- [neillee95](https://github.com/neillee95)
-- [crazy-sheep](https://github.com/crazy-sheep)
-- [zhangzq7](https://github.com/zhangzq7)
-- [l81893521](https://github.com/l81893521)
-- [zhuyoufeng](https://github.com/zhuyoufeng)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [Bughue](https://github.com/Bughue)
+- [pengten](https://github.com/pengten)
+- [wangliang181230](https://github.com/wangliang181230)
+- [GoodBoyCoder](https://github.com/GoodBoyCoder)
+- [a364176773](https://github.com/a364176773)
+- [isharpever](https://github.com/isharpever)
+- [ZhangShiYeChina](https://github.com/ZhangShiYeChina)
+- [mxsm](https://github.com/mxsm)
+- [l81893521](https://github.com/l81893521)
+- [liuqiufeng](https://github.com/liuqiufeng)
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

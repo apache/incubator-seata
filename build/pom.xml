@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.6.0-SNAPSHOT</revision>
+        <revision>1.7.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -73,8 +73,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.4.13</spring-boot.version>
-        <spring-framework.version>5.3.18</spring-framework.version>
+        <spring-boot.version>2.5.13</spring-boot.version>
+        <spring-framework.version>5.3.20</spring-framework.version>
+
+        <!-- For test -->
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit-platform.version>1.8.2</junit-platform.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
@@ -159,6 +163,11 @@
                     <groupId>org.xolstice.maven.plugins</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
                     <version>${protobuf-maven-plugin.version}</version>
+                    <configuration>
+                        <!-- Solve the problem that protobuf compilation fails due to too long command line under the window operating system,
+                        ref: https://www.xolstice.org/protobuf-maven-plugin/usage.html -->
+                        <useArgumentFile>true</useArgumentFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.mycila</groupId>

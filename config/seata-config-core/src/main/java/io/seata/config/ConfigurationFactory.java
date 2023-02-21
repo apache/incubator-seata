@@ -69,10 +69,12 @@ public final class ConfigurationFactory {
                 LOGGER.info("load Configuration from :{}", extConfiguration == null ?
                     configuration.getClass().getSimpleName() : "Spring Configuration");
             }
-        } catch (EnhancedServiceNotFoundException ignore) {
-
+        } catch (EnhancedServiceNotFoundException e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.warn("failed to load extConfiguration: {}", e.getMessage(), e);
+            }
         } catch (Exception e) {
-            LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
+            LOGGER.error("failed to load extConfiguration: {}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
     }
@@ -102,7 +104,7 @@ public final class ConfigurationFactory {
         String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                 ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                         + ConfigurationKeys.FILE_ROOT_TYPE);
-
+        LOGGER.info("use configuration center type: {}", configTypeName);
         if (StringUtils.isBlank(configTypeName)) {
             throw new NotSupportYetException("config type can not be null");
         }
