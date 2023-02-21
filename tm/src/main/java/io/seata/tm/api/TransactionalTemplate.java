@@ -202,8 +202,9 @@ public class TransactionalTemplate {
             throws TransactionalExecutor.ExecutionException, TransactionException {
         if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
-            LOGGER.info("TM detected timeout, xid = {}", tx.getXid());
-            tx.rollback();
+            Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
+                String.format("client detected transaction timeout before commit, so change to rollback, xid = %s", tx.getXid()));
+            rollbackTransaction(tx, exx);
             return;
         }
 
