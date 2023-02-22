@@ -1,7 +1,7 @@
 name: "test"
 
 on:
-  push:
+  pull_request:
     branches: [ native ]
 
 jobs:
