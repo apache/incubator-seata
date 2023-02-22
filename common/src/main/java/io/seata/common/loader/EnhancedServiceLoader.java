@@ -429,7 +429,7 @@ public class EnhancedServiceLoader {
         private S getExtensionInstance(ExtensionDefinition<S> definition, ClassLoader loader, Class<?>[] argTypes,
                                        Object[] args) {
             if (definition == null) {
-                throw new EnhancedServiceNotFoundException("!not found service provider for : " + type.getName());
+                throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
             if (Scope.SINGLETON.equals(definition.getScope())) {
                 Holder<Object> holder = CollectionUtils.computeIfAbsent(definitionToInstanceMap, definition,
