@@ -79,7 +79,6 @@ public class TableMetaCacheFactory {
      * @param dataSourceProxy
      */
     public static void registerTableMeta(DataSourceProxy dataSourceProxy) {
-        getTableMetaCache(dataSourceProxy.getDbType());
         TableMetaRefreshHolder holder = new TableMetaRefreshHolder(dataSourceProxy);
         TABLE_META_REFRESH_HOLDER_MAP.put(dataSourceProxy.getResourceId(), holder);
     }

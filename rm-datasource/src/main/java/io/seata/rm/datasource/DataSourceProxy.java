@@ -104,10 +104,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * public tableMeta refresh event
+     * publish tableMeta refresh event
      */
     public void tableMetaRefreshEvent() {
-        // todo
+        TableMetaCacheFactory.tableMetaRefreshEvent(this.getResourceId());
     }
 
     /**
