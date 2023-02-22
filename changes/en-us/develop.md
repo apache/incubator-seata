@@ -44,6 +44,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
+- [[#5382](https://github.com/seata/seata/pull/5382)] fix multi spring version test failed
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
