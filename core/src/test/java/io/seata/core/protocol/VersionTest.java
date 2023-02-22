@@ -29,6 +29,10 @@ public class VersionTest {
     public void testConvertVersion() {
         // case: success
         Assertions.assertDoesNotThrow(() -> {
+            long v = Version.convertVersion(Version.getCurrent());
+            Assertions.assertTrue(v > 0);
+        });
+        Assertions.assertDoesNotThrow(() -> {
             long v = Version.convertVersion("1.7.0-SNAPSHOT");
             Assertions.assertEquals(1070000, v);
         });
