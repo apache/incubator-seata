@@ -23,6 +23,7 @@
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
 - [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
+- [[#5145](https://github.com/seata/seata/pull/5145)] 修复saga模式全局事务状态始终为Begin的问题
 
 
 ### optimize:

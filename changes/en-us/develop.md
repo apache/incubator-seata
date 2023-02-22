@@ -23,6 +23,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
 - [[#5321](https://github.com/seata/seata/pull/5321)] fix When the rollback logic on the TC side returns RollbackFailed, the custom FailureHandler is not executed
 - [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
+- [[#5145](https://github.com/seata/seata/pull/5145)] fix global session is always begin in saga mode
 
 
 ### optimize:

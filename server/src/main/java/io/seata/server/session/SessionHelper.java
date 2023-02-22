@@ -153,12 +153,11 @@ public class SessionHelper {
      * End saga global session
      *
      * @param globalSession the global session
-     * @param globalStatus  the global status
      * @throws TransactionException the transaction exception
      */
-    public static void endSagaGlobalSession(GlobalSession globalSession, GlobalStatus globalStatus) throws TransactionException {
-        globalSession.changeGlobalStatus(globalStatus);
-        if (globalStatus == GlobalStatus.Committing) {
+    public static void endSagaGlobalSession(GlobalSession globalSession) throws TransactionException {
+        globalSession.end();
+        if (globalSession.getStatus() == GlobalStatus.Committing) {
             MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Committed, false, false);
         } else {
             MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
