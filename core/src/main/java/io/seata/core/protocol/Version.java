@@ -113,13 +113,18 @@ public class Version {
     }
 
     public static long convertVersion(String version) throws IncompatibleVersionException {
+        if (StringUtils.isBlank(version)) {
+            throw new IllegalArgumentException("The version must not be blank.");
+        }
+
         String[] parts = StringUtils.split(version, '.');
-        long result = 0L;
-        int i = 1;
         int size = parts.length;
         if (size > MAX_VERSION_DOT + 1) {
             throw new IncompatibleVersionException("incompatible version format:" + version);
         }
+
+        long result = 0L;
+        int i = 1;
         size = MAX_VERSION_DOT + 1;
         for (String part : parts) {
             if (StringUtils.isNumeric(part)) {
@@ -140,7 +145,7 @@ public class Version {
         try {
             return convertVersion(version);
         } catch (Exception e) {
-            LOGGER.error("convert version error,version:{}",version,e);
+            LOGGER.error("convert version error,version:{}", version, e);
         }
         return -1;
     }
