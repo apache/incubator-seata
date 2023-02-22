@@ -44,7 +44,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
 
 ### test:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
+- [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
