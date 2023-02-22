@@ -73,7 +73,7 @@ jobs:
           fi
       # step 3 based on java17
       - name: "Publish images to DockerHub based on java17"
-        if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' }}
+        if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
         env:
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
