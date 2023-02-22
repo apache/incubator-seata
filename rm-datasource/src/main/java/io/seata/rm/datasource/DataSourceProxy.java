@@ -19,33 +19,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.Constants;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -58,12 +46,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
 
-    private static final long TABLE_META_REFRESH_INTERVAL_TIME = 1000L;
-    
-    private BlockingQueue<Long> tableMetaRefreshQueue;
-
-    private long lastRefreshTime;
-
     private String resourceGroupId;
 
     private String jdbcUrl;
@@ -75,26 +57,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String userName;
 
     private String version;
-
-    /**
-     * Enable the table meta checker
-     */
-    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
-
-    /**
-     * Table meta checker interval
-     */
-    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
-            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
-
-    private final ScheduledExecutorService tableMetaCheckExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("tableMetaChecker", 1, true));
-
-    private final Executor tableMetaRefreshExecutor = new ThreadPoolExecutor(1, 1,
-            0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("tableMetaRefresh", 1, true));
 
     /**
      * Instantiates a new Data source proxy.
@@ -122,8 +84,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
-        this.tableMetaRefreshQueue = new LinkedBlockingQueue<>();
-        this.lastRefreshTime = System.currentTimeMillis() - TABLE_META_REFRESH_INTERVAL_TIME;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl);
@@ -138,27 +98,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
-        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaCheckExecutor.scheduleAtFixedRate(this::tableMetaRefreshEvent,
-                    0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
-        }
-        tableMetaRefreshExecutor.execute(() -> {
-            while (true) {
-                try {
-                    Long eventTime = tableMetaRefreshQueue.take();
-                    // if it has bean refreshed not long ago, skip
-                    if (eventTime - lastRefreshTime > TABLE_META_REFRESH_INTERVAL_TIME) {
-                        try (Connection connection = dataSource.getConnection()) {
-                            TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType());
-                            tableMetaCache.refresh(connection, DataSourceProxy.this.getResourceId());
-                        }
-                        lastRefreshTime = System.currentTimeMillis();
-                    }
-                } catch (Exception exx) {
-                    LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
-                }
-            }
-        });
+        TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
@@ -167,10 +107,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * public tableMeta refresh event
      */
     public void tableMetaRefreshEvent() {
-        boolean offer = tableMetaRefreshQueue.offer(System.currentTimeMillis());
-        if (!offer) {
-            LOGGER.error("table refresh event offer error:{}", resourceId);
-        }
+        // todo
     }
 
     /**
