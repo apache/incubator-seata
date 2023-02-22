@@ -44,7 +44,8 @@
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
 ### test:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
+- [[#5380](https://github.com/seata/seata/pull/5380)] 修复 UpdateExecutorTest 单测失败问题
+- [[#5382](https://github.com/seata/seata/pull/5382)] 修复多Spring版本测试失败
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
