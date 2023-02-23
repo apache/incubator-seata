@@ -190,7 +190,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
-            Assertions.assertEquals(GlobalStatus.Rollbacking, globalTransaction.getStatus());
+            Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
         });
     }
 
@@ -274,7 +274,7 @@ public class StateMachineDBTests extends AbstractServerTest {
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
             //End with Rollbacked = Finished
-            Assertions.assertEquals(GlobalStatus.Rollbacking, globalTransaction.getStatus());
+            Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
         });
     }
 
