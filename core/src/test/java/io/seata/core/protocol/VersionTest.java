@@ -50,6 +50,12 @@ public class VersionTest {
         });
 
         // case: fail
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Version.convertVersion(null);
+        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            Version.convertVersion("     ");
+        });
         Assertions.assertThrows(IncompatibleVersionException.class, () -> {
             Version.convertVersion("1.7.0.native.rc1-SNAPSHOT");
         });

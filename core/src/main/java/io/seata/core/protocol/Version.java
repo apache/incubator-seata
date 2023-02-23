@@ -36,7 +36,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = "1.7.0-native-rc3-SNAPSHOT";
+    private static final String CURRENT = VersionInfo.VERSION;
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final int MAX_VERSION_DOT = 3;
@@ -113,8 +113,11 @@ public class Version {
     }
 
     public static long convertVersion(String version) throws IncompatibleVersionException {
-        String[] parts = StringUtils.split(version, '.');
+        if (StringUtils.isBlank(version)) {
+            throw new IllegalArgumentException("The version must not be blank.");
+        }
 
+        String[] parts = StringUtils.split(version, '.');
         int size = parts.length;
         if (size > MAX_VERSION_DOT + 1) {
             throw new IncompatibleVersionException("incompatible version format:" + version);
@@ -142,7 +145,7 @@ public class Version {
         try {
             return convertVersion(version);
         } catch (Exception e) {
-            LOGGER.error("convert version error,version:{}",version,e);
+            LOGGER.error("convert version error,version:{}", version, e);
         }
         return -1;
     }
