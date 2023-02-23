@@ -135,6 +135,7 @@ public class SessionHelper {
                 beginTime, retryBranch);
         } else {
             if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Committed);
                 globalSession.end();
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
@@ -205,6 +206,7 @@ public class SessionHelper {
                     beginTime, retryBranch);
         } else {
             if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
                 globalSession.end();
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
