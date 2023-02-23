@@ -43,8 +43,8 @@
     <!-- kafka-appender: off by default -->
     <!--<include resource="logback/kafka-appender.xml"/>-->
 
-    <appender name="METRIC" class="io.seata.server.logging.logback.appender.MetricLogbackAppender"/>
-
+    <!-- metric-appender: off by default -->
+    <!--<include resource="logback/metric-appender.xml"/>-->
 
     <root level="INFO">
         <!-- console-appender -->
@@ -61,7 +61,7 @@
         <!-- kafka-appender: off by default -->
         <!--<appender-ref ref="KAFKA"/>-->
 
-        <!-- metric-appender -->
-        <appender-ref ref="METRIC"/>
+        <!-- metric-appender: off by default -->
+        <!--<appender-ref ref="METRIC"/>-->
     </root>
 </configuration>
