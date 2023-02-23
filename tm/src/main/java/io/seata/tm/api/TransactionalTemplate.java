@@ -156,7 +156,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo          the transaction info
+     * @param txInfo    the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -239,9 +239,29 @@ public class TransactionalTemplate {
                     TransactionalExecutor.Code.RollbackFailure, originalException);
         }
 
-        // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+        //# fix #5231
+        TransactionalExecutor.Code code;
+        switch (tx.getLocalStatus()) {
+            case RollbackFailed:
+            case TimeoutRollbackFailed:
+            case RollbackRetryTimeout:
+                code = TransactionalExecutor.Code.RollbackFailure;
+                break;
+            case Rollbacking:
+            case RollbackRetrying:
+                code = TransactionalExecutor.Code.RollbackRetrying;
+                break;
+            case TimeoutRollbacking:
+            case TimeoutRollbackRetrying:
+            case TimeoutRollbacked:
+                code = TransactionalExecutor.Code.TimeoutRollback;
+                break;
+            case Rollbacked:
+            default:
+                code = TransactionalExecutor.Code.RollbackDone;
+        }
+        throw new TransactionalExecutor.ExecutionException(tx, code, originalException);
+
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
