@@ -65,6 +65,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -337,7 +338,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return false;
                 }
 
-                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+                LOGGER.warn("Global transaction[{}] is timeout and will be rollback,transaction begin time:{} and now:{}", globalSession.getXid(),
+                    DateFormatUtils.ISO_DATE_FORMAT.format(globalSession.getBeginTime()), DateFormatUtils.ISO_DATE_FORMAT.format(System.currentTimeMillis()));
 
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
@@ -383,9 +385,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
-                    // Prevent thread safety issues
-                    SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("Global transaction rollback retry timeout and has removed [{}]", rollbackingSession.getXid());
 
                     SessionHelper.endRollbackFailed(rollbackingSession, true, true);
 
@@ -421,9 +420,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return;
                 }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
-                    // Prevent thread safety issues
-                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("Global transaction commit retry timeout and has removed [{}]", committingSession.getXid());
 
                     // commit retry timeout event
                     SessionHelper.endCommitFailed(committingSession, true, true);
