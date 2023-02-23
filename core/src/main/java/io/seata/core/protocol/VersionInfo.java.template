@@ -13,19 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.tx.api.json;
-
-import java.io.IOException;
+package io.seata.core.protocol;
 
 /**
- * @author leezongjie
- * @author zouwei
+ * The interface VersionInfo.
+ *
+ * @author wang.liang
  */
-public interface JsonParser {
+interface VersionInfo {
 
-    String toJSONString(Object object) throws IOException;
+    String VERSION = "${project.version}";
 
-    <T> T parseObject(String text, Class<T> clazz) throws IOException;
-
-    String getName();
 }

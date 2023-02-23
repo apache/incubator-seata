@@ -82,7 +82,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                            rpcBranchType != null ? rpcBranchType : "AT", previousBranchType);
+                        rpcBranchType != null ? rpcBranchType : BranchType.AT,previousBranchType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);

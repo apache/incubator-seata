@@ -15,19 +15,34 @@
  */
 package io.seata.integration.tx.api.util;
 
-import io.seata.integration.tx.api.json.DefaultJsonParser;
+import java.util.Objects;
+
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.Constants;
+import io.seata.common.DefaultValues;
+import io.seata.config.ConfigurationFactory;
+import io.seata.integration.tx.api.json.JsonParserFactory;
 
 /**
  * @author leezongjie
+ * @author zouwei
  */
 public class JsonUtil {
 
+    private static final String CONFIG_JSON_PARSER_NAME =
+        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
+            DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+
     public static String toJSONString(Object object) {
-        return DefaultJsonParser.get().toJSONString(object);
+        return JsonParserFactory.getInstance(CONFIG_JSON_PARSER_NAME).toJSONString(object);
     }
 
     public static <T> T parseObject(String text, Class<T> clazz) {
-        return DefaultJsonParser.get().parseObject(text, clazz);
+        if (Objects.isNull(text) || Objects.isNull(clazz)) {
+            return null;
+        }
+        String jsonParseName = text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX) ? Constants.JACKSON_JSON_PARSER_NAME
+            : CONFIG_JSON_PARSER_NAME;
+        return JsonParserFactory.getInstance(jsonParseName).parseObject(text, clazz);
     }
-
 }
