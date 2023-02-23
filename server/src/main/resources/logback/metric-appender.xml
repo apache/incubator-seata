@@ -18,5 +18,4 @@
 <included>
     <!-- metric-appender properties -->
     <appender name="METRIC" class="io.seata.server.logging.logback.appender.MetricLogbackAppender"/>
-
 </included>
