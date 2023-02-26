@@ -16,12 +16,11 @@
 package io.seata.rm.tcc.api;
 
 import io.seata.common.Constants;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.integration.tx.api.interceptor.ActionContextUtil;
 import io.seata.integration.tx.api.util.JsonUtil;
-import io.seata.rm.tcc.api.context.ContextStoreManager;
+import io.seata.rm.tcc.api.context.DefaultContextReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,14 +79,7 @@ public final class BusinessActionContextUtil {
         }
         // set updated
         actionContext.setUpdated(true);
-
-        // if delay report, params will be finally reported after phase 1 execution
-        if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
-            return false;
-        }
-
-        // do branch report
-        return reportContext();
+        return true;
     }
 
     /**
@@ -97,9 +89,7 @@ public final class BusinessActionContextUtil {
      */
     public static boolean reportContext() {
         BusinessActionContext context = getContext();
-        ContextStoreManager contextStoreManager = EnhancedServiceLoader.load(ContextStoreManager.class
-                , context.getActionContext(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, String.class));
-        return contextStoreManager.storeContext(context);
+        return DefaultContextReporter.get().report(context);
     }
 
     public static BusinessActionContext getContext() {

@@ -18,22 +18,17 @@ package io.seata.rm.tcc.api.context;
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
- * manage the actionContext store
- * @author pengten
+ * report the actionContext
+ * @author yangwenpeng
  */
-public interface ContextStoreManager {
+public interface ContextReporter {
 
     /**
      * store context
      * @param context the BusinessActionContext
      * @return the boolean
      */
-    boolean storeContext(BusinessActionContext context);
+    boolean report(BusinessActionContext context);
 
-    /**
-     * search context
-     * @param context the BusinessActionContext in TC
-     * @return the boolean
-     */
-    BusinessActionContext searchContext(BusinessActionContext context);
+    boolean isSupport(BusinessActionContext context);
 }

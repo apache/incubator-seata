@@ -1,2 +1,0 @@
-io.seata.rm.tcc.context.ReportContextStoreManager
-io.seata.rm.tcc.context.FenceLogContextStoreManager

@@ -18,6 +18,9 @@ package io.seata.rm.fence;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
+import io.seata.rm.tcc.api.context.DefaultContextSearcher;
+import io.seata.rm.tcc.context.FenceLogContextReporter;
+import io.seata.rm.tcc.context.FenceLogContextSearcher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -46,18 +49,18 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
 
     @Override
     public void afterPropertiesSet() {
-        SpringFenceHandler springFenceHandler = SpringFenceHandler.get();
         if (dataSource != null) {
             // set dataSource
-            springFenceHandler.setDataSource(dataSource);
-            springFenceHandler.init();
+            SpringFenceHandler.setDataSource(dataSource);
+            FenceLogContextReporter.setDataSource(dataSource);
+            FenceLogContextSearcher.setDataSource(dataSource);
             init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
         if (transactionManager != null) {
             // set transaction template
-            springFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
+            SpringFenceHandler.setTransactionTemplate(new TransactionTemplate(transactionManager));
         } else {
             throw new CommonFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
         }

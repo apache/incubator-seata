@@ -23,10 +23,10 @@ import io.seata.core.model.BranchStatus;
 import io.seata.integration.tx.api.util.JsonUtil;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.context.ContextReporter;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
 
 /**
  * report the context to TC
@@ -34,20 +34,20 @@ import java.util.Collections;
  * @author yangwenpeng
  */
 @LoadLevel(name = "tc")
-public class ReportContextStoreManager extends AbstractContextStoreManager {
+public class TcContextReporter implements ContextReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportContextStoreManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TcContextReporter.class);
 
     @Override
-    protected boolean doStore(BusinessActionContext context) {
+    public boolean report(BusinessActionContext context) {
         try {
             // branch report
             DefaultResourceManager.get().branchReport(
-                    context.getBranchType(),
-                    context.getXid(),
-                    context.getBranchId(),
-                    BranchStatus.Registered,
-                    JsonUtil.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context.getActionContext()))
+                context.getBranchType(),
+                context.getXid(),
+                context.getBranchId(),
+                BranchStatus.Registered,
+                JsonUtil.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context.getActionContext()))
             );
             return true;
         } catch (TransactionException e) {
@@ -58,7 +58,7 @@ public class ReportContextStoreManager extends AbstractContextStoreManager {
     }
 
     @Override
-    protected BusinessActionContext doSearch(BusinessActionContext context) {
-        return context;
+    public boolean isSupport(BusinessActionContext context) {
+        return true;
     }
 }

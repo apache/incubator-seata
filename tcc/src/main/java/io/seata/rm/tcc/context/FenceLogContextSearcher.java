@@ -16,51 +16,31 @@
 package io.seata.rm.tcc.context;
 
 import io.seata.common.Constants;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import io.seata.integration.tx.api.fence.store.CommonFenceStore;
 import io.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
 import io.seata.integration.tx.api.util.JsonUtil;
 import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.context.ContextSearcher;
+import java.sql.Connection;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Map;
-
 /**
- * store actionContext in tcc_fence_log
+ * search action context from fenceLog
  *
  * @author yangwenpeng
  */
-@LoadLevel(name = "fence")
-public class FenceLogContextStoreManager extends AbstractContextStoreManager {
+public class FenceLogContextSearcher implements ContextSearcher {
 
     private static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();
 
-    @Override
-    protected boolean doStore(BusinessActionContext context) {
-
-        // save context to fenceLog
-        DataSource dataSource = DefaultCommonFenceHandler.get().getDataSource();
-        Connection connection = null;
-        try {
-            connection = DataSourceUtils.getConnection(dataSource);
-            return COMMON_FENCE_DAO.updateApplicationData(connection, context.getXid(), context.getBranchId()
-                    , JsonUtil.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context.getActionContext())));
-        } finally {
-            if (connection != null) {
-                DataSourceUtils.releaseConnection(connection, dataSource);
-            }
-        }
-    }
+    private static DataSource dataSource;
 
     @Override
-    protected BusinessActionContext doSearch(BusinessActionContext context) {
+    public BusinessActionContext search(BusinessActionContext context) {
         // search tcc context from fenceLog
-        DataSource dataSource = DefaultCommonFenceHandler.get().getDataSource();
         Connection connection = null;
         try {
             connection = DataSourceUtils.getConnection(dataSource);
@@ -79,7 +59,15 @@ public class FenceLogContextStoreManager extends AbstractContextStoreManager {
     }
 
     @Override
-    protected boolean isSupport(BusinessActionContext context) {
+    public boolean isSupport(BusinessActionContext context) {
         return Boolean.TRUE.equals(context.getActionContext(Constants.USE_COMMON_FENCE));
+    }
+
+    public static DataSource getDataSource() {
+        return FenceLogContextSearcher.dataSource;
+    }
+
+    public static void setDataSource(DataSource dataSource) {
+        FenceLogContextSearcher.dataSource = dataSource;
     }
 }

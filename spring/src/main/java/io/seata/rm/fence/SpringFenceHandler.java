@@ -15,6 +15,18 @@
  */
 package io.seata.rm.fence;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -39,30 +51,16 @@ import io.seata.integration.tx.api.fence.store.CommonFenceDO;
 import io.seata.integration.tx.api.fence.store.CommonFenceStore;
 import io.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
 import io.seata.integration.tx.api.remoting.TwoPhaseResult;
-import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 /**
  * Common Fence Handler(idempotent, non_rollback, suspend)
  *
  * @author kaka2code
- * @author yangwenpeng
  */
 public class SpringFenceHandler implements FenceHandler {
 
@@ -70,9 +68,9 @@ public class SpringFenceHandler implements FenceHandler {
 
     private static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();
 
-    private DataSource dataSource;
+    private static DataSource dataSource;
 
-    private TransactionTemplate transactionTemplate;
+    private static TransactionTemplate transactionTemplate;
 
     private static final int MAX_THREAD_CLEAN = 1;
 
@@ -89,39 +87,25 @@ public class SpringFenceHandler implements FenceHandler {
 
     private static ExecutorService logCleanExecutor;
 
-    private FenceHandler fenceHandler;
-
-    private static class SingletonHolder {
-        private static final SpringFenceHandler INSTANCE = new SpringFenceHandler();
-    }
-
-    private SpringFenceHandler() {
-    }
-
-    public void init() {
+    static {
         try {
             initLogCleanExecutor();
+            DefaultCommonFenceHandler.get().setFenceHandler(new SpringFenceHandler());
         } catch (Exception e) {
             LOGGER.error("init fence log clean executor error", e);
         }
-        DefaultCommonFenceHandler.get().setFenceHandler(this);
     }
 
-    public static SpringFenceHandler get() {
-        return SpringFenceHandler.SingletonHolder.INSTANCE;
+    public static DataSource getDataSource() {
+        return SpringFenceHandler.dataSource;
     }
 
-    @Override
-    public DataSource getDataSource() {
-        return this.dataSource;
+    public static void setDataSource(DataSource dataSource) {
+        SpringFenceHandler.dataSource = dataSource;
     }
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
-        this.transactionTemplate = transactionTemplate;
+    public static void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        SpringFenceHandler.transactionTemplate = transactionTemplate;
     }
 
     /**
@@ -156,9 +140,6 @@ public class SpringFenceHandler implements FenceHandler {
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
-            } finally {
-                // save context in the same transaction
-                BusinessActionContextUtil.reportContext();
             }
         });
     }
@@ -166,16 +147,16 @@ public class SpringFenceHandler implements FenceHandler {
     /**
      * common commit method enhanced
      *
-     * @param commitMethod  commit method
-     * @param targetTCCBean target common bean
-     * @param xid           the global transaction id
-     * @param branchId      the branch transaction id
-     * @param args          commit method's parameters
+     * @param commitMethod          commit method
+     * @param targetTCCBean         target common bean
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
+     * @param args                  commit method's parameters
      * @return the boolean
      */
     @Override
     public boolean commitFence(Method commitMethod, Object targetTCCBean,
-                               String xid, Long branchId, Object[] args) {
+                                      String xid, Long branchId, Object[] args) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -205,17 +186,17 @@ public class SpringFenceHandler implements FenceHandler {
     /**
      * Common rollback method enhanced
      *
-     * @param rollbackMethod rollback method
-     * @param targetTCCBean  target tcc bean
-     * @param xid            the global transaction id
-     * @param branchId       the branch transaction id
-     * @param args           rollback method's parameters
-     * @param actionName     the action name
+     * @param rollbackMethod        rollback method
+     * @param targetTCCBean         target tcc bean
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
+     * @param args                  rollback method's parameters
+     * @param actionName            the action name
      * @return the boolean
      */
     @Override
     public boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
-                                 String xid, Long branchId, Object[] args, String actionName) {
+                                        String xid, Long branchId, Object[] args, String actionName) {
         return transactionTemplate.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
@@ -258,7 +239,7 @@ public class SpringFenceHandler implements FenceHandler {
      * @param status   the status
      * @return the boolean
      */
-    private boolean insertCommonFenceLog(Connection conn, String xid, Long branchId, String actionName, Integer status) {
+    private static boolean insertCommonFenceLog(Connection conn, String xid, Long branchId, String actionName, Integer status) {
         CommonFenceDO commonFenceDO = new CommonFenceDO();
         commonFenceDO.setXid(xid);
         commonFenceDO.setBranchId(branchId);
@@ -270,14 +251,14 @@ public class SpringFenceHandler implements FenceHandler {
     /**
      * Update TCC Fence status and invoke target method
      *
-     * @param method        target method
-     * @param targetTCCBean target bean
-     * @param xid           the global transaction id
-     * @param branchId      the branch transaction id
-     * @param status        the tcc fence status
+     * @param method                target method
+     * @param targetTCCBean         target bean
+     * @param xid                   the global transaction id
+     * @param branchId              the branch transaction id
+     * @param status                the tcc fence status
      * @return the boolean
      */
-    private boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
+    private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
                                                              String xid, Long branchId, int status,
                                                              TransactionStatus transactionStatus,
                                                              Object[] args) throws Exception {
@@ -307,11 +288,11 @@ public class SpringFenceHandler implements FenceHandler {
      * @param branchId the branch transaction id
      * @return the boolean
      */
-    public boolean deleteFence(String xid, Long branchId) {
+    public static boolean deleteFence(String xid, Long branchId) {
         return transactionTemplate.execute(status -> {
             boolean ret = false;
             try {
-                Connection conn = DataSourceUtils.getConnection(this.getDataSource());
+                Connection conn = DataSourceUtils.getConnection(dataSource);
                 ret = COMMON_FENCE_DAO.deleteCommonFenceDO(conn, xid, branchId);
             } catch (RuntimeException e) {
                 status.setRollbackOnly();
@@ -329,7 +310,7 @@ public class SpringFenceHandler implements FenceHandler {
      */
     @Override
     public int deleteFenceByDate(Date datetime) {
-        DataSource dataSource = this.getDataSource();
+        DataSource dataSource = SpringFenceHandler.getDataSource();
         Connection connection = null;
         int total = 0;
         try {
@@ -365,17 +346,13 @@ public class SpringFenceHandler implements FenceHandler {
         return false;
     }
 
-    private synchronized void initLogCleanExecutor() {
-        if (logCleanExecutor == null) {
-            logCleanExecutor = new ThreadPoolExecutor(MAX_THREAD_CLEAN, MAX_THREAD_CLEAN, Integer.MAX_VALUE,
-                    TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory("fenceLogCleanThread", MAX_THREAD_CLEAN, true)
-            );
-        }
-        if (fenceLogCleanRunnable == null) {
-            fenceLogCleanRunnable = new FenceLogCleanRunnable(this);
-            logCleanExecutor.submit(fenceLogCleanRunnable);
-        }
+    private static void initLogCleanExecutor() {
+        logCleanExecutor = new ThreadPoolExecutor(MAX_THREAD_CLEAN, MAX_THREAD_CLEAN, Integer.MAX_VALUE,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("fenceLogCleanThread", MAX_THREAD_CLEAN, true)
+        );
+        fenceLogCleanRunnable = new FenceLogCleanRunnable();
+        logCleanExecutor.submit(fenceLogCleanRunnable);
     }
 
     private static void addToLogCleanQueue(final String xid, final long branchId) {
@@ -395,20 +372,13 @@ public class SpringFenceHandler implements FenceHandler {
      * @see CommonFenceConstant
      */
     private static class FenceLogCleanRunnable implements Runnable {
-
-        private final SpringFenceHandler springFenceHandler;
-
-        public FenceLogCleanRunnable(SpringFenceHandler springFenceHandler) {
-            this.springFenceHandler = springFenceHandler;
-        }
-
         @Override
         public void run() {
             while (true) {
 
                 try {
                     FenceLogIdentity logIdentity = LOG_QUEUE.take();
-                    boolean ret = springFenceHandler.deleteFence(logIdentity.getXid(), logIdentity.getBranchId());
+                    boolean ret = SpringFenceHandler.deleteFence(logIdentity.getXid(), logIdentity.getBranchId());
                     if (!ret) {
                         LOGGER.error("delete fence log failed, xid: {}, branchId: {}", logIdentity.getXid(), logIdentity.getBranchId());
                     }

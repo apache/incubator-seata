@@ -23,7 +23,6 @@ import io.seata.common.executor.Callback;
 /**
  * the default fenceHandler, the upper layer only uses this class to access FenceHandler.
  * @author leezongjie
- * @date 2022/12/17
  */
 public class DefaultCommonFenceHandler implements FenceHandler {
 
@@ -31,9 +30,6 @@ public class DefaultCommonFenceHandler implements FenceHandler {
 
     private static class SingletonHolder {
         private static final DefaultCommonFenceHandler INSTANCE = new DefaultCommonFenceHandler();
-    }
-
-    private DefaultCommonFenceHandler() {
     }
 
     public static DefaultCommonFenceHandler get() {

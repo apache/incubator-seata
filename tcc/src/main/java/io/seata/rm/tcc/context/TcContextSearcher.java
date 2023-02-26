@@ -13,24 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.tx.api.fence;
+package io.seata.rm.tcc.context;
 
-import io.seata.common.executor.Callback;
-
-import java.lang.reflect.Method;
-import java.util.Date;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.context.ContextSearcher;
 
 /**
- * @author leezongjie
+ * search action context from tc
+ *
+ * @author yangwenpeng
  */
-public interface FenceHandler {
+public class TcContextSearcher implements ContextSearcher {
+    @Override
+    public BusinessActionContext search(BusinessActionContext context) {
+        return context;
+    }
 
-    Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback);
-
-    boolean commitFence(Method commitMethod, Object targetTCCBean, String xid, Long branchId, Object[] args);
-
-    boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, String xid, Long branchId, Object[] args, String actionName);
-
-    int deleteFenceByDate(Date datetime);
-
+    @Override public boolean isSupport(BusinessActionContext context) {
+        return true;
+    }
 }

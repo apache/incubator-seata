@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.seata.common.Constants;
-import io.seata.common.ContextStoreConstant;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.SkipCallbackWrapperException;
 import io.seata.common.executor.Callback;
@@ -82,10 +81,6 @@ public class ActionInterceptorHandler {
         //Set the action name
         String actionName = businessActionParam.getActionName();
         actionContext.setActionName(actionName);
-        //Set the delay report
-        boolean isDelayReport = CONTEXT_STORE_TYPE.equals(ContextStoreConstant.STORE_TYPE_FENCE) && businessActionParam.getUseCommonFence()
-                || businessActionParam.getDelayReport();
-        actionContext.setDelayReport(isDelayReport);
         //Set branch type
         actionContext.setBranchType(businessActionParam.getBranchType());
 
@@ -129,7 +124,7 @@ public class ActionInterceptorHandler {
         } finally {
             try {
                 //to report business action context finally if the actionContext.getUpdated() is true
-                BusinessActionContextUtil.reportContext();
+                report();
             } finally {
                 if (previousActionContext != null) {
                     // recovery the previous action context
@@ -238,7 +233,7 @@ public class ActionInterceptorHandler {
     protected void initFrameworkContext(Map<String, Object> context) {
         try {
             context.put(Constants.HOST_NAME, NetUtil.getLocalIp());
-            context.put(Constants.TCC_ACTION_CONTEXT_STORE_TYPE, CONTEXT_STORE_TYPE);
+            context.put(Constants.TCC_ACTION_CONTEXT_REPORT_TYPE, CONTEXT_STORE_TYPE);
         } catch (Throwable t) {
             LOGGER.warn("getLocalIP error", t);
         }
@@ -295,6 +290,16 @@ public class ActionInterceptorHandler {
             }
         }
         return context;
+    }
+
+    /**
+     * report context
+     */
+    private void report() {
+        BusinessActionContext context = BusinessActionContextUtil.getContext();
+        if (!context.getActionContextReported()) {
+            BusinessActionContextUtil.reportContext();
+        }
     }
 
 }
