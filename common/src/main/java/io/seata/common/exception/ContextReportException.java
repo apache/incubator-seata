@@ -20,7 +20,7 @@ package io.seata.common.exception;
  *
  * @author yangwenpeng
  */
-public class ContextReportException extends FrameworkException{
+public class ContextReportException extends FrameworkException {
 
     public ContextReportException() {
     }
