@@ -203,5 +203,5 @@ public interface Constants {
     /**
      * where is the tcc actionContext stored
      */
-    String TCC_ACTION_CONTEXT_REPORT_TYPE = "actionContextStoreType";
+    String TCC_ACTION_CONTEXT_REPORT_TYPE = "actionContextReportType";
 }
