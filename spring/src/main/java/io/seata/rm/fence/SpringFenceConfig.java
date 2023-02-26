@@ -18,7 +18,6 @@ package io.seata.rm.fence;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
-import io.seata.rm.tcc.api.context.DefaultContextSearcher;
 import io.seata.rm.tcc.context.FenceLogContextReporter;
 import io.seata.rm.tcc.context.FenceLogContextSearcher;
 import org.springframework.beans.factory.InitializingBean;
