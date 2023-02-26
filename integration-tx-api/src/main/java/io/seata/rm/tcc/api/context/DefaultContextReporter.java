@@ -20,7 +20,6 @@ import io.seata.common.ContextStoreConstant;
 import io.seata.common.exception.ContextReportException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
