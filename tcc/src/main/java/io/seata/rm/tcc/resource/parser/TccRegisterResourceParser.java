@@ -41,52 +41,43 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
 
     @Override
     public void registerResource(Object target) {
-        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, target.toString());
-        if (isTxRemotingBean) {
-            RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
-            if (remotingDesc != null) {
-                if (remotingDesc.isService()) {
-                    try {
-                        //service bean, registry resource
-                        Class<?> serviceClass = remotingDesc.getServiceClass();
-                        Set<Method> methods = new HashSet<>(Arrays.asList(serviceClass.getMethods()));
-                        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceClass);
-                        if (interfaceClasses != null) {
-                            for (Class<?> interClass : interfaceClasses) {
-                                methods.addAll(Arrays.asList(interClass.getMethods()));
-                            }
-                        }
-                        Object targetBean = remotingDesc.getTargetBean();
-                        for (Method m : methods) {
-                            TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
-                            if (twoPhaseBusinessAction != null) {
-                                TCCResource tccResource = new TCCResource();
-                                tccResource.setActionName(twoPhaseBusinessAction.name());
-                                tccResource.setTargetBean(targetBean);
-                                tccResource.setPrepareMethod(m);
-                                tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                                tccResource.setCommitMethod(serviceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
-                                        twoPhaseBusinessAction.commitArgsClasses()));
-                                tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                                tccResource.setRollbackMethod(serviceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
-                                        twoPhaseBusinessAction.rollbackArgsClasses()));
-                                // set argsClasses
-                                tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
-                                tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
-                                // set phase two method's keys
-                                tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
-                                        twoPhaseBusinessAction.commitArgsClasses()));
-                                tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
-                                        twoPhaseBusinessAction.rollbackArgsClasses()));
-                                //registry tcc resource
-                                DefaultResourceManager.get().registerResource(tccResource);
-                            }
-                        }
-                    } catch (Throwable t) {
-                        throw new FrameworkException(t, "parser remoting service error");
-                    }
+        try {
+            //service bean, registry resource
+            Class<?> serviceClass = target.getClass();
+            Set<Method> methods = new HashSet<>(Arrays.asList(serviceClass.getMethods()));
+            Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceClass);
+            if (interfaceClasses != null) {
+                for (Class<?> interClass : interfaceClasses) {
+                    methods.addAll(Arrays.asList(interClass.getMethods()));
                 }
             }
+            for (Method m : methods) {
+                TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
+                if (twoPhaseBusinessAction != null) {
+                    TCCResource tccResource = new TCCResource();
+                    tccResource.setActionName(twoPhaseBusinessAction.name());
+                    tccResource.setTargetBean(target);
+                    tccResource.setPrepareMethod(m);
+                    tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
+                    tccResource.setCommitMethod(serviceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                            twoPhaseBusinessAction.commitArgsClasses()));
+                    tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
+                    tccResource.setRollbackMethod(serviceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                            twoPhaseBusinessAction.rollbackArgsClasses()));
+                    // set argsClasses
+                    tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
+                    tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
+                    // set phase two method's keys
+                    tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                            twoPhaseBusinessAction.commitArgsClasses()));
+                    tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                            twoPhaseBusinessAction.rollbackArgsClasses()));
+                    //registry tcc resource
+                    DefaultResourceManager.get().registerResource(tccResource);
+                }
+            }
+        } catch (Throwable t) {
+            throw new FrameworkException(t, "parser remoting service error");
         }
     }
 
