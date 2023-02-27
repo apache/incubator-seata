@@ -80,7 +80,6 @@
         <xstream.version>1.4.19</xstream.version>
 
         <jwt.version>0.10.5</jwt.version>
-        <jackson.databind.version>2.13.4.1</jackson.databind.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.2.9</logback.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
@@ -615,11 +614,6 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
