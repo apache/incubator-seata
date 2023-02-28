@@ -34,8 +34,6 @@ import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
 
-import com.google.common.collect.Interner;
-import com.google.common.collect.Interners;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
@@ -58,8 +56,6 @@ public class TableRecords implements java.io.Serializable {
     private String tableName;
 
     private List<Row> rows = new ArrayList<Row>();
-
-    private static final Interner<String> TABLE_NAME_POOL = Interners.newWeakInterner();
 
     /**
      * Gets table name.

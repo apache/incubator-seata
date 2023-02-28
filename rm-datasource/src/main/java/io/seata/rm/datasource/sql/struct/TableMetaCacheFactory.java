@@ -37,6 +37,8 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENAB
 import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
+ * Table meta cache factory
+ *
  * @author guoyao
  */
 public class TableMetaCacheFactory {
@@ -48,6 +50,8 @@ public class TableMetaCacheFactory {
     private static final Map<String, TableMetaRefreshHolder> TABLE_META_REFRESH_HOLDER_MAP = new ConcurrentHashMap<>();
 
     private static final long TABLE_META_REFRESH_INTERVAL_TIME = 1000L;
+
+    private static final int MAX_QUEUE_SIZE = 2000;
 
     /**
      * Enable the table meta checker
@@ -101,12 +105,12 @@ public class TableMetaCacheFactory {
 
 
         private final Executor tableMetaRefreshExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue(), new NamedThreadFactory("tableMetaRefresh", 1, true));
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("tableMetaRefresh", 1, true));
 
         TableMetaRefreshHolder(DataSourceProxy dataSource) {
             this.dataSource = dataSource;
             this.lastRefreshFinishTime = System.currentTimeMillis() - TABLE_META_REFRESH_INTERVAL_TIME;
-            this.tableMetaRefreshQueue = new LinkedBlockingQueue<>();
+            this.tableMetaRefreshQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
             tableMetaRefreshExecutor.execute(() -> {
                 while (true) {
