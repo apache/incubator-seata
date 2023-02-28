@@ -25,6 +25,7 @@
 - [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
 - [[#5413](https://github.com/seata/seata/pull/5413)] 修复 arm64平台下的JDK和Spring兼容问题
+- [[#5415](https://github.com/seata/seata/pull/5415)] 修复客户侧事务提交前超时未执行hook和failureHandler的问题
 
 
 ### optimize:
