@@ -291,6 +291,9 @@
                         <exclude>**/antlr/mysql/parser/*.*</exclude>
                         <exclude>**/antlr/mysql/antlr/*.*</exclude>
                         <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
+                        <exclude>**/antlr/oracle/parser/*.*</exclude>
+                        <exclude>**/antlr/oracle/antlr/*.*</exclude>
+                        <exclude>**/antlr/oracle/stream/ANTLRNoCaseStringStream.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>

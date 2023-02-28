@@ -75,4 +75,24 @@ public class AntlrOracleSelectRecognizer implements SQLSelectRecognizer {
     public String getWhereCondition() {
         return oracleContext.getWhereCondition();
     }
+
+    @Override
+    public String getLimitCondition() {
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
 }

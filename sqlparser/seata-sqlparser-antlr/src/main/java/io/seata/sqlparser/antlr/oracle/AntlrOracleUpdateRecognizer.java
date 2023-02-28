@@ -22,6 +22,8 @@ import io.seata.sqlparser.antlr.oracle.listener.UpdateSpecificationSqlListener;
 import io.seata.sqlparser.antlr.oracle.parser.OracleLexer;
 import io.seata.sqlparser.antlr.oracle.parser.OracleParser;
 import io.seata.sqlparser.antlr.oracle.stream.ANTLRNoCaseStringStream;
+import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -88,6 +90,12 @@ public class AntlrOracleUpdateRecognizer implements SQLUpdateRecognizer {
         return updateColumnValues.stream().map(updateValues -> updateValues.getUpdateValue()).collect(Collectors.toList());
     }
 
+    @Override
+    public List<String> getUpdateColumnsIsSimplified() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, JdbcConstants.ORACLE);
+    }
+
 
     @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
@@ -97,5 +105,25 @@ public class AntlrOracleUpdateRecognizer implements SQLUpdateRecognizer {
     @Override
     public String getWhereCondition() {
         return oracleContext.getWhereCondition();
+    }
+
+    @Override
+    public String getLimitCondition() {
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
     }
 }

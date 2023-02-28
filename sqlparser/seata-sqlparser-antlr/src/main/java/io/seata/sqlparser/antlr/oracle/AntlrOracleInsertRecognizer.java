@@ -21,6 +21,8 @@ import io.seata.sqlparser.antlr.oracle.parser.OracleLexer;
 import io.seata.sqlparser.antlr.oracle.parser.OracleParser;
 import io.seata.sqlparser.antlr.oracle.stream.ANTLRNoCaseStringStream;
 import io.seata.sqlparser.antlr.oracle.visitor.InsertStatementSqlVisitor;
+import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.ArrayList;
@@ -101,5 +103,11 @@ public class AntlrOracleInsertRecognizer implements SQLInsertRecognizer {
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsIsSimplified() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, JdbcConstants.ORACLE);
     }
 }
