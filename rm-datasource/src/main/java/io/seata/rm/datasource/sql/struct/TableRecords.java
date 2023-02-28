@@ -33,7 +33,6 @@ import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
