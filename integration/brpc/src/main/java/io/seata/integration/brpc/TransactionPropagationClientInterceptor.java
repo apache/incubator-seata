@@ -15,65 +15,60 @@
  */
 package io.seata.integration.brpc;
 
-import com.baidu.brpc.RpcContext;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.baidu.brpc.interceptor.AbstractInterceptor;
 import com.baidu.brpc.interceptor.InterceptorChain;
 import com.baidu.brpc.protocol.Request;
 import com.baidu.brpc.protocol.Response;
-import io.seata.core.context.RootContext;
+import io.seata.integration.rpc.core.ConsumerRpcFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * load SEATA xid for brpc request
  *
  * @author mxz0828@163.com
  */
-public class TransactionPropagationClientInterceptor extends AbstractInterceptor {
+public class TransactionPropagationClientInterceptor extends AbstractInterceptor implements ConsumerRpcFilter<Request> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationClientInterceptor.class);
 
     @Override
     public void aroundProcess(Request brpcRequest, Response brpcResponse, InterceptorChain chain) throws Exception {
 
-        String xid = RootContext.getXID();
-        String rpcXid = getRpcXid();
-        Map<String, Object> kvAttachment = brpcRequest.getKvAttachment();
+        Map<String, String> rootContexts = getRootContexts();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("SEATA-BRPC[{}]: xid in RootContext[{}] xid in RpcContext[{}]", RootContext.getBranchType(), xid, rpcXid);
+            LOGGER.debug("SEATA-BRPC context:{}", getJsonContext(rootContexts));
         }
 
-        if (null != xid) {
-            if (null == kvAttachment) {
-                kvAttachment = new HashMap<>();
-            }
-            kvAttachment.put(RootContext.KEY_XID, xid);
-            if (null != RootContext.getBranchType()) {
-                kvAttachment.put(RootContext.KEY_BRANCH_TYPE, RootContext.getBranchType().name());
-            }
-            brpcRequest.setKvAttachment(kvAttachment);
+        if (null != getXidFromRootContexts(rootContexts)) {
+            bindContextsToRequest(brpcRequest, rootContexts);
         }
 
         try {
             chain.intercept(brpcRequest, brpcResponse);
         } finally {
-            Map<String, Object> requestAttachment = brpcRequest.getKvAttachment();
-            if (null != requestAttachment) {
-                requestAttachment.remove(RootContext.KEY_XID);
-                requestAttachment.remove(RootContext.KEY_BRANCH_TYPE);
-            }
+            cleanRequestContexts(brpcRequest, rootContexts);
         }
     }
 
-    private String getRpcXid() {
-        RpcContext context = RpcContext.getContext();
-        Map<String, Object> requestKvAttachmentMap = context.getRequestKvAttachment();
-        if (null == requestKvAttachmentMap) {
-            return null;
+    @Override
+    public void bindContextToRequest(Request rpcRequest, String key, String value) {
+        Map<String, Object> kvAttachment = rpcRequest.getKvAttachment();
+        if (null == kvAttachment) {
+            kvAttachment = new HashMap<>();
+            rpcRequest.setKvAttachment(kvAttachment);
         }
-        return (String) requestKvAttachmentMap.get(RootContext.KEY_XID);
+        kvAttachment.put(key, value);
+    }
+
+    @Override
+    public void cleanRequestContext(Request rpcRequest, String key) {
+        Map<String, Object> requestAttachment = rpcRequest.getKvAttachment();
+        if (null != requestAttachment) {
+            requestAttachment.remove(key);
+        }
     }
 }
