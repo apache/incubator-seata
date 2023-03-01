@@ -32,7 +32,6 @@ import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
