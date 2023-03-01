@@ -41,6 +41,7 @@
         <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
+        <module>integration/rpc-core</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
