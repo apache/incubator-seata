@@ -432,9 +432,9 @@ public class EnhancedServiceLoader {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
             int state;
-            if (BitUtils.isSetBit(state = definition.getState(),Constants.DISABLE_EXTENSION_DEFINITION)){
-                state = BitUtils.unSetBit(state,Constants.DISABLE_EXTENSION_DEFINITION);
-                state = BitUtils.setBit(state,Constants.ACTIVE_EXTENSION_DEFINITION);
+            if (BitUtils.isSetBit(state = definition.getState(), Constants.DISABLE_EXTENSION_DEFINITION)) {
+                state = BitUtils.unSetBit(state, Constants.DISABLE_EXTENSION_DEFINITION);
+                state = BitUtils.setBit(state, Constants.ACTIVE_EXTENSION_DEFINITION);
                 definition.setState(state);
             }
 
