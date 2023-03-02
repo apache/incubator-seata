@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.google.common.eventbus.Subscribe;
+import io.seata.core.event.ExceptionEvent;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.registry.Registry;
@@ -198,6 +199,13 @@ public class MetricsSubscriber {
         if (registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
+    }
+
+
+    @Subscribe
+    public void exceptionEventForMetrics(ExceptionEvent event) {
+        registry.getSummary(MeterIdConstants.SUMMARY_EXP
+                .withTag(APP_ID_KEY, event.getName())).increase(1);
     }
 
     @Override
