@@ -20,6 +20,7 @@
 - [[#5299](https://github.com/seata/seata/pull/5299)] 修复TC端重试回滚或重试提交超时GlobalSession的删除问题
 - [[#5307](https://github.com/seata/seata/pull/5307)] 修复生成update前后镜像sql不对关键字转义的bug
 - [[#5311](https://github.com/seata/seata/pull/5311)] 移除基于文件存储恢复时的RollbackRetryTimeout事务
+- [[#4734](https://github.com/seata/seata/pull/4734)] 修复AT模式下新增字段产生的字段找不到
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
 - [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
@@ -44,7 +45,8 @@
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
 ### test:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
+- [[#5380](https://github.com/seata/seata/pull/5380)] 修复 UpdateExecutorTest 单测失败问题
+- [[#5382](https://github.com/seata/seata/pull/5382)] 修复多Spring版本测试失败
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
