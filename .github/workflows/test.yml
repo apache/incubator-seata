@@ -61,7 +61,7 @@ jobs:
       matrix:
         java: [ 17 ]
         springboot: [
-          3.0.0 -Dspring-framework.version=6.0.2 -Dspring-boot-for-server.version=2.5.13 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22,
+          3.0.0 -Dspring-framework.version=6.0.4 -Dspring-boot-for-server.version=2.5.13 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22,
           3.0.3 -Dspring-framework.version=6.0.5 -Dspring-boot-for-server.version=2.5.13 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22
         ]
     steps:
