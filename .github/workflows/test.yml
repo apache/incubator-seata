@@ -14,7 +14,7 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
         springboot: [
-          2.7.6          -Dspring-framework.version=5.3.24,
+          2.7.9          -Dspring-framework.version=5.3.25,
           2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,
@@ -61,7 +61,8 @@ jobs:
       matrix:
         java: [ 17 ]
         springboot: [
-          3.0.0 -Dspring-framework.version=6.0.2 -Dspring-boot-for-server.version=2.4.13 -Dspring-framework-for-server.version=5.3.18 -Dkotlin-maven-plugin.version=1.7.22
+          3.0.0 -Dspring-framework.version=6.0.2 -Dspring-boot-for-server.version=2.5.13 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22,
+          3.0.3 -Dspring-framework.version=6.0.5 -Dspring-boot-for-server.version=2.5.13 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22
         ]
     steps:
       # step 1
@@ -88,7 +89,7 @@ jobs:
       fail-fast: false
       matrix:
         springboot: [
-          2.7.6          -Dspring-framework.version=5.3.24,
+          2.7.9          -Dspring-framework.version=5.3.25,
           2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,

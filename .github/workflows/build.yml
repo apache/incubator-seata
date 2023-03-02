@@ -48,14 +48,15 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up QEMU
+      - name: "Checkout"
+        uses: actions/checkout@v2
+      - name: "Set up QEMU"
         id: qemu
         uses: docker/setup-qemu-action@v1
-      - name: Build arm-binary
+      - name: "Build arm-binary"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
             apt-get install maven -y && \
-            mvn -Prelease-seata -Dmaven.test.skip=true clean install -U'
+            mvn -Prelease-seata -DskipTests clean install -U'
