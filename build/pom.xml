@@ -73,7 +73,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.5.13</spring-boot.version>
+        <spring-boot.version>2.5.14</spring-boot.version>
         <spring-framework.version>5.3.20</spring-framework.version>
 
         <!-- For test -->
@@ -126,6 +126,7 @@
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
+        <image.name>${IMAGE_NAME}</image.name>
         <image.tags>latest</image.tags>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
@@ -300,9 +301,6 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
-            <properties>
-                <image.tags>${project.version},latest</image.tags>
-            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
