@@ -15,6 +15,8 @@
  */
 package io.seata.common.loader;
 
+import io.seata.common.Constants;
+import io.seata.common.util.BitUtils;
 import io.seata.common.util.StringUtils;
 
 /**
@@ -29,6 +31,7 @@ final class ExtensionDefinition<S> {
     private final Class<S> serviceClass;
     private final Integer order;
     private final Scope scope;
+    private int state;
 
     public Integer getOrder() {
         return this.order;
@@ -47,6 +50,7 @@ final class ExtensionDefinition<S> {
         this.order = order;
         this.scope = scope;
         this.serviceClass = clazz;
+        this.state = BitUtils.setBit(0, Constants.ACTIVE_EXTENSION_DEFINITION);
     }
 
     @Override
@@ -57,6 +61,7 @@ final class ExtensionDefinition<S> {
         result = prime * result + ((serviceClass == null) ? 0 : serviceClass.hashCode());
         result = prime * result + ((order == null) ? 0 : order.hashCode());
         result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+        result = prime * result + state;
         return result;
     }
 
@@ -82,10 +87,21 @@ final class ExtensionDefinition<S> {
         if (!order.equals(other.order)) {
             return false;
         }
+        if (state != other.state) {
+            return false;
+        }
         return scope.equals(other.scope);
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
     }
 }

@@ -166,4 +166,14 @@ public interface Constants {
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
 
+    /**
+     * The constant ACTIVE_EXTENSION_DEFINITION
+     */
+    int ACTIVE_EXTENSION_DEFINITION = 1 << 1;
+
+    /**
+     * The constant DISABLE_EXTENSION_DEFINITION
+     */
+    int DISABLE_EXTENSION_DEFINITION = 1 << 2;
+
 }

@@ -133,4 +133,12 @@ public class EnhancedServiceLoaderTest {
         });
     }
 
+
+    @Test
+    public void test() {
+        Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
+        EnhancedServiceLoader.unload(Hello.class,"EnglishHello");
+        englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
+    }
+
 }
