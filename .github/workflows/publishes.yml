@@ -32,7 +32,11 @@ jobs:
           server-username: OSSRH_USERNAME
           server-password: OSSRH_PASSWORD
 
-      # step 3 for type=OSSRH
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+
+      # step 4 for type=OSSRH
       - name: "Import GPG-SECRET-KEY, Package and Publish-To-OSSRH"
         if: matrix.type == 'OSSRH'
         env:
