@@ -59,4 +59,5 @@ jobs:
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
             apt-get install maven -y && \
+            mvn -version && \
             mvn -Prelease-seata -DskipTests clean install -U'
