@@ -7,8 +7,8 @@ Add changes here for all PR submitted to the develop branch.
 
 ### bugfix:
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
-- [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
-- [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
+- [[#5021](https://github.com/seata/seata/pull/5201)] fix JDK Reflection for Spring origin proxy failed in JDK17
+- [[#5023](https://github.com/seata/seata/pull/5203)] fix `seata-core` dependency transitive conflict in `seata-dubbo`
 - [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
 - [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
