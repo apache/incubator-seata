@@ -40,6 +40,7 @@
 - [[#5325](https://github.com/seata/seata/pull/5325)] 添加配置中心、注册中心类型以及存储模式日志信息
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
+- [[#5414](https://github.com/seata/seata/pull/5414)] 优化事务失败处理 handler
 
 
 ### security:
