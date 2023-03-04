@@ -24,6 +24,7 @@
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
 - [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
+- [[#5413](https://github.com/seata/seata/pull/5413)] 修复 arm64平台下的JDK和Spring兼容问题
 
 
 ### optimize:
