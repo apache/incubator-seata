@@ -28,6 +28,48 @@
     <name>seata-server ${project.version}</name>
     <description>server for Seata built with Maven</description>
 
+    <properties>
+        <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
+        <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-framework-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework-for-server.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-for-server.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-framework-bom</artifactId>
+                    </exclusion>
+                </exclusions>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- springboot web -->
         <dependency>
@@ -247,7 +289,7 @@
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
-                        <image>${IMAGE_NAME}</image>
+                        <image>${image.name}</image>
                         <platforms>
                             <platform>
                                 <os>linux</os>
@@ -291,11 +333,7 @@
                             <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
                             <!--gc-->
                             <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
-                            <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
-                            <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
-                            <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
-                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
-                            <jvmFlag>-verbose:gc</jvmFlag>
+                            <jvmFlag>-XX:+UseG1GC</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
                             <!--log-->
@@ -332,7 +370,7 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>

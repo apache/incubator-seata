@@ -15,25 +15,27 @@
  */
 package io.seata.integration.http;
 
-import io.seata.core.context.RootContext;
+import org.springframework.lang.Nullable;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Http exception handle.
+ * The Handler Interceptor Adapter
  *
- * @author wangxb
+ * @author wang.liang
  */
-public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
+public interface HandlerInterceptorAdapter extends HandlerInterceptor {
 
+    default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        return true;
+    }
 
-    @Override
-    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse httpServletResponse, Object o, Exception e) {
+    default void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
+    }
 
-        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
-        return null;
+    default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
     }
 }

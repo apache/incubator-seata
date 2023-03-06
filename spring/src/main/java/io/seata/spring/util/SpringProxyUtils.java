@@ -85,14 +85,14 @@ public class SpringProxyUtils {
      * @throws Exception the exception
      */
     public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
-        Field h;
+        Object dynamicAdvisedInterceptor;
         if (AopUtils.isJdkDynamicProxy(proxy)) {
-            h = proxy.getClass().getSuperclass().getDeclaredField("h");
+            dynamicAdvisedInterceptor = Proxy.getInvocationHandler(proxy);
         } else {
-            h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            Field h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            h.setAccessible(true);
+            dynamicAdvisedInterceptor = h.get(proxy);
         }
-        h.setAccessible(true);
-        Object dynamicAdvisedInterceptor = h.get(proxy);
         Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
         return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);

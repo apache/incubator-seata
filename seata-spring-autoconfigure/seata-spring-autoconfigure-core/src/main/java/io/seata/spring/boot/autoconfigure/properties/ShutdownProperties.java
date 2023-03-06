@@ -30,13 +30,13 @@ public class ShutdownProperties {
     /**
      * when destroy server, wait seconds
      */
-    private long wait = DEFAULT_SHUTDOWN_TIMEOUT_SEC;
+    private int wait = DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 
-    public long getWait() {
+    public int getWait() {
         return wait;
     }
 
-    public ShutdownProperties setWait(long wait) {
+    public ShutdownProperties setWait(int wait) {
         this.wait = wait;
         return this;
     }

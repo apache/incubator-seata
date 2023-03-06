@@ -53,7 +53,7 @@
 
         <fileSet>
             <directory>../ext/apm-seata-skywalking-plugin/target/ext/skywalking-agent/</directory>
-            <outputDirectory>ext/apm-skywalking/</outputDirectory>
+            <outputDirectory>ext/apm-skywalking</outputDirectory>
         </fileSet>
 
         <fileSet>

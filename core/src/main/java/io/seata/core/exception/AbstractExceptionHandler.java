@@ -132,10 +132,10 @@ public abstract class AbstractExceptionHandler {
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
             if (Objects.equals(LockKeyConflict, tex.getCode())) {
-                LOGGER.info("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
+                LOGGER.error("this request cannot acquire global lock, you can let Seata retry by setting config [{}] = false or manually retry by yourself. request: {}",
                         ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, request);
             } else if (Objects.equals(LockKeyConflictFailFast, tex.getCode())) {
-                LOGGER.info("this request cannot acquire global lock, decide fail-fast because LockStatus is {}. request: {}",
+                LOGGER.error("this request cannot acquire global lock, decide fail-fast because LockStatus is {}. request: {}",
                         LockStatus.Rollbacking, request);
             } else {
                 LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
