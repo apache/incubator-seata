@@ -290,7 +290,7 @@
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
-                        <image>${IMAGE_NAME}</image>
+                        <image>${image.name}</image>
                         <platforms>
                             <platform>
                                 <os>linux</os>
