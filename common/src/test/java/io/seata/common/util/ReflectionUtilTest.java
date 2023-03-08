@@ -189,6 +189,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
+    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.getAnnotationValues` does not supported java17
     public void testGetAnnotationValues() throws NoSuchMethodException, NoSuchFieldException {
         Assertions.assertEquals(new LinkedHashMap<>(), ReflectionUtil
             .getAnnotationValues(this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));
