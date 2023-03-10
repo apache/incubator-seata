@@ -36,7 +36,6 @@ public class ClassUtils {
                         return method;
                     }
                 } else {
-
                     return method;
                 }
             } catch (SecurityException ex) {
