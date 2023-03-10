@@ -41,6 +41,7 @@ import io.seata.integration.tx.api.annotation.AspectTransactional;
 import io.seata.integration.tx.api.event.DegradeCheckEvent;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+import io.seata.integration.tx.api.util.ClassUtils;
 import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
@@ -140,11 +141,10 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         Class<?> targetClass = invocation.getTarget().getClass();
-        Method specificMethod = invocation.getMethod();
+        Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
-            final Method method = invocation.getMethod();
-            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
-            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(specificMethod, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(specificMethod, targetClass, GlobalLock.class);
             boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
