@@ -52,8 +52,7 @@ public class ClassUtils {
         if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
             return true;
         }
-        return (targetClass == null ||
-                getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass)));
+        return targetClass == null || getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass));
     }
 
     public static String getPackageName(Class<?> clazz) {
@@ -62,6 +61,6 @@ public class ClassUtils {
 
     public static String getPackageName(String fqClassName) {
         int lastDotIndex = fqClassName.lastIndexOf(PACKAGE_SEPARATOR);
-        return (lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "");
+        return lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "";
     }
 }
