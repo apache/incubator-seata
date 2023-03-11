@@ -13,14 +13,14 @@ jobs:
         uses: actions/checkout@v3
       # step 2
       - name: Check License Header
-        uses: apache/skywalking-eyes/header@e1a02359b239bd28de3f6d35fdc870250fa513d5
+        uses: apache/skywalking-eyes/header@main
         with:
           log: info
           config: .licenserc.yaml
           mode: check
       # step 3
       - name: Check Dependencies' License
-        uses: apache/skywalking-eyes/dependency@e1a02359b239bd28de3f6d35fdc870250fa513d5
+        uses: apache/skywalking-eyes/dependency@main
         with:
           log: info
           config: .licenserc.yaml
