@@ -41,7 +41,6 @@ import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
-import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
 import io.seata.server.cluster.raft.execute.branch.AddBranchSessionExecute;
 import io.seata.server.cluster.raft.execute.branch.RemoveBranchSessionExecute;
