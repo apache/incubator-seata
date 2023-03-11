@@ -21,11 +21,11 @@ import java.util.stream.Stream;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,12 +45,12 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 public class GlobalSessionTest {
 
 
-    @BeforeAll
+    @BeforeEach
     public static void setUp(ApplicationContext context){
 
     }
     @BeforeAll
-    public static void init(){
+    public static void init(ApplicationContext context){
         SessionHolder.init(StoreConfig.SessionMode.FILE);
     }
     @AfterAll
