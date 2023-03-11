@@ -42,12 +42,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class FileTransactionStoreManagerTest {
 
-    @BeforeAll
-    public static void init(){
+    @BeforeEach
+    public void init(){
         SessionHolder.init(StoreConfig.SessionMode.FILE);
     }
-    @AfterAll
-    public static void destroy(){
+    @AfterEach
+    public void destroy(){
         SessionHolder.destroy();
     }
 
