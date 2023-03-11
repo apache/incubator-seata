@@ -118,6 +118,9 @@ public interface DefaultValues {
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
+    // default tcc business action context json parser
+    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "fastjson";
+
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
     String DEFAULT_LOAD_BALANCE = "XID";

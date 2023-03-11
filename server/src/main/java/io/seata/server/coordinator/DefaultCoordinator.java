@@ -94,6 +94,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
+    private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
+
     /**
      * The constant COMMITTING_RETRY_PERIOD.
      */
@@ -339,7 +341,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 }
 
                 LOGGER.warn("Global transaction[{}] is timeout and will be rollback,transaction begin time:{} and now:{}", globalSession.getXid(),
-                    DateFormatUtils.ISO_DATE_FORMAT.format(globalSession.getBeginTime()), DateFormatUtils.ISO_DATE_FORMAT.format(System.currentTimeMillis()));
+                    DateFormatUtils.format(globalSession.getBeginTime(), TIME_FORMAT_PATTERN), DateFormatUtils.format(System.currentTimeMillis(), TIME_FORMAT_PATTERN));
 
                 globalSession.close();
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);

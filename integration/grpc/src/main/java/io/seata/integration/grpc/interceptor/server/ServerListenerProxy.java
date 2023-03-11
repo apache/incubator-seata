@@ -15,25 +15,33 @@
  */
 package io.seata.integration.grpc.interceptor.server;
 
+import java.util.Map;
+import java.util.Objects;
+
 import io.grpc.ServerCall;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-
-import java.util.Objects;
+import io.seata.core.model.BranchType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author eddyxu1213@126.com
  */
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);
 
     private ServerCall.Listener<ReqT> target;
-    private String xid;
+    private final String xid;
 
-    public ServerListenerProxy(String xid, ServerCall.Listener<ReqT> target) {
+    private final Map<String, String> context;
+
+    public ServerListenerProxy(String xid, Map<String, String> context, ServerCall.Listener<ReqT> target) {
         super();
         Objects.requireNonNull(target);
         this.target = target;
         this.xid = xid;
+        this.context = context;
     }
 
     @Override
@@ -45,28 +53,46 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     public void onHalfClose() {
         if (StringUtils.isNotBlank(xid)) {
             RootContext.bind(xid);
+            String branchType = context.get(RootContext.KEY_BRANCH_TYPE);
+            if (StringUtils.equals(BranchType.TCC.name(), branchType)) {
+                RootContext.bindBranchType(BranchType.TCC);
+            }
         }
         target.onHalfClose();
     }
 
     @Override
     public void onCancel() {
-        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            RootContext.unbind();
-        }
+        cleanContext();
         target.onCancel();
     }
 
     @Override
     public void onComplete() {
-        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            RootContext.unbind();
-        }
+        cleanContext();
         target.onComplete();
     }
 
     @Override
     public void onReady() {
         target.onReady();
+    }
+
+    private void cleanContext() {
+        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
+            String unbindXid = RootContext.unbind();
+            BranchType previousBranchType = RootContext.getBranchType();
+            if (BranchType.TCC == previousBranchType) {
+                RootContext.unbindBranchType();
+            }
+            if (!xid.equalsIgnoreCase(unbindXid)) {
+                RootContext.bind(unbindXid);
+                LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
+                if (BranchType.TCC == previousBranchType) {
+                    RootContext.bindBranchType(previousBranchType);
+                    LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
+                }
+            }
+        }
     }
 }

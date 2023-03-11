@@ -158,6 +158,8 @@ seata:
     fence:
       log-table-name: tcc_fence_log
       clean-period: 1h
+    # You can choose from the following options: fastjson, jackson, gson
+    context-json-parser-type: fastjson
   saga:
     enabled: false
     state-machine:
