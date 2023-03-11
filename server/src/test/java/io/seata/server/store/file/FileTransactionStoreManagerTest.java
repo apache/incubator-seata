@@ -35,6 +35,7 @@ import org.assertj.core.util.Files;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author ggndnn
@@ -43,7 +44,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class FileTransactionStoreManagerTest {
 
     @BeforeAll
-    public static void init(){
+    public static void init(ApplicationContext context){
         SessionHolder.init(StoreConfig.SessionMode.FILE);
     }
     @AfterAll
