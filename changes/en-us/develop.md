@@ -42,6 +42,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5315](https://github.com/seata/seata/pull/5315)] optimize the log of SPI
 - [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
 - [[#5414](https://github.com/seata/seata/pull/5414)] optimize transaction fail handler
+- [[#5438](https://github.com/seata/seata/pull/5438)] optimize code style properties
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
