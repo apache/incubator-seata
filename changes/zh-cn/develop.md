@@ -42,6 +42,7 @@
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
 - [[#5414](https://github.com/seata/seata/pull/5414)] 优化事务失败处理 handler
+- [[#5438](https://github.com/seata/seata/pull/5438)] 优化code style检测属性
 
 
 ### security:
