@@ -32,6 +32,9 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE
       # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
       - name: "Publish to OSSRH"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -58,7 +61,10 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      # step 3 based on java8
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4 based on java8
       - name: "Publish images to DockerHub based on java8"
         if: matrix.java == 8
         env:
@@ -71,7 +77,7 @@ jobs:
             ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage,release-image-based-on-java8       -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
             ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342-slim -Pimage,release-image-based-on-java8-slim  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
-      # step 3 based on java17
+      # step 4 based on java17
       - name: "Publish images to DockerHub based on java17"
         if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
         env:
