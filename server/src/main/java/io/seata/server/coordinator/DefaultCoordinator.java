@@ -65,6 +65,7 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -337,7 +338,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     return false;
                 }
 
-                LOGGER.info("Global transaction[{}] is timeout and will be rollback.", globalSession.getXid());
+                LOGGER.warn("Global transaction[{}] is timeout and will be rollback,transaction begin time:{} and now:{}", globalSession.getXid(),
+                    DateFormatUtils.ISO_DATE_FORMAT.format(globalSession.getBeginTime()), DateFormatUtils.ISO_DATE_FORMAT.format(System.currentTimeMillis()));
 
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();

@@ -34,6 +34,8 @@ import io.seata.config.changelistener.ConfigurationChangeListener;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
+import io.seata.core.exception.TmTransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
@@ -245,9 +247,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
             Throwable cause = e.getCause();
+            boolean timeout = isTimeoutException(cause);
             switch (code) {
                 case RollbackDone:
-                    throw e.getOriginalException();
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 case BeginFailure:
                     succeed = false;
                     failureHandler.onBeginFailure(e.getTransaction(), cause);
@@ -259,12 +266,13 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
                     throw e.getOriginalException();
-                case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
-                case TimeoutRollback:
-                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
-                    throw cause;
+                case Rollbacking:
+                    failureHandler.onRollbacking(e.getTransaction(), e.getOriginalException());
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
@@ -345,6 +353,19 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 }
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isTimeoutException(Throwable th) {
+        if (null == th) {
+            return false;
+        }
+        if (th instanceof TmTransactionException) {
+            TmTransactionException exx = (TmTransactionException)th;
+            if (TransactionExceptionCode.TransactionTimeout == exx.getCode()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Subscribe
