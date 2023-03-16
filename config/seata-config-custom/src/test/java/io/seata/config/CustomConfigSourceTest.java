@@ -37,8 +37,8 @@ public class CustomConfigSourceTest {
         Assertions.assertNotNull(properties);
         for (String name : properties.stringPropertyNames()) {
             String value = properties.getProperty(name);
-            Assertions.assertNotNull(value);
-            Assertions.assertEquals(value, configuration.getString(name));
+            Assertions.assertNotNull(value, name + " is null");
+            Assertions.assertEquals(value, configuration.getString(name), name + " is not equal");
         }
     }
 }
