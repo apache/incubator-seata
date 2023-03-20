@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceNotFoundException;
-import io.seata.sqlparser.KeywordCheckerFactory;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
 public class EscapeHandlerFactoryTest {
 
     @Test
-    public void testKeywordCheckerFacotry() {
-        KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
-        Assertions.assertNotNull(keywordCheckerFactory);
+    public void testEscapeHandlerFactoryTest() {
+        EscapeHandlerFactory escapeHandlerFactory = new EscapeHandlerFactory();
+        Assertions.assertNotNull(escapeHandlerFactory);
 
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> EscapeHandlerFactory.getEscapeHandler("unknow"));
     }
 }

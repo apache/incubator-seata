@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.seata.sqlparser.EscapeHandler;
-import io.seata.sqlparser.KeywordCheckerFactory;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,7 +29,7 @@ public class OracleEscapeHandlerTest {
 
     @Test
     public void testOracleKeywordChecker() {
-        EscapeHandler escapeHandler = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.ORACLE);
         Assertions.assertNotNull(escapeHandler);
     }
 

@@ -21,7 +21,7 @@ import java.util.List;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
-import io.seata.sqlparser.KeywordCheckerFactory;
+import io.seata.sqlparser.EscapeHandlerFactory;
 
 /**
  * column utils
@@ -59,7 +59,7 @@ public final class ColumnUtils {
      * @return string string
      */
     public static String delEscape(String colName, String dbType) {
-        EscapeHandler escapeHandler = KeywordCheckerFactory.getKeywordChecker(dbType);
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(dbType);
         return escapeHandler.delColNameEscape(colName);
     }
 
@@ -103,7 +103,7 @@ public final class ColumnUtils {
         if (StringUtils.isBlank(colName)) {
             return colName;
         }
-        EscapeHandler escapeHandler = KeywordCheckerFactory.getKeywordChecker(dbType);
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(dbType);
         return escapeHandler.addColNameEscape(colName);
     }
 
