@@ -41,8 +41,7 @@ public interface EscapeHandler {
      */
     boolean checkIfNeedEscape(String fieldOrTableName);
 
-
-    default char getEscapeSymbol(){
+    default char getEscapeSymbol() {
         return '"';
     }
 
@@ -53,7 +52,8 @@ public interface EscapeHandler {
      */
     default boolean containsEscape(String fieldOrTableName) {
         fieldOrTableName = fieldOrTableName.trim();
-        if (fieldOrTableName.charAt(0) == getEscapeSymbol() && fieldOrTableName.charAt(fieldOrTableName.length() - 1) == getEscapeSymbol()) {
+        char escapeSymbol = getEscapeSymbol();
+        if (fieldOrTableName.charAt(0) == escapeSymbol && fieldOrTableName.charAt(fieldOrTableName.length() - 1) == escapeSymbol) {
             return true;
         }
         return false;
