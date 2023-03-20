@@ -20,7 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,7 +30,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
-public class MySQLKeywordChecker implements KeywordChecker {
+public class MySQLEscapeHandler implements EscapeHandler {
 
     private Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
 
@@ -1101,7 +1102,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
 
 
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -1113,8 +1114,19 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        return check(fieldOrTableName);
+    public boolean checkIfNeedEscape(String fieldOrTableName) {
+        if (StringUtils.isBlank(fieldOrTableName)) {
+            return false;
+        }
+        fieldOrTableName = fieldOrTableName.trim();
+        if (containsEscape(fieldOrTableName)) {
+            return false;
+        }
+        return checkIfKeyWords(fieldOrTableName);
     }
 
+    @Override
+    public char getEscapeSymbol() {
+        return '`';
+    }
 }

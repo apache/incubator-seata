@@ -13,24 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
+package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.sqlparser.KeywordCheckerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author will
  */
-public class OracleKeywordCheckerTest {
+public class EscapeHandlerFactoryTest {
 
     @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        Assertions.assertNotNull(keywordChecker);
-    }
+    public void testKeywordCheckerFacotry() {
+        KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
+        Assertions.assertNotNull(keywordCheckerFactory);
 
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
+    }
 }

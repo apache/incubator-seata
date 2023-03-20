@@ -20,7 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,7 +30,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author ccg
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
-public class OracleKeywordChecker implements KeywordChecker {
+public class OracleEscapeHandler implements EscapeHandler {
 
     private Set<String> keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
 
@@ -488,7 +489,7 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -499,13 +500,33 @@ public class OracleKeywordChecker implements KeywordChecker {
 
     }
 
+
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        boolean check = check(fieldOrTableName);
+    public boolean checkIfNeedEscape(String fieldOrTableName) {
+        if (StringUtils.isBlank(fieldOrTableName)) {
+            return false;
+        }
+        fieldOrTableName = fieldOrTableName.trim();
+        if (containsEscape(fieldOrTableName)) {
+            return false;
+        }
+        boolean isKeyWord = checkIfKeyWords(fieldOrTableName);
+        if (isKeyWord) {
+            return true;
+        }
         // oracle
         // we are recommend table name and column name must uppercase.
         // if exists full uppercase, the table name or column name does't bundle escape symbol.
-        if (!check && isUppercase(fieldOrTableName)) {
+        //创建\读取    table TABLE "table" "TABLE"
+        //
+        //table        √     √       ×       √
+        //
+        //TABLE        √     √       ×       √
+        //
+        //"table"      ×     ×       √       ×
+        //
+        //"TABLE"      √     √       ×       √
+        if (isUppercase(fieldOrTableName)) {
             return false;
         }
         return true;

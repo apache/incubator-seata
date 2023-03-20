@@ -17,7 +17,7 @@ package io.seata.rm.datasource.undo.mysql.keyword;
 
 import java.sql.Types;
 
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
@@ -39,15 +39,15 @@ import org.junit.jupiter.api.Test;
  *
  * @author Wu
  */
-public class MySQLKeywordCheckerTest {
+public class MySQLEscapeHandlerTest {
 
     /**
      * Test check
      */
     @Test
     public void testCheck() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        Assertions.assertTrue(keywordChecker.check("desc"));
+        EscapeHandler escapeHandler = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        Assertions.assertTrue(escapeHandler.checkIfKeyWords("desc"));
     }
 
     /**

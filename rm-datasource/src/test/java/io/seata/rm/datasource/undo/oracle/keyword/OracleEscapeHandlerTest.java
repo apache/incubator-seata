@@ -13,28 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser;
+package io.seata.rm.datasource.undo.oracle.keyword;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.KeywordCheckerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The interface Keyword checker.
- *
- * @author Wu
+ * @author will
  */
-public interface KeywordChecker {
-    /**
-     * check whether given field name and table name use keywords
-     *
-     * @param fieldOrTableName the field or table name
-     * @return boolean
-     */
-    boolean check(String fieldOrTableName);
+public class OracleEscapeHandlerTest {
 
-
-    /**
-     * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
-     * @return true: need to escape. false: no need to escape.
-     */
-    boolean checkEscape(String fieldOrTableName);
+    @Test
+    public void testOracleKeywordChecker() {
+        EscapeHandler escapeHandler = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        Assertions.assertNotNull(escapeHandler);
+    }
 
 }

@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class KeywordCheckerFactory {
 
-    private static final Map<String, KeywordChecker> KEYWORD_CHECKER_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, EscapeHandler> KEYWORD_CHECKER_MAP = new ConcurrentHashMap<>();
 
     /**
      * get keyword checker
@@ -36,8 +36,8 @@ public class KeywordCheckerFactory {
      * @param dbType the db type
      * @return keyword checker
      */
-    public static KeywordChecker getKeywordChecker(String dbType) {
+    public static EscapeHandler getKeywordChecker(String dbType) {
         return CollectionUtils.computeIfAbsent(KEYWORD_CHECKER_MAP, dbType,
-            key -> EnhancedServiceLoader.load(KeywordChecker.class, dbType));
+            key -> EnhancedServiceLoader.load(EscapeHandler.class, dbType));
     }
 }

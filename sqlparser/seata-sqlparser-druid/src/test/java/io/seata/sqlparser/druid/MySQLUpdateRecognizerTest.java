@@ -380,7 +380,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
-        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
+        List<String> updateColumns = recognizer.getUpdateColumnsUnEscape();
         for (String updateColumn : updateColumns) {
             Assertions.assertFalse(updateColumn.contains("`"));
         }
