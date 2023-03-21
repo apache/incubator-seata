@@ -277,7 +277,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                         throw e.getOriginalException();
                     }
                 default:
-                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code), e.getOriginalException());
             }
         } finally {
             if (ATOMIC_DEGRADE_CHECK.get()) {
