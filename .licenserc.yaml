@@ -85,3 +85,17 @@ dependency:
     - console/src/main/resources/static/console-fe/package.json
   excludes:
     - name: io.seata:*
+      recursive: false
+    # exclude manually confirmed license
+    # BSD-3-Clause https://www.npmjs.com/package/universal-canvas-context
+    - name: universal-canvas-context
+      recursive: false
+    # BSD-3-Clause https://www.npmjs.com/package/universal-element
+    - name: universal-element
+      recursive: false
+    # remove later https://www.npmjs.com/package/@gcanvas/core
+    - name: @gcanvas/core
+      recursive: true
+    # remove later https://www.npmjs.com/package/universal-env
+    - name: universal-env
+      recursive: true
