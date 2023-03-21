@@ -27,6 +27,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5145](https://github.com/seata/seata/pull/5145)] fix global session is always begin in saga mode
 - [[#5413](https://github.com/seata/seata/pull/5413)] fix bad service configuration file and compilation failure
 - [[#5415](https://github.com/seata/seata/pull/5415)] fix transaction timeout on client side not execute hook and failureHandler
+- [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
 
 
 ### optimize:

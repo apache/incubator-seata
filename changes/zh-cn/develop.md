@@ -27,6 +27,7 @@
 - [[#5145](https://github.com/seata/seata/pull/5145)] 修复saga模式全局事务状态始终为Begin的问题
 - [[#5413](https://github.com/seata/seata/pull/5413)] 修复 arm64平台下的JDK和Spring兼容问题
 - [[#5415](https://github.com/seata/seata/pull/5415)] 修复客户侧事务提交前超时未执行hook和failureHandler的问题
+- [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
 
 
 ### optimize:
