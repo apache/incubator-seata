@@ -517,7 +517,7 @@ public class OracleEscapeHandler implements EscapeHandler {
         // oracle
         // we are recommend table name and column name must uppercase.
         // if exists full uppercase, the table name or column name does't bundle escape symbol.
-        //创建\读取    table TABLE "table" "TABLE"
+        //create\read    table TABLE "table" "TABLE"
         //
         //table        √     √       ×       √
         //
