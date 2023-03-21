@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.undo.h2.keyword;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLEscapeHandler;
+import io.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
