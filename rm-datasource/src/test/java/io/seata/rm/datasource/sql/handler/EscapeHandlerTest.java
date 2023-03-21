@@ -32,9 +32,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
+ * The type Escape handler test.
+ *
  * @author slievrly
  */
 public class EscapeHandlerTest {
+    /**
+     * Test update columns escape.
+     */
     @Test
     public void testUpdateColumnsEscape() {
         //mysql
@@ -77,6 +82,10 @@ public class EscapeHandlerTest {
         }
 
     }
+
+    /**
+     * Test insert columns escape.
+     */
     @Test
     public void testInsertColumnsEscape() {
         String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";

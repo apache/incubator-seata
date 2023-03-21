@@ -70,7 +70,7 @@ public class ColumnUtilsTest {
         List<String> cols8 = new ArrayList<>();
         cols8.add("`scheme`.id");
         cols8 = ColumnUtils.delEscape(cols8, JdbcConstants.ORACLE);
-        Assertions.assertEquals("scheme.id", cols8.get(0));
+        Assertions.assertEquals("`scheme`.id", cols8.get(0));
 
         List<String> cols9 = new ArrayList<>();
         cols9.add("scheme.`id`");
