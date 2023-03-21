@@ -21,8 +21,11 @@ import java.util.List;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
+import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
+import io.seata.sqlparser.druid.postgresql.PostgresqlInsertRecognizer;
 import io.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
@@ -42,13 +45,22 @@ public class EscapeHandlerTest {
         for (String updateColumn : updateColMysql) {
             Assertions.assertFalse(updateColumn.contains("`"));
         }
+        updateColMysql = regMysql.getUpdateColumns();
+        for (String updateColumn : updateColMysql) {
+            Assertions.assertTrue(updateColumn.contains("`"));
+        }
+
         //oracle
         String sql2 = "update t set \"a\" = 1, \"b\" = 2, \"c\" = 3";
         List<SQLStatement> astsOracle = SQLUtils.parseStatements(sql2, JdbcConstants.ORACLE);
         OracleUpdateRecognizer regOracle = new OracleUpdateRecognizer(sql2, astsOracle.get(0));
         List<String> updateColOracle = regOracle.getUpdateColumnsUnEscape();
         for (String updateColumn : updateColOracle) {
-            Assertions.assertFalse(updateColumn.contains("`"));
+            Assertions.assertFalse(updateColumn.contains("\""));
+        }
+        updateColOracle = regOracle.getUpdateColumns();
+        for (String updateColumn : updateColOracle) {
+            Assertions.assertTrue(updateColumn.contains("\""));
         }
 
         //postgresql
@@ -57,8 +69,52 @@ public class EscapeHandlerTest {
         PostgresqlUpdateRecognizer regPgsql = new PostgresqlUpdateRecognizer(sql3, astsPgsql.get(0));
         List<String> updateColPgsql = regPgsql.getUpdateColumnsUnEscape();
         for (String updateColumn : updateColPgsql) {
-            Assertions.assertFalse(updateColumn.contains("`"));
+            Assertions.assertFalse(updateColumn.contains("\""));
+        }
+        updateColPgsql = regPgsql.getUpdateColumns();
+        for (String updateColumn : updateColPgsql) {
+            Assertions.assertTrue(updateColumn.contains("\""));
         }
 
+    }
+    @Test
+    public void testInsertColumnsEscape() {
+        String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        List<String> insertColumns = recognizer.getInsertColumnsUnEscape();
+        for (String insertColumn : insertColumns) {
+            Assertions.assertFalse(insertColumn.contains("`"));
+        }
+        insertColumns = recognizer.getInsertColumns();
+        for (String insertColumn : insertColumns) {
+            Assertions.assertTrue(insertColumn.contains("`"));
+        }
+
+        //oracle
+        String sql2 = "insert into t(\"id\", \"no\", \"name\", \"age\") values (1, 'no001', 'aaa', '20')";
+        List<SQLStatement> astsOracle = SQLUtils.parseStatements(sql2, JdbcConstants.ORACLE);
+        OracleInsertRecognizer regOracle = new OracleInsertRecognizer(sql2, astsOracle.get(0));
+        List<String> insertColOracle = regOracle.getInsertColumnsUnEscape();
+        for (String insertCol : insertColOracle) {
+            Assertions.assertFalse(insertCol.contains("\""));
+        }
+        insertColOracle = regOracle.getInsertColumns();
+        for (String insertCol : insertColOracle) {
+            Assertions.assertTrue(insertCol.contains("\""));
+        }
+
+        //postgresql
+        String sql3 = "insert into t(\"id\", \"no\", \"name\", \"age\") values (1, 'no001', 'aaa', '20')";
+        List<SQLStatement> astsPgsql = SQLUtils.parseStatements(sql2, JdbcConstants.POSTGRESQL);
+        PostgresqlInsertRecognizer regPgsql = new PostgresqlInsertRecognizer(sql3, astsPgsql.get(0));
+        List<String> insertColPgsql = regPgsql.getInsertColumnsUnEscape();
+        for (String insertCol : insertColPgsql) {
+            Assertions.assertFalse(insertCol.contains("\""));
+        }
+        insertColPgsql = regPgsql.getInsertColumns();
+        for (String insertCol : insertColPgsql) {
+            Assertions.assertTrue(insertCol.contains("\""));
+        }
     }
 }
