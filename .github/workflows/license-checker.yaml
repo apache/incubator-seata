@@ -14,7 +14,7 @@ jobs:
       # step 2
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 12.22.12
       # step 3
       - name: Check License Header
         uses: apache/skywalking-eyes/header@main
