@@ -12,13 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       # step 2
+      - uses: actions/checkout@v3
+        with:
+          node-version: 14
+      # step 3
       - name: Check License Header
         uses: apache/skywalking-eyes/header@main
         with:
           log: info
           config: .licenserc.yaml
           mode: check
-      # step 3
+      # step 4
       - name: Check Dependencies' License
         uses: apache/skywalking-eyes/dependency@main
         with:
