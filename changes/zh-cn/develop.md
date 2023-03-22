@@ -36,5 +36,13 @@
 - [xssdpgy](https://github.com/xssdpgy)
 - [albumenj](https://github.com/albumenj)
 - [PeppaO](https://github.com/PeppaO)
+- [yuruixin](https://github.com/yuruixin)
+- [CrazyLionLi](https://github.com/JavaLionLi)
+- [xingfudeshi](https://github.com/xingfudeshi)
+- [Bughue](https://github.com/Bughue)
+- [pengten](https://github.com/pengten)
+- [wangliang181230](https://github.com/wangliang181230)
+- [tuwenlin](https://github.com/tuwenlin)
+
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
