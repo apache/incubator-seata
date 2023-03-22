@@ -8,7 +8,8 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
-- [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate 
+- [[#5224](https://github.com/seata/seata/pull/5224)] fix oracle initialize script index_name is duplicate
+- [[#5464](https://github.com/seata/seata/pull/5464)] fix global session is always begin in saga mode
 
 ### optimize:
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
