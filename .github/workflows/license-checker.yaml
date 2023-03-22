@@ -11,10 +11,12 @@ jobs:
       # step 1
       - name: Checkout
         uses: actions/checkout@v3
-      # step 2
+      # step 2 https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
       - uses: actions/setup-node@v3
         with:
-          node-version: 12.22.12
+          node-version: '14.x'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
       # step 3
       - name: Check License Header
         uses: apache/skywalking-eyes/header@main
