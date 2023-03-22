@@ -131,7 +131,6 @@ public class DefaultCore implements Core {
         throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name, timeout);
         MDC.put(RootContext.MDC_KEY_XID, session.getXid());
-        session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
 
@@ -155,7 +154,6 @@ public class DefaultCore implements Core {
             return GlobalStatus.TimeoutRollbacking;
         }
 
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
 
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
@@ -241,8 +239,9 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
-                        new String[] {branchSession.toString()});
+                    String commitInfo = retrying ? "Global commit continue" : "Global commit failed";
+                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception:retrying={}, {}, {}",
+                        new String[] {String.valueOf(retrying), branchSession.toString(), commitInfo});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
@@ -280,7 +279,6 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
@@ -337,8 +335,8 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                        "Rollback branch transaction exception, xid = {} ,branchId = {} ,retrying={} ,exception = {}, global rollback failed",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), String.valueOf(retrying), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
@@ -376,7 +374,6 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return globalStatus;
         }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         doGlobalReport(globalSession, xid, globalStatus);
         return globalSession.getStatus();
     }

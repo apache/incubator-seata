@@ -36,7 +36,7 @@ public class RedisLockManager extends AbstractLockManager implements Initialize 
 
     @Override
     public void init() {
-        locker = new RedisLocker();
+        locker = RedisLockerFactory.getLocker();
     }
 
     @Override
