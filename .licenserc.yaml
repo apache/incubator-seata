@@ -94,7 +94,7 @@ dependency:
     - name: universal-element
       recursive: false
     # remove later https://www.npmjs.com/package/@gcanvas/core
-    - name: @gcanvas/core
+    - name: "@gcanvas/core"
       recursive: true
     # remove later https://www.npmjs.com/package/universal-env
     - name: universal-env
