@@ -1,22 +1,22 @@
 # 开始项目
 ## cnpm 安装（可忽略）
 ```sh
-npm install -g cnpm --registry=https://registry.npm.taobao.org
+npm install -g cnpm --registry=https://registry.npmmirror.com
 
 # 设置匿名
-alias cnpm="npm --registry=https://registry.npm.taobao.org \
+alias cnpm="npm --registry=https://registry.npmmirror.com \
 --cache=$HOME/.npm/.cache/cnpm \
---disturl=https://npm.taobao.org/dist \
+--disturl=https://npmmirror.com/mirrors/node \
 --userconfig=$HOME/.cnpmrc"
 
 # Or alias it in .bashrc or .zshrc
-$ echo '\n#alias for cnpm\nalias cnpm="npm --registry=https://registry.npm.taobao.org \
+$ echo '\n#alias for cnpm\nalias cnpm="npm --registry=https://registry.npmmirror.com \
   --cache=$HOME/.npm/.cache/cnpm \
-  --disturl=https://npm.taobao.org/dist \
+  --disturl=https://npmmirror.com/mirrors/node \
   --userconfig=$HOME/.cnpmrc"' >> ~/.zshrc && source ~/.zshrc
 
 ```
-[详情地址: http://npm.taobao.org/](http://npm.taobao.org/) 
+[详情地址: https://npmmirror.com/](https://npmmirror.com/) 
 
 ## 安装依赖
 ```sh
