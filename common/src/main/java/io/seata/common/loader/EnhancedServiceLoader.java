@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
-import io.seata.common.util.BitUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -197,10 +196,7 @@ public class EnhancedServiceLoader {
                 continue;
             }
             if (name.equals(activateName)) {
-                int state = entry.getValue().getState();
-                state = BitUtils.unSetBit(state,Constants.ACTIVE_EXTENSION_DEFINITION);
-                state = BitUtils.setBit(state,Constants.DISABLE_EXTENSION_DEFINITION);
-                entry.getValue().setState(state);
+                entry.getValue().setState(false);
                 extensionDefinitions.add(entry.getValue());
             }
         }
@@ -431,12 +427,7 @@ public class EnhancedServiceLoader {
             if (definition == null) {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
             }
-            int state;
-            if (BitUtils.isSetBit(state = definition.getState(), Constants.DISABLE_EXTENSION_DEFINITION)) {
-                state = BitUtils.unSetBit(state, Constants.DISABLE_EXTENSION_DEFINITION);
-                state = BitUtils.setBit(state, Constants.ACTIVE_EXTENSION_DEFINITION);
-                definition.setState(state);
-            }
+            definition.setState(true);
 
             if (Scope.SINGLETON.equals(definition.getScope())) {
                 Holder<Object> holder = CollectionUtils.computeIfAbsent(definitionToInstanceMap, definition,
