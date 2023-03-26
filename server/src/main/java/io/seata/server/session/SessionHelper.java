@@ -134,6 +134,10 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
                 beginTime, retryBranch);
         } else {
+            if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Committed);
+                globalSession.end();
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }
@@ -152,8 +156,8 @@ public class SessionHelper {
     /**
      * End commit failed.
      *
-     * @param globalSession the global session
-     * @param retryGlobal the retry global
+     * @param globalSession  the global session
+     * @param retryGlobal    the retry global
      * @param isRetryTimeout is retry timeout
      * @throws TransactionException the transaction exception
      */
@@ -201,6 +205,10 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                     beginTime, retryBranch);
         } else {
+            if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
+                globalSession.end();
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
         }
     }
