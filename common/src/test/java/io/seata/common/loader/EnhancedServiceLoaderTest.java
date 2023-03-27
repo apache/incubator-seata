@@ -139,6 +139,7 @@ public class EnhancedServiceLoaderTest {
         Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
         EnhancedServiceLoader.unload(Hello.class,"EnglishHello");
         englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
+        Assertions.assertNotNull(englishHello);
     }
 
 }
