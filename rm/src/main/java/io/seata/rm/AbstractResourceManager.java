@@ -69,7 +69,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
                 throw new RmTransactionException(response.getTransactionExceptionCode(),
                     String.format("branch register failed, xid: %s, errMsg: %s ", xid, response.getMsg()));
             }
-            if(LOGGER.isInfoEnabled()){
+            if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("branch register success, xid:{}, branchId:{}, lockKeys:{}", xid, response.getBranchId(), lockKeys);
             }
             return response.getBranchId();
