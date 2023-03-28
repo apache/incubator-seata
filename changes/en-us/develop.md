@@ -28,7 +28,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5413](https://github.com/seata/seata/pull/5413)] fix bad service configuration file and compilation failure
 - [[#5415](https://github.com/seata/seata/pull/5415)] fix transaction timeout on client side not execute hook and failureHandler
 - [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
-
+- [[#5472](https://github.com/seata/seata/pull/5472)] Using `@GlobalTransactional` in RM, `ShouldNverHappenException` will be thrown
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
