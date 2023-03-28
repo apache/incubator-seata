@@ -154,7 +154,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo    the transaction info
+     * @param txInfo          the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
