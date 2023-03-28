@@ -13,6 +13,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5233](https://github.com/seata/seata/pull/5233)] fix the inconsistent configuration item names related to LoadBalance
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
 - [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
+- [[#5462](https://github.com/seata/seata/pull/5462)] Using `@GlobalTransactional` in RM, when RM rolls back, `ShouldNeverHappenException` will be thrown
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
