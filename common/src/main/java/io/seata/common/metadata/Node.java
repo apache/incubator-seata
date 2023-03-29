@@ -24,7 +24,7 @@ import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
  */
 public class Node {
 
-    private String hostAddress;
+    private String host;
 
     private int nettyPort;
 
@@ -47,12 +47,12 @@ public class Node {
 
     private ClusterRole role = ClusterRole.MEMBER;
 
-    public String getHostAddress() {
-        return hostAddress;
+    public String getHost() {
+        return host;
     }
 
-    public void setHostAddress(String hostAddress) {
-        this.hostAddress = hostAddress;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public String getGroup() {
@@ -104,14 +104,14 @@ public class Node {
             return false;
         }
         Node node = (Node)o;
-        return Objects.equals(hostAddress, node.hostAddress) && Objects.equals(nettyPort, node.nettyPort)
+        return Objects.equals(host, node.host) && Objects.equals(nettyPort, node.nettyPort)
             && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(httpPort, node.httpPort)
             && Objects.equals(group, node.group);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(hostAddress, nettyPort, grpcPort, httpPort, group);
+        return Objects.hash(host, nettyPort, grpcPort, httpPort, group);
     }
 
 }

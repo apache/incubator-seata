@@ -97,21 +97,21 @@ public class ClusterController {
                     Node leaderNode = new Node(leader.getIdx(), leader.getPort());
                     leaderNode.setRole(ClusterRole.LEADER);
                     leaderNode.setGroup(group);
-                    leaderNode.setHostAddress(leader.getIp());
+                    leaderNode.setHost(leader.getIp());
                     nodes.add(leaderNode);
                     Configuration configuration = routeTable.getConfiguration(group);
                     nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
                         Node node = new Node(learner.getIdx(), learner.getPort());
                         node.setGroup(group);
                         node.setRole(ClusterRole.LEARNER);
-                        node.setHostAddress(learner.getIp());
+                        node.setHost(learner.getIp());
                         return node;
                     }).collect(Collectors.toList()));
                     nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
                         Node node = new Node(follower.getIdx(), follower.getPort());
                         node.setGroup(group);
                         node.setRole(ClusterRole.FOLLOWER);
-                        node.setHostAddress(follower.getIp());
+                        node.setHost(follower.getIp());
                         return node;
                     }).collect(Collectors.toList()));
                     metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());
