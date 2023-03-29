@@ -152,7 +152,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     }
 
     @Override
-    public List<String> getInsertColumnsIsSimplified() {
+    public List<String> getInsertColumnsUnEscape() {
         List<String> insertColumns = getInsertColumns();
         return ColumnUtils.delEscape(insertColumns, getDbType());
     }
