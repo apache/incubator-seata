@@ -120,6 +120,9 @@ public class DataSourceManager extends AbstractResourceManager {
         }
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("branch rollback success, xid:{}, branchId:{}", xid, branchId);
+            }
         } catch (TransactionException te) {
             StackTraceLogger.error(LOGGER, te,
                 "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",

@@ -65,14 +65,14 @@ public class TransactionalTemplate {
                 case NOT_SUPPORTED:
                     // If transaction is existing, suspend it.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend();
+                        suspendedResourcesHolder = tx.suspend(false);
                     }
                     // Execute without transaction and return.
                     return business.execute();
                 case REQUIRES_NEW:
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend();
+                        suspendedResourcesHolder = tx.suspend(false);
                         tx = GlobalTransactionContext.createNew();
                     }
                     // Continue and execute with new transaction
@@ -210,6 +210,9 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeCommit();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("transaction {} will be commit", tx.getXid());
+            }
             tx.commit();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
             switch (tx.getLocalStatus()) {
@@ -237,6 +240,10 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeRollback();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
+                    originalException.getMessage());
+            }
             tx.rollback();
             triggerAfterRollback();
         } catch (TransactionException txe) {

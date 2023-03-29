@@ -23,7 +23,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +145,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend();
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -182,7 +181,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         } finally {
             if (xid.equals(RootContext.getXID())) {
-                suspend();
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -192,14 +191,23 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public SuspendedResourcesHolder suspend() throws TransactionException {
+        return suspend(false);
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean clean) throws TransactionException {
         // In order to associate the following logs with XID, first get and then unbind.
         String xid = RootContext.getXID();
         if (xid != null) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Suspending current transaction, xid = {}", xid);
+                if (clean) {
+                    LOGGER.info("transaction end, xid = {}", xid);
+                } else {
+                    LOGGER.info("suspending current transaction, xid = {}", xid);
+                }
             }
             RootContext.unbind();
-            return new SuspendedResourcesHolder(xid);
+            return clean ? null : new SuspendedResourcesHolder(xid);
         } else {
             return null;
         }
@@ -245,7 +253,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
         if (xid.equals(RootContext.getXID())) {
-            suspend();
+            suspend(true);
         }
     }
 
