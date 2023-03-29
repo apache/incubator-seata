@@ -75,7 +75,12 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend()
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        return null;
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean clean)
             throws TransactionException {
         return null;
     }
