@@ -65,5 +65,5 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      *
      * @return (`a`, `b`, `c`)  ->  (a, b, c)
      */
-    List<String> getInsertColumnsIsSimplified();
+    List<String> getInsertColumnsUnEscape();
 }

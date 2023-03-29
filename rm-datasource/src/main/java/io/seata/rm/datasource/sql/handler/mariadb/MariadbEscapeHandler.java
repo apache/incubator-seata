@@ -13,15 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.h2.keyword;
+package io.seata.rm.datasource.sql.handler.mariadb;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import io.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author JerryYin
+ * The type Mariadb escape handler.
+ *
+ * @author slievrly
  */
-@LoadLevel(name = JdbcConstants.H2)
-public class H2KeywordChecker extends MySQLKeywordChecker {
+@LoadLevel(name = JdbcConstants.MARIADB)
+public class MariadbEscapeHandler extends MySQLEscapeHandler {
 }

@@ -13,23 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.h2.keyword;
 
-import io.seata.common.loader.EnhancedServiceNotFoundException;
-import io.seata.sqlparser.KeywordCheckerFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author will
+ * @author JerryYin
  */
-public class KeywordCheckerFactoryTest {
-
-    @Test
-    public void testKeywordCheckerFacotry() {
-        KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
-        Assertions.assertNotNull(keywordCheckerFactory);
-
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
-    }
+@LoadLevel(name = JdbcConstants.H2)
+public class H2EscapeHandler extends MySQLEscapeHandler {
 }
