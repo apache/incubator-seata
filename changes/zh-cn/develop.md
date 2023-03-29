@@ -28,6 +28,7 @@
 - [[#5413](https://github.com/seata/seata/pull/5413)] 修复 arm64平台下的JDK和Spring兼容问题
 - [[#5415](https://github.com/seata/seata/pull/5415)] 修复客户侧事务提交前超时未执行hook和failureHandler的问题
 - [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
+- [[#5472](https://github.com/seata/seata/pull/5472)] 在RM中使用`@GlobalTransactional`时,如果RM执行失败会抛出`ShouldNeverHappenException`
 
 
 ### optimize:
