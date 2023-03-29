@@ -15,26 +15,29 @@
  */
 package io.seata.sqlparser;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * The interface Keyword checker.
+ * The type Keyword checker factory.
  *
  * @author Wu
  */
-public interface KeywordChecker {
+public class EscapeHandlerFactory {
+
+    private static final Map<String, EscapeHandler> ESCAPE_HANDLER_MAP = new ConcurrentHashMap<>();
+
     /**
-     * check whether given field name and table name use keywords
+     * get keyword checker
      *
-     * @param fieldOrTableName the field or table name
-     * @return boolean
+     * @param dbType the db type
+     * @return keyword checker
      */
-    boolean check(String fieldOrTableName);
-
-
-    /**
-     * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
-     * @return true: need to escape. false: no need to escape.
-     */
-    boolean checkEscape(String fieldOrTableName);
-
+    public static EscapeHandler getEscapeHandler(String dbType) {
+        return CollectionUtils.computeIfAbsent(ESCAPE_HANDLER_MAP, dbType,
+            key -> EnhancedServiceLoader.load(EscapeHandler.class, dbType));
+    }
 }
