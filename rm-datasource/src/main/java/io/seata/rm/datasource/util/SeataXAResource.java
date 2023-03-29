@@ -13,24 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
+package io.seata.rm.datasource.util;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+import javax.transaction.xa.XAResource;
 
 /**
- * @author will
+ * @author PeppaO
+ * @since 2023/3/16
  */
-public class OracleKeywordCheckerTest {
-
-    @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        Assertions.assertNotNull(keywordChecker);
-    }
+public interface SeataXAResource extends XAResource {
+    // OracleXAResource Loosely Coupled Branches
+    public static final int ORATRANSLOOSE = 65536;
 
 }

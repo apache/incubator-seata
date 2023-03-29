@@ -13,24 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.postgresql.keyword;
+package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author will
  */
-public class PostgresqlKeywordCheckerTest {
+public class EscapeHandlerFactoryTest {
 
     @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
-        Assertions.assertNotNull(keywordChecker);
-    }
+    public void testEscapeHandlerFactoryTest() {
+        EscapeHandlerFactory escapeHandlerFactory = new EscapeHandlerFactory();
+        Assertions.assertNotNull(escapeHandlerFactory);
 
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> EscapeHandlerFactory.getEscapeHandler("unknow"));
+    }
 }
