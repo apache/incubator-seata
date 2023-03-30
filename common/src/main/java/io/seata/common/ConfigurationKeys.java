@@ -642,6 +642,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
+     * The constant STORE_REDIS_TYPE. lua pipeline
+     */
+    String STORE_REDIS_TYPE = STORE_REDIS_PREFIX + "type";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
@@ -808,6 +813,11 @@ public interface ConfigurationKeys {
      * The constant TCC_FENCE_LOG_TABLE_NAME
      */
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
+
+    /**
+     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
+     */
+    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
 
     /**
      * The constant rpcRmRequestTimeout

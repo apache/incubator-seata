@@ -1,4 +1,6 @@
-<img src="https://img.alicdn.com/imgextra/i1/O1CN011z0JfQ2723QgDiWuH_!!6000000007738-2-tps-1497-401.png"  height="100" width="426">
+<div style="align: center">
+<img src="https://img.alicdn.com/imgextra/i1/O1CN011z0JfQ2723QgDiWuH_!!6000000007738-2-tps-1497-401.png"  height="100" width="426"/>
+</div>
 
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
@@ -82,11 +84,18 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>1.5.2</seata.version>
-
+<seata.version>1.6.1</seata.version>
 <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
+    <version>${seata.version}</version>
+</dependency>
+
+<!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
+<!--Notice: `seata-spring-boot-starter` has included `seata-all` dependency-->
+<dependency>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
 </dependency>
 
@@ -114,9 +123,9 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
-  
+* Online chat: 
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01FKBxyk25Ffx83dIJc_!!6000000007497-0-tps-1078-354.jpg"  height="200" width="630">
+<img src="https://img.alicdn.com/imgextra/i2/O1CN01nQG77T1VNcpPDOMVi_!!6000000002641-0-tps-1566-424.jpg"  height="200" width="630">
 
 
 ## Seata ecosystem

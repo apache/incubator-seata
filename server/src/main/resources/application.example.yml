@@ -42,8 +42,8 @@ seata:
       password:
       context-path:
       ##if use MSE Nacos with auth, mutex with username/password attribute
-      #access-key: ""
-      #secret-key: ""
+      #access-key:
+      #secret-key:
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
@@ -80,8 +80,8 @@ seata:
       password:
       context-path:
       ##if use MSE Nacos with auth, mutex with username/password attribute
-      #access-key: ""
-      #secret-key: ""
+      #access-key:
+      #secret-key:
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
@@ -97,8 +97,8 @@ seata:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
-      username: ""
-      password: ""
+      username:
+      password:
     consul:
       cluster: default
       server-addr: 127.0.0.1:8500
@@ -125,6 +125,7 @@ seata:
     enable-parallel-handle-branch: false
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
+    enableParallelRequestHandle: true
     recovery:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
@@ -157,22 +158,24 @@ seata:
       url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
       user: mysql
       password: mysql
-      min-conn: 5
+      min-conn: 10
       max-conn: 100
       global-table: global_table
       branch-table: branch_table
       lock-table: lock_table
       distributed-lock-table: distributed_lock
-      query-limit: 100
+      query-limit: 1000
       max-wait: 5000
     redis:
       mode: single
+      # support: lua 、 pipeline
+      type: lua
       database: 0
-      min-conn: 1
-      max-conn: 10
+      min-conn: 10
+      max-conn: 100
       password:
       max-total: 100
-      query-limit: 100
+      query-limit: 1000
       single:
         host: 127.0.0.1
         port: 6379
@@ -185,7 +188,7 @@ seata:
     exporter-list: prometheus
     exporter-prometheus-port: 9898
   transport:
-    rpc-tc-request-timeout: 30000
+    rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false
     shutdown:
       wait: 3

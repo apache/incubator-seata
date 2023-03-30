@@ -15,25 +15,21 @@
  */
 package io.seata.server.storage.redis.store;
 
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.server.session.SessionStatusValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
@@ -41,29 +37,36 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.util.BeanUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionStatusValidator;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
+
 import static io.seata.common.ConfigurationKeys.STORE_REDIS_QUERY_LIMIT;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_LOG_QUERY_LIMIT;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
-import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_XID;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_GMT_MODIFIED;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
+import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 
 /**
  * The redis transaction store manager
@@ -71,25 +74,34 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICA
  * @author funkye
  * @author wangzhongxiang
  * @author doubleDimple
+ * @author conghuhu
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManager.class);
 
-    /**the prefix of the branch transactions*/
+    /**
+     * the prefix of the branch transactions
+     */
     private static final String REDIS_SEATA_BRANCHES_PREFIX = "SEATA_BRANCHES_";
 
-    /**the prefix of the branch transaction*/
+    /**
+     * the prefix of the branch transaction
+     */
     private static final String REDIS_SEATA_BRANCH_PREFIX = "SEATA_BRANCH_";
 
-    /**the prefix of the global transaction*/
+    /**
+     * the prefix of the global transaction
+     */
     private static final String REDIS_SEATA_GLOBAL_PREFIX = "SEATA_GLOBAL_";
 
-    /**the prefix of the global transaction status*/
+    /**
+     * the prefix of the global transaction status
+     */
     private static final String REDIS_SEATA_STATUS_PREFIX = "SEATA_STATUS_";
 
     /**the key of global transaction status for begin*/
-    private static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
+    protected static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -98,12 +110,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * The constant CONFIG.
      */
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * The Log query limit.
      */
-    private int logQueryLimit;
+    protected int logQueryLimit;
 
     /**
      * Get the instance.
@@ -126,7 +138,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         super();
         initGlobalMap();
         initBranchMap();
-        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
+        initLogQueryLimit();
+    }
+
+    protected void initLogQueryLimit() {
+        logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
 
     /**
@@ -139,42 +155,38 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      */
     public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
 
-
     /**
      * init globalMap
-     *
      */
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             globalMap = ImmutableMap.<LogOperation, Function<GlobalTransactionDO, Boolean>>builder()
-                    .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
-                    .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
-                    .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
-                    .build();
+                .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
+                .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
+                .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
+                .build();
         }
     }
 
     /**
      * init branchMap
-     *
      */
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             branchMap = ImmutableMap.<LogOperation, Function<BranchTransactionDO, Boolean>>builder()
-                    .put(LogOperation.BRANCH_ADD, this::insertBranchTransactionDO)
-                    .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
-                    .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
-                    .build();
+                .put(LogOperation.BRANCH_ADD, this::insertBranchTransactionDO)
+                .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
+                .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
+                .build();
         }
     }
-
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         if (globalMap.containsKey(logOperation) || branchMap.containsKey(logOperation)) {
             return globalMap.containsKey(logOperation) ?
-                    globalMap.get(logOperation).apply(SessionConverter.convertGlobalTransactionDO(session)) :
-                    branchMap.get(logOperation).apply(SessionConverter.convertBranchTransactionDO(session));
+                globalMap.get(logOperation).apply(SessionConverter.convertGlobalTransactionDO(session)) :
+                branchMap.get(logOperation).apply(SessionConverter.convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
@@ -182,10 +194,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * Insert branch transaction
+     *
      * @param branchTransactionDO
      * @return the boolean
      */
-    private boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
         String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
@@ -203,17 +216,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * Delete the branch transaction
+     *
      * @param branchTransactionDO
      * @return
      */
-    private boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
+        String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String xid = jedis.hget(branchKey, REDIS_KEY_BRANCH_XID);
             if (StringUtils.isEmpty(xid)) {
                 return true;
             }
-            String branchListKey = buildBranchListKeyByXid(branchTransactionDO.getXid());
             try (Pipeline pipelined = jedis.pipelined()) {
                 pipelined.lrem(branchListKey, 0, branchKey);
                 pipelined.del(branchKey);
@@ -227,21 +241,24 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * Update the branch transaction
+     *
      * @param branchTransactionDO
      * @return
      */
-    private boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
+    protected boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         String branchKey = buildBranchKey(branchTransactionDO.getBranchId());
+        String branchStatus = String.valueOf(branchTransactionDO.getStatus());
+        String applicationData = String.valueOf(branchTransactionDO.getApplicationData());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             String previousBranchStatus = jedis.hget(branchKey, REDIS_KEY_BRANCH_STATUS);
             if (StringUtils.isEmpty(previousBranchStatus)) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
             }
             Map<String, String> map = new HashMap<>(3, 1);
-            map.put(REDIS_KEY_BRANCH_STATUS, String.valueOf(branchTransactionDO.getStatus()));
+            map.put(REDIS_KEY_BRANCH_STATUS, branchStatus);
             map.put(REDIS_KEY_BRANCH_GMT_MODIFIED, String.valueOf((new Date()).getTime()));
             if (StringUtils.isNotBlank(branchTransactionDO.getApplicationData())) {
-                map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, String.valueOf(branchTransactionDO.getApplicationData()));
+                map.put(REDIS_KEY_BRANCH_APPLICATION_DATA, applicationData);
             }
             jedis.hmset(branchKey, map);
             return true;
@@ -252,10 +269,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * Insert the global transaction.
+     *
      * @param globalTransactionDO
      * @return
      */
-    private boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             Date now = new Date();
@@ -276,15 +294,18 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * Delete the global transaction.
      * It will operate two parts:
-     *  1.delete the global session map
-     *  2.remove the xid from the global status list
+     * 1.delete the global session map
+     * 2.remove the xid from the global status list
      * If the operate failed,the succeed operates will rollback
+     *
      * @param globalTransactionDO
      * @return
      */
-    private boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+        String globalStatus = buildGlobalStatus(globalTransactionDO.getStatus());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            // pipeline mode
             String xid = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
             if (StringUtils.isEmpty(xid)) {
                 LOGGER.warn("Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
@@ -292,7 +313,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 return true;
             }
             try (Pipeline pipelined = jedis.pipelined()) {
-                pipelined.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, globalTransactionDO.getXid());
+                pipelined.lrem(globalStatus, 0, globalTransactionDO.getXid());
                 pipelined.del(globalKey);
                 if (GlobalStatus.Begin.getCode() == globalTransactionDO.getStatus()
                     || GlobalStatus.UnKnown.getCode() == globalTransactionDO.getStatus()) {
@@ -309,15 +330,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * Update the global transaction.
      * It will update two parts:
-     *  1.the global session map
-     *  2.the global status list
+     * 1.the global session map
+     * 2.the global status list
      * If the update failed,the succeed operates will rollback
+     *
      * @param globalTransactionDO
      * @return
      */
-    private boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
+    protected boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
         String xid = globalTransactionDO.getXid();
         String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+        Integer status = globalTransactionDO.getStatus();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             // Defensive watch to prevent other TC server operating concurrently,Fail fast
             jedis.watch(globalKey);
@@ -327,12 +350,12 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 jedis.unwatch();
                 throw new StoreException("Global transaction is not exist, update global transaction failed.");
             }
-            if (previousStatus.equals(String.valueOf(globalTransactionDO.getStatus()))) {
+            if (previousStatus.equals(String.valueOf(status))) {
                 jedis.unwatch();
                 return true;
             }
             GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
-            GlobalStatus after = GlobalStatus.get(globalTransactionDO.getStatus());
+            GlobalStatus after = GlobalStatus.get(status);
             if (!SessionStatusValidator.validateUpdateStatus(before, after)) {
                 throw new StoreException("Illegal changing of global status, update global transaction failed."
                     + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
@@ -350,26 +373,26 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             List<Object> exec = multi.exec();
             if (CollectionUtils.isEmpty(exec)) {
                 //The data has changed by another tc, so we still think the modification is successful.
-                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results",globalTransactionDO.getXid());
+                LOGGER.warn("The global transaction xid = {}, maybe changed by another TC. It does not affect the results", xid);
                 return true;
             }
             String hmset = exec.get(0).toString();
-            long lrem  = (long)exec.get(1);
-            long rpush = (long)exec.get(2);
+            long lrem = (long) exec.get(1);
+            long rpush = (long) exec.get(2);
             if (OK.equalsIgnoreCase(hmset) && lrem > 0 && rpush > 0) {
                 return true;
             } else {
-                // If someone failed, the succeed operations need rollback
+                // pipeline mode
                 if (OK.equalsIgnoreCase(hmset)) {
                     // Defensive watch to prevent other TC server operating concurrently,give up this operate
                     jedis.watch(globalKey);
                     String xid2 = jedis.hget(globalKey, REDIS_KEY_GLOBAL_XID);
                     if (StringUtils.isNotEmpty(xid2)) {
-                        Map<String,String> mapPrevious = new HashMap<>(2,1);
-                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS,previousStatus);
-                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED,previousGmtModified);
+                        Map<String, String> mapPrevious = new HashMap<>(2, 1);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_STATUS, previousStatus);
+                        mapPrevious.put(REDIS_KEY_GLOBAL_GMT_MODIFIED, previousGmtModified);
                         Transaction multi2 = jedis.multi();
-                        multi2.hmset(globalKey,mapPrevious);
+                        multi2.hmset(globalKey, mapPrevious);
                         multi2.exec();
                     }
                 }
@@ -377,7 +400,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                     jedis.rpush(buildGlobalStatus(Integer.valueOf(previousStatus)), xid);
                 }
                 if (rpush > 0) {
-                    jedis.lrem(buildGlobalStatus(globalTransactionDO.getStatus()), 0, xid);
+                    jedis.lrem(buildGlobalStatus(status), 0, xid);
                 }
                 return false;
             }
@@ -389,8 +412,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * Read session global session.
      *
-     * @param xid the xid
-     * @param withBranchSessions  the withBranchSessions
+     * @param xid                the xid
+     * @param withBranchSessions the withBranchSessions
      * @return the global session
      */
     @Override
@@ -398,11 +421,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         String transactionId = String.valueOf(XID.getTransactionId(xid));
         String globalKey = buildGlobalKeyByTransactionId(transactionId);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            Map<String, String> map  = jedis.hgetAll(globalKey);
+            Map<String, String> map = jedis.hgetAll(globalKey);
             if (CollectionUtils.isEmpty(map)) {
                 return null;
             }
-            GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
+            GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO) BeanUtils.mapToObject(map, GlobalTransactionDO.class);
             List<BranchTransactionDO> branchTransactionDOs = null;
             if (withBranchSessions) {
                 branchTransactionDOs = this.readBranchSessionByXid(jedis, xid);
@@ -415,8 +438,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**
      * Read session global session.
      *
-     * @param xid
-     *            the xid
+     * @param xid the xid
      * @return the global session
      */
     @Override
@@ -512,6 +534,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * read the global session list by different condition
+     *
      * @param sessionCondition the session condition
      * @return the global sessions
      */
@@ -572,9 +595,10 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * assemble the global session and branch session
-     * @param globalTransactionDO the global transactionDo
+     *
+     * @param globalTransactionDO  the global transactionDo
      * @param branchTransactionDOs the branch transactionDos
-     * @param withBranchSessions if read branch sessions
+     * @param withBranchSessions   if read branch sessions
      * @return the global session with branch session
      */
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
@@ -590,7 +614,8 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**
      * read the global session by transactionId
-     * @param transactionId the transaction id
+     *
+     * @param transactionId      the transaction id
      * @param withBranchSessions if read branch sessions
      * @return the global session
      */
@@ -602,7 +627,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             if (CollectionUtils.isEmpty(map)) {
                 return null;
             }
-            GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO)BeanUtils.mapToObject(map, GlobalTransactionDO.class);
+            GlobalTransactionDO globalTransactionDO = (GlobalTransactionDO) BeanUtils.mapToObject(map, GlobalTransactionDO.class);
             if (globalTransactionDO != null) {
                 xid = globalTransactionDO.getXid();
             }
@@ -614,11 +639,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
     }
 
-
     /**
      * Read the branch session list by xid
+     *
      * @param jedis the jedis
-     * @param xid the xid
+     * @param xid   the xid
      * @return the branch transactionDo list
      */
     private List<BranchTransactionDO> readBranchSessionByXid(Jedis jedis, String xid) {
@@ -631,9 +656,9 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 List<Object> branchInfos = pipeline.syncAndReturnAll();
                 for (Object branchInfo : branchInfos) {
                     if (branchInfo != null) {
-                        Map<String, String> branchInfoMap = (Map<String, String>)branchInfo;
+                        Map<String, String> branchInfoMap = (Map<String, String>) branchInfo;
                         Optional<BranchTransactionDO> branchTransactionDO = Optional.ofNullable(
-                            (BranchTransactionDO)BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
+                            (BranchTransactionDO) BeanUtils.mapToObject(branchInfoMap, BranchTransactionDO.class));
                         branchTransactionDO.ifPresent(branchTransactionDOs::add);
                     }
                 }
@@ -651,7 +676,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         int limit = 20;
         int start = 0;
         int stop = limit;
-        for (;;) {
+        for (; ; ) {
             values = jedis.lrange(key, start, stop);
             keys.addAll(values);
             if (CollectionUtils.isEmpty(values) || values.size() < limit) {
@@ -742,7 +767,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
             statusKeys.stream().forEach(statusKey -> pipelined.llen(statusKey));
-            List<Long> list = (List<Long>)(List)pipelined.syncAndReturnAll();
+            List<Long> list = (List<Long>) (List) pipelined.syncAndReturnAll();
             if (list.size() > 0) {
                 total = list.stream().mapToLong(value -> value).sum();
             }
@@ -759,7 +784,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private void dogetXidsForTargetMapRecursive(Map<String, Integer> targetMap, long start, long end,
-                                                long queryCount, List<List<String>> listList) {
+        long queryCount, List<List<String>> listList) {
 
         long total = listList.stream().mapToLong(List::size).sum();
 
@@ -805,7 +830,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     private List<List<String>> dogetXidsForTargetMap(Map<String, Integer> targetMap, int start, int end,
-                                                     int totalCount) {
+        int totalCount) {
         List<List<String>> listList = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             for (String key : targetMap.keySet()) {
@@ -822,19 +847,19 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return listList;
     }
 
-    private String buildBranchListKeyByXid(String xid) {
+    protected String buildBranchListKeyByXid(String xid) {
         return REDIS_SEATA_BRANCHES_PREFIX + xid;
     }
 
-    private String buildGlobalKeyByTransactionId(Object transactionId) {
+    protected String buildGlobalKeyByTransactionId(Object transactionId) {
         return REDIS_SEATA_GLOBAL_PREFIX + transactionId;
     }
 
-    private String buildBranchKey(Long branchId) {
+    protected String buildBranchKey(Long branchId) {
         return REDIS_SEATA_BRANCH_PREFIX + branchId;
     }
 
-    private String buildGlobalStatus(Integer status) {
+    protected String buildGlobalStatus(Integer status) {
         return REDIS_SEATA_STATUS_PREFIX + status;
     }
 

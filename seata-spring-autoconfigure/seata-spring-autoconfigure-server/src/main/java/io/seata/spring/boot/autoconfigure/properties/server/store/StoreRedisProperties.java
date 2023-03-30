@@ -18,6 +18,9 @@ package io.seata.spring.boot.autoconfigure.properties.server.store;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
+import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
+import static io.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
@@ -32,11 +35,12 @@ public class StoreRedisProperties {
      * single, sentinel
      */
     private String mode = "single";
+    private String type = "pipeline";
+    private Integer maxConn = DEFAULT_REDIS_MAX_IDLE;
     private String password = null;
-    private Integer maxConn = 10;
-    private Integer minConn = 1;
+    private Integer minConn = DEFAULT_REDIS_MIN_IDLE;
     private Integer database = 0;
-    private Integer queryLimit = 100;
+    private Integer queryLimit = DEFAULT_QUERY_LIMIT;
     private Integer maxTotal = 100;
 
     public String getMode() {
@@ -45,6 +49,15 @@ public class StoreRedisProperties {
 
     public StoreRedisProperties setMode(String mode) {
         this.mode = mode;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public StoreRedisProperties setType(String type) {
+        this.type = type;
         return this;
     }
 
@@ -102,7 +115,6 @@ public class StoreRedisProperties {
         return this;
     }
 
-
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SINGLE_PREFIX)
     public static class Single {
@@ -128,16 +140,14 @@ public class StoreRedisProperties {
         }
     }
 
-
-
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
     public static class Sentinel {
-        private String masterName = "";
+        private String masterName;
         /**
          * such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
          */
-        private String sentinelHosts = "";
+        private String sentinelHosts;
 
         public String getMasterName() {
             return masterName;

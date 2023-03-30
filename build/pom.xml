@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.6.0-SNAPSHOT</revision>
+        <revision>2.0.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -73,12 +73,16 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.4.13</spring-boot.version>
-        <spring-framework.version>5.3.18</spring-framework.version>
+        <spring-boot.version>2.5.13</spring-boot.version>
+        <spring-framework.version>5.3.20</spring-framework.version>
+
+        <!-- For test -->
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit-platform.version>1.8.2</junit-platform.version>
 
         <!-- Maven plugin versions -->
         <!-- Build -->
-        <easyj-maven-plugin.version>1.0.5</easyj-maven-plugin.version>
+        <easyj-maven-plugin.version>1.1.5</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -122,6 +126,7 @@
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
+        <image.name>${IMAGE_NAME}</image.name>
         <image.tags>latest</image.tags>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
@@ -159,6 +164,11 @@
                     <groupId>org.xolstice.maven.plugins</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
                     <version>${protobuf-maven-plugin.version}</version>
+                    <configuration>
+                        <!-- Solve the problem that protobuf compilation fails due to too long command line under the window operating system,
+                        ref: https://www.xolstice.org/protobuf-maven-plugin/usage.html -->
+                        <useArgumentFile>true</useArgumentFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>com.mycila</groupId>
@@ -291,9 +301,6 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
-            <properties>
-                <image.tags>${project.version},latest</image.tags>
-            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
