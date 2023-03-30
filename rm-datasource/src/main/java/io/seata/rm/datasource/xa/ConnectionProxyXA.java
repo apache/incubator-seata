@@ -21,6 +21,8 @@ import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
+
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -30,6 +32,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.util.SeataXAResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +65,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private volatile Long prepareTime = null;
 
     private volatile Integer timeout = null;
-    
+
     private boolean shouldBeHeld = false;
 
     /**
@@ -265,7 +268,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private synchronized void start() throws XAException, SQLException {
         // 3. XA Start
-        xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
+        if (JdbcConstants.ORACLE.equals(resource.getDbType())) {
+            xaResource.start(this.xaBranchXid, SeataXAResource.ORATRANSLOOSE);
+        } else {
+            xaResource.start(this.xaBranchXid, XAResource.TMNOFLAGS);
+        }
+
         try {
             termination();
         } catch (SQLException e) {

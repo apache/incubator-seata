@@ -194,7 +194,7 @@ public class SagaCore extends AbstractCore {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
             SessionHelper.removeAllBranch(globalSession, false);
-            SessionHelper.endCommitted(globalSession,false);
+            SessionHelper.endCommitted(globalSession, false);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
