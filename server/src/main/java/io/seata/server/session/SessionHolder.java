@@ -83,9 +83,6 @@ public class SessionHolder {
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
-    private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
-    private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
-    private static SessionManager RETRY_ROLLBACKING_SESSION_MANAGER;
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
@@ -102,14 +99,9 @@ public class SessionHolder {
         if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
+        LOGGER.info("use session store mode: {}", sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName(),
-                new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.DB.getName());
         } else if (SessionMode.FILE.equals(sessionMode)) {
@@ -120,19 +112,10 @@ public class SessionHolder {
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                 new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-            ASYNC_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            RETRY_COMMITTING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
-            RETRY_ROLLBACKING_SESSION_MANAGER = ROOT_SESSION_MANAGER;
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.FILE.getName());
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[]{ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[]{RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class,
-                SessionMode.REDIS.getName(), new Object[]{RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
         } else {
@@ -172,11 +155,8 @@ public class SessionHolder {
                             removeInErrorState(globalSession);
                             break;
                         case AsyncCommitting:
-                            queueToAsyncCommitting(globalSession);
-                            break;
                         case Committing:
                         case CommitRetrying:
-                            queueToRetryCommit(globalSession);
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());
@@ -187,7 +167,6 @@ public class SessionHolder {
                                 case TimeoutRollbackRetrying:
                                     globalSession.getBranchSessions().parallelStream()
                                         .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-                                    queueToRetryRollback(globalSession);
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
@@ -239,14 +218,6 @@ public class SessionHolder {
         }
     }
 
-    private static void queueToAsyncCommitting(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getAsyncCommittingSessionManager());
-            getAsyncCommittingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
-    }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         branchSessions.forEach(branchSession -> {
@@ -258,23 +229,7 @@ public class SessionHolder {
         });
     }
 
-    private static void queueToRetryCommit(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
-            getRetryCommittingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
-    }
 
-    private static void queueToRetryRollback(GlobalSession globalSession) {
-        try {
-            globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
-            getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-        } catch (TransactionException e) {
-            throw new ShouldNeverHappenException(e);
-        }
-    }
 
     //endregion
 
@@ -290,45 +245,6 @@ public class SessionHolder {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return ROOT_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets async committing session manager.
-     *
-     * @return the async committing session manager
-     */
-    @Deprecated
-    public static SessionManager getAsyncCommittingSessionManager() {
-        if (ASYNC_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return ASYNC_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry committing session manager.
-     *
-     * @return the retry committing session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryCommittingSessionManager() {
-        if (RETRY_COMMITTING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_COMMITTING_SESSION_MANAGER;
-    }
-
-    /**
-     * Gets retry rollbacking session manager.
-     *
-     * @return the retry rollbacking session manager
-     */
-    @Deprecated
-    public static SessionManager getRetryRollbackingSessionManager() {
-        if (RETRY_ROLLBACKING_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return RETRY_ROLLBACKING_SESSION_MANAGER;
     }
 
     //endregion

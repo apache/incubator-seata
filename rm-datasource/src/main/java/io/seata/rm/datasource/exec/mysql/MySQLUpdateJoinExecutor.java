@@ -132,10 +132,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
+        suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoin.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
 
@@ -202,11 +201,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
-        suffix += buildGroupBy(pkColumns,needUpdateColumns);
+        suffix += buildGroupBy(pkColumns, needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoiner.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
 
@@ -260,6 +257,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
      * @param afterImage  the after image
      * @return sql undo log
      */
+    @Override
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = beforeImage.getTableName();

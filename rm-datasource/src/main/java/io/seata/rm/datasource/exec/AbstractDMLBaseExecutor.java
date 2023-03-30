@@ -25,15 +25,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,23 +94,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        if (!JdbcConstants.MYSQL.equalsIgnoreCase(getDbType()) && isMultiPk()) {
-            throw new NotSupportYetException("multi pk only support mysql!");
+        try {
+            TableRecords beforeImage = beforeImage();
+            T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLog(beforeImage, afterImage);
+            return result;
+        } catch (TableMetaException e) {
+            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}",
+                e.getTableName(), e.getColumnName());
+            statementProxy.getConnectionProxy().getDataSourceProxy().tableMetaRefreshEvent();
+            throw e;
         }
-        // mock connectionProxy#getDataSourceProxy is empty
-        boolean beforeDml = statementProxy.getConnectionProxy().getDataSourceProxy() == null
-                            || statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() == null;
-        TableRecords beforeImage = null;
-        if (beforeDml) {
-            beforeImage = beforeImage();
-        }
-        T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        if (!beforeDml) {
-            beforeImage = beforeImage();
-        }
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLog(beforeImage, afterImage);
-        return result;
     }
 
     private boolean isMultiPk() {

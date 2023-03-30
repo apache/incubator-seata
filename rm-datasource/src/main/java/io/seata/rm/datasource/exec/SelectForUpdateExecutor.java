@@ -149,6 +149,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         if (StringUtils.isNotBlank(limitCondition)) {
             selectSQLAppender.append(" ").append(limitCondition);
         }
+        selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();
     }
 }

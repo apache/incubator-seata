@@ -79,6 +79,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
         if (whereCondition.length() > 0) {
             suffix.append(" WHERE ").append(whereCondition);
         }
+        suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());
         for (String column : tmeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(ColumnUtils.addEscape(column, getDbType())));

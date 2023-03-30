@@ -137,10 +137,5 @@
             <artifactId>commons-logging</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 </project>

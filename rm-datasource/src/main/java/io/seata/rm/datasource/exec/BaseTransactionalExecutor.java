@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -461,16 +460,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         ResultSet rs = null;
-        Connection connection;
-        boolean seataDatasource = statementProxy.getConnectionProxy().getDataSourceProxy() != null
-            && statementProxy.getConnectionProxy().getDataSourceProxy().getSeataDataSource() != null;
-        if (seataDatasource) {
-            connection = statementProxy.getConnectionProxy().getDataSourceProxy().getSeataConnection();
-        } else {
-            connection = statementProxy.getConnection();
-            selectSQL = selectSQL + " FOR UPDATE";
-        }
-        try (PreparedStatement ps = connection.prepareStatement(selectSQL)) {
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
@@ -482,9 +472,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            if (seataDatasource) {
-                IOUtil.close(connection);
-            }
             IOUtil.close(rs);
         }
     }
@@ -509,7 +496,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumnsIsSimplified());
+            columns.addAll(recognizer.getInsertColumnsUnEscape());
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(columnName);

@@ -17,14 +17,12 @@ package io.seata.rm.datasource;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.Properties;
 import javax.sql.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,25 +43,9 @@ public class DataSourceProxyTest {
     }
 
     @Test
-    public void test_HikariDataSource() {
-        final MockDriver mockDriver = new MockDriver();
-        final String username = "username";
-        final String jdbcUrl = "jdbc:mock:xxx";
-        Properties properties = new Properties();
-        HikariConfig config = new HikariConfig(properties);
-        config.setDriverClassName(mockDriver.getClass().getName());
-        config.setJdbcUrl(jdbcUrl);
-        config.setUsername(username);
-        DataSource dataSource = new HikariDataSource(config);
-
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
-        Assertions.assertInstanceOf(HikariDataSource.class, dataSourceProxy.targetDataSource);
-    }
-
-    @Test
     public void getResourceIdTest() throws SQLException, NoSuchFieldException, IllegalAccessException {
         // Disable 'DataSourceProxy.tableMetaExecutor' to prevent unit tests from being affected
-        Field enableField = DataSourceProxy.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
+        Field enableField = TableMetaCacheFactory.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
         enableField.setAccessible(true);
         enableField.set(null, false);
 
@@ -81,7 +63,7 @@ public class DataSourceProxyTest {
 
         // create data source proxy
         final DataSourceProxy proxy = new DataSourceProxy(dataSource);
-        Assertions.assertNull(proxy.getSeataDataSource());
+
         // get fields
         Field resourceIdField = proxy.getClass().getDeclaredField("resourceId");
         resourceIdField.setAccessible(true);

@@ -112,6 +112,9 @@ public interface DefaultValues {
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
+    // default tcc business action context json parser
+    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "fastjson";
+
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
     String DEFAULT_LOAD_BALANCE = "XID";
@@ -148,22 +151,27 @@ public interface DefaultValues {
     int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
 
     /**
+     * the constant SAGA_ACTION_INTERCEPTOR_ORDER
+     */
+    int SAGA_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+
+    /**
      * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
      */
     int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
 
     /**
-     * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
+     * the constant DEFAULT_COMMON_FENCE_CLEAN_PERIOD
      */
-    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
+    int DEFAULT_COMMON_FENCE_CLEAN_PERIOD = 1;
     /**
-     * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
+     * the constant DEFAULT_COMMON_FENCE_LOG_TABLE_NAME
      */
-    String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
+    String DEFAULT_COMMON_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
     /**
-     * the constant TCC_FENCE_BEAN_NAME
+     * the constant COMMON_FENCE_BEAN_NAME
      */
-    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+    String COMMON_FENCE_BEAN_NAME = "tccFenceConfig";
 
     /**
      * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT

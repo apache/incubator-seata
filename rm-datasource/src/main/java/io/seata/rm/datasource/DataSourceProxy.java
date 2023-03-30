@@ -15,26 +15,17 @@
  */
 package io.seata.rm.datasource;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
-import com.alibaba.druid.mock.MockDriver;
-import com.alibaba.druid.pool.DruidDataSource;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.Constants;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
@@ -43,11 +34,6 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -60,11 +46,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT";
 
-    /**
-     * The seata data source.
-     */
-    private DataSource seataDataSource;
-
     private String resourceGroupId;
 
     private String jdbcUrl;
@@ -76,21 +57,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String userName;
 
     private String version;
-
-    /**
-     * Enable the table meta checker
-     */
-    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
-
-    /**
-     * Table meta checker interval
-     */
-    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
-            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
-
-    private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
      * Instantiates a new Data source proxy.
@@ -111,68 +77,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (targetDataSource instanceof SeataDataSourceProxy) {
             LOGGER.info("Unwrap the target data source, because the type is: {}", targetDataSource.getClass().getName());
             targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
-        } else {
-            initSeataDataSource(targetDataSource);
         }
         this.targetDataSource = targetDataSource;
         init(targetDataSource, resourceGroupId);
-    }
-
-    private void initSeataDataSource(DataSource targetDataSource) {
-        try {
-            Class.forName("com.alibaba.druid.pool.DruidDataSource");
-            if (targetDataSource instanceof DruidDataSource) {
-                DruidDataSource druidDataSource = (DruidDataSource)targetDataSource;
-                Driver driver = druidDataSource.getDriver();
-                if (!(driver instanceof MockDriver)) {
-                    DruidDataSource seataDataSource = new DruidDataSource();
-                    seataDataSource.setDriver(driver);
-                    seataDataSource.setDriverClassName(druidDataSource.getDriverClassName());
-                    seataDataSource.setDriverClassLoader(druidDataSource.getDriverClassLoader());
-                    int maxActive =
-                        Math.max(5, BigDecimal.valueOf(druidDataSource.getMaxActive())
-                            .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
-                    seataDataSource.setMaxActive(maxActive);
-                    seataDataSource.setPassword(druidDataSource.getPassword());
-                    seataDataSource.setUsername(druidDataSource.getUsername());
-                    int minIdle =
-                        Math.max(2, BigDecimal.valueOf(druidDataSource.getMinIdle())
-                            .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
-                    seataDataSource.setMinIdle(minIdle);
-                    seataDataSource.setMaxWait(druidDataSource.getMaxWait());
-                    seataDataSource.setKeepAlive(druidDataSource.isKeepAlive());
-                    seataDataSource.setKeepAliveBetweenTimeMillis(druidDataSource.getKeepAliveBetweenTimeMillis());
-                    seataDataSource.setDbType(druidDataSource.getDbType());
-                    seataDataSource.setUrl(druidDataSource.getUrl());
-                    try {
-                        seataDataSource.init();
-                    } catch (SQLException e) {
-                        LOGGER.info("create seata at mode datasource fail error: {}", e.getMessage());
-                        seataDataSource.close();
-                    }
-                    this.seataDataSource = seataDataSource;
-                }
-            }
-            return;
-        } catch (ClassNotFoundException ignored) {
-        }
-        try {
-            Class.forName("com.zaxxer.hikari.HikariDataSource");
-            if (targetDataSource instanceof HikariConfig) {
-                HikariConfig hikariConfig = new HikariConfig();
-                hikariConfig.copyStateTo((HikariConfig)targetDataSource);
-                int maxActive =
-                    Math.max(5, BigDecimal.valueOf(hikariConfig.getMaximumPoolSize())
-                        .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
-                hikariConfig.setMaximumPoolSize(maxActive);
-                int minIdle =
-                    Math.max(2, BigDecimal.valueOf(hikariConfig.getMinimumIdle())
-                        .divide(BigDecimal.valueOf(3), RoundingMode.HALF_UP).intValue());
-                hikariConfig.setMinimumIdle(minIdle);
-                this.seataDataSource = new HikariDataSource(hikariConfig);
-            }
-        } catch (ClassNotFoundException ignored) {
-        }
     }
 
     private void init(DataSource dataSource, String resourceGroupId) {
@@ -191,18 +98,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
-        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExecutor.scheduleAtFixedRate(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                        .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (Exception ignore) {
-                }
-            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
-        }
-
+        TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+    }
+
+    /**
+     * publish tableMeta refresh event
+     */
+    public void tableMetaRefreshEvent() {
+        TableMetaCacheFactory.tableMetaRefreshEvent(this.getResourceId());
     }
 
     /**
@@ -213,16 +118,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public Connection getPlainConnection() throws SQLException {
         return targetDataSource.getConnection();
-    }
-
-    /**
-     * Gets seata connection.
-     *
-     * @return the seata connection
-     * @throws SQLException the sql exception
-     */
-    public Connection getSeataConnection() throws SQLException {
-        return seataDataSource != null ? seataDataSource.getConnection() : null;
     }
 
     /**
@@ -356,14 +251,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         return BranchType.AT;
     }
 
-    public DataSource getSeataDataSource() {
-        return seataDataSource;
-    }
-
-    public void setSeataDataSource(DataSource seataDataSource) {
-        this.seataDataSource = seataDataSource;
-    }
-
     public String getVersion() {
         return version;
     }
@@ -381,5 +268,4 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         return "";
     }
-
 }
