@@ -43,6 +43,7 @@
     <!--<include resource="logback/metric-appender.xml"/>-->
     <!-- kafka-appender: off by default -->
     <!--<include resource="logback/kafka-appender.xml"/>-->
+
     <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
         <!-- console-appender -->
         <appender-ref ref="CONSOLE"/>
