@@ -82,7 +82,7 @@ final class ExtensionDefinition<S> {
         if (!order.equals(other.order)) {
             return false;
         }
-        return !scope.equals(other.scope);
+        return scope.equals(other.scope);
     }
 
     public String getName() {
