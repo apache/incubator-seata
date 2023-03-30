@@ -39,18 +39,11 @@
 
     <!-- logstash-appender: off by default -->
     <!--<include resource="logback/logstash-appender.xml"/>-->
-
-    <!-- kafka-appender: off by default -->
-    <!--<include resource="logback/kafka-appender.xml"/>-->
-<<<<<<< HEAD
-    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
-=======
-
     <!-- metric-appender: off by default -->
     <!--<include resource="logback/metric-appender.xml"/>-->
-
-    <root level="INFO">
->>>>>>> faea6fb881774364c6281322fbbbd13a526c3c11
+    <!-- kafka-appender: off by default -->
+    <!--<include resource="logback/kafka-appender.xml"/>-->
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
         <!-- console-appender -->
         <appender-ref ref="CONSOLE"/>
         <discardingThreshold>0</discardingThreshold>
