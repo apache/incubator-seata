@@ -1,8 +1,8 @@
 name: "test"
 
 on:
-  pull_request:
-    branches: [ native ]
+  push:
+    branches: [ test*, "*.*.*" ]
 
 jobs:
   # job 1
