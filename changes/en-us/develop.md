@@ -3,7 +3,7 @@ Add changes here for all PR submitted to the develop branch.
 <!-- Please add the `changes` to the following location(feature/bugfix/optimize/test) based on the type of PR -->
 
 ### feature:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
+- [[#5476](https://github.com/seata/seata/pull/5476)] First support `native-image` for `seata-client`
 
 ### bugfix:
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table

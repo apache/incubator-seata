@@ -3,7 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
+- [[#5476](https://github.com/seata/seata/pull/5476)] seata客户端，首次支持 `native-image`
 
 ### bugfix:
 - [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
