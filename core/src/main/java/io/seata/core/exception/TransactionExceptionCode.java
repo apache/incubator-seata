@@ -125,8 +125,17 @@ public enum TransactionExceptionCode {
     /**
      * transaction already timeout
      */
-    TransactionTimeout
-    ;
+    TransactionTimeout,
+
+    /**
+     * Commit heuristic transaction exception code.
+     */
+    CommitHeuristic,
+
+    /**
+     * Broken transaction exception code.
+     */
+    Broken;
 
 
     /**
