@@ -35,7 +35,6 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import static io.seata.core.model.LockStatus.Locked;
 
 /**
@@ -84,7 +83,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     public BranchSession(BranchType branchType) {
         this.branchType = branchType;
-        this.lockHolder = new ConcurrentHashMap<>(8);
+        this.lockHolder = branchType == BranchType.AT ? new ConcurrentHashMap<>(8) : Collections.emptyMap();
     }
 
     /**
