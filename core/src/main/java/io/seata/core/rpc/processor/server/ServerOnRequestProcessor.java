@@ -146,19 +146,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         Object message = rpcMessage.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
-        } else {
-            try {
-                BatchLogHandler.INSTANCE.getLogQueue()
-                    .put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                        + rpcContext.getTransactionServiceGroup());
-            } catch (InterruptedException e) {
-                LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
-            }
-        }
         if (!(message instanceof AbstractMessage)) {
+            LOGGER.error("unrecognized message:{}", message);
             return;
         }
         // the batch send request message
@@ -209,8 +198,18 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         } else {
             // the single send request message
             final AbstractMessage msg = (AbstractMessage) message;
+            if (LOGGER.isInfoEnabled()) {
+                String receiveMsgLog = String.format("receive msg[single]: %s, clientIp: %s, vgroup: %s", message,
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
+            }
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
+            if (LOGGER.isInfoEnabled()) {
+                String resultMsgLog = String.format("result msg[single]: %s, clientIp: %s, vgroup: %s", result,
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
+            }
         }
     }
 
@@ -281,7 +280,18 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
      * @param rpcContext rpcContext
      */
     private AbstractResultMessage handleRequestsByMergedWarpMessage(AbstractMessage subMessage, RpcContext rpcContext) {
-        return transactionMessageHandler.onRequest(subMessage, rpcContext);
+        if (LOGGER.isInfoEnabled()) {
+            String receiveMsgLog = String.format("receive msg[merged]: %s, clientIp: %s, vgroup: %s", subMessage,
+                NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+            BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
+        }
+        AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(subMessage, rpcContext);
+        if (LOGGER.isInfoEnabled()) {
+            String resultMsgLog = String.format("result msg[merged]: %s, clientIp: %s, vgroup: %s", resultMessage,
+                NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+            BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
+        }
+        return resultMessage;
     }
 
     /**
@@ -294,10 +304,20 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
      */
     private void handleRequestsByMergedWarpMessageBy150(AbstractMessage msg, int msgId, RpcMessage rpcMessage,
         ChannelHandlerContext ctx, RpcContext rpcContext) {
+        if (LOGGER.isInfoEnabled()) {
+            String receiveMsgLog = String.format("receive msg[merged]: %s, clientIp: %s, vgroup: %s", msg,
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+            BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
+        }
         AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msg, rpcContext);
         BlockingQueue<QueueItem> msgQueue = computeIfAbsentMsgQueue(ctx.channel());
         offerMsg(msgQueue, rpcMessage, resultMessage, msgId, ctx.channel());
         notifyBatchRespondingThread();
+        if (LOGGER.isInfoEnabled()) {
+            String resultMsgLog = String.format("result msg[merged]: %s, clientIp: %s, vgroup: %s", resultMessage,
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+            BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
+        }
     }
 
     /**
