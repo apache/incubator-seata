@@ -78,13 +78,10 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("timeout=");
-        result.append(timeout);
-        result.append(",");
-        result.append("transactionName=");
-        result.append(transactionName);
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder("GlobalBeginRequest{");
+        sb.append("transactionName='").append(transactionName).append('\'');
+        sb.append(", timeout=").append(timeout);
+        sb.append('}');
+        return sb.toString();
     }
 }

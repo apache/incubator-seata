@@ -87,11 +87,4 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
         return MessageType.TYPE_REG_CLT;
     }
 
-    @Override
-    public String toString() {
-        return "RegisterTMRequest{" +
-            "applicationId='" + applicationId + '\'' +
-            ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
-            '}';
-    }
 }

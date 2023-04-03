@@ -33,7 +33,7 @@ public class GlobalRollbackRequestTest {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
         globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
         globalRollbackRequest.setExtraData("test_extra_data");
-        Assertions.assertEquals("xid=127.0.0.1:8091:1249853,extraData=test_extra_data", globalRollbackRequest.toString());
+        Assertions.assertEquals("GlobalRollbackRequest{xid='127.0.0.1:8091:1249853', extraData='test_extra_data'}", globalRollbackRequest.toString());
     }
 
 }

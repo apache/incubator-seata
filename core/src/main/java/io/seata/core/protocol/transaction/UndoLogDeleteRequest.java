@@ -78,10 +78,11 @@ public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM impleme
 
     @Override
     public String toString() {
-        return "UndoLogDeleteRequest{" +
-                "resourceId='" + resourceId + '\'' +
-                ", saveDays=" + saveDays +
-                ", branchType=" + branchType +
-                '}';
+        final StringBuilder sb = new StringBuilder("UndoLogDeleteRequest{");
+        sb.append("resourceId='").append(resourceId).append('\'');
+        sb.append(", saveDays=").append(saveDays);
+        sb.append(", branchType=").append(branchType);
+        sb.append('}');
+        return sb.toString();
     }
 }

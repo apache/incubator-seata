@@ -22,9 +22,9 @@ package io.seata.core.protocol;
  */
 public abstract class AbstractResultMessage extends AbstractMessage  {
 
-    private ResultCode resultCode;
+    protected ResultCode resultCode;
 
-    private String msg;
+    protected String msg;
 
     /**
      * Gets result code.

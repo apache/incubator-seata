@@ -94,22 +94,14 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("xid=");
-        result.append(xid);
-        result.append(",");
-        result.append("branchId=");
-        result.append(branchId);
-        result.append(",");
-        result.append("branchStatus=");
-        result.append(branchStatus);
-        result.append(",");
-        result.append("result code =");
-        result.append(getResultCode());
-        result.append(",");
-        result.append("getMsg =");
-        result.append(getMsg());
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(", branchId=").append(branchId);
+        sb.append(", branchStatus=").append(branchStatus);
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

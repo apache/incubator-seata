@@ -58,4 +58,14 @@ public class GlobalReportRequest extends AbstractGlobalEndRequest {
     public void setGlobalStatus(GlobalStatus globalStatus) {
         this.globalStatus = globalStatus;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("GlobalReportRequest{");
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(",globalStatus=").append(globalStatus);
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

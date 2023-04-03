@@ -15,6 +15,9 @@
  */
 package io.seata.core.rpc.processor.server;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -28,9 +31,6 @@ import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * handle RM/TM response message.
@@ -66,6 +66,11 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+        String receiveMsgLog = String.format("receive msg[single]: %s, clientIp: %s, vgroup: %s", rpcMessage.getBody(), NetUtil.toIpAddress(ctx.channel().remoteAddress()),
+            ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
+        if (LOGGER.isInfoEnabled()) {
+            BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
+        }
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage.getBody());
         } else {
@@ -73,9 +78,6 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
                 onResponseMessage(ctx, rpcMessage);
             } else {
                 try {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
-                    }
                     ctx.disconnect();
                     ctx.close();
                 } catch (Exception exx) {
@@ -89,19 +91,6 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
     }
 
     private void onResponseMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", rpcMessage.getBody(),
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()),
-                ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
-        } else {
-            try {
-                BatchLogHandler.INSTANCE.getLogQueue()
-                    .put(rpcMessage.getBody() + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                        + ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
-            } catch (InterruptedException e) {
-                LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
-            }
-        }
         if (rpcMessage.getBody() instanceof AbstractResultMessage) {
             RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
             transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), rpcContext);
