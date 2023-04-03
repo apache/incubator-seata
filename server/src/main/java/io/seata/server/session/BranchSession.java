@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -72,10 +74,18 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private LockStatus lockStatus = Locked;
 
-    private Map<FileLocker.BucketLockMap, Set<String>> lockHolder
-        = Collections.emptyMap();
+    private final Map<FileLocker.BucketLockMap, Set<String>> lockHolder;
 
     private final LockManager lockManager = LockerManagerFactory.getLockManager();
+
+    public BranchSession() {
+        lockHolder = Collections.emptyMap();
+    }
+
+    public BranchSession(BranchType branchType) {
+        this.branchType = branchType;
+        this.lockHolder = new ConcurrentHashMap<>(8);
+    }
 
     /**
      * Gets application data.
@@ -278,14 +288,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      */
     public Map<FileLocker.BucketLockMap, Set<String>> getLockHolder() {
         return lockHolder;
-    }
-
-    /**
-     * Set lock holder.
-     *
-     */
-    public void setLockHolder(Map<FileLocker.BucketLockMap, Set<String>> lockHolder) {
-        this.lockHolder = lockHolder;
     }
 
     @Override

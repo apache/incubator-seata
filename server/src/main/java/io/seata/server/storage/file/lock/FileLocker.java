@@ -75,7 +75,7 @@ public class FileLocker extends AbstractLocker {
         String resourceId = branchSession.getResourceId();
         long transactionId = branchSession.getTransactionId();
 
-        Map<BucketLockMap, Set<String>> bucketHolder = new ConcurrentHashMap<>(8);
+        Map<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
         Map<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = CollectionUtils.computeIfAbsent(
             LOCK_MAP, resourceId, key -> new ConcurrentHashMap<>(8));
         boolean failFast = false;
@@ -101,7 +101,6 @@ public class FileLocker extends AbstractLocker {
                 LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
                 try {
                     if (CollectionUtils.isNotEmpty(bucketHolder)) {
-                        branchSession.setLockHolder(bucketHolder);
                         // Release all acquired locks.
                         branchSession.unlock();
                     }
@@ -122,9 +121,6 @@ public class FileLocker extends AbstractLocker {
         }
         if (failFast) {
             throw new StoreException(new BranchTransactionException(LockKeyConflictFailFast));
-        }
-        if (CollectionUtils.isNotEmpty(bucketHolder)) {
-            branchSession.setLockHolder(bucketHolder);
         }
         return canLock;
     }
