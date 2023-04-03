@@ -28,4 +28,13 @@ public class BranchReportResponse extends AbstractTransactionResponse {
     public short getTypeCode() {
         return MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BranchReportResponse{");
+        sb.append("resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

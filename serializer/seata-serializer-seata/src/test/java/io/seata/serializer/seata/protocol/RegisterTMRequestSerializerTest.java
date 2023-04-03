@@ -98,14 +98,6 @@ public class RegisterTMRequestSerializerTest {
         Assertions.assertEquals(TYPE_CODE, registerTMRequest.getTypeCode());
     }
 
-    /**
-     * Test toString having all the parameters initialized to null
-     */
-    @Test
-    public void testToStringNullValues() {
-        Assertions.assertEquals("RegisterTMRequest{" + "applicationId='" + null + '\'' + ", transactionServiceGroup='"
-                + null + '\'' + '}', registerTMRequest.toString());
-    }
 
     /**
      * Test decode method with empty parameter

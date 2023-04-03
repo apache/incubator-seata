@@ -138,4 +138,15 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
         this.extraData = extraData;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("version='").append(version).append('\'');
+        sb.append(", applicationId='").append(applicationId).append('\'');
+        sb.append(", transactionServiceGroup='").append(transactionServiceGroup).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

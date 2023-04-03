@@ -33,7 +33,7 @@ public class BranchRollbackResponseTest {
         branchRollbackResponse.setResultCode(ResultCode.Success);
         branchRollbackResponse.setMsg("");
         Assertions.assertEquals(
-            "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
+            "BranchRollbackResponse{xid='127.0.0.1:8091:123456', branchId=2345678, branchStatus=PhaseOne_Done, resultCode=Success, msg=''}",
             branchRollbackResponse.toString());
 
     }

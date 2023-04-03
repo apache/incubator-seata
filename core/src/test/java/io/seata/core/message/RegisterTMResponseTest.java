@@ -37,7 +37,7 @@ public class RegisterTMResponseTest {
         registerTMResponse.setVersion("1");
         registerTMResponse.setIdentified(true);
         registerTMResponse.setResultCode(ResultCode.Success);
-        Assertions.assertEquals("version=1,extraData=null,identified=true,resultCode=Success,msg=null",
+        Assertions.assertEquals("RegisterTMResponse{version='1', extraData='null', identified=true, resultCode=Success, msg='null'}",
                 registerTMResponse.toString());
     }
 }

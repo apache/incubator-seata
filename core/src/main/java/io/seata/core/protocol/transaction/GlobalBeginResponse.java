@@ -69,4 +69,14 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
         return MessageType.TYPE_GLOBAL_BEGIN_RESULT;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("GlobalBeginResponse{");
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

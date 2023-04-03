@@ -160,22 +160,14 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC {
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("xid=");
-        result.append(xid);
-        result.append(",");
-        result.append("branchId=");
-        result.append(branchId);
-        result.append(",");
-        result.append("resourceId=");
-        result.append(resourceId);
-        result.append(",");
-        result.append("status=");
-        result.append(status);
-        result.append(",");
-        result.append("applicationData=");
-        result.append(applicationData);
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder("BranchReportRequest{");
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(", branchId=").append(branchId);
+        sb.append(", resourceId='").append(resourceId).append('\'');
+        sb.append(", status=").append(status);
+        sb.append(", applicationData='").append(applicationData).append('\'');
+        sb.append(", branchType=").append(branchType);
+        sb.append('}');
+        return sb.toString();
     }
 }

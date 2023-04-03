@@ -38,9 +38,7 @@ public class BranchReportRequestTest {
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
         branchReportRequest.setApplicationData("test app data");
         Assertions.assertEquals(
-            "xid=127.0.0.1:8091:1249853,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,"
-                + "applicationData=test app"
-                + " data",
+            "BranchReportRequest{xid='127.0.0.1:8091:1249853', branchId=3, resourceId='resource003', status=PhaseOne_Timeout, applicationData='test app data', branchType=AT}",
             branchReportRequest.toString());
     }
 

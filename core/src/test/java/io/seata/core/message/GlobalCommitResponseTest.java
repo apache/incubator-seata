@@ -45,7 +45,7 @@ public class GlobalCommitResponseTest {
 
         System.out.println(globalCommitResponse.toString());
 
-        Assertions.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
+        Assertions.assertEquals("GlobalCommitResponse{globalStatus=Committed, resultCode=Success, msg='OK'}", globalCommitResponse.toString());
     }
 
 }
