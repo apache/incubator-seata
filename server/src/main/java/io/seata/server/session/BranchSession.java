@@ -78,7 +78,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private final LockManager lockManager = LockerManagerFactory.getLockManager();
 
     public BranchSession() {
-        lockHolder = Collections.emptyMap();
+        lockHolder = new ConcurrentHashMap<>(2);
     }
 
     public BranchSession(BranchType branchType) {
