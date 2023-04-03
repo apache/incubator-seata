@@ -172,4 +172,44 @@ public enum GlobalStatus {
         }
         return value;
     }
+
+    /**
+     * Is one phase timeout boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isOnePhaseTimeout(GlobalStatus status) {
+        if (status == TimeoutRollbacking || status == TimeoutRollbackRetrying || status == TimeoutRollbacked || status == TimeoutRollbackFailed) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is two phase success boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isTwoPhaseSuccess(GlobalStatus status) {
+        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
+            || status == GlobalStatus.TimeoutRollbacked) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is two phase heuristic boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isTwoPhaseHeuristic(GlobalStatus status) {
+        if (status == GlobalStatus.Finished) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -23,6 +23,7 @@ import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
+import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -214,19 +215,30 @@ public class TransactionalTemplate {
                 LOGGER.info("transaction {} will be commit", tx.getXid());
             }
             tx.commit();
+            GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
-            switch (tx.getLocalStatus()) {
+            switch (afterCommitStatus) {
                 case TimeoutRollbacking:
                     code = TransactionalExecutor.Code.Rollbacking;
                     break;
                 case TimeoutRollbacked:
                     code = TransactionalExecutor.Code.RollbackDone;
                     break;
+                case Finished:
+                    code = TransactionalExecutor.Code.CommitFailure;
+                    break;
                 default:
             }
-            if (code != TransactionalExecutor.Code.Unknown) {
-                Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout, String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
-                throw new TransactionalExecutor.ExecutionException(tx, exx, code);
+            Exception statusException = null;
+            if (GlobalStatus.isTwoPhaseHeuristic(afterCommitStatus)) {
+                statusException = new TmTransactionException(TransactionExceptionCode.CommitHeuristic,
+                    String.format("Global transaction[%s] not found, may be rollbacked.", tx.getXid()));
+            } else if (GlobalStatus.isOnePhaseTimeout(afterCommitStatus)) {
+                statusException = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
+                    String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
+            }
+            if (null != statusException) {
+                throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
             }
             triggerAfterCommit();
         } catch (TransactionException txe) {
