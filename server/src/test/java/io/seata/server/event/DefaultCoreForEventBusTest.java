@@ -57,6 +57,8 @@ public class DefaultCoreForEventBusTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
+        Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
+        Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
         StoreUtil.deleteDataFile();
         Thread.sleep(5000);
     }
