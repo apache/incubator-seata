@@ -120,7 +120,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        return branchSessions.remove(branchSession);
+        synchronized (this) {
+            return branchSessions.remove(branchSession);
+        }
     }
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
