@@ -63,9 +63,9 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static int keepAliveTime = Integer.parseInt(System.getProperty(
             ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
     private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.BusyPin.getValue())));
+            ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
     private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.BusyPin.getValue())));
+            ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
     private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
         DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
