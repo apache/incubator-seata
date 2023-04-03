@@ -44,9 +44,7 @@ public class LockerManagerFactory {
      * @return the lock manager
      */
     public static LockManager getLockManager() {
-        if (LOCK_MANAGER == null) {
-            init();
-        }
+        init();
         return LOCK_MANAGER;
     }
 
