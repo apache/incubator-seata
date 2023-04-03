@@ -206,9 +206,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             if (LOGGER.isInfoEnabled()) {
-                String receiveMsgLog = String.format("result msg[single]: %s, clientIp: %s, vgroup: %s", result,
+                String resultMsgLog = String.format("result msg[single]: %s, clientIp: %s, vgroup: %s", result,
                     NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
-                BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
+                BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
             }
         }
     }
