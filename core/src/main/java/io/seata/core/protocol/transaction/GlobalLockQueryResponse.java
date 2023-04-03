@@ -50,4 +50,13 @@ public class GlobalLockQueryResponse extends AbstractTransactionResponse {
         return MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("GlobalLockQueryResponse{");
+        sb.append("lockable=").append(lockable);
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
