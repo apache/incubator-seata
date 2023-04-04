@@ -1,8 +1,9 @@
 ---
 name: Feature Request
+
 about: Suggest an idea for Seata
 
-Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
+notice: Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
 
 ---
 
