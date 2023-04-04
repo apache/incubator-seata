@@ -20,8 +20,16 @@
 - [[#5299](https://github.com/seata/seata/pull/5299)] 修复TC端重试回滚或重试提交超时GlobalSession的删除问题
 - [[#5307](https://github.com/seata/seata/pull/5307)] 修复生成update前后镜像sql不对关键字转义的bug
 - [[#5311](https://github.com/seata/seata/pull/5311)] 移除基于文件存储恢复时的RollbackRetryTimeout事务
+- [[#4734](https://github.com/seata/seata/pull/4734)] 修复AT模式下新增字段产生的字段找不到
 - [[#5316](https://github.com/seata/seata/pull/5316)] 修复jdk8 中 G1 参数
+- [[#5321](https://github.com/seata/seata/pull/5321)] 修复当TC端回滚返回RollbackFailed时，自定义FailureHandler的方法未执行
 - [[#5332](https://github.com/seata/seata/pull/5332)] 修复单元测试中发现的bug
+- [[#5145](https://github.com/seata/seata/pull/5145)] 修复saga模式全局事务状态始终为Begin的问题
+- [[#5413](https://github.com/seata/seata/pull/5413)] 修复 arm64平台下的JDK和Spring兼容问题
+- [[#5415](https://github.com/seata/seata/pull/5415)] 修复客户侧事务提交前超时未执行hook和failureHandler的问题
+- [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
+- [[#5472](https://github.com/seata/seata/pull/5472)] 在RM中使用`@GlobalTransactional`时,如果RM执行失败会抛出`ShouldNeverHappenException`
+
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -36,13 +44,15 @@
 - [[#5325](https://github.com/seata/seata/pull/5325)] 添加配置中心、注册中心类型以及存储模式日志信息
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
+- [[#5414](https://github.com/seata/seata/pull/5414)] 优化事务失败处理 handler
 
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 
 ### test:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 增加 xxx 测试
+- [[#5380](https://github.com/seata/seata/pull/5380)] 修复 UpdateExecutorTest 单测失败问题
+- [[#5382](https://github.com/seata/seata/pull/5382)] 修复多Spring版本测试失败
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 

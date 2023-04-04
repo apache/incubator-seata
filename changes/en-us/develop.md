@@ -20,8 +20,15 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5299](https://github.com/seata/seata/pull/5299)] fix GlobalSession deletion when retry rollback or retry commit timeout
 - [[#5307](https://github.com/seata/seata/pull/5307)] fix that keywords don't add escaped characters
 - [[#5311](https://github.com/seata/seata/pull/5311)] remove RollbackRetryTimeout sessions during in file storage recover
+- [[#4734](https://github.com/seata/seata/pull/4734)] check if table meta cache should be refreshed in AT mode
 - [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
+- [[#5321](https://github.com/seata/seata/pull/5321)] fix When the rollback logic on the TC side returns RollbackFailed, the custom FailureHandler is not executed
 - [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
+- [[#5145](https://github.com/seata/seata/pull/5145)] fix global session is always begin in saga mode
+- [[#5413](https://github.com/seata/seata/pull/5413)] fix bad service configuration file and compilation failure
+- [[#5415](https://github.com/seata/seata/pull/5415)] fix transaction timeout on client side not execute hook and failureHandler
+- [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
+- [[#5472](https://github.com/seata/seata/pull/5472)] fix if using `@GlobalTransactional` in RM, `ShouldNeverHappenException` will be thrown
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -36,12 +43,14 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5325](https://github.com/seata/seata/pull/5325)] add store mode,config type and registry type log info
 - [[#5315](https://github.com/seata/seata/pull/5315)] optimize the log of SPI
 - [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
+- [[#5414](https://github.com/seata/seata/pull/5414)] optimize transaction fail handler
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
 
 ### test:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] add test for xxx
+- [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
+- [[#5382](https://github.com/seata/seata/pull/5382)] fix multi spring version test failed
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
