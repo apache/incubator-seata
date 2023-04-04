@@ -39,43 +39,22 @@
 
     <!-- logstash-appender: off by default -->
     <!--<include resource="logback/logstash-appender.xml"/>-->
-    <!-- metric-appender: off by default -->
-    <!--<include resource="logback/metric-appender.xml"/>-->
+
     <!-- kafka-appender: off by default -->
     <!--<include resource="logback/kafka-appender.xml"/>-->
 
-    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- console-appender -->
-        <appender-ref ref="CONSOLE"/>
-        <discardingThreshold>0</discardingThreshold>
-        <queueSize>2048</queueSize>
-        <neverBlock>true</neverBlock>
-    </appender>
-    <appender name="ASYNC_FILE_ALL" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- file-appender -->
-        <appender-ref ref="FILE_ALL"/>
-        <discardingThreshold>0</discardingThreshold>
-        <queueSize>2048</queueSize>
-        <neverBlock>true</neverBlock>
-    </appender>
-    <appender name="ASYNC_FILE_WARN" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="FILE_WARN"/>
-        <discardingThreshold>0</discardingThreshold>
-        <queueSize>1024</queueSize>
-        <neverBlock>true</neverBlock>
-    </appender>
-    <appender name="ASYNC_FILE_ERROR" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="FILE_ERROR"/>
-        <discardingThreshold>0</discardingThreshold>
-        <queueSize>1024</queueSize>
-        <neverBlock>true</neverBlock>
-    </appender>
+    <!-- metric-appender: off by default -->
+    <!--<include resource="logback/metric-appender.xml"/>-->
 
     <root level="INFO">
-        <appender-ref ref="ASYNC_CONSOLE"/>
-        <appender-ref ref="ASYNC_FILE_ALL"/>
-        <appender-ref ref="ASYNC_FILE_WARN"/>
-        <appender-ref ref="ASYNC_FILE_ERROR"/>
+        <!-- console-appender -->
+        <appender-ref ref="CONSOLE"/>
+
+        <!-- file-appender -->
+        <appender-ref ref="FILE_ALL"/>
+        <appender-ref ref="FILE_WARN"/>
+        <appender-ref ref="FILE_ERROR"/>
+
         <!-- logstash-appender: off by default -->
         <!--<appender-ref ref="LOGSTASH"/>-->
 
