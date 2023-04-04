@@ -1,8 +1,9 @@
 ---
 name: Bug Report
+
 about: If you would like to report an issue to Seata, please use this template.
 
-Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
+notice: Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
 
 ---
 
