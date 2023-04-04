@@ -111,8 +111,11 @@ You can view the full documentation from Seata Official Website: [Seata Website 
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/seata/seata/blob/develop/.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
+Please follow the [template](./.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
 
+## Security
+
+Please do not use our public issue tracker but refer to our [security policy](./SECURITY.md)
 
 ## Contributing
 
