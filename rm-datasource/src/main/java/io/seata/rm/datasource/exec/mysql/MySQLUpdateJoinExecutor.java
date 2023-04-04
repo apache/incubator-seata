@@ -257,6 +257,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
      * @param afterImage  the after image
      * @return sql undo log
      */
+    @Override
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = beforeImage.getTableName();
