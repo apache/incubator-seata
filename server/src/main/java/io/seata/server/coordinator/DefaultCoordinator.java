@@ -614,7 +614,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 if (branchSession != null) {
                     doRemove(branchSession);
                 } else {
-                    globalSession.getSortedBranches().forEach(this::doRemove);
+                    globalSession.getSortedBranches().parallelStream().forEach(this::doRemove);
                 }
             } catch (Exception unKnowException) {
                 LOGGER.error("Asynchronous delete branchSession error, xid = {}", globalSession.getXid(), unKnowException);

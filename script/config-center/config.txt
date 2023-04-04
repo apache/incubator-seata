@@ -125,6 +125,8 @@ server.rollbackRetryTimeoutUnlockEnable=false
 server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
+server.enableParallelRequestHandle=true
+server.enableParallelHandleBranch=false
 
 server.raft.cluster=127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093
 server.raft.snapshotInterval=600
@@ -139,7 +141,8 @@ server.raft.serialization=kryo
 server.raft.compressor=none
 server.raft.autoJoin=false
 server.raft.sync=true
-server.enableParallelRequestHandle=false
+
+
 
 #Metrics configuration, only for the server
 metrics.enabled=false
