@@ -592,11 +592,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.mariadb.jdbc</groupId>
-                <artifactId>mariadb-java-client</artifactId>
-                <version>${mariadb.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>jraft-core</artifactId>
                 <version>${jraft.version}</version>

@@ -15,14 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.DefaultValues;
@@ -49,6 +41,14 @@ import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -77,6 +77,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
+
+            // Found one or more resources that were registered before initialization
+            if (resourceManager != null
+                    && !resourceManager.getManagedResources().isEmpty()
+                    && StringUtils.isNotBlank(transactionServiceGroup)) {
+                getClientChannelManager().reconnect(transactionServiceGroup);
+            }
         }
     }
 
@@ -203,6 +210,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
+            getClientChannelManager().reconnect(transactionServiceGroup);
             return;
         }
         synchronized (getClientChannelManager().getChannels()) {
@@ -311,5 +319,4 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }
-
 }
