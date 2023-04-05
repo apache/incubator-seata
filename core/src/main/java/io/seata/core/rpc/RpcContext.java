@@ -73,7 +73,6 @@ public class RpcContext {
     public void release() {
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         if (clientIDHolderMap != null) {
-            clientIDHolderMap.remove(channel);
             clientIDHolderMap = null;
         }
         if (clientRole == NettyPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {

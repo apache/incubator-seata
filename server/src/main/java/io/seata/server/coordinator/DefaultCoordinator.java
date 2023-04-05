@@ -564,10 +564,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         this.remotingServer = remotingServer;
     }
 
-    public RemotingServer getRemotingServer() {
-        return remotingServer;
-    }
-
     /**
      * the task to remove branchSession
      */
@@ -637,5 +633,4 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         }
     }
-
 }
