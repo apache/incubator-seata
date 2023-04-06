@@ -100,10 +100,8 @@ public class FileLocker extends AbstractLocker {
             } else {
                 LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
                 try {
-                    if (CollectionUtils.isNotEmpty(bucketHolder)) {
-                        // Release all acquired locks.
-                        branchSession.unlock();
-                    }
+                    // Release all acquired locks.
+                    branchSession.unlock();
                 } catch (TransactionException e) {
                     throw new FrameworkException(e);
                 }
