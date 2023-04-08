@@ -741,14 +741,24 @@ public interface ConfigurationKeys {
     String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
+     * The constant ACCESS_KEY.
+     */
+    String ACCESS_KEY = "accesskey";
+
+    /**
+     * The constant SECRET_KEY.
+     */
+    String SECRET_KEY = "secretkey";
+
+    /**
      * The constant SEATA_ACCESS_KEY.
      */
-    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + ACCESS_KEY;
 
     /**
      * The constant SEATA_SECRET_KEY.
      */
-    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+    String SEATA_SECRET_KEY = SEATA_PREFIX + SECRET_KEY;
 
     /**
      * The constant EXTRA_DATA_SPLIT_CHAR.

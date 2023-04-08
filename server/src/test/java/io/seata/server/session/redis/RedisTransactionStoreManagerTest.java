@@ -20,21 +20,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.github.fppt.jedismock.RedisServer;
+import java.util.Set;
 import io.seata.common.XID;
 import io.seata.common.exception.RedisException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.BeanUtils;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -42,8 +46,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Pipeline;
+
+
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
@@ -54,18 +59,14 @@ public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
 
-    private static RedisServer server = null;
-    private static RedisTransactionStoreManager redisTransactionStoreManager = null;
-    private static SessionManager sessionManager = null;
+    private static volatile RedisTransactionStoreManager redisTransactionStoreManager = null;
+    private static volatile SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
+        JedisPooledFactory.getJedisInstance().flushAll();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -73,7 +74,45 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @Test
-    public void testInsertGlobalSessionDataAndQuery() throws TransactionException {
+    public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
+        GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 500);
+        String xid1 = XID.generateXID(session1.getTransactionId());
+        session1.setXid(xid1);
+        session1.setTransactionId(session1.getTransactionId());
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setApplicationData("abc=878s1");
+        session1.setStatus(GlobalStatus.Begin);
+        GlobalSession session2 = GlobalSession.createGlobalSession("test3", "test4", "test002", 450);
+        String xid2 = XID.generateXID(session2.getTransactionId());
+        session2.setXid(xid2);
+        session2.setTransactionId(session2.getTransactionId());
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setApplicationData("abc1=878s2");
+        session2.setStatus(GlobalStatus.Begin);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
+        sessionManager.addGlobalSession(session1);
+        sessionManager.addGlobalSession(session2);
+        List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
+        for (GlobalSession globalSession : list) {
+            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
+        for (GlobalSession globalSession : list2) {
+            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+        }
+        Assertions.assertEquals(2, list2.size());
+        if(CollectionUtils.isNotEmpty(list)) {
+            Assertions.assertEquals(xid1, list.size() > 1 ? list.get(1).getXid() : list.get(0));
+            if (list.size() > 1 && list2.size() > 1) {
+                Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
+            }
+            sessionManager.removeGlobalSession(session1);
+            sessionManager.removeGlobalSession(session2);
+        }
+    }
+
+    @Test
+    public synchronized void testInsertGlobalSessionDataAndQuery() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -177,7 +216,12 @@ public class RedisTransactionStoreManagerTest {
         final List<GlobalSession> globalSessionStatus = redisTransactionStoreManager.readSessionStatusByPage(param);
         LOGGER.info("the  globalSessionStatus result is:[{}]", globalSessionStatus);
         LOGGER.info("the  globalSessionStatus result size is:[{}]", globalSessionStatus);
-
+        sessionManager.removeGlobalSession(session1);
+        sessionManager.removeGlobalSession(session2);
+        sessionManager.removeGlobalSession(session3);
+        sessionManager.removeGlobalSession(session4);
+        sessionManager.removeGlobalSession(session5);
+        sessionManager.removeGlobalSession(session);
     }
 
     @Test
@@ -230,9 +274,8 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
+    public static void close(){
+        redisTransactionStoreManager=null;
     }
 
 }

@@ -41,7 +41,7 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
  */
 public class ATCore extends AbstractCore {
     
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     public ATCore(RemotingServer remotingServer) {
         super(remotingServer);
@@ -59,9 +59,6 @@ public class ATCore extends AbstractCore {
         boolean autoCommit = true;
         boolean skipCheckLock = false;
         if (StringUtils.isNotBlank(applicationData)) {
-            if (objectMapper == null) {
-                objectMapper = new ObjectMapper();
-            }
             try {
                 Map<String, Object> data = objectMapper.readValue(applicationData, HashMap.class);
                 Object clientAutoCommit = data.get(AUTO_COMMIT);
@@ -83,8 +80,9 @@ public class ATCore extends AbstractCore {
                         branchSession.getBranchId()));
             }
         } catch (StoreException e) {
-            if (e.getCause() instanceof BranchTransactionException) {
-                throw new BranchTransactionException(((BranchTransactionException)e.getCause()).getCode(),
+            Throwable cause = e.getCause();
+            if (cause instanceof BranchTransactionException) {
+                throw new BranchTransactionException(((BranchTransactionException)cause).getCode(),
                     String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
                         branchSession.getBranchId()));
             }

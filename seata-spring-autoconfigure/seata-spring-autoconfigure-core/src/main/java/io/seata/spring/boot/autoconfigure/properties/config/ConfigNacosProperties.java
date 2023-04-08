@@ -27,13 +27,14 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_P
 @ConfigurationProperties(prefix = CONFIG_NACOS_PREFIX)
 public class ConfigNacosProperties {
     private String serverAddr;
-    private String namespace = "";
+    private String namespace;
     private String group = "SEATA_GROUP";
-    private String username = "";
-    private String password = "";
-    private String accessKey = "";
-    private String secretKey = "";
+    private String username;
+    private String password;
+    private String accessKey;
+    private String secretKey;
     private String dataId = "seata.properties";
+    private String contextPath;
 
     public String getServerAddr() {
         return serverAddr;
@@ -104,6 +105,15 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+        return this;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public ConfigNacosProperties setContextPath(String contextPath) {
+        this.contextPath = contextPath;
         return this;
     }
 }

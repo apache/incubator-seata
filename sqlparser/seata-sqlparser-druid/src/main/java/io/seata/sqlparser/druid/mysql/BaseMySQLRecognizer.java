@@ -133,6 +133,17 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
+    protected String getJoinCondition(SQLExpr joinCondition,final ParametersHolder parametersHolder,
+                                        final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(joinCondition)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeVisit(joinCondition, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
     public String getDbType() {
         return JdbcConstants.MYSQL;
     }
