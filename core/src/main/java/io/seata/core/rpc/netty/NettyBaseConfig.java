@@ -70,7 +70,7 @@ public class NettyBaseConfig {
     /**
      * The constant WORKER_THREAD_SIZE.
      */
-    protected static int WORKER_THREAD_SIZE;
+    protected static final int WORKER_THREAD_SIZE;
 
     /**
      * The constant TRANSPORT_SERVER_TYPE.

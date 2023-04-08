@@ -10,48 +10,79 @@ on:
     - cron: '0 16 * * *' #GMT+0
 
 jobs:
-  publish:
-    name: "Publish"
+  # job 1
+  publish-to-OSSRH:
+    name: "Publish to OSSRH"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        type: [ "OSSRH", "image" ]
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
-
+        uses: actions/checkout@v3
       # step 2
       - name: "Setup Java JDK"
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v3.9.0
         with:
           distribution: 'zulu'
           java-version: 8
           server-id: oss_seata
-          server-username: OSSRH_USERNAME
-          server-password: OSSRH_PASSWORD
-
-      # step 3 for type=OSSRH
-      - name: "Import GPG-SECRET-KEY, Package and Publish-To-OSSRH"
-        if: matrix.type == 'OSSRH'
+          server-username: OSSRH_USERNAME # Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+          server-password: OSSRH_PASSWORD # Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
+      - name: "Publish to OSSRH"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import;
-          ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+          ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
-      # step 4 for type=image
-      - name: "Package and Publish-Image-To-DockerHub"
-        if: matrix.type == 'image'
+  # job 2
+  publish-images-to-dockerhub:
+    name: "Publish images to DockerHub"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 8, 17 ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Setup Java JDK"
+        uses: actions/setup-java@v3.9.0
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4 based on java8
+      - name: "Publish images to DockerHub based on java8"
+        if: matrix.java == 8
         env:
-          IMAGE_NAME: openjdk:8u342
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
         run: |
-          if [ "${{ github.ref_name }}" == "develop" ] || [ "${{ github.ref_name }}" == "snapshot" ]; then
-            ./mvnw -T 4C clean package -Pimage               -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          if [ "${{ github.ref_name }}" == "develop" ] || [ "${{ github.ref_name }}" == "snapshot"  || [ "${{ github.ref_name }}" == "2.x" ]; then
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage                                    -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            ./mvnw -T 4C clean package -Pimage,release-image -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage,release-image-based-on-java8       -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342-slim -Pimage,release-image-based-on-java8-slim  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
+      # step 4 based on java17
+      - name: "Publish images to DockerHub based on java17"
+        if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2       -Pimage,release-image-based-on-java17      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2-slim  -Pimage,release-image-based-on-java17-slim -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;

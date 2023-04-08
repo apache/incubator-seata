@@ -122,6 +122,7 @@ seata:
     rollback-retry-timeout-unlock-enable: false
     enable-check-auth: true
     enable-parallel-request-handle: true
+    enable-parallel-handle-branch: false
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
     enableParallelRequestHandle: true
@@ -167,6 +168,8 @@ seata:
       max-wait: 5000
     redis:
       mode: single
+      # support: lua 、 pipeline
+      type: lua
       database: 0
       min-conn: 10
       max-conn: 100

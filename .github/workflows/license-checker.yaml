@@ -2,7 +2,7 @@ name: License checker
 
 on:
   pull_request:
-      branches: [ develop, master ]
+      branches: [ 2.x, develop, master ]
 
 jobs:
   check-license:
@@ -10,17 +10,23 @@ jobs:
     steps:
       # step 1
       - name: Checkout
-        uses: actions/checkout@v2.4.0
-      # step 2
+        uses: actions/checkout@v3
+      # step 2 https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '14.x'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      # step 3
       - name: Check License Header
-        uses: apache/skywalking-eyes/header@25edfc2fd8d52fb266653fb5f6c42da633d85c07
+        uses: apache/skywalking-eyes/header@main
         with:
           log: info
           config: .licenserc.yaml
           mode: check
-      # step 3
+      # step 4
       - name: Check Dependencies' License
-        uses: apache/skywalking-eyes/dependency@25edfc2fd8d52fb266653fb5f6c42da633d85c07
+        uses: apache/skywalking-eyes/dependency@main
         with:
           log: info
           config: .licenserc.yaml

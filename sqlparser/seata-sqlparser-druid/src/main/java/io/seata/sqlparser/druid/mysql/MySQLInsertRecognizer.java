@@ -169,7 +169,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
     }
 
     @Override
-    public List<String> getInsertColumnsIsSimplified() {
+    public List<String> getInsertColumnsUnEscape() {
         List<String> insertColumns = getInsertColumns();
         return ColumnUtils.delEscape(insertColumns, getDbType());
     }

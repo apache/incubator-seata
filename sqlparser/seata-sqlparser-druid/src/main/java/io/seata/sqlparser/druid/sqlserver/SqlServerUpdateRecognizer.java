@@ -163,7 +163,7 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     }
 
     @Override
-    public List<String> getUpdateColumnsIsSimplified() {
+    public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());
     }
