@@ -29,8 +29,6 @@ import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitorAdapter;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
-import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
