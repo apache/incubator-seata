@@ -21,8 +21,16 @@ import java.util.Objects;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerASTVisitorAdapter;
 import com.alibaba.druid.sql.dialect.sqlserver.visitor.SQLServerOutputVisitor;
+import com.alibaba.druid.sql.visitor.SQLASTVisitor;
+import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
@@ -100,4 +108,50 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
     public String getDbType() {
         return JdbcConstants.SQLSERVER;
     }
+
+    @Override
+    public boolean isSqlSyntaxSupports() {
+        SQLServerASTVisitorAdapter visitor = new SQLServerASTVisitorAdapter() {
+            @Override
+            public boolean visit(SQLInSubQueryExpr x) {
+                //just like: ...where id in (select id from t)
+                throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLSubqueryTableSource x) {
+                //just like: select * from (select * from t)
+                throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLReplaceStatement x) {
+                //just like: replace into t (id,dr) values (1,'2'), (2,'3')
+                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLMergeStatement x) {
+                //just like: merge into ... WHEN MATCHED THEN ...
+                throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
+                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+            }
+
+            @Override
+            public boolean visit(SQLInsertStatement x) {
+                if (null != x.getQuery()) {
+                    //just like: insert into t select * from t1
+                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
+                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                }
+                return true;
+            }
+        };
+        getAst().accept(visitor);
+        return true;
+    }
+
 }
