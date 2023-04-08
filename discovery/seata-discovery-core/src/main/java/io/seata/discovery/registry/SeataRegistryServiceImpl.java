@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,11 +34,9 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.Metadata;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
-import io.seata.common.store.StoreMode;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -309,22 +306,10 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 if (StringUtils.isNotBlank(response)) {
                     try {
                         metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
+                        METADATA.refreshMetadata(group, metadataResponse);
                     } catch (JsonProcessingException e) {
                         LOGGER.error(e.getMessage(), e);
-                        return;
                     }
-                }
-                if (metadataResponse != null) {
-                    List<Node> list = new ArrayList<>();
-                    for (Node node : metadataResponse.getNodes()) {
-                        if (node.getRole() == ClusterRole.LEADER) {
-                            METADATA.setLeader(node);
-                        }
-                        list.add(node);
-                    }
-                    METADATA.setStoreMode(StoreMode.get(metadataResponse.getStoreMode()));
-                    METADATA.setNodes(group, list);
-                    METADATA.getClusterTerm().put(group, metadataResponse.getTerm());
                 }
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);

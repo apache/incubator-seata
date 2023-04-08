@@ -15,6 +15,7 @@
  */
 package io.seata.common.metadata;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,6 +85,19 @@ public class Metadata {
 
     public Map<String, Long> getClusterTerm() {
         return clusterTerm;
+    }
+
+    public void refreshMetadata(String group, MetadataResponse metadataResponse) {
+        List<Node> list = new ArrayList<>();
+        for (Node node : metadataResponse.getNodes()) {
+            if (node.getRole() == ClusterRole.LEADER) {
+                this.setLeader(node);
+            }
+            list.add(node);
+        }
+        this.storeMode = StoreMode.get(metadataResponse.getStoreMode());
+        this.nodes.put(group, list);
+        this.clusterTerm.put(group, metadataResponse.getTerm());
     }
 
     @Override
