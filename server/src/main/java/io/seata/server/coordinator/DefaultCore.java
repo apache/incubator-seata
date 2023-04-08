@@ -41,7 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.core.constants.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
+import static io.seata.common.ConfigurationKeys.ENABLE_PARALLEL_HANDLE_BRANCH_KEY;
+import static io.seata.common.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 
 /**
@@ -57,6 +58,9 @@ public class DefaultCore implements Core {
             DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+
+    private static final boolean PARALLEL_HANDLE_BRANCH =
+            ConfigurationFactory.getInstance().getBoolean(ENABLE_PARALLEL_HANDLE_BRANCH_KEY, false);
 
     /**
      * get the Default core.
@@ -131,7 +135,6 @@ public class DefaultCore implements Core {
         throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name, timeout);
         MDC.put(RootContext.MDC_KEY_XID, session.getXid());
-        session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
 
@@ -155,9 +158,7 @@ public class DefaultCore implements Core {
             return GlobalStatus.TimeoutRollbacking;
         }
 
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
-
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             if (globalSession.getStatus() == GlobalStatus.Begin) {
                 // Highlight: Firstly, close the session, then no more branch can be registered.
@@ -197,7 +198,8 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalCommit(globalSession, retrying);
         } else {
-            Boolean result = SessionHelper.forEach(globalSession.getSortedBranches(), branchSession -> {
+            List<BranchSession> branchSessions = globalSession.getSortedBranches();
+            Boolean result = SessionHelper.forEach(branchSessions, branchSession -> {
                 // if not retrying, skip the canBeCommittedAsync branches
                 if (!retrying && branchSession.canBeCommittedAsync()) {
                     return CONTINUE;
@@ -241,15 +243,16 @@ public class DefaultCore implements Core {
                             }
                     }
                 } catch (Exception ex) {
-                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception: {}",
-                        new String[] {branchSession.toString()});
+                    String commitInfo = retrying ? "Global commit continue" : "Global commit failed";
+                    StackTraceLogger.error(LOGGER, ex, "Committing branch transaction exception:retrying={}, {}, {}",
+                        new String[] {String.valueOf(retrying), branchSession.toString(), commitInfo});
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
                         throw new TransactionException(ex);
                     }
                 }
                 return CONTINUE;
-            });
+            }, PARALLEL_HANDLE_BRANCH && branchSessions.size() >= 2);
             // Return if the result is not null
             if (result != null) {
                 return result;
@@ -280,7 +283,6 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
         boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
@@ -307,7 +309,8 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            Boolean result = SessionHelper.forEach(globalSession.getReverseSortedBranches(), branchSession -> {
+            List<BranchSession> branchSessions = globalSession.getSortedBranches();
+            Boolean result = SessionHelper.forEach(branchSessions, branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     SessionHelper.removeBranch(globalSession, branchSession, !retrying);
@@ -337,14 +340,14 @@ public class DefaultCore implements Core {
                     }
                 } catch (Exception ex) {
                     StackTraceLogger.error(LOGGER, ex,
-                        "Rollback branch transaction exception, xid = {} branchId = {} exception = {}",
-                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), ex.getMessage()});
+                        "Rollback branch transaction exception, xid = {} ,branchId = {} ,retrying={} ,exception = {}, global rollback failed",
+                        new String[] {globalSession.getXid(), String.valueOf(branchSession.getBranchId()), String.valueOf(retrying), ex.getMessage()});
                     if (!retrying) {
                         globalSession.queueToRetryRollback();
                     }
                     throw new TransactionException(ex);
                 }
-            });
+            }, PARALLEL_HANDLE_BRANCH && branchSessions.size() >= 2);
             // Return if the result is not null
             if (result != null) {
                 return result;
@@ -376,7 +379,6 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return globalStatus;
         }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         doGlobalReport(globalSession, xid, globalStatus);
         return globalSession.getStatus();
     }

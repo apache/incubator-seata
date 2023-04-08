@@ -14,7 +14,7 @@ jobs:
       matrix:
         java: [ 8, 11, 17 ]
         springboot: [
-          2.7.6          -Dspring-framework.version=5.3.24,
+          2.7.9          -Dspring-framework.version=5.3.25,
           2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,
@@ -32,7 +32,7 @@ jobs:
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
         uses: actions/setup-java@v2.5.0
@@ -40,6 +40,9 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
       # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
       - name: "Test with Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
@@ -58,12 +61,12 @@ jobs:
       matrix:
         java: [ 17 ]
         springboot: [
-          3.0.0 -Dspring-framework.version=6.0.2 -Dspring-boot-for-server.version=2.4.13 -Dspring-framework-for-server.version=5.3.18 -Dkotlin-maven-plugin.version=1.7.22
+          3.0.4 -Dspring-framework.version=6.0.6 -Dspring-boot-for-server.version=2.5.14 -Dspring-framework-for-server.version=5.3.20 -Dkotlin-maven-plugin.version=1.7.22
         ]
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
         uses: actions/setup-java@v2.5.0
@@ -71,18 +74,21 @@ jobs:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
       # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
       - name: "Test with Maven"
         run: |
           ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 3
   arm64-test:
-     runs-on: ubuntu-latest
-     strategy:
+    runs-on: ubuntu-latest
+    strategy:
       fail-fast: false
       matrix:
         springboot: [
-          2.7.6          -Dspring-framework.version=5.3.24,
+          2.7.9          -Dspring-framework.version=5.3.25,
           2.6.14         -Dspring-framework.version=5.3.24,
           2.5.14         -Dspring-framework.version=5.3.20,
           2.4.13         -Dspring-framework.version=5.3.13,
@@ -97,17 +103,25 @@ jobs:
           #1.1.12.RELEASE,
           #1.0.2.RELEASE
         ]
-     steps:
-      - uses: actions/checkout@v2
-      - name: Set up QEMU
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up QEMU"
         id: qemu
         uses: docker/setup-qemu-action@v1
-      - name: install
+      # step 3
+      - name: "install"
         run: |
-               docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-               arm64v8/ubuntu:20.04 \
-               bash -exc 'apt-get update -y && \
-                apt-get install maven -y'
-      - name: test-arm64
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            arm64v8/ubuntu:20.04 \
+            bash -exc 'apt-get update -y && \
+                       apt-get install maven -y'
+      # step 4
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 5
+      - name: "test-arm64"
         run: |
-            ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn          
+          ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn          

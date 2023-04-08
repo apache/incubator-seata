@@ -422,10 +422,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-        </dependency>
-        <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
         </dependency>
@@ -599,6 +595,10 @@
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
         </dependency>
     </dependencies>
 
