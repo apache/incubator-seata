@@ -88,7 +88,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
             }
 
-            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumnsIsSimplified();
+            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumnsUnEscape();
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
@@ -152,7 +152,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumnsIsSimplified());
+            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumnsUnEscape());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());

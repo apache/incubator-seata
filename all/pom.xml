@@ -399,6 +399,12 @@
         <dependency>
             <groupId>org.apache.dubbo.extensions</groupId>
             <artifactId>dubbo-filter-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -414,10 +420,6 @@
             <groupId>com.alibaba.edas</groupId>
             <artifactId>edas-sdk</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
         </dependency>
         <dependency>
             <groupId>aopalliance</groupId>
@@ -593,6 +595,10 @@
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
         </dependency>
     </dependencies>
 

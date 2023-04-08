@@ -61,7 +61,7 @@ public class SqlServerUpdateExecutor<T, S extends Statement> extends UpdateExecu
             suffix.append(WHERE).append(whereCondition);
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
+        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
         for (String needUpdateColumn : needUpdateColumns) {
             selectSQLJoin.add(needUpdateColumn);
         }

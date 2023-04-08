@@ -1,6 +1,6 @@
 <!-- Please make sure you have read and understood the contributing guidelines -->
 
-- [ ] I have registered the PR [changes](https://github.com/seata/seata/tree/develop/changes).
+- [ ] I have registered the PR [changes](../changes).
 
 ### Ⅰ. Describe what this PR did
 

@@ -113,8 +113,8 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
-                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr) expr).getOwnernName() + "." + ((SQLPropertyExpr) expr).getName());
+                } else if (((SQLPropertyExpr) expr).getOwnerName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr) expr).getOwnerName() + "." + ((SQLPropertyExpr) expr).getName());
                 }
             } else {
                 wrapSQLParsingException(expr);
@@ -163,7 +163,7 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     }
 
     @Override
-    public List<String> getUpdateColumnsIsSimplified() {
+    public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());
     }

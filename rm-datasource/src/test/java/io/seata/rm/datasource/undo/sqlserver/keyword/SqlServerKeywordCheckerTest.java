@@ -15,8 +15,8 @@
  */
 package io.seata.rm.datasource.undo.sqlserver.keyword;
 
-import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.KeywordCheckerFactory;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 public class SqlServerKeywordCheckerTest {
     @Test
     public void testSqlServerKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.SQLSERVER);
-        Assertions.assertNotNull(keywordChecker);
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.SQLSERVER);
+        Assertions.assertNotNull(escapeHandler);
     }
 }
