@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.EscapeSymbol;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -33,6 +34,8 @@ public class SqlServerEscapeHandler implements EscapeHandler {
     private Set<String> keywordSet = Arrays.stream(SqlServerEscapeHandler.SqlServerKeyword.values())
             .map(SqlServerEscapeHandler.SqlServerKeyword::name)
             .collect(Collectors.toSet());
+
+    private static final EscapeSymbol ESCAPE_SYMBOL = new EscapeSymbol('[', ']');
 
     /**
      * SqlServer keyword
@@ -805,5 +808,8 @@ public class SqlServerEscapeHandler implements EscapeHandler {
         return checkIfKeyWords(fieldOrTableName);
     }
 
-
+    @Override
+    public EscapeSymbol getEscapeSymbol() {
+        return ESCAPE_SYMBOL;
+    }
 }
