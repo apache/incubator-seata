@@ -156,8 +156,8 @@ public class SessionHelper {
     /**
      * End commit failed.
      *
-     * @param globalSession the global session
-     * @param retryGlobal the retry global
+     * @param globalSession  the global session
+     * @param retryGlobal    the retry global
      * @param isRetryTimeout is retry timeout
      * @throws TransactionException the transaction exception
      */

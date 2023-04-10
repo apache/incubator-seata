@@ -91,7 +91,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
+        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
         needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
@@ -119,7 +119,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + whereSql;
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
+        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
         needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
@@ -135,8 +135,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 }
             }
             needUpdateColumns.addAll(unescapeUpdateColumns.parallelStream()
-                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType()))
-                .collect(Collectors.toList()));
+                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType())).collect(Collectors.toList()));
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
