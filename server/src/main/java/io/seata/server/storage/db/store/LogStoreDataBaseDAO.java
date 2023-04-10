@@ -237,8 +237,9 @@ public class LogStoreDataBaseDAO implements LogStore {
     }
 
     @Override
-    public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus){
-        String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
+    public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus) {
+        String sql =
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
