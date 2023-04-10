@@ -64,6 +64,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
 
+    /**
+     * ThreadLocal should be optimize.
+     * It is tied to the current threading model. threadlocal's public set method does nothing to protect it from abuse.
+     */
     private static final ThreadLocal<GlobalStatus> EXPECTED_STATUS_THREAD_LOCAL = new ThreadLocal<>();
 
     /**
