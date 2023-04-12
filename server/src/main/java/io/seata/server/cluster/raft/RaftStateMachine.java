@@ -165,10 +165,6 @@ public class RaftStateMachine extends StateMachineAdapter {
             }
             return false;
         }
-        if (reader.getFileMeta("data") == null) {
-            LOGGER.error("Fail to find data file in {}", reader.getPath());
-            return false;
-        }
         for (StoreSnapshotFile snapshotFile : snapshotFiles) {
             if (!snapshotFile.load(reader)) {
                 return false;

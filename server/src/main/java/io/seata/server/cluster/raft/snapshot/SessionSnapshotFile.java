@@ -115,6 +115,10 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
 
     @Override
     public boolean load(SnapshotReader reader) {
+        if (reader.getFileMeta(fileName) == null) {
+            LOGGER.error("Fail to find data file in {}", reader.getPath());
+            return false;
+        }
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
