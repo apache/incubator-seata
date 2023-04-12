@@ -104,7 +104,7 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
             globalSessionByteMap.size(), branchSessionByteMap.size());
         String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
         if (save(raftSnapshot, path)) {
-            if (writer.addFile("data")) {
+            if (writer.addFile(fileName)) {
                 return Status.OK();
             } else {
                 return new Status(RaftError.EIO, "Fail to add file to writer");
