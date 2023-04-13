@@ -41,6 +41,12 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
+     * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_MYSQL.
+     */
+    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_MYSQL =
+        UPDATE_GLOBAL_TRANSACTION_STATUS_MYSQL + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL = "select " + ALL_GLOBAL_COLUMNS
@@ -89,6 +95,11 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
         return UPDATE_GLOBAL_TRANSACTION_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    }
+
+    @Override
+    public String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable) {
+        return UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override
