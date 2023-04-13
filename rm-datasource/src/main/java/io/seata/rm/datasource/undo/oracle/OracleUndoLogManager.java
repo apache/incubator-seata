@@ -15,13 +15,13 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.DateUtil;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -47,13 +47,13 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
             + "VALUES (UNDO_LOG_SEQ.nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= to_date(?,'yyyy-mm-dd hh24:mi:ss') and ROWNUM <= ?";
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
-            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+            String dateStr = DateUtil.formatDate(logCreated, "yyyy-MM-dd HH:mm:ss");
+            deletePST.setString(1, dateStr);
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
