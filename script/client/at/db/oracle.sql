@@ -8,7 +8,7 @@ CREATE TABLE undo_log
     log_status    NUMBER(10)    NOT NULL,
     log_created   TIMESTAMP(0)  NOT NULL,
     log_modified  TIMESTAMP(0)  NOT NULL,
-    PRIMARY KEY (branch_id)
+    CONSTRAINT ux_undo_log UNIQUE (xid, branch_id)
 );
 CREATE INDEX ix_log_created ON undo_log(log_created);
 COMMENT ON TABLE undo_log IS 'AT transaction mode undo table';
