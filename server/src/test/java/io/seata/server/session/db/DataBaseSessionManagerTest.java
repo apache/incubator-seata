@@ -161,7 +161,6 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        session.setStatus(GlobalStatus.Committing);
         sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
 
         String sql = "select * from global_table where xid= '"+xid+"'";
