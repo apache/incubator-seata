@@ -62,12 +62,12 @@ public class CommonFenceStoreSqls {
             + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")";
 
     /**
-     * used for oracle. eg: ... and ROWNUM <= 10
+     * used for oracle. eg: and ROWNUM <= 10
      */
     protected static final String ORACLE_QUERY_LIMIT = " and ROWNUM <= ？";
 
     /**
-     * used for mysql、pgsql、mariadb. eg: ... limit 10
+     * used for mysql, pgsql and mariadb. eg: limit 10
      */
     protected static final String NONE_ORACLE_QUERY_LIMIT = " limit ? ";
 
