@@ -64,7 +64,7 @@ public class CommonFenceStoreSqls {
     /**
      * used for oracle. eg: and ROWNUM <= 10
      */
-    protected static final String ORACLE_QUERY_LIMIT = " and ROWNUM <= ？";
+    protected static final String ORACLE_QUERY_LIMIT = " and ROWNUM <= ? ";
 
     /**
      * used for mysql, pgsql and mariadb. eg: limit 10
