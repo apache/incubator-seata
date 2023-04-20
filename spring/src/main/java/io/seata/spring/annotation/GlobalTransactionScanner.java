@@ -239,7 +239,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
@@ -288,8 +288,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
 
-                    if (!existsAnnotation(new Class[]{serviceInterface})
-                        && !existsAnnotation(interfacesIfJdk)) {
+                    if (!existsAnnotation(serviceInterface)
+                            && !existsAnnotation(interfacesIfJdk)) {
                         return bean;
                     }
 
@@ -302,7 +302,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     interceptor = globalTransactionalInterceptor;
                 }
 
-                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
+                LOGGER.info("Bean [{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -325,7 +325,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private boolean doCheckers(Object bean, String beanName) {
         if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
-            || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
             return false;
         }
 
@@ -461,7 +461,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     //endregion the methods about findAddSeataAdvisorPosition  END
 
 
-    private boolean existsAnnotation(Class<?>[] classes) {
+    private boolean existsAnnotation(Class<?>... classes) {
         if (CollectionUtils.isNotEmpty(classes)) {
             for (Class<?> clazz : classes) {
                 if (clazz == null) {

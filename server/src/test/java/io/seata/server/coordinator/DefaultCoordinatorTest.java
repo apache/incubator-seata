@@ -16,7 +16,6 @@
 package io.seata.server.coordinator;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +23,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import io.netty.channel.Channel;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
@@ -61,6 +60,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+
 /**
  * The type DefaultCoordinator test.
  *
@@ -169,10 +169,10 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
 
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
@@ -180,7 +180,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
@@ -196,11 +196,11 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
 
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
         TimeUnit.MILLISECONDS.sleep(100);
 
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
@@ -209,7 +209,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
@@ -249,7 +249,8 @@ public class DefaultCoordinatorTest {
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {
+        public Object sendSyncRequest(String resourceId, String clientId, Object message, boolean tryOtherApp)
+            throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);

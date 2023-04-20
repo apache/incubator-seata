@@ -105,11 +105,11 @@ public class CorePropertiesTest {
     @Test
     public void testRegistryNacosProperties() {
         assertEquals("localhost:8848", context.getBean(RegistryNacosProperties.class).getServerAddr());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
+        assertEquals(null, context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("SEATA_GROUP", context.getBean(RegistryNacosProperties.class).getGroup());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getUsername());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getPassword());
+        assertEquals(null, context.getBean(RegistryNacosProperties.class).getUsername());
+        assertEquals(null, context.getBean(RegistryNacosProperties.class).getPassword());
         assertEquals("seata-server", context.getBean(RegistryNacosProperties.class).getApplication());
     }
 
@@ -123,7 +123,7 @@ public class CorePropertiesTest {
     public void testRegistryRedisProperties() {
         assertEquals("localhost:6379", context.getBean(RegistryRedisProperties.class).getServerAddr());
         assertEquals(0, context.getBean(RegistryRedisProperties.class).getDb());
-        assertEquals("", context.getBean(RegistryRedisProperties.class).getPassword());
+        assertEquals(null, context.getBean(RegistryRedisProperties.class).getPassword());
         assertEquals("default", context.getBean(RegistryRedisProperties.class).getCluster());
         assertEquals(0, context.getBean(RegistryRedisProperties.class).getTimeout());
     }
@@ -149,7 +149,7 @@ public class CorePropertiesTest {
 
     @Test
     public void testRegistryCustomProperties() {
-        assertEquals("", context.getBean(RegistryCustomProperties.class).getName());
+        assertEquals(null, context.getBean(RegistryCustomProperties.class).getName());
     }
 
 

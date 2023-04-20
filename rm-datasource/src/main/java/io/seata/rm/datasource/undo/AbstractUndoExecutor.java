@@ -273,7 +273,7 @@ public abstract class AbstractUndoExecutor {
                             "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
                             "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
-                throw new SQLException("Has dirty records when undo.");
+                throw new SQLUndoDirtyException("Has dirty records when undo.");
             }
         }
         return true;

@@ -33,7 +33,6 @@ import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.Service;
-
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
@@ -49,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * The type Nacos registry service.
  *
  * @author slievrly
+ * @author xingfudeshi@gmail.com
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
 
@@ -69,6 +69,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
     private static final String SLB_PATTERN = "slbPattern";
+    private static final String CONTEXT_PATH = "contextPath";
     private static final String USE_PARSE_RULE = "false";
     private static final String PUBLIC_NAMING_ADDRESS_PREFIX = "public_";
     private static final String PUBLIC_NAMING_SERVICE_META_IP_KEY = "publicIp";
@@ -269,13 +270,17 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     LOGGER.info("Nacos check auth with ak/sk.");
                 }
             }
-        }
+        } 
         // nacos client subscribe application name is unknown
         if (Objects.isNull(System.getProperty("project.name"))) {
             String applicationId = FILE_CONFIG.getConfig(getClientApplication());
             if (Objects.nonNull(applicationId)) {
                 System.setProperty("project.name", applicationId);
-            }
+            } 
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        if (StringUtils.isNotBlank(contextPath)) {
+            properties.setProperty(CONTEXT_PATH, contextPath);
+ 
         }
         return properties;
     }
@@ -333,6 +338,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
    }
     private static String getNacosUrlPatternOfSLB() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
+    }
+
+    private static String getNacosContextPathKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, CONTEXT_PATH);
     }
 
 }

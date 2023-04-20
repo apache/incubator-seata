@@ -134,6 +134,10 @@ public class SessionHelper {
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
                 beginTime, retryBranch);
         } else {
+            if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Committed);
+                globalSession.end();
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }
@@ -146,7 +150,24 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
-        globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        endCommitFailed(globalSession, retryGlobal, false);
+    }
+
+    /**
+     * End commit failed.
+     *
+     * @param globalSession  the global session
+     * @param retryGlobal    the retry global
+     * @param isRetryTimeout is retry timeout
+     * @throws TransactionException the transaction exception
+     */
+    public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout)
+        throws TransactionException {
+        if (isRetryTimeout) {
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetryTimeout);
+        } else {
+            globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+        }
         LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.",
             globalSession.getXid(), globalSession.getStatus());
 
@@ -164,26 +185,31 @@ public class SessionHelper {
     public static void endRollbacked(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
         if (retryGlobal || !DELAY_HANDLE_SESSION) {
             long beginTime = System.currentTimeMillis();
+            boolean timeoutDone = false;
             GlobalStatus currentStatus = globalSession.getStatus();
+            if (currentStatus == GlobalStatus.TimeoutRollbacking) {
+                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
+                timeoutDone = true;
+            }
             boolean retryBranch =
-                currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
+                    currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
             if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
             }
             globalSession.end();
-            if (!DELAY_HANDLE_SESSION) {
+            if (!DELAY_HANDLE_SESSION && !timeoutDone) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
-                beginTime, retryBranch);
+                    beginTime, retryBranch);
         } else {
-            if (SessionStatusValidator.isTimeoutGlobalStatus(globalSession.getStatus())) {
-                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
-            } else {
-                MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
+            if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
+                globalSession.end();
             }
+            MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
         }
     }
 
@@ -195,8 +221,22 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal) throws TransactionException {
+        endRollbackFailed(globalSession, retryGlobal, false);
+    }
+
+    /**
+     * End rollback failed.
+     *
+     * @param globalSession the global session
+     * @param retryGlobal   the retry global
+     * @param isRetryTimeout   is retry timeout
+     * @throws TransactionException the transaction exception
+     */
+    public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+        if (isRetryTimeout) {
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
+        } else if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
@@ -262,7 +302,8 @@ public class SessionHelper {
      */
     public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
             throws TransactionException {
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
+        globalSession.unlockBranch(branchSession);
+        if (isEnableBranchRemoveAsync() && isAsync) {
             COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
         } else {
             globalSession.removeBranch(branchSession);
@@ -280,12 +321,26 @@ public class SessionHelper {
         if (branchSessions == null || branchSessions.isEmpty()) {
             return;
         }
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
-            COORDINATOR.doBranchRemoveAllAsync(globalSession);
-        } else {
-            for (BranchSession branchSession : branchSessions) {
-                globalSession.removeBranch(branchSession);
+        boolean isAsyncRemove = isEnableBranchRemoveAsync() && isAsync;
+        for (BranchSession branchSession : branchSessions) {
+            if (isAsyncRemove) {
+                globalSession.unlockBranch(branchSession);
+            } else {
+                globalSession.removeAndUnlockBranch(branchSession);
             }
         }
+        if (isAsyncRemove) {
+            COORDINATOR.doBranchRemoveAllAsync(globalSession);
+        }
+    }
+
+    /**
+     * if true, enable delete the branch asynchronously
+     *
+     * @return the boolean
+     */
+    private static boolean isEnableBranchRemoveAsync() {
+        return Objects.equals(Boolean.TRUE, DELAY_HANDLE_SESSION)
+                && Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE);
     }
 }

@@ -350,6 +350,15 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
+    @Test
+    public void testUpdateJoinSql() {
+        String sql = "update t1 inner join t2 on t1.id = t2.id set name = ?, age = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        String tableName = recognizer.getTableName();
+        Assertions.assertEquals("t1 INNER JOIN t2 ON t1.id = t2.id#t1#t2",tableName);
+    }
+
     @Override
     public String getDbType() {
         return JdbcConstants.MYSQL;

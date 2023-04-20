@@ -39,6 +39,7 @@ public class UndoExecutorFactory {
                 result = holder.getInsertExecutor(sqlUndoLog);
                 break;
             case UPDATE:
+            case UPDATE_JOIN:
                 result = holder.getUpdateExecutor(sqlUndoLog);
                 break;
             case DELETE:

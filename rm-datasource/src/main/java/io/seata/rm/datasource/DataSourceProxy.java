@@ -16,16 +16,17 @@
 package io.seata.rm.datasource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.seata.common.Constants;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -33,11 +34,6 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 
 /**
  * The type Data source proxy.
@@ -60,20 +56,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String userName;
 
-    /**
-     * Enable the table meta checker
-     */
-    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
-
-    /**
-     * Table meta checker interval
-     */
-    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance().getLong(
-            ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
-
-    private final ScheduledExecutorService tableMetaExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("tableMetaChecker", 1, true));
+    private String version;
 
     /**
      * Instantiates a new Data source proxy.
@@ -109,23 +92,22 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             } else if (JdbcConstants.MARIADB.equals(dbType)) {
                 dbType = JdbcConstants.MYSQL;
             }
+            version = selectDbVersion(connection);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
-        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExecutor.scheduleAtFixedRate(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                        .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (Exception ignore) {
-                }
-            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
-        }
-
+        TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+    }
+
+    /**
+     * publish tableMeta refresh event
+     */
+    public void tableMetaRefreshEvent() {
+        TableMetaCacheFactory.tableMetaRefreshEvent(this.getResourceId());
     }
 
     /**
@@ -267,5 +249,23 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    private String selectDbVersion(Connection connection) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                 ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    return versionResult.getString("VERSION()");
+                }
+            } catch (Exception e) {
+                LOGGER.error("get mysql version fail error: {}", e.getMessage());
+            }
+        }
+        return "";
     }
 }

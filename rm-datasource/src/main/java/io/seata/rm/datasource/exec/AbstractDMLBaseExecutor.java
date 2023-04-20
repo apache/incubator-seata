@@ -30,6 +30,7 @@ import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
 
     protected static final String WHERE = " WHERE ";
+
+    protected static final String GROUP_BY = " GROUP BY ";
 
 
     /**
@@ -91,11 +94,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        TableRecords beforeImage = beforeImage();
-        T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLog(beforeImage, afterImage);
-        return result;
+        try {
+            TableRecords beforeImage = beforeImage();
+            T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLog(beforeImage, afterImage);
+            return result;
+        } catch (TableMetaException e) {
+            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}",
+                e.getTableName(), e.getColumnName());
+            statementProxy.getConnectionProxy().getDataSourceProxy().tableMetaRefreshEvent();
+            throw e;
+        }
     }
 
     private boolean isMultiPk() {
