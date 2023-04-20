@@ -100,7 +100,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void keepIfNecessary() {
         resource.hold(xaBranchXid.toString(), this);
-        this.shouldBeHeld = true;
     }
 
     private void releaseIfNecessary() {
@@ -108,7 +107,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             String xaBranchXid = this.xaBranchXid.toString();
             if (isHeld()) {
                 resource.release(xaBranchXid, this);
-                this.shouldBeHeld = false;
             }
         }
     }
