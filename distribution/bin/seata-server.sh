@@ -204,8 +204,7 @@ case "$1" in
         restart_server
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
-        exit 1
+        start_server
         ;;
 esac
 
