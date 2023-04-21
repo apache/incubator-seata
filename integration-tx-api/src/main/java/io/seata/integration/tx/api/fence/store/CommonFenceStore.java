@@ -82,14 +82,6 @@ public interface CommonFenceStore {
     int deleteTCCFenceDO(Connection conn, List<String> xids);
 
     /**
-     * Delete common fence by datetime.
-     * @param conn the connection
-     * @param datetime datetime
-     * @return the deleted row count
-     */
-    int deleteCommonFenceDOByDate(Connection conn, Date datetime);
-
-    /**
      * Set LogTable Name
      * @param logTableName logTableName
      */
