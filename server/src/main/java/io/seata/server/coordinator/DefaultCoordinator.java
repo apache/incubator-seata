@@ -170,8 +170,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
         GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
 
-    private final GlobalStatus[] retryCommittingStatuses =
-        new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying};
+    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Committed};
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
@@ -411,8 +410,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (committingSession.getStatus() == GlobalStatus.Committing
-                    && !committingSession.isDeadSession()) {
+                if (GlobalStatus.Committing.equals(committingSession.getStatus()) && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
                 }
@@ -423,6 +421,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                     //The function of this 'return' is 'continue'.
                     return;
+                }
+                if (GlobalStatus.Committed.equals(committingSession.getStatus())
+                    && committingSession.getBranchSessions().isEmpty()) {
+                    SessionHelper.endCommitted(committingSession,true);
                 }
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
@@ -435,27 +437,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting, GlobalStatus.Committed);
-        Collection<GlobalSession> committingSessions =
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
+        Collection<GlobalSession> asyncCommittingSessions =
                 SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
-        if (CollectionUtils.isEmpty(committingSessions)) {
+        if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
-        SessionHelper.forEach(committingSessions, committingSession -> {
-            if (GlobalStatus.AsyncCommitting.equals(committingSession.getStatus())) {
+        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
                 try {
-                    core.doGlobalCommit(committingSession, true);
+                core.doGlobalCommit(asyncCommittingSession, true);
                 } catch (TransactionException ex) {
-                    LOGGER.error("Failed to async committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
-                }
-            } else if (GlobalStatus.Committed.equals(committingSession.getStatus())) {
-                try {
-                    if (committingSession.getBranchSessions().isEmpty()) {
-                        SessionHelper.endCommitted(committingSession, true);
-                    }
-                } catch (TransactionException ex) {
-                    LOGGER.error("Failed to clean committed [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
-                }
+                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
             }
         });
     }
