@@ -144,7 +144,6 @@ if [ ! -x "$BASEDIR"/logs ]; then
 fi
 
 
-#start-server
 start_server() {
 
   echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
@@ -153,7 +152,6 @@ start_server() {
 
 }
 
-#stop-server
 stop_server() {
 
   PID=`ps aux | grep -i 'seata-server' | grep java | grep -v grep | awk '{print $2}'`
