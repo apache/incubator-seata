@@ -146,9 +146,11 @@ fi
 
 #start-server
 start_server() {
+
   echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
   nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
   echo "The seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+
 }
 
 #stop-server
