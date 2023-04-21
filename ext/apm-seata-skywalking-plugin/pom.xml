@@ -27,6 +27,7 @@
     <artifactId>apm-seata-skywalking-plugin</artifactId>
     <packaging>jar</packaging>
     <name>apm-seata-skywalking-plugin ${project.version}</name>
+    <description>skywalking plugin for Seata built with Maven</description>
 
     <properties>
         <skywalking.version>8.6.0</skywalking.version>

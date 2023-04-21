@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.seata.console.config.WebSecurityConfig;
 import io.seata.console.constant.Code;
+import io.seata.console.result.SingleResult;
 import io.seata.console.security.User;
 import io.seata.console.utils.JwtTokenUtils;
-import io.seata.console.utils.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -55,7 +55,7 @@ public class AuthController {
      * Seata is in broken states.
      */
     @PostMapping("/login")
-    public Result login(HttpServletResponse response, @RequestBody User user) {
+    public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             user.getUsername(), user.getPassword());
 
@@ -71,9 +71,9 @@ public class AuthController {
             //put token into http header
             response.addHeader(WebSecurityConfig.AUTHORIZATION_HEADER, authHeader);
 
-            return Result.ofSuccess(authHeader);
+            return SingleResult.success(authHeader);
         } catch (BadCredentialsException authentication) {
-            return Result.ofError(Code.LOGIN_FAILED);
+            return SingleResult.failure(Code.LOGIN_FAILED);
         }
     }
 }

@@ -15,9 +15,9 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccActionImpl;
-import io.seata.rm.tcc.remoting.RemotingDesc;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -66,8 +66,8 @@ public class LocalTCCRemotingParserTest {
         RemotingDesc remotingDesc = localTCCRemotingParser.getServiceDesc(tccAction, "c");
         Assertions.assertNotNull(remotingDesc);
 
-        Assertions.assertEquals("io.seata.rm.tcc.TccAction", remotingDesc.getInterfaceClassName());
-        Assertions.assertEquals(remotingDesc.getInterfaceClass(), TccAction.class);
+        Assertions.assertEquals("io.seata.rm.tcc.TccAction", remotingDesc.getServiceClassName());
+        Assertions.assertEquals(remotingDesc.getServiceClass(), TccAction.class);
         Assertions.assertEquals(remotingDesc.getTargetBean(), tccAction);
     }
 

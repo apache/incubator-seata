@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.IOException;
 
 import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.store.StoreMode;
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,8 +61,7 @@ public class SessionHolderTest {
         if (rootSessionFile.exists()) {
             rootSessionFile.delete();
         }
-        final String mode = StoreMode.FILE.getName();
-        SessionHolder.init(mode);
+        SessionHolder.init(SessionMode.FILE);
         try {
             final File actual = new File(pathname);
             Assertions.assertTrue(actual.exists());

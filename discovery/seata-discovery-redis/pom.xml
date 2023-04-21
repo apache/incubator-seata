@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-redis</artifactId>
     <name>seata-discovery-redis ${project.version}</name>
+    <description>discovery-redis for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

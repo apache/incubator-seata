@@ -15,17 +15,18 @@
  */
 package io.seata.server.session.redis;
 
+import javax.annotation.Resource;
+
 import com.alibaba.fastjson.JSON;
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.param.GlobalSessionParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalLockVO;
-import io.seata.core.console.vo.GlobalSessionVO;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.param.GlobalLockParam;
+import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.console.service.GlobalSessionService;
+import io.seata.server.console.vo.GlobalLockVO;
+import io.seata.server.console.vo.GlobalSessionVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import javax.annotation.Resource;
 
 /**
  * @author doubleDimple

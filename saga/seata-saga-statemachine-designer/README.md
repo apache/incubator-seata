@@ -16,7 +16,7 @@ $ npm start
 ## build a package
 ```sh
 $ cd saga/saga-statemachine-designer
-$ npm build
+$ npm run build
 ```
 
 copy 'index.html' and 'dist' directory to static html directory of web server

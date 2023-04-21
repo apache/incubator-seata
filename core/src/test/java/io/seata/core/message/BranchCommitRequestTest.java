@@ -44,8 +44,7 @@ public class BranchCommitRequestTest {
         branchCommitRequest.setResourceId("resource1");
         branchCommitRequest.setApplicationData("app1");
 
-        Assertions.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
-            + "resourceId=resource1,applicationData=app1", branchCommitRequest.toString());
+        Assertions.assertEquals("BranchCommitRequest{xid='127.0.0.1:9999:39875642', branchId=1, branchType=AT, resourceId='resource1', applicationData='app1'}", branchCommitRequest.toString());
 
     }
 }

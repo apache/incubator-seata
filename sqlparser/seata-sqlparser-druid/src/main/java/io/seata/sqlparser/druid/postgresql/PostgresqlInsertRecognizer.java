@@ -33,6 +33,7 @@ import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
@@ -158,6 +159,12 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

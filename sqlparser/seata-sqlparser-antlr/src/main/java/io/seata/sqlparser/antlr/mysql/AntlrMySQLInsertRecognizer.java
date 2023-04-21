@@ -15,12 +15,14 @@
  */
 package io.seata.sqlparser.antlr.mysql;
 
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import io.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.ArrayList;
@@ -104,5 +106,11 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, JdbcConstants.MYSQL);
     }
 }

@@ -15,28 +15,30 @@
  */
 package io.seata.server.lock;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
+
 import javax.annotation.Resource;
 
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.common.util.CollectionUtils;
+import io.seata.console.result.PageResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.lock.file.FileLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.session.SessionManager;
-
+import io.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -215,8 +217,16 @@ public class LockManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init("file");
+        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        //make sure sessionMaanager is empty
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            //FileSessionManager use ConcurrentHashMap is thread safe
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
         try {
             sessionManager.addGlobalSession(globalSessions1);
             sessionManager.addGlobalSession(globalSessions2);
@@ -230,87 +240,106 @@ public class LockManagerTest {
                     () -> globalLockService.query(param)
             );
 
+            LockManager lockManager = new FileLockManagerForTest();
+            for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
+                lockManager.acquireLock(branchSession);
+            }
+
+            for (BranchSession branchSession : globalSessions2.getBranchSessions()) {
+                lockManager.acquireLock(branchSession);
+            }
+
             param.setPageNum(1);
             param.setPageSize(10);
 
             // query all data
             final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
-            Assertions.assertEquals(fullQueryTestResult.getPages(), 1);
-            Assertions.assertEquals(fullQueryTestResult.getTotal(), 8);
-            Assertions.assertEquals(fullQueryTestResult.getData().size(), 8);
+            Assertions.assertEquals(1,fullQueryTestResult.getPages());
+            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
 
             // test paging
             param.setPageSize(1);
             final PageResult<GlobalLockVO> pagingTestResult = globalLockService.query(param);
-            Assertions.assertEquals(pagingTestResult.getPages(), 8);
-            Assertions.assertEquals(pagingTestResult.getTotal(), 8);
-            Assertions.assertEquals(pagingTestResult.getData().size(), 1);
+            Assertions.assertEquals(8, pagingTestResult.getPages());
+            Assertions.assertEquals(8, pagingTestResult.getTotal());
+            Assertions.assertEquals(1, pagingTestResult.getData().size());
 
             // transaction id
             param.setPageSize(10);
             param.setTransactionId("49");
             final PageResult<GlobalLockVO> transactionIdTestResult1 = globalLockService.query(param);
-            Assertions.assertEquals(transactionIdTestResult1.getTotal(), 2);
+            Assertions.assertEquals(2, transactionIdTestResult1.getTotal());
 
             param.setTransactionId("72");
             final PageResult<GlobalLockVO> transactionIdTestResult2 = globalLockService.query(param);
-            Assertions.assertEquals(transactionIdTestResult2.getTotal(), 6);
+            Assertions.assertEquals(6, transactionIdTestResult2.getTotal());
 
             param.setTransactionId("493747292");
             final PageResult<GlobalLockVO> transactionIdTestResult3 = globalLockService.query(param);
-            Assertions.assertEquals(transactionIdTestResult3.getTotal(), 2);
+            Assertions.assertEquals(2, transactionIdTestResult3.getTotal());
 
             // branch id
             param.setTransactionId(null);
             param.setBranchId("2");
             final PageResult<GlobalLockVO> branchIdTestResult = globalLockService.query(param);
-            Assertions.assertEquals(branchIdTestResult.getPages(), 1);
-            Assertions.assertEquals(branchIdTestResult.getTotal(), 4);
-            Assertions.assertEquals(branchIdTestResult.getData().size(), 4);
+            Assertions.assertEquals(1, branchIdTestResult.getPages());
+            Assertions.assertEquals(4, branchIdTestResult.getTotal());
+            Assertions.assertEquals(4, branchIdTestResult.getData().size());
 
             // xid
             param.setBranchId(null);
             param.setXid("id1");
             final PageResult<GlobalLockVO> xidTestResult1 = globalLockService.query(param);
-            Assertions.assertEquals(xidTestResult1.getTotal(), 4);
+            Assertions.assertEquals(4, xidTestResult1.getTotal());
 
             param.setXid("d");
             final PageResult<GlobalLockVO> xidTestResult2 = globalLockService.query(param);
-            Assertions.assertEquals(xidTestResult2.getTotal(), 8);
+            Assertions.assertEquals(8, xidTestResult2.getTotal());
 
             // table name
             param.setXid(null);
             param.setTableName("de");
             final PageResult<GlobalLockVO> tableTestResult1 = globalLockService.query(param);
-            Assertions.assertEquals(tableTestResult1.getTotal(), 2);
+            Assertions.assertEquals(2, tableTestResult1.getTotal());
 
             param.setTableName("e");
             final PageResult<GlobalLockVO> tableTestResult2 = globalLockService.query(param);
-            Assertions.assertEquals(tableTestResult2.getTotal(), 4);
+            Assertions.assertEquals(4, tableTestResult2.getTotal());
 
             // timeStart and timeEnd
             final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             param.setTableName(null);
-            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01"));
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01").getTime());
             final PageResult<GlobalLockVO> timeTestResult1 = globalLockService.query(param);
-            Assertions.assertEquals(timeTestResult1.getTotal(), 0);
+            Assertions.assertEquals(0, timeTestResult1.getTotal());
 
-            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00"));
+            param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult2 = globalLockService.query(param);
-            Assertions.assertEquals(timeTestResult2.getTotal(), 4);
+            Assertions.assertEquals(4, timeTestResult2.getTotal());
 
             param.setTimeStart(null);
-            param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59"));
+            param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59").getTime());
             final PageResult<GlobalLockVO> timeTestResult3 = globalLockService.query(param);
-            Assertions.assertEquals(timeTestResult3.getTotal(), 0);
+            Assertions.assertEquals(0, timeTestResult3.getTotal());
 
-            param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00"));
+            param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
-            Assertions.assertEquals(timeTestResult4.getTotal(), 4);
-//            param.setTimeEnd();
-            System.out.println();
-            //
-//            globalLockService.query()
+            Assertions.assertEquals(4, timeTestResult4.getTotal());
+
+            //test release lock
+            for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
+                lockManager.releaseLock(branchSession);
+            }
+
+            final GlobalLockParam param2 = new GlobalLockParam();
+            param2.setPageNum(1);
+            param2.setPageSize(10);
+
+            final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param2);
+            Assertions.assertEquals(1,fullQueryTestResult2.getPages());
+            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
 
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);

@@ -41,7 +41,7 @@ public interface RemotingClient {
      * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
      * is enabled, the message will be sent in batches.
      *
-     * @param msg transaction message {@link io.seata.core.protocol}
+     * @param msg transaction message {@code io.seata.core.protocol}
      * @return server result message
      * @throws TimeoutException TimeoutException
      */
@@ -51,7 +51,7 @@ public interface RemotingClient {
      * client send sync request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      * @return server result message
      * @throws TimeoutException TimeoutException
      */
@@ -61,7 +61,7 @@ public interface RemotingClient {
      * client send async request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncRequest(Channel channel, Object msg);
 
@@ -70,7 +70,7 @@ public interface RemotingClient {
      *
      * @param serverAddress server address
      * @param rpcMessage    rpc message from server request
-     * @param msg           transaction message {@link io.seata.core.protocol}
+     * @param msg           transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg);
 

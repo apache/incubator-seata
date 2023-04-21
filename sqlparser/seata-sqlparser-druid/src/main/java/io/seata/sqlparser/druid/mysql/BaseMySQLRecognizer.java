@@ -27,6 +27,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author will
@@ -132,4 +133,18 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
+    protected String getJoinCondition(SQLExpr joinCondition,final ParametersHolder parametersHolder,
+                                        final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(joinCondition)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeVisit(joinCondition, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
+    }
 }

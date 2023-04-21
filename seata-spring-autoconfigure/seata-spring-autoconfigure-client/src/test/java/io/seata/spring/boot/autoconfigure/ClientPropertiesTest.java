@@ -73,7 +73,7 @@ public class ClientPropertiesTest {
     public void testRmProperties() {
         assertEquals(10000, context.getBean(RmProperties.class).getAsyncCommitBufferLimit());
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
-        assertFalse(context.getBean(RmProperties.class).isTableMetaCheckEnable());
+        assertTrue(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
         assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
         assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
@@ -108,7 +108,7 @@ public class ClientPropertiesTest {
 
     @Test
     public void testLoadBalanceProperties() {
-        assertEquals("RandomLoadBalance", context.getBean(LoadBalanceProperties.class).getType());
+        assertEquals("XID", context.getBean(LoadBalanceProperties.class).getType());
         assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
 

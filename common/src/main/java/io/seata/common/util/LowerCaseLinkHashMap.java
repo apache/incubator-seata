@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,17 +28,21 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     private final LinkedHashMap<String, V> targetMap;
 
+    private final LinkedHashMap<String, String> lowerKeyToOriginMap;
+
     public LowerCaseLinkHashMap() {
         targetMap = new LinkedHashMap<>(16, 1.001f);
+        lowerKeyToOriginMap = new LinkedHashMap<>(16, 1.001f);
     }
 
     public LowerCaseLinkHashMap(Integer initialCapacity, float loadFactor) {
         targetMap = new LinkedHashMap<>(initialCapacity, loadFactor);
-
+        lowerKeyToOriginMap = new LinkedHashMap<>(initialCapacity, loadFactor);
     }
 
     public LowerCaseLinkHashMap(Map<String, V> map) {
         targetMap = new LinkedHashMap<>(16, 1.001f);
+        lowerKeyToOriginMap = new LinkedHashMap<>(16, 1.001f);
 
         putAll(map);
     }
@@ -63,7 +68,7 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public boolean containsValue(Object o) {
-        return targetMap.containsKey(o);
+        return targetMap.containsValue(o);
     }
 
     @Override
@@ -77,12 +82,14 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public V put(String s, V v) {
+        lowerKeyToOriginMap.put(s.toLowerCase(), s);
         return targetMap.put(s.toLowerCase(), v);
     }
 
     @Override
     public V remove(Object o) {
         if (o instanceof String) {
+            lowerKeyToOriginMap.remove(((String) o).toLowerCase());
             return targetMap.remove(((String) o).toLowerCase());
         }
 
@@ -91,17 +98,19 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
 
     @Override
     public void putAll(Map<? extends String, ? extends V> map) {
+        map.forEach((k, v) -> lowerKeyToOriginMap.put(k.toLowerCase(), k));
         map.forEach((k, v) -> targetMap.put(k.toLowerCase(), v));
     }
 
     @Override
     public void clear() {
         targetMap.clear();
+        lowerKeyToOriginMap.clear();
     }
 
     @Override
     public Set<String> keySet() {
-        return targetMap.keySet();
+        return new HashSet<>(lowerKeyToOriginMap.values());
     }
 
     @Override
@@ -195,4 +204,10 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
     public int hashCode() {
         return Objects.hash(targetMap);
     }
+
+    @Override
+    public String toString() {
+        return targetMap.toString();
+    }
+
 }

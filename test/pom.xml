@@ -26,6 +26,7 @@
     <artifactId>seata-test</artifactId>
     <packaging>jar</packaging>
     <name>seata-test ${project.version}</name>
+    <description>test for Seata built with Maven</description>
 
     <build>
         <plugins>
@@ -83,10 +84,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency>
@@ -126,6 +123,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-serializer-seata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

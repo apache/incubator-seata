@@ -26,6 +26,7 @@
     <artifactId>seata-rm</artifactId>
     <packaging>jar</packaging>
     <name>seata-rm ${project.version}</name>
+    <description>resource manager for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

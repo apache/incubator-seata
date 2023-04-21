@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-serializer-all</artifactId>
     <name>seata-serializer-all ${project.version}</name>
+    <description>serializer-all for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

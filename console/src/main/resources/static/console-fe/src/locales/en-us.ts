@@ -19,12 +19,16 @@ import { ILocale } from './index.d';
 const enUs: ILocale = {
   MenuRouter: {
     overview: 'Overview',
+    transactionInfo: 'TransactionInfo',
+    globalLockInfo: 'GlobalLockInfo',
   },
   Header: {
     home: 'HOME',
+    cloud: 'CLOUD',
     docs: 'DOCS',
     blog: 'BLOG',
     community: 'COMMUNITY',
+    download: 'DOWNLOAD',
     languageSwitchButton: '中',
     logout: 'logout',
     passwordRequired: 'password should not be empty',
@@ -36,13 +40,35 @@ const enUs: ILocale = {
     pleaseInputUsername: 'Please input username',
     pleaseInputPassword: 'Please input password',
     invalidUsernameOrPassword: 'invalid username or password',
-    desc: 'Seata is an open source distributed transaction solution that delivers high performance and easy to use distributed transaction services under a microservices architecture.'
+    desc: 'Seata is an open source distributed transaction solution that delivers high performance and easy to use distributed transaction services under a microservices architecture.',
   },
   Overview: {
     title: 'Overview',
     subTitle: 'list',
     search: 'search',
-  }
+  },
+  TransactionInfo: {
+    title: 'TransactionInfo',
+    subTitle: 'list',
+    createTimeLabel: 'CreateTime',
+    selectFilerPlaceholder: 'Please select filter criteria',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    branchSessionSwitchLabel: 'Whether to include branch sessions',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
+    operateTitle: 'operate',
+    showBranchSessionTitle: 'View branch session',
+    showGlobalLockTitle: 'View global lock',
+    branchSessionDialogTitle: 'Branch session info',
+  },
+  GlobalLockInfo: {
+    title: 'GlobalLockInfo',
+    subTitle: 'list',
+    createTimeLabel: 'CreateTime',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
+  },
 };
 
 export default enUs;

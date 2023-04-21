@@ -24,9 +24,9 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.param.GlobalLockParam;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalLockParam;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.core.lock.RowLock;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.lock.LockerManagerFactory;
@@ -38,7 +38,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.util.StringUtils.isBlank;
-import static io.seata.core.console.vo.GlobalLockVO.convert;
+import static io.seata.server.console.vo.GlobalLockVO.convert;
 import static java.util.Objects.isNull;
 
 /**
@@ -80,6 +80,9 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
      * @return the RowLock list
      */
     private Stream<RowLock> filterAndMap(GlobalLockParam param, BranchSession branchSession) {
+        if (CollectionUtils.isEmpty(branchSession.getLockHolder())) {
+            return Stream.empty();
+        }
 
         final String tableName = param.getTableName();
 
@@ -159,11 +162,11 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart().getTime() <= globalSession.getBeginTime())
+                    (isNull(param.getTimeStart()) || param.getTimeStart() <= globalSession.getBeginTime())
 
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd().getTime() >= globalSession.getBeginTime());
+                    (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
         };
     }
 

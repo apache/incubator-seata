@@ -37,13 +37,13 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.LOAD_BALANCE_PRE
 public class ConsistentHashLoadBalance implements LoadBalance {
 
     /**
-     * The constant LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES.
+     * The constant LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES.
      */
-    public static final String LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES = LOAD_BALANCE_PREFIX + "visualNodes";
+    public static final String LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES = LOAD_BALANCE_PREFIX + "virtualNodes";
     /**
      * The constant VIRTUAL_NODES_NUM.
      */
-    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(LOAD_BALANCE_CONSISTENT_HASH_VISUAL_NODES, VIRTUAL_NODES_DEFAULT);
+    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
 
     @Override
     public <T> T select(List<T> invokers, String xid) {

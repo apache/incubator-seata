@@ -26,6 +26,7 @@
     <artifactId>seata-spring</artifactId>
     <packaging>jar</packaging>
     <name>seata-spring ${project.version}</name>
+    <description>spring for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -40,12 +41,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tcc</artifactId>
+            <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-rm</artifactId>
+            <artifactId>seata-integration-tx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -54,8 +55,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-tcc</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- spring  -->
@@ -65,15 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
+            <artifactId>spring-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -89,8 +83,6 @@
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
         </dependency>
-
-
     </dependencies>
 
     <build>

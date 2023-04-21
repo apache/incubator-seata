@@ -37,9 +37,8 @@ public class GlobalBeginRequestTest {
     public void testToString() throws Exception {
         GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
         globalBeginRequest.setTransactionName("tran 1");
-        System.out.println(globalBeginRequest.toString());
 
-        Assertions.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
+        Assertions.assertEquals("GlobalBeginRequest{transactionName='tran 1', timeout=60000}", globalBeginRequest.toString());
     }
 
 }

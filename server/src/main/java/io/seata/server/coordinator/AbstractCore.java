@@ -76,7 +76,6 @@ public abstract class AbstractCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                     applicationData, lockKeys, clientId);
             MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
@@ -91,7 +90,7 @@ public abstract class AbstractCore implements Core {
             }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
-                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+                        globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
             }
             return branchSession.getBranchId();
         });
@@ -138,7 +137,6 @@ public abstract class AbstractCore implements Core {
                     String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
         }
         branchSession.setApplicationData(applicationData);
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
 
         if (LOGGER.isInfoEnabled()) {
@@ -172,8 +170,9 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
                                             BranchSession branchSession) throws IOException, TimeoutException {
+
         BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
-                branchSession.getResourceId(), branchSession.getClientId(), request);
+            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
         return response.getBranchStatus();
     }
 
@@ -196,8 +195,9 @@ public abstract class AbstractCore implements Core {
 
     protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
                                               BranchSession branchSession) throws IOException, TimeoutException {
+
         BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
-                branchSession.getResourceId(), branchSession.getClientId(), request);
+            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
         return response.getBranchStatus();
     }
 

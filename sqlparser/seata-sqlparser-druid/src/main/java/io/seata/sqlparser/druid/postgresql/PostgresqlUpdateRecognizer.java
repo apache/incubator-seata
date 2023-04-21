@@ -30,6 +30,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGUpdateStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -96,6 +97,12 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
             }
         }
         return list;
+    }
+
+    @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

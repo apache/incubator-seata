@@ -402,8 +402,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * Find the last instance of the forward execution state
      *
-     * @param stateInstanceList
-     * @return
+     * @param stateInstanceList the state instance list
+     * @return the state instance
      */
     public StateInstance findOutLastForwardStateInstance(List<StateInstance> stateInstanceList) {
         StateInstance lastForwardStateInstance = null;
@@ -561,8 +561,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * override state machine instance
      *
-     * @param instId
-     * @return
+     * @param instId the state instance id
+     * @return the state machine instance
      */
     @Override
     public StateMachineInstance reloadStateMachineInstance(String instId) {
@@ -599,13 +599,13 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * Check if the status is legal
      *
-     * @param stateMachineInstance
-     * @param acceptStatus
-     * @param denyStatus
-     * @param status
-     * @param compenStatus
-     * @param operation
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param acceptStatus accept status
+     * @param denyStatus deny status
+     * @param status execution status
+     * @param compenStatus compensate status
+     * @param operation the operation
+     * @return the boolean
      */
     protected boolean checkStatus(StateMachineInstance stateMachineInstance, ExecutionStatus[] acceptStatus,
                                   ExecutionStatus[] denyStatus, ExecutionStatus status, ExecutionStatus compenStatus,

@@ -28,8 +28,8 @@ public interface ProcessController {
     /**
      * process business logic
      *
-     * @param context
-     * @throws FrameworkException
+     * @param context the process context
+     * @throws FrameworkException the framework exception
      */
     void process(ProcessContext context) throws FrameworkException;
 }

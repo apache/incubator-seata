@@ -1,6 +1,6 @@
 [English](README.md) | 简体中文
 
-# Seata Saga StateMachine Designer
+# Seata Saga 状态机可视化图形设计器
 
 Seata Saga 状态机可视化图形设计器, 基于 [GGEditor](https://github.com/alibaba/GGEditor)
 
@@ -16,7 +16,7 @@ $ npm start
 ## 打包
 ```sh
 $ cd saga/saga-statemachine-designer
-$ npm build
+$ npm run build
 ```
 
 然后将index.html和dist目录拷贝到web server的静态页面目录下

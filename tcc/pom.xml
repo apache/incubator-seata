@@ -27,6 +27,7 @@
     <artifactId>seata-tcc</artifactId>
     <packaging>jar</packaging>
     <name>seata-tcc ${project.version}</name>
+    <description>tcc transaction mode for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -41,13 +42,31 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-integration-tx-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-
 </project>

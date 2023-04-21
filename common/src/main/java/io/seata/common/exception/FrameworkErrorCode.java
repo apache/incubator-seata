@@ -219,9 +219,9 @@ public enum FrameworkErrorCode {
     DateSourceNeedInjected("0501","TCC fence datasource need injected","TCC fence datasource need injected"),
 
     /**
-     * TCC fence record already exists
+     * TCC fence record not exists
      */
-    RecordAlreadyExists("0502","TCC fence record already exists","TCC fence record already exists"),
+    RecordNotExists("0502","TCC fence record not exists","TCC fence record not exists"),
 
     /**
      * Insert tcc fence record error

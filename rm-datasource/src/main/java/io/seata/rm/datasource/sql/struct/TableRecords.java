@@ -34,7 +34,12 @@ import javax.sql.rowset.serial.SerialDatalink;
 import javax.sql.rowset.serial.SerialJavaObject;
 import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
 
 /**
  * The type Table records.
@@ -192,7 +197,7 @@ public class TableRecords implements java.io.Serializable {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = tmeta.getColumnMeta(colName);
+                ColumnMeta col = getColumnMeta(tmeta,colName);
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
@@ -237,6 +242,8 @@ public class TableRecords implements java.io.Serializable {
                     if (object != null) {
                         field.setValue(new SerialJavaObject(object));
                     }
+                } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
+                    field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
                 } else {
                     // JDBCType.DISTINCT, JDBCType.STRUCT etc...
                     field.setValue(holdSerialDataType(resultSet.getObject(i)));
@@ -251,6 +258,20 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * check if the column is null and return
+     *
+     * @param tmeta the table meta
+     * @param colName the column nmae
+     */
+    private static ColumnMeta getColumnMeta(TableMeta tmeta , String colName) throws SQLException {
+        ColumnMeta col = tmeta.getColumnMeta(colName);
+        if (col == null) {
+            throw new TableMetaException(tmeta.getTableName(), colName);
+        }
+        return col;
     }
 
     /**

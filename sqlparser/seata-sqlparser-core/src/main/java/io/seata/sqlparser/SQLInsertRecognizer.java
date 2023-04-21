@@ -59,4 +59,11 @@ public interface SQLInsertRecognizer extends SQLRecognizer {
      * @return the duplicateKey columns
      */
     List<String> getDuplicateKeyUpdate();
+
+    /**
+     * Gets insert columns is Simplified.
+     *
+     * @return (`a`, `b`, `c`)  ->  (a, b, c)
+     */
+    List<String> getInsertColumnsUnEscape();
 }

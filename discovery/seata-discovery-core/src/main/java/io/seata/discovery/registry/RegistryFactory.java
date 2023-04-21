@@ -21,6 +21,8 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Registry factory.
@@ -28,6 +30,8 @@ import io.seata.config.ConfigurationKeys;
  * @author slievrly
  */
 public class RegistryFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
 
     /**
      * Gets instance.
@@ -43,6 +47,7 @@ public class RegistryFactory {
         String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
             ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
+        LOGGER.info("use registry center type: {}", registryTypeName);
         try {
             registryType = RegistryType.getType(registryTypeName);
         } catch (Exception exx) {

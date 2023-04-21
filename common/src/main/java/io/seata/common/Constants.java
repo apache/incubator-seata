@@ -69,7 +69,7 @@ public interface Constants {
     /**
      * Use TCC fence
      */
-    String USE_TCC_FENCE = "useTCCFence";
+    String USE_COMMON_FENCE = "useTCCFence";
 
     /**
      * phase one method name
@@ -94,7 +94,7 @@ public interface Constants {
     /**
      * branch context
      */
-    String TCC_ACTION_CONTEXT = "actionContext";
+    String TX_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name
@@ -109,6 +109,10 @@ public interface Constants {
      * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
      */
     String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
     /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
@@ -126,11 +130,6 @@ public interface Constants {
      * The constant RETRY_ROLLBACKING
      */
     String RETRY_ROLLBACKING = "RetryRollbacking";
-
-    /**
-     * The constant HANDLE_ALL_SESSION
-     */
-    String HANDLE_ALL_SESSION = "HandleAllSession";
 
     /**
      * The constant RETRY_COMMITTING
@@ -162,4 +161,38 @@ public interface Constants {
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
 
+    /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
+    
+    /**
+     * phase two compensation method name
+     */
+    String COMPENSATION_METHOD = "sys::compensation";
+
+    /**
+     * phase STORE_REDIS_TYPE_PIPELINE
+     */
+    String STORE_REDIS_TYPE_PIPELINE = "pipeline";
+
+    /**
+     * The constant FASTJSON_JSON_PARSER_NAME
+     */
+    String FASTJSON_JSON_PARSER_NAME = "fastjson";
+
+    /**
+     * The constant JACKSON_JSON_PARSER_NAME
+     */
+    String JACKSON_JSON_PARSER_NAME = "jackson";
+
+    /**
+     * The constant GSON_JSON_PARSER_NAME
+     */
+    String GSON_JSON_PARSER_NAME = "gson";
+
+    /**
+     * The constant JACKSON_JSON_TEXT_PREFIX
+     */
+    String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
 }

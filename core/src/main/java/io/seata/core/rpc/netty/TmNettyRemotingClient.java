@@ -29,6 +29,9 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.RejectedPolicies;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.auth.AuthSigner;
 import io.seata.core.constants.ConfigurationKeys;
@@ -73,6 +76,19 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                                   ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
+        // set enableClientBatchSendRequest
+        this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
+                DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
+        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                String dataId = event.getDataId();
+                String newValue = event.getNewValue();
+                if (ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
+                    enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
+                }
+            }
+        });
     }
 
     /**
@@ -191,8 +207,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     public boolean isEnableClientBatchSendRequest() {
-        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
-            DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
+        return enableClientBatchSendRequest;
     }
 
     @Override
@@ -267,6 +282,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         sb.append(RegisterTMRequest.UDATA_AK).append(EXTRA_DATA_KV_CHAR).append(accessKey).append(EXTRA_DATA_SPLIT_CHAR);
         sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
         sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(EXTRA_DATA_SPLIT_CHAR);
         return sb.toString();
     }
 }

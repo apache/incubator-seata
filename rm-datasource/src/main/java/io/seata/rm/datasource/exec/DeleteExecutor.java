@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -46,7 +46,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
+    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

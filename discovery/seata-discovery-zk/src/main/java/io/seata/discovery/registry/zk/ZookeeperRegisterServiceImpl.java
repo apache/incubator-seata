@@ -171,8 +171,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     /**
      * @param key the key
-     * @return
-     * @throws Exception
+     * @return the socket address list
+     * @throws Exception the exception
      */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {

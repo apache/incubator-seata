@@ -46,7 +46,6 @@ public interface ConfigurationKeys {
      */
     String DATA_TYPE = "dataType";
 
-
     /**
      * The constant SEATA_PREFIX.
      */
@@ -364,9 +363,24 @@ public interface ConfigurationKeys {
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
 
     /**
-     * The constant HANDLE_ALL_SESSION_PERIOD.
+     * The constant COMMITING_RETRY_PERIOD.
      */
-    String HANDLE_ALL_SESSION_PERIOD = RECOVERY_PREFIX + "handleAllSessionPeriod";
+    String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
+
+    /**
+     * The constant ASYN_COMMITING_RETRY_PERIOD.
+     */
+    String ASYNC_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asyncCommittingRetryPeriod";
+
+    /**
+     * The constant ROLLBACKING_RETRY_PERIOD.
+     */
+    String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
+
+    /**
+     * The constant TIMEOUT_RETRY_PERIOD.
+     */
+    String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
      * The constant CLIENT_UNDO_PREFIX.
@@ -377,6 +391,7 @@ public interface ConfigurationKeys {
      * The constant TRANSACTION_UNDO_DATA_VALIDATION.
      */
     String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
+
     /**
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
@@ -627,6 +642,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
+     * The constant STORE_REDIS_TYPE. lua pipeline
+     */
+    String STORE_REDIS_TYPE = STORE_REDIS_PREFIX + "type";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
@@ -726,14 +746,24 @@ public interface ConfigurationKeys {
     String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
+     * The constant ACCESS_KEY.
+     */
+    String ACCESS_KEY = "accesskey";
+
+    /**
+     * The constant SECRET_KEY.
+     */
+    String SECRET_KEY = "secretkey";
+
+    /**
      * The constant SEATA_ACCESS_KEY.
      */
-    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + ACCESS_KEY;
 
     /**
      * The constant SEATA_SECRET_KEY.
      */
-    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+    String SEATA_SECRET_KEY = SEATA_PREFIX + SECRET_KEY;
 
     /**
      * The constant EXTRA_DATA_SPLIT_CHAR.
@@ -785,6 +815,11 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
+     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
+     */
+    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
+
+    /**
      * The constant rpcRmRequestTimeout
      */
     String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
@@ -808,4 +843,40 @@ public interface ConfigurationKeys {
      * The constant ENABLE_BRANCH_ASYNC_REMOVE
      */
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
+
+    /**
+     * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
+     */
+    String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
+
+    /**
+     * The constant IS_USE_ENDPOINT_PARSING_RULE.
+     */
+    String IS_USE_ENDPOINT_PARSING_RULE = "isUseEndpointParsingRule";
+
+    /**
+     * The constant XAER_NOTA_RETRY_TIMEOUT
+     */
+    String XAER_NOTA_RETRY_TIMEOUT = SERVER_PREFIX + "xaerNotaRetryTimeout";
+
+    /**
+     * The constant XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    String XA_BRANCH_EXECUTION_TIMEOUT = CLIENT_RM_PREFIX + "branchExecutionTimeoutXA";
+
+    /**
+     * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
+     */
+    String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
+
+    /**
+     * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
+     */
+    String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
+
+    /**
+     * The constant ENABLE_PARALLEL_HANDLE_BRANCH_KEY
+     */
+    String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
+
 }
