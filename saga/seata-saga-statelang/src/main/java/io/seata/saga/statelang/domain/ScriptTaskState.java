@@ -25,14 +25,14 @@ public interface ScriptTaskState extends TaskState {
     /**
      * get ScriptType such as groovy
      *
-     * @return
+     * @return the script type
      */
     String getScriptType();
 
     /**
      * get ScriptContent
      *
-     * @return
+     * @return the script content
      */
     String getScriptContent();
 }

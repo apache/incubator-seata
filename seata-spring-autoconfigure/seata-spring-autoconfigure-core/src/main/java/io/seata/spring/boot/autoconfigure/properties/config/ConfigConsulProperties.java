@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_
 public class ConfigConsulProperties {
     private String serverAddr;
     private String key = "seata.properties";
-    private String aclToken = "";
+    private String aclToken;
 
     public String getServerAddr() {
         return serverAddr;

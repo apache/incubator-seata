@@ -43,7 +43,7 @@ const codeMessage = {
 
 const request = () => {
   const instance: AxiosInstance = axios.create({
-    baseURL: '/api/v1',
+    baseURL: 'api/v1',
     method: 'get',
   });
 
@@ -58,8 +58,8 @@ const request = () => {
   instance.interceptors.response.use(
     (response: AxiosResponse): Promise<any> => {
       const code = get(response, 'data.code');
-      if (response.status === 200 && code === 200) {
-        return Promise.resolve(get(response, 'data.data'));
+      if (response.status === 200 && code === '200') {
+        return Promise.resolve(get(response, 'data'));
       } else {
         const errorText =
           (codeMessage as any)[code] ||

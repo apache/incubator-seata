@@ -21,5 +21,5 @@ export default {
   TIMEDURINT: 2000,
   is_preview: process.env.NODE_ENV === 'development',
   projectName: 'seata',
-  defaultLanguage: 'en-US',
+  defaultLanguage: 'zh-CN',
 };

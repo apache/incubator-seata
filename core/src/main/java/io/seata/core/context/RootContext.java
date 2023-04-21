@@ -48,6 +48,11 @@ public class RootContext {
     public static final String KEY_XID = "TX_XID";
 
     /**
+     * The constant KEY_TIMEOUT.
+     */
+    public static final String KEY_TIMEOUT = "TX_TIMEOUT";
+
+    /**
      * The constant MDC_KEY_XID for logback
      * @since 1.5.0
      */
@@ -114,6 +119,14 @@ public class RootContext {
             }
             CONTEXT_HOLDER.put(KEY_XID, xid);
         }
+    }
+
+    public static Integer getTimeout() {
+        return (Integer) CONTEXT_HOLDER.get(KEY_TIMEOUT);
+    }
+
+    public static void setTimeout(Integer timeout) {
+        CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
     }
 
     /**

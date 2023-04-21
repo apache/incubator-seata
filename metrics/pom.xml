@@ -26,6 +26,7 @@
     <packaging>pom</packaging>
     <artifactId>seata-metrics</artifactId>
     <name>seata-metrics ${project.version}</name>
+    <description>metrics top parent for Seata built with Maven</description>
 
     <modules>
         <module>seata-metrics-all</module>

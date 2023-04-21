@@ -52,5 +52,6 @@ public interface FailureHandler {
      * @param tx                the tx
      * @param originalException the originalException
      */
-    void onRollbackRetrying(GlobalTransaction tx, Throwable originalException);
+    void onRollbacking(GlobalTransaction tx, Throwable originalException);
+
 }

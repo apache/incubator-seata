@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser.antlr.mysql;
 
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -22,6 +23,7 @@ import io.seata.sqlparser.antlr.mysql.listener.UpdateSpecificationSqlListener;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -70,6 +72,12 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
         }
 
         return updateForValues.stream().map(updateValues -> updateValues.getUpdateValue()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, JdbcConstants.MYSQL);
     }
 
     @Override

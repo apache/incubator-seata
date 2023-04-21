@@ -28,21 +28,21 @@ public interface StateMachine {
     /**
      * name
      *
-     * @return
+     * @return the state machine name
      */
     String getName();
 
     /**
      * comment
      *
-     * @return
+     * @return the state machine comment
      */
     String getComment();
 
     /**
      * start state name
      *
-     * @return
+     * @return the start state name
      */
     String getStartState();
 
@@ -51,36 +51,36 @@ public interface StateMachine {
     /**
      * version
      *
-     * @return
+     * @return the state machine version
      */
     String getVersion();
 
     /**
      * set version
      *
-     * @param version
+     * @param version the state machine version
      */
     void setVersion(String version);
 
     /**
      * states
      *
-     * @return
+     * @return the state machine key: the state machine name,value: the state machine
      */
     Map<String/** state machine name **/, State> getStates();
 
     /**
      * get state
      *
-     * @param name
-     * @return
+     * @param name the state machine name
+     * @return the state machine
      */
     State getState(String name);
 
     /**
      * get id
      *
-     * @return
+     * @return the state machine id
      */
     String getId();
 
@@ -89,77 +89,77 @@ public interface StateMachine {
     /**
      * get tenantId
      *
-     * @return
+     * @return the tenant id
      */
     String getTenantId();
 
     /**
      * set tenantId
      *
-     * @param tenantId
+     * @param tenantId the tenant id
      */
     void setTenantId(String tenantId);
 
     /**
      * app name
      *
-     * @return
+     * @return the app name
      */
     String getAppName();
 
     /**
      * type, there is only one type: SSL(SEATA state language)
      *
-     * @return
+     * @return the state type
      */
     String getType();
 
     /**
      * statue (Active|Inactive)
      *
-     * @return
+     * @return the state machine status
      */
     Status getStatus();
 
     /**
      * recover strategy: prefer compensation or forward when error occurred
      *
-     * @return
+     * @return the recover strategy
      */
     RecoverStrategy getRecoverStrategy();
 
     /**
      * set RecoverStrategy
      *
-     * @param recoverStrategy
+     * @param recoverStrategy the recover strategy
      */
     void setRecoverStrategy(RecoverStrategy recoverStrategy);
 
     /**
      * Is it persist execution log to storage?, default true
      *
-     * @return
+     * @return is persist
      */
     boolean isPersist();
 
     /**
      * Is update last retry execution log, default append new
      *
-     * @return
+     * @return the boolean
      */
     Boolean isRetryPersistModeUpdate();
 
     /**
      * Is update last compensate execution log, default append new
      *
-     * @return
+     * @return the boolean
      */
     Boolean isCompensatePersistModeUpdate();
 
     /**
      * State language text
      *
-     * @return
+     * @return the state language text
      */
     String getContent();
 
@@ -168,14 +168,14 @@ public interface StateMachine {
     /**
      * get create time
      *
-     * @return
+     * @return the create gmt
      */
     Date getGmtCreate();
 
     /**
      * set create time
      *
-     * @param date
+     * @param date the create gmt
      */
     void setGmtCreate(Date date);
 

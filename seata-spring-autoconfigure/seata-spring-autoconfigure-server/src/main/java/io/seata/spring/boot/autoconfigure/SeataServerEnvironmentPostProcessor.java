@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import io.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
@@ -50,25 +51,34 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_
  */
 public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
+    private static final AtomicBoolean INIT = new AtomicBoolean(false);
+
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        PROPERTY_BEAN_MAP.put(SERVER_PREFIX, ServerProperties.class);
-        PROPERTY_BEAN_MAP.put(SERVER_UNDO_PREFIX, ServerUndoProperties.class);
-        PROPERTY_BEAN_MAP.put(SERVER_RECOVERY_PREFIX, ServerRecoveryProperties.class);
-        PROPERTY_BEAN_MAP.put(METRICS_PREFIX, MetricsProperties.class);
-        PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
-        PROPERTY_BEAN_MAP.put(STORE_SESSION_PREFIX, StoreProperties.Session.class);
-        PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, StoreProperties.Lock.class);
-        PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
-        PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
-        PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
-        PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
-        PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
-        PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
+        init();
     }
 
     @Override
     public int getOrder() {
         return Ordered.HIGHEST_PRECEDENCE;
     }
+
+    public static void init() {
+        if (INIT.compareAndSet(false, true)) {
+            PROPERTY_BEAN_MAP.put(SERVER_PREFIX, ServerProperties.class);
+            PROPERTY_BEAN_MAP.put(SERVER_UNDO_PREFIX, ServerUndoProperties.class);
+            PROPERTY_BEAN_MAP.put(SERVER_RECOVERY_PREFIX, ServerRecoveryProperties.class);
+            PROPERTY_BEAN_MAP.put(METRICS_PREFIX, MetricsProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_SESSION_PREFIX, StoreProperties.Session.class);
+            PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, StoreProperties.Lock.class);
+            PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
+            PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
+            PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
+        }
+    }
+
 }

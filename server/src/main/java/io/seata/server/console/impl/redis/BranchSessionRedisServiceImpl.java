@@ -19,11 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.console.result.PageResult;
-import io.seata.core.console.vo.BranchSessionVO;
+import io.seata.console.result.PageResult;
+import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
+import io.seata.server.storage.redis.store.RedisTransactionStoreManagerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -31,8 +32,8 @@ import org.springframework.stereotype.Component;
 /**
  * Branch Session Redis ServiceImpl
  *
- * @author: zhongxiang.wang
- * @author: doubleDimple
+ * @author zhongxiang.wang
+ * @author doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration
@@ -47,7 +48,7 @@ public class BranchSessionRedisServiceImpl implements BranchSessionService {
 
         List<BranchSessionVO> branchSessionVos = new ArrayList<>();
 
-        RedisTransactionStoreManager instance = RedisTransactionStoreManager.getInstance();
+        RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
 
         List<BranchTransactionDO> branchSessionDos = instance.findBranchSessionByXid(xid);
 

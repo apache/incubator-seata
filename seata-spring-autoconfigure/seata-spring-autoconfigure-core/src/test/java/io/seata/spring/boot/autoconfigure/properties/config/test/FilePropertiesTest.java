@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class FilePropertiesTest extends BasePropertiesTest {
-    @Bean
+    @Bean("testConfigFileProperties")
     public ConfigFileProperties configFileProperties() {
         return new ConfigFileProperties().setName(STR_TEST_AAA);
     }

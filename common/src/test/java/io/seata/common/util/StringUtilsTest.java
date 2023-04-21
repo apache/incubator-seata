@@ -59,6 +59,61 @@ public class StringUtilsTest {
     }
 
     @Test
+    public void testIsBlank() {
+        assertThat(StringUtils.isBlank(null)).isTrue();
+        assertThat(StringUtils.isBlank("abc")).isFalse();
+        assertThat(StringUtils.isBlank("")).isTrue();
+        assertThat(StringUtils.isBlank(" ")).isTrue();
+    }
+
+    @Test
+    public void testIsNotBlank() {
+        assertThat(StringUtils.isNotBlank(null)).isFalse();
+        assertThat(StringUtils.isNotBlank("abc")).isTrue();
+        assertThat(StringUtils.isNotBlank("")).isFalse();
+        assertThat(StringUtils.isNotBlank(" ")).isFalse();
+    }
+
+    @Test
+    public void testTrimToNull() {
+        assertThat(StringUtils.trimToNull(null)).isNull();
+        assertThat(StringUtils.trimToNull("abc")).isEqualTo("abc");
+        assertThat(StringUtils.trimToNull("")).isNull();
+        assertThat(StringUtils.trimToNull(" ")).isNull();
+    }
+
+    @Test
+    public void testTrim() {
+        assertThat(StringUtils.trim(null)).isNull();
+        assertThat(StringUtils.trim("abc")).isEqualTo("abc");
+        assertThat(StringUtils.trim("")).isEqualTo("");
+        assertThat(StringUtils.trim(" ")).isEqualTo("");
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertThat(StringUtils.isEmpty(null)).isTrue();
+        assertThat(StringUtils.isEmpty("abc")).isFalse();
+        assertThat(StringUtils.isEmpty("")).isTrue();
+        assertThat(StringUtils.isEmpty(" ")).isFalse();
+    }
+
+    @Test
+    public void testIsNotEmpty() {
+        assertThat(StringUtils.isNotEmpty(null)).isFalse();
+        assertThat(StringUtils.isNotEmpty("abc")).isTrue();
+        assertThat(StringUtils.isNotEmpty("")).isFalse();
+        assertThat(StringUtils.isNotEmpty(" ")).isTrue();
+    }
+
+    @Test
+    public void testHump2Line(){
+        assertThat(StringUtils.hump2Line("abc-d").equals("abcD")).isTrue();
+        assertThat(StringUtils.hump2Line("aBc").equals("a-bc")).isTrue();
+        assertThat(StringUtils.hump2Line("abc").equals("abc")).isTrue();
+    }
+
+    @Test
     public void testInputStream2String() throws IOException {
         assertNull(StringUtils.inputStream2String(null));
         String data = "abc\n"

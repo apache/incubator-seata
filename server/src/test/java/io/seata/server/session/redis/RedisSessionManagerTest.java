@@ -16,10 +16,12 @@
 package io.seata.server.session.redis;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 
-import com.github.fppt.jedismock.RedisServer;
 import io.seata.common.XID;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -29,17 +31,16 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-import io.seata.server.storage.redis.JedisPooledFactory;
 import io.seata.server.storage.redis.session.RedisSessionManager;
 import io.seata.server.storage.redis.store.RedisTransactionStoreManager;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -48,17 +49,14 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 public class RedisSessionManagerTest {
-    private static RedisServer server = null;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManagerTest.class);
     private static SessionManager sessionManager = null;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        server = RedisServer.newRedisServer(6789);
-        server.start();
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000));
+        MockRedisServer.getInstance();
+        EnhancedServiceLoader.unloadAll();
         RedisTransactionStoreManager transactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(transactionStoreManager);
@@ -80,7 +78,7 @@ public class RedisSessionManagerTest {
     }
 
     //Cause the jedismock can not mock the watch command,so I annotation it after I had tested this method and had successed.
-    //@Test
+    @Test
     public void test_updateGlobalSessionStatus() throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
@@ -90,8 +88,7 @@ public class RedisSessionManagerTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
-        session.setStatus(GlobalStatus.Committing);
-        sessionManager.updateGlobalSessionStatus(session,GlobalStatus.Committing);
+        sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
     }
 
     @Test
@@ -142,9 +139,9 @@ public class RedisSessionManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setClientId("storage-server:192.168.158.80:11934");
-        sessionManager.addBranchSession(globalSession,branchSession);
+        sessionManager.addBranchSession(globalSession, branchSession);
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -174,7 +171,7 @@ public class RedisSessionManagerTest {
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -202,13 +199,13 @@ public class RedisSessionManagerTest {
         sessionManager.addBranchSession(session, branchSession);
 
         GlobalSession globalSession = sessionManager.findGlobalSession(xid);
-        Assertions.assertEquals(session.getXid(),globalSession.getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSession.getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSession.getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSession.getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSession.getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSession.getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSession.getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSession.getBranchSessions().get(0).getClientId());
 
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -239,26 +236,26 @@ public class RedisSessionManagerTest {
         condition.setXid(xid);
 
         List<GlobalSession> globalSessions = sessionManager.findGlobalSessions(condition);
-        Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSessions.get(0).getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSessions.get(0).getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSessions.get(0).getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSessions.get(0).getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSessions.get(0).getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSessions.get(0).getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setXid(null);
         condition.setTransactionId(session.getTransactionId());
         globalSessions = sessionManager.findGlobalSessions(condition);
-        Assertions.assertEquals(session.getXid(),globalSessions.get(0).getXid());
-        Assertions.assertEquals(session.getTransactionId(),globalSessions.get(0).getTransactionId());
-        Assertions.assertEquals(branchSession.getXid(),globalSessions.get(0).getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSessions.get(0).getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSessions.get(0).getBranchSessions().get(0).getClientId());
+        Assertions.assertEquals(session.getXid(), globalSessions.get(0).getXid());
+        Assertions.assertEquals(session.getTransactionId(), globalSessions.get(0).getTransactionId());
+        Assertions.assertEquals(branchSession.getXid(), globalSessions.get(0).getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSessions.get(0).getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSessions.get(0).getBranchSessions().get(0).getClientId());
 
         condition.setTransactionId(null);
         globalSessions = sessionManager.findGlobalSessions(condition);
         Assertions.assertNull(globalSessions);
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
@@ -294,12 +291,12 @@ public class RedisSessionManagerTest {
         condition.setStatuses(statuses);
         sessionManager.findGlobalSessions(condition);
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
     }
 
     @Test
-    public void testReadSessionWithBranch() throws TransactionException {
+    public void testReadSessionWithBranch() throws TransactionException, NoSuchFieldException, IllegalAccessException {
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
@@ -324,22 +321,18 @@ public class RedisSessionManagerTest {
         GlobalSession globalSession = sessionManager.findGlobalSession(xid,false);
         Assertions.assertEquals(session.getXid(),globalSession.getXid());
         Assertions.assertEquals(session.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(0,globalSession.getBranchSessions().size());
+        Class<?> clz = globalSession.getClass();
+        Field branchSessions = clz.getDeclaredField("branchSessions");
+        branchSessions.setAccessible(true);
+        Assertions.assertTrue(CollectionUtils.isEmpty((List<BranchSession>)branchSessions.get(globalSession)));
 
-        globalSession = sessionManager.findGlobalSession(xid,true);
-        Assertions.assertEquals(branchSession.getXid(),globalSession.getBranchSessions().get(0).getXid());
-        Assertions.assertEquals(branchSession.getBranchId(),globalSession.getBranchSessions().get(0).getBranchId());
-        Assertions.assertEquals(branchSession.getClientId(),globalSession.getBranchSessions().get(0).getClientId());
+        globalSession = sessionManager.findGlobalSession(xid, true);
+        Assertions.assertEquals(branchSession.getXid(), globalSession.getBranchSessions().get(0).getXid());
+        Assertions.assertEquals(branchSession.getBranchId(), globalSession.getBranchSessions().get(0).getBranchId());
+        Assertions.assertEquals(branchSession.getClientId(), globalSession.getBranchSessions().get(0).getClientId());
 
-        sessionManager.removeBranchSession(session,branchSession);
+        sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
-    }
-
-
-    @AfterAll
-    public static void after() {
-        server.stop();
-        server = null;
     }
 
 }

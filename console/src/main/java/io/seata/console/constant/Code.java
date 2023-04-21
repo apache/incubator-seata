@@ -24,27 +24,27 @@ public enum Code {
     /**
      * response success
      */
-    SUCCESS(200, "ok"),
+    SUCCESS("200", "ok"),
     /**
      * server error
      */
-    ERROR(500, "Server error"),
+    ERROR("500", "Server error"),
     /**
      * the custom error
      */
-    LOGIN_FAILED(401, "Login failed");
+    LOGIN_FAILED("401", "Login failed");
 
     /**
      * The Code.
      */
-    public int code;
+    public String code;
 
     /**
      * The Msg.
      */
     public String msg;
 
-    private Code(int code, String msg) {
+    private Code(String code, String msg) {
         this.code = code;
         this.msg = msg;
     }
@@ -54,7 +54,7 @@ public enum Code {
      *
      * @return the code
      */
-    public int getCode() {
+    public String getCode() {
         return this.code;
     }
 
@@ -63,7 +63,7 @@ public enum Code {
      *
      * @param code the code
      */
-    public void setCode(int code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -91,10 +91,10 @@ public enum Code {
      * @param code the code
      * @return the error msg
      */
-    public static String getErrorMsg(int code) {
+    public static String getErrorMsg(String code) {
         Code[] errorCodes = values();
         for (Code errCode : errorCodes) {
-            if (errCode.getCode() == code) {
+            if (errCode.getCode().equals(code)) {
                 return errCode.getMsg();
             }
         }

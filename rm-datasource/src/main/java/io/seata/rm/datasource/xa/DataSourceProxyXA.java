@@ -16,12 +16,18 @@
 package io.seata.rm.datasource.xa;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.Version;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.rm.datasource.util.XAUtils;
@@ -49,7 +55,29 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         this.dataSource = dataSource;
         this.branchType = BranchType.XA;
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
-
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+            try (Connection connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                ResultSet versionResult = preparedStatement.executeQuery()) {
+                if (versionResult.next()) {
+                    long currentVersion = Version.convertVersion(versionResult.getString("VERSION()"));
+                    long version = Version.convertVersion("8.0.29");
+                    if (currentVersion < version) {
+                        setShouldBeHeld(true);
+                    }
+                }
+            } catch (Exception e) {
+                setShouldBeHeld(true);
+                LOGGER.info("get mysql version fail error: {}", e.getMessage());
+            }
+        } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
+            setShouldBeHeld(true);
+        }
+        Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
+            if (resourceManager instanceof ResourceManagerXA) {
+                ((ResourceManagerXA)resourceManager).initXaTwoPhaseTimeoutChecker();
+            }
+        });
         //Set the default branch type to 'XA' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }

@@ -26,6 +26,8 @@
     <artifactId>seata-serializer-seata</artifactId>
     <packaging>jar</packaging>
     <name>seata-serializer-seata ${project.version}</name>
+    <description>serializer-seata for Seata built with Maven</description>
+
     <dependencies>
 
         <dependency>

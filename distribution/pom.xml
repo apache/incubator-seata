@@ -26,6 +26,7 @@
     <artifactId>seata-distribution</artifactId>
     <packaging>pom</packaging>
     <name>seata-distribution ${project.version}</name>
+    <description>distribution for Seata built with Maven</description>
 
     <profiles>
         <profile>
@@ -34,6 +35,11 @@
                 <dependency>
                     <groupId>io.seata</groupId>
                     <artifactId>seata-server</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.seata</groupId>
+                    <artifactId>apm-seata-skywalking-plugin</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>
