@@ -143,7 +143,62 @@ if [ ! -x "$BASEDIR"/logs ]; then
   mkdir "$BASEDIR"/logs
 fi
 
-# start
-echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
-echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+
+#start-server
+start_server() {
+  echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
+  nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
+  echo "The seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+}
+
+#stop-server
+stop_server() {
+
+  PID=`ps aux | grep -i 'seata-server' | grep java | grep -v grep | awk '{print $2}'`
+
+  if [ -z "$PID" ]; then
+    echo "No seata-server running."
+    exit -1;
+  fi
+
+    echo "The seata-server(${PID}) is running..."
+    kill ${PID}
+    echo "Send shutdown request to seata-server(${PID}) OK"
+
+}
+
+restart_server() {
+
+  PID=`ps aux | grep -i 'seata-server' | grep java | grep -v grep | awk '{print $2}'`
+
+  if [ -z "$PID" ]; then
+    echo "No seata-server running."
+    exit -1;
+  fi
+
+    echo "The seata-server(${PID}) is running..."
+    kill ${PID}
+
+    echo "The seata-server restarting..."
+    echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
+    nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
+    echo "The seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+}
+
+case "$1" in
+    start)
+        start_server
+        ;;
+    stop)
+        stop_server
+        ;;
+    restart)
+        restart_server
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0
