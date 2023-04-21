@@ -435,17 +435,27 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
-        Collection<GlobalSession> asyncCommittingSessions =
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting, GlobalStatus.Committed);
+        Collection<GlobalSession> committingSessions =
                 SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
-        if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
+        if (CollectionUtils.isEmpty(committingSessions)) {
             return;
         }
-        SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
-            try {
-                core.doGlobalCommit(asyncCommittingSession, true);
-            } catch (TransactionException ex) {
-                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
+        SessionHelper.forEach(committingSessions, committingSession -> {
+            if (GlobalStatus.AsyncCommitting.equals(committingSession.getStatus())) {
+                try {
+                    core.doGlobalCommit(committingSession, true);
+                } catch (TransactionException ex) {
+                    LOGGER.error("Failed to async committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
+                }
+            } else if (GlobalStatus.Committed.equals(committingSession.getStatus())) {
+                try {
+                    if (committingSession.getBranchSessions().isEmpty()) {
+                        SessionHelper.endCommitted(committingSession, true);
+                    }
+                } catch (TransactionException ex) {
+                    LOGGER.error("Failed to clean committed [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
+                }
             }
         });
     }

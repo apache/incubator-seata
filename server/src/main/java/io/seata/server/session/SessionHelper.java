@@ -132,6 +132,7 @@ public class SessionHelper {
         if (retryGlobal || !DELAY_HANDLE_SESSION) {
             long beginTime = System.currentTimeMillis();
             boolean retryBranch = globalSession.getStatus() == GlobalStatus.CommitRetrying;
+            //TODO: If the globalSession status in the database is Committed, don't set status again
             globalSession.changeGlobalStatus(GlobalStatus.Committed);
             globalSession.end();
             if (!DELAY_HANDLE_SESSION) {
