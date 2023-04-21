@@ -444,9 +444,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             return;
         }
         SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
-                try {
+            try {
                 core.doGlobalCommit(asyncCommittingSession, true);
-                } catch (TransactionException ex) {
+            } catch (TransactionException ex) {
                 LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage(), ex);
             }
         });
