@@ -118,9 +118,10 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onApply(Iterator iterator) {
         while (iterator.hasNext()) {
-            if (iterator.done() != null) {
+            Closure done = iterator.done();
+            if (done != null) {
                 // leader does not need to be serialized, just execute the task directly
-                Optional.ofNullable(iterator.done()).ifPresent(done -> done.run(Status.OK()));
+                done.run(Status.OK());
             } else {
                 ByteBuffer byteBuffer = iterator.getData();
                 // if data is empty, it is only a heartbeat event and can be ignored
@@ -144,6 +145,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             done.run(Status.OK());
             return;
         }
+        long current = System.currentTimeMillis();
         for (StoreSnapshotFile snapshotFile : snapshotFiles) {
             Status status = snapshotFile.save(writer);
             if (!status.isOk()) {
@@ -151,6 +153,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 return;
             }
         }
+        LOGGER.info("groupId: {}, onSnapshotSave cost: {} ms.", group, System.currentTimeMillis() - current);
         done.run(Status.OK());
     }
 
@@ -165,11 +168,13 @@ public class RaftStateMachine extends StateMachineAdapter {
             }
             return false;
         }
+        long current = System.currentTimeMillis();
         for (StoreSnapshotFile snapshotFile : snapshotFiles) {
             if (!snapshotFile.load(reader)) {
                 return false;
             }
         }
+        LOGGER.info("groupId: {}, onSnapshotLoad cost: {} ms.", group, System.currentTimeMillis() - current);
         return true;
     }
 
