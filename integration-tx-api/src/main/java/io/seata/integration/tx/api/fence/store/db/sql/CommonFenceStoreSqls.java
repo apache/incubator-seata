@@ -57,10 +57,19 @@ public class CommonFenceStoreSqls {
      * The constant QUERY_END_STATUS_BY_DATE.
      */
     protected static final String QUERY_END_STATUS_BY_DATE = "select xid, branch_id, status, gmt_create, gmt_modified "
-            + "from " + LOCAL_TCC_LOG_PLACEHOLD
+            + " from " + LOCAL_TCC_LOG_PLACEHOLD
             + " where  gmt_modified < ? "
-            + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")"
-            + " limit ?";
+            + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")";
+
+    /**
+     * used for oracle. eg: and ROWNUM <= 10
+     */
+    protected static final String ORACLE_QUERY_LIMIT = " and ROWNUM <= ? ";
+
+    /**
+     * used for mysql, pgsql and mariadb. eg: limit 10
+     */
+    protected static final String NONE_ORACLE_QUERY_LIMIT = " limit ? ";
 
     /**
      * The constant UPDATE_STATUS_BY_BRANCH_ID_AND_XID.
@@ -94,8 +103,14 @@ public class CommonFenceStoreSqls {
         return QUERY_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
-    public static String getQueryEndStatusSQLByDate(String localTccTable) {
-        return QUERY_END_STATUS_BY_DATE.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    public static String getQueryEndStatusSQLByDate(String localTccTable, boolean isOracle) {
+        StringBuilder querySQLTemplate = new StringBuilder(QUERY_END_STATUS_BY_DATE);
+        if (isOracle) {
+            querySQLTemplate.append(ORACLE_QUERY_LIMIT);
+        } else {
+            querySQLTemplate.append(NONE_ORACLE_QUERY_LIMIT);
+        }
+        return querySQLTemplate.toString().replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
     public static String getUpdateStatusSQLByBranchIdAndXid(String localTccTable) {
@@ -109,10 +124,6 @@ public class CommonFenceStoreSqls {
     public static String getDeleteSQLByXids(String localTccTable, String paramsPlaceHolder) {
         return DELETE_BY_BRANCH_XIDS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
-    }
-
-    public static String getDeleteSQLByDateAndStatus(String localTccTable) {
-        return DELETE_BY_DATE_AND_STATUS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
 }
