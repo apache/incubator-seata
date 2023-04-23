@@ -343,6 +343,10 @@
                             <name>seata-server</name>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <entrypoint>
+                            <arg>/bin/sh</arg>
+                            <arg>/seata-server-entrypoint.sh</arg>
+                        </entrypoint>
                     </container>
                     <extraDirectories>
                         <paths>
