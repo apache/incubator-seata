@@ -28,21 +28,37 @@
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="7091"/>
+    <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
 
+    <if condition='property("LOG_BASH_DIR").equals("")' >
+        <then>
+            <!-- console-appender -->
+            <include resource="logback/console-appender.xml"/>
 
-    <!-- console-appender -->
-    <include resource="logback/console-appender.xml"/>
+            <!-- file-appender -->
+            <include resource="logback/file-appender.xml"/>
 
-    <!-- file-appender -->
-    <include resource="logback/file-appender.xml"/>
+            <!-- logstash-appender: off by default -->
+            <!--<include resource="logback/logstash-appender.xml"/>-->
+            <!-- metric-appender: off by default -->
+            <!--<include resource="logback/metric-appender.xml"/>-->
+            <!-- kafka-appender: off by default -->
+            <!--<include resource="logback/kafka-appender.xml"/>-->
+        </then>
+        <else>
+            <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
+            <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
+            <!-- logstash-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>-->
+            <!-- metric-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>-->
+            <!-- kafka-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>-->
+        </else>
+    </if>
 
-    <!-- logstash-appender: off by default -->
-    <!--<include resource="logback/logstash-appender.xml"/>-->
-    <!-- metric-appender: off by default -->
-    <!--<include resource="logback/metric-appender.xml"/>-->
-    <!-- kafka-appender: off by default -->
-    <!--<include resource="logback/kafka-appender.xml"/>-->
+
 
     <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
         <!-- console-appender -->

@@ -113,6 +113,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <bytebuddy.version>1.12.17</bytebuddy.version>
+        <janino-version>3.1.7</janino-version>
     </properties>
 
     <dependencyManagement>
@@ -680,6 +681,11 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
                 <version>${jetty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
