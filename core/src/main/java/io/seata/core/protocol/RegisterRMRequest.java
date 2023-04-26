@@ -68,10 +68,13 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
 
     @Override
     public String toString() {
-        return "RegisterRMRequest{" +
-                "resourceIds='" + resourceIds + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("RegisterRMRequest{");
+        sb.append("resourceIds='").append(resourceIds).append('\'');
+        sb.append(", version='").append(version).append('\'');
+        sb.append(", applicationId='").append(applicationId).append('\'');
+        sb.append(", transactionServiceGroup='").append(transactionServiceGroup).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
