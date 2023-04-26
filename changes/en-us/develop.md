@@ -30,6 +30,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
 - [[#5472](https://github.com/seata/seata/pull/5472)] fix if using `@GlobalTransactional` in RM, `ShouldNeverHappenException` will be thrown
 - [[#5535](https://github.com/seata/seata/pull/5535)] fix the log file path was loaded incorrectly
+- [[#5538](https://github.com/seata/seata/pull/5538)] fix finished transaction swallows exception when committing
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
