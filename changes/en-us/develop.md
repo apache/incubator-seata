@@ -32,6 +32,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5535](https://github.com/seata/seata/pull/5535)] fix the log file path was loaded incorrectly
 - [[#5538](https://github.com/seata/seata/pull/5538)] fix finished transaction swallows exception when committing
 - [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
+- [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
