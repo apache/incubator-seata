@@ -233,7 +233,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        if (isSuccessEnd()) {
+        if (GlobalStatus.isTwoPhaseSuccess(status)) {
             // Clean locks first
             clean();
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
@@ -244,14 +244,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 lifecycleListener.onFailEnd(this);
             }
         }
-    }
-
-    public boolean isSuccessEnd() {
-        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
-            return true;
-        }
-        return false;
     }
 
     public void clean() throws TransactionException {
