@@ -30,6 +30,7 @@
 - [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
 - [[#5472](https://github.com/seata/seata/pull/5472)] 在RM中使用`@GlobalTransactional`时,如果RM执行失败会抛出`ShouldNeverHappenException`
 - [[#5535](https://github.com/seata/seata/pull/5535)] 修复读取logback文件路径错误的问题
+- [[#5538](https://github.com/seata/seata/pull/5538)] 修复提交事务时事务已完成不抛出异常问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
