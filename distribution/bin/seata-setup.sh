@@ -30,6 +30,7 @@ done
 
 PRGDIR=`dirname "$PRG"`
 BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
+BASEDIR=${BASEDIR//"//"/"/"}
 
 # Reset the REPO variable. If you need to influence this use the environment setup file.
 REPO=
