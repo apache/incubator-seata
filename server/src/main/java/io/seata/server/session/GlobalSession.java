@@ -246,6 +246,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void end() throws TransactionException {
         if (GlobalStatus.isTwoPhaseSuccess(status)) {
+            // TODO: Non AT mode does not need to be unlocked
             // Clean locks first
             clean();
             SessionHolder.getRootSessionManager().onSuccessEnd(this);
