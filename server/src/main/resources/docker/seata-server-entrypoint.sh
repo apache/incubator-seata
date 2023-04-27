@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright 1999-2019 Seata.io Group.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,9 @@
 
 # entrypoint for server
 
-exec java $JAVA_OPTS \
-  -cp $( cat /app/jib-classpath-file ) \
-  $( cat /app/jib-main-class-file )
+. /seata-setup.sh
+JAVA_OPT=${JAVA_OPT//"//"/"/"}
+echo "Affected JVM parameters:$JAVA_OPT"
+exec java $JAVA_OPT \
+  -cp $( cat /seata-server/jib-classpath-file ) \
+  $( cat /seata-server/jib-main-class-file )
