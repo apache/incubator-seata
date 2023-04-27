@@ -30,7 +30,6 @@ done
 
 PRGDIR=`dirname "$PRG"`
 BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
-BASEDIR=${BASEDIR//"//"/"/"}
 
 # Reset the REPO variable. If you need to influence this use the environment setup file.
 REPO=
@@ -145,6 +144,7 @@ fi
 
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
+
 
 if [ ! -x "$BASEDIR"/logs ]; then
   mkdir "$BASEDIR"/logs
