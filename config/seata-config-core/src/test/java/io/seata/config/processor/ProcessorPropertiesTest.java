@@ -13,24 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
+
+package io.seata.config.processor;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import io.seata.sqlparser.KeywordChecker;
-import io.seata.sqlparser.KeywordCheckerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
- * @author will
+ * @author liuqiufeng
  */
-public class OracleKeywordCheckerTest {
+class ProcessorPropertiesTest {
 
     @Test
-    public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        Assertions.assertNotNull(keywordChecker);
+    void processor() throws IOException {
+        String properties = "registry.type=file\n" +
+                "registry.file.name=file-test-pro.conf";
+        
+        Properties processor = new ProcessorProperties().processor(properties);
+        Assertions.assertEquals("file", processor.get("registry.type"));
+        // not exist
+        Assertions.assertNull(processor.get("registry"));
+        Assertions.assertNull(processor.get("null"));
     }
-
 }

@@ -61,6 +61,8 @@ client.undo.compress.threshold=64k
 #For TCC transaction mode
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
+# You can choose from the following options: fastjson, jackson, gson
+tcc.contextJsonParserType=fastjson
 
 #Log rule configuration, for client and server
 log.exceptionRate=100
@@ -122,7 +124,8 @@ server.distributedLockExpireTime=10000
 server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
-server.enableParallelRequestHandle=false
+server.enableParallelRequestHandle=true
+server.enableParallelHandleBranch=false
 
 #Metrics configuration, only for the server
 metrics.enabled=false

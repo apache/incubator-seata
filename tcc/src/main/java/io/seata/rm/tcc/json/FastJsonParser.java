@@ -16,11 +16,16 @@
 package io.seata.rm.tcc.json;
 
 import com.alibaba.fastjson.JSON;
+
+import io.seata.common.Constants;
+import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
  * @author leezongjie
+ * @author zouwei
  */
+@LoadLevel(name = Constants.FASTJSON_JSON_PARSER_NAME)
 public class FastJsonParser implements JsonParser {
 
     @Override
@@ -31,5 +36,10 @@ public class FastJsonParser implements JsonParser {
     @Override
     public <T> T parseObject(String text, Class<T> clazz) {
         return JSON.parseObject(text, clazz);
+    }
+
+    @Override
+    public String getName() {
+        return Constants.FASTJSON_JSON_PARSER_NAME;
     }
 }

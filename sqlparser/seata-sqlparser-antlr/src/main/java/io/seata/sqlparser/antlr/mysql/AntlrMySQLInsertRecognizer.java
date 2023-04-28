@@ -109,7 +109,7 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
     }
 
     @Override
-    public List<String> getInsertColumnsIsSimplified() {
+    public List<String> getInsertColumnsUnEscape() {
         List<String> insertColumns = getInsertColumns();
         return ColumnUtils.delEscape(insertColumns, JdbcConstants.MYSQL);
     }

@@ -79,7 +79,6 @@
         <xstream.version>1.4.19</xstream.version>
 
         <jwt.version>0.10.5</jwt.version>
-        <jackson.databind.version>2.13.4.1</jackson.databind.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.2.9</logback.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
@@ -114,6 +113,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <bytebuddy.version>1.12.17</bytebuddy.version>
+        <janino-version>3.1.7</janino-version>
     </properties>
 
     <dependencyManagement>
@@ -617,11 +617,6 @@
                 <version>${jwt.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
                 <version>${prometheus.client.version}</version>
@@ -686,6 +681,11 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
                 <version>${jetty-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -15,6 +15,7 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
+import io.seata.tm.api.GlobalTransaction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
@@ -34,11 +35,14 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
+import io.seata.core.exception.TmTransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.integration.tx.api.annotation.AspectTransactional;
 import io.seata.integration.tx.api.event.DegradeCheckEvent;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+import io.seata.integration.tx.api.util.ClassUtils;
 import io.seata.rm.GlobalLockExecutor;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.spring.annotation.GlobalLock;
@@ -59,7 +63,7 @@ import static io.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
-
+import static io.seata.tm.api.GlobalTransactionRole.Participant;
 
 /**
  * The type Global transactional interceptor handler.
@@ -138,11 +142,10 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         Class<?> targetClass = invocation.getTarget().getClass();
-        Method specificMethod = invocation.getMethod();
+        Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
-            final Method method = invocation.getMethod();
-            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass, GlobalTransactional.class);
-            final GlobalLock globalLockAnnotation = getAnnotation(method, targetClass, GlobalLock.class);
+            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(specificMethod, targetClass, GlobalTransactional.class);
+            final GlobalLock globalLockAnnotation = getAnnotation(specificMethod, targetClass, GlobalLock.class);
             boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
@@ -238,30 +241,43 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                 }
             });
         } catch (TransactionalExecutor.ExecutionException e) {
+            GlobalTransaction globalTransaction = e.getTransaction();
+
+            // If Participant, just throw the exception to original.
+            if (globalTransaction.getGlobalTransactionRole() == Participant) {
+                throw e.getOriginalException();
+            }
+
             TransactionalExecutor.Code code = e.getCode();
             Throwable cause = e.getCause();
+            boolean timeout = isTimeoutException(cause);
             switch (code) {
                 case RollbackDone:
-                    throw e.getOriginalException();
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 case BeginFailure:
                     succeed = false;
-                    failureHandler.onBeginFailure(e.getTransaction(), cause);
+                    failureHandler.onBeginFailure(globalTransaction, cause);
                     throw cause;
                 case CommitFailure:
                     succeed = false;
-                    failureHandler.onCommitFailure(e.getTransaction(), cause);
+                    failureHandler.onCommitFailure(globalTransaction, cause);
                     throw cause;
                 case RollbackFailure:
-                    failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
+                    failureHandler.onRollbackFailure(globalTransaction, e.getOriginalException());
                     throw e.getOriginalException();
-                case RollbackRetrying:
-                    failureHandler.onRollbackRetrying(e.getTransaction(), e.getOriginalException());
-                    throw e.getOriginalException();
-                case TimeoutRollback:
-                    failureHandler.onTimeoutRollback(e.getTransaction(), e.getOriginalException());
-                    throw cause;
+                case Rollbacking:
+                    failureHandler.onRollbacking(globalTransaction, e.getOriginalException());
+                    if (timeout) {
+                        throw cause;
+                    } else {
+                        throw e.getOriginalException();
+                    }
                 default:
-                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code), e.getOriginalException());
             }
         } finally {
             if (ATOMIC_DEGRADE_CHECK.get()) {
@@ -341,6 +357,19 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                 }
             }
         }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isTimeoutException(Throwable th) {
+        if (null == th) {
+            return false;
+        }
+        if (th instanceof TmTransactionException) {
+            TmTransactionException exx = (TmTransactionException)th;
+            if (TransactionExceptionCode.TransactionTimeout == exx.getCode()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

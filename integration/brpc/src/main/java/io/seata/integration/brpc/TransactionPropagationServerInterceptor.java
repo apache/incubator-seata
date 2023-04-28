@@ -22,7 +22,7 @@ import com.baidu.brpc.interceptor.InterceptorChain;
 import com.baidu.brpc.protocol.Request;
 import com.baidu.brpc.protocol.Response;
 import io.seata.core.context.RootContext;
-import io.seata.core.model.BranchType;
+import io.seata.integration.rpc.core.ProviderRpcFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,22 +32,21 @@ import org.slf4j.LoggerFactory;
  *
  * @author mxz0828@163.com
  */
-public class TransactionPropagationServerInterceptor extends AbstractInterceptor {
+public class TransactionPropagationServerInterceptor extends AbstractInterceptor implements ProviderRpcFilter<Request> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationServerInterceptor.class);
 
     @Override
     public boolean handleRequest(Request request) {
 
-        String branchType = getRpcBranchType(request);
+        Map<String, String> rpcContexts = getRpcContexts(request);
         String xid = RootContext.getXID();
-        String rpcXid = getRpcXid(request);
+        String rpcXid = getXidFromContexts(rpcContexts);
         if (null == xid) {
             if (null != rpcXid) {
-                RootContext.bind(rpcXid);
-                RootContext.bindBranchType(BranchType.valueOf(branchType));
+                bindRequestToContexts(rpcContexts);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("SEATA-BRPC[{}], bind [{}] to RootContext", branchType, rpcXid);
+                    LOGGER.info("SEATA-BRPC bind {} to RootContext", getJsonContext(rpcContexts));
                 }
             }
         }
@@ -61,46 +60,28 @@ public class TransactionPropagationServerInterceptor extends AbstractInterceptor
         try {
             chain.intercept(brpcRequest, brpcResponse);
         } finally {
-            String unbindXid = RootContext.unbind();
-            String rpcXid = getRpcXid(brpcRequest);
-            BranchType branchType = RootContext.unbindBranchType();
+            Map<String, String> rootContexts = cleanRootContexts();
+            Map<String, String> rpcContexts = getRpcContexts(brpcRequest);
+            String rpcXid = getXidFromContexts(rpcContexts);
+            String xid = getXidFromContexts(rootContexts);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("SEATA-BRPC[{}]: unbind[{}] from RootContext", branchType, unbindXid);
+                LOGGER.info("SEATA-BRPC unbind {} from RootContext", getJsonContext(rootContexts));
             }
-            if (null != rpcXid) {
-                if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("SEATA-BRPC[{}]: xid in change during RPC from [{}] to [{}]", branchType, rpcXid, unbindXid);
-                    }
-                    if (unbindXid != null) {
-                        RootContext.bind(unbindXid);
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("SEATA-BRPC[{}]: bind [{}] back to RootContext", branchType, unbindXid);
-                        }
-                    }
+            if (null != rpcXid && !rpcXid.equalsIgnoreCase(xid)) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("SEATA-BRPC context changed during RPC from {} to {},will be reset.", getJsonContext(rpcContexts), getJsonContext(rootContexts));
                 }
+                resetRootContexts(rootContexts);
             }
         }
     }
 
-    private String getRpcXid(Request brpcRequest) {
-
-        Map<String, Object> kvAttachment = brpcRequest.getKvAttachment();
-        if (null == kvAttachment) {
+    @Override
+    public String getRpcContext(Request rpcContext, String key) {
+        if (null == rpcContext.getKvAttachment()) {
             return null;
         }
-        String xid = (String)kvAttachment.get(RootContext.KEY_XID);
-        if (null != xid) {
-            return xid;
-        }
-        return (String)kvAttachment.get(RootContext.KEY_XID.toLowerCase());
-    }
-
-    private String getRpcBranchType(Request brpcRequest) {
-        Map<String, Object> kvAttachment = brpcRequest.getKvAttachment();
-        if (null == kvAttachment) {
-            return null;
-        }
-        return (String) kvAttachment.get(RootContext.KEY_BRANCH_TYPE);
+        Object value = rpcContext.getKvAttachment().get(key);
+        return value == null ? null : value.toString();
     }
 }

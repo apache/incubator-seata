@@ -13,23 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
 
-import io.seata.common.loader.EnhancedServiceNotFoundException;
-import io.seata.sqlparser.KeywordCheckerFactory;
+package io.seata.config.file;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+
 /**
- * @author will
+ * @author liuqiufeng
  */
-public class KeywordCheckerFactoryTest {
+class SimpleFileConfigTest {
 
     @Test
-    public void testKeywordCheckerFacotry() {
-        KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
-        Assertions.assertNotNull(keywordCheckerFactory);
-
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
+    void getString() {
+        SimpleFileConfig config = new SimpleFileConfig();
+        Assertions.assertEquals(File.pathSeparator, config.getString("path.separator"));
+        
+        config = new SimpleFileConfig(new File("file.conf"), "");
+        Assertions.assertEquals("default", config.getString("service.vgroupMapping.default_tx_group"));
+        
+        config = new SimpleFileConfig(new File("src/test/resources/file"), "file:");
+        Assertions.assertEquals("default", config.getString("service.vgroupMapping.default_tx_group"));
     }
 }
