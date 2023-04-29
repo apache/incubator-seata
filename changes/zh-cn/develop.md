@@ -29,7 +29,10 @@
 - [[#5415](https://github.com/seata/seata/pull/5415)] 修复客户侧事务提交前超时未执行hook和failureHandler的问题
 - [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
 - [[#5472](https://github.com/seata/seata/pull/5472)] 在RM中使用`@GlobalTransactional`时,如果RM执行失败会抛出`ShouldNeverHappenException`
-
+- [[#5535](https://github.com/seata/seata/pull/5535)] 修复读取logback文件路径错误的问题
+- [[#5538](https://github.com/seata/seata/pull/5538)] 修复提交事务时事务已完成不抛出异常问题
+- [[#5539](https://github.com/seata/seata/pull/5539)] 修复Oracle 10g where条件包含setDate全表扫描问题
+- [[#5540](https://github.com/seata/seata/pull/5540)] 修复 GlobalStatus=9 在DB存储模式无法清除的问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -45,6 +48,8 @@
 - [[#5315](https://github.com/seata/seata/pull/5315)] 优化SPI加载日志
 - [[#5323](https://github.com/seata/seata/pull/5323)] 为全局事务超时日志添加时间信息
 - [[#5414](https://github.com/seata/seata/pull/5414)] 优化事务失败处理 handler
+- [[#5537](https://github.com/seata/seata/pull/5537)] 优化客户侧事务日志
+- [[#5541](https://github.com/seata/seata/pull/5541)] 优化Server日志输出
 
 
 ### security:
