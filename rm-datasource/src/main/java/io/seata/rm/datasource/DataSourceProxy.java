@@ -96,6 +96,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            LOGGER.info("SQLServer support in AT mode is currently an experimental function, " +
+                    "if you have any problems in use, please feedback to us");
+        }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         TableMetaCacheFactory.registerTableMeta(this);
