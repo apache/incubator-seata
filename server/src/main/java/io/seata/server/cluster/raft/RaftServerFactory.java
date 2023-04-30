@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
+import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -60,6 +61,7 @@ import static io.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static java.io.File.separator;
 
 /**
@@ -112,24 +114,15 @@ public class RaftServerFactory {
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
-        String host = XID.getIpAddress();
-        PeerId serverId = null;
-        if (port <= 0) {
-            // Highly available deployments require different nodes
-            for (PeerId peer : initConf.getPeers()) {
-                if (StringUtils.equals(peer.getIp(), host)) {
-                    if (serverId != null) {
-                        throw new IllegalArgumentException(
-                            "server.raft.cluster has duplicate ip, For local debugging, use -Dserver.raftPort to specify the raft port");
-                    }
-                    serverId = peer;
-                }
-            }
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "0"));
+        if (port > 0) {
+            port = port + SERVICE_OFFSET_SPRING_BOOT;
         } else {
-            // Local debugging use
-            serverId = new PeerId(host, port);
+            throw new IllegalArgumentException(
+                "raft port need server.servicePort, For local debugging, use -Dserver.servicePort to specify the service port");
         }
+        String host = XID.getIpAddress();
+        PeerId serverId = new PeerId(host, port);
         boolean autoJoinCluster = CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false);
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + "raft" + separator + serverId.getPort();
