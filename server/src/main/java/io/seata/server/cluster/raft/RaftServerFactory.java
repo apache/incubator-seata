@@ -48,7 +48,6 @@ import io.seata.discovery.registry.SeataRegistryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
 import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
