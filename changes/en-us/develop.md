@@ -50,6 +50,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5414](https://github.com/seata/seata/pull/5414)] optimize transaction fail handler
 - [[#5537](https://github.com/seata/seata/pull/5537)] optimize transaction log on client side
 - [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
+- [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
