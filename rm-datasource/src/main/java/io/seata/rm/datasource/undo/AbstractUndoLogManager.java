@@ -255,6 +255,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
+        ConnectionProxy connectionProxy = null;
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
@@ -262,8 +263,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
         for (; ; ) {
             try {
-                conn = dataSourceProxy.getPlainConnection();
-
+                connectionProxy = dataSourceProxy.getConnection();
+                conn = connectionProxy.getTargetConnection();
                 // The entire undo process should run in a local transaction.
                 if (originalAutoCommit = conn.getAutoCommit()) {
                     conn.setAutoCommit(false);
@@ -312,7 +313,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                 dataSourceProxy.getDbType(), sqlUndoLog);
-                            undoExecutor.executeOn(conn);
+                            undoExecutor.executeOn(connectionProxy);
                         }
                     } finally {
                         // remove serializer name
@@ -381,7 +382,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         if (originalAutoCommit) {
                             conn.setAutoCommit(true);
                         }
-                        conn.close();
+                        connectionProxy.close();
                     }
                 } catch (SQLException closeEx) {
                     LOGGER.warn("Failed to close JDBC resource while undo ... ", closeEx);

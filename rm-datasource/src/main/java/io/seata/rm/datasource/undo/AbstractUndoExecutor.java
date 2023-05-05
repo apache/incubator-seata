@@ -34,6 +34,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
@@ -110,11 +111,12 @@ public abstract class AbstractUndoExecutor {
     /**
      * Execute on.
      *
-     * @param conn the conn
+     * @param connectionProxy the connection proxy
      * @throws SQLException the sql exception
      */
-    public void executeOn(Connection conn) throws SQLException {
-        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
+    public void executeOn(ConnectionProxy connectionProxy) throws SQLException {
+        Connection conn = connectionProxy.getTargetConnection();
+        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(connectionProxy)) {
             return;
         }
         PreparedStatement undoPST = null;
@@ -228,7 +230,7 @@ public abstract class AbstractUndoExecutor {
      * @return return true if data validation is ok and need continue undo, and return false if no need continue undo.
      * @throws SQLException the sql exception such as has dirty data
      */
-    protected boolean dataValidationAndGoOn(Connection conn) throws SQLException {
+    protected boolean dataValidationAndGoOn(ConnectionProxy conn) throws SQLException {
 
         TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
         TableRecords afterRecords = sqlUndoLog.getAfterImage();
@@ -251,7 +253,7 @@ public abstract class AbstractUndoExecutor {
         Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
         if (!afterEqualsCurrentResult.getResult()) {
 
-            // If current data is not equivalent to the after data, then compare the current data with the before 
+            // If current data is not equivalent to the after data, then compare the current data with the before
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
             Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
             if (beforeEqualsCurrentResult.getResult()) {
@@ -282,11 +284,12 @@ public abstract class AbstractUndoExecutor {
     /**
      * Query current records.
      *
-     * @param conn the conn
+     * @param connectionProxy the connection proxy
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected TableRecords queryCurrentRecords(Connection conn) throws SQLException {
+    protected TableRecords queryCurrentRecords(ConnectionProxy connectionProxy) throws SQLException {
+        Connection conn = connectionProxy.getTargetConnection();
         TableRecords undoRecords = getUndoRows();
         TableMeta tableMeta = undoRecords.getTableMeta();
         //the order of element matters
@@ -301,7 +304,7 @@ public abstract class AbstractUndoExecutor {
         String firstKey = pkRowValues.keySet().stream().findFirst().get();
         int pkRowSize = pkRowValues.get(firstKey).size();
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
+                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, connectionProxy.getDbType()));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
