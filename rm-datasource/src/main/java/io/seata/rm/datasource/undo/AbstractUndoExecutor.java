@@ -126,7 +126,7 @@ public abstract class AbstractUndoExecutor {
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, getDbType(conn));
+                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, connectionProxy.getDbType());
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);
@@ -381,17 +381,6 @@ public abstract class AbstractUndoExecutor {
         }
         Map<String, List<Field>> pkValueMap = pkFieldList.stream().collect(Collectors.groupingBy(Field::getName));
         return pkValueMap;
-    }
-
-    /**
-     * Get db type
-     *
-     * @param conn the connection
-     * @return the db type
-     * @throws SQLException SQLException
-     */
-    protected String getDbType(Connection conn) throws SQLException {
-        return JdbcUtils.getDbType(conn.getMetaData().getURL());
     }
 
 }
