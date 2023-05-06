@@ -265,6 +265,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             try {
                 connectionProxy = dataSourceProxy.getConnection();
                 conn = connectionProxy.getTargetConnection();
+				
                 // The entire undo process should run in a local transaction.
                 if (originalAutoCommit = conn.getAutoCommit()) {
                     conn.setAutoCommit(false);
