@@ -190,15 +190,21 @@ class NettyClientChannelManager {
             return;
         }
         Set<String> channelAddress = new HashSet<>(availList.size());
+        List<String> failedConnectList = new ArrayList<>();
         try {
             for (String serverAddress : availList) {
                 try {
                     acquireChannel(serverAddress);
                     channelAddress.add(serverAddress);
                 } catch (Exception e) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                        serverAddress, e.getMessage(), e);
+                    if (LOGGER.isDebugEnabled()) {
+                        e.printStackTrace();
+                    }
+                    failedConnectList.add(serverAddress);
                 }
+            }
+            if (failedConnectList.size() > 1) {
+                LOGGER.error("{} can not connect to {}", FrameworkErrorCode.NetConnect.getErrCode(), failedConnectList);
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
