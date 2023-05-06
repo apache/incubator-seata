@@ -204,10 +204,12 @@ class NettyClientChannelManager {
                 }
             }
             if (failedList.size() > 0) {
-                LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                        failedList, exceptionMessageList, ex);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.error("stack information:{}", exceptionList);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedList, exceptionList);
+                } else if (LOGGER.isDebugEnabled()) {
+                    LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedList, exceptionMessageList, exceptionList);
                 }
             }
         } finally {
