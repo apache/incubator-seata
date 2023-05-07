@@ -36,6 +36,7 @@
 - [[#5552](https://github.com/seata/seata/pull/5552)] 修复mariadb回滚失败的问题
 - [[#5583](https://github.com/seata/seata/pull/5583)] 修复grpc xid 解绑问题
 - [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
+- [[#5645](https://github.com/seata/seata/pull/5645)] 修复 oracle 插入 undolog 失败问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
