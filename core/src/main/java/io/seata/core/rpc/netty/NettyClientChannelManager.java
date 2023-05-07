@@ -189,6 +189,7 @@ class NettyClientChannelManager {
             }
             return;
         }
+
         Set<String> channelAddress = new HashSet<>(availList.size());
         try {
             for (String serverAddress : availList) {
