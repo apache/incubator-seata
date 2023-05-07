@@ -401,9 +401,6 @@ function restart_server() {
   start_server
 }
 
-
-echo "开始执行函数,当前参数是: ${CMD_LINE_ARGS}"
-
 if [ -z "${CMD_LINE_ARGS}" ]; then
   start_server
 else
