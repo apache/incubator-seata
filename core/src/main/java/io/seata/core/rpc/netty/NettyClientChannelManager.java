@@ -205,7 +205,7 @@ class NettyClientChannelManager {
             }
             if (failedList.size() > 0) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                    LOGGER.error("{} can not connect to {} cause: {}", FrameworkErrorCode.NetConnect.getErrCode(),
                             failedList, exceptionList);
                 } else if (LOGGER.isDebugEnabled()) {
                     LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(),
