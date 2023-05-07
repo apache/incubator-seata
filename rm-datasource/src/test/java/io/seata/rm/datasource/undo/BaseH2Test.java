@@ -16,6 +16,8 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.util.IOUtil;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -44,7 +46,9 @@ public abstract class BaseH2Test {
     
     static BasicDataSource dataSource = null;
 
-    static Connection connection = null;
+    static ConnectionProxy connection = null;
+
+    static DataSourceProxy dataSourceProxy = null;
 
     static TableMeta tableMeta = null;
     
@@ -55,8 +59,8 @@ public abstract class BaseH2Test {
         dataSource.setUrl("jdbc:h2:./db_store/test_undo");
         dataSource.setUsername("sa");
         dataSource.setPassword("");
-
-        connection = dataSource.getConnection();
+        dataSourceProxy = new DataSourceProxy(dataSource);
+        connection = dataSourceProxy.getConnection();
 
         tableMeta = mockTableMeta();
     }
