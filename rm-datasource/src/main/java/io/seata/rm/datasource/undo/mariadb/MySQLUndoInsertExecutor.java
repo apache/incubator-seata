@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.mysql;
+package io.seata.rm.datasource.undo.mariadb;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

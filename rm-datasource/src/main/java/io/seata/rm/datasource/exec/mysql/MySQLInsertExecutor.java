@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLInsertExecutor.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     /**
      * the modify for test

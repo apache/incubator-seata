@@ -89,8 +89,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
-            } else if (JdbcConstants.MARIADB.equals(dbType)) {
-                dbType = JdbcConstants.MYSQL;
             }
             version = selectDbVersion(connection);
         } catch (SQLException e) {

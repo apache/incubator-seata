@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -77,7 +77,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
+        String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, this.getClass().getAnnotation(LoadLevel.class).name()) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());

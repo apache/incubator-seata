@@ -55,11 +55,11 @@ import org.slf4j.LoggerFactory;
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUpdateJoinExecutor.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
-    private final boolean isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
+    protected volatile boolean isLowerSupportGroupByPksVersion;
     private String sqlMode = "";
 
     /**
@@ -72,6 +72,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     public MySQLUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
         SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
     }
 
     @Override
