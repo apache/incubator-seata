@@ -23,7 +23,7 @@ import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
  *
  * @author funkye
  */
-public class MariadbInsertRecognizer extends MySQLInsertRecognizer{
+public class MariadbInsertRecognizer extends MySQLInsertRecognizer {
 
     /**
      * Instantiates a new Mariadb insert recognizer.
