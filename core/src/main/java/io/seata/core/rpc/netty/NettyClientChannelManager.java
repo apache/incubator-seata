@@ -16,11 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -190,26 +186,23 @@ class NettyClientChannelManager {
             return;
         }
         Set<String> channelAddress = new HashSet<>(availList.size());
-        List<String> failedList = new ArrayList<>(), exceptionMessageList = new ArrayList<>();
-        List<Exception> exceptionList = new ArrayList<>();
+        Map<String, Exception> failedMap = new HashMap<>();
         try {
             for (String serverAddress : availList) {
                 try {
                     acquireChannel(serverAddress);
                     channelAddress.add(serverAddress);
                 } catch (Exception e) {
-                    failedList.add(serverAddress);
-                    exceptionList.add(e);
-                    exceptionMessageList.add(e.getMessage());
+                    failedMap.put(serverAddress, e);
                 }
             }
-            if (failedList.size() > 0) {
+            if (failedMap.size() > 0) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                            failedList, exceptionList);
+                            failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toList()));
                 } else if (LOGGER.isDebugEnabled()) {
                     LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                            failedList, exceptionMessageList, exceptionList);
+                            failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toList()), failedMap.values());
                 }
             }
         } finally {
