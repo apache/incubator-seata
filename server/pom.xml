@@ -168,7 +168,6 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>${mariadb.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
