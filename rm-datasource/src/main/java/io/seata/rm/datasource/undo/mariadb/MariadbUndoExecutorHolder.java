@@ -22,25 +22,25 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The Type MySQLUndoExecutorHolder
+ * The Type MariadbUndoExecutorHolder
  *
- * @author Zhibei Hao
+ * @author funkye
  */
-@LoadLevel(name = JdbcConstants.MYSQL)
-public class MySQLUndoExecutorHolder implements UndoExecutorHolder {
+@LoadLevel(name = JdbcConstants.MARIADB)
+public class MariadbUndoExecutorHolder implements UndoExecutorHolder {
 
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
-        return new MySQLUndoInsertExecutor(sqlUndoLog);
+        return new MariadbUndoInsertExecutor(sqlUndoLog);
     }
 
     @Override
     public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
-        return new MySQLUndoUpdateExecutor(sqlUndoLog);
+        return new MariadbUndoInsertExecutor(sqlUndoLog);
     }
 
     @Override
     public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
-        return new MySQLUndoDeleteExecutor(sqlUndoLog);
+        return new MariadbUndoInsertExecutor(sqlUndoLog);
     }
 }

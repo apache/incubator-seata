@@ -23,7 +23,7 @@ import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.sqlparser.SQLRecognizer;
 
 /**
- * @author jianbin.chen
+ * @author funkye
  */
 public class MariadbUpdateJoinExecutor<T, S extends Statement> extends MySQLUpdateJoinExecutor<T, S> {
 

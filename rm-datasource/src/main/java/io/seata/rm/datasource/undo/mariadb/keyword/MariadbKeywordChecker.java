@@ -13,24 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.exec.mariadb;
+package io.seata.rm.datasource.undo.mariadb.keyword;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
-import io.seata.sqlparser.SQLRecognizer;
+import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
+ * The type Mariadb keyword checker.
+ *
  * @author funkye
  */
-@LoadLevel(name = JdbcConstants.MARIADB, scope = Scope.PROTOTYPE)
-public class MariadbInsertOnDuplicateUpdateExecutor extends MySQLInsertOnDuplicateUpdateExecutor {
-
-    public MariadbInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-        SQLRecognizer sqlRecognizer) {
-        super(statementProxy, statementCallback, sqlRecognizer);
-    }
+@LoadLevel(name = JdbcConstants.MARIADB)
+public class MariadbKeywordChecker extends MySQLKeywordChecker {
 }

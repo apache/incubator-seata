@@ -31,7 +31,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLKeywordChecker implements KeywordChecker {
 
-    private Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
+    protected Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
 
     /**
      * MySQL keyword

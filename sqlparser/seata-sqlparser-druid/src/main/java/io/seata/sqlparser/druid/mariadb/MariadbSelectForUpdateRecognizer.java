@@ -13,16 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct.cache;
+package io.seata.sqlparser.druid.mariadb;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.util.JdbcConstants;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 
 /**
- * The type Table meta cache.
+ * The type Mariadb select for update recognizer.
  *
  * @author funkye
  */
-@LoadLevel(name = JdbcConstants.MARIADB)
-public class MariadbTableMetaCache extends MysqlTableMetaCache {
+public class MariadbSelectForUpdateRecognizer extends MySQLSelectForUpdateRecognizer {
+
+    /**
+     * Instantiates a new Mariadb select for update recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
+    public MariadbSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
+        super(originalSQL, ast);
+    }
 }

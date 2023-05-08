@@ -26,7 +26,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type My sql insert executor.
  *
- * @author jsbxyyx
+ * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB, scope = Scope.PROTOTYPE)
 public class MariadbInsertExecutor extends MySQLInsertExecutor {

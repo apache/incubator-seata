@@ -15,30 +15,33 @@
  */
 package io.seata.sqlparser.druid;
 
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
-import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
-import io.seata.sqlparser.ParametersHolder;
-import io.seata.sqlparser.SQLParsingException;
-import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
-import io.seata.sqlparser.util.JdbcConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.seata.sqlparser.druid.mariadb.MariadbUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLParsingException;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
+
 /**
- * The type My sql update recognizer test.
+ * The type Mariadb update recognizer test.
  */
-public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
+public class MariadbUpdateRecognizerTest extends AbstractRecognizerTest {
 
     /**
      * Update recognizer test 0.
@@ -50,14 +53,14 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(1, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(1, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("id = 'id1'", mariadbUpdateRecognizer.getWhereCondition());
     }
 
     /**
@@ -70,16 +73,16 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
-        Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals("id = 'id1'", mariadbUpdateRecognizer.getWhereCondition());
     }
 
     /**
@@ -92,26 +95,23 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add("id1");
-                Map result = new HashMap();
-                result.put(1, idParam);
-                return result;
-            }
+        String whereCondition = mariadbUpdateRecognizer.getWhereCondition(() -> {
+            ArrayList<Object> idParam = new ArrayList<>();
+            idParam.add("id1");
+            Map result = new HashMap();
+            result.put(1, idParam);
+            return result;
         }, paramAppenderList);
 
         Assertions.assertEquals(Collections.singletonList(Collections.singletonList("id1")), paramAppenderList);
@@ -129,29 +129,26 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                ArrayList<Object> id1Param = new ArrayList<>();
-                id1Param.add("id1");
-                ArrayList<Object> id2Param = new ArrayList<>();
-                id2Param.add("id2");
-                Map result = new HashMap();
-                result.put(1, id1Param);
-                result.put(2, id2Param);
-                return result;
-            }
+        String whereCondition = mariadbUpdateRecognizer.getWhereCondition(() -> {
+            ArrayList<Object> id1Param = new ArrayList<>();
+            id1Param.add("id1");
+            ArrayList<Object> id2Param = new ArrayList<>();
+            id2Param.add("id2");
+            Map result = new HashMap();
+            result.put(1, id1Param);
+            result.put(2, id2Param);
+            return result;
         }, paramAppenderList);
 
         Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2")), paramAppenderList);
@@ -169,18 +166,18 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
+        String whereCondition = mariadbUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> id1Param = new ArrayList<>();
@@ -212,18 +209,18 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         SQLStatement statement = getSQLStatement(sql);
 
-        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(sql, statement);
 
-        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mariadbUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mariadbUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mariadbUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mariadbUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mariadbUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
-        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
+        String whereCondition = mariadbUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public Map<Integer,ArrayList<Object>> getParameters() {
                 ArrayList<Object> id1Param = new ArrayList<>();
@@ -244,9 +241,9 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void testGetSqlType() {
         String sql = "update t set n = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
 
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.UPDATE);
     }
 
@@ -254,29 +251,29 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     public void testGetUpdateColumns() {
         // test with normal
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         List<String> updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
         // test with alias
         sql = "update t set a.a = ?, a.b = ?, a.c = ?";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
         //test with error
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = a";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MARIADB);
             SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement) sqlStatements.get(0);
             List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            mySQLUpdateRecognizer.getUpdateColumns();
+            MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(s, sqlUpdateStatement);
+            mariadbUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -285,29 +282,29 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     public void testGetUpdateDatabaseNameColumns() {
         // test with normal
         String sql = "update d.t set d.t.a = ?, d.t.b = ?, d.t.c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         List<String> updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
         // test with alias
         sql = "update t set a.a = ?, a.b = ?, a.c = ?";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
         //test with error
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = a";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MARIADB);
             SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement) sqlStatements.get(0);
             List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            mySQLUpdateRecognizer.getUpdateColumns();
+            MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(s, sqlUpdateStatement);
+            mariadbUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -315,60 +312,60 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     public void testGetUpdateValues() {
         // test with normal
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         List<Object> updateValues = recognizer.getUpdateValues();
         Assertions.assertEquals(updateValues.size(), 3);
 
         // test with values
         sql = "update t set a = 1, b = 2, c = 3";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         updateValues = recognizer.getUpdateValues();
         Assertions.assertEquals(updateValues.size(), 3);
 
         // test with error
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = ?";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MARIADB);
             SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement)sqlStatements.get(0);
             List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setValue(new MySqlOrderingExpr());
             }
-            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            mySQLUpdateRecognizer.getUpdateValues();
+            MariadbUpdateRecognizer mariadbUpdateRecognizer = new MariadbUpdateRecognizer(s, sqlUpdateStatement);
+            mariadbUpdateRecognizer.getUpdateValues();
         });
     }
 
     @Test
     public void testGetTableAlias() {
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
 
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testUpdateJoinSql() {
         String sql = "update t1 inner join t2 on t1.id = t2.id set name = ?, age = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         String tableName = recognizer.getTableName();
         Assertions.assertEquals("t1 INNER JOIN t2 ON t1.id = t2.id#t1#t2",tableName);
     }
 
     @Override
     public String getDbType() {
-        return JdbcConstants.MYSQL;
+        return JdbcConstants.MARIADB;
     }
 
     @Test
     public void testGetUpdateColumns_2() {
         String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         List<String> updateColumns = recognizer.getUpdateColumns();
         for (String updateColumn : updateColumns) {
             Assertions.assertTrue(updateColumn.contains("`"));
@@ -378,8 +375,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
     @Test
     public void testGetUpdateColumnsIsSimplified() {
         String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
+        MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
         List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
         for (String updateColumn : updateColumns) {
             Assertions.assertFalse(updateColumn.contains("`"));

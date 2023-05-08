@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     /**
      * branch_id, xid, context, rollback_info, log_status, log_created, log_modified
