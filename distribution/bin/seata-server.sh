@@ -154,8 +154,6 @@ fi
 CMD_LINE_ARGS=$@
 NEW_ARGS=$(echo "${CMD_LINE_ARGS}" | sed -e 's/^start//g' -e 's/^restart//g' -e 's/^ //g')
 
-
-
 show_usage() {
     echo "  Usage: sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for"
     echo "            windows) [options]"
@@ -179,7 +177,6 @@ show_usage() {
     echo "  --help"
 }
 
-# 校验host参数
 function validate_host() {
     local host=$1
     local re_ip="^([0-9]{1,3}\.){3}[0-9]{1,3}$"
@@ -190,7 +187,6 @@ function validate_host() {
     fi
 }
 
-# 校验port参数
 function validate_port() {
     local port="$1"
     if ! [[ "$port" =~ ^[0-9]+$ ]]; then
@@ -356,8 +352,6 @@ function replace_old_arg() {
 function restart_server() {
 
   PID=`ps aux | grep -i 'seata-server' | grep java | grep -v grep | awk '{print $2}'`
-
-
   #filtered
   OLD_ARGS=`ps -p $PID -o args= | grep -v "^$0" | sed -E 's/.*seata-server.jar(.*)/\1/g'`
   #Unfiltered
@@ -391,13 +385,8 @@ function restart_server() {
   done
 
   NEW_ARGS=$(printf "%s " "${OLD_ARGS_ARRAY[@]}")
-
-  #echo "Combined parameters ${NEW_ARGS}"
-
   stop_server
-
   echo "The seata-server restarting..."
-
   start_server
 }
 
