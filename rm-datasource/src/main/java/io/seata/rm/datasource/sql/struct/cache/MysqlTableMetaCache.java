@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -56,7 +56,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
-            LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
+            logger.error("Could not get connection, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -68,7 +68,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 cacheKey.append(defaultTableName.toLowerCase());
             }
         } catch (SQLException e) {
-            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
+            logger.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 

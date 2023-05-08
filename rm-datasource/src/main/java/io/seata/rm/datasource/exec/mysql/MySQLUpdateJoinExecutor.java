@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
@@ -296,7 +296,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
         } catch (Exception e) {
             groupByPks = false;
-            LOGGER.warn("determine group by pks or all columns error:{}",e.getMessage());
+            logger.warn("determine group by pks or all columns error:{}",e.getMessage());
         }
         List<String> groupByColumns = groupByPks ? pkColumns : allSelectColumns;
         StringBuilder groupByStr = new StringBuilder();

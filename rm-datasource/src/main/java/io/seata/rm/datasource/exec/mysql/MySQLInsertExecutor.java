@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultable {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * the modify for test
@@ -140,7 +140,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                logger.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
                 try {
                     genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
@@ -170,7 +170,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         try {
             genKeys.beforeFirst();
         } catch (SQLException e) {
-            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+            logger.warn("Fail to reset ResultSet cursor. can not get primary key value");
         } finally {
             if (isManualCloseResultSet) {
                 IOUtil.close(genKeys);
