@@ -24,7 +24,7 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The type My sql insert executor.
+ * The type Mariadb insert executor.
  *
  * @author funkye
  */
