@@ -196,8 +196,7 @@ class NettyClientChannelManager {
                     acquireChannel(serverAddress);
                     channelAddress.add(serverAddress);
                 } catch (Exception e) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                        serverAddress, e.getMessage(), e);
+                    throw new FrameworkException(e, "can not connect to :" + serverAddress);
                 }
             }
         } finally {
