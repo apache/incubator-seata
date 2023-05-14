@@ -49,7 +49,6 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
         if (dataSource != null) {
             // set dataSource
             SpringFenceHandler.setDataSource(dataSource);
-            init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
