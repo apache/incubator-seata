@@ -118,6 +118,10 @@ public interface Constants {
      */
     String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
     /**
+     * The constant BEAN_NAME_SPRING_FENCE_CONFIG
+     */
+    String BEAN_NAME_SPRING_FENCE_CONFIG = "SpringFenceConfig";
+    /**
      * The constant BEAN_NAME_FAILURE_HANDLER
      */
     String BEAN_NAME_FAILURE_HANDLER = "failureHandler";
