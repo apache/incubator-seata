@@ -209,6 +209,11 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             return;
         }
 
+        // ResourceId can not be null or empty
+        if (StringUtils.isBlank(resourceId)) {
+            throw new FrameworkException("Register resource failed, RM resourceId is null or empty");
+        }
+
         if (getClientChannelManager().getChannels().isEmpty()) {
             getClientChannelManager().reconnect(transactionServiceGroup);
             return;
