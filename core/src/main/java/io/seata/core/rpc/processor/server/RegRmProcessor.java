@@ -20,6 +20,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.ChannelManager;
@@ -62,11 +63,13 @@ public class RegRmProcessor implements RemotingProcessor {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
+        RegisterRMResponse response = new RegisterRMResponse();
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
+                response.setResultCode(ResultCode.Success);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
@@ -80,7 +83,10 @@ public class RegRmProcessor implements RemotingProcessor {
             errorInfo = exx.getMessage();
             LOGGER.error("RM register fail, error message:{}", errorInfo);
         }
-        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
+        response.setIdentified(isSuccess);
+        if (!isSuccess) {
+            response.setResultCode(ResultCode.Failed);
+        }
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
