@@ -15,6 +15,7 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import io.seata.common.holder.ObjectHolder;
 import io.seata.rm.fence.SpringFenceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,8 +32,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
+import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
+
 /**
- * TCC fence auto configuration.
+ * Spring fence auto configuration.
  *
  * @author kaka2code
  */
@@ -41,20 +44,22 @@ import javax.sql.DataSource;
 @ConditionalOnMissingBean(SpringFenceConfig.class)
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class, TransactionAutoConfiguration.class})
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
-public class SeataTCCFenceAutoConfiguration {
+public class SeataSpringFenceAutoConfiguration {
 
-    public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
-    public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
+    public static final String SPRING_FENCE_DATA_SOURCE_BEAN_NAME = "seataSpringFenceDataSource";
+    public static final String SPRING_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataSpringFenceTransactionManager";
 
     @Bean
     @ConfigurationProperties(StarterConstants.TCC_FENCE_PREFIX)
-    public SpringFenceConfig tccFenceConfig(
+    public SpringFenceConfig springFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,
-            @Qualifier(TCC_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource tccFenceDataSource,
-            @Qualifier(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager tccFenceTransactionManager) {
-        return new SpringFenceConfig(tccFenceDataSource != null ? tccFenceDataSource : dataSource,
-                tccFenceTransactionManager != null ? tccFenceTransactionManager : transactionManager);
+            @Qualifier(SPRING_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource springFenceDataSource,
+            @Qualifier(SPRING_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager springFenceTransactionManager) {
+        SpringFenceConfig springFenceConfig = new SpringFenceConfig(springFenceDataSource != null ? springFenceDataSource : dataSource,
+                springFenceTransactionManager != null ? springFenceTransactionManager : transactionManager);
+        ObjectHolder.INSTANCE.setObject(BEAN_NAME_SPRING_FENCE_CONFIG, springFenceConfig);
+        return springFenceConfig;
     }
 
 }
