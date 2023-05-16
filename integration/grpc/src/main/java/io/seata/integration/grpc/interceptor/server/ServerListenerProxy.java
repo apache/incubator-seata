@@ -51,6 +51,7 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     @Override
     public void onHalfClose() {
+        cleanContext();
         if (StringUtils.isNotBlank(xid)) {
             RootContext.bind(xid);
             String branchType = context.get(RootContext.KEY_BRANCH_TYPE);
@@ -63,13 +64,11 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     @Override
     public void onCancel() {
-        cleanContext();
         target.onCancel();
     }
 
     @Override
     public void onComplete() {
-        cleanContext();
         target.onComplete();
     }
 
@@ -79,20 +78,10 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     }
 
     private void cleanContext() {
-        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            String unbindXid = RootContext.unbind();
-            BranchType previousBranchType = RootContext.getBranchType();
-            if (BranchType.TCC == previousBranchType) {
-                RootContext.unbindBranchType();
-            }
-            if (!xid.equalsIgnoreCase(unbindXid)) {
-                RootContext.bind(unbindXid);
-                LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
-                if (BranchType.TCC == previousBranchType) {
-                    RootContext.bindBranchType(previousBranchType);
-                    LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
-                }
-            }
+        RootContext.unbind();
+        BranchType previousBranchType = RootContext.getBranchType();
+        if (BranchType.TCC == previousBranchType) {
+            RootContext.unbindBranchType();
         }
     }
 }
