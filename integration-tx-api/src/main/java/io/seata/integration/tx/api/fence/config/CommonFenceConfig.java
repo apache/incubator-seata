@@ -83,7 +83,7 @@ public class CommonFenceConfig implements Disposable {
         try {
             // disable clear task when cleanPeriod <= 0
             if (cleanPeriod.isZero() || cleanPeriod.isNegative()) {
-                LOGGER.info("TCC fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
+                LOGGER.info("Common fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
                 return;
             }
             // convert to second level. maximum interval is 68 years
@@ -95,17 +95,17 @@ public class CommonFenceConfig implements Disposable {
                     timeBefore = DateUtils.addSeconds(new Date(), -(int) periodSeconds);
                     int deletedRowCount = DefaultCommonFenceHandler.get().deleteFenceByDate(timeBefore);
                     if (deletedRowCount > 0) {
-                        LOGGER.info("TCC fence clean task executed success, timeBefore: {}, deleted row count: {}",
+                        LOGGER.info("Common fence clean task executed success, timeBefore: {}, deleted row count: {}",
                                 timeBefore, deletedRowCount);
                     }
                 } catch (RuntimeException e) {
-                    LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
+                    LOGGER.error("Delete common fence log failed, timeBefore: {}", timeBefore, e);
                 }
             },  new Random(System.currentTimeMillis()).nextInt(60), periodSeconds, TimeUnit.SECONDS);
 
-            LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod);
+            LOGGER.info("Common fence log clean task start success, cleanPeriod:{}", cleanPeriod);
         } catch (NumberFormatException e) {
-            LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
+            LOGGER.error("Common fence log clean period only supports positive integers, clean task start failed");
         }
     }
 

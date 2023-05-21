@@ -15,8 +15,6 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,10 +24,12 @@ import java.util.Set;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
+import io.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
 import io.seata.integration.tx.api.interceptor.parser.InterfaceParser;
+import io.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
+import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
-import org.springframework.aop.support.AopUtils;
 
 /**
  * @author leezongjie
@@ -38,43 +38,34 @@ public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target) {
-
-        // below only enhance the native business bean.
-        // eliminate without two phase annotation bean.
+        // eliminate the bean without two phase annotation.
         Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
         if (methodsToProxy.isEmpty()) {
             return null;
         }
-
-        // eliminate aop proxy.
-        if (AopUtils.isAopProxy(target)) {
-            return null;
-        }
-
-        // eliminate dubbo etc proxy bean.
-        Field[] fields = ReflectionUtil.getAllFields(target.getClass());
-        for (Field field : fields) {
-            if (field.getGenericType().equals(InvocationHandler.class)) {
-                return null;
-            }
-        }
-
         // register resource and enhance with interceptor
         DefaultResourceRegisterParser.get().registerResource(target);
         return new TccActionInterceptorHandler(target, methodsToProxy);
     }
 
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhanceBean(Object target) {
+        IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
+        if(DefaultRemotingParser.get().isService(target, target.getClass().getName())) {
+            ifNeedEnhanceBean.setIfNeed(true);
+            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.SERVICE_BEAN);
+        }
+        return ifNeedEnhanceBean;
+    }
+
     /**
      * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
      *
-     * @param target the target bean
+     * @param target the remoting desc
      * @return boolean boolean
      */
 
     private Set<String> tccProxyTargetMethod(Object target) {
-        if (target == null) {
-            return Collections.emptySet();
-        }
         Set<String> methodsToProxy = new HashSet<>();
         //check if it is TCC bean
         Class<?> tccServiceClazz = target.getClass();

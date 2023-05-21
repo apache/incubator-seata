@@ -59,6 +59,18 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         return null;
     }
 
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhanceBean(Object target) throws Exception {
+        Class<?> serviceInterface = DefaultTargetClassParser.get().findTargetClass(target);
+        Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
+        IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
+        if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
+            ifNeedEnhanceBean.setIfNeed(true);
+            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.GLOBE_BEAN);
+        }
+        return ifNeedEnhanceBean;
+    }
+
     private boolean existsAnnotation(Class<?>... classes) {
         boolean result = false;
         if (CollectionUtils.isNotEmpty(classes)) {

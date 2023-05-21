@@ -63,4 +63,15 @@ public class DefaultInterfaceParser implements InterfaceParser {
         return null;
     }
 
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhanceBean(Object target) throws Exception {
+        for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
+            IfNeedEnhanceBean ifNeedEnhanceBean = interfaceParser.parseIfNeedEnhanceBean(target);
+            if (ifNeedEnhanceBean.isIfNeed()) {
+                return ifNeedEnhanceBean;
+            }
+        }
+        return new IfNeedEnhanceBean();
+    }
+
 }

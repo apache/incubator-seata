@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableSet;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -41,6 +42,8 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
+import io.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
+import io.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.util.OrderUtil;
@@ -59,10 +62,13 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -111,6 +117,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
+
+    private static final Set<String> NEED_ENHANCE_BEAN_NAME_SET = new HashSet<>();
 
 
     /**
@@ -276,6 +284,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         try {
             synchronized (PROXYED_SET) {
                 if (PROXYED_SET.contains(beanName)) {
+                    return bean;
+                }
+                if(!NEED_ENHANCE_BEAN_NAME_SET.contains(beanName)) {
                     return bean;
                 }
                 interceptor = null;
@@ -467,7 +478,65 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (initialized.compareAndSet(false, true)) {
             initClient();
         }
+
+        this.findBusinessBeanNamesNeededEnhancement();
     }
+
+    private void findBusinessBeanNamesNeededEnhancement() {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ConfigurableApplicationContext configurableApplicationContext = ((ConfigurableApplicationContext) applicationContext);
+            ConfigurableListableBeanFactory configurableListableBeanFactory = configurableApplicationContext.getBeanFactory();
+
+            String[] beanNames = applicationContext.getBeanDefinitionNames();
+            for (String  contextBeanName : beanNames) {
+                BeanDefinition beanDefinition = configurableListableBeanFactory.getBeanDefinition(contextBeanName);
+                if(IGNORE_ENHANCE_CHECK_SET.contains(beanDefinition.getBeanClassName())) {
+                    continue;
+                }
+                try {
+                    Object object = Class.forName(beanDefinition.getBeanClassName()).newInstance();
+                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhanceBean(object);
+                    if(!ifNeedEnhanceBean.isIfNeed()) {
+                        continue;
+                    }
+                    if(ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
+                        // dubbo, sofa
+                        PropertyValue propertyValue = beanDefinition.getPropertyValues().getPropertyValue("ref");
+                        if(propertyValue == null) {
+                            // HSF
+                            propertyValue = beanDefinition.getPropertyValues().getPropertyValue("target");
+                        }
+                        if(propertyValue != null) {
+                            RuntimeBeanReference r = (RuntimeBeanReference) propertyValue.getValue();
+                            if (r != null && StringUtils.isNotBlank(r.getBeanName())) {
+                                NEED_ENHANCE_BEAN_NAME_SET.add(r.getBeanName());
+                                continue;
+                            }
+                        }
+                        // local tcc
+                        NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
+                    } else {
+                        // globe bean
+                        NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("check if need enhance bean error, it can be ignore", e);
+                }
+            }
+            LOGGER.info("The needed enhancement business beans are : {}", NEED_ENHANCE_BEAN_NAME_SET);
+        }
+    }
+
+    private static final Set<String> IGNORE_ENHANCE_CHECK_SET = ImmutableSet.of(
+            "io.seata.spring.annotation.GlobalTransactionScanner"
+            , "io.seata.rm.fence.SpringFenceConfig"
+            , "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
+            , "org.springframework.context.annotation.internalAutowiredAnnotationProcessor"
+            , "org.springframework.context.annotation.internalCommonAnnotationProcessor"
+            , "org.springframework.context.event.internalEventListenerProcessor"
+            , "org.springframework.context.event.internalEventListenerFactory"
+    );
+
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
