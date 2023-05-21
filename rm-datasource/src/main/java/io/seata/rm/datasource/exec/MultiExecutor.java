@@ -18,9 +18,12 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.sqlserver.SqlServerMultiDeleteExecutor;
+import io.seata.rm.datasource.exec.sqlserver.SqlServerMultiUpdateExecutor;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -72,10 +75,18 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case UPDATE:
-                    executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiUpdateExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 case DELETE:
-                    executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiDeleteExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
@@ -92,10 +103,18 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
             switch (value.get(0).getSQLType()) {
                 case UPDATE:
-                    executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiUpdateExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiUpdateExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 case DELETE:
-                    executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(getDbType())) {
+                        executor = new SqlServerMultiDeleteExecutor<>(statementProxy, statementCallback, value);
+                    } else {
+                        executor = new MultiDeleteExecutor<T, S>(statementProxy, statementCallback, value);
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
