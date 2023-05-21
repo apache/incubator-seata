@@ -111,5 +111,17 @@ public class DataSourceProxyTest {
             Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
+
+        // case: dbType = sqlserver
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.SQLSERVER);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:mock:xxx;database=test");
+            Assertions.assertEquals("jdbc:mock:xxx;database=test", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
     }
 }
