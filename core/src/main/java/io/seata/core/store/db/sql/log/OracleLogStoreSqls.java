@@ -41,6 +41,12 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
+     * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE.
+     */
+    public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE =
+        UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE = "select A.* from ("
@@ -95,6 +101,11 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
         return UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    }
+
+    @Override
+    public String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable) {
+        return UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }
 
     @Override

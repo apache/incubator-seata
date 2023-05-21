@@ -3,9 +3,8 @@ name: Feature Request
 
 about: Suggest an idea for Seata
 
-notice: Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
-
 ---
+<!-- Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy). -->
 
 ## Why you need it?
  Is your feature request related to a problem? Please describe in details
