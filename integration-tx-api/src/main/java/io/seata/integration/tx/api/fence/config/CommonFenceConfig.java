@@ -61,8 +61,8 @@ public class CommonFenceConfig implements Disposable {
     /**
      * Common fence clean scheduled thread pool
      */
-    private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("tccFenceClean", 1));
+    private final ScheduledThreadPoolExecutor commonFenceClean = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("CommonFenceClean", 1));
 
     public AtomicBoolean getInitialized() {
         return initialized;
@@ -77,7 +77,7 @@ public class CommonFenceConfig implements Disposable {
     }
 
     /**
-     * init tcc fence clean task
+     * init common fence clean task
      */
     public void initCleanTask() {
         try {
@@ -88,8 +88,8 @@ public class CommonFenceConfig implements Disposable {
             }
             // convert to second level. maximum interval is 68 years
             long periodSeconds = cleanPeriod.compareTo(MAX_PERIOD) >= 0 ? Integer.MAX_VALUE : cleanPeriod.toMillis() / 1000;
-            // start tcc fence clean schedule
-            tccFenceClean.scheduleWithFixedDelay(() -> {
+            // start common fence clean schedule
+            commonFenceClean.scheduleWithFixedDelay(() -> {
                 Date timeBefore = null;
                 try {
                     timeBefore = DateUtils.addSeconds(new Date(), -(int) periodSeconds);
@@ -111,8 +111,8 @@ public class CommonFenceConfig implements Disposable {
 
     @Override
     public void destroy() {
-        // shutdown delete tcc fence log task
-        tccFenceClean.shutdown();
+        // shutdown delete common fence log task
+        commonFenceClean.shutdown();
     }
 
     public void init() {

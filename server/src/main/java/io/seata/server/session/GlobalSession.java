@@ -65,6 +65,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         MAX_GLOBAL_SESSION_SIZE));
 
     /**
+     * ThreadLocal should be optimize.
+     * It is tied to the current threading model. threadlocal's public set method does nothing to protect it from abuse.
+     */
+    private static final ThreadLocal<GlobalStatus> EXPECTED_STATUS_THREAD_LOCAL = new ThreadLocal<>();
+
+    /**
      * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
      *  then the tx will be remand as need to retry rollback
      */
@@ -120,7 +126,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        return branchSessions.remove(branchSession);
+        synchronized (this) {
+            return branchSessions.remove(branchSession);
+        }
     }
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
@@ -200,10 +208,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeGlobalStatus(GlobalStatus status) throws TransactionException {
-        if (GlobalStatus.Rollbacking == status) {
+        if (GlobalStatus.Rollbacking == status || GlobalStatus.TimeoutRollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, status);
+        // set session status after update successfully
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
@@ -236,7 +245,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        if (isSuccessEnd()) {
+        if (GlobalStatus.isTwoPhaseSuccess(status)) {
+            // TODO: Non AT mode does not need to be unlocked
             // Clean locks first
             clean();
             SessionHolder.getRootSessionManager().onSuccessEnd(this);
@@ -249,14 +259,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 lifecycleListener.onFailEnd(this);
             }
         }
-    }
-
-    public boolean isSuccessEnd() {
-        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
-            return true;
-        }
-        return false;
     }
 
     public void clean() throws TransactionException {
@@ -780,6 +782,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         // [optimize-session-manager] add--> root manager.update
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, newStatus);
+    }
+
+    public void setExpectedStatusFromCurrent() {
+        EXPECTED_STATUS_THREAD_LOCAL.set(this.status);
+    }
+
+    public void cleanExpectedStatus() {
+        EXPECTED_STATUS_THREAD_LOCAL.remove();
+    }
+
+    public GlobalStatus getExpectedStatus() {
+        return EXPECTED_STATUS_THREAD_LOCAL.get();
     }
 
     @Override

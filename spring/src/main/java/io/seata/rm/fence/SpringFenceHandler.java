@@ -15,10 +15,8 @@
  */
 package io.seata.rm.fence;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
@@ -26,6 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import javax.sql.DataSource;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.SkipCallbackWrapperException;
@@ -307,18 +307,15 @@ public class SpringFenceHandler implements FenceHandler {
         int total = 0;
         try {
             connection = DataSourceUtils.getConnection(dataSource);
-            if (isOracle(connection)) {
-                // delete by date if DB is oracle
-                return COMMON_FENCE_DAO.deleteCommonFenceDOByDate(connection, datetime);
-            }
-
-            //delete by id if DB is not oracle
             while (true) {
                 Set<String> xidSet = COMMON_FENCE_DAO.queryEndStatusXidsByDate(connection, datetime, LIMIT_DELETE);
                 if (xidSet.isEmpty()) {
                     break;
                 }
                 total += COMMON_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
+                if (xidSet.size() < LIMIT_DELETE) {
+                    break;
+                }
             }
         } catch (RuntimeException e) {
             LOGGER.error("delete fence log failed ", e);
@@ -329,16 +326,6 @@ public class SpringFenceHandler implements FenceHandler {
         }
         return total;
 
-    }
-
-    private static boolean isOracle(Connection connection) {
-        try {
-            String url = connection.getMetaData().getURL();
-            return url.toLowerCase().contains(":oracle:");
-        } catch (SQLException e) {
-            LOGGER.error("get db type fail", e);
-        }
-        return false;
     }
 
     private static void initLogCleanExecutor() {

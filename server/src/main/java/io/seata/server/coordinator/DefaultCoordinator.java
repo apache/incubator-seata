@@ -170,8 +170,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
         GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
 
-    private final GlobalStatus[] retryCommittingStatuses =
-        new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying};
+    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Committed};
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
@@ -411,8 +410,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (committingSession.getStatus() == GlobalStatus.Committing
-                    && !committingSession.isDeadSession()) {
+                if (GlobalStatus.Committing.equals(committingSession.getStatus()) && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
                 }
@@ -423,6 +421,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
                     //The function of this 'return' is 'continue'.
                     return;
+                }
+                if (GlobalStatus.Committed.equals(committingSession.getStatus())
+                    && committingSession.getBranchSessions().isEmpty()) {
+                    SessionHelper.endCommitted(committingSession,true);
                 }
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
@@ -610,7 +612,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 if (branchSession != null) {
                     doRemove(branchSession);
                 } else {
-                    globalSession.getSortedBranches().forEach(this::doRemove);
+                    globalSession.getSortedBranches().parallelStream().forEach(this::doRemove);
                 }
             } catch (Exception unKnowException) {
                 LOGGER.error("Asynchronous delete branchSession error, xid = {}", globalSession.getXid(), unKnowException);

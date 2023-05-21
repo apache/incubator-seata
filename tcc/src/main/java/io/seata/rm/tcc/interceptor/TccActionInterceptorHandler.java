@@ -23,10 +23,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
+import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
@@ -36,6 +38,7 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
 import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
+import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
 /**
  * @author leezongjie
@@ -117,6 +120,8 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                             Method m = interClass.getMethod(method.getName(), method.getParameterTypes());
                             businessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
                             if (businessAction != null) {
+                                // init common fence clean task if enable useTccFence
+                                initCommonFenceCleanTask(businessAction);
                                 break;
                             }
                         } catch (NoSuchMethodException e) {
@@ -128,6 +133,24 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             return businessAction;
         });
         return result;
+    }
+
+    /**
+     * init common fence clean task if enable useTccFence
+     *
+     * @param twoPhaseBusinessAction the twoPhaseBusinessAction
+     */
+    private void initCommonFenceCleanTask(TwoPhaseBusinessAction twoPhaseBusinessAction) {
+        CommonFenceConfig commonFenceConfig = (CommonFenceConfig) ObjectHolder.INSTANCE.getObject(BEAN_NAME_SPRING_FENCE_CONFIG);
+        if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
+            return;
+        }
+        if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
+            if (commonFenceConfig.getInitialized().compareAndSet(false, true)) {
+                // init common fence clean task if enable useTccFence
+                commonFenceConfig.init();
+            }
+        }
     }
 
     @Override
