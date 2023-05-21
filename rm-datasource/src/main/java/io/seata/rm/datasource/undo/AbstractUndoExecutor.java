@@ -302,7 +302,7 @@ public abstract class AbstractUndoExecutor {
         // build check sql
         String firstKey = pkRowValues.keySet().stream().findFirst().get();
         int pkRowSize = pkRowValues.get(firstKey).size();
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+        String checkSQL = buildCheckSql(sqlUndoLog.getTableName(),
                 SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, connectionProxy.getDbType()));
 
         PreparedStatement statement = null;
@@ -328,6 +328,17 @@ public abstract class AbstractUndoExecutor {
             IOUtil.close(checkSet, statement);
         }
         return currentRecords;
+    }
+
+    /**
+     * build sql for query current records.
+     *
+     * @param tableName the tableName to query
+     * @param whereCondition the where condition
+     * @return the check sql for query current records
+     */
+    protected String buildCheckSql(String tableName, String whereCondition) {
+        return String.format(CHECK_SQL_TEMPLATE, tableName, whereCondition);
     }
 
     protected List<Field> getOrderedPkList(TableRecords image, Row row, String dbType) {

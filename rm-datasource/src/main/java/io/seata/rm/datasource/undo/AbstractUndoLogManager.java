@@ -272,7 +272,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 }
 
                 // Find UNDO LOG
-                selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
+                selectPST = conn.prepareStatement(buildSelectUndoSql());
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
                 rs = selectPST.executeQuery();
@@ -390,6 +390,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 }
             }
         }
+    }
+
+    /**
+     * Construct a lock query sql
+     *
+     * @return sql
+     */
+    protected String buildSelectUndoSql() {
+        return SELECT_UNDO_LOG_SQL;
     }
 
     /**

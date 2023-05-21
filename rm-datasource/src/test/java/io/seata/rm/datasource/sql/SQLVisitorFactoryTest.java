@@ -26,6 +26,9 @@ import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerDeleteRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerInsertRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,11 @@ public class SQLVisitorFactoryTest {
         List<SQLRecognizer> recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLInsertRecognizer.class.getName());
 
+        //test for oracle insert
+        sql = "insert into t(id) values (1)";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleInsertRecognizer.class.getName());
+
         //test for mysql delete
         sql = "delete from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
@@ -60,20 +68,30 @@ public class SQLVisitorFactoryTest {
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLUpdateRecognizer.class.getName());
 
-        //test for mysql select
-        sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertNull(recognizer);
-
         //test for mysql select for update
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
 
-        //test for oracle insert
+        //test for sqlserver insert
         sql = "insert into t(id) values (1)";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleInsertRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerInsertRecognizer.class.getName());
+
+        //test for sqlserver delete
+        sql = "delete from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerDeleteRecognizer.class.getName());
+
+        //test for sqlserver update
+        sql = "update t set a = a";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerUpdateRecognizer.class.getName());
+
+        //test for sqlserver select
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertNull(recognizer);
 
         //test for oracle delete
         sql = "delete from t";
@@ -180,6 +198,16 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
         });
+        //test for sqlserver select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.SQLSERVER);
+        });
+
+        //test for sqlserver select for update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from t WITH(UPDLOCK); select * from t where id = 2", JdbcConstants.SQLSERVER);
+        });
+
     }
 
     @Test

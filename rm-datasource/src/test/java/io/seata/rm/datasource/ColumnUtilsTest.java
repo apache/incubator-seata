@@ -78,6 +78,30 @@ public class ColumnUtilsTest {
         Assertions.assertEquals("scheme.id", cols9.get(0));
 
         Assertions.assertNull(ColumnUtils.delEscape((String) null, JdbcConstants.MYSQL));
+
+        //SqlServer test case
+        List<String> cols10 = new ArrayList<>();
+        cols10.add("[id]");
+        cols10.add("name");
+        cols10 = ColumnUtils.delEscape(cols10, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("id", cols10.get(0));
+        Assertions.assertEquals("name", cols10.get(1));
+
+        List<String> cols11 = new ArrayList<>();
+        cols11.add("[scheme].[id]");
+        cols11 = ColumnUtils.delEscape(cols11, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("scheme.id", cols11.get(0));
+
+        List<String> cols12 = new ArrayList<>();
+        cols12.add("[scheme].id");
+        cols12 = ColumnUtils.delEscape(cols12, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("scheme.id", cols12.get(0));
+
+        List<String> cols13 = new ArrayList<>();
+        cols13.add("scheme.[id]");
+        cols13 = ColumnUtils.delEscape(cols13, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("scheme.id", cols13.get(0));
+        Assertions.assertNull(ColumnUtils.delEscape((String) null, JdbcConstants.MYSQL));
     }
 
     @Test
@@ -98,9 +122,15 @@ public class ColumnUtilsTest {
         cols5 = ColumnUtils.delEscape(cols5, JdbcConstants.POSTGRESQL);
         Assertions.assertEquals("id", cols5.get(0));
 
+        List<String> cols6 = new ArrayList<>();
+        cols6.add("[id]");
+        cols6 = ColumnUtils.delEscape(cols6, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals("id", cols6.get(0));
+
         Assertions.assertEquals("id", ColumnUtils.delEscape("`id`", JdbcConstants.MYSQL));
         Assertions.assertEquals("id", ColumnUtils.delEscape("\"id\"", JdbcConstants.ORACLE));
         Assertions.assertEquals("id", ColumnUtils.delEscape("\"id\"", JdbcConstants.POSTGRESQL));
+        Assertions.assertEquals("id", ColumnUtils.delEscape("[id]", JdbcConstants.SQLSERVER));
     }
 
     @Test
