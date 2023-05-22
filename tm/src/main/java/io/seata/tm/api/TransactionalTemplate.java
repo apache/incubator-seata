@@ -113,7 +113,7 @@ public class TransactionalTemplate {
             // set current tx config to holder
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
             
-            if(tx.getGlobalTransactionRole()==GlobalTransactionRole.Participant){
+            if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
                 LOGGER.info("join into a existing global transaction,xid={}", tx.getXid());
             }
 
