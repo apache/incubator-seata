@@ -112,6 +112,10 @@ public class TransactionalTemplate {
 
             // set current tx config to holder
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
+            
+            if(tx.getGlobalTransactionRole()==GlobalTransactionRole.Participant){
+                LOGGER.info("join into a existing global transaction,xid={}", tx.getXid());
+            }
 
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
