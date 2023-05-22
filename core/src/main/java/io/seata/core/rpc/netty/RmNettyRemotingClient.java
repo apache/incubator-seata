@@ -211,7 +211,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
         // ResourceId can not be null or empty
         if (StringUtils.isBlank(resourceId)) {
-            throw new FrameworkException("Register resource failed, RM resourceId is null or empty");
+            LOGGER.warn("The resourceId must not be null or empty when registering the RM client.");
+            return;
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
@@ -254,6 +255,10 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             StringBuilder sb = new StringBuilder();
             boolean first = true;
             for (String resourceId : resourceIds) {
+                if (StringUtils.isBlank(resourceId)) {
+                    LOGGER.warn("The resourceId must not be null or empty when registering the RM client.");
+                    continue;
+                }
                 if (first) {
                     first = false;
                 } else {

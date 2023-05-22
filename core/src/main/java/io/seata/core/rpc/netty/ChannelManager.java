@@ -146,7 +146,6 @@ public class ChannelManager {
         throws IncompatibleVersionException {
         Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
-        checkDbKeySet(dbkeySet);
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
             rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.RMROLE, resourceManagerRequest.getVersion(),
@@ -157,6 +156,7 @@ public class ChannelManager {
             rpcContext = IDENTIFIED_CHANNELS.get(channel);
             rpcContext.addResources(dbkeySet);
         }
+        if (dbkeySet == null || dbkeySet.isEmpty()) { return; }
         for (String resourceId : dbkeySet) {
             String clientIp;
             ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(RM_CHANNELS, resourceId, key -> new ConcurrentHashMap<>())
@@ -196,17 +196,6 @@ public class ChannelManager {
             return null;
         }
         return new HashSet<String>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
-    }
-
-    private static void checkDbKeySet(Set<String> dbKeySet) {
-        if (dbKeySet == null || dbKeySet.isEmpty()) {
-            throw new FrameworkException("RM resourceId is null or empty");
-        }
-        for (String dbKey : dbKeySet) {
-            if (StringUtils.isBlank(dbKey)) {
-                throw new FrameworkException("RM resourceId is null or empty");
-            }
-        }
     }
 
     /**
