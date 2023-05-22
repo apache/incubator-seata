@@ -74,8 +74,8 @@ public class TransactionalTemplate {
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(false);
-                        tx = GlobalTransactionContext.createNew();
                     }
+                    tx = GlobalTransactionContext.createNew();
                     // Continue and execute with new transaction
                     break;
                 case SUPPORTS:
@@ -86,8 +86,8 @@ public class TransactionalTemplate {
                     // Continue and execute with new transaction
                     break;
                 case REQUIRED:
-                    // If current transaction is existing, execute with current transaction,
-                    // else continue and execute with new transaction.
+                    // If current transaction is existing, execute with current transaction，else create
+                    tx = GlobalTransactionContext.getCurrentOrCreate();
                     break;
                 case NEVER:
                     // If transaction is existing, throw exception.
@@ -108,11 +108,6 @@ public class TransactionalTemplate {
                     break;
                 default:
                     throw new TransactionException("Not Supported Propagation:" + propagation);
-            }
-
-            // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
-            if (tx == null) {
-                tx = GlobalTransactionContext.createNew();
             }
 
             // set current tx config to holder
@@ -211,9 +206,9 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeCommit();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be commit", tx.getXid());
-            }
+//            if (LOGGER.isInfoEnabled()) {
+//                LOGGER.info("transaction {} will be commit", tx.getXid());
+//            }
             tx.commit();
             GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
@@ -252,10 +247,10 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeRollback();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
-                    originalException.getMessage());
-            }
+//            if (LOGGER.isInfoEnabled()) {
+//                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
+//                    originalException.getMessage());
+//            }
             tx.rollback();
             triggerAfterRollback();
         } catch (TransactionException txe) {
