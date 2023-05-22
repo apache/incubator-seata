@@ -54,31 +54,37 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.MYSQL));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.POSTGRESQL));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.SQLSERVER));
 
         String sql5 = "insert into a values (1, 2)";
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MYSQL));
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POSTGRESQL));
+        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.SQLSERVER));
 
         String sql6 = "insert into a (id, name) values (1, 2), (3, 4)";
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MYSQL));
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
+        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.SQLSERVER));
 
         String sql7 = "insert into a select * from b";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.MYSQL));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.POSTGRESQL));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.SQLSERVER));
 
         String sql8 = "delete from t where id = ?";
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MYSQL));
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POSTGRESQL));
+        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.SQLSERVER));
 
         String sql9 = "delete from t where id in (select id from b)";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.MYSQL));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.POSTGRESQL));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.SQLSERVER));
 
         String sql10 = "select * from t for update";
         Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MYSQL));
