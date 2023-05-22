@@ -484,7 +484,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private void findBusinessBeanNamesNeededEnhancement() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ConfigurableApplicationContext configurableApplicationContext = ((ConfigurableApplicationContext) applicationContext);
+            ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) applicationContext;
             ConfigurableListableBeanFactory configurableListableBeanFactory = configurableApplicationContext.getBeanFactory();
 
             String[] beanNames = applicationContext.getBeanDefinitionNames();
@@ -500,10 +500,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         continue;
                     }
                     if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
-                        // dubbo, sofa
+                        // the native bean which dubbo, sofa bean service bean referenced
                         PropertyValue propertyValue = beanDefinition.getPropertyValues().getPropertyValue("ref");
                         if (propertyValue == null) {
-                            // HSF
+                            // the native bean which HSF service bean referenced
                             propertyValue = beanDefinition.getPropertyValues().getPropertyValue("target");
                         }
                         if (propertyValue != null) {
@@ -513,10 +513,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                                 continue;
                             }
                         }
-                        // local tcc
+                        // the native bean which local tcc service bean referenced
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     } else {
-                        // globe bean
+                        // global transactional bean
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     }
                 } catch (Exception e) {
