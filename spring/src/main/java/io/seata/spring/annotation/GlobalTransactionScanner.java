@@ -515,7 +515,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         }
                         // the native bean which local tcc service bean referenced
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
-                    } else {
+                    } else if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN)) {
                         // global transactional bean
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     }
