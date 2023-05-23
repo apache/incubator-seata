@@ -26,6 +26,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
@@ -494,7 +495,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     continue;
                 }
                 try {
-                    Object object = Class.forName(beanDefinition.getBeanClassName()).newInstance();
+                    Object object = ReflectionUtil.getClassByName(beanDefinition.getBeanClassName()).newInstance();
                     IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhanceBean(object);
                     if (!ifNeedEnhanceBean.isIfNeed()) {
                         continue;
