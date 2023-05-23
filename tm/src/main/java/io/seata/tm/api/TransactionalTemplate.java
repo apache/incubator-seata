@@ -86,7 +86,7 @@ public class TransactionalTemplate {
                     // Continue and execute with new transaction
                     break;
                 case REQUIRED:
-                    // If current transaction is existing, execute with current transaction，else create
+                    // If current transaction is existing, execute with current transaction,else create
                     tx = GlobalTransactionContext.getCurrentOrCreate();
                     break;
                 case NEVER:
@@ -210,9 +210,6 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeCommit();
-//            if (LOGGER.isInfoEnabled()) {
-//                LOGGER.info("transaction {} will be commit", tx.getXid());
-//            }
             tx.commit();
             GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
@@ -251,10 +248,6 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeRollback();
-//            if (LOGGER.isInfoEnabled()) {
-//                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
-//                    originalException.getMessage());
-//            }
             tx.rollback();
             triggerAfterRollback();
         } catch (TransactionException txe) {
