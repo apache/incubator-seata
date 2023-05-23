@@ -129,6 +129,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNotNull();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("transaction {} will be commit", xid);
+        }
         int retry = COMMIT_RETRY_COUNT <= 0 ? DEFAULT_TM_COMMIT_RETRY_COUNT : COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
@@ -164,6 +167,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             return;
         }
         assertXIDNotNull();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("transaction {} will be rollback", xid);
+        }
 
         int retry = ROLLBACK_RETRY_COUNT <= 0 ? DEFAULT_TM_ROLLBACK_RETRY_COUNT : ROLLBACK_RETRY_COUNT;
         try {
