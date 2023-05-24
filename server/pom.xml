@@ -223,6 +223,10 @@
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -289,7 +293,7 @@
                 <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <from>
-                        <image>${IMAGE_NAME}</image>
+                        <image>${image.name}</image>
                         <platforms>
                             <platform>
                                 <os>linux</os>
@@ -370,7 +374,7 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>

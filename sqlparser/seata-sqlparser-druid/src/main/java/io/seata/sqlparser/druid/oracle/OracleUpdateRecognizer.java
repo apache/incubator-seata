@@ -102,7 +102,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     }
 
     @Override
-    public List<String> getUpdateColumnsIsSimplified() {
+    public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());
     }

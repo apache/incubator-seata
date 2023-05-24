@@ -173,6 +173,12 @@ public class LogStoreDataBaseDAO implements LogStore {
                 ps.setInt(i + 1, status);
             }
             ps.setInt(statuses.length + 1, limit);
+
+            //modify for the change of limit position in sqlserver
+            if ("sqlserver".equalsIgnoreCase(dbType)) {
+                ps.setInt(1, limit);
+                ps.setInt(statuses.length + 1, statuses[0]);
+            }
             rs = ps.executeQuery();
             while (rs.next()) {
                 ret.add(convertGlobalTransactionDO(rs));
@@ -228,6 +234,27 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps = conn.prepareStatement(sql);
             ps.setInt(index++, globalTransactionDO.getStatus());
             ps.setString(index++, globalTransactionDO.getXid());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+    }
+
+    @Override
+    public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus) {
+        String sql =
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, globalTransactionDO.getStatus());
+            ps.setString(2, globalTransactionDO.getXid());
+            ps.setInt(3, expectedStatus.intValue());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -516,6 +543,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             } catch (SQLException e) {
                 throw new StoreException(e);
             }
+        } else if ("sqlserver".equalsIgnoreCase(dbType)) {
+            return conn.getSchema();
         } else {
             return conn.getMetaData().getUserName();
         }

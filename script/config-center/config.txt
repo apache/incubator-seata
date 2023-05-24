@@ -61,6 +61,8 @@ client.undo.compress.threshold=64k
 #For TCC transaction mode
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
+# You can choose from the following options: fastjson, jackson, gson
+tcc.contextJsonParserType=fastjson
 
 #Log rule configuration, for client and server
 log.exceptionRate=100
@@ -98,6 +100,7 @@ store.db.maxWait=5000
 
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single
+store.redis.type=pipeline
 store.redis.single.host=127.0.0.1
 store.redis.single.port=6379
 store.redis.sentinel.masterName=
@@ -121,7 +124,8 @@ server.distributedLockExpireTime=10000
 server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
-server.enableParallelRequestHandle=false
+server.enableParallelRequestHandle=true
+server.enableParallelHandleBranch=false
 
 #Metrics configuration, only for the server
 metrics.enabled=false
