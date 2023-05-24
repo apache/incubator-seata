@@ -15,6 +15,8 @@
  */
 package io.seata.apm.skywalking.plugin;
 
+import com.alipay.sofa.common.profile.StringUtil;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
@@ -48,12 +50,20 @@ public class RemotingProcessorProcessInterceptor implements InstanceMethodsAroun
         AbstractSpan activeSpan = ContextManager.createEntrySpan(operationName, contextCarrier);
         SpanLayer.asRPCFramework(activeSpan);
         activeSpan.setComponent(ComponentsDefine.SEATA);
+
+        String xid = SWSeataUtils.convertXid(rpcMessage);
+        if(StringUtil.isNotBlank(xid)){
+            activeSpan.tag("SEATA.XID",xid);
+        }
     }
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
-        ContextManager.stopSpan();
+        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        if(rpcMessage.getBody() instanceof AbstractMessage){
+            ContextManager.stopSpan();
+        }
         return ret;
     }
 
