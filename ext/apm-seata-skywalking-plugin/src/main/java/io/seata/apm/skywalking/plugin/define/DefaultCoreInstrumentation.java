@@ -42,60 +42,60 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
     @Override
     public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
         return new InstanceMethodsInterceptPoint[]{
-                new InstanceMethodsInterceptPoint() {
-                    @Override
-                    public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return named("doGlobalCommit");
-                    }
-
-                    @Override
-                    public String getMethodsInterceptor() {
-                        return INTERCEPTOR_CLASS;
-                    }
-
-                    @Override
-                    public boolean isOverrideArgs() {
-                        return false;
-                    }
-                },
-                new InstanceMethodsInterceptPoint() {
-                    @Override
-                    public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return named("processCommitRequest").and(takesArguments(3))
-                                .and(takesArgument(0, named("io.seata.core.protocol.RpcMessage")))
-                                .and(takesArgument(1, named("io.seata.core.protocol.transaction.GlobalCommitRequest")))
-                                .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
-                    }
-
-                    @Override
-                    public String getMethodsInterceptor() {
-                        return INTERCEPTOR_CLASS;
-                    }
-
-                    @Override
-                    public boolean isOverrideArgs() {
-                        return false;
-                    }
-                },
-                new InstanceMethodsInterceptPoint() {
-                    @Override
-                    public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return named("processRollbackRequest").and(takesArguments(3))
-                                .and(takesArgument(0, named("io.seata.core.protocol.RpcMessage")))
-                                .and(takesArgument(1, named("io.seata.core.protocol.transaction.GlobalRollbackRequest")))
-                                .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
-                    }
-
-                    @Override
-                    public String getMethodsInterceptor() {
-                        return INTERCEPTOR_CLASS;
-                    }
-
-                    @Override
-                    public boolean isOverrideArgs() {
-                        return false;
-                    }
+            new InstanceMethodsInterceptPoint() {
+                @Override
+                public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                    return named("doGlobalCommit");
                 }
+
+                @Override
+                public String getMethodsInterceptor() {
+                    return INTERCEPTOR_CLASS;
+                }
+
+                @Override
+                public boolean isOverrideArgs() {
+                    return false;
+                }
+            },
+            new InstanceMethodsInterceptPoint() {
+                @Override
+                public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                    return named("processCommitRequest").and(takesArguments(3))
+                            .and(takesArgument(0, named("io.seata.core.protocol.RpcMessage")))
+                            .and(takesArgument(1, named("io.seata.core.protocol.transaction.GlobalCommitRequest")))
+                            .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
+                }
+
+                @Override
+                public String getMethodsInterceptor() {
+                    return INTERCEPTOR_CLASS;
+                }
+
+                @Override
+                public boolean isOverrideArgs() {
+                    return false;
+                }
+            },
+            new InstanceMethodsInterceptPoint() {
+                @Override
+                public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                    return named("processRollbackRequest").and(takesArguments(3))
+                            .and(takesArgument(0, named("io.seata.core.protocol.RpcMessage")))
+                            .and(takesArgument(1, named("io.seata.core.protocol.transaction.GlobalRollbackRequest")))
+                            .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
+                }
+
+                @Override
+                public String getMethodsInterceptor() {
+                    return INTERCEPTOR_CLASS;
+                }
+
+                @Override
+                public boolean isOverrideArgs() {
+                    return false;
+                }
+            }
         };
     }
 

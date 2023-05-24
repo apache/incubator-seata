@@ -20,7 +20,6 @@ import com.alipay.sofa.common.profile.StringUtil;
 import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
-import java.lang.reflect.Method;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
@@ -32,50 +31,52 @@ import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceM
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
+import java.lang.reflect.Method;
+
 /**
  * The RemoteProcessor deal.
-     *
-     * @author zhaoyuguang
-     */
+ *
+ * @author zhaoyuguang
+ */
 public class RemotingProcessorProcessInterceptor implements
         InstanceMethodsAroundInterceptor {
 
-  @Override
-  public void beforeMethod(EnhancedInstance objInst, Method method,
-                         Object[] allArguments, Class<?>[] argumentsTypes,
-                         MethodInterceptResult result) throws Throwable {
-    RpcMessage rpcMessage = (RpcMessage) allArguments[1];
-    String operationName = SWSeataUtils.convertOperationName(rpcMessage);
-    ContextCarrier contextCarrier = new ContextCarrier();
-    CarrierItem next = contextCarrier.items();
-    while (next.hasNext()) {
-      next = next.next();
-      next.setHeadValue(rpcMessage.getHeadMap().get(next.getHeadKey()));
-    }
-    AbstractSpan activeSpan = ContextManager.createEntrySpan(operationName, contextCarrier);
-    SpanLayer.asRPCFramework(activeSpan);
-    activeSpan.setComponent(ComponentsDefine.SEATA);
+    @Override
+    public void beforeMethod(EnhancedInstance objInst, Method method,
+                             Object[] allArguments, Class<?>[] argumentsTypes,
+                             MethodInterceptResult result) throws Throwable {
+        RpcMessage rpcMessage = (RpcMessage) allArguments[1];
+        String operationName = SWSeataUtils.convertOperationName(rpcMessage);
+        ContextCarrier contextCarrier = new ContextCarrier();
+        CarrierItem next = contextCarrier.items();
+        while (next.hasNext()) {
+            next = next.next();
+            next.setHeadValue(rpcMessage.getHeadMap().get(next.getHeadKey()));
+        }
+        AbstractSpan activeSpan = ContextManager.createEntrySpan(operationName, contextCarrier);
+        SpanLayer.asRPCFramework(activeSpan);
+        activeSpan.setComponent(ComponentsDefine.SEATA);
 
-    String xid = SWSeataUtils.convertXid(rpcMessage);
-    if (StringUtil.isNotBlank(xid)) {
-      activeSpan.tag(new StringTag(20, "Seata.xid"), xid);
+        String xid = SWSeataUtils.convertXid(rpcMessage);
+        if (StringUtil.isNotBlank(xid)) {
+            activeSpan.tag(new StringTag(20, "Seata.xid"), xid);
+        }
     }
-  }
 
-  @Override
-  public Object afterMethod(EnhancedInstance objInst, Method method,
+    @Override
+    public Object afterMethod(EnhancedInstance objInst, Method method,
                               Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
-    RpcMessage rpcMessage = (RpcMessage) allArguments[0];
-    if (rpcMessage.getBody() instanceof AbstractMessage) {
-      ContextManager.stopSpan();
+        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        if (rpcMessage.getBody() instanceof AbstractMessage) {
+            ContextManager.stopSpan();
+        }
+        return ret;
     }
-    return ret;
-  }
 
-  @Override
-  public void handleMethodException(EnhancedInstance objInst,
+    @Override
+    public void handleMethodException(EnhancedInstance objInst,
                                       Method method, Object[] allArguments,
                                       Class<?>[] argumentsTypes, Throwable t) {
-  }
+    }
 }

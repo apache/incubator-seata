@@ -38,7 +38,7 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
     public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                              MethodInterceptResult result) throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[0];
-        if(!(rpcMessage.getBody() instanceof AbstractMessage)){
+        if (!(rpcMessage.getBody() instanceof AbstractMessage)) {
             return;
         }
 
@@ -46,8 +46,8 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
         activeSpan.setComponent(ComponentsDefine.SEATA);
 
         String xid = SWSeataUtils.convertXid(rpcMessage);
-        if(StringUtil.isNotBlank(xid)){
-            activeSpan.tag(new StringTag(20, "Seata.xid"),xid);
+        if (StringUtil.isNotBlank(xid)) {
+            activeSpan.tag(new StringTag(20, "Seata.xid"), xid);
         }
     }
 
@@ -55,7 +55,7 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[0];
-        if(rpcMessage.getBody() instanceof AbstractMessage){
+        if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
         }
         return ret;
