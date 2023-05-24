@@ -211,9 +211,6 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeCommit();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be commit", tx.getXid());
-            }
             tx.commit();
             GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
@@ -252,10 +249,6 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeRollback();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
-                    originalException.getMessage());
-            }
             tx.rollback();
             triggerAfterRollback();
         } catch (TransactionException txe) {
