@@ -15,7 +15,9 @@
  */
 package io.seata.apm.skywalking.plugin;
 
+import com.alipay.sofa.common.profile.StringUtil;
 import io.netty.channel.Channel;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
@@ -55,12 +57,18 @@ public class NettyRemotingClientSendSyncInterceptor implements InstanceMethodsAr
             next = next.next();
             rpcMessage.getHeadMap().put(next.getHeadKey(), next.getHeadValue());
         }
+
+        String xid = SWSeataUtils.convertXid(rpcMessage);
+        if(StringUtil.isNotBlank(xid)){
+            activeSpan.tag("SEATA.XID",xid);
+        }
     }
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
-        if (allArguments[0] != null) {
+        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        if(rpcMessage.getBody() instanceof AbstractMessage){
             ContextManager.stopSpan();
         }
         return ret;
