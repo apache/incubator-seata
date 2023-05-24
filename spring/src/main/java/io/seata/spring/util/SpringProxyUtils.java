@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import io.seata.integration.tx.api.util.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
@@ -85,14 +85,14 @@ public class SpringProxyUtils {
      * @throws Exception the exception
      */
     public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
-        Field h;
+        Object dynamicAdvisedInterceptor;
         if (AopUtils.isJdkDynamicProxy(proxy)) {
-            h = proxy.getClass().getSuperclass().getDeclaredField("h");
+            dynamicAdvisedInterceptor = Proxy.getInvocationHandler(proxy);
         } else {
-            h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            Field h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
+            h.setAccessible(true);
+            dynamicAdvisedInterceptor = h.get(proxy);
         }
-        h.setAccessible(true);
-        Object dynamicAdvisedInterceptor = h.get(proxy);
         Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
         advised.setAccessible(true);
         return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
@@ -122,7 +122,7 @@ public class SpringProxyUtils {
      */
     public static Class<?> getTargetInterface(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
 
         //jdk proxy
@@ -143,7 +143,7 @@ public class SpringProxyUtils {
      */
     protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
         //not proxy
         if (!AopUtils.isAopProxy(proxy)) {
