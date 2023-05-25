@@ -15,8 +15,11 @@
  */
 package io.seata.apm.skywalking.plugin.common;
 
-import io.seata.core.protocol.transaction.*;
-
+import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
+import io.seata.core.protocol.transaction.AbstractBranchEndResponse;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
