@@ -75,7 +75,7 @@ public class TransactionalTemplate {
                     if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(false);
                     }
-                        tx = GlobalTransactionContext.createNew();
+                    tx = GlobalTransactionContext.createNew();
                     // Continue and execute with new transaction
                     break;
                 case SUPPORTS:
