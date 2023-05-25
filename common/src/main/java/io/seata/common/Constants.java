@@ -204,4 +204,14 @@ public interface Constants {
      * where is the tcc actionContext stored
      */
     String TCC_ACTION_CONTEXT_REPORT_TYPE = "actionContextReportType";
+
+    /**
+     * The constant TCC_PREPARE_STATUS
+     */
+    String TCC_PREPARE_STATUS = "tccPrepareStatus";
+
+    /**
+     * Tcc prepare error
+     */
+    String TCC_PREPARE_STATUS_ERROR = "error";
 }

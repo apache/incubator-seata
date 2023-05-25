@@ -60,7 +60,8 @@ public class FenceLogContextSearcher implements ContextSearcher {
 
     @Override
     public boolean isSupport(BusinessActionContext context) {
-        return Boolean.TRUE.equals(context.getActionContext(Constants.USE_COMMON_FENCE));
+        return Boolean.TRUE.equals(context.getActionContext(Constants.USE_COMMON_FENCE))
+                && !Constants.TCC_PREPARE_STATUS_ERROR.equals(context.getActionContext(Constants.TCC_PREPARE_STATUS));
     }
 
     public static DataSource getDataSource() {
