@@ -207,7 +207,7 @@ class NettyClientChannelManager {
                     LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
                             failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
-                    failedMap.forEach((key, value)->{
+                    failedMap.forEach((key, value) -> {
                         LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
