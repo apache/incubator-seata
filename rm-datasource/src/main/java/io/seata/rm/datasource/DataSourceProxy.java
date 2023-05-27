@@ -96,6 +96,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            LOGGER.info("SQLServer support in AT mode is currently an experimental function, " +
+                    "if you have any problems in use, please feedback to us");
+        }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         TableMetaCacheFactory.registerTableMeta(this);
@@ -161,6 +165,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType)) {
             initMysqlResourceId();
+        } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            initSqlServerResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -238,6 +244,39 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
             if (paramsBuilder.length() > 0) {
                 jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            resourceId = jdbcUrlBuilder.toString();
+        } else {
+            resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * The general form of the connection URL for SqlServer is
+     * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
+     * required connection properties: [INSTANCENAME], [databaseName,database]
+     *
+     */
+    private void initSqlServerResourceId() {
+        if (jdbcUrl.contains(";")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf(';'));
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf(';') + 1);
+            String[] urlParams = paramUrl.split(";");
+            for (String urlParam : urlParams) {
+                String[] paramSplit = urlParam.split("=");
+                String propertyName = paramSplit[0];
+                if ("INSTANCENAME".equalsIgnoreCase(propertyName)
+                        || "databaseName".equalsIgnoreCase(propertyName)
+                        || "database".equalsIgnoreCase(propertyName)) {
+                    paramsBuilder.append(urlParam);
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append(";");
                 jdbcUrlBuilder.append(paramsBuilder);
             }
             resourceId = jdbcUrlBuilder.toString();
