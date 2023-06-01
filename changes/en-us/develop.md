@@ -34,6 +34,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
 - [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
 - [[#5552](https://github.com/seata/seata/pull/5552)] fix mariadb rollback failed
+- [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
