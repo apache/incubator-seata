@@ -34,6 +34,8 @@
 - [[#5539](https://github.com/seata/seata/pull/5539)] 修复Oracle 10g where条件包含setDate全表扫描问题
 - [[#5540](https://github.com/seata/seata/pull/5540)] 修复 GlobalStatus=9 在DB存储模式无法清除的问题
 - [[#5552](https://github.com/seata/seata/pull/5552)] 修复mariadb回滚失败的问题
+- [[#5583](https://github.com/seata/seata/pull/5583)] 修复grpc xid 解绑问题
+- [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
