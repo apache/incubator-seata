@@ -33,6 +33,9 @@
 - [[#5538](https://github.com/seata/seata/pull/5538)] 修复提交事务时事务已完成不抛出异常问题
 - [[#5539](https://github.com/seata/seata/pull/5539)] 修复Oracle 10g where条件包含setDate全表扫描问题
 - [[#5540](https://github.com/seata/seata/pull/5540)] 修复 GlobalStatus=9 在DB存储模式无法清除的问题
+- [[#5552](https://github.com/seata/seata/pull/5552)] 修复mariadb回滚失败的问题
+- [[#5583](https://github.com/seata/seata/pull/5583)] 修复grpc xid 解绑问题
+- [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -50,7 +53,7 @@
 - [[#5414](https://github.com/seata/seata/pull/5414)] 优化事务失败处理 handler
 - [[#5537](https://github.com/seata/seata/pull/5537)] 优化客户侧事务日志
 - [[#5541](https://github.com/seata/seata/pull/5541)] 优化Server日志输出
-
+- [[#5548](https://github.com/seata/seata/pull/5548)] 优化 gpg key 和 发布流水线
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本

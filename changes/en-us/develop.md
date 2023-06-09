@@ -33,6 +33,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5538](https://github.com/seata/seata/pull/5538)] fix finished transaction swallows exception when committing
 - [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
 - [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
+- [[#5552](https://github.com/seata/seata/pull/5552)] fix mariadb rollback failed
+- [[#5583](https://github.com/seata/seata/pull/5583)] fix grpc interceptor xid unbinding problem
+- [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -50,6 +53,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5414](https://github.com/seata/seata/pull/5414)] optimize transaction fail handler
 - [[#5537](https://github.com/seata/seata/pull/5537)] optimize transaction log on client side
 - [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
+- [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
