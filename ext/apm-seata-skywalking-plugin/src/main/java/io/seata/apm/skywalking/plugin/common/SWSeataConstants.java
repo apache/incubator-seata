@@ -15,6 +15,12 @@
  */
 package io.seata.apm.skywalking.plugin.common;
 
+import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
+import io.seata.core.protocol.transaction.AbstractBranchEndResponse;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +31,8 @@ public class SWSeataConstants {
 
     private static final Set<String> TRANSACTION_MANAGER_OPERATION_NAME_MAPPING = new HashSet<>();
 
+    public static final HashMap<String,Class> TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING = new HashMap<>();
+
     static {
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalBeginRequest");
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalBeginResponse");
@@ -32,6 +40,20 @@ public class SWSeataConstants {
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalRollbackResponse");
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalCommitRequest");
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalCommitResponse");
+        TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalReportRequest");
+        TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalReportResponse");
+
+
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchCommitRequest", AbstractBranchEndRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchCommitResponse", AbstractBranchEndResponse.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchRegisterRequest", BranchRegisterRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchRollbackRequest", AbstractBranchEndRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchRollbackResponse", AbstractBranchEndResponse.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("GlobalBeginResponse", GlobalBeginResponse.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("GlobalCommitRequest", AbstractGlobalEndRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("GlobalRollbackRequest", AbstractGlobalEndRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("GlobalStatusRequest", AbstractGlobalEndRequest.class);
+        TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("GlobalReportResponse", AbstractGlobalEndRequest.class);
     }
 
     public static boolean isTransactionManagerOperationName(String operationName) {

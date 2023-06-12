@@ -15,17 +15,20 @@
  */
 package io.seata.apm.skywalking.plugin;
 
+import com.alipay.sofa.common.profile.StringUtil;
 import io.netty.channel.Channel;
+import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
+import org.apache.skywalking.apm.agent.core.context.tag.StringTag;
 import org.apache.skywalking.apm.agent.core.context.trace.AbstractSpan;
 import org.apache.skywalking.apm.agent.core.context.trace.SpanLayer;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor;
 import org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.MethodInterceptResult;
-import io.seata.apm.skywalking.plugin.common.SWSeataUtils;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 import java.lang.reflect.Method;
@@ -55,12 +58,18 @@ public class NettyRemotingClientSendSyncInterceptor implements InstanceMethodsAr
             next = next.next();
             rpcMessage.getHeadMap().put(next.getHeadKey(), next.getHeadValue());
         }
+
+        String xid = SWSeataUtils.convertXid(rpcMessage);
+        if (StringUtil.isNotBlank(xid)) {
+            activeSpan.tag(new StringTag(20, "Seata.xid"), xid);
+        }
     }
 
     @Override
     public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
                               Object ret) throws Throwable {
-        if (allArguments[0] != null) {
+        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
         }
         return ret;

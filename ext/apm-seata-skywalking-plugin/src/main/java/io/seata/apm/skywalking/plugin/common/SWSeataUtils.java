@@ -16,13 +16,18 @@
 package io.seata.apm.skywalking.plugin.common;
 
 import io.netty.channel.Channel;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
+import org.apache.skywalking.apm.agent.core.logging.api.ILog;
+import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 /**
  * @author zhaoyuguang
  */
 public class SWSeataUtils {
+
+    private static final ILog LOGGER = LogManager.getLogger(SWSeataUtils.class);
 
     public static String convertPeer(Channel channel) {
         String peer = channel.remoteAddress().toString();
@@ -41,5 +46,21 @@ public class SWSeataUtils {
             return ComponentsDefine.SEATA.getName() + "/TM/" + requestSimpleName;
         }
         return ComponentsDefine.SEATA.getName() + "/RM/" + requestSimpleName;
+    }
+
+    public static String convertXid(RpcMessage rpcMessage) {
+        AbstractMessage subMessage = (AbstractMessage) rpcMessage.getBody();
+        String requestSimpleName = rpcMessage.getBody().getClass().getSimpleName();
+
+        String xid = null;
+        try {
+            xid = SWSeataConstants.TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.get(requestSimpleName) != null
+                    ? (String) SWSeataConstants.TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.get(requestSimpleName)
+                    .getDeclaredMethod("getXid").invoke(subMessage)
+                    : xid;
+        } catch (Throwable e) {
+            LOGGER.error("convert seata xid failure", e);
+        }
+        return xid;
     }
 }
