@@ -106,6 +106,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        //always true and nothing to do with escape characters for mysql.
+        // May be not consistent with lower_case_table_names
+        tm.setCaseSensitive(true);
 
         /*
          * here has two different type to get the data
@@ -137,6 +140,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+                col.setCaseSensitive(rsmd.isCaseSensitive(col.getOrdinalPosition()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
