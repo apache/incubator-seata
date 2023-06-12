@@ -15,6 +15,7 @@
  */
 package io.seata.core.message;
 
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.ResultCode;
 
@@ -39,5 +40,21 @@ public class RegisterTMResponseTest {
         registerTMResponse.setResultCode(ResultCode.Success);
         Assertions.assertEquals("RegisterTMResponse{version='1', extraData='null', identified=true, resultCode=Success, msg='null'}",
                 registerTMResponse.toString());
+    }
+
+    @Test
+    public void getTypeCode() {
+        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
+
+        Assertions.assertEquals(MessageType.TYPE_REG_CLT_RESULT, registerTMResponse.getTypeCode());
+    }
+
+    @Test
+    public void isIdentified() {
+        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
+        Assertions.assertTrue(registerTMResponse.isIdentified()); // default to true
+
+        RegisterTMResponse registerTMResp = new RegisterTMResponse(false);
+        Assertions.assertFalse(registerTMResp.isIdentified());
     }
 }

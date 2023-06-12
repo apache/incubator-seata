@@ -26,6 +26,15 @@ import org.junit.jupiter.api.Test;
 public class VersionTest {
 
     @Test
+    public void isAboveOrEqualVersion150() {
+        Assertions.assertTrue(Version.isAboveOrEqualVersion150("2.0.2"));
+        Assertions.assertTrue(Version.isAboveOrEqualVersion150("1.5"));
+        Assertions.assertFalse(Version.isAboveOrEqualVersion150("1.4.9"));
+        Assertions.assertFalse(Version.isAboveOrEqualVersion150("")); // Invalid version code will always return false.
+        Assertions.assertFalse(Version.isAboveOrEqualVersion150("abd"));
+    }
+
+    @Test
     public void testConvertVersion() {
         // case: success
         Assertions.assertDoesNotThrow(() -> {

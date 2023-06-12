@@ -18,7 +18,10 @@ package io.seata.core.protocol;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The type MergedWarpMessageTest test.
@@ -31,6 +34,28 @@ public class MergedWarpMessageTest {
     public void getTypeCode() {
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         assertThat(mergedWarpMessage.getTypeCode()).isEqualTo(MessageType.TYPE_SEATA_MERGE);
+    }
+
+    @Test
+    public void testToString() {
+        MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
+
+        assertEquals("SeataMergeMessage ", mergedWarpMessage.toString());
+
+        RegisterRMResponse registerRMResponse = new RegisterRMResponse();
+        registerRMResponse.setVersion("1");
+        registerRMResponse.setIdentified(true);
+        registerRMResponse.setResultCode(ResultCode.Failed);
+        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
+        registerTMResponse.setVersion("2");
+        registerTMResponse.setIdentified(true);
+        registerTMResponse.setResultCode(ResultCode.Success);
+        mergedWarpMessage.msgs = Arrays.asList(registerRMResponse, registerTMResponse);
+
+        assertEquals(
+                "SeataMergeMessage RegisterRMResponse{version='1', extraData='null', identified=true, resultCode=Failed, msg='null'}\nRegisterTMResponse{version='2', extraData='null', identified=true, resultCode=Success, msg='null'}\n",
+                mergedWarpMessage.toString()
+        );
     }
 
     private GlobalBeginRequest buildGlobalBeginRequest() {
