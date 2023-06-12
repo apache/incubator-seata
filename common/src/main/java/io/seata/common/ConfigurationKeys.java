@@ -879,4 +879,9 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
 
+    /**
+     * The constant ENABLE_PARALLEL_HANDLE_BRANCH_KEY
+     */
+    String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
+
 }

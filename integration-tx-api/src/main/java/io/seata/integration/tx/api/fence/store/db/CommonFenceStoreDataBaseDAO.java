@@ -15,26 +15,28 @@
  */
 package io.seata.integration.tx.api.fence.store.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.StoreException;
 import io.seata.common.util.IOUtil;
-import io.seata.integration.tx.api.fence.store.db.sql.CommonFenceStoreSqls;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
 import io.seata.integration.tx.api.fence.store.CommonFenceDO;
 import io.seata.integration.tx.api.fence.store.CommonFenceStore;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import io.seata.integration.tx.api.fence.store.db.sql.CommonFenceStoreSqls;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Common Fence store data base dao
@@ -43,6 +45,7 @@ import java.util.Set;
  */
 public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonFenceStoreDataBaseDAO.class);
     /**
      * Common fence log table name
      */
@@ -94,7 +97,7 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            String sql = CommonFenceStoreSqls.getQueryEndStatusSQLByDate(logTableName);
+            String sql = CommonFenceStoreSqls.getQueryEndStatusSQLByDate(logTableName, isOracle(conn));
             ps = conn.prepareStatement(sql);
             ps.setTimestamp(1, new Timestamp(datetime.getTime()));
             ps.setInt(2, limit);
@@ -192,22 +195,17 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
     }
 
     @Override
-    public int deleteCommonFenceDOByDate(Connection conn, Date datetime) {
-        PreparedStatement ps = null;
-        try {
-            String sql = CommonFenceStoreSqls.getDeleteSQLByDateAndStatus(logTableName);
-            ps = conn.prepareStatement(sql);
-            ps.setTimestamp(1, new Timestamp(datetime.getTime()));
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new StoreException(e);
-        } finally {
-            IOUtil.close(ps);
-        }
-    }
-
-    @Override
     public void setLogTableName(String logTableName) {
         this.logTableName = logTableName;
+    }
+
+    private static boolean isOracle(Connection connection) {
+        try {
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
+        } catch (SQLException e) {
+            LOGGER.error("get db type fail", e);
+        }
+        return false;
     }
 }

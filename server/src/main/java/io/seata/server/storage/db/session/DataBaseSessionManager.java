@@ -69,10 +69,17 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
 
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
-        session.setStatus(status);
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
-        if (!ret) {
-            throw new StoreException("updateGlobalSessionStatus failed.");
+        try {
+            // set expected status threadlocal
+            session.setExpectedStatusFromCurrent();
+            session.setStatus(status);
+            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+            if (!ret) {
+                throw new StoreException("updateGlobalSessionStatus failed.");
+            }
+        } finally {
+            // remove expected status threadlocal
+            session.cleanExpectedStatus();
         }
     }
 
