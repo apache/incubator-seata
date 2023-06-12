@@ -13,7 +13,7 @@ install: true
 
 before_script:
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-      export IMAGE_NAME="openjdk:8u212-jre-alpine";
+      export IMAGE_NAME="openjdk:8-jre-slim";
     fi
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk11" ]; then
       export IMAGE_NAME="openjdk:11-jre-stretch";
