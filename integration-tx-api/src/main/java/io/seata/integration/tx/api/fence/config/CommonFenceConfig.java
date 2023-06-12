@@ -61,8 +61,8 @@ public class CommonFenceConfig implements Disposable {
     /**
      * Common fence clean scheduled thread pool
      */
-    private final ScheduledThreadPoolExecutor tccFenceClean = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("tccFenceClean", 1));
+    private final ScheduledThreadPoolExecutor commonFenceClean = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("CommonFenceClean", 1));
 
     public AtomicBoolean getInitialized() {
         return initialized;
@@ -77,42 +77,42 @@ public class CommonFenceConfig implements Disposable {
     }
 
     /**
-     * init tcc fence clean task
+     * init common fence clean task
      */
     public void initCleanTask() {
         try {
             // disable clear task when cleanPeriod <= 0
             if (cleanPeriod.isZero() || cleanPeriod.isNegative()) {
-                LOGGER.info("TCC fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
+                LOGGER.info("Common fence log clean task is not started, cleanPeriod is:{}", cleanPeriod);
                 return;
             }
             // convert to second level. maximum interval is 68 years
             long periodSeconds = cleanPeriod.compareTo(MAX_PERIOD) >= 0 ? Integer.MAX_VALUE : cleanPeriod.toMillis() / 1000;
-            // start tcc fence clean schedule
-            tccFenceClean.scheduleWithFixedDelay(() -> {
+            // start common fence clean schedule
+            commonFenceClean.scheduleWithFixedDelay(() -> {
                 Date timeBefore = null;
                 try {
                     timeBefore = DateUtils.addSeconds(new Date(), -(int) periodSeconds);
                     int deletedRowCount = DefaultCommonFenceHandler.get().deleteFenceByDate(timeBefore);
                     if (deletedRowCount > 0) {
-                        LOGGER.info("TCC fence clean task executed success, timeBefore: {}, deleted row count: {}",
+                        LOGGER.info("Common fence clean task executed success, timeBefore: {}, deleted row count: {}",
                                 timeBefore, deletedRowCount);
                     }
                 } catch (RuntimeException e) {
-                    LOGGER.error("Delete tcc fence log failed, timeBefore: {}", timeBefore, e);
+                    LOGGER.error("Delete common fence log failed, timeBefore: {}", timeBefore, e);
                 }
             },  new Random(System.currentTimeMillis()).nextInt(60), periodSeconds, TimeUnit.SECONDS);
 
-            LOGGER.info("TCC fence log clean task start success, cleanPeriod:{}", cleanPeriod);
+            LOGGER.info("Common fence log clean task start success, cleanPeriod:{}", cleanPeriod);
         } catch (NumberFormatException e) {
-            LOGGER.error("TCC fence log clean period only supports positive integers, clean task start failed");
+            LOGGER.error("Common fence log clean period only supports positive integers, clean task start failed");
         }
     }
 
     @Override
     public void destroy() {
-        // shutdown delete tcc fence log task
-        tccFenceClean.shutdown();
+        // shutdown delete common fence log task
+        commonFenceClean.shutdown();
     }
 
     public void init() {

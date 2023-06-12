@@ -1,1 +1,1 @@
-io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration
+io.seata.spring.boot.autoconfigure.SeataSpringFenceAutoConfiguration
