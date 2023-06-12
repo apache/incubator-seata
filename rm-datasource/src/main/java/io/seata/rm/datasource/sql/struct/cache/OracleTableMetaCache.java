@@ -91,6 +91,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         } else {
             tableName = tableName.toUpperCase();
         }
+        tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -114,6 +115,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
+                col.setCaseSensitive(StringUtils.hasLowerCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");

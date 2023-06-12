@@ -349,4 +349,28 @@ public class StringUtils {
         return sb.toString();
     }
 
+    public static boolean hasLowerCase(String str) {
+        if (null == str) {
+            return false;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isLowerCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasUpperCase(String str) {
+        if (null == str) {
+            return false;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isUpperCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
