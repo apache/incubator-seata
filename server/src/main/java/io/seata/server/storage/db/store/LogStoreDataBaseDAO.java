@@ -254,7 +254,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps = conn.prepareStatement(sql);
             ps.setInt(1, globalTransactionDO.getStatus());
             ps.setString(2, globalTransactionDO.getXid());
-            ps.setInt(3, expectedStatus.intValue());
+            ps.setInt(3, expectedStatus);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
