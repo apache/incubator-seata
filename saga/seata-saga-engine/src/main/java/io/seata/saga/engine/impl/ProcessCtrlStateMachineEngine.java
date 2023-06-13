@@ -15,12 +15,6 @@
  */
 package io.seata.saga.engine.impl;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.AsyncCallback;
@@ -35,21 +29,18 @@ import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ProcessContextBuilder;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessType;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.*;
 import io.seata.saga.statelang.domain.TaskState.Loop;
-import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
-import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
-import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
+import io.seata.saga.statelang.domain.impl.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ProcessCtrl-based state machine engine
@@ -355,7 +346,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
     protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
         Map<String, Object> contextVariables = new HashMap<>();
-        if (stateMachineInstance.getStartParams() == null) {
+        if (stateMachineInstance.getStartParams() != null) {
             contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 

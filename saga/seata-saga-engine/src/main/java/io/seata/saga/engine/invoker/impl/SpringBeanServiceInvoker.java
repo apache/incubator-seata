@@ -15,18 +15,6 @@
  */
 package io.seata.saga.engine.invoker.impl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -43,6 +31,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * SpringBean Service Invoker
@@ -301,7 +301,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
             }
             String jsonValue = jsonParser.toJsonString(value, true, false);
-            return jsonParser.parse(jsonValue, paramType, false);
+            return jsonParser.parse(jsonValue, paramType, true);
         }
     }
 
