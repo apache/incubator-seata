@@ -34,8 +34,6 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        super.encode(t, out);
-
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
         boolean identified = abstractIdentifyResponse.isIdentified();
         String version = abstractIdentifyResponse.getVersion();
@@ -54,8 +52,6 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        super.decode(t, in);
-
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
 
         abstractIdentifyResponse.setIdentified(in.get() == 1);

@@ -63,13 +63,11 @@ public class RegRmProcessor implements RemotingProcessor {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
-        RegisterRMResponse response = new RegisterRMResponse();
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
-                response.setResultCode(ResultCode.Success);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
@@ -83,10 +81,7 @@ public class RegRmProcessor implements RemotingProcessor {
             errorInfo = exx.getMessage();
             LOGGER.error("RM register fail, error message:{}", errorInfo);
         }
-        response.setIdentified(isSuccess);
-        if (!isSuccess) {
-            response.setResultCode(ResultCode.Failed);
-        }
+        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }

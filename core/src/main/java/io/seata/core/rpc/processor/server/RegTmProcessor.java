@@ -64,13 +64,12 @@ public class RegTmProcessor implements RemotingProcessor {
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
-        RegisterTMResponse response = new RegisterTMResponse();
+
         try {
             if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
-                response.setResultCode(ResultCode.Success);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("TM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
                         ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
@@ -86,10 +85,7 @@ public class RegTmProcessor implements RemotingProcessor {
             errorInfo = exx.getMessage();
             LOGGER.error("TM register fail, error message:{}", errorInfo);
         }
-        response.setIdentified(isSuccess);
-        if (!isSuccess) {
-            response.setResultCode(ResultCode.Failed);
-        }
+        RegisterTMResponse response = new RegisterTMResponse(isSuccess);
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
