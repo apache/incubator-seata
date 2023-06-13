@@ -20,7 +20,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.ChannelManager;

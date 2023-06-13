@@ -20,7 +20,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.ChannelManager;
@@ -64,7 +63,6 @@ public class RegTmProcessor implements RemotingProcessor {
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
-
         try {
             if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
