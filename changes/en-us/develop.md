@@ -56,7 +56,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
 - [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
 - [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
-
+- [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
 
