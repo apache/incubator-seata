@@ -57,6 +57,7 @@
 - [[#5548](https://github.com/seata/seata/pull/5548)] 优化 gpg key 和 发布流水线
 - [[#5646](https://github.com/seata/seata/pull/5646)] 重构 ColumnUtils 和 EscapeHandler
 - [[#5648](https://github.com/seata/seata/pull/5648)] 优化Server日志输出
+- [[#5647](https://github.com/seata/seata/pull/5647)] 支持表和列元数据大小写敏感设置
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
