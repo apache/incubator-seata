@@ -285,6 +285,13 @@ public class ChannelManager {
             throw new FrameworkException("Invalid Client ID: " + clientId);
         }
 
+        if (StringUtils.isBlank(resourceId)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("No channel is available, resourceId is null or empty");
+            }
+            return null;
+        }
+
         String targetApplicationId = clientIdInfo[0];
         String targetIP = clientIdInfo[1];
         int targetPort = Integer.parseInt(clientIdInfo[2]);
