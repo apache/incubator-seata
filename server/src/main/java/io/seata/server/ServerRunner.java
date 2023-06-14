@@ -19,11 +19,15 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.seata.core.rpc.Disposable;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 
@@ -31,11 +35,17 @@ import org.springframework.stereotype.Component;
  * @author spilledyear@outlook.com
  */
 @Component
-public class ServerRunner implements CommandLineRunner, DisposableBean {
+public class ServerRunner implements CommandLineRunner, DisposableBean,
+    ApplicationListener<ApplicationEvent>, Ordered {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerRunner.class);
 
     private boolean started = Boolean.FALSE;
+
+    private int port;
+
+    @Value("${logging.file.path}")
+    private String logPath;
 
     private static final List<Disposable> DISPOSABLE_LIST = new CopyOnWriteArrayList<>();
 
@@ -51,6 +61,7 @@ public class ServerRunner implements CommandLineRunner, DisposableBean {
             started = true;
 
             long cost = System.currentTimeMillis() - start;
+            LOGGER.info("\r\n you can visit seata console UI on http://127.0.0.1:{}. \r\n log path: {}.", this.port, this.logPath);
             LOGGER.info("seata server started in {} millSeconds", cost);
         } catch (Throwable e) {
             started = Boolean.FALSE;
@@ -78,5 +89,17 @@ public class ServerRunner implements CommandLineRunner, DisposableBean {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destoryAll finish");
         }
+    }
+
+    @Override
+    public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof WebServerInitializedEvent) {
+            this.port = ((WebServerInitializedEvent)event).getWebServer().getPort();
+        }
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
     }
 }
