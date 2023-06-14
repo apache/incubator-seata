@@ -93,7 +93,7 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        if(event instanceof WebServerInitializedEvent) {
+        if (event instanceof WebServerInitializedEvent) {
             this.port = ((WebServerInitializedEvent)event).getWebServer().getPort();
         }
     }
