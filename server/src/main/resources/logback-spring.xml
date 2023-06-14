@@ -75,4 +75,6 @@
         <!-- kafka-appender: off by default -->
         <!--<appender-ref ref="KAFKA"/>-->
     </root>
+    <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
+    <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
 </configuration>
