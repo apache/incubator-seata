@@ -357,7 +357,6 @@ function restart_server() {
   #Unfiltered
   #OLD_ARGS=`ps -p $PID -o args= | grep -v "^$0"`
   #echo "previous parameters  ${OLD_ARGS}"
-
   IFS=' ' read -r -a OLD_ARGS_ARRAY <<< "${OLD_ARGS}"
   IFS=' ' read -r -a NEW_ARGS_ARRAY <<< "${NEW_ARGS}"
 
