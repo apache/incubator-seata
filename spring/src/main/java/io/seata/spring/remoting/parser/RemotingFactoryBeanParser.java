@@ -68,6 +68,11 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
     }
 
     @Override
+    public boolean isService(Class<?> beanClass) throws FrameworkException {
+        return false;
+    }
+
+    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         Object factoryBean = getRemotingFactoryBean(bean, beanName);
         if (factoryBean == null) {

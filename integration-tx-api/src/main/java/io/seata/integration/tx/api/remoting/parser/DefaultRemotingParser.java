@@ -124,6 +124,21 @@ public class DefaultRemotingParser {
     }
 
     /**
+     * is service bean ?
+     *
+     * @param beanClass the bean class
+     * @return boolean boolean
+     */
+    public boolean isService(Class<?> beanClass) {
+        for (RemotingParser remotingParser : allRemotingParsers) {
+            if (remotingParser.isService(beanClass)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * get the remoting Service desc
      *
      * @param bean     the bean

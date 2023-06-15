@@ -43,6 +43,11 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
+    public boolean isService(Class<?> beanClass) throws FrameworkException {
+        return isLocalTCC(beanClass);
+    }
+
+    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         if (!this.isRemoting(bean, beanName)) {
             return null;
@@ -84,6 +89,10 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
      */
     private boolean isLocalTCC(Object bean) {
         Class<?> classType = bean.getClass();
+        return isLocalTCC(classType);
+    }
+
+    private boolean isLocalTCC(Class<?> classType) {
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for (Class<?> interClass : interfaceClasses) {
             if (interClass.isAnnotationPresent(LocalTCC.class)) {

@@ -26,7 +26,6 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
@@ -495,8 +494,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     continue;
                 }
                 try {
-                    Object object = ReflectionUtil.getClassByName(beanDefinition.getBeanClassName()).newInstance();
-                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhanceBean(object);
+                    // get the class by bean definition class name
+                    Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
+                    // check if it needs enhancement by the class
+                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
                     if (!ifNeedEnhanceBean.isIfNeed()) {
                         continue;
                     }
@@ -520,7 +521,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         // global transactional bean
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     }
-                } catch (Exception e) {
+                } catch (ClassNotFoundException e) {
                     LOGGER.warn("check if need enhance bean error, it can be ignore", e);
                 }
             }
