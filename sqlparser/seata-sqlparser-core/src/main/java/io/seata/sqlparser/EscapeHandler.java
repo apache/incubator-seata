@@ -81,7 +81,10 @@ public interface EscapeHandler {
             return colName;
         }
         if (tableMeta != null) {
-            colName = tableMeta.getColumnMeta(colName).getColumnName();
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(colName);
+            if (columnMeta != null) {
+                colName = columnMeta.getColumnName();
+            }
         }
         char escapeChar = getEscapeSymbol();
         if (colName.contains(DOT)) {
