@@ -17,6 +17,10 @@ package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
