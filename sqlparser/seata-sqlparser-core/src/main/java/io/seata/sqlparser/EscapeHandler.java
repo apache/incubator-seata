@@ -16,6 +16,7 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 
 /**
@@ -80,7 +81,10 @@ public interface EscapeHandler {
             return colName;
         }
         if (tableMeta != null) {
-            colName = tableMeta.getColumnMeta(colName).getColumnName();
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(colName);
+            if (columnMeta != null) {
+                colName = columnMeta.getColumnName();
+            }
         }
         EscapeSymbol escapeChar = getEscapeSymbol();
         if (colName.contains(DOT)) {
