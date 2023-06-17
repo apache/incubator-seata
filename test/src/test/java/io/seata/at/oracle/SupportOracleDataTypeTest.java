@@ -16,7 +16,6 @@
 package io.seata.at.oracle;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -25,7 +24,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
@@ -39,7 +38,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import static io.seata.at.DruidDataSourceUtils.ORACLE;
-import static io.seata.at.DruidDataSourceUtils.POSTGRESQL;
 import static io.seata.at.DruidDataSourceUtils.createNewDruidDataSource;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TABLE_NAME;
 import static io.seata.at.oracle.OracleSqlConstant.BINARY_TYPE;
