@@ -108,6 +108,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         } else {
             tableName = tableName.toLowerCase();
         }
+        tm.setCaseSensitive(StringUtils.hasUpperCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -132,6 +133,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+                col.setCaseSensitive(StringUtils.hasUpperCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
