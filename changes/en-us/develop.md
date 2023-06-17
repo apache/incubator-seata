@@ -37,6 +37,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5583](https://github.com/seata/seata/pull/5583)] fix grpc interceptor xid unbinding problem
 - [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
 - [[#5645](https://github.com/seata/seata/pull/5645)] fix oracle insert undolog failed
+- [[#5659](https://github.com/seata/seata/pull/5659)] fix the issue of case sensitivity enforcement on the database after adding escape characters to keywords
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
