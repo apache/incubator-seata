@@ -22,7 +22,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.EscapeHandlerFactory;
-import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 
 /**
