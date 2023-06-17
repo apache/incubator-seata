@@ -64,7 +64,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile Long prepareTime = null;
 
-    private volatile Integer timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+    private static final Integer timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
 
     private boolean shouldBeHeld = false;
 
