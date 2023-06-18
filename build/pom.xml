@@ -82,7 +82,7 @@
 
         <!-- Maven plugin versions -->
         <!-- Build -->
-        <easyj-maven-plugin.version>1.1.2</easyj-maven-plugin.version>
+        <easyj-maven-plugin.version>1.1.5</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -120,7 +120,7 @@
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
-        <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
+        <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
         <gpg.arg2/>
 

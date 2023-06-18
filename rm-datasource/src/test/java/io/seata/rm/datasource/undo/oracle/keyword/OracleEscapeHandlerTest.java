@@ -13,15 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.h2.keyword;
+package io.seata.rm.datasource.undo.oracle.keyword;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author JerryYin
+ * @author will
  */
-@LoadLevel(name = JdbcConstants.H2)
-public class H2KeywordChecker extends MySQLKeywordChecker {
+public class OracleEscapeHandlerTest {
+
+    @Test
+    public void testOracleKeywordChecker() {
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.ORACLE);
+        Assertions.assertNotNull(escapeHandler);
+    }
+
 }

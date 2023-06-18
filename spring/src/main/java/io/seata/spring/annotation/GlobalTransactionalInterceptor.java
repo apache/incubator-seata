@@ -43,6 +43,7 @@ import io.seata.spring.event.DegradeCheckEvent;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
+import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 import io.seata.tm.api.transaction.NoRollbackRule;
@@ -64,6 +65,7 @@ import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES;
 import static io.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK_PERIOD;
 import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
+import static io.seata.tm.api.GlobalTransactionRole.Participant;
 
 /**
  * The type Global transactional interceptor.
@@ -247,6 +249,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 }
             });
         } catch (TransactionalExecutor.ExecutionException e) {
+            GlobalTransaction globalTransaction = e.getTransaction();
+
+            // If Participant, just throw the exception to original.
+            if (globalTransaction.getGlobalTransactionRole() == Participant) {
+                throw e.getOriginalException();
+            }
             TransactionalExecutor.Code code = e.getCode();
             Throwable cause = e.getCause();
             boolean timeout = isTimeoutException(cause);
@@ -259,17 +267,17 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     }
                 case BeginFailure:
                     succeed = false;
-                    failureHandler.onBeginFailure(e.getTransaction(), cause);
+                    failureHandler.onBeginFailure(globalTransaction, cause);
                     throw cause;
                 case CommitFailure:
                     succeed = false;
-                    failureHandler.onCommitFailure(e.getTransaction(), cause);
+                    failureHandler.onCommitFailure(globalTransaction, cause);
                     throw cause;
                 case RollbackFailure:
-                    failureHandler.onRollbackFailure(e.getTransaction(), e.getOriginalException());
+                    failureHandler.onRollbackFailure(globalTransaction, e.getOriginalException());
                     throw e.getOriginalException();
                 case Rollbacking:
-                    failureHandler.onRollbacking(e.getTransaction(), e.getOriginalException());
+                    failureHandler.onRollbacking(globalTransaction, e.getOriginalException());
                     if (timeout) {
                         throw cause;
                     } else {
