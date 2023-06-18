@@ -24,9 +24,19 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5316](https://github.com/seata/seata/pull/5316)] fix G1 jvm parameter in jdk8
 - [[#5321](https://github.com/seata/seata/pull/5321)] fix When the rollback logic on the TC side returns RollbackFailed, the custom FailureHandler is not executed
 - [[#5332](https://github.com/seata/seata/pull/5332)] fix bugs found in unit tests
+- [[#5145](https://github.com/seata/seata/pull/5145)] fix global session is always begin in saga mode
 - [[#5413](https://github.com/seata/seata/pull/5413)] fix bad service configuration file and compilation failure
 - [[#5415](https://github.com/seata/seata/pull/5415)] fix transaction timeout on client side not execute hook and failureHandler
-
+- [[#5447](https://github.com/seata/seata/pull/5447)] fix oracle xa mode cannnot be used By same database
+- [[#5472](https://github.com/seata/seata/pull/5472)] fix if using `@GlobalTransactional` in RM, `ShouldNeverHappenException` will be thrown
+- [[#5535](https://github.com/seata/seata/pull/5535)] fix the log file path was loaded incorrectly
+- [[#5538](https://github.com/seata/seata/pull/5538)] fix finished transaction swallows exception when committing
+- [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
+- [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
+- [[#5552](https://github.com/seata/seata/pull/5552)] fix mariadb rollback failed
+- [[#5583](https://github.com/seata/seata/pull/5583)] fix grpc interceptor xid unbinding problem
+- [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
+- [[#5645](https://github.com/seata/seata/pull/5645)] fix oracle insert undolog failed
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -42,6 +52,13 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5315](https://github.com/seata/seata/pull/5315)] optimize the log of SPI
 - [[#5323](https://github.com/seata/seata/pull/5323)] add time info for global transaction timeout log
 - [[#5414](https://github.com/seata/seata/pull/5414)] optimize transaction fail handler
+- [[#5537](https://github.com/seata/seata/pull/5537)] optimize transaction log on client side
+- [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
+- [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
+- [[#5638](https://github.com/seata/seata/pull/5638)] optimize: set server's transaction level to READ_COMMITTED
+- [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
+- [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
+- [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities

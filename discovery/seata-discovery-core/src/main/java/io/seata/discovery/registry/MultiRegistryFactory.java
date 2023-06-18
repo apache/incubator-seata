@@ -53,8 +53,10 @@ public class MultiRegistryFactory {
         if (StringUtils.isBlank(registryTypeNamesStr)) {
             registryTypeNamesStr = RegistryType.File.name();
         }
-        LOGGER.info("use multi registry center type: {}", registryTypeNamesStr);
         String[] registryTypeNames = registryTypeNamesStr.split(Constants.REGISTRY_TYPE_SPLIT_CHAR);
+        if (registryTypeNames.length > 1) {
+            LOGGER.info("use multi registry center type: {}", registryTypeNamesStr);
+        }
         for (String registryTypeName : registryTypeNames) {
             RegistryType registryType;
             try {
