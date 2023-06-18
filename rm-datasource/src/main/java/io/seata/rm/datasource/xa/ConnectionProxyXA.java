@@ -26,7 +26,6 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -64,7 +63,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile Long prepareTime = null;
 
-    private static final Integer timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+    private static final Integer TIMEOUT = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
 
     private boolean shouldBeHeld = false;
 
@@ -294,7 +293,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void checkTimeout(Long now) throws XAException {
-        if (now - branchRegisterTime > timeout) {
+        if (now - branchRegisterTime > TIMEOUT) {
             xaRollback(xaBranchXid);
             throw new XAException("XA branch timeout error");
         }
