@@ -17,12 +17,11 @@ package io.seata.rm.tcc.resource.parser;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.integration.tx.api.interceptor.ActionContextUtil;
 import io.seata.integration.tx.api.interceptor.parser.RegisterResourceParser;
 import io.seata.rm.DefaultResourceManager;
@@ -30,7 +29,6 @@ import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-
 /**
  * @author leezongjie
  */
@@ -48,6 +46,9 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                     TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
                     if (twoPhaseBusinessAction != null) {
                         TCCResource tccResource = new TCCResource();
+                        if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
+                            throw new FrameworkException("TCC bean name cannot be null or empty");
+                        }
                         tccResource.setActionName(twoPhaseBusinessAction.name());
                         tccResource.setTargetBean(target);
                         tccResource.setPrepareMethod(m);
@@ -69,7 +70,7 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
                 }
-                
+
             }
         } catch (Throwable t) {
             throw new FrameworkException(t, "parser remoting service error");
