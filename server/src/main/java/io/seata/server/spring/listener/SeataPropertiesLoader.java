@@ -34,7 +34,7 @@ import static io.seata.config.FileConfiguration.SYS_FILE_RESOURCE_PREFIX;
 
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    Resource resource;
+    private Resource resource;
 
     private ResourceLoader resourceLoader;
 
@@ -48,9 +48,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
                 ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
                 entry.getValue().unwrapped()));
             String configPath = appConfig.getString("registry.file.name");
-            if (StringUtils.isNotBlank(configPath) && configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                Resource fileResource = resourceLoader.getResource(configPath);
-                appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
+            if (StringUtils.isNotBlank(configPath)) {
+                Resource fileResource = configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)?resourceLoader.getResource(configPath):resourceLoader.getResource("classpath:file.conf");
+                if(fileResource.isFile()) {
+                    appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
+                }
             }
             appConfig.entrySet().forEach(entry -> properties.put(
                 ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
@@ -68,6 +70,10 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         String registryName = environment.resolvePlaceholders("${SEATA_CONFIG_NAME:}");
         if (StringUtils.isNotBlank(registryName)) {
             resource = resourceLoader.getResource(registryName);
+        } else {
+            resource = resourceLoader.getResource("classpath:registry.conf");
+        }
+        if (resource.isFile()) {
             loadSeataConfig();
         }
         // Load by priority
