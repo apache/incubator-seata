@@ -68,8 +68,8 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         String registryName = environment.resolvePlaceholders("${SEATA_CONFIG_NAME:}");
         if (StringUtils.isNotBlank(registryName)) {
             resource = resourceLoader.getResource(registryName);
+            loadSeataConfig();
         }
-        loadSeataConfig();
         // Load by priority
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());
