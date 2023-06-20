@@ -52,6 +52,16 @@ public interface ConfigurationKeys {
     String SEATA_PREFIX = SEATA_FILE_ROOT_CONFIG + ".";
 
     /**
+     * The constant CONFIG_FILE_NAME.
+     */
+    String CONFIG_FILE_NAME = SEATA_PREFIX + FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR+ "name";
+
+    /**
+     * The constant REGISTRY_FILE_NAME.
+     */
+    String REGISTRY_FILE_NAME = SEATA_PREFIX + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "name";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     String SERVICE_PREFIX = "service.";
