@@ -15,8 +15,7 @@
  */
 package io.seata.server;
 
-import java.io.IOException;
-
+import io.seata.server.spring.listener.SeataPropertiesLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -25,8 +24,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(scanBasePackages = {"io.seata"})
 public class ServerApplication {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(ServerApplication.class);
+        app.addInitializers(new SeataPropertiesLoader());
         // run the spring-boot application
-        SpringApplication.run(ServerApplication.class, args);
+        app.run(args);
     }
+
 }

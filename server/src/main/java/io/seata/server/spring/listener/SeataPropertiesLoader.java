@@ -19,45 +19,60 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import io.seata.server.store.StoreConfig;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+import org.springframework.core.io.ResourceLoader;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Properties;
 
 import static io.seata.config.FileConfiguration.SYS_FILE_RESOURCE_PREFIX;
 
-//@ConditionalOnResource(resources = "${SEATA_CONFIG_NAME}")
-@Component
-public class SeataPropertiesLoader implements ApplicationListener<ContextRefreshedEvent> {
+public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    @Value("${SEATA_CONFIG_NAME:}")
     Resource resource;
 
-    @javax.annotation.Resource
+    private ResourceLoader resourceLoader;
+
     private ConfigurableEnvironment environment;
 
-    @Override
-    public void onApplicationEvent(@Nonnull ContextRefreshedEvent event) {
+    private void loadSeataConfig() {
         Properties properties = new Properties();
         try {
             Config appConfig = ConfigFactory.parseFileAnySyntax(resource.getFile());
-            String configPath = properties.getProperty(ConfigurationKeys.CONFIG_FILE_NAME);
+            appConfig.entrySet().forEach(entry -> properties.put(
+                ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
+                entry.getValue().unwrapped()));
+            String configPath = appConfig.getString("registry.file.name");
             if (StringUtils.isNotBlank(configPath) && configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                Resource fileResource = environment.getRequiredProperty(configPath, Resource.class);
+                Resource fileResource = resourceLoader.getResource(configPath);
                 appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
             }
-            appConfig.entrySet().forEach(entry -> properties.put(entry.getKey(), entry.getValue().unwrapped()));
+            appConfig.entrySet().forEach(entry -> properties.put(
+                ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
+                entry.getValue().unwrapped()));
             environment.getPropertySources().addLast(new PropertiesPropertySource("SeataRegistryConfig", properties));
         } catch (IOException e) {
             throw new RuntimeException("load seata registry config error: " + resource.getFilename(), e);
         }
+    }
+
+    @Override
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        this.resourceLoader = applicationContext;
+        this.environment = applicationContext.getEnvironment();
+        String registryName = environment.resolvePlaceholders("${SEATA_CONFIG_NAME:}");
+        if (StringUtils.isNotBlank(registryName)) {
+            resource = resourceLoader.getResource(registryName);
+        }
+        loadSeataConfig();
+        // Load by priority
+        System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
+        System.setProperty("lockMode", StoreConfig.getLockMode().getName());
     }
 
 }
