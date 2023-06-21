@@ -15,7 +15,6 @@
  */
 package io.seata.server;
 
-import io.seata.server.spring.listener.SeataPropertiesLoader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -25,10 +24,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = {"io.seata"})
 public class ServerApplication {
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(ServerApplication.class);
-        app.addInitializers(new SeataPropertiesLoader());
         // run the spring-boot application
-        app.run(args);
+        SpringApplication.run(ServerApplication.class, args);
     }
-
 }

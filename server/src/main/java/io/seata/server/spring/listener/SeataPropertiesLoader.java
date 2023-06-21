@@ -16,10 +16,13 @@
 package io.seata.server.spring.listener;
 
 import com.typesafe.config.Config;
+import com.typesafe.config.ConfigException;
 import com.typesafe.config.ConfigFactory;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.StringUtils;
 import io.seata.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
@@ -37,6 +40,8 @@ import static io.seata.config.FileConfiguration.SYS_FILE_RESOURCE_PREFIX;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataPropertiesLoader.class);
+    
     private Resource resource;
 
     private ResourceLoader resourceLoader;
@@ -50,18 +55,24 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             appConfig.entrySet().forEach(entry -> properties.put(
                 ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
                 entry.getValue().unwrapped()));
-            String configPath = appConfig.getString("registry.file.name");
-            if (StringUtils.isNotBlank(configPath)) {
-                Resource fileResource = configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)
-                    ? resourceLoader.getResource(configPath) : resourceLoader.getResource("classpath:file.conf");
-                if (fileResource.isFile()) {
-                    appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
+            try {
+                String configPath = appConfig.getString("registry.file.name");
+                if (StringUtils.isNotBlank(configPath)) {
+                    Resource fileResource =
+                        configPath.startsWith(SYS_FILE_RESOURCE_PREFIX) ? resourceLoader.getResource(configPath)
+                            : resourceLoader.getResource("classpath:" + configPath);
+                    if (fileResource.isFile()) {
+                        appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
+                        appConfig.entrySet().forEach(entry -> properties.put(ConfigurationKeys.SEATA_FILE_ROOT_CONFIG
+                            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(), entry.getValue().unwrapped()));
+                    }
+                }
+            } catch (ConfigException.Missing e) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("registry.file.name not found in registry.conf");
                 }
             }
-            appConfig.entrySet().forEach(entry -> properties.put(
-                ConfigurationKeys.SEATA_FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + entry.getKey(),
-                entry.getValue().unwrapped()));
-            environment.getPropertySources().addLast(new PropertiesPropertySource("SeataRegistryConfig", properties));
+            environment.getPropertySources().addLast(new PropertiesPropertySource("seataRegistryConfig", properties));
         } catch (IOException e) {
             throw new RuntimeException("load seata registry config error: " + resource.getFilename(), e);
         }
