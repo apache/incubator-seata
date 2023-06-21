@@ -22,6 +22,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.server.store.StoreConfig;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.io.Resource;
@@ -32,6 +34,7 @@ import java.util.Properties;
 
 import static io.seata.config.FileConfiguration.SYS_FILE_RESOURCE_PREFIX;
 
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     private Resource resource;
