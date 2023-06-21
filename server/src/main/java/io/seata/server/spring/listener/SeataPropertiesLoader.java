@@ -49,8 +49,9 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
                 entry.getValue().unwrapped()));
             String configPath = appConfig.getString("registry.file.name");
             if (StringUtils.isNotBlank(configPath)) {
-                Resource fileResource = configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)?resourceLoader.getResource(configPath):resourceLoader.getResource("classpath:file.conf");
-                if(fileResource.isFile()) {
+                Resource fileResource = configPath.startsWith(SYS_FILE_RESOURCE_PREFIX)
+                    ? resourceLoader.getResource(configPath) : resourceLoader.getResource("classpath:file.conf");
+                if (fileResource.isFile()) {
                     appConfig = ConfigFactory.parseFileAnySyntax(fileResource.getFile());
                 }
             }
