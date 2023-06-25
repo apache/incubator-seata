@@ -301,7 +301,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
             }
             String jsonValue = jsonParser.toJsonString(value, true, false);
-            return jsonParser.parse(jsonValue, paramType, false);
+            return jsonParser.parse(jsonValue, paramType, true);
         }
     }
 
