@@ -21,6 +21,7 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.JsonParser;
 import io.seata.saga.statelang.parser.JsonParserFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -263,8 +264,12 @@ public class StateMachineTests {
         map1.put("lilei4", people4);
         people1.setChildrenMap(map1);
 
-        String json = JsonParserFactory.getJsonParser("jackson").toJsonString(people1, false, true);
+        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        String json = jsonParser.toJsonString(people1, true, true);
         System.out.println(json);
+
+        String autoTypeJson = jsonParser.toJsonString(people1, false, true);
+        Assertions.assertTrue(jsonParser.useAutoType(autoTypeJson));
     }
 
     @Test

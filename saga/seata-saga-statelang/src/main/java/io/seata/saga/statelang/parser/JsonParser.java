@@ -31,13 +31,12 @@ public interface JsonParser {
     String getName();
 
     /**
-     * Object to Json string
+     * Check json use autoType mode
      *
-     * @param o the input object
-     * @param prettyPrint is pretty and print
-     * @return the json result
+     * @param json json
+     * @return boolean
      */
-    String toJsonString(Object o, boolean prettyPrint);
+    boolean useAutoType(String json);
 
     /**
      * Object to Json string

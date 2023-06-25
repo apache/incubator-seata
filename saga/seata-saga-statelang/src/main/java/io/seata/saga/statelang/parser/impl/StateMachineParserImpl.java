@@ -61,7 +61,7 @@ public class StateMachineParserImpl implements StateMachineParser {
         if (DesignerJsonTransformer.isDesignerJson(node)) {
             node = DesignerJsonTransformer.toStandardJson(node);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("===== Transformed standard state language:\n{}", jsonParser.toJsonString(node, true));
+                LOGGER.debug("===== Transformed standard state language:\n{}", jsonParser.toJsonString(node, true,true));
             }
         }
 

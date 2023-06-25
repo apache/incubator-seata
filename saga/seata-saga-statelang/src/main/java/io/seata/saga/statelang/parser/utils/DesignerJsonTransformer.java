@@ -76,7 +76,7 @@ public class DesignerJsonTransformer {
             }
         } else if (!"Catch".equals(type)) {
             Map<String, Object> states = (Map<String, Object>) CollectionUtils.computeIfAbsent(machineJsonObject, "States",
-                key -> new LinkedHashMap<>());
+                    key -> new LinkedHashMap<>());
 
             Map<String, Object> stateJsonObject = new LinkedHashMap<>();
             String stateId = (String) nodeObj.get("stateId");
@@ -135,7 +135,7 @@ public class DesignerJsonTransformer {
                     }
                     Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
                     List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
-                        key -> new ArrayList<>());
+                            key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
@@ -146,7 +146,7 @@ public class DesignerJsonTransformer {
                     }
                 } else if ("Choice".equals(sourceType)) {
                     List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
-                        key -> new ArrayList<>());
+                            key -> new ArrayList<>());
 
                     Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
                     if (edgeProps != null) {
@@ -209,8 +209,9 @@ public class DesignerJsonTransformer {
 
     /**
      * Generate tracing graph json
+     *
      * @param stateMachineInstance the state machine instance
-     * @param jsonParser the json parser
+     * @param jsonParser           the json parser
      * @return the tracing graph json
      */
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
@@ -280,7 +281,7 @@ public class DesignerJsonTransformer {
         }
 
         if (stateMachineJsonObj != null) { /*lgtm[java/useless-null-check]*/
-            return jsonParser.toJsonString(stateMachineJsonObj, true);
+            return jsonParser.toJsonString(stateMachineJsonObj, true, true);
         }
         return "";
     }

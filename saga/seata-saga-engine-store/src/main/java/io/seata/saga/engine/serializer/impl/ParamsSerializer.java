@@ -36,7 +36,7 @@ public class ParamsSerializer implements Serializer<Object, String> {
             if (jsonParser == null) {
                 throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
             }
-            return jsonParser.toJsonString(params, false);
+            return jsonParser.toJsonString(params, true, false);
         }
         return null;
     }
@@ -48,7 +48,11 @@ public class ParamsSerializer implements Serializer<Object, String> {
             if (jsonParser == null) {
                 throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
             }
-            return jsonParser.parse(json, Object.class, false);
+
+            //compatible history autoType serialize json
+            boolean useAutoType = jsonParser.useAutoType(json);
+
+            return jsonParser.parse(json, Object.class, useAutoType);
         }
         return null;
     }

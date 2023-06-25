@@ -15,15 +15,15 @@
  */
 package io.seata.saga.statelang.parser;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
-
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * StateParser tests
@@ -42,13 +42,18 @@ public class StateParserTests {
         Assertions.assertNotNull(stateMachine);
 
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
-        String outputJson = jsonParser.toJsonString(stateMachine, true);
+        String outputJson = jsonParser.toJsonString(stateMachine,true, true);
         System.out.println(outputJson);
 
+        boolean jacksonUseAutoType = jsonParser.useAutoType(outputJson);
+        Assertions.assertFalse(jacksonUseAutoType);
 
         JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
-        String fastjsonOutputJson = fastjsonParser.toJsonString(stateMachine, true);
+        String fastjsonOutputJson = fastjsonParser.toJsonString(stateMachine,true, true);
         System.out.println(fastjsonOutputJson);
+
+        boolean fastJsonUseAutoType = fastjsonParser.useAutoType(fastjsonOutputJson);
+        Assertions.assertFalse(fastJsonUseAutoType);
 
         Assertions.assertEquals("simpleTestStateMachine", stateMachine.getName());
         Assertions.assertTrue(stateMachine.getStates().size() > 0);
@@ -63,7 +68,7 @@ public class StateParserTests {
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
 
-        String outputJson = jsonParser.toJsonString(parsedObj, true);
+        String outputJson = jsonParser.toJsonString(parsedObj, true,true);
         System.out.println(outputJson);
 
 
@@ -71,7 +76,7 @@ public class StateParserTests {
         Map<String, Object> fastjsonParsedObj = DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(fastjsonParsedObj);
 
-        String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);
+        String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true,true);
         System.out.println(fastjsonOutputJson);
     }
 }
