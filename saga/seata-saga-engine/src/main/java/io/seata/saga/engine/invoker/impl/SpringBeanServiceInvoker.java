@@ -305,7 +305,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
             //compatible history autoType serialize json
             boolean useAutoType = jsonParser.useAutoType(jsonValue);
 
-            return jsonParser.parse(jsonValue, paramType, useAutoType);
+            return jsonParser.parse(jsonValue, paramType, !useAutoType);
         }
     }
 
