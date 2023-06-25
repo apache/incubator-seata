@@ -32,7 +32,37 @@ public enum Code {
     /**
      * the custom error
      */
-    LOGIN_FAILED("401", "Login failed");
+    LOGIN_FAILED("401", "Login failed"),
+
+    /**
+     * Offline the client which doesn't exist
+     */
+    OFFLINE_CLIENT_NOT_EXIST("40001", "Offline client not exist"),
+
+    /**
+     * Lack param client_role
+     */
+    LACK_CLIENT_ROLE("40002", "lack param client_role"),
+
+    /**
+     * Wrong client_role
+     */
+    WRONG_CLIENT_ROLE("40003", "wrong client_role"),
+
+    /**
+     * Lack param resource_id
+     */
+    LACK_RESOURCE_ID("40004", "lack param resource_id"),
+
+    /**
+     * Wrong page_size or page_num
+     */
+    WRONG_PAGE("40005", "wrong page_size or page_num"),
+
+    /**
+     * lack param client_id
+     */
+    LACK_CLIENT_ID("40006", "lack param client_id");
 
     /**
      * The Code.

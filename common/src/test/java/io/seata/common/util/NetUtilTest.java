@@ -18,7 +18,6 @@ package io.seata.common.util;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import org.junit.jupiter.api.Test;
@@ -61,10 +60,10 @@ public class NetUtilTest {
      */
     @Test
     public void testToStringAddress1() {
-        assertThat(NetUtil.toStringAddress((SocketAddress)ipv4))
-            .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
-        assertThat(NetUtil.toStringAddress((SocketAddress)ipv6)).isEqualTo(
-            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+        assertThat(NetUtil.toStringAddress(ipv4))
+                .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+        assertThat(NetUtil.toStringAddress(ipv6)).isEqualTo(
+                ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
     /**
@@ -73,9 +72,9 @@ public class NetUtilTest {
     @Test
     public void testToStringAddress2() {
         assertThat(NetUtil.toStringAddress(ipv4)).isEqualTo(
-            ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+                ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
         assertThat(NetUtil.toStringAddress(ipv6)).isEqualTo(
-            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+                ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
     /**
@@ -179,6 +178,20 @@ public class NetUtilTest {
             NetUtil.isValidIp(unknownHost, false);
         }).isInstanceOf(RuntimeException.class).hasMessageContaining("UnknownHostException");
 
+    }
+
+    @Test
+    public void testIsCorrectFormatAddress() {
+        String address0 = "127.0.0.1:-1";
+        String address1 = "192.168.1.1:1";
+        String address2 = "192.168.1.2:65535";
+        String address3 = "192.168.1.3:65536";
+        String address4 = "172.1.1.1";
+        assertThat(NetUtil.isCorrectFormatAddress(address0)).isFalse();
+        assertThat(NetUtil.isCorrectFormatAddress(address1)).isTrue();
+        assertThat(NetUtil.isCorrectFormatAddress(address2)).isTrue();
+        assertThat(NetUtil.isCorrectFormatAddress(address3)).isFalse();
+        assertThat(NetUtil.isCorrectFormatAddress(address4)).isFalse();
     }
 
 }

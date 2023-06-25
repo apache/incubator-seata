@@ -23,7 +23,7 @@ import io.seata.console.constant.Code;
  * The single result
  * @author zhongxiang.wang
  */
-public class SingleResult<T> extends Result<T>  implements Serializable {
+public class SingleResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 77612626624298767L;
 
     /**
@@ -35,8 +35,17 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
         super(code, message);
     }
 
+    public SingleResult(Code code) {
+        super(code);
+    }
+
     public SingleResult(String code, String message, T data) {
         super(code, message);
+        this.data = data;
+    }
+
+    public SingleResult(Code code, T data) {
+        super(code);
         this.data = data;
     }
 
@@ -49,7 +58,7 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
     }
 
     public static <T> SingleResult<T> success(T data) {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,data);
+        return new SingleResult<>(Code.SUCCESS, data);
     }
 
     public T getData() {

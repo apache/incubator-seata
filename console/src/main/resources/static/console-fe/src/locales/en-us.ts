@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    clientInfo: 'ClientInfo',
   },
   Header: {
     home: 'HOME',
@@ -60,6 +61,16 @@ const enUs: ILocale = {
     showBranchSessionTitle: 'View branch session',
     showGlobalLockTitle: 'View global lock',
     branchSessionDialogTitle: 'Branch session info',
+  },
+  ClientInfo: {
+    title: 'ClientInfo',
+    subTitle: 'list',
+    selectFilerPlaceholder: 'Please select filter criteria',
+    inputFilterPlaceholder: 'Please enter filter criteria',
+    resetButtonLabel: 'Reset',
+    searchButtonLabel: 'Search',
+    operateTitle: 'operate',
+    offlineTitle: 'offline',
   },
   GlobalLockInfo: {
     title: 'GlobalLockInfo',

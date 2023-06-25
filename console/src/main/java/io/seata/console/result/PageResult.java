@@ -18,13 +18,16 @@ package io.seata.console.result;
 import java.io.Serializable;
 import java.util.List;
 
+import io.seata.console.constant.Code;
 import io.seata.console.param.BaseParam;
+
 /**
  * The page result
  *
  * @author zhongxiang.wang
  * @author miaoxueyu
  * @author doubleDimple
+ * @author: zhongxiang.wang
  */
 public class PageResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
@@ -53,12 +56,16 @@ public class PageResult<T> extends Result<T> implements Serializable {
     public PageResult() {
     }
 
+    public PageResult(Code code) {
+        super(code);
+    }
+
     public PageResult(String code, String message) {
         super(code, message);
     }
 
     public PageResult(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG);
+        super(Code.SUCCESS);
         this.total = total;
         this.pages = pages;
         this.pageNum = pageNum;
@@ -86,7 +93,7 @@ public class PageResult<T> extends Result<T> implements Serializable {
     }
 
     public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG);
+        super(Code.SUCCESS);
         this.total = total;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
@@ -104,12 +111,13 @@ public class PageResult<T> extends Result<T> implements Serializable {
     }
 
     public static <T> PageResult<T> success() {
-        return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
+        return new PageResult<>(Code.SUCCESS);
     }
 
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
     }
+
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pageNum, pageSize);
     }

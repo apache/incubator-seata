@@ -67,7 +67,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
     get menu() {
         const { locale }: AppPropsType = this.props;
         const { MenuRouter = {} } = locale;
-        const { overview,transactionInfo,globalLockInfo } = MenuRouter;
+        const { overview,transactionInfo,globalLockInfo, clientInfo } = MenuRouter;
         return {
             items: [
                 // {
@@ -81,6 +81,10 @@ class App extends React.Component<AppPropsType, AppStateType> {
                 {
                     key:'/GlobalLockInfo',
                     label: globalLockInfo,
+                },
+                {
+                    key:'/ClientInfo',
+                    label: clientInfo
                 }
             ],
             header: 'Seata',

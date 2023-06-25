@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -22,6 +23,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -41,6 +43,8 @@ public class NetUtil {
     private static volatile InetAddress LOCAL_ADDRESS = null;
 
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
+
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("[0-9]*");
 
     /**
      * To string address string.
@@ -139,6 +143,7 @@ public class NetUtil {
      * not support ipv6
      * if match the preferredNetworks rule return the first
      * if all not match preferredNetworks rule return the first valid ip
+     *
      * @return the local address
      */
     public static InetAddress getLocalAddress(String... preferredNetworks) {
@@ -245,6 +250,34 @@ public class NetUtil {
             return !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
         }
 
+    }
+
+    /**
+     * is correct format address
+     *
+     * @param address
+     * @return true if the given address match the format ip:host
+     */
+    public static boolean isCorrectFormatAddress(String address) {
+        if (address.split(":").length == 2 && isValidIp(address.split(":")[0], true) && isPort(address.split(":")[1])) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * check if the portStr is a real net port
+     *
+     * @param portStr
+     * @return true if the given portStr is a real net port
+     */
+    public static boolean isPort(String portStr) {
+        Matcher isNum = NUMBER_PATTERN.matcher(portStr);
+        if (isNum.matches() && portStr.length() < 6 && Integer.valueOf(portStr) >= 1
+                && Integer.valueOf(portStr) <= 65535) {
+            return true;
+        }
+        return false;
     }
 
     /**

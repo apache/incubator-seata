@@ -21,6 +21,7 @@ const zhCn: ILocale = {
     overview: '概览',
     transactionInfo: '事务信息',
     globalLockInfo: '全局锁信息',
+    clientInfo: '长连接客户端信息',
   },
   Header: {
     home: '首页',
@@ -60,6 +61,16 @@ const zhCn: ILocale = {
     showBranchSessionTitle: '查看分支信息',
     showGlobalLockTitle: '查看全局锁',
     branchSessionDialogTitle: '分支事务信息',
+  },
+  ClientInfo: {
+    title: '客户端信息',
+    subTitle: '基础列表页',
+    selectFilerPlaceholder: '请选择筛选条件',
+    inputFilterPlaceholder: '请输入筛选条件',
+    resetButtonLabel: '重置',
+    searchButtonLabel: '搜索',
+    operateTitle: '操作',
+    offlineTitle: '下线',
   },
   GlobalLockInfo: {
     title: '全局锁信息',

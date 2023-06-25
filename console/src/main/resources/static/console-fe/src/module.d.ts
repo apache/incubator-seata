@@ -32,3 +32,6 @@ export interface GlobalProps {
   locale: ILocaleMap;
   history: History;
 }
+
+declare module '@alifd/next/lib/locale/en-us'
+declare module '@alifd/next/lib/locale/zh-cn'
