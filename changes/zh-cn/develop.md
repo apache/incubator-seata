@@ -6,8 +6,8 @@
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
 
 ### bugfix:
-- [[#5633]()] 修复saga模式下serviceTask入参autoType转化失败问题
-- [[#5427]()] 修复saga模式下direct eventbus toString stackOverFlow问题
+- [[#5633](https://github.com/seata/seata/pull/5670)] 修复saga模式下serviceTask入参autoType转化失败问题
+- [[#5427](https://github.com/seata/seata/pull/5670)] 修复saga模式下direct eventbus toString stackOverFlow问题
 - [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
 - [[#5021](https://github.com/seata/seata/pull/5201)] 修复 JDK17 下获取 Spring 原始代理对象失败的问题
 - [[#5023](https://github.com/seata/seata/pull/5203)] 修复 `seata-core` 模块传递依赖冲突
@@ -39,7 +39,7 @@
 - [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
 
 ### optimize:
-- [[#5699]()] saga模式下json序列化不再支持autoType方式，反序列化兼容历史autoType方式的数据
+- [[#5699](https://github.com/seata/seata/pull/5670)] saga模式下json序列化不再支持autoType方式，反序列化兼容历史autoType方式的数据
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
 - [[#5212](https://github.com/seata/seata/pull/5212)] 优化不合理的日志信息级别
 - [[#5237](https://github.com/seata/seata/pull/5237)] 优化异常日志打印(EnhancedServiceLoader.loadFile#cahtch)

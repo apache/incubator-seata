@@ -6,8 +6,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
-- [[#5633]()] fix saga mode serviceTask inputParams json autoType convert exception 
-- [[#5427]()] fix saga mode direct eventbus toString stackOverFlow
+- [[#5633](https://github.com/seata/seata/pull/5670)] fix saga mode serviceTask inputParams json autoType convert exception 
+- [[#5427](https://github.com/seata/seata/pull/5670)] fix saga mode direct eventbus toString stackOverFlow
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 - [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
@@ -39,7 +39,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
 
 ### optimize:
-- [[#5699]()] optimize saga mode  (ParamsSerializer#serialize), not support autoType because is not safe   
+- [[#5699](https://github.com/seata/seata/pull/5670)] optimize saga mode  (ParamsSerializer#serialize), not support autoType because is not safe   
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
 - [[#5212](https://github.com/seata/seata/pull/5212)] optimize log message level
 - [[#5237](https://github.com/seata/seata/pull/5237)] optimize exception log message print(EnhancedServiceLoader.loadFile#cahtch)
