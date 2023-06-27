@@ -177,15 +177,8 @@ class NettyClientChannelManager {
             RegistryService registryService = RegistryFactory.getInstance();
             String clusterName = registryService.getServiceGroup(transactionServiceGroup);
 
-            if (StringUtils.isBlank(clusterName)) {
-                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
-                        transactionServiceGroup);
-                return;
-            }
-
             if (!(registryService instanceof FileRegistryServiceImpl)) {
-                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
+                LOGGER.error("no available service endpoint found in cluster '{}', please make sure registry config correct and keep your seata-server is running", clusterName);
             }
             return;
         }
