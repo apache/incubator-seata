@@ -38,6 +38,7 @@
 - [[#5583](https://github.com/seata/seata/pull/5583)] 修复grpc xid 解绑问题
 - [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
 - [[#5645](https://github.com/seata/seata/pull/5645)] 修复 oracle 插入 undolog 失败问题
+- [[#5659](https://github.com/seata/seata/pull/5659)] 修复后镜像查询时增加关键字转义符导致数据库强制开启大小写校验引起的sql异常
 - [[#5663](https://github.com/seata/seata/pull/5663)] 修复connectionProxyXA连接复用时timeout为null
 
 ### optimize:

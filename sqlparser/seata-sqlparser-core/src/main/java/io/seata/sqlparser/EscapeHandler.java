@@ -16,6 +16,8 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
 
 /**
  * The interface Keyword checker.
@@ -61,13 +63,29 @@ public interface EscapeHandler {
 
     /**
      * add escape if colName is keywords
-     * @param colName
-     * @return
+     * @param colName colName
+     * @return colName
      */
     default String addColNameEscape(String colName) {
+        return addColNameEscape(colName, null);
+    }
+
+    /**
+     * add escape if colName is keywords
+     * @param colName colName
+     * @param tableMeta tableMeta
+     * @return colName
+     */
+    default String addColNameEscape(String colName, TableMeta tableMeta) {
         boolean needEscape = checkIfNeedEscape(colName);
         if (!needEscape) {
             return colName;
+        }
+        if (tableMeta != null) {
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(colName);
+            if (columnMeta != null) {
+                colName = columnMeta.getColumnName();
+            }
         }
         char escapeChar = getEscapeSymbol();
         if (colName.contains(DOT)) {
