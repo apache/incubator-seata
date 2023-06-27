@@ -146,7 +146,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 }
 
                 AtomicInteger retryCount = CollectionUtils.computeIfAbsent(retryCountMap, matchedRetryConfig,
-                        key -> new AtomicInteger(0));
+                    key -> new AtomicInteger(0));
                 if (retryCount.intValue() >= matchedRetryConfig.getMaxAttempts()) {
                     throw e;
                 }
