@@ -37,6 +37,7 @@ import com.alipay.sofa.registry.core.model.ScopeEnum;
 import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.lang.StringUtils;
 
@@ -160,7 +161,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             CountDownLatch respondRegistries = new CountDownLatch(1);
