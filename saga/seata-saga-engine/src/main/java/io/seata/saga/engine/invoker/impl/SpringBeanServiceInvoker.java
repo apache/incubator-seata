@@ -146,7 +146,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 }
 
                 AtomicInteger retryCount = CollectionUtils.computeIfAbsent(retryCountMap, matchedRetryConfig,
-                    key -> new AtomicInteger(0));
+                        key -> new AtomicInteger(0));
                 if (retryCount.intValue() >= matchedRetryConfig.getMaxAttempts()) {
                     throw e;
                 }
@@ -301,7 +301,11 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
             }
             String jsonValue = jsonParser.toJsonString(value, true, false);
-            return jsonParser.parse(jsonValue, paramType, false);
+
+            //compatible history autoType serialize json
+            boolean useAutoType = jsonParser.useAutoType(jsonValue);
+
+            return jsonParser.parse(jsonValue, paramType, !useAutoType);
         }
     }
 

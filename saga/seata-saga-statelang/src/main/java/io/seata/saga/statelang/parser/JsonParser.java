@@ -39,6 +39,15 @@ public interface JsonParser {
      */
     String toJsonString(Object o, boolean prettyPrint);
 
+
+    /**
+     * Check json use auto type boolean.
+     *
+     * @param json the json
+     * @return the boolean
+     */
+    boolean useAutoType(String json);
+
     /**
      * Object to Json string
      * @param o the input object
