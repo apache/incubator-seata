@@ -21,6 +21,7 @@ const enUs: ILocale = {
     overview: 'Overview',
     transactionInfo: 'TransactionInfo',
     globalLockInfo: 'GlobalLockInfo',
+    sagaStatemachineDesigner: 'SagaStatemachineDesigner',
   },
   Header: {
     home: 'HOME',
