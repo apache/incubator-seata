@@ -26,7 +26,7 @@ import java.util.List;
 import com.alibaba.druid.util.jdbc.ResultSetBase;
 
 import com.google.common.collect.Lists;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

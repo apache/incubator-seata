@@ -29,7 +29,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.server.UUIDGenerator;

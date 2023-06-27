@@ -18,7 +18,7 @@ package io.seata.rm.datasource;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
