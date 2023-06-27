@@ -6,6 +6,7 @@
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
 
 ### bugfix:
+- [[#5671](https://github.com/seata/seata/pull/5671)] 修复saga模式下serviceTask入参autoType转化失败问题
 - [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
 - [[#5021](https://github.com/seata/seata/pull/5201)] 修复 JDK17 下获取 Spring 原始代理对象失败的问题
 - [[#5023](https://github.com/seata/seata/pull/5203)] 修复 `seata-core` 模块传递依赖冲突
@@ -89,6 +90,7 @@
 - [mxsm](https://github.com/mxsm)
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [yixia](https://github.com/wt-better)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
