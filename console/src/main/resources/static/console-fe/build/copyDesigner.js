@@ -16,44 +16,30 @@
 
 const fs = require('fs');
 const path = require('path');
-// 默认打包存放地址
-const srcDir = path.join(__dirname, '../dist');
-// 打包后文件存放地址
-const destDir = path.join(__dirname, '../../');
+const childProcess = require('child_process')
 
 const mkdir = dir => {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir);
-    }
-  };
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+};
 
-const copyList = ['js/main.js', 'css/main.css'];
+// copy seata-saga-statemachine-designer to console
+const designerDir = path.join(__dirname, '../../../../../../../saga/seata-saga-statemachine-designer');
+if (!fs.existsSync(path.join(designerDir, "dist"))) {
+  // if seata-saga-statemachine-designer not build, build this
+  childProcess.execSync('cd ' + designerDir + '&& npm install && npm run build')
+}
 
-copyList.forEach(_fileName => {
-    const srcFileName = path.join(srcDir, _fileName);
-    const destFileName = path.join(destDir, _fileName);
-
-    if (!fs.existsSync(srcFileName)) {
-        return;
-    }
-
-    mkdir(path.dirname(destFileName));
-
-    const readStream = fs.createReadStream(srcFileName);
-    const writeStream = fs.createWriteStream(destFileName);
-    readStream.pipe(writeStream);
-});
-
-// copy seata-saga-statemachine-designer from console-fe/public to console resource folder
-const designerDir = path.join(__dirname, '../public/saga-statemachine-designer');
-const designerDestDir = path.join(destDir, 'saga-statemachine-designer');
+// copy file
+const designerDestDir = path.join(__dirname,'../public/saga-statemachine-designer');
 const designerHtmlFileName = path.join(designerDestDir, 'designer.html');
 const designerBundleFileName = path.join(designerDestDir, 'dist/bundle.js');
 
 mkdir(path.dirname(designerHtmlFileName));
 mkdir(path.dirname(designerBundleFileName));
 
-fs.createReadStream(path.join(designerDir, 'designer.html'))
+fs.createReadStream(path.join(designerDir, 'index.html'))
 .pipe(
   fs.createWriteStream(designerHtmlFileName)
   );
