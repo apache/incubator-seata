@@ -35,7 +35,10 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
 - [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
 - [[#5552](https://github.com/seata/seata/pull/5552)] fix mariadb rollback failed
+- [[#5583](https://github.com/seata/seata/pull/5583)] fix grpc interceptor xid unbinding problem
 - [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
+- [[#5645](https://github.com/seata/seata/pull/5645)] fix oracle insert undolog failed
+- [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -54,6 +57,10 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5537](https://github.com/seata/seata/pull/5537)] optimize transaction log on client side
 - [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
 - [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
+- [[#5638](https://github.com/seata/seata/pull/5638)] optimize: set server's transaction level to READ_COMMITTED
+- [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
+- [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
+- [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
