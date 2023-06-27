@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import io.seata.common.util.ReflectionUtil;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
 
 /**
  * @author will

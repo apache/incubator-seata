@@ -21,6 +21,7 @@ import java.sql.Types;
 import java.util.List;
 
 import io.seata.rm.datasource.exception.TableMetaException;
+import io.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

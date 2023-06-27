@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
