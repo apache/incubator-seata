@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
+- [[#5671](https://github.com/seata/seata/pull/5671)] fix saga mode serviceTask inputParams json autoType convert exception
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 - [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
@@ -38,6 +39,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
 - [[#5645](https://github.com/seata/seata/pull/5645)] fix oracle insert undolog failed
 - [[#5659](https://github.com/seata/seata/pull/5659)] fix the issue of case sensitivity enforcement on the database after adding escape characters to keywords
+- [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -89,6 +91,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [mxsm](https://github.com/mxsm)
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [yixia](https://github.com/wt-better)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
