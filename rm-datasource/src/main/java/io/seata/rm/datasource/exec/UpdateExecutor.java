@@ -33,7 +33,7 @@ import io.seata.common.DefaultValues;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -73,7 +73,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
+    protected String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         StringBuilder prefix = new StringBuilder("SELECT ");
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -134,19 +134,19 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias,pkNameList));
                 }
             }
-            needUpdateColumns.addAll(unescapeUpdateColumns.parallelStream()
-                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType()))
+            needUpdateColumns.addAll(unescapeUpdateColumns.stream()
+                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType(), tableMeta))
                 .collect(Collectors.toList()));
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
             onUpdateColumns.removeAll(unescapeUpdateColumns);
-            needUpdateColumns.addAll(onUpdateColumns.parallelStream()
-                .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType()))
+            needUpdateColumns.addAll(onUpdateColumns.stream()
+                .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))
                 .collect(Collectors.toList()));
         } else {
-            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().parallelStream()
-                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType())).collect(Collectors.toList()));
+            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().stream()
+                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta)).collect(Collectors.toList()));
         }
         return needUpdateColumns;
     }

@@ -35,7 +35,7 @@ import io.seata.common.DefaultValues;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -104,15 +104,12 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (noWhereCondition) {
             //select all rows
             paramAppenderList.clear();
-        } else {
-            suffix.append(" WHERE ").append(whereCondition);
+            whereCondition = new StringBuilder();
         }
-        suffix.append(" FOR UPDATE");
-        final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
+        final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, buildSuffixSql(whereCondition.toString()));
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
                 selectSQLAppender.add(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
@@ -173,5 +170,13 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
         }
         return selectSQLJoiner.toString();
+    }
+
+    protected String buildSuffixSql(String whereCondition) {
+        final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        if (StringUtils.isNotBlank(whereCondition)) {
+            suffix.append(" WHERE ").append(whereCondition);
+        }
+        return suffix.append(" FOR UPDATE").toString();
     }
 }

@@ -761,13 +761,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-        this.setStatus(GlobalStatus.AsyncCommitting);
         // [optimize-session-manager] add--> root manager.update
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this, GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
-        this.setStatus(GlobalStatus.CommitRetrying);
         // [optimize-session-manager] add--> root manager.update
         SessionHolder.getRootSessionManager().updateGlobalSessionStatus(this,GlobalStatus.CommitRetrying);
     }

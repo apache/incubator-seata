@@ -24,7 +24,7 @@ import java.util.StringJoiner;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
@@ -60,7 +60,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
+    protected String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         String orderByCondition = buildOrderCondition(visitor, paramAppenderList);
         String limitCondition = buildLimitCondition(visitor, paramAppenderList);
