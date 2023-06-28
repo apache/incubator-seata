@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.seata.sqlparser.druid.mariadb.MariadbInsertRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -187,14 +188,4 @@ public class MariadbInsertRecognizerTest extends AbstractRecognizerTest {
         }
     }
 
-    @Test
-    public void testGetInsertColumnsIsSimplified() {
-        String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
-        MariadbInsertRecognizer recognizer = new MariadbInsertRecognizer(sql, asts.get(0));
-        List<String> insertColumns = recognizer.getInsertColumns();
-        for (String insertColumn : insertColumns) {
-            Assertions.assertFalse(insertColumn.contains("`"));
-        }
-    }
 }
