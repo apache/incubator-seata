@@ -16,7 +16,6 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
-import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 
 /**
