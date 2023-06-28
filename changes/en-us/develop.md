@@ -6,7 +6,6 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
-- [[#5671](https://github.com/seata/seata/pull/5671)] fix saga mode serviceTask inputParams json autoType convert exception
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 - [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
@@ -43,7 +42,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
-- [yixia](https://github.com/wt-better)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
