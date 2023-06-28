@@ -13,17 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.mariadb.keyword;
+package io.seata.rm.datasource.undo.postgresql.keyword;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The type Mariadb keyword checker.
- *
- * @author funkye
+ * @author will
  */
-@LoadLevel(name = JdbcConstants.MARIADB)
-public class MariadbKeywordChecker extends MySQLKeywordChecker {
+public class PostgresqlEscapeHandlerTest {
+
+    @Test
+    public void testOracleKeywordChecker() {
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.POSTGRESQL);
+        Assertions.assertNotNull(escapeHandler);
+    }
+
 }

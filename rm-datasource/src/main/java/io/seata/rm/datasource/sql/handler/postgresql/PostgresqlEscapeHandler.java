@@ -13,14 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.postgresql.keyword;
+package io.seata.rm.datasource.sql.handler.postgresql;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,10 +32,10 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author japsercloud
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
-public class PostgresqlKeywordChecker implements KeywordChecker {
+public class PostgresqlEscapeHandler implements EscapeHandler {
 
-    private Set<String> keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values())
-            .map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
+    private Set<String> keywordSet = Arrays.stream(PostgresqlEscapeHandler.PostgresqlKeyword.values())
+            .map(PostgresqlEscapeHandler.PostgresqlKeyword::name).collect(Collectors.toSet());
 
     /**
      * postgresql keyword
@@ -357,7 +360,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -369,12 +372,24 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        boolean check = check(fieldOrTableName);
-        if (!check && !containsUppercase(fieldOrTableName)) {
-            // postgresql
-            // we are recommend table name and column name must lowercase.
-            // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        columnName = columnName.trim();
+        if (containsEscape(columnName)) {
+            return false;
+        }
+        boolean isKeyWord = checkIfKeyWords(columnName);
+        if (isKeyWord) {
+            return true;
+        }
+        if (null != tableMeta) {
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(columnName);
+            if (null != columnMeta) {
+                return columnMeta.isCaseSensitive();
+            }
+        } else if (!containsUppercase(columnName)) {
             return false;
         }
         return true;

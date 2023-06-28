@@ -13,14 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle.keyword;
+package io.seata.rm.datasource.sql.handler.oracle;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,7 +32,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author ccg
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
-public class OracleKeywordChecker implements KeywordChecker {
+public class OracleEscapeHandler implements EscapeHandler {
 
     private Set<String> keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
 
@@ -488,7 +491,7 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -499,13 +502,38 @@ public class OracleKeywordChecker implements KeywordChecker {
 
     }
 
+
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        boolean check = check(fieldOrTableName);
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        columnName = columnName.trim();
+        if (containsEscape(columnName)) {
+            return false;
+        }
+        boolean isKeyWord = checkIfKeyWords(columnName);
+        if (isKeyWord) {
+            return true;
+        }
         // oracle
         // we are recommend table name and column name must uppercase.
-        // if exists full uppercase, the table name or column name does't bundle escape symbol.
-        if (!check && isUppercase(fieldOrTableName)) {
+        // if exists full uppercase, the table name or column name doesn't bundle escape symbol.
+        //create\read    table TABLE "table" "TABLE"
+        //
+        //table        √     √       ×       √
+        //
+        //TABLE        √     √       ×       √
+        //
+        //"table"      ×     ×       √       ×
+        //
+        //"TABLE"      √     √       ×       √
+        if (null != tableMeta) {
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(columnName);
+            if (null != columnMeta) {
+                return columnMeta.isCaseSensitive();
+            }
+        } else if (isUppercase(columnName)) {
             return false;
         }
         return true;

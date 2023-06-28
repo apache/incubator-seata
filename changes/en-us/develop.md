@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
+- [[#5671](https://github.com/seata/seata/pull/5671)] fix saga mode serviceTask inputParams json autoType convert exception
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
 - [[#5023](https://github.com/seata/seata/pull/5203)] Fix `seata-core` dependency transitive conflict in `seata-dubbo`
@@ -34,6 +35,12 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5539](https://github.com/seata/seata/pull/5539)] fix the full table scan issue with 'setDate' condition in Oracle 10g
 - [[#5540](https://github.com/seata/seata/pull/5540)] fix GlobalStatus=9 can't be cleared in DB storage mode
 - [[#5552](https://github.com/seata/seata/pull/5552)] fix mariadb rollback failed
+- [[#5583](https://github.com/seata/seata/pull/5583)] fix grpc interceptor xid unbinding problem
+- [[#5602](https://github.com/seata/seata/pull/5602)] fix log in participant transaction role
+- [[#5645](https://github.com/seata/seata/pull/5645)] fix oracle insert undolog failed
+- [[#5659](https://github.com/seata/seata/pull/5659)] fix the issue of case sensitivity enforcement on the database after adding escape characters to keywords
+- [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
+- [[#5675](https://github.com/seata/seata/pull/5675)] bugfix: fix compatibility between xxx.grouplist and grouplist.xxx configuration items
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -52,6 +59,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5537](https://github.com/seata/seata/pull/5537)] optimize transaction log on client side
 - [[#5541](https://github.com/seata/seata/pull/5541)] optimize server log output
 - [[#5548](https://github.com/seata/seata/pull/5548)] update expire gpg key and publish workflow
+- [[#5638](https://github.com/seata/seata/pull/5638)] optimize: set server's transaction level to READ_COMMITTED
+- [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
+- [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
+- [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
+- [[#5678](https://github.com/seata/seata/pull/5678)] optimize escape character for case of columnNames
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
@@ -81,6 +93,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [mxsm](https://github.com/mxsm)
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [yixia](https://github.com/wt-better)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

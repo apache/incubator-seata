@@ -6,6 +6,7 @@
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
 
 ### bugfix:
+- [[#5671](https://github.com/seata/seata/pull/5671)] 修复saga模式下serviceTask入参autoType转化失败问题
 - [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
 - [[#5021](https://github.com/seata/seata/pull/5201)] 修复 JDK17 下获取 Spring 原始代理对象失败的问题
 - [[#5023](https://github.com/seata/seata/pull/5203)] 修复 `seata-core` 模块传递依赖冲突
@@ -34,6 +35,12 @@
 - [[#5539](https://github.com/seata/seata/pull/5539)] 修复Oracle 10g where条件包含setDate全表扫描问题
 - [[#5540](https://github.com/seata/seata/pull/5540)] 修复 GlobalStatus=9 在DB存储模式无法清除的问题
 - [[#5552](https://github.com/seata/seata/pull/5552)] 修复mariadb回滚失败的问题
+- [[#5583](https://github.com/seata/seata/pull/5583)] 修复grpc xid 解绑问题
+- [[#5602](https://github.com/seata/seata/pull/5602)] 修复participant情况下的重复日志
+- [[#5645](https://github.com/seata/seata/pull/5645)] 修复 oracle 插入 undolog 失败问题
+- [[#5659](https://github.com/seata/seata/pull/5659)] 修复后镜像查询时增加关键字转义符导致数据库强制开启大小写校验引起的sql异常
+- [[#5663](https://github.com/seata/seata/pull/5663)] 修复connectionProxyXA连接复用时timeout为null
+- [[#5675](https://github.com/seata/seata/pull/5675)] 修复 xxx.grouplist 和 grouplist.xxx 配置项兼容问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -52,6 +59,11 @@
 - [[#5537](https://github.com/seata/seata/pull/5537)] 优化客户侧事务日志
 - [[#5541](https://github.com/seata/seata/pull/5541)] 优化Server日志输出
 - [[#5548](https://github.com/seata/seata/pull/5548)] 优化 gpg key 和 发布流水线
+- [[#5638](https://github.com/seata/seata/pull/5638)] 优化server端事务隔离级别为读已提交
+- [[#5646](https://github.com/seata/seata/pull/5646)] 重构 ColumnUtils 和 EscapeHandler
+- [[#5648](https://github.com/seata/seata/pull/5648)] 优化Server日志输出
+- [[#5647](https://github.com/seata/seata/pull/5647)] 支持表和列元数据大小写敏感设置
+- [[#5678](https://github.com/seata/seata/pull/5678)] 优化大小写转义符
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -81,6 +93,7 @@
 - [mxsm](https://github.com/mxsm)
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [yixia](https://github.com/wt-better)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

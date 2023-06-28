@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 

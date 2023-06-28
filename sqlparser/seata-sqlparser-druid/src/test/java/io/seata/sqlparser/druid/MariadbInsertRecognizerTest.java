@@ -192,7 +192,7 @@ public class MariadbInsertRecognizerTest extends AbstractRecognizerTest {
         String sql = "insert into t(`id`, `no`, `name`, `age`) values (1, 'no001', 'aaa', '20')";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
         MariadbInsertRecognizer recognizer = new MariadbInsertRecognizer(sql, asts.get(0));
-        List<String> insertColumns = recognizer.getInsertColumnsIsSimplified();
+        List<String> insertColumns = recognizer.getInsertColumns();
         for (String insertColumn : insertColumns) {
             Assertions.assertFalse(insertColumn.contains("`"));
         }

@@ -377,7 +377,7 @@ public class MariadbUpdateRecognizerTest extends AbstractRecognizerTest {
         String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MARIADB);
         MariadbUpdateRecognizer recognizer = new MariadbUpdateRecognizer(sql, asts.get(0));
-        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
+        List<String> updateColumns = recognizer.getUpdateColumns();
         for (String updateColumn : updateColumns) {
             Assertions.assertFalse(updateColumn.contains("`"));
         }

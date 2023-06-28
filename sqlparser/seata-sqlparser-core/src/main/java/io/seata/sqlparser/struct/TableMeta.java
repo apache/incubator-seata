@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.sqlparser.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +35,8 @@ import io.seata.sqlparser.util.ColumnUtils;
  */
 public class TableMeta {
     private String tableName;
+
+    private boolean isCaseSensitive;
 
     /**
      * key: column name
@@ -90,6 +92,24 @@ public class TableMeta {
      */
     public Map<String, IndexMeta> getAllIndexes() {
         return allIndexes;
+    }
+
+    /**
+     * Is case sensitive boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isCaseSensitive() {
+        return isCaseSensitive;
+    }
+
+    /**
+     * Sets case sensitive.
+     *
+     * @param caseSensitive the case sensitive
+     */
+    public void setCaseSensitive(boolean caseSensitive) {
+        isCaseSensitive = caseSensitive;
     }
 
     /**
@@ -214,6 +234,7 @@ public class TableMeta {
         int hash = Objects.hashCode(tableName);
         hash += Objects.hashCode(allColumns);
         hash += Objects.hashCode(allIndexes);
+        hash += Objects.hashCode(isCaseSensitive);
         return hash;
     }
 }

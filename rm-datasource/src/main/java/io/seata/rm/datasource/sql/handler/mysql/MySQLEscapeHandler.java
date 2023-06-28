@@ -13,14 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.mysql.keyword;
+package io.seata.rm.datasource.sql.handler.mysql;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.KeywordChecker;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -29,7 +31,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
-public class MySQLKeywordChecker implements KeywordChecker {
+public class MySQLEscapeHandler implements EscapeHandler {
 
     protected Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
 
@@ -1101,7 +1103,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
 
 
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -1113,8 +1115,19 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        return check(fieldOrTableName);
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        columnName = columnName.trim();
+        if (containsEscape(columnName)) {
+            return false;
+        }
+        return checkIfKeyWords(columnName);
     }
 
+    @Override
+    public char getEscapeSymbol() {
+        return '`';
+    }
 }
