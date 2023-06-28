@@ -16,7 +16,14 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * The type Table meta cache.
@@ -25,4 +32,18 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbTableMetaCache extends MysqlTableMetaCache {
+
+    @Override
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
+        String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MARIADB) + " LIMIT 1";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
+        } catch (Exception e) {
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
+        }
+    }
+
 }
