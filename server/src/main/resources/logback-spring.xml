@@ -105,4 +105,6 @@
         <!-- metric-appender: off by default -->
         <!--<appender-ref ref="METRIC"/>-->
     </root>
+    <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
+    <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
 </configuration>

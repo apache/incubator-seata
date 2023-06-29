@@ -21,7 +21,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
