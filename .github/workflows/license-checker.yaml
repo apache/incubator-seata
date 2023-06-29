@@ -19,8 +19,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
       # step 4 check license
       - name: Check License Header
         uses: apache/skywalking-eyes/header@8fc52baabc14c86294d96034bcc194cfa7f76b05
