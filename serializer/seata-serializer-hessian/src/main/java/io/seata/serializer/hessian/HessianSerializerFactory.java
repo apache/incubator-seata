@@ -87,7 +87,7 @@ public class HessianSerializerFactory extends SerializerFactory {
         super.getClassFactory().allow(TreeMap.class.getCanonicalName());
     }
 
-    private void denyTypes(){
+    private void denyTypes() {
         super.getClassFactory().deny("javax.naming.InitialContext");
         super.getClassFactory().deny("javax.net.ssl.*");
         super.getClassFactory().deny("com.unboundid.ldap.*");
