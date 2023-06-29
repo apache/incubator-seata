@@ -15,9 +15,18 @@
  */
 package io.seata.serializer.hessian;
 
-import com.caucho.hessian.io.Deserializer;
-import com.caucho.hessian.io.HessianProtocolException;
-import com.caucho.hessian.io.Serializer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import com.caucho.hessian.io.SerializerFactory;
 
 /*
@@ -28,19 +37,59 @@ public class HessianSerializerFactory extends SerializerFactory {
 
     private HessianSerializerFactory() {
         super();
+        super.getClassFactory().setWhitelist(true);
+        super.getClassFactory().allow("io.seata.*");
+        allowBasicTypes();
+        allowCollections();
+        denyTypes();
     }
 
     public static SerializerFactory getInstance() {
         return INSTANCE;
     }
 
-    @Override
-    protected Serializer loadSerializer(Class<?> cl) throws HessianProtocolException {
-        return super.loadSerializer(cl);
+    private void allowBasicTypes() {
+        super.getClassFactory().allow(boolean.class.getCanonicalName());
+        super.getClassFactory().allow(byte.class.getCanonicalName());
+        super.getClassFactory().allow(char.class.getCanonicalName());
+        super.getClassFactory().allow(double.class.getCanonicalName());
+        super.getClassFactory().allow(float.class.getCanonicalName());
+        super.getClassFactory().allow(int.class.getCanonicalName());
+        super.getClassFactory().allow(long.class.getCanonicalName());
+        super.getClassFactory().allow(short.class.getCanonicalName());
+        super.getClassFactory().allow(Boolean.class.getCanonicalName());
+        super.getClassFactory().allow(Byte.class.getCanonicalName());
+        super.getClassFactory().allow(Character.class.getCanonicalName());
+        super.getClassFactory().allow(Double.class.getCanonicalName());
+        super.getClassFactory().allow(Float.class.getCanonicalName());
+        super.getClassFactory().allow(Integer.class.getCanonicalName());
+        super.getClassFactory().allow(Long.class.getCanonicalName());
+        super.getClassFactory().allow(Short.class.getCanonicalName());
+
+        super.getClassFactory().allow(Number.class.getCanonicalName());
+        super.getClassFactory().allow(Class.class.getCanonicalName());
+        super.getClassFactory().allow(String.class.getCanonicalName());
     }
 
-    @Override
-    protected Deserializer loadDeserializer(Class cl) throws HessianProtocolException {
-        return super.loadDeserializer(cl);
+    private void allowCollections() {
+        super.getClassFactory().allow(List.class.getCanonicalName());
+        super.getClassFactory().allow(ArrayList.class.getCanonicalName());
+        super.getClassFactory().allow(LinkedList.class.getCanonicalName());
+
+        super.getClassFactory().allow(Set.class.getCanonicalName());
+        super.getClassFactory().allow(HashSet.class.getCanonicalName());
+        super.getClassFactory().allow(LinkedHashSet.class.getCanonicalName());
+        super.getClassFactory().allow(TreeSet.class.getCanonicalName());
+
+        super.getClassFactory().allow(Map.class.getCanonicalName());
+        super.getClassFactory().allow(HashMap.class.getCanonicalName());
+        super.getClassFactory().allow(LinkedHashMap.class.getCanonicalName());
+        super.getClassFactory().allow(TreeMap.class.getCanonicalName());
+    }
+
+    private void denyTypes() {
+        super.getClassFactory().deny("javax.naming.InitialContext");
+        super.getClassFactory().deny("javax.net.ssl.*");
+        super.getClassFactory().deny("com.unboundid.ldap.*");
     }
 }
