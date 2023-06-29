@@ -13,14 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
-import Overview from '@/pages/Overview';
-import TransactionInfo from '@/pages/TransactionInfo';
-import GlobalLockInfo from './pages/GlobalLockInfo';
+import Iframe from './Iframe';
 
-export default [
-  // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
-  // { path: '/Overview', component: Overview },
-  { path: '/transaction/list', component: TransactionInfo },
-  { path: '/globallock/list', component: GlobalLockInfo },
-];
+export default Iframe;
