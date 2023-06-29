@@ -67,6 +67,7 @@
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
+- [[#5683](https://github.com/seata/seata/pull/5683)] 增加Hessian 序列化黑白名单
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] 修复 UpdateExecutorTest 单测失败问题

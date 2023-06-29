@@ -63,10 +63,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
 - [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
 - [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
-- [[#5678](https://github.com/seata/seata/pull/5678)] optimize escape character for case of columnNames
+- [[#5683](https://github.com/seata/seata/pull/5683)] optimize escape character for case of columnNames
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
+- [[#5642](https://github.com/seata/seata/pull/5642)] add Hessian Serializer WhiteDenyList
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
