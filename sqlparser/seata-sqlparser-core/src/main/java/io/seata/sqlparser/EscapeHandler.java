@@ -16,7 +16,6 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
-import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 
 /**
@@ -38,10 +37,11 @@ public interface EscapeHandler {
 
     /**
      * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
+     * @param columnName the column or table name
+     * @param tableMeta the tableMeta
      * @return true: need to escape. false: no need to escape.
      */
-    boolean checkIfNeedEscape(String fieldOrTableName);
+    boolean checkIfNeedEscape(String columnName, TableMeta tableMeta);
 
     default char getEscapeSymbol() {
         return '"';
@@ -77,15 +77,9 @@ public interface EscapeHandler {
      * @return colName
      */
     default String addColNameEscape(String colName, TableMeta tableMeta) {
-        boolean needEscape = checkIfNeedEscape(colName);
+        boolean needEscape = checkIfNeedEscape(colName, tableMeta);
         if (!needEscape) {
             return colName;
-        }
-        if (tableMeta != null) {
-            ColumnMeta columnMeta = tableMeta.getColumnMeta(colName);
-            if (columnMeta != null) {
-                colName = columnMeta.getColumnName();
-            }
         }
         char escapeChar = getEscapeSymbol();
         if (colName.contains(DOT)) {

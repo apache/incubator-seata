@@ -41,6 +41,7 @@
 - [[#5645](https://github.com/seata/seata/pull/5645)] 修复 oracle 插入 undolog 失败问题
 - [[#5659](https://github.com/seata/seata/pull/5659)] 修复后镜像查询时增加关键字转义符导致数据库强制开启大小写校验引起的sql异常
 - [[#5663](https://github.com/seata/seata/pull/5663)] 修复connectionProxyXA连接复用时timeout为null
+- [[#5675](https://github.com/seata/seata/pull/5675)] 修复 xxx.grouplist 和 grouplist.xxx 配置项兼容问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
@@ -63,6 +64,7 @@
 - [[#5646](https://github.com/seata/seata/pull/5646)] 重构 ColumnUtils 和 EscapeHandler
 - [[#5648](https://github.com/seata/seata/pull/5648)] 优化Server日志输出
 - [[#5647](https://github.com/seata/seata/pull/5647)] 支持表和列元数据大小写敏感设置
+- [[#5678](https://github.com/seata/seata/pull/5678)] 优化大小写转义符
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
