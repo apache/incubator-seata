@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.EscapeSymbol;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -804,8 +805,8 @@ public class SqlServerEscapeHandler implements EscapeHandler {
     }
 
     @Override
-    public boolean checkIfNeedEscape(String fieldOrTableName) {
-        return checkIfKeyWords(fieldOrTableName);
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        return checkIfKeyWords(columnName);
     }
 
     @Override

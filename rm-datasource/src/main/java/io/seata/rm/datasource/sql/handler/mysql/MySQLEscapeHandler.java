@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.EscapeSymbol;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -1116,15 +1117,15 @@ public class MySQLEscapeHandler implements EscapeHandler {
     }
 
     @Override
-    public boolean checkIfNeedEscape(String fieldOrTableName) {
-        if (StringUtils.isBlank(fieldOrTableName)) {
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        if (StringUtils.isBlank(columnName)) {
             return false;
         }
-        fieldOrTableName = fieldOrTableName.trim();
-        if (containsEscape(fieldOrTableName)) {
+        columnName = columnName.trim();
+        if (containsEscape(columnName)) {
             return false;
         }
-        return checkIfKeyWords(fieldOrTableName);
+        return checkIfKeyWords(columnName);
     }
 
     @Override
