@@ -6,7 +6,7 @@
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
 
 ### bugfix:
-- [[#](https://github.com/seata/seata/pull/)] 修复saga模式下replay context丢失startParams问题
+- [[#5682](https://github.com/seata/seata/pull/5682)] 修复saga模式下replay context丢失startParams问题
 - [[#5671](https://github.com/seata/seata/pull/5671)] 修复saga模式下serviceTask入参autoType转化失败问题
 - [[#5194](https://github.com/seata/seata/pull/5194)] 修复使用Oracle作为服务端DB存储时的建表失败问题
 - [[#5021](https://github.com/seata/seata/pull/5201)] 修复 JDK17 下获取 Spring 原始代理对象失败的问题
