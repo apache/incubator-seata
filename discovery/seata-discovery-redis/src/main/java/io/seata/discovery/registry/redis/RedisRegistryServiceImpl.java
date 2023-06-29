@@ -35,6 +35,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -220,7 +221,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public List<InetSocketAddress> lookup(String key) {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         return lookupByCluster(clusterName);
     }
