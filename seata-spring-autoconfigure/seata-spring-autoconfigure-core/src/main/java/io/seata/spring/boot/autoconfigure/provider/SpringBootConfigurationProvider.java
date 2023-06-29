@@ -227,6 +227,14 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (value == null) {
             value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), dataType);
         }
+        if (value == null) {
+            String grouplistPrefix = SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT;
+            if (dataId.startsWith(grouplistPrefix)) {
+                String vgroup = StringUtils.removeStart(dataId, grouplistPrefix);
+                String oldGrouplistDataId = SERVICE_PREFIX + DOT + vgroup + DOT + SPECIAL_KEY_GROUPLIST;
+                return getConfigFromEnvironment(oldGrouplistDataId, dataType);
+            }
+        }
         return value;
     }
 
