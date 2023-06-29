@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
+- [[#5682](https://github.com/seata/seata/pull/5682)]  fix saga mode replay context lost startParams
 - [[#5671](https://github.com/seata/seata/pull/5671)] fix saga mode serviceTask inputParams json autoType convert exception
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
