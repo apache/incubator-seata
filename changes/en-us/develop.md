@@ -6,6 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#xxx](https://github.com/seata/seata/pull/xxx)] support xxx
 
 ### bugfix:
+- [[#5682](https://github.com/seata/seata/pull/5682)]  fix saga mode replay context lost startParams
 - [[#5671](https://github.com/seata/seata/pull/5671)] fix saga mode serviceTask inputParams json autoType convert exception
 - [[#5194](https://github.com/seata/seata/pull/5194)] fix wrong keyword order for oracle when creating a table
 - [[#5021](https://github.com/seata/seata/pull/5201)] Fix JDK Reflection for Spring origin proxy failed in JDK17
@@ -63,10 +64,11 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
 - [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
 - [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
-- [[#5678](https://github.com/seata/seata/pull/5678)] optimize escape character for case of columnNames
+- [[#5683](https://github.com/seata/seata/pull/5683)] optimize escape character for case of columnNames
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
+- [[#5642](https://github.com/seata/seata/pull/5642)] add Hessian Serializer WhiteDenyList
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
