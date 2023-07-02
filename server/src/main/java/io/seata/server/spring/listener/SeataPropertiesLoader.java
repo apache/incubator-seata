@@ -44,11 +44,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstance();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
-        if(CollectionUtils.isNotEmpty(configs)) {
+        if (CollectionUtils.isNotEmpty(configs)) {
             Properties properties = new Properties();
             configs.forEach((k, v) -> {
-                if(v instanceof String){
-                    if(StringUtils.isEmpty((String)v)){
+                if (v instanceof String) {
+                    if (StringUtils.isEmpty((String)v)) {
                         return;
                     }
                 }
