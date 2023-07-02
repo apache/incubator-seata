@@ -42,13 +42,35 @@ public final class ConfigurationFactory {
 
     private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
 
-    public static Configuration CURRENT_FILE_INSTANCE;
+    public static volatile Configuration CURRENT_FILE_INSTANCE;
+
+    public static volatile FileConfiguration ORIGIN_FILE_INSTANCE;
 
     static {
+        initOriginConfiguraction();
         load();
     }
 
     private static void load() {
+        Configuration configuration = ORIGIN_FILE_INSTANCE;
+        Configuration extConfiguration = null;
+        try {
+            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("load Configuration from :{}",
+                    extConfiguration == null ? configuration.getClass().getSimpleName() : "Spring Configuration");
+            }
+        } catch (EnhancedServiceNotFoundException e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.warn("failed to load extConfiguration: {}", e.getMessage(), e);
+            }
+        } catch (Exception e) {
+            LOGGER.error("failed to load extConfiguration: {}", e.getMessage(), e);
+        }
+        CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
+    }
+
+    private static void initOriginConfiguraction() {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         if (seataConfigName == null) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
@@ -60,23 +82,12 @@ public final class ConfigurationFactory {
         if (envValue == null) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (envValue == null) ? new FileConfiguration(seataConfigName,
-                false) : new FileConfiguration(seataConfigName + "-" + envValue, false);
-        Configuration extConfiguration = null;
-        try {
-            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("load Configuration from :{}", extConfiguration == null ?
-                    configuration.getClass().getSimpleName() : "Spring Configuration");
-            }
-        } catch (EnhancedServiceNotFoundException e) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.warn("failed to load extConfiguration: {}", e.getMessage(), e);
-            }
-        } catch (Exception e) {
-            LOGGER.error("failed to load extConfiguration: {}", e.getMessage(), e);
-        }
-        CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
+        seataConfigName = envValue == null ? seataConfigName : seataConfigName + "-" + envValue;
+        ORIGIN_FILE_INSTANCE = new FileConfiguration(seataConfigName, true);
+    }
+
+    public static FileConfiguration getOriginFileInstance() {
+        return ORIGIN_FILE_INSTANCE;
     }
 
     private static final String NAME_KEY = "name";
