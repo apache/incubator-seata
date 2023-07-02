@@ -75,6 +75,6 @@ public class YamlFileConfig implements FileConfig {
 
     @Override
     public Map<String, Object> getAllConfig() {
-        return null;
+        return configMap;
     }
 }
