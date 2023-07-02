@@ -4,6 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### feature:
 - [[#5476](https://github.com/seata/seata/pull/5476)] First support `native-image` for `seata-client`
+- [[#5495](https://github.com/seata/seata/pull/5495)] console integration saga-statemachine-designer
 
 ### bugfix:
 - [[#5682](https://github.com/seata/seata/pull/5682)]  fix saga mode replay context lost startParams
@@ -72,6 +73,7 @@ Add changes here for all PR submitted to the develop branch.
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
 - [[#5683](https://github.com/seata/seata/pull/5683)] add Hessian Serializer WhiteDenyList
+- [[#5696](https://github.com/seata/seata/pull/5696)] fix several node.js security vulnerabilities
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
