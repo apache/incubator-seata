@@ -4,6 +4,7 @@
 
 ### feature:
 - [[#5476](https://github.com/seata/seata/pull/5476)] seata客户端，首次支持 `native-image`
+- [[#5495](https://github.com/seata/seata/pull/5495)] 控制台集成Saga状态机设计器
 
 ### bugfix:
 - [[#5682](https://github.com/seata/seata/pull/5682)] 修复saga模式下replay context丢失startParams问题
@@ -71,6 +72,7 @@
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
 - [[#5683](https://github.com/seata/seata/pull/5683)] 增加Hessian 序列化黑白名单
+- [[#5696](https://github.com/seata/seata/pull/5696)] 修复若干Node.js依赖安全漏洞
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] 修复 UpdateExecutorTest 单测失败问题
