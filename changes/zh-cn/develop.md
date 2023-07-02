@@ -3,7 +3,7 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature:
-- [[#xxx](https://github.com/seata/seata/pull/xxx)] 支持 xxx
+- [[#5476](https://github.com/seata/seata/pull/5476)] seata客户端，首次支持 `native-image`
 
 ### bugfix:
 - [[#5682](https://github.com/seata/seata/pull/5682)] 修复saga模式下replay context丢失startParams问题

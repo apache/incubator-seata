@@ -17,18 +17,18 @@ package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
-import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
-import io.seata.server.console.vo.GlobalLockVO;
+import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
+import io.seata.server.console.vo.GlobalLockVO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Global Lock Controller
+ *
  * @author zhongxiang.wang
  */
 @RestController
@@ -40,6 +40,7 @@ public class GlobalLockController {
 
     /**
      * Query locks by param
+     *
      * @param param the param
      * @return the list of GlobalLockVO
      */
