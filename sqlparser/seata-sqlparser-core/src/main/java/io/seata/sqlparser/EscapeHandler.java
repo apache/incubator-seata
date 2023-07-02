@@ -16,6 +16,7 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.struct.TableMeta;
 
 /**
  * The interface Keyword checker.
@@ -36,10 +37,11 @@ public interface EscapeHandler {
 
     /**
      * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
+     * @param columnName the column or table name
+     * @param tableMeta the tableMeta
      * @return true: need to escape. false: no need to escape.
      */
-    boolean checkIfNeedEscape(String fieldOrTableName);
+    boolean checkIfNeedEscape(String columnName, TableMeta tableMeta);
 
     default char getEscapeSymbol() {
         return '"';
@@ -61,11 +63,21 @@ public interface EscapeHandler {
 
     /**
      * add escape if colName is keywords
-     * @param colName
-     * @return
+     * @param colName colName
+     * @return colName
      */
     default String addColNameEscape(String colName) {
-        boolean needEscape = checkIfNeedEscape(colName);
+        return addColNameEscape(colName, null);
+    }
+
+    /**
+     * add escape if colName is keywords
+     * @param colName colName
+     * @param tableMeta tableMeta
+     * @return colName
+     */
+    default String addColNameEscape(String colName, TableMeta tableMeta) {
+        boolean needEscape = checkIfNeedEscape(colName, tableMeta);
         if (!needEscape) {
             return colName;
         }

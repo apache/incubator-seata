@@ -32,7 +32,7 @@ jobs:
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
         uses: actions/setup-java@v2.5.0
@@ -66,7 +66,7 @@ jobs:
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
         uses: actions/setup-java@v2.5.0
@@ -106,7 +106,7 @@ jobs:
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up QEMU"
         id: qemu

@@ -16,6 +16,9 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

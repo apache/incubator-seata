@@ -38,6 +38,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,7 +146,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         if (useSLBWay) {
             if (LOGGER.isDebugEnabled()) {
