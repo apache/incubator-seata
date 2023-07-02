@@ -28,23 +28,36 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
+import static io.seata.common.ConfigurationKeys.METRICS_PREFIX;
 import static io.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
+import static io.seata.common.ConfigurationKeys.SERVER_PREFIX;
+import static io.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static io.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+    
+    List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX,
+        STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
-        FileConfiguration configuration = ConfigurationFactory.getOriginFileInstance();
+        FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
         if (CollectionUtils.isNotEmpty(configs)) {
+            FileConfiguration fileConfiguration = ConfigurationFactory.getOriginFileInstance();
+            if (fileConfiguration != null) {
+                configs.putAll(fileConfiguration.getFileConfig().getAllConfig());
+            }
             Properties properties = new Properties();
             configs.forEach((k, v) -> {
                 if (v instanceof String) {
@@ -53,11 +66,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
                     }
                 }
                 // Convert the configuration name to the configuration name under Spring Boot
-                if (k.startsWith(FILE_ROOT_PREFIX_REGISTRY) || k.startsWith(FILE_ROOT_PREFIX_CONFIG)) {
+                if (prefixList.stream().anyMatch(k::startsWith)) {
                     properties.put(SEATA_FILE_PREFIX_ROOT_CONFIG + k, v);
                 }
             });
-            environment.getPropertySources().addLast(new PropertiesPropertySource("seataRegistryConfig", properties));
+            environment.getPropertySources().addLast(new PropertiesPropertySource("seataOldConfig", properties));
         }
         // Load by priority
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());

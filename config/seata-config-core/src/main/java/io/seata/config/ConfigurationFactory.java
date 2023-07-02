@@ -44,15 +44,18 @@ public final class ConfigurationFactory {
 
     public static volatile Configuration CURRENT_FILE_INSTANCE;
 
-    public static volatile FileConfiguration ORIGIN_FILE_INSTANCE;
+    public static volatile FileConfiguration ORIGIN_FILE_INSTANCE_REGISTRY;
+
+    public static volatile FileConfiguration ORIGIN_FILE_INSTANCE = null;
 
     static {
         initOriginConfiguraction();
         load();
+        initOriginFileInstance();
     }
 
     private static void load() {
-        Configuration configuration = ORIGIN_FILE_INSTANCE;
+        Configuration configuration = ORIGIN_FILE_INSTANCE_REGISTRY;
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
@@ -83,11 +86,11 @@ public final class ConfigurationFactory {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
         seataConfigName = envValue == null ? seataConfigName : seataConfigName + "-" + envValue;
-        ORIGIN_FILE_INSTANCE = new FileConfiguration(seataConfigName, true);
+        ORIGIN_FILE_INSTANCE_REGISTRY = new FileConfiguration(seataConfigName, false);
     }
 
-    public static FileConfiguration getOriginFileInstance() {
-        return ORIGIN_FILE_INSTANCE;
+    public static FileConfiguration getOriginFileInstanceRegistry() {
+        return ORIGIN_FILE_INSTANCE_REGISTRY;
     }
 
     private static final String NAME_KEY = "name";
@@ -111,28 +114,38 @@ public final class ConfigurationFactory {
         return instance;
     }
 
-    private static Configuration buildConfiguration() {
-        String configTypeName = CURRENT_FILE_INSTANCE.getConfig(
-                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                        + ConfigurationKeys.FILE_ROOT_TYPE);
-        LOGGER.info("use configuration center type: {}", configTypeName);
-        if (StringUtils.isBlank(configTypeName)) {
-            throw new NotSupportYetException("config type can not be null");
-        }
-        ConfigType configType = ConfigType.getType(configTypeName);
-
-        Configuration extConfiguration = null;
-        Configuration configuration;
-        if (ConfigType.File == configType) {
+    private static void initOriginFileInstance() {
+        if (ConfigType.File == getConfigType()) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                     ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            configuration = new FileConfiguration(name);
+            ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
+        }
+    }
+
+    private static ConfigType getConfigType() {
+        String configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+        if (StringUtils.isBlank(configTypeName)) {
+            throw new NotSupportYetException("config type can not be null");
+        }
+        return ConfigType.getType(configTypeName);
+    }
+
+    public static FileConfiguration getOriginFileInstance() {
+        return ORIGIN_FILE_INSTANCE;
+    }
+
+    private static Configuration buildConfiguration() {
+        ConfigType configType = getConfigType();
+        Configuration extConfiguration = null;
+        Configuration configuration = ORIGIN_FILE_INSTANCE;
+        if (configuration != null) {
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load Configuration from :{}", extConfiguration == null ?
-                        configuration.getClass().getSimpleName() : "Spring Configuration");
+                    LOGGER.info("load Configuration from :{}",
+                        extConfiguration == null ? configuration.getClass().getSimpleName() : "Spring Configuration");
                 }
             } catch (EnhancedServiceNotFoundException ignore) {
 
@@ -165,6 +178,7 @@ public final class ConfigurationFactory {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();
+        initOriginFileInstance();
         instance = null;
         getInstance();
     }

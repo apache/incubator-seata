@@ -45,6 +45,10 @@ public class LoaderConfTest {
     public void checkConf() {
         String nacosServerAddr = environment.resolveRequiredPlaceholders("${seata.config.nacos.serverAddr:localhost}");
         Assertions.assertEquals(nacosServerAddr, "127.0.0.1:8848");
+        String nacosNamespace = environment.resolveRequiredPlaceholders("${seata.config.nacos.namespace:seata-group}");
+        Assertions.assertEquals(nacosNamespace, "seata-test");
+        String undologSaveDays = environment.resolveRequiredPlaceholders("${seata.server.undo.log-save-days:7}");
+        Assertions.assertEquals(undologSaveDays, "2");
     }
     
 
