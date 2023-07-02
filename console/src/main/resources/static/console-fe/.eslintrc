@@ -30,6 +30,7 @@
     "generator-star-spacing": "off",
     "wrap-iife": "off",
     "arrow-parens": "off",
-    "indent": "off"
+    "indent": "off",
+    "react/jsx-filename-extension": [2, { "extensions": [".js", ".jsx", ".ts", ".tsx"] }]
   }
 }
