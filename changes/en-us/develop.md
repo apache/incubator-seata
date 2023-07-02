@@ -42,6 +42,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5659](https://github.com/seata/seata/pull/5659)] fix the issue of case sensitivity enforcement on the database after adding escape characters to keywords
 - [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
 - [[#5675](https://github.com/seata/seata/pull/5675)] bugfix: fix compatibility between xxx.grouplist and grouplist.xxx configuration items
+- [[#5690](https://github.com/seata/seata/pull/5690)] fix console print `unauthorized error`
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -64,11 +65,13 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5646](https://github.com/seata/seata/pull/5646)] refactor ColumnUtils and EscapeHandler
 - [[#5648](https://github.com/seata/seata/pull/5648)] optimize server logs print
 - [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
-- [[#5683](https://github.com/seata/seata/pull/5683)] optimize escape character for case of columnNames
+- [[#5678](https://github.com/seata/seata/pull/5678)] optimize escape character for case of columnNames
+- [[#5684](https://github.com/seata/seata/pull/5684)] optimize github actions for CodeQL, skywalking-eyes and checkout
+
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities
-- [[#5642](https://github.com/seata/seata/pull/5642)] add Hessian Serializer WhiteDenyList
+- [[#5683](https://github.com/seata/seata/pull/5683)] add Hessian Serializer WhiteDenyList
 
 ### test:
 - [[#5380](https://github.com/seata/seata/pull/5380)] fix UpdateExecutorTest failed
@@ -96,6 +99,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [l81893521](https://github.com/l81893521)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [yixia](https://github.com/wt-better)
+- [jumtp](https://github.com/jumtp)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
