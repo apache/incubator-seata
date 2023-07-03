@@ -5,6 +5,7 @@ Add changes here for all PR submitted to the develop branch.
 ### feature:
 - [[#5476](https://github.com/seata/seata/pull/5476)] First support `native-image` for `seata-client`
 - [[#5495](https://github.com/seata/seata/pull/5495)] console integration saga-statemachine-designer
+- [[#5668](https://github.com/seata/seata/pull/5668)] compatible with file.conf and registry.conf configurations in version 1.4.2 and below
 
 ### bugfix:
 - [[#5682](https://github.com/seata/seata/pull/5682)]  fix saga mode replay context lost startParams

@@ -5,6 +5,7 @@
 ### feature:
 - [[#5476](https://github.com/seata/seata/pull/5476)] seata客户端，首次支持 `native-image`
 - [[#5495](https://github.com/seata/seata/pull/5495)] 控制台集成Saga状态机设计器
+- [[#5668](https://github.com/seata/seata/pull/5668)] 兼容1.4.2及以下版本的file.conf/registry.conf配置
 
 ### bugfix:
 - [[#5682](https://github.com/seata/seata/pull/5682)] 修复saga模式下replay context丢失startParams问题

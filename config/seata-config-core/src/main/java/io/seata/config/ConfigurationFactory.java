@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -51,7 +52,7 @@ public final class ConfigurationFactory {
     static {
         initOriginConfiguraction();
         load();
-        initOriginFileInstance();
+        maybeNeedOriginFileInstance();
     }
 
     private static void load() {
@@ -86,6 +87,7 @@ public final class ConfigurationFactory {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
         seataConfigName = envValue == null ? seataConfigName : seataConfigName + "-" + envValue;
+        // create FileConfiguration for read registry.conf
         ORIGIN_FILE_INSTANCE_REGISTRY = new FileConfiguration(seataConfigName, false);
     }
 
@@ -114,11 +116,12 @@ public final class ConfigurationFactory {
         return instance;
     }
 
-    private static void initOriginFileInstance() {
+    private static void maybeNeedOriginFileInstance() {
         if (ConfigType.File == getConfigType()) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                     ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
+            // create FileConfiguration for read file.conf
             ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
         }
     }
@@ -132,8 +135,8 @@ public final class ConfigurationFactory {
         return ConfigType.getType(configTypeName);
     }
 
-    public static FileConfiguration getOriginFileInstance() {
-        return ORIGIN_FILE_INSTANCE;
+    public static Optional<FileConfiguration> getOriginFileInstance() {
+        return Optional.ofNullable(ORIGIN_FILE_INSTANCE);
     }
 
     private static Configuration buildConfiguration() {
@@ -178,7 +181,7 @@ public final class ConfigurationFactory {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();
-        initOriginFileInstance();
+        maybeNeedOriginFileInstance();
         instance = null;
         getInstance();
     }

@@ -31,6 +31,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
@@ -54,10 +55,9 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
         if (CollectionUtils.isNotEmpty(configs)) {
-            FileConfiguration fileConfiguration = ConfigurationFactory.getOriginFileInstance();
-            if (fileConfiguration != null) {
-                configs.putAll(fileConfiguration.getFileConfig().getAllConfig());
-            }
+            Optional<FileConfiguration> originFileInstance = ConfigurationFactory.getOriginFileInstance();
+            originFileInstance
+                .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
             Properties properties = new Properties();
             configs.forEach((k, v) -> {
                 if (v instanceof String) {
