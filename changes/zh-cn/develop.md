@@ -69,6 +69,7 @@
 - [[#5647](https://github.com/seata/seata/pull/5647)] 支持表和列元数据大小写敏感设置
 - [[#5678](https://github.com/seata/seata/pull/5678)] 优化大小写转义符
 - [[#5684](https://github.com/seata/seata/pull/5684)] 优化 CodeQL, skywalking-eyes 和 checkout 等 actions
+- [[#5700](https://github.com/seata/seata/pull/5700)] 优化分布式锁竞争日志
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
