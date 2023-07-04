@@ -190,7 +190,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
             if (distributedLockDOFromDB.getExpireTime() >= System.currentTimeMillis()
                     && !Objects.equals(distributedLockDOFromDB.getLockValue(), distributedLockDO.getLockValue())) {
-                if(LOGGER.isDebugEnabled()) {
+                if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("the distribute lock for key :{} is holding by :{}, skip the release lock.",
                         distributedLockDO.getLockKey(), distributedLockDOFromDB.getLockValue());
                 }
