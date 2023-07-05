@@ -69,6 +69,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5647](https://github.com/seata/seata/pull/5647)] support case-sensitive attributes for table and column metadata
 - [[#5678](https://github.com/seata/seata/pull/5678)] optimize escape character for case of columnNames
 - [[#5684](https://github.com/seata/seata/pull/5684)] optimize github actions for CodeQL, skywalking-eyes and checkout
+- [[#5700](https://github.com/seata/seata/pull/5700)] optimize distributed lock log
 
 
 ### security:
