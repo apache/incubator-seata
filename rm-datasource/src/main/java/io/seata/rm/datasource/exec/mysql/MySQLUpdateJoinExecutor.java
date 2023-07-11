@@ -41,7 +41,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.exec.UpdateExecutor;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -134,9 +134,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoin.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
 
@@ -203,11 +201,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
         List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
-        suffix += buildGroupBy(pkColumns,needUpdateColumns);
+        suffix += buildGroupBy(pkColumns, needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoiner.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
 
@@ -261,6 +257,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
      * @param afterImage  the after image
      * @return sql undo log
      */
+    @Override
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = beforeImage.getTableName();

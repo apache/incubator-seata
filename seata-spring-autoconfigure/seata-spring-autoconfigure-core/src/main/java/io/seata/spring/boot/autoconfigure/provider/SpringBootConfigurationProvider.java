@@ -16,22 +16,25 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.lang.Nullable;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.common.util.StringFormatUtils.DOT;
@@ -52,29 +55,58 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     private static final String INTERCEPT_METHOD_PREFIX = "get";
 
-    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new HashMap<>(64);
+    private static final Map<String, Object> PROPERTY_BEAN_INSTANCE_MAP = new ConcurrentHashMap<>(64);
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(originalConfiguration.getClass(),
-            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
+        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
+            , (proxy, method, args) -> {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result;
                     String rawDataId = (String)args[0];
+                    Class<?> dataType = ReflectionUtil.getWrappedClass(method.getReturnType());
+
+                    // 1. Get config value from the system property
                     result = originalConfiguration.getConfigFromSys(rawDataId);
-                    if (null == result) {
-                        if (args.length == 1) {
-                            result = get(convertDataId(rawDataId));
-                        } else {
-                            result = get(convertDataId(rawDataId), args[1]);
+
+                    if (result == null) {
+                        String dataId = convertDataId(rawDataId);
+
+                        // 2. Get config value from the springboot environment
+                        result = getConfigFromEnvironment(dataId, dataType);
+                        if (result != null) {
+                            return result;
+                        }
+
+                        // 3. Get config defaultValue from the arguments
+                        if (args.length > 1) {
+                            result = args[1];
+
+                            if (result != null) {
+                                // See Configuration#getConfig(String dataId, long timeoutMills)
+                                if (dataType.isAssignableFrom(result.getClass())) {
+                                    return result;
+                                } else {
+                                    result = null;
+                                }
+                            }
+                        }
+
+                        // 4. Get config defaultValue from the property object
+                        try {
+                            result = getDefaultValueFromPropertyObject(dataId);
+                        } catch (Throwable t) {
+                            LOGGER.error("Get config '{}' default value from the property object failed:", dataId, t);
                         }
                     }
+
                     if (result != null) {
-                        // If the return type is String,need to convert the object to string
-                        if (method.getReturnType().equals(String.class)) {
-                            return String.valueOf(result);
+                        if (dataType.isAssignableFrom(result.getClass())) {
+                            return result;
                         }
-                        return result;
+
+                        // Convert type
+                        return this.convertType(result, dataType);
                     }
                 }
 
@@ -82,62 +114,67 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             });
     }
 
-    private Object get(String dataId, Object defaultValue) throws IllegalAccessException, InstantiationException {
-        Object result = get(dataId);
-        if (result == null) {
-            return defaultValue;
-        }
-        return result;
-    }
-
-    private Object get(String dataId) throws IllegalAccessException {
+    private Object getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException, InvocationTargetException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
-        Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
-        Object valueObject = null;
-        if (propertyClass != null) {
-            try {
-                valueObject = getFieldValue(
-                    Objects.requireNonNull(PROPERTY_BEAN_INSTANCE_MAP.computeIfAbsent(propertyPrefix, k -> {
-                        try {
-                            return propertyClass.newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            LOGGER.error("PropertyClass for prefix: [" + propertyPrefix
-                                + "] should not be null. error :" + e.getMessage(), e);
-                        }
-                        return null;
-                    })), propertySuffix, dataId);
-            } catch (NoSuchBeanDefinitionException ignore) {
 
-            }
-        } else {
+        // Get the property class
+        final Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
+        if (propertyClass == null) {
             throw new ShouldNeverHappenException("PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
         }
 
-        return valueObject;
+        // Instantiate the property object
+        Object propertyObj = CollectionUtils.computeIfAbsent(PROPERTY_BEAN_INSTANCE_MAP, propertyPrefix, k -> {
+            try {
+                return propertyClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                LOGGER.warn("PropertyClass for prefix: [" + propertyPrefix + "] should not be null. error :" + e.getMessage(), e);
+            }
+            return null;
+        });
+        Objects.requireNonNull(propertyObj, () -> "Instantiate the property object fail: " + propertyClass.getName());
+
+        // Get defaultValue from the property object
+        return getDefaultValueFromPropertyObject(propertyObj, propertySuffix);
     }
 
     /**
-     * get field value
+     * Get defaultValue from the property object
      *
-     * @param object
-     * @param fieldName
-     * @param dataId
-     * @return java.lang.Object
+     * @param propertyObj the property object
+     * @param fieldName   the field name
+     * @return defaultValue
      * @author xingfudeshi@gmail.com
      */
-    private Object getFieldValue(Object object, String fieldName, String dataId) throws IllegalAccessException {
-        Optional<Field> fieldOptional = Stream.of(object.getClass().getDeclaredFields())
-            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
-        if (fieldOptional.isPresent()) {
-            Field field = fieldOptional.get();
-            if (Objects.equals(field.getType(), Map.class)) {
-                return getConfig(dataId, null, String.class);
+    @Nullable
+    private Object getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException, InvocationTargetException {
+        try {
+            Field field = propertyObj.getClass().getDeclaredField(fieldName);
+
+            if (!Map.class.isAssignableFrom(field.getType())) {
+                field.setAccessible(true);
+                return field.get(propertyObj);
             }
-            field.setAccessible(true);
-            Object defaultValue = field.get(object);
-            return getConfig(dataId, defaultValue, field.getType());
+        } catch (NoSuchFieldException e) {
+            Method method = null;
+            try {
+                method = propertyObj.getClass().getMethod("get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1));
+            } catch (NoSuchMethodException ex) {
+                try {
+                    method = propertyObj.getClass().getMethod("is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1));
+                } catch (NoSuchMethodException exc) {
+                    LOGGER.warn("The get method not found for the field '{}#{}'.", propertyObj.getClass().getSimpleName(), fieldName);
+                }
+            }
+            if (method != null) {
+                if (!Map.class.isAssignableFrom(method.getReturnType())) {
+                    method.setAccessible(true);
+                    return method.invoke(propertyObj);
+                }
+            }
         }
+
         return null;
     }
 
@@ -191,19 +228,49 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     /**
      * get spring config
-     * @param dataId data id
-     * @param defaultValue default value
-     * @param type type
+     *
+     * @param dataId   data id
+     * @param dataType data type
      * @return object
      */
-    private Object getConfig(String dataId, Object defaultValue, Class<?> type) {
-        ConfigurableEnvironment environment =
-            (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        Object value = environment.getProperty(dataId, type);
+    @Nullable
+    private Object getConfigFromEnvironment(String dataId, Class<?> dataType) {
+        ConfigurableEnvironment environment = (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        Object value = environment.getProperty(dataId, dataType);
         if (value == null) {
-            value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), type);
+            value = environment.getProperty(io.seata.common.util.StringUtils.hump2Line(dataId), dataType);
         }
-        return value != null ? value : defaultValue;
+        if (value == null) {
+            String grouplistPrefix = SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT;
+            if (dataId.startsWith(grouplistPrefix)) {
+                String vgroup = StringUtils.removeStart(dataId, grouplistPrefix);
+                String oldGrouplistDataId = SERVICE_PREFIX + DOT + vgroup + DOT + SPECIAL_KEY_GROUPLIST;
+                return getConfigFromEnvironment(oldGrouplistDataId, dataType);
+            }
+        }
+        return value;
+    }
+
+    private Object convertType(Object configValue, Class<?> dataType) {
+        if (String.class.equals(dataType)) {
+            return String.valueOf(configValue);
+        }
+        if (Long.class.equals(dataType)) {
+            return Long.parseLong(String.valueOf(configValue));
+        }
+        if (Integer.class.equals(dataType)) {
+            return Integer.parseInt(String.valueOf(configValue));
+        }
+        if (Short.class.equals(dataType)) {
+            return Short.parseShort(String.valueOf(configValue));
+        }
+        if (Boolean.class.equals(dataType)) {
+            return Boolean.parseBoolean(String.valueOf(configValue));
+        }
+        if (Duration.class.equals(dataType)) {
+            return Duration.parse(String.valueOf(configValue));
+        }
+        return configValue;
     }
 
 }

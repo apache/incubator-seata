@@ -26,8 +26,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.sqlparser.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMetaCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,17 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
     private static final long EXPIRE_TIME = 900 * 1000;
 
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+    private static final Cache<String, TableMeta> TABLE_META_CACHE;
+
+    static {
+        try {
+            TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
+                    .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+        } catch (Throwable t) {
+            LOGGER.error("Build the `TABLE_META_CACHE` failed:", t);
+            throw t;
+        }
+    }
 
 
     @Override

@@ -233,7 +233,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        if (isSuccessEnd()) {
+        if (GlobalStatus.isTwoPhaseSuccess(status)) {
             // Clean locks first
             clean();
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
@@ -244,14 +244,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 lifecycleListener.onFailEnd(this);
             }
         }
-    }
-
-    public boolean isSuccessEnd() {
-        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
-            return true;
-        }
-        return false;
     }
 
     public void clean() throws TransactionException {
@@ -312,7 +304,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(BranchSession branchSession) throws TransactionException {
+    public void unlockBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked in 'DefaultCore.commit()'
         if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
@@ -320,10 +312,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
+    }
+
+    @Override
+    public void removeBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
         remove(branchSession);
+    }
+
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
     }
 
     /**

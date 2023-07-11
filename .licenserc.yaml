@@ -74,6 +74,8 @@ header:
     - 'console/src/main/resources/static/**'
     - 'ext/apm-seata-skywalking-plugin/config/agent.config'
     - 'server/src/main/resources/lua/redislocker/redislock.lua'
+    - 'server/src/main/resources/banner.txt'
+    - '**/org/springframework/**'
 
 
   comment: on-failure

@@ -1,0 +1,74 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.loadbalance.LoadBalance"
+    },
+    "name": "io.seata.discovery.loadbalance.RoundRobinLoadBalance",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.loadbalance.LoadBalance"
+    },
+    "name": "io.seata.discovery.loadbalance.RandomLoadBalance",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.loadbalance.LoadBalance"
+    },
+    "name": "io.seata.discovery.loadbalance.ConsistentHashLoadBalance",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.loadbalance.LoadBalance"
+    },
+    "name": "io.seata.discovery.loadbalance.LeastActiveLoadBalance",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.loadbalance.LoadBalance"
+    },
+    "name": "io.seata.discovery.loadbalance.XIDLoadBalance",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.registry.RegistryProvider"
+    },
+    "name": "io.seata.discovery.registry.FileRegistryProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

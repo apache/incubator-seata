@@ -81,22 +81,28 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 
 ## Maven dependency
+Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` and `io.seata:seata-spring-boot-starter`.
 ```xml
-<seata.version>1.6.1</seata.version>
-<dependency>
+<properties>
+  <seata.version>1.7.0</seata.version>
+</properties>
+
+<dependencies>
+<!--dependencies for non-SpringBoot application framework-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
-</dependency>
+  </dependency>
 
 <!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
-<!--Notice: `seata-spring-boot-starter` has included `seata-all` dependency-->
-<dependency>
+<!--Notice: `seata-spring-boot-starter` has already included `seata-all` dependency-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
-</dependency>
-
+  </dependency>
+</dependencies>
 ```
 ## Quick Start
 

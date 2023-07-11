@@ -1,0 +1,74 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.druid.SQLOperateRecognizerHolder"
+    },
+    "name": "io.seata.sqlparser.druid.mysql.MySQLOperateRecognizerHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.druid.SQLOperateRecognizerHolder"
+    },
+    "name": "io.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.druid.SQLOperateRecognizerHolder"
+    },
+    "name": "io.seata.sqlparser.druid.postgresql.PostgresqlOperateRecognizerHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.h2.keyword.H2KeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.SQLRecognizerFactory"
+    },
+    "name": "io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.util.DbTypeParser"
+    },
+    "name": "io.seata.sqlparser.druid.DruidDelegatingDbTypeParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

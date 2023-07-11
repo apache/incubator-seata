@@ -1,0 +1,188 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.constants.DubboConstants"
+    },
+    "name": "org.apache.dubbo.rpc.RpcContext"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.serializer.SerializerServiceLoader"
+    },
+    "name": "io.seata.serializer.protobuf.ProtobufSerializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.auth.AuthSigner"
+    },
+    "name": "io.seata.core.auth.DefaultAuthSigner",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.context.ContextCore"
+    },
+    "name": "io.seata.core.context.ThreadLocalContextCore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.context.ContextCore"
+    },
+    "name": "io.seata.core.context.FastThreadLocalContextCore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.rpc.hook.RpcHook"
+    },
+    "name": "io.seata.core.rpc.hook.StatusRpcHook",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.lock.LockStoreSql"
+    },
+    "name": "io.seata.core.store.db.sql.lock.MysqlLockStoreSql",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.lock.LockStoreSql"
+    },
+    "name": "io.seata.core.store.db.sql.lock.OracleLockStoreSql",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.lock.LockStoreSql"
+    },
+    "name": "io.seata.core.store.db.sql.lock.OceanbaseLockStoreSql",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.lock.LockStoreSql"
+    },
+    "name": "io.seata.core.store.db.sql.lock.PostgresqlLockStoreSql",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.lock.LockStoreSql"
+    },
+    "name": "io.seata.core.store.db.sql.lock.H2LockStoreSql",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.log.LogStoreSqls"
+    },
+    "name": "io.seata.core.store.db.sql.log.MysqlLogStoreSqls",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.log.LogStoreSqls"
+    },
+    "name": "io.seata.core.store.db.sql.log.OracleLogStoreSqls",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.log.LogStoreSqls"
+    },
+    "name": "io.seata.core.store.db.sql.log.PostgresqlLogStoreSqls",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.log.LogStoreSqls"
+    },
+    "name": "io.seata.core.store.db.sql.log.OceanbaseLogStoreSqls",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.sql.log.LogStoreSqls"
+    },
+    "name": "io.seata.core.store.db.sql.log.H2LogStoreSqls",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

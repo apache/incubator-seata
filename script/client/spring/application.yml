@@ -44,7 +44,7 @@ seata:
         type: zip
         threshold: 64k
     load-balance:
-      type: RandomLoadBalance
+      type: XID
       virtual-nodes: 10
   service:
     vgroup-mapping:
