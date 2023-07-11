@@ -45,6 +45,7 @@
 - [[#5663](https://github.com/seata/seata/pull/5663)] 修复connectionProxyXA连接复用时timeout为null
 - [[#5675](https://github.com/seata/seata/pull/5675)] 修复 xxx.grouplist 和 grouplist.xxx 配置项兼容问题
 - [[#5690](https://github.com/seata/seata/pull/5690)] 修复控制台打印 `unauthorized error` 问题
+- [[#5711](https://github.com/seata/seata/pull/5711)] 修复取中划线配置项错误问题
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] 优化多次重复获取Throwable#getCause问题
