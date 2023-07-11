@@ -45,6 +45,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5663](https://github.com/seata/seata/pull/5663)] bugfix: fix the timeout is null when the connectionProxyXA connection is reused
 - [[#5675](https://github.com/seata/seata/pull/5675)] bugfix: fix compatibility between xxx.grouplist and grouplist.xxx configuration items
 - [[#5690](https://github.com/seata/seata/pull/5690)] fix console print `unauthorized error`
+- [[#5711](https://github.com/seata/seata/pull/5711)] fix get configuration item contains underlined error
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
