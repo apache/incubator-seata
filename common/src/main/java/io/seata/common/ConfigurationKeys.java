@@ -29,6 +29,7 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_REGISTRY.
      */
     String FILE_ROOT_REGISTRY = "registry";
+
     /**
      * The constant FILE_ROOT_CONFIG.
      */
@@ -37,6 +38,22 @@ public interface ConfigurationKeys {
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
     String FILE_CONFIG_SPLIT_CHAR = ".";
+
+    /**
+     * The constant FILE_ROOT_PREFIX_REGISTRY.
+     */
+    String FILE_ROOT_PREFIX_REGISTRY = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant FILE_ROOT_PREFIX_CONFIG.
+     */
+    String FILE_ROOT_PREFIX_CONFIG = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant SEATA_FILE_PREFIX_ROOT_CONFIG
+     */
+    String SEATA_FILE_PREFIX_ROOT_CONFIG = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
     /**
      * The constant FILE_ROOT_TYPE.
      */
@@ -642,11 +659,6 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
-     * The constant STORE_REDIS_TYPE. lua pipeline
-     */
-    String STORE_REDIS_TYPE = STORE_REDIS_PREFIX + "type";
-
-    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
@@ -815,11 +827,6 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
-     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
-     */
-    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
-
-    /**
      * The constant rpcRmRequestTimeout
      */
     String RPC_RM_REQUEST_TIMEOUT = TRANSPORT_PREFIX + "rpcRmRequestTimeout";
@@ -873,10 +880,5 @@ public interface ConfigurationKeys {
      * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
      */
     String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
-
-    /**
-     * The constant ENABLE_PARALLEL_HANDLE_BRANCH_KEY
-     */
-    String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
 
 }
