@@ -29,10 +29,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import io.netty.channel.Channel;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
