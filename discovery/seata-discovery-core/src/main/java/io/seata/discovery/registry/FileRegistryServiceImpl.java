@@ -19,10 +19,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
