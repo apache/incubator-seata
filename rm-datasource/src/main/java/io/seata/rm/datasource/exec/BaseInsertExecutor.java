@@ -34,7 +34,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLRecognizer;

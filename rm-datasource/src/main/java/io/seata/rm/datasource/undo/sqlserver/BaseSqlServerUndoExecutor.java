@@ -13,33 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.rm.datasource.undo.sqlserver;
 
-import java.sql.Connection;
+import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
- * The type Table meta cache.
- *
- * @author sharajava
+ * @author GoodBoyCoder
+ * @date 2021-07-26
  */
-public interface TableMetaCache {
-
+public abstract class BaseSqlServerUndoExecutor extends AbstractUndoExecutor {
     /**
-     * Gets table meta.
+     * Instantiates a new Abstract undo executor.
      *
-     * @param connection the connection
-     * @param tableName  the table name
-     * @param resourceId the resource id
-     * @return the table meta
+     * @param sqlUndoLog the sql undo log
      */
-    TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
+    public BaseSqlServerUndoExecutor(SQLUndoLog sqlUndoLog) {
+        super(sqlUndoLog);
+    }
 
-    /**
-     * Clear the table meta cache
-     *
-     * @param connection the connection
-     * @param resourceId the resource id
-     */
-    void refresh(Connection connection, String resourceId);
-
+    @Override
+    protected String buildCheckSql(String tableName, String whereCondition) {
+        return "SELECT * FROM " + tableName + " WITH(UPDLOCK) WHERE " + whereCondition;
+    }
 }

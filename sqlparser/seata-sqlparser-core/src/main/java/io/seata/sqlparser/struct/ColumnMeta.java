@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.sqlparser.struct;
 
 import java.util.Objects;
 
@@ -43,6 +43,8 @@ public class ColumnMeta {
     private String isAutoincrement;
     private boolean isOnUpdate;
 
+    private boolean isCaseSensitive;
+
     /**
      * Instantiates a new Column meta.
      */
@@ -51,27 +53,29 @@ public class ColumnMeta {
 
     @Override
     public String toString() {
-        return "ColumnMeta{" +
-                "tableCat='" + tableCat + '\'' +
-                ", tableSchemaName='" + tableSchemaName + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", columnName='" + columnName + '\'' +
-                ", dataType=" + dataType +
-                ", dataTypeName='" + dataTypeName + '\'' +
-                ", columnSize=" + columnSize +
-                ", decimalDigits=" + decimalDigits +
-                ", numPrecRadix=" + numPrecRadix +
-                ", nullAble=" + nullAble +
-                ", remarks='" + remarks + '\'' +
-                ", columnDef='" + columnDef + '\'' +
-                ", sqlDataType=" + sqlDataType +
-                ", sqlDatetimeSub=" + sqlDatetimeSub +
-                ", charOctetLength=" + charOctetLength +
-                ", ordinalPosition=" + ordinalPosition +
-                ", isNullAble='" + isNullAble + '\'' +
-                ", isAutoincrement='" + isAutoincrement + '\'' +
-                ", isOnUpdate=" + isOnUpdate +
-                '}';
+        final StringBuilder sb = new StringBuilder("ColumnMeta{");
+        sb.append("tableCat='").append(tableCat).append('\'');
+        sb.append(", tableSchemaName='").append(tableSchemaName).append('\'');
+        sb.append(", tableName='").append(tableName).append('\'');
+        sb.append(", columnName='").append(columnName).append('\'');
+        sb.append(", dataType=").append(dataType);
+        sb.append(", dataTypeName='").append(dataTypeName).append('\'');
+        sb.append(", columnSize=").append(columnSize);
+        sb.append(", decimalDigits=").append(decimalDigits);
+        sb.append(", numPrecRadix=").append(numPrecRadix);
+        sb.append(", nullAble=").append(nullAble);
+        sb.append(", remarks='").append(remarks).append('\'');
+        sb.append(", columnDef='").append(columnDef).append('\'');
+        sb.append(", sqlDataType=").append(sqlDataType);
+        sb.append(", sqlDatetimeSub=").append(sqlDatetimeSub);
+        sb.append(", charOctetLength=").append(charOctetLength);
+        sb.append(", ordinalPosition=").append(ordinalPosition);
+        sb.append(", isNullAble='").append(isNullAble).append('\'');
+        sb.append(", isAutoincrement='").append(isAutoincrement).append('\'');
+        sb.append(", isOnUpdate=").append(isOnUpdate);
+        sb.append(", isCaseSensitive=").append(isCaseSensitive);
+        sb.append('}');
+        return sb.toString();
     }
 
     /**
@@ -415,6 +419,14 @@ public class ColumnMeta {
         isOnUpdate = onUpdate;
     }
 
+    public boolean isCaseSensitive() {
+        return isCaseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        isCaseSensitive = caseSensitive;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -481,6 +493,9 @@ public class ColumnMeta {
         if (!Objects.equals(columnMeta.isOnUpdate, this.isOnUpdate)) {
             return false;
         }
+        if (!Objects.equals(columnMeta.isCaseSensitive, this.isCaseSensitive)) {
+            return false;
+        }
         return true;
     }
 
@@ -505,6 +520,7 @@ public class ColumnMeta {
         hash += Objects.hashCode(isNullAble);
         hash += Objects.hashCode(isAutoincrement);
         hash += Objects.hashCode(isOnUpdate);
+        hash += Objects.hashCode(isCaseSensitive);
         return hash;
     }
 }

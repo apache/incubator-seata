@@ -80,6 +80,10 @@
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <junit-platform.version>1.8.2</junit-platform.version>
 
+        <!-- For test -->
+        <junit-jupiter.version>5.8.2</junit-jupiter.version>
+        <junit-platform.version>1.8.2</junit-platform.version>
+
         <!-- Maven plugin versions -->
         <!-- Build -->
         <easyj-maven-plugin.version>1.1.5</easyj-maven-plugin.version>
@@ -120,7 +124,7 @@
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
-        <gpg.keyname>A1C4DAB9B220DBA0C277E945D6A1420D747D1EE0</gpg.keyname>
+        <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
         <gpg.arg2/>
 

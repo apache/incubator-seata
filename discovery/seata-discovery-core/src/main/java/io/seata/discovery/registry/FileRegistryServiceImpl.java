@@ -15,6 +15,9 @@
  */
 package io.seata.discovery.registry;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
 
 /**
  * The type File registry service.
@@ -31,13 +35,13 @@ import io.seata.config.ConfigurationFactory;
  * @author slievrly
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
+
     private static volatile FileRegistryServiceImpl instance;
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String POSTFIX_GROUPLIST = ".grouplist";
     private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String ENDPOINT_AGAIN_SPLIT_CHAR = ",";
     private static final String IP_PORT_SPLIT_CHAR = ":";
-
 
     private FileRegistryServiceImpl() {
     }
@@ -82,13 +86,10 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
-        String endpointStr = CONFIG.getConfig(
-                PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
-        if (StringUtils.isNullOrEmpty(endpointStr)) {
-            throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
-        }
+        String endpointStr = getGroupListFromConfig(clusterName);
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
         if (endpoints.length <= 1) {
             endpoints = endpointStr.split(ENDPOINT_AGAIN_SPLIT_CHAR);
@@ -102,6 +103,17 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
             inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
         }
         return inetSocketAddresses;
+    }
+
+    private String getGroupListFromConfig(String clusterName) {
+        String oldGrouplistDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST;
+        String endpointStr = CONFIG.getConfig(oldGrouplistDataId);
+        if (StringUtils.isNullOrEmpty(endpointStr)) {
+            String newGrouplistDataId = PREFIX_SERVICE_ROOT + POSTFIX_GROUPLIST + CONFIG_SPLIT_CHAR + clusterName;
+            throw new ConfigNotFoundException("%s or %s configuration item is required", oldGrouplistDataId,
+                newGrouplistDataId);
+        }
+        return endpointStr;
     }
 
     @Override
