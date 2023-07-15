@@ -63,7 +63,7 @@
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>6.3.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
-        <jcommander.version>1.75</jcommander.version>
+        <jcommander.version>1.82</jcommander.version>
         <xz.version>1.8</xz.version>
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
