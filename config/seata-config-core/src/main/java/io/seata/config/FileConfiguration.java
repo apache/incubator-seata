@@ -350,6 +350,10 @@ public class FileConfiguration extends AbstractConfiguration {
 
     }
 
+    public FileConfig getFileConfig() {
+        return fileConfig;
+    }
+
     /**
      * The type FileListener.
      */
