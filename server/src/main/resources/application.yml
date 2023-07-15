@@ -34,7 +34,6 @@ console:
   user:
     username: seata
     password: seata
-
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3

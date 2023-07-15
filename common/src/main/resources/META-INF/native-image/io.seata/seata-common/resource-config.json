@@ -1,0 +1,66 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/services\/io.seata.\\E.*"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/seata\/io.seata.\\E.*"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.alibaba.dubbo.rpc.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.alibaba.dubbo.rpc.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.alipay.sofa.rpc.filter.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.alipay.sofa.rpc.filter.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.taobao.hsf.invocation.filter.RPCFilter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.taobao.hsf.invocation.filter.RPCFilter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/services\/com.weibo.api.motan.filter.Filter\\E"
+      },
+      {
+        "condition": {
+          "typeReachable": "io.seata.common.loader.EnhancedServiceLoader"
+        },
+        "pattern": "\\QMETA-INF\/seata\/com.weibo.api.motan.filter.Filter\\E"
+      }
+    ]
+  }
+}

@@ -1,11 +1,11 @@
 {
   "name": "console-fe",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "console fe",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --config build/webpack.dev.conf.js",
-    "build": "cross-env NODE_ENV=production webpack --config build/webpack.prod.conf.js && node build/copyFile.js",
+    "start": "node build/copyDesigner.js && cross-env NODE_ENV=development webpack-dev-server --config build/webpack.dev.conf.js",
+    "build": "node build/copyDesigner.js && cross-env NODE_ENV=production webpack --config build/webpack.prod.conf.js && node build/copyFile.js",
     "eslint": "eslint --ext .js src/",
     "eslint-fix": "eslint  --ext .js --fix src/"
   },
@@ -29,7 +29,7 @@
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
     "@babel/plugin-proposal-decorators": "^7.2.3",
-    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-env": "^7.22.5",
     "@babel/preset-typescript": "^7.7.7",
     "@babel/runtime": "^7.2.0",
     "@types/lodash": "^4.14.149",

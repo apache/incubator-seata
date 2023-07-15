@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.weibo.api.motan.filter.Filter"
+    },
+    "name": "io.seata.integration.motan.MotanTransactionFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

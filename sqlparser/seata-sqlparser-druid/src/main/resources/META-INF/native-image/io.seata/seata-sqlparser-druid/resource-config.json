@@ -1,0 +1,12 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "condition": {
+          "typeReachable": "io.seata.sqlparser.druid.DefaultDruidLoader"
+        },
+        "pattern": "\\Qlib\/sqlparser\/druid.jar\\E"
+      }
+    ]
+  }
+}
