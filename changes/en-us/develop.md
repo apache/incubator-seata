@@ -12,7 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 
 
 ### optimize:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5804](https://github.com/seata/seata/pull/5804)] optimize docker default timezone
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] fix some dependencies vulnerability
