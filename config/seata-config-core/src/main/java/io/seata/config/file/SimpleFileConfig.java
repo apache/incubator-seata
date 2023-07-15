@@ -24,6 +24,8 @@ import io.seata.config.FileConfigFactory;
 import io.seata.config.FileConfiguration;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author wangwei-ying
@@ -50,4 +52,12 @@ public class SimpleFileConfig implements FileConfig {
     public String getString(String path) {
         return fileConfig.getString(path);
     }
+
+    @Override
+    public Map<String, Object> getAllConfig() {
+        return fileConfig.entrySet().stream().collect(HashMap::new, (m, e) ->
+                        m.put(e.getKey(), e.getValue().unwrapped()),
+            HashMap::putAll);
+    }
+
 }

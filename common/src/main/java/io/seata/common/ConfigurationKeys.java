@@ -29,6 +29,7 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_REGISTRY.
      */
     String FILE_ROOT_REGISTRY = "registry";
+
     /**
      * The constant FILE_ROOT_CONFIG.
      */
@@ -37,6 +38,22 @@ public interface ConfigurationKeys {
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
     String FILE_CONFIG_SPLIT_CHAR = ".";
+
+    /**
+     * The constant FILE_ROOT_PREFIX_REGISTRY.
+     */
+    String FILE_ROOT_PREFIX_REGISTRY = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant FILE_ROOT_PREFIX_CONFIG.
+     */
+    String FILE_ROOT_PREFIX_CONFIG = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant SEATA_FILE_PREFIX_ROOT_CONFIG
+     */
+    String SEATA_FILE_PREFIX_ROOT_CONFIG = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
     /**
      * The constant FILE_ROOT_TYPE.
      */
