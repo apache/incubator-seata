@@ -36,11 +36,11 @@ public class MariadbUndoExecutorHolder implements UndoExecutorHolder {
 
     @Override
     public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
-        return new MariadbUndoInsertExecutor(sqlUndoLog);
+        return new MariadbUndoUpdateExecutor(sqlUndoLog);
     }
 
     @Override
     public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
-        return new MariadbUndoInsertExecutor(sqlUndoLog);
+        return new MariadbUndoDeleteExecutor(sqlUndoLog);
     }
 }
