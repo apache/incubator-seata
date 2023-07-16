@@ -38,280 +38,281 @@ import org.junit.jupiter.api.Test;
  * @author funkye
  */
 public class MariadbEscapeHandlerTest {
-	/**
-	 * Test check
-	 */
-	@Test
-	public void testCheck() {
-		EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.MARIADB);
-		Assertions.assertTrue(escapeHandler.checkIfKeyWords("desc"));
-	}
+    /**
+     * Test check
+     */
+    @Test
+    public void testCheck() {
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.MARIADB);
+        Assertions.assertTrue(escapeHandler.checkIfKeyWords("desc"));
+    }
 
-	/**
-	 * Test keyword check with UPDATE case
-	 */
-	@Test
-	public void testUpdateKeywordCheck() {
-		SQLUndoLog sqlUndoLog = new SQLUndoLog();
-		sqlUndoLog.setTableName("`lock`");
-		sqlUndoLog.setSqlType(SQLType.UPDATE);
+    /**
+     * Test keyword check with UPDATE case
+     */
+    @Test
+    public void testUpdateKeywordCheck() {
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setTableName("`lock`");
+        sqlUndoLog.setSqlType(SQLType.UPDATE);
 
-		TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		Row beforeRow = new Row();
+        Row beforeRow = new Row();
 
-		Field pkField = new Field();
-		pkField.setKeyType(KeyType.PRIMARY_KEY);
-		pkField.setName("`key`");
-		pkField.setType(Types.INTEGER);
-		pkField.setValue(213);
-		beforeRow.add(pkField);
+        Field pkField = new Field();
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
+        pkField.setName("`key`");
+        pkField.setType(Types.INTEGER);
+        pkField.setValue(213);
+        beforeRow.add(pkField);
 
-		Field name = new Field();
-		name.setName("`desc`");
-		name.setType(Types.VARCHAR);
-		name.setValue("SEATA");
-		beforeRow.add(name);
+        Field name = new Field();
+        name.setName("`desc`");
+        name.setType(Types.VARCHAR);
+        name.setValue("SEATA");
+        beforeRow.add(name);
 
-		Field since = new Field();
-		since.setName("since");
-		since.setType(Types.VARCHAR);
-		since.setValue("2014");
-		beforeRow.add(since);
+        Field since = new Field();
+        since.setName("since");
+        since.setType(Types.VARCHAR);
+        since.setValue("2014");
+        beforeRow.add(since);
 
-		beforeImage.add(beforeRow);
+        beforeImage.add(beforeRow);
 
-		TableRecords afterImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords afterImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		Row afterRow = new Row();
+        Row afterRow = new Row();
 
-		Field pkField1 = new Field();
-		pkField1.setKeyType(KeyType.PRIMARY_KEY);
-		pkField1.setName("`key`");
-		pkField1.setType(Types.INTEGER);
-		pkField1.setValue(214);
-		afterRow.add(pkField1);
+        Field pkField1 = new Field();
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
+        pkField1.setName("`key`");
+        pkField1.setType(Types.INTEGER);
+        pkField1.setValue(214);
+        afterRow.add(pkField1);
 
-		Field name1 = new Field();
-		name1.setName("`desc`");
-		name1.setType(Types.VARCHAR);
-		name1.setValue("GTS");
-		afterRow.add(name1);
+        Field name1 = new Field();
+        name1.setName("`desc`");
+        name1.setType(Types.VARCHAR);
+        name1.setValue("GTS");
+        afterRow.add(name1);
 
-		Field since1 = new Field();
-		since1.setName("since");
-		since1.setType(Types.VARCHAR);
-		since1.setValue("2016");
-		afterRow.add(since1);
+        Field since1 = new Field();
+        since1.setName("since");
+        since1.setType(Types.VARCHAR);
+        since1.setValue("2016");
+        afterRow.add(since1);
 
-		afterImage.add(afterRow);
+        afterImage.add(afterRow);
 
-		sqlUndoLog.setBeforeImage(beforeImage);
-		sqlUndoLog.setAfterImage(afterImage);
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
 
-		MariadbEscapeHandlerTest.MariadbUndoUpdateExecutorExtension
-			mariadbUndoUpdateExecutorExtension = new MariadbEscapeHandlerTest.MariadbUndoUpdateExecutorExtension(sqlUndoLog);
+        MariadbEscapeHandlerTest.MariadbUndoUpdateExecutorExtension mariadbUndoUpdateExecutorExtension =
+            new MariadbEscapeHandlerTest.MariadbUndoUpdateExecutorExtension(sqlUndoLog);
 
-		Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
-			mariadbUndoUpdateExecutorExtension.getSql().trim());
+        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
+            mariadbUndoUpdateExecutorExtension.getSql().trim());
 
-	}
+    }
 
-	/**
-	 * Test keyword check with INSERT case
-	 */
-	@Test
-	public void testInsertKeywordCheck() {
-		SQLUndoLog sqlUndoLog = new SQLUndoLog();
-		sqlUndoLog.setTableName("`lock`");
-		sqlUndoLog.setSqlType(SQLType.INSERT);
+    /**
+     * Test keyword check with INSERT case
+     */
+    @Test
+    public void testInsertKeywordCheck() {
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setTableName("`lock`");
+        sqlUndoLog.setSqlType(SQLType.INSERT);
 
-		TableRecords beforeImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords beforeImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		TableRecords afterImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords afterImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		Row afterRow1 = new Row();
+        Row afterRow1 = new Row();
 
-		Field pkField = new Field();
-		pkField.setKeyType(KeyType.PRIMARY_KEY);
-		pkField.setName("`key`");
-		pkField.setType(Types.INTEGER);
-		pkField.setValue(213);
-		afterRow1.add(pkField);
+        Field pkField = new Field();
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
+        pkField.setName("`key`");
+        pkField.setType(Types.INTEGER);
+        pkField.setValue(213);
+        afterRow1.add(pkField);
 
-		Field name = new Field();
-		name.setName("`desc`");
-		name.setType(Types.VARCHAR);
-		name.setValue("SEATA");
-		afterRow1.add(name);
+        Field name = new Field();
+        name.setName("`desc`");
+        name.setType(Types.VARCHAR);
+        name.setValue("SEATA");
+        afterRow1.add(name);
 
-		Field since = new Field();
-		since.setName("since");
-		since.setType(Types.VARCHAR);
-		since.setValue("2014");
-		afterRow1.add(since);
+        Field since = new Field();
+        since.setName("since");
+        since.setType(Types.VARCHAR);
+        since.setValue("2014");
+        afterRow1.add(since);
 
-		Row afterRow = new Row();
+        Row afterRow = new Row();
 
-		Field pkField1 = new Field();
-		pkField1.setKeyType(KeyType.PRIMARY_KEY);
-		pkField1.setName("`key`");
-		pkField1.setType(Types.INTEGER);
-		pkField1.setValue(214);
-		afterRow.add(pkField1);
+        Field pkField1 = new Field();
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
+        pkField1.setName("`key`");
+        pkField1.setType(Types.INTEGER);
+        pkField1.setValue(214);
+        afterRow.add(pkField1);
 
-		Field name1 = new Field();
-		name1.setName("`desc`");
-		name1.setType(Types.VARCHAR);
-		name1.setValue("GTS");
-		afterRow.add(name1);
+        Field name1 = new Field();
+        name1.setName("`desc`");
+        name1.setType(Types.VARCHAR);
+        name1.setValue("GTS");
+        afterRow.add(name1);
 
-		Field since1 = new Field();
-		since1.setName("since");
-		since1.setType(Types.VARCHAR);
-		since1.setValue("2016");
-		afterRow.add(since1);
+        Field since1 = new Field();
+        since1.setName("since");
+        since1.setType(Types.VARCHAR);
+        since1.setValue("2016");
+        afterRow.add(since1);
 
-		afterImage.add(afterRow1);
-		afterImage.add(afterRow);
+        afterImage.add(afterRow1);
+        afterImage.add(afterRow);
 
-		sqlUndoLog.setBeforeImage(beforeImage);
-		sqlUndoLog.setAfterImage(afterImage);
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
 
-		MariadbEscapeHandlerTest.MariadbUndoInsertExecutorExtension
-			mariadbUndoInsertExecutorExtension = new MariadbEscapeHandlerTest.MariadbUndoInsertExecutorExtension(sqlUndoLog);
+        MariadbEscapeHandlerTest.MariadbUndoInsertExecutorExtension mariadbUndoInsertExecutorExtension =
+            new MariadbEscapeHandlerTest.MariadbUndoInsertExecutorExtension(sqlUndoLog);
 
-		Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mariadbUndoInsertExecutorExtension.getSql().trim());
+        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?",
+            mariadbUndoInsertExecutorExtension.getSql().trim());
 
-	}
+    }
 
-	/**
-	 * Test keyword check with DELETE case
-	 */
-	@Test
-	public void testDeleteKeywordCheck() {
-		SQLUndoLog sqlUndoLog = new SQLUndoLog();
-		sqlUndoLog.setTableName("`lock`");
-		sqlUndoLog.setSqlType(SQLType.DELETE);
+    /**
+     * Test keyword check with DELETE case
+     */
+    @Test
+    public void testDeleteKeywordCheck() {
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setTableName("`lock`");
+        sqlUndoLog.setSqlType(SQLType.DELETE);
 
-		TableRecords afterImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords afterImage = TableRecords.empty(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
+        TableRecords beforeImage = new TableRecords(new UndoExecutorTest.MockTableMeta("product", "key"));
 
-		Row afterRow1 = new Row();
+        Row afterRow1 = new Row();
 
-		Field pkField = new Field();
-		pkField.setKeyType(KeyType.PRIMARY_KEY);
-		pkField.setName("`key`");
-		pkField.setType(Types.INTEGER);
-		pkField.setValue(213);
-		afterRow1.add(pkField);
+        Field pkField = new Field();
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
+        pkField.setName("`key`");
+        pkField.setType(Types.INTEGER);
+        pkField.setValue(213);
+        afterRow1.add(pkField);
 
-		Field name = new Field();
-		name.setName("`desc`");
-		name.setType(Types.VARCHAR);
-		name.setValue("SEATA");
-		afterRow1.add(name);
+        Field name = new Field();
+        name.setName("`desc`");
+        name.setType(Types.VARCHAR);
+        name.setValue("SEATA");
+        afterRow1.add(name);
 
-		Field since = new Field();
-		since.setName("since");
-		since.setType(Types.VARCHAR);
-		since.setValue("2014");
-		afterRow1.add(since);
+        Field since = new Field();
+        since.setName("since");
+        since.setType(Types.VARCHAR);
+        since.setValue("2014");
+        afterRow1.add(since);
 
-		Row afterRow = new Row();
+        Row afterRow = new Row();
 
-		Field pkField1 = new Field();
-		pkField1.setKeyType(KeyType.PRIMARY_KEY);
-		pkField1.setName("`key`");
-		pkField1.setType(Types.INTEGER);
-		pkField1.setValue(214);
-		afterRow.add(pkField1);
+        Field pkField1 = new Field();
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
+        pkField1.setName("`key`");
+        pkField1.setType(Types.INTEGER);
+        pkField1.setValue(214);
+        afterRow.add(pkField1);
 
-		Field name1 = new Field();
-		name1.setName("`desc`");
-		name1.setType(Types.VARCHAR);
-		name1.setValue("GTS");
-		afterRow.add(name1);
+        Field name1 = new Field();
+        name1.setName("`desc`");
+        name1.setType(Types.VARCHAR);
+        name1.setValue("GTS");
+        afterRow.add(name1);
 
-		Field since1 = new Field();
-		since1.setName("since");
-		since1.setType(Types.VARCHAR);
-		since1.setValue("2016");
-		afterRow.add(since1);
+        Field since1 = new Field();
+        since1.setName("since");
+        since1.setType(Types.VARCHAR);
+        since1.setValue("2016");
+        afterRow.add(since1);
 
-		beforeImage.add(afterRow1);
-		beforeImage.add(afterRow);
+        beforeImage.add(afterRow1);
+        beforeImage.add(afterRow);
 
-		sqlUndoLog.setAfterImage(afterImage);
-		sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        sqlUndoLog.setBeforeImage(beforeImage);
 
-		MariadbEscapeHandlerTest.MariadbUndoDeleteExecutorExtension
-			mariadbUndoDeleteExecutorExtension = new MariadbEscapeHandlerTest.MariadbUndoDeleteExecutorExtension(sqlUndoLog);
+        MariadbEscapeHandlerTest.MariadbUndoDeleteExecutorExtension mariadbUndoDeleteExecutorExtension =
+            new MariadbEscapeHandlerTest.MariadbUndoDeleteExecutorExtension(sqlUndoLog);
 
-		Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)",
-			mariadbUndoDeleteExecutorExtension.getSql());
+        Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)",
+            mariadbUndoDeleteExecutorExtension.getSql());
 
-	}
+    }
 
-	private static class MariadbUndoUpdateExecutorExtension extends MariadbUndoUpdateExecutor {
-		/**
-		 * Instantiates a new Mariadb undo update executor.
-		 *
-		 * @param sqlUndoLog the sql undo log
-		 */
-		public MariadbUndoUpdateExecutorExtension(SQLUndoLog sqlUndoLog) {
-			super(sqlUndoLog);
-		}
+    private static class MariadbUndoUpdateExecutorExtension extends MariadbUndoUpdateExecutor {
+        /**
+         * Instantiates a new Mariadb undo update executor.
+         *
+         * @param sqlUndoLog the sql undo log
+         */
+        public MariadbUndoUpdateExecutorExtension(SQLUndoLog sqlUndoLog) {
+            super(sqlUndoLog);
+        }
 
-		/**
-		 * Gets sql.
-		 *
-		 * @return the sql
-		 */
-		public String getSql() {
-			return super.buildUndoSQL();
-		}
-	}
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
+            return super.buildUndoSQL();
+        }
+    }
 
-	private static class MariadbUndoInsertExecutorExtension extends MariadbUndoInsertExecutor {
-		/**
-		 * Instantiates a new Mariadb undo insert executor.
-		 *
-		 * @param sqlUndoLog the sql undo log
-		 */
-		public MariadbUndoInsertExecutorExtension(SQLUndoLog sqlUndoLog) {
-			super(sqlUndoLog);
-		}
+    private static class MariadbUndoInsertExecutorExtension extends MariadbUndoInsertExecutor {
+        /**
+         * Instantiates a new Mariadb undo insert executor.
+         *
+         * @param sqlUndoLog the sql undo log
+         */
+        public MariadbUndoInsertExecutorExtension(SQLUndoLog sqlUndoLog) {
+            super(sqlUndoLog);
+        }
 
-		/**
-		 * Gets sql.
-		 *
-		 * @return the sql
-		 */
-		public String getSql() {
-			return super.buildUndoSQL();
-		}
-	}
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
+            return super.buildUndoSQL();
+        }
+    }
 
-	private static class MariadbUndoDeleteExecutorExtension extends MariadbUndoDeleteExecutor {
+    private static class MariadbUndoDeleteExecutorExtension extends MariadbUndoDeleteExecutor {
 
-		/**
-		 * Instantiates a new My sql undo insert executor.
-		 *
-		 * @param sqlUndoLog the sql undo log
-		 */
-		public MariadbUndoDeleteExecutorExtension(SQLUndoLog sqlUndoLog) {
-			super(sqlUndoLog);
-		}
+        /**
+         * Instantiates a new My sql undo insert executor.
+         *
+         * @param sqlUndoLog the sql undo log
+         */
+        public MariadbUndoDeleteExecutorExtension(SQLUndoLog sqlUndoLog) {
+            super(sqlUndoLog);
+        }
 
-		/**
-		 * Gets sql.
-		 *
-		 * @return the sql
-		 */
-		public String getSql() {
-			return super.buildUndoSQL();
-		}
-	}
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
+            return super.buildUndoSQL();
+        }
+    }
 }
