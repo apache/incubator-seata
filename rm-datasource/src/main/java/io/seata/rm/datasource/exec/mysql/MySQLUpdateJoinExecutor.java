@@ -59,7 +59,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
-    protected volatile boolean isLowerSupportGroupByPksVersion;
+    protected boolean isLowerSupportGroupByPksVersion;
     private String sqlMode = "";
 
     /**
