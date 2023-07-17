@@ -20,6 +20,7 @@ import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
 import io.seata.saga.statelang.builder.StateMachineBuilder;
 import io.seata.saga.statelang.builder.impl.StateMachineBuilderImpl;
 import io.seata.saga.statelang.domain.StateMachine;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -50,6 +51,6 @@ public class StateBuilderTests {
                         .and()
                     .configure()
                 .build();
-        System.out.println(stateMachine);
+        Assertions.assertNotNull(stateMachine);
     }
 }

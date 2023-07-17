@@ -7,7 +7,7 @@ import io.seata.saga.statelang.domain.State;
  *
  * @param <B> builder type
  * @param <S> state type
- * @author PTYin
+ * @author ptyin
  */
 public interface StateBuilder<B extends StateBuilder<B, S>, S extends State>
 {
