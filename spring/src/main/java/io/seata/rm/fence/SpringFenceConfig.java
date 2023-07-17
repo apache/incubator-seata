@@ -49,10 +49,6 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
     @Override
     public void afterPropertiesSet() {
         if (dataSource != null) {
-            // set dataSource
-            SpringFenceHandler.setDataSource(dataSource);
-            FenceLogContextReporter.setDataSource(dataSource);
-            FenceLogContextSearcher.setDataSource(dataSource);
             init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
@@ -65,5 +61,12 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
         }
     }
 
-
+    @Override
+    public void init() {
+        // set dataSource
+        SpringFenceHandler.setDataSource(dataSource);
+        FenceLogContextReporter.setDataSource(dataSource);
+        FenceLogContextSearcher.setDataSource(dataSource);
+        super.init();
+    }
 }
