@@ -332,6 +332,9 @@
                             <arg>/bin/bash</arg>
                             <arg>/seata-server-entrypoint.sh</arg>
                         </entrypoint>
+                        <environment>
+                            <TZ>Asia/Shanghai</TZ>
+                        </environment>
                     </container>
                     <extraDirectories>
                         <paths>
@@ -350,6 +353,7 @@
                         </paths>
                     </extraDirectories>
                     <skip>${image.publish.skip}</skip>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
                 </configuration>
                 <executions>
                     <execution>
