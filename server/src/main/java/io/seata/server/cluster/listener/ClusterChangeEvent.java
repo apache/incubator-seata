@@ -25,12 +25,15 @@ public class ClusterChangeEvent extends ApplicationEvent {
 
     private String group;
 
+    private boolean leader;
+
     private long term;
 
-    public ClusterChangeEvent(Object source, String group, long term) {
+    public ClusterChangeEvent(Object source, String group, long term, boolean leader) {
         super(source);
         this.group = group;
         this.term = term;
+        this.leader = leader;
     }
 
     public ClusterChangeEvent(Object source, String group) {
@@ -58,4 +61,11 @@ public class ClusterChangeEvent extends ApplicationEvent {
         this.term = term;
     }
 
+    public boolean isLeader() {
+        return leader;
+    }
+
+    public void setLeader(boolean leader) {
+        this.leader = leader;
+    }
 }

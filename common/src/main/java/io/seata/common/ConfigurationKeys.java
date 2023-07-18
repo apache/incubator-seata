@@ -877,11 +877,6 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_GROUP = SERVER_RAFT + "group";
 
     /**
-     * The constant SERVER_RAFT_AUTO_JOIN.
-     */
-    String SERVER_RAFT_AUTO_JOIN = SERVER_RAFT + "autoJoin";
-
-    /**
      * The constant SERVER_RAFT_SNAPSHOT_INTERVAL.
      */
     String SERVER_RAFT_SNAPSHOT_INTERVAL = SERVER_RAFT + "snapshotInterval";

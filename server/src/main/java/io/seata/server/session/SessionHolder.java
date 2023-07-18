@@ -36,8 +36,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
-import io.seata.server.AbstractTCInboundHandler;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.cluster.raft.RaftServer;
@@ -107,8 +106,6 @@ public class SessionHolder {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
-                // When the RAFT mode is started, the request must be rejected by default
-                AbstractTCInboundHandler.setPrevent(group, true);
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
             } else {
@@ -293,14 +290,13 @@ public class SessionHolder {
      * @return the root session manager
      */
     public static SessionManager getRootSessionManager() {
-        return getRootSessionManager(RaftClusterContext.getGroup());
+        String group = SeataClusterContext.getGroup();
+        return getRootSessionManager(group);
     }
 
     public static SessionManager getRootSessionManager(String group) {
-        SessionManager sessionManager = SESSION_MANAGER_MAP.get(group);
-        return sessionManager != null ? sessionManager : ROOT_SESSION_MANAGER;
+        return StringUtils.isNotBlank(group) ? SESSION_MANAGER_MAP.get(group) : ROOT_SESSION_MANAGER;
     }
-
 
     //endregion
 

@@ -18,14 +18,12 @@ package io.seata.server.cluster.raft;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
-import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
@@ -38,7 +36,6 @@ import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
 import io.seata.common.store.StoreMode;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
@@ -54,7 +51,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_AUTO_JOIN;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
@@ -122,7 +118,6 @@ public class RaftServerFactory {
         }
         String host = XID.getIpAddress();
         PeerId serverId = new PeerId(host, port);
-        boolean autoJoinCluster = CONFIG.getBoolean(SERVER_RAFT_AUTO_JOIN, false);
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + "raft" + separator + serverId.getPort();
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
@@ -135,23 +130,6 @@ public class RaftServerFactory {
             }
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(group, raftServer);
-            // whether to join an existing cluster
-            if (autoJoinCluster) {
-                List<PeerId> currentPeers = null;
-                try {
-                    currentPeers = getCliServiceInstance().getPeers(group, initConf);
-                } catch (Exception e) {
-                    // In the first deployment, the leader cannot be found
-                }
-                if (CollectionUtils.isNotEmpty(currentPeers) && !currentPeers.contains(serverId)) {
-                    Status status = getCliServiceInstance().addPeer(group, initConf, serverId);
-                    if (!status.isOk()) {
-                        LOGGER.error(
-                            "failed to join the RAFT cluster: {}. Please check the status of the cluster, status error: {}",
-                            initConfStr, status.getErrorMsg());
-                    }
-                }
-            }
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());

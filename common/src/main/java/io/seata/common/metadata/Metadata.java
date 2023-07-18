@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
@@ -30,45 +31,47 @@ import io.seata.common.util.StringUtils;
  */
 public class Metadata {
 
-    private final Map<String, Node> leaders = new ConcurrentHashMap<>();
+    private final Map<String/*clusterName*/, Map<String/*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();
 
-    private final Map<String, Long> clusterTerm = new ConcurrentHashMap<>();
+    private final Map<String/*clusterName*/, Map<String/*raft-group*/, Long>> clusterTerm = new ConcurrentHashMap<>();
 
-    private final Map<String, List<Node>> nodes = new ConcurrentHashMap<>();
+    private final Map<String/*clusterName*/, Map<String/*raft-group*/, List<Node>>> clusterNodes =
+        new ConcurrentHashMap<>();
 
     private StoreMode storeMode = StoreMode.FILE;
 
-    public Node getLeader(String group) {
-        return leaders.get(group);
+    public Node getLeader(String clusterName) {
+        Map<String/*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
+        List<Node> nodes = new ArrayList<>(map.values());
+        return nodes.size() > 0 ? nodes.get(ThreadLocalRandom.current().nextInt(nodes.size())) : null;
     }
 
-    public void setLeaderNode(Node node) {
+    public void setLeaderNode(String clusterName, Node node) {
         String group = node.getGroup();
-        this.leaders.put(node.getGroup(), node);
+        Map<String/*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
+        map.put(group, node);
+        this.leaders.put(clusterName, map);
     }
 
-    public void setLeader(Node leader) {
-        setLeader(leader.getGroup(), leader);
+    public List<Node> getNodes(String clusterName, String group) {
+        return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).get(group);
     }
 
-    public void setLeader(String group, Node leader) {
-        this.leaders.put(group, leader);
+    public List<Node> getNodes(String clusterName) {
+        return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).values().stream()
+            .flatMap(List::stream).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
-    public List<Node> getNodes(String group) {
-        return nodes.get(group);
-    }
-
-    public void setNodes(String group, List<Node> nodes) {
-        this.nodes.put(group, nodes);
+    public void setNodes(String clusterName, String group, List<Node> nodes) {
+        this.clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).put(group, nodes);
     }
 
     public boolean containsGroup(String group) {
-        return nodes.containsKey(group);
+        return clusterNodes.containsKey(group);
     }
 
-    public Set<String> groups() {
-        return nodes.keySet();
+    public Set<String> groups(String clusterName) {
+        return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).keySet();
     }
 
     public StoreMode getStoreMode() {
@@ -83,21 +86,25 @@ public class Metadata {
         this.storeMode = storeMode;
     }
 
-    public Map<String, Long> getClusterTerm() {
-        return clusterTerm;
+    public Map<String, Long> getClusterTerm(String clusterName) {
+        return clusterTerm.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
     }
 
-    public void refreshMetadata(String group, MetadataResponse metadataResponse) {
+    public void refreshMetadata(String clusterName, MetadataResponse metadataResponse) {
         List<Node> list = new ArrayList<>();
         for (Node node : metadataResponse.getNodes()) {
             if (node.getRole() == ClusterRole.LEADER) {
-                this.setLeader(node);
+                this.setLeaderNode(clusterName, node);
             }
             list.add(node);
         }
         this.storeMode = StoreMode.get(metadataResponse.getStoreMode());
-        this.nodes.put(group, list);
-        this.clusterTerm.put(group, metadataResponse.getTerm());
+        if (!list.isEmpty()) {
+            String group = list.get(0).getGroup();
+            this.setNodes(clusterName, group, list);
+            this.clusterTerm.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).put(group,
+                metadataResponse.getTerm());
+        }
     }
 
     @Override

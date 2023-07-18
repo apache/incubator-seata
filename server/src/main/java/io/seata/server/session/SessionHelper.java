@@ -37,7 +37,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.store.StoreConfig.SessionMode;
@@ -302,14 +302,14 @@ public class SessionHelper {
 
         Stream<GlobalSession> stream = StreamSupport.stream(sessions.spliterator(), parallel);
         stream.forEach(globalSession -> {
-            RaftClusterContext.bindGroup(GROUP);
+            SeataClusterContext.bindGroup(GROUP);
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
             } catch (Throwable th) {
                 LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
             } finally {
-                RaftClusterContext.unbindGroup();
+                SeataClusterContext.unbindGroup();
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
         });

@@ -26,8 +26,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
-import io.seata.core.protocol.transaction.AbstractTransactionRequest;
-import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.core.protocol.transaction.BranchReportRequest;
@@ -46,10 +44,8 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.protocol.transaction.TCInboundHandler;
 import io.seata.core.rpc.RpcContext;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +57,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler implements TCInboundHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTCInboundHandler.class);
-
-    protected static final Map<String, Boolean> GROUP_PREVENT = new ConcurrentHashMap<>();
 
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
@@ -350,44 +344,6 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             }
         } catch (Exception exx) {
             LOGGER.error("check transaction status error,{}]", exx.getMessage());
-        }
-    }
-
-    /**
-     * Exception handle template.
-     *
-     * @param <T>      the type parameter
-     * @param <S>      the type parameter
-     * @param callback the callback
-     * @param request  the request
-     * @param response the response
-     */
-    @Override
-    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
-        String group = request.getGroupId();
-        RaftClusterContext.bindGroup(group);
-        try {
-            if (isPrevent(group)) {
-                throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                        " The current TC is not a leader node, interrupt processing !");
-            }
-            super.exceptionHandleTemplate(callback,request,response);
-        } catch (TransactionException tex) {
-            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
-            callback.onTransactionException(request, response, tex);
-        } finally {
-            RaftClusterContext.unbindGroup();
-        }
-    }
-
-    public boolean isPrevent(String group) {
-        // Non-raft mode always allows requests
-        return Optional.ofNullable(GROUP_PREVENT.get(group)).orElse(false);
-    }
-
-    public static void setPrevent(String group, boolean prevent) {
-        if (StoreConfig.getSessionMode() == StoreConfig.SessionMode.RAFT) {
-            GROUP_PREVENT.put(group, prevent);
         }
     }
 

@@ -77,10 +77,12 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
-        GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
-        // Notifications are made of changes in cluster information
-        Optional.ofNullable(WATCHERS.remove(event.getGroup()))
-            .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+        if (event.getTerm() > 0) {
+            GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
+            // Notifications are made of changes in cluster information
+            Optional.ofNullable(WATCHERS.remove(event.getGroup()))
+                .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+        }
     }
 
     private void notify(Watcher<?> watcher) {

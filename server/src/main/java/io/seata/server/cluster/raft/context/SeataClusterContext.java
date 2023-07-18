@@ -18,15 +18,21 @@ package io.seata.server.cluster.raft.context;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.ContextCore;
 import io.seata.core.context.ContextCoreLoader;
+
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @author funkye
  */
-public class RaftClusterContext {
+public class SeataClusterContext {
 
-    private RaftClusterContext() {
+    private static final String GROUP = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+
+    private SeataClusterContext() {
     }
 
     /**
@@ -43,6 +49,15 @@ public class RaftClusterContext {
      */
     public static void bindGroup(@Nonnull String group) {
         CONTEXT_HOLDER.put(KEY_GROUP, group);
+    }
+
+    /**
+     * Bind group.
+     *
+     */
+    public static String bindGroup() {
+        CONTEXT_HOLDER.put(KEY_GROUP, GROUP);
+        return GROUP;
     }
 
     /**

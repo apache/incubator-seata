@@ -139,7 +139,6 @@ server.raft.reporterEnabled=false
 server.raft.reporterInitialDelay=60
 server.raft.serialization=kryo
 server.raft.compressor=none
-server.raft.autoJoin=false
 server.raft.sync=true
 
 

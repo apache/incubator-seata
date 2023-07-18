@@ -35,9 +35,8 @@ import io.seata.common.holder.ObjectHolder;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.server.AbstractTCInboundHandler;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.common.ConfigurationKeys;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
@@ -187,26 +186,26 @@ public class RaftStateMachine extends StateMachineAdapter {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("groupId: {}, session map: {} ", group,
                     SessionHolder.getRootSessionManager().allSessions().size());
-                RaftClusterContext.bindGroup(group);
+                SeataClusterContext.bindGroup(group);
                 try {
                     SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(),
                         StoreConfig.SessionMode.RAFT, false);
                 } finally {
-                    RaftClusterContext.unbindGroup();
+                    SeataClusterContext.unbindGroup();
                 }
             });
         }
-        AbstractTCInboundHandler.setPrevent(group, false);
         // become the leader again,reloading global session
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group, term));
+            .publishEvent(new ClusterChangeEvent(this, group, term, true));
     }
 
     @Override
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         LOGGER.info("groupId: {}, onLeaderStop: status={}.", group, status);
-        AbstractTCInboundHandler.setPrevent(group, true);
+        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            .publishEvent(new ClusterChangeEvent(this, group, -1, false));
     }
 
     @Override
@@ -218,9 +217,8 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
-        AbstractTCInboundHandler.setPrevent(group, true);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm()));
+            .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm(),false));
     }
 
     @Override
@@ -228,7 +226,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group));
+            .publishEvent(new ClusterChangeEvent(this,group, currentTerm.get(), isLeader()));
     }
 
     private void onExecuteRaft(RaftSessionSyncMsg msg) {

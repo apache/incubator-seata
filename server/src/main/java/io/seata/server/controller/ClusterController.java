@@ -28,11 +28,12 @@ import javax.servlet.http.HttpServletRequest;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
@@ -82,8 +83,12 @@ public class ClusterController {
     }
 
     @GetMapping("/cluster")
-    public MetadataResponse cluster(@RequestParam(defaultValue = DEFAULT_SEATA_GROUP) String group) {
+    public MetadataResponse cluster(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
+        if (StringUtils.isBlank(group)) {
+            group =
+                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+        }
         RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer(group);
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
@@ -100,16 +105,17 @@ public class ClusterController {
                     leaderNode.setHost(leader.getIp());
                     nodes.add(leaderNode);
                     Configuration configuration = routeTable.getConfiguration(group);
-                    nodes.addAll(configuration.getLearners().parallelStream().map(learner -> {
+                    String finalGroup = group;
+                    nodes.addAll(configuration.getLearners().stream().map(learner -> {
                         Node node = new Node(learner.getIdx(), learner.getPort());
-                        node.setGroup(group);
+                        node.setGroup(finalGroup);
                         node.setRole(ClusterRole.LEARNER);
                         node.setHost(learner.getIp());
                         return node;
                     }).collect(Collectors.toList()));
-                    nodes.addAll(configuration.getPeers().parallelStream().map(follower -> {
+                    nodes.addAll(configuration.getPeers().stream().map(follower -> {
                         Node node = new Node(follower.getIdx(), follower.getPort());
-                        node.setGroup(group);
+                        node.setGroup(finalGroup);
                         node.setRole(ClusterRole.FOLLOWER);
                         node.setHost(follower.getIp());
                         return node;
@@ -124,21 +130,16 @@ public class ClusterController {
         return metadataResponse;
     }
 
-    @GetMapping("/watch")
-    public void watch(HttpServletRequest request, @RequestParam String groupTerms,
+    @PostMapping("/watch")
+    public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
         @RequestParam(defaultValue = "28000") int timeout) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        try {
-            Map<String, Object> groupTermMap = objectMapper.readValue(groupTerms, HashMap.class);
-            groupTermMap.forEach((group, term) -> {
-                Watcher<AsyncContext> watcher =
-                    new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
-                clusterWatcherManager.registryWatcher(watcher);
-            });
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        groupTerms.forEach((group, term) -> {
+            Watcher<AsyncContext> watcher =
+                new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+            clusterWatcherManager.registryWatcher(watcher);
+        });
     }
 
 }

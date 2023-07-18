@@ -25,7 +25,7 @@ import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.server.cluster.raft.RaftServerFactory;
-import io.seata.server.cluster.raft.context.RaftClusterContext;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
 import io.seata.server.cluster.raft.msg.RaftSyncMsg;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
@@ -49,7 +49,7 @@ public class RaftTaskUtil {
         }
         task.setDone(done == null ? status -> {
         } : done);
-        RaftServerFactory.getInstance().getRaftServer(RaftClusterContext.getGroup()).getNode().apply(task);
+        RaftServerFactory.getInstance().getRaftServer(SeataClusterContext.getGroup()).getNode().apply(task);
         if (completableFuture != null) {
             return futureGet(completableFuture);
         }

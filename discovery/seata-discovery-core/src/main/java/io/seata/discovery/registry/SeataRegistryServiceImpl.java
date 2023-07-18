@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -44,19 +45,26 @@ import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.common.ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 
 /**
  * The type File registry service.
@@ -64,6 +72,7 @@ import static io.seata.common.ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS;
  * @author funkye
  */
 public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
+   
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataRegistryServiceImpl.class);
 
     private static volatile SeataRegistryServiceImpl instance;
@@ -82,8 +91,12 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
         new PoolingHttpClientConnectionManager();
+    
+    private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static volatile String CURRENT_TRANSACTION_SERVICE_GROUP;
+
+    private static volatile String CURRENT_TRANSACTION_CLUSTER_NAME;
 
     private static volatile ThreadPoolExecutor REFRESH_METADATA_EXECUTOR;
 
@@ -97,8 +110,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
     }
 
-    private SeataRegistryServiceImpl() {
-    }
+    private SeataRegistryServiceImpl() {}
 
     /**
      * Gets instance.
@@ -148,15 +160,16 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                         while (true) {
                             // Forced refresh of metadata information after set age
                             boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
+                            String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
                             if (!fetch) {
                                 fetch = watch();
                             }
                             // Cluster changes or reaches timeout refresh time
                             if (fetch) {
                                 AtomicBoolean success = new AtomicBoolean(true);
-                                METADATA.groups().parallelStream().forEach(group -> {
+                                METADATA.groups(clusterName).parallelStream().forEach(group -> {
                                     try {
-                                        acquireClusterMetaData(group);
+                                        acquireClusterMetaData(clusterName, group);
                                     } catch (Exception e) {
                                         success.set(false);
                                         // prevents an exception from being thrown that causes the thread to break
@@ -176,35 +189,40 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 }
             }
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> HTTP_CLIENT_MAP.values().stream().forEach(client -> {
+            try {
+                client.close();
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        })));
     }
 
-    private static String queryHttpAddress(String group) {
-        List<Node> nodeList = METADATA.getNodes(group);
+    private static String queryHttpAddress(String clusterName, String group) {
+        List<Node> nodeList = METADATA.getNodes(clusterName, group);
         List<String> addressList = null;
         Stream<InetSocketAddress> stream = null;
         if (CollectionUtils.isNotEmpty(nodeList)) {
             List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
             if (CollectionUtils.isEmpty(inetSocketAddresses)) {
-                addressList = nodeList.parallelStream()
-                    .map(node -> node.getHost() + IP_PORT_SPLIT_CHAR + node.getHttpPort())
+                addressList = nodeList.stream().map(node -> node.getHost() + IP_PORT_SPLIT_CHAR + node.getHttpPort())
                     .collect(Collectors.toList());
             } else {
-                stream = inetSocketAddresses.parallelStream();
+                stream = inetSocketAddresses.stream();
             }
         } else {
             // http port = netty port - 1000
-            stream = INIT_ADDRESSES.get(group).parallelStream();
+            stream = INIT_ADDRESSES.get(clusterName).stream();
         }
         addressList = addressList != null ? addressList
             : stream.map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR
-                + (inetSocketAddress.getPort() - 1000)).collect(Collectors.toList());
+                + (inetSocketAddress.getPort() - SERVICE_OFFSET_SPRING_BOOT)).collect(Collectors.toList());
         int length = addressList.size();
         return addressList.get(ThreadLocalRandom.current().nextInt(length));
     }
 
     @Override
-    public void close() throws Exception {
-    }
+    public void close() throws Exception {}
 
     private InetSocketAddress convertInetSocketAddress(Node node) {
         String host = node.getHost();
@@ -219,6 +237,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             return null;
         }
         CURRENT_TRANSACTION_SERVICE_GROUP = key;
+        CURRENT_TRANSACTION_CLUSTER_NAME = clusterName;
         if (!METADATA.containsGroup(clusterName)) {
             List<InetSocketAddress> list = FILE_REGISTRY_SERVICE.lookup(key);
             if (CollectionUtils.isEmpty(list)) {
@@ -226,7 +245,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             }
             INIT_ADDRESSES.put(clusterName, list);
             // Refresh the metadata by initializing the address
-            acquireClusterMetaData(clusterName);
+            acquireClusterMetaDataByClusterName(clusterName);
             startQueryMetadata();
         }
         List<Node> nodes = METADATA.getNodes(clusterName);
@@ -249,14 +268,14 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     }
 
     private static boolean watch() {
-        try {
-            Map<String, String> param = new HashMap<>();
-            Map<String, Long> groupTerms = METADATA.getClusterTerm();
-            param.put("groupTerms", OBJECT_MAPPER.writeValueAsString(groupTerms));
-            String clusterName = FILE_REGISTRY_SERVICE.getServiceGroup(CURRENT_TRANSACTION_SERVICE_GROUP);
-            String tcAddress = queryHttpAddress(clusterName);
+        Map<String, String> param = new HashMap<>();
+        String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
+        Map<String, Long> groupTerms = METADATA.getClusterTerm(clusterName);
+        groupTerms.forEach((k, v) -> param.put(k, String.valueOf(v)));
+        for (String group : groupTerms.keySet()) {
+            String tcAddress = queryHttpAddress(clusterName, group);
             try (CloseableHttpResponse response =
-                doGet("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+                doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -267,9 +286,9 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException ignored) {
                 }
+                continue;
             }
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
+            break;
         }
         return false;
     }
@@ -284,15 +303,20 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             return ALIVE_NODES.put(transactionServiceGroup,
                 aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
                     // Since only follower will turn into leader, only the follower node needs to be listened to
-                    return inetSocketAddress.getPort() != port || !inetSocketAddress.getAddress().getHostAddress().equals(host);
+                    return inetSocketAddress.getPort() != port
+                        || !inetSocketAddress.getAddress().getHostAddress().equals(host);
                 }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
     }
 
-    private static void acquireClusterMetaData(String group) {
-        String tcAddress = queryHttpAddress(group);
+    private static void acquireClusterMetaDataByClusterName(String clusterName) {
+        acquireClusterMetaData(clusterName, "");
+    }
+
+    private static void acquireClusterMetaData(String clusterName, String group) {
+        String tcAddress = queryHttpAddress(clusterName, group);
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
@@ -302,11 +326,11 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                 }
-                MetadataResponse metadataResponse = null;
+                MetadataResponse metadataResponse;
                 if (StringUtils.isNotBlank(response)) {
                     try {
                         metadataResponse = OBJECT_MAPPER.readValue(response, MetadataResponse.class);
-                        METADATA.refreshMetadata(group, metadataResponse);
+                        METADATA.refreshMetadata(clusterName, metadataResponse);
                     } catch (JsonProcessingException e) {
                         LOGGER.error(e.getMessage(), e);
                     }
@@ -319,6 +343,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
 
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
         int timeout) {
+        CloseableHttpClient client = null;
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -331,12 +356,43 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             if (header != null) {
                 header.forEach(httpGet::addHeader);
             }
-            CloseableHttpClient client =
-                HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+            client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
                     .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
                         .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build();
+                    .build());
             return client.execute(httpGet);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
+        int timeout) {
+        CloseableHttpClient client = null;
+        try {
+            URIBuilder builder = new URIBuilder(url);
+            URI uri = builder.build();
+            HttpPost httpPost = new HttpPost(uri);
+            if (header != null) {
+                header.forEach(httpPost::addHeader);
+            }
+            List<NameValuePair> nameValuePairs = new ArrayList<>();
+            params.forEach((k, v) -> {
+                nameValuePairs.add(new BasicNameValuePair(k, v));
+            });
+            String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
+
+            StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
+            httpPost.setEntity(stringEntity);
+            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
+            return client.execute(httpPost);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

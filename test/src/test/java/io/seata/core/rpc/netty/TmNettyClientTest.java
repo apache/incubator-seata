@@ -146,7 +146,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         request.setXid("127.0.0.1:8091:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
-        request.setGroupId(DEFAULT_SEATA_GROUP);
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());

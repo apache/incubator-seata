@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import io.seata.common.XID;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
@@ -29,7 +30,11 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
+import org.springframework.context.ApplicationListener;
 
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -72,10 +77,20 @@ public class Server {
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
+        ConfigurableListableBeanFactory beanFactory =
+            ((AnnotationConfigServletWebServerApplicationContext)ObjectHolder.INSTANCE
+                .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
+        beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
+        beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
+        if (coordinator instanceof ApplicationListener) {
+            ((AnnotationConfigServletWebServerApplicationContext)ObjectHolder.INSTANCE
+                .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                    .addApplicationListener((ApplicationListener<?>)coordinator);
+        }
         //log store mode : file, db, redis
         SessionHolder.init();
         LockerManagerFactory.init();
-        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 
