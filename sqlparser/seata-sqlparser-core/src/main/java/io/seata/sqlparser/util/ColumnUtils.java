@@ -22,6 +22,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.EscapeHandlerFactory;
+import io.seata.sqlparser.struct.TableMeta;
 
 /**
  * column utils
@@ -97,14 +98,25 @@ public final class ColumnUtils {
      *
      * @param colName the column name
      * @param dbType  the dbType
-     * @return
+     * @return colName
      */
     public static String addEscape(String colName, String dbType) {
+        return addEscape(colName, dbType, null);
+    }
+
+    /**
+     * if necessary, add escape
+     *
+     * @param colName the column name
+     * @param dbType  the dbType
+     * @param tableMeta  the tableMeta
+     * @return colName
+     */
+    public static String addEscape(String colName, String dbType, TableMeta tableMeta) {
         if (StringUtils.isBlank(colName)) {
             return colName;
         }
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(dbType);
-        return escapeHandler.addColNameEscape(colName);
+        return escapeHandler.addColNameEscape(colName, tableMeta);
     }
-
 }
