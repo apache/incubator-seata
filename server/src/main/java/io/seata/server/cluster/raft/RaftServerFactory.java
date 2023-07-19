@@ -132,7 +132,7 @@ public class RaftServerFactory {
             RAFT_SERVER_MAP.put(group, raftServer);
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         } catch (IOException e) {
-            throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage());
+            throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage(), e);
         }
     }
 
