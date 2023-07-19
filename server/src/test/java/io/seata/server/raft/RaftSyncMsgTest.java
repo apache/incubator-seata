@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author jianbin.chen
@@ -49,10 +50,12 @@ public class RaftSyncMsgTest {
     private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
 
     private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
+
     @BeforeAll
-    public static void init(){
+    public static void setUp(ApplicationContext context){
         SessionHolder.init(StoreConfig.SessionMode.FILE);
     }
+
     @AfterAll
     public static void destroy(){
         SessionHolder.destroy();

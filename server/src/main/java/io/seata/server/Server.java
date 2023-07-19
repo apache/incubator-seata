@@ -31,8 +31,9 @@ import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
@@ -78,15 +79,14 @@ public class Server {
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         ConfigurableListableBeanFactory beanFactory =
-            ((AnnotationConfigServletWebServerApplicationContext)ObjectHolder.INSTANCE
+            ((GenericWebApplicationContext)ObjectHolder.INSTANCE
                 .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
         beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
         if (coordinator instanceof ApplicationListener) {
-            ((AnnotationConfigServletWebServerApplicationContext)ObjectHolder.INSTANCE
-                .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                    .addApplicationListener((ApplicationListener<?>)coordinator);
+            ((GenericWebApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                .addApplicationListener((ApplicationListener<?>)coordinator);
         }
         //log store mode : file, db, redis
         SessionHolder.init();
