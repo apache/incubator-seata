@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @author minghua.xie
+ * @author Bughue
  * @since 2.0.0
  */
 public class CompatibleProtocolEncoder extends MessageToByteEncoder {

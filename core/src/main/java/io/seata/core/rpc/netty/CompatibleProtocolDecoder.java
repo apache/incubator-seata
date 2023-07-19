@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @author minghua.xie
+ * @author Bughue
  * @since 2.0.0
  */
 public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
@@ -91,6 +91,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     if(version == ProtocolConstants.OLD_VERSION){
                         return ProtocolOldDecoder.decodeFrame(frame);
                     }else if(version == ProtocolConstants.VERSION){
+                        // todo spi?
                         return ProtocolV1Decoder.decodeFrame(frame);
                     }else {
                         throw new IllegalArgumentException("Unknown version: " + version );
