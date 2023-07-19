@@ -17,6 +17,7 @@ package io.seata.rm.tcc.resource.parser;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.integration.tx.api.interceptor.ActionContextUtil;
 import io.seata.integration.tx.api.interceptor.TxBeanParserUtils;
 import io.seata.integration.tx.api.interceptor.parser.RegisterResourceParser;
@@ -61,6 +62,9 @@ public class TccRegisterResourceParser implements RegisterResourceParser {
                             TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
                             if (twoPhaseBusinessAction != null) {
                                 TCCResource tccResource = new TCCResource();
+                                if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
+                                    throw new FrameworkException("TCC bean name cannot be null or empty");
+                                }
                                 tccResource.setActionName(twoPhaseBusinessAction.name());
                                 tccResource.setTargetBean(targetBean);
                                 tccResource.setPrepareMethod(m);

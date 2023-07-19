@@ -36,6 +36,9 @@ import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
+
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
 import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;

@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,34 +37,44 @@ import java.util.Map;
 public class YamlFileConfig implements FileConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YamlFileConfig.class);
-    private Map configMap;
+    private final Map<String, Object> configMap = new HashMap<>();
 
     public YamlFileConfig(File file, String name) throws IOException {
         Yaml yaml = new Yaml();
         try (InputStream is = new FileInputStream(file)) {
-            configMap = yaml.load(is);
+            flattenConfig("", yaml.loadAs(is, HashMap.class), configMap);
         } catch (FileNotFoundException e) {
             throw new IllegalArgumentException("file not found");
+        }
+    }
+
+    private void flattenConfig(String prefix, Map<String, Object> config, Map<String, Object> flatMap) {
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            String key = prefix.isEmpty() ? entry.getKey() : prefix + "." + entry.getKey();
+            Object value = entry.getValue();
+            if (value != null) {
+                if (value instanceof Map) {
+                    flattenConfig(key, (Map<String, Object>)value, flatMap);
+                } else {
+                    flatMap.put(key, String.valueOf(value));
+                }
+            }
         }
     }
 
     @Override
     public String getString(String path) {
         try {
-            Map config = configMap;
-            String[] dataId = path.split("\\.");
-            for (int i = 0; i < dataId.length - 1; i++) {
-                if (config.containsKey(dataId[i])) {
-                    config = (Map) config.get(dataId[i]);
-                } else {
-                    return null;
-                }
-            }
-            Object value = config.get(dataId[dataId.length - 1]);
+            Object value = configMap.get(path);
             return value == null ? null : String.valueOf(value);
         } catch (Exception e) {
             LOGGER.warn("get config data error" + path, e);
             return null;
         }
+    }
+
+    @Override
+    public Map<String, Object> getAllConfig() {
+        return configMap;
     }
 }
