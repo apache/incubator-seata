@@ -96,7 +96,11 @@ public class ProtocolOldDecoder {
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isSeataCodec) { bodyLength = frame.readShort(); } else { typeCode = frame.readShort(); }
+        if (!isSeataCodec) {
+            bodyLength = frame.readShort();
+        } else {
+            typeCode = frame.readShort();
+        }
         long msgId = frame.readLong();
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setCompressor(CompressorType.NONE.getCode());
@@ -121,19 +125,13 @@ public class ProtocolOldDecoder {
             return rpcMessage;
         }
 
-        // TODO  怎样知道是不是one way
+        // todo  怎样知道是不是one way
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
 
+        // todo 暂时新旧的都按这样写，应该要剥离开来（用typeCode判断序列化方式）
         rpcMessage.setBody(CompatibleProtocolDecoder.getBody(frame, rpcMessage.getMessageType(),
                 rpcMessage.getCompressor(),rpcMessage.getCodec(),bodyLength));
         return rpcMessage;
-    }
-
-    private static short getShort(byte b0, byte b1) {
-        ByteBuffer byteBufferX = ByteBuffer.allocate(128);
-        byteBufferX.put(b0);
-        byteBufferX.put(b1);
-        return byteBufferX.getShort(0);
     }
 }
