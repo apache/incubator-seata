@@ -30,6 +30,8 @@ import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
+import io.seata.core.rpc.netty.CompatibleProtocolDecoder;
+import io.seata.core.rpc.netty.CompatibleProtocolEncoder;
 import io.seata.core.serializer.SerializerType;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
@@ -80,8 +82,8 @@ public class ProtocolV1Client {
             @Override
             protected void initChannel(Channel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
-                pipeline.addLast(new ProtocolV1Encoder());
-                pipeline.addLast(new ProtocolV1Decoder(8 * 1024 * 1024));
+                pipeline.addLast(new CompatibleProtocolEncoder());
+                pipeline.addLast(new CompatibleProtocolDecoder(8 * 1024 * 1024));
                 pipeline.addLast(new ClientChannelHandler(ProtocolV1Client.this));
             }
         });

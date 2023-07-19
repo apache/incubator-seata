@@ -32,6 +32,11 @@ public interface ProtocolConstants {
     byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
 
     /**
+     * Old protocol version
+     */
+    byte OLD_VERSION = 0;
+
+    /**
      * Protocol version
      */
     byte VERSION = 1;

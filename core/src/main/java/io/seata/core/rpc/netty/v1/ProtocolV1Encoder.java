@@ -17,7 +17,8 @@ package io.seata.core.rpc.netty.v1;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToByteEncoder;
+import io.seata.core.rpc.netty.CompatibleProtocolEncoder;
+import io.seata.core.rpc.netty.old.ProtocolOldEncoder;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
@@ -57,15 +58,15 @@ import java.util.Map;
  * @see ProtocolV1Decoder
  * @since 0.7.0
  */
-public class ProtocolV1Encoder extends MessageToByteEncoder {
+public class ProtocolV1Encoder{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Encoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolOldEncoder.class);
 
-    @Override
-    public void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
+    public static void encode(RpcMessage rpcMessage, ByteBuf out) {
         try {
-            if (msg instanceof RpcMessage) {
-                RpcMessage rpcMessage = (RpcMessage) msg;
+            // todo 外层已经判断好，可以去掉
+//            if (msg instanceof RpcMessage) {
+//                RpcMessage rpcMessage = (RpcMessage) msg;
 
                 int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
                 int headLength = ProtocolConstants.V1_HEAD_LENGTH;
@@ -110,9 +111,9 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 out.writeInt(fullLength);
                 out.writeShort(headLength);
                 out.writerIndex(writeIndex);
-            } else {
-                throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
-            }
+//            } else {
+//                throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
+//            }
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
         }
