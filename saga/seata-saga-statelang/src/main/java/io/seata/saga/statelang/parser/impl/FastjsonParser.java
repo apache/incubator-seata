@@ -53,6 +53,11 @@ public class FastjsonParser implements JsonParser {
     }
 
     @Override
+    public boolean useAutoType(String json) {
+        return json != null && json.contains("\"@type\"");
+    }
+
+    @Override
     public String toJsonString(Object o, boolean prettyPrint) {
         return toJsonString(o, false, prettyPrint);
     }

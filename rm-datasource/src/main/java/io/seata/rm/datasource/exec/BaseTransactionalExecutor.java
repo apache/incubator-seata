@@ -39,7 +39,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -496,7 +496,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumnsIsSimplified());
+            columns.addAll(recognizer.getInsertColumnsUnEscape());
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(columnName);

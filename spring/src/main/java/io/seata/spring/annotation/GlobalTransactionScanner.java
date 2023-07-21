@@ -25,7 +25,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
+import io.seata.common.aot.NativeUtils;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeEvent;
@@ -36,6 +38,7 @@ import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
+import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
@@ -492,9 +495,31 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         return new MethodDesc(anno, method);
     }
 
+    public static boolean isTccAutoProxy(Class<?> beanClass) {
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(beanClass);
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
+                return true;
+            }
+        }
+        return beanClass.isAnnotationPresent(LocalTCC.class);
+    }
+
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
             throws BeansException {
+        if (NativeUtils.isSpringAotProcessing()) {
+            if (isTccAutoProxy(beanClass)) {
+                LOGGER.info("Proxy TCC service: {}", beanName);
+                return new Object[]{new TccActionInterceptor()};
+            } else if (existsAnnotation(beanClass)) {
+                LOGGER.info("Proxy TM bean: {}", beanName);
+                return new Object[]{new GlobalTransactionalInterceptor(failureHandlerHook)};
+            } else {
+                return DO_NOT_PROXY;
+            }
+        }
+
         return new Object[]{interceptor};
     }
 
