@@ -83,7 +83,7 @@ public class NetUtil {
      * @return the inet socket address
      */
     public static InetSocketAddress toInetSocketAddress(String address) {
-        int i = address.indexOf(':');
+        int i = address.lastIndexOf(':');
         String host;
         int port;
         if (i > -1) {
