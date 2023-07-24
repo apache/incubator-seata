@@ -44,6 +44,9 @@ import org.slf4j.LoggerFactory;
  */
 public class EnhancedServiceLoader {
 
+    public static final String SERVICES_DIRECTORY = "META-INF/services/";
+    public static final String SEATA_DIRECTORY = "META-INF/seata/";
+
     /**
      * Class->InnerEnhancedServiceLoader map
      */
@@ -245,8 +248,6 @@ public class EnhancedServiceLoader {
 
     private static class InnerEnhancedServiceLoader<S> {
         private static final Logger LOGGER = LoggerFactory.getLogger(InnerEnhancedServiceLoader.class);
-        private static final String SERVICES_DIRECTORY = "META-INF/services/";
-        private static final String SEATA_DIRECTORY = "META-INF/seata/";
 
         private final Class<S> type;
         private final Holder<List<ExtensionDefinition<S>>> definitionsHolder = new Holder<>();
@@ -555,7 +556,9 @@ public class EnhancedServiceLoader {
 
                 if (LOGGER.isDebugEnabled()) {
                     if (!hasServiceFile) {
-                        LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
+                        if (!SEATA_DIRECTORY.equals(dir)) {
+                            LOGGER.warn("Load [{}] class fail: no service files found in '{}'.", type.getName(), dir);
+                        }
                     } else if (!hasClasses) {
                         LOGGER.warn("Load [{}] class fail: the service files in '{}' is all empty.", type.getName(), dir);
                     }
