@@ -65,7 +65,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 if (xaTwoPhaseTimeoutChecker == null) {
                     boolean shouldBeHold = dataSourceCache.values().parallelStream().anyMatch(resource -> {
                         if (resource instanceof DataSourceProxyXA) {
-                            return ((DataSourceProxyXA)resource).isShouldBeHeld();
+                            return ((DataSourceProxyXA)resource).isShouldBeHold();
                         }
                         return false;
                     });
@@ -77,7 +77,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                 BaseDataSourceResource resource = (BaseDataSourceResource)entry.getValue();
                                 if (resource instanceof DataSourceProxyXA) {
                                     BaseDataSourceResourceXA<ConnectionProxyXA> resourceXA = (BaseDataSourceResourceXA<ConnectionProxyXA>) resource;
-                                    if (resourceXA.isShouldBeHeld()) {
+                                    if (resourceXA.isShouldBeHold()) {
                                         Map<String, ConnectionProxyXA> keeper = BaseDataSourceResourceXA.getKeeper();
                                         for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
                                             ConnectionProxyXA connection = connectionEntry.getValue();

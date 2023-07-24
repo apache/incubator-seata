@@ -65,7 +65,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile Integer timeout = null;
 
-    private boolean shouldBeHeld = false;
+    private boolean shouldBeHold;
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -77,7 +77,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public ConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResourceXA resource, String xid) {
         super(originalConnection, xaConnection, resource, xid);
-        this.shouldBeHeld = resource.isShouldBeHeld();
+        this.shouldBeHold = resource.isShouldBeHold();
     }
 
     public void init() {
@@ -340,7 +340,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public boolean shouldBeHeld() {
-        return shouldBeHeld || StringUtils.isBlank(resource.getDbType());
+        return shouldBeHold || StringUtils.isBlank(resource.getDbType());
     }
 
     public Long getPrepareTime() {

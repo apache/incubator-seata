@@ -37,7 +37,7 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
 
     private static final Map<String, ConnectionProxyXA> KEEPER = new ConcurrentHashMap<>();
 
-    private boolean shouldBeHeld = false;
+    private boolean shouldBeHold = false;
 
     public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
         BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
@@ -88,11 +88,11 @@ public abstract class BaseDataSourceResourceXA<T extends Holdable> extends BaseD
         return KEEPER;
     }
 
-    public boolean isShouldBeHeld() {
-        return shouldBeHeld;
+    public boolean isShouldBeHold() {
+        return shouldBeHold;
     }
 
-    public void setShouldBeHeld(boolean shouldBeHeld) {
-        this.shouldBeHeld = shouldBeHeld;
+    public void setShouldBeHold(boolean shouldBeHold) {
+        this.shouldBeHold = shouldBeHold;
     }
 }
