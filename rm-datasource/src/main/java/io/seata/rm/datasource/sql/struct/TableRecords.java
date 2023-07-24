@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
@@ -194,6 +196,7 @@ public class TableRecords implements java.io.Serializable {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
+        Set<String> lowerCasePKColNames = primaryKeyMap.keySet().stream().map(String::toLowerCase).collect(Collectors.toSet());
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
@@ -204,7 +207,7 @@ public class TableRecords implements java.io.Serializable {
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (primaryKeyMap.containsKey(colName)) {
+                if (isPrimaryKey(colName, lowerCasePKColNames)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);
@@ -261,6 +264,18 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * Determines if the specified column is a primary key.
+     *
+     * @param columnName name of the column to be tested.
+     * @param lowerCasePKColNames lowercase primary key column name set.
+     * @return {@code true} if the column is a primary key;
+     *         {@code false} otherwise.
+     */
+    public static boolean isPrimaryKey(String columnName, Set<String> lowerCasePKColNames) {
+        return lowerCasePKColNames.contains(columnName.toLowerCase());
     }
 
     /**
