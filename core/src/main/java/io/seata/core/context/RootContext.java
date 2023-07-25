@@ -49,7 +49,7 @@ public class RootContext {
     public static final String KEY_XID = "TX_XID";
 
     /**
-     * The constant HIDDEN_KEY_XID.
+     * The constant HIDDEN_KEY_XID for sofa-rpc integration.
      */
     public static final String HIDDEN_KEY_XID = Constants.HIDE_KEY_PREFIX_CHAR + KEY_XID;
 
@@ -76,7 +76,7 @@ public class RootContext {
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     /**
-     * The constant HIDDEN_KEY_BRANCH_TYPE
+     * The constant HIDDEN_KEY_BRANCH_TYPE for sofa-rpc integration.
      */
     public static final String HIDDEN_KEY_BRANCH_TYPE = Constants.HIDE_KEY_PREFIX_CHAR + KEY_BRANCH_TYPE;
 
