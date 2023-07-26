@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -148,6 +151,26 @@ public class TableMeta {
         }
 
         return pk;
+    }
+
+    /**
+     * Gets ignore case primary key set
+     *
+     * @return ignore case, unmodifiable primary key set
+     */
+    public Set<String> getIgnoreCasePKs() {
+        Set<String> pks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        allIndexes.forEach((key, index) -> {
+            if (index.getIndextype().value() == IndexType.PRIMARY.value()) {
+                for (ColumnMeta col : index.getValues()) {
+                    pks.add(col.getColumnName());
+                }
+            }
+        });
+        if (pks.size() < 1) {
+            throw new NotSupportYetException(String.format("%s needs to contain the primary key.", tableName));
+        }
+        return Collections.unmodifiableSet(pks);
     }
 
     /**
