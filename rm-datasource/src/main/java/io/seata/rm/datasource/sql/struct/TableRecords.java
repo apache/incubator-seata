@@ -194,7 +194,7 @@ public class TableRecords implements java.io.Serializable {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        Set<String> ignoreCasePKs = tmeta.getIgnoreCasePKs();
+        Set<String> ignoreCasePKs = tmeta.getCaseInsensitivePKs();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {

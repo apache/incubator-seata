@@ -154,11 +154,11 @@ public class TableMeta {
     }
 
     /**
-     * Gets ignore case primary key set
+     * Gets case-insensitive primary key set
      *
-     * @return ignore case, unmodifiable primary key set
+     * @return case-insensitive, unmodifiable primary key set
      */
-    public Set<String> getIgnoreCasePKs() {
+    public Set<String> getCaseInsensitivePKs() {
         Set<String> pks = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         allIndexes.forEach((key, index) -> {
             if (index.getIndextype().value() == IndexType.PRIMARY.value()) {
