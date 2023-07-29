@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
@@ -35,12 +34,14 @@ import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.Result;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +64,11 @@ public class ClusterController {
     private ClusterWatcherManager clusterWatcherManager;
 
     @Resource
-    private ObjectMapper objectMapper;
+    private ServerProperties serverProperties;
+
+    @Resource
+    private NettyRemotingServer nettyRemotingServer;
+
 
     @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
@@ -104,12 +109,16 @@ public class ClusterController {
                     leaderNode.setHost(leader.getIp());
                     nodes.add(leaderNode);
                     Configuration configuration = routeTable.getConfiguration(group);
+                    int nettyPort = nettyRemotingServer.getListenPort();
+                    int httpPort = serverProperties.getPort();
                     String finalGroup = group;
                     nodes.addAll(configuration.getLearners().stream().map(learner -> {
                         Node node = new Node(learner.getIdx(), learner.getPort());
                         node.setGroup(finalGroup);
                         node.setRole(ClusterRole.LEARNER);
                         node.setHost(learner.getIp());
+                        node.setNettyPort(nettyPort);
+                        node.setHttpPort(httpPort);
                         return node;
                     }).collect(Collectors.toList()));
                     nodes.addAll(configuration.getPeers().stream().map(follower -> {
@@ -117,6 +126,8 @@ public class ClusterController {
                         node.setGroup(finalGroup);
                         node.setRole(ClusterRole.FOLLOWER);
                         node.setHost(follower.getIp());
+                        node.setNettyPort(nettyPort);
+                        node.setHttpPort(httpPort);
                         return node;
                     }).collect(Collectors.toList()));
                     metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());

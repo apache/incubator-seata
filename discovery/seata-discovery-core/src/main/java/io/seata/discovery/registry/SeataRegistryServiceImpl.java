@@ -211,14 +211,27 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                 stream = inetSocketAddresses.stream();
             }
         } else {
-            // http port = netty port - 1000
             stream = INIT_ADDRESSES.get(clusterName).stream();
         }
-        addressList = addressList != null ? addressList
-            : stream.map(inetSocketAddress -> inetSocketAddress.getAddress().getHostAddress() + IP_PORT_SPLIT_CHAR
-                + (inetSocketAddress.getPort() - SERVICE_OFFSET_SPRING_BOOT)).collect(Collectors.toList());
-        int length = addressList.size();
-        return addressList.get(ThreadLocalRandom.current().nextInt(length));
+        if (addressList != null) {
+            return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
+        } else {
+            Map<String, Node> map = new HashMap<>();
+            for (Node node : nodeList) {
+                map.put(node.getHost(), node);
+            }
+            addressList = stream.map(inetSocketAddress -> {
+                String host = inetSocketAddress.getAddress().getHostAddress();
+                Node node = map.get(host);
+                if (node != null) {
+                    return host + IP_PORT_SPLIT_CHAR + node.getHttpPort();
+                } else {
+                    // http port = netty port - 1000
+                    return host + IP_PORT_SPLIT_CHAR + (inetSocketAddress.getPort() - SERVICE_OFFSET_SPRING_BOOT);
+                }
+            }).collect(Collectors.toList());
+            return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
+        }
     }
 
     @Override
