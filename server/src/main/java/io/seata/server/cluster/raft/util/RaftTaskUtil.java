@@ -26,8 +26,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
-import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
-import io.seata.server.cluster.raft.msg.RaftSyncMsg;
+import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.msg.RaftSyncMessage;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 
 /**
@@ -39,10 +39,10 @@ public class RaftTaskUtil {
         throws TransactionException {
         final Task task = new Task();
         if (data != null) {
-            RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
-            raftSyncMsg.setBody(data);
+            RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
+            raftSyncMessage.setBody(data);
             try {
-                task.setData(ByteBuffer.wrap(RaftSyncMsgSerializer.encode(raftSyncMsg)));
+                task.setData(ByteBuffer.wrap(RaftSyncMessageSerializer.encode(raftSyncMessage)));
             } catch (IOException e) {
                 throw new TransactionException(e);
             }

@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
-import io.seata.server.cluster.raft.msg.RaftSyncMsg;
+import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.msg.RaftSyncMessage;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
@@ -31,7 +31,7 @@ import io.seata.server.storage.raft.RaftSessionSyncMsg;
  * @author funkye
  */
 @SpringBootTest
-public class RaftSyncMsgSerializerTest {
+public class RaftSyncMessageSerializerTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {
 
@@ -43,11 +43,11 @@ public class RaftSyncMsgSerializerTest {
         raftSessionSyncMsg.setMsgType(RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION);
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         raftSessionSyncMsg.setGlobalSession(SessionConverter.convertGlobalTransactionDO(session));
-        RaftSyncMsg raftSyncMsg = new RaftSyncMsg();
-        raftSyncMsg.setBody(raftSessionSyncMsg);
-        byte[] bytes = RaftSyncMsgSerializer.encode(raftSyncMsg);
-        RaftSyncMsg raftSyncMsg2 = RaftSyncMsgSerializer.decode(bytes);
-        RaftSessionSyncMsg raftSessionSyncMsg2 = (RaftSessionSyncMsg)raftSyncMsg2.getBody();
+        RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
+        raftSyncMessage.setBody(raftSessionSyncMsg);
+        byte[] bytes = RaftSyncMessageSerializer.encode(raftSyncMessage);
+        RaftSyncMessage raftSyncMessage2 = RaftSyncMessageSerializer.decode(bytes);
+        RaftSessionSyncMsg raftSessionSyncMsg2 = (RaftSessionSyncMsg) raftSyncMessage2.getBody();
         Assertions.assertTrue(raftSessionSyncMsg2.getGlobalSession().getXid().equals(session.getXid()));
     }
 

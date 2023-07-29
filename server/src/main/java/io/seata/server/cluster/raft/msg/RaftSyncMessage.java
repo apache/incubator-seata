@@ -28,7 +28,7 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SERIALIZATIO
 /**
  * @author funkye
  */
-public class RaftSyncMsg implements java.io.Serializable {
+public class RaftSyncMessage implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;
     private byte codec = SerializerType
@@ -72,7 +72,7 @@ public class RaftSyncMsg implements java.io.Serializable {
      * @param codec the codec
      * @return the codec
      */
-    public RaftSyncMsg setCodec(byte codec) {
+    public RaftSyncMessage setCodec(byte codec) {
         this.codec = codec;
         return this;
     }
@@ -92,7 +92,7 @@ public class RaftSyncMsg implements java.io.Serializable {
      * @param compressor the compressor
      * @return the compressor
      */
-    public RaftSyncMsg setCompressor(byte compressor) {
+    public RaftSyncMessage setCompressor(byte compressor) {
         this.compressor = compressor;
         return this;
     }

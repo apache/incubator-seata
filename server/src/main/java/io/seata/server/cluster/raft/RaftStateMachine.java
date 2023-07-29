@@ -49,7 +49,7 @@ import io.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
 import io.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
-import io.seata.server.cluster.raft.msg.RaftSyncMsgSerializer;
+import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.RaftSessionSyncMsg;
 import io.seata.server.store.StoreConfig;
@@ -125,7 +125,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 // if data is empty, it is only a heartbeat event and can be ignored
                 if (byteBuffer != null && byteBuffer.hasRemaining()) {
                     RaftSessionSyncMsg msg =
-                        (RaftSessionSyncMsg)RaftSyncMsgSerializer.decode(byteBuffer.array()).getBody();
+                        (RaftSessionSyncMsg) RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
                     // follower executes the corresponding task
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("sync msg: {}", msg);
