@@ -6,7 +6,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### bugfix:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5749](https://github.com/seata/seata/pull/5749)] case of the pk col-name in the business sql is inconsistent with the case in the table metadata, resulting in a rollback failure
+
 
 ### optimize:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX

@@ -6,7 +6,7 @@
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### bugfix:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5749](https://github.com/seata/seata/pull/5749)] 修复在某些情况下，业务sql中主键字段名大小写与表元数据中的不一致，导致回滚失败
 
 ### optimize:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
