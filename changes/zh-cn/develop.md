@@ -21,7 +21,7 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
-- [CaptHua](https://github.com/capthua)
+- [capthua](https://github.com/capthua)
 - [XXX](https://github.com/XXX)
 
 
