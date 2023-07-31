@@ -22,6 +22,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [CaptHua](https://github.com/capthua)
 - [XXX](https://github.com/XXX)
 
 
