@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
@@ -193,7 +194,7 @@ public class TableRecords implements java.io.Serializable {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
+        Set<String> ignoreCasePKs = tmeta.getCaseInsensitivePKs();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
@@ -204,7 +205,7 @@ public class TableRecords implements java.io.Serializable {
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (primaryKeyMap.containsKey(colName)) {
+                if (ignoreCasePKs.contains(colName)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);
