@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
@@ -28,13 +29,13 @@ import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.XID;
 import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.Result;
-import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
@@ -42,6 +43,7 @@ import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,12 +65,15 @@ public class ClusterController {
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
 
-    @Resource
     private ServerProperties serverProperties;
 
     @Resource
-    private NettyRemotingServer nettyRemotingServer;
+    ApplicationContext applicationContext;
 
+    @PostConstruct
+    private void init(){
+        this.serverProperties = applicationContext.getBean(ServerProperties.class);
+    }
 
     @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
@@ -109,7 +114,7 @@ public class ClusterController {
                     leaderNode.setHost(leader.getIp());
                     nodes.add(leaderNode);
                     Configuration configuration = routeTable.getConfiguration(group);
-                    int nettyPort = nettyRemotingServer.getListenPort();
+                    int nettyPort = XID.getPort();
                     int httpPort = serverProperties.getPort();
                     String finalGroup = group;
                     nodes.addAll(configuration.getLearners().stream().map(learner -> {
