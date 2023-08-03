@@ -71,7 +71,7 @@ public class ClusterController {
     ApplicationContext applicationContext;
 
     @PostConstruct
-    private void init(){
+    private void init() {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
