@@ -7,6 +7,7 @@
 
 ### bugfix:
 - [[#5749](https://github.com/seata/seata/pull/5749)] 修复在某些情况下，业务sql中主键字段名大小写与表元数据中的不一致，导致回滚失败
+- [[#5762](https://github.com/seata/seata/pull/5762)] 修复TableMetaCache的一些字段类型，避免溢出
 
 ### optimize:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
@@ -22,6 +23,7 @@
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
 - [capthua](https://github.com/capthua)
+- [robynron](https://github.com/robynron)
 - [XXX](https://github.com/XXX)
 
 
