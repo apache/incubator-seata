@@ -14,6 +14,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5245](https://github.com/seata/seata/pull/5245)] fix the incomplete dependency of distribution module
 - [[#5239](https://github.com/seata/seata/pull/5239)] fix `getConfig` throw `ClassCastException` when use JDK proxy
 - [[#5462](https://github.com/seata/seata/pull/5462)] fix if using `@GlobalTransactional` in RM, `ShouldNeverHappenException` will be thrown
+- [[#5762](https://github.com/seata/seata/pull/5762)] change some fields type of TableMetaCache to avoid integer overflow
 
 ### optimize:
 - [[#5208](https://github.com/seata/seata/pull/5208)] optimize throwable getCause once more
@@ -42,6 +43,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
+- [robynron](https://github.com/robynron)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
