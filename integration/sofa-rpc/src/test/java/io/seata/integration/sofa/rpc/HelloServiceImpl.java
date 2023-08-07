@@ -16,6 +16,7 @@
 package io.seata.integration.sofa.rpc;
 
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 
 /**
  * @author Geng Zhang
@@ -25,6 +26,8 @@ public class HelloServiceImpl implements HelloService {
     private String result;
     
     private String xid;
+
+    private BranchType branchType;
 
     public HelloServiceImpl() {
 
@@ -37,10 +40,15 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public String sayHello(String name, int age) {
         xid = RootContext.getXID();
+        branchType = RootContext.getBranchType();
         return result != null ? result : "hello " + name + " from server! age: " + age;
     }
 
     public String getXid() {
         return xid;
+    }
+
+    public BranchType getBranchType() {
+        return branchType;
     }
 }
