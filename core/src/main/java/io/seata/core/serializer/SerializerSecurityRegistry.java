@@ -142,6 +142,7 @@ public class SerializerSecurityRegistry {
                     classNameSet.add(
                         Thread.currentThread().getContextClassLoader().loadClass(rootPackageName + '.' + className));
                 } catch (ClassNotFoundException ignore) {
+                    //ignore interface
                 }
             }
         }
