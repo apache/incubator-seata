@@ -87,14 +87,13 @@ public class SerializerSecurityRegistry {
     }
 
     private static Class<?>[] getBasicClassType() {
-        return new Class[] {boolean.class, byte.class, char.class, double.class, float.class, int.class, long.class,
-            short.class, Boolean.class, Byte.class, Character.class, Double.class, Float.class, Integer.class,
+        return new Class[] {Boolean.class, Byte.class, Character.class, Double.class, Float.class, Integer.class,
             Long.class, Short.class, Number.class, Class.class, String.class};
     }
 
     private static Class<?>[] getCollectionClassType() {
-        return new Class[] {List.class, ArrayList.class, LinkedList.class, Set.class, HashSet.class,
-            LinkedHashSet.class, TreeSet.class, Map.class, HashMap.class, LinkedHashMap.class, TreeMap.class};
+        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class,
+            LinkedHashSet.class, TreeSet.class, HashMap.class, LinkedHashMap.class, TreeMap.class};
     }
 
     private static String getSeataClassPattern() {
@@ -157,7 +156,7 @@ public class SerializerSecurityRegistry {
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }
-        if (fileName.contains(REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.contains(MESSAGE_CLASS_ID)) {
+        if (fileName.contains(REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID)) {
             return true;
         }
         return false;
