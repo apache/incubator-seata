@@ -33,6 +33,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
+
 /**
  * Serializer Security Registry
  * @author funkye
@@ -58,6 +64,7 @@ public class SerializerSecurityRegistry {
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getBasicClassType()));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getCollectionClassType()));
         ALLOW_CLAZZ_SET.addAll(getProtocolType());
+        ALLOW_CLAZZ_SET.addAll(Arrays.asList(getProtocolInnerFields()));
 
         for (Class<?> clazz : ALLOW_CLAZZ_SET) {
             ALLOW_CLAZZ_PATTERN.add(clazz.getCanonicalName());
@@ -154,5 +161,9 @@ public class SerializerSecurityRegistry {
             return true;
         }
         return false;
+    }
+
+    private static Class<?>[] getProtocolInnerFields() {
+        return new Class<?>[] {ResultCode.class, GlobalStatus.class, BranchStatus.class, BranchType.class, TransactionExceptionCode.class};
     }
 }
