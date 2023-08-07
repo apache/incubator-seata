@@ -17,7 +17,7 @@
 package io.seata.core.serializer;
 
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.ResultCode;
+import io.seata.core.protocol.Version;
 import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
@@ -36,12 +36,13 @@ public class SerializerSecurityRegistryTest {
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(BranchCommitRequest.class));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(BranchCommitResponse.class));
         Assertions.assertFalse(SerializerSecurityRegistry.getAllowClassType().contains(AbstractBranchEndRequest.class));
-        Assertions.assertFalse(SerializerSecurityRegistry.getAllowClassType().contains(ResultCode.class));
+        Assertions.assertFalse(SerializerSecurityRegistry.getAllowClassType().contains(Version.class));
     }
 
     @Test
     public void getAllowClassPattern() {
-        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern().contains(Long.class.getCanonicalName()));
+        Assertions.assertTrue(
+            SerializerSecurityRegistry.getAllowClassPattern().contains(Long.class.getCanonicalName()));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern().contains(int.class.getCanonicalName()));
         Assertions.assertTrue(
             SerializerSecurityRegistry.getAllowClassPattern().contains(HeartbeatMessage.class.getCanonicalName()));
@@ -49,11 +50,10 @@ public class SerializerSecurityRegistryTest {
             SerializerSecurityRegistry.getAllowClassPattern().contains(BranchCommitRequest.class.getCanonicalName()));
         Assertions.assertTrue(
             SerializerSecurityRegistry.getAllowClassPattern().contains(BranchCommitResponse.class.getCanonicalName()));
+        Assertions.assertFalse(SerializerSecurityRegistry.getAllowClassPattern()
+            .contains(AbstractBranchEndRequest.class.getCanonicalName()));
         Assertions.assertFalse(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(AbstractBranchEndRequest.class.getCanonicalName()));
-        Assertions.assertFalse(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(ResultCode.class.getCanonicalName()));
-        Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains("io.seata.*"));
+            SerializerSecurityRegistry.getAllowClassPattern().contains(Version.class.getCanonicalName()));
+        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern().contains("io.seata.*"));
     }
 }
