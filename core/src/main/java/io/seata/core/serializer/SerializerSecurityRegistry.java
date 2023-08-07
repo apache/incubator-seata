@@ -151,6 +151,7 @@ public class SerializerSecurityRegistry {
         if (!fileName.endsWith(CLASS_POSTFIX)) {
             return false;
         }
+        fileName = fileName.replace(CLASS_POSTFIX, "");
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }

@@ -31,7 +31,7 @@ public class SerializerSecurityRegistryTest {
     @Test
     public void getAllowClassType() {
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(Long.class));
-        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(int.class));
+        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(Integer.class));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(HeartbeatMessage.class));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(BranchCommitRequest.class));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassType().contains(BranchCommitResponse.class));
@@ -43,7 +43,8 @@ public class SerializerSecurityRegistryTest {
     public void getAllowClassPattern() {
         Assertions.assertTrue(
             SerializerSecurityRegistry.getAllowClassPattern().contains(Long.class.getCanonicalName()));
-        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern().contains(int.class.getCanonicalName()));
+        Assertions.assertTrue(
+            SerializerSecurityRegistry.getAllowClassPattern().contains(Integer.class.getCanonicalName()));
         Assertions.assertTrue(
             SerializerSecurityRegistry.getAllowClassPattern().contains(HeartbeatMessage.class.getCanonicalName()));
         Assertions.assertTrue(
