@@ -64,6 +64,9 @@ public class TransactionContextProviderFilter extends Filter {
         try {
             return filterInvoker.invoke(sofaRequest);
         } finally {
+            if (xid != null) {
+                RpcInternalContext.getContext().removeAttachment(RootContext.HIDDEN_KEY_XID);
+            }
             if (bind) {
                 String unbindXid = RootContext.unbind();
                 if (LOGGER.isDebugEnabled()) {
