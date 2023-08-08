@@ -35,7 +35,7 @@ public class IndexMeta {
     private short type;
     private IndexType indextype;
     private String ascOrDesc;
-    private int cardinality;
+    private long cardinality;
     private int ordinalPosition;
 
     /**
@@ -157,7 +157,7 @@ public class IndexMeta {
      *
      * @return the cardinality
      */
-    public int getCardinality() {
+    public long getCardinality() {
         return cardinality;
     }
 
@@ -166,7 +166,7 @@ public class IndexMeta {
      *
      * @param cardinality the cardinality
      */
-    public void setCardinality(int cardinality) {
+    public void setCardinality(long cardinality) {
         this.cardinality = cardinality;
     }
 
