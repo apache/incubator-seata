@@ -486,20 +486,20 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        StringBuilder prefix = new StringBuilder("SELECT ");
+        String prefix = "SELECT ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         // build check sql
         String firstKey = pkValuesMap.keySet().stream().findFirst().get();
         int rowSize = pkValuesMap.get(firstKey).size();
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
-        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
         List<String> insertColumns = recognizer.getInsertColumns();
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
             columns.addAll(recognizer.getInsertColumnsUnEscape());
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
-                selectSQLJoin.add(columnName);
+                selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
             }
         } else {
             selectSQLJoin.add(" * ");
