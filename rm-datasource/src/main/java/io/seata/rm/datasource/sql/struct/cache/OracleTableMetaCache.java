@@ -142,7 +142,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("TYPE"));
                     index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setCardinality(rsIndex.getLong("CARDINALITY"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);
