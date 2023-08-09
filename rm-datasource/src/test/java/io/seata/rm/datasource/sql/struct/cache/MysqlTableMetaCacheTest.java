@@ -55,9 +55,9 @@ public class MysqlTableMetaCacheTest {
 
     private static Object[][] indexMetas =
         new Object[][] {
-            new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34},
-            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
-            new Object[] {"name2", "name2", true, "", 3, 2, "A", 34},
+            new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34L},
+            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34L},
+            new Object[] {"name2", "name2", true, "", 3, 2, "A", 34L},
         };
 
     @Test
