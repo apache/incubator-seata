@@ -493,10 +493,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         int rowSize = pkValuesMap.get(firstKey).size();
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
-        List<String> insertColumns = recognizer.getInsertColumns();
-        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
+        List<String> insertColumnsUnEscape = recognizer.getInsertColumnsUnEscape();
+        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumnsUnEscape)) {
             Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumnsUnEscape());
+            // because it needs to be de-duplicated, it must be unescape processed
+            columns.addAll(insertColumnsUnEscape);
             columns.addAll(pkColumnNameList);
             for (String columnName : columns) {
                 selectSQLJoin.add(ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
