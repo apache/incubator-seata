@@ -217,8 +217,10 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         } else {
             Map<String, Node> map = new HashMap<>();
-            for (Node node : nodeList) {
-                map.put(node.getHost(), node);
+            if (CollectionUtils.isNotEmpty(map)) {
+                for (Node node : nodeList) {
+                    map.put(node.getHost(), node);
+                }
             }
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
