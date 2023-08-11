@@ -97,8 +97,11 @@ public class RaftSessionManager extends FileSessionManager {
         Closure closure = closureStatus -> {
             if (closureStatus.isOk()) {
                 globalSession.setStatus(globalStatus);
-                if (GlobalStatus.Rollbacking == globalStatus || GlobalStatus.TimeoutRollbacking == globalStatus) {
-                    globalSession.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
+                if (GlobalStatus.RollbackRetrying.equals(globalSession.getStatus())
+                    || GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                    || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                    globalSession.getBranchSessions().parallelStream()
+                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                 }
                 completableFuture.complete(true);
             } else {
