@@ -8,6 +8,7 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5749](https://github.com/seata/seata/pull/5749)] case of the pk col-name in the business sql is inconsistent with the case in the table metadata, resulting in a rollback failure
 - [[#5762](https://github.com/seata/seata/pull/5762)] change some fields type of TableMetaCache to avoid integer overflow
+- [[#5769](https://github.com/seata/seata/pull/5769)] fix the problem that the parameter prefix requirement of the setAttachment method in sofa-rpc is not met
 
 
 ### optimize:
@@ -25,6 +26,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [slievrly](https://github.com/slievrly)
 - [capthua](https://github.com/capthua)
 - [robynron](https://github.com/robynron)
+- [dmego](https://github.com/dmego)
 - [XXX](https://github.com/XXX)
 
 
