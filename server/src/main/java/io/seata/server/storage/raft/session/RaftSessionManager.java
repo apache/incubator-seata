@@ -24,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.LockStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.session.BranchSession;
@@ -96,6 +97,9 @@ public class RaftSessionManager extends FileSessionManager {
         Closure closure = closureStatus -> {
             if (closureStatus.isOk()) {
                 globalSession.setStatus(globalStatus);
+                if (GlobalStatus.Rollbacking == globalStatus || GlobalStatus.TimeoutRollbacking == globalStatus) {
+                    globalSession.getBranchSessions().forEach(i -> i.setLockStatus(LockStatus.Rollbacking));
+                }
                 completableFuture.complete(true);
             } else {
                 completableFuture.completeExceptionally(
