@@ -27,13 +27,7 @@ import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.CompensateSubStateMachineState;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.SubStateMachine;
+import io.seata.saga.statelang.domain.*;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
@@ -51,6 +45,16 @@ public class TaskStateRouter implements StateRouter {
 
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
+
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        if (!stateMachineInstance.isRunning()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("StateMachine instance [{}] ended. Current state [{}]", stateMachineInstance.getId(),
+                        state.getName());
+            }
+            return null;
+        }
 
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
         if (stateInstruction.isEnd()) {

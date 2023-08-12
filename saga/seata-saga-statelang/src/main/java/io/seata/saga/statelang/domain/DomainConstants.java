@@ -32,6 +32,8 @@ public interface DomainConstants {
     String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
     String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
     String STATE_TYPE_LOOP_START = "LoopStart";
+    String STATE_TYPE_FORK = "Fork";
+    String STATE_TYPE_JOIN = "Join";
     //endregion
 
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
@@ -82,6 +84,11 @@ public interface DomainConstants {
     String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
     // endregion
 
+    // region of parallel
+    String PARALLEL_SEMAPHORE = "parallelSemaphore";
+    String PARALLEL_LATCH = "parallelLatch";
+    // endregion
+
     String OPERATION_NAME_START = "start";
     String OPERATION_NAME_FORWARD = "forward";
     String OPERATION_NAME_COMPENSATE = "compensate";
@@ -96,4 +103,6 @@ public interface DomainConstants {
     String SEPERATOR_PARENT_ID      = ":";
 
     String DEFAULT_JSON_PARSER      = "fastjson";
+
+    int DEFAULT_FORK_AWAIT_TIME  = 12 * 60 * 60 * 1000;  // 12 hours
 }

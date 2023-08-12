@@ -29,9 +29,8 @@ import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.mock.DemoService.Engineer;
 import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.*;
+import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.AfterAll;
@@ -42,12 +41,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * State machine tests with db log store
@@ -1136,6 +1133,71 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
             Assertions.assertNull(inst.getCompensationStatus());
+        });
+    }
+
+
+    @Test
+    public void testSimpleStateMachineWithFork() throws Exception {
+        String stateMachineName = "simpleForkTestStateMachine";
+        SagaCostPrint.executeAndPrint("3-40-1", () -> {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            paramMap.put("forthSleepTime", 1000);
+            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            StateMachine stateMachine = inst.getStateMachine();
+            ForkStateImpl outerForkState = (ForkStateImpl) stateMachine.getState("OuterForkState");
+            Map<String, Set<String>> outerForkBranchStates = outerForkState.getAllBranchStates();
+            // Test join state pairing and branch states generation
+            Assertions.assertEquals("OuterJoinState", outerForkState.getPairedJoinState());
+            Assertions.assertEquals(2, outerForkBranchStates.size());
+            Assertions.assertEquals(4, outerForkBranchStates.get("SecondState").size());
+            Assertions.assertEquals(2, outerForkBranchStates.get("ThirdState").size());
+            // Test successful parallel execution
+            int successCount = 0;
+            Date forthStateEnd = null, fifthStateStart = null;
+            for (StateInstance stateInstance: inst.getStateList()) {
+                if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
+                    successCount++;
+                }
+                if ("ForthState".equals(stateInstance.getName())) {
+                    forthStateEnd = stateInstance.getGmtEnd();
+                } else if ("FifthState".equals(stateInstance.getName())) {
+                    fifthStateStart = stateInstance.getGmtStarted();
+                }
+            }
+            Assertions.assertEquals(6, successCount);
+            Assertions.assertNotNull(forthStateEnd);
+            Assertions.assertNotNull(fifthStateStart);
+            Assertions.assertTrue(forthStateEnd.before(fifthStateStart));
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        });
+
+        // Test compensation
+        SagaCostPrint.executeAndPrint("3-40-2", () -> {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            paramMap.put("forthThrowException", "true");
+            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+
+            Map<String, StateInstance> stateInstanceMap = new HashMap<>();
+            for (StateInstance stateInstance: inst.getStateList()) {
+                if (stateInstance.isForCompensation()) {
+                    stateInstanceMap.put(stateInstance.getName(), stateInstance);
+                }
+            }
+            List<String> compensateStateInstanceList = inst.getStateList().stream()
+                    .filter(StateInstance::isForCompensation)
+                    .map(StateInstance::getName)
+                    .collect(Collectors.toList());
+            Assertions.assertEquals("CompensateForthState", compensateStateInstanceList.get(0));
+            Assertions.assertEquals("CompensateFirstState",
+                    compensateStateInstanceList.get(compensateStateInstanceList.size() - 1));
+            Assertions.assertFalse(compensateStateInstanceList.contains("CompensateFifthState"));
+
+            GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+            Assertions.assertNotNull(globalTransaction);
+            Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
         });
     }
 }

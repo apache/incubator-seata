@@ -24,6 +24,8 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.routers.EndStateRouter;
+import io.seata.saga.engine.pcext.routers.ForkStateRouter;
+import io.seata.saga.engine.pcext.routers.JoinStateRouter;
 import io.seata.saga.engine.pcext.routers.TaskStateRouter;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.proctrl.Instruction;
@@ -117,6 +119,9 @@ public class StateMachineProcessRouter implements ProcessRouter {
 
             this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, new EndStateRouter());
             this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, new EndStateRouter());
+
+            this.stateRouters.put(DomainConstants.STATE_TYPE_FORK, new ForkStateRouter());
+            this.stateRouters.put(DomainConstants.STATE_TYPE_JOIN, new JoinStateRouter());
         }
     }
 

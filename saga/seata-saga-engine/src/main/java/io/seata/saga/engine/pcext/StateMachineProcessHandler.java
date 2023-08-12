@@ -22,14 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
-import io.seata.saga.engine.pcext.handlers.CompensationTriggerStateHandler;
-import io.seata.saga.engine.pcext.handlers.FailEndStateHandler;
-import io.seata.saga.engine.pcext.handlers.LoopStartStateHandler;
-import io.seata.saga.engine.pcext.handlers.ScriptTaskStateHandler;
-import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
-import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
-import io.seata.saga.engine.pcext.handlers.SucceedEndStateHandler;
+import io.seata.saga.engine.pcext.handlers.*;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.statelang.domain.DomainConstants;
@@ -98,6 +91,8 @@ public class StateMachineProcessHandler implements ProcessHandler {
             stateHandlers.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_LOOP_START, new LoopStartStateHandler());
+            stateHandlers.put(DomainConstants.STATE_TYPE_FORK, new ForkStateHandler());
+            stateHandlers.put(DomainConstants.STATE_TYPE_JOIN, new JoinStateHandler());
         }
     }
 
