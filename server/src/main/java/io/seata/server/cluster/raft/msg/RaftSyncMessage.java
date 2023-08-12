@@ -18,6 +18,7 @@ package io.seata.server.cluster.raft.msg;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.CompressorType;
+import io.seata.core.protocol.Version;
 import io.seata.core.serializer.SerializerType;
 
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
@@ -37,7 +38,10 @@ public class RaftSyncMessage implements java.io.Serializable {
     private byte compressor = CompressorType
         .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
         .getCode();
+
     private Object body;
+
+    private String version = Version.getCurrent();
 
     /**
      * Gets body.
@@ -97,6 +101,13 @@ public class RaftSyncMessage implements java.io.Serializable {
         return this;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     @Override
     public String toString() {

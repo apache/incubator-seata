@@ -19,6 +19,7 @@ import java.io.Serializable;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.CompressorType;
+import io.seata.core.protocol.Version;
 import io.seata.core.serializer.SerializerType;
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
@@ -39,6 +40,10 @@ public class RaftSnapshot implements Serializable {
             .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
             .getCode();
     private Object body;
+    
+    private String version = Version.getCurrent();
+    
+    private SnapshotType type;
 
     /**
      * Gets body.
@@ -98,10 +103,37 @@ public class RaftSnapshot implements Serializable {
         return this;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public SnapshotType getType() {
+        return type;
+    }
+
+    public void setType(SnapshotType type) {
+        this.type = type;
+    }
 
     @Override
     public String toString() {
         return StringUtils.toString(this);
     }
 
+    public enum SnapshotType {
+
+        session("session");
+
+        String type;
+
+        SnapshotType(String type) {
+            this.type = type;
+        }
+
+    }
+    
 }

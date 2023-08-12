@@ -28,6 +28,7 @@ import io.seata.server.cluster.raft.msg.RaftSyncMessage;
 import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
+import io.seata.server.cluster.raft.snapshot.session.SessionSnapshot;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -46,10 +47,6 @@ import org.springframework.context.ApplicationContext;
  */
 @SpringBootTest
 public class RaftSyncMessageTest {
-
-    private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
-
-    private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
 
     @BeforeAll
     public static void setUp(ApplicationContext context){
@@ -76,40 +73,22 @@ public class RaftSyncMessageTest {
 
     @Test
     public void testSnapshotSerialize() throws IOException, TransactionException {
-        Map<String, Object> maps = new HashMap<>(2);
         Map<String, GlobalSession> sessionMap = new HashMap<>();
         GlobalSession globalSession = GlobalSession.createGlobalSession("123", "123", "123", 11111);
         sessionMap.put(globalSession.getXid(), globalSession);
         globalSession
             .addBranch(SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, "!23", null, "123", "123"));
-        Map<String, byte[]> globalSessionByteMap = new HashMap<>();
-        // each transaction is expected to have two branches
-        Map<Long, byte[]> branchSessionByteMap = new HashMap<>();
-        sessionMap.forEach((k, v) -> {
-            globalSessionByteMap.put(v.getXid(), v.encode());
-            List<BranchSession> branchSessions = Collections.unmodifiableList(v.getBranchSessions());
-            branchSessions.forEach(
-                branchSession -> branchSessionByteMap.put(branchSession.getBranchId(), branchSession.encode()));
-        });
-        maps.put(GLOBAL_SESSION_MAP_KEY, globalSessionByteMap);
-        maps.put(BRANCH_SESSION_MAP_KEY, branchSessionByteMap);
+        SessionSnapshot sessionSnapshot = new SessionSnapshot();
+        sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
         RaftSnapshot raftSnapshot = new RaftSnapshot();
-        raftSnapshot.setBody(maps);
+        raftSnapshot.setBody(sessionSnapshot);
         byte[] msg = RaftSnapshotSerializer.encode(raftSnapshot);
         RaftSnapshot raftSnapshot1 = RaftSnapshotSerializer.decode(msg);
-        Assertions.assertEquals(1,
-            ((Map<Long, byte[]>)((Map<String, Object>)raftSnapshot1.getBody()).get(BRANCH_SESSION_MAP_KEY)).size());
-        Assertions.assertEquals(1,  ((Map<String, byte[]>)((Map<String, Object>)raftSnapshot1.getBody()).get(GLOBAL_SESSION_MAP_KEY)).size());
-        ((Map<Long, byte[]>)((Map<String, Object>)raftSnapshot1.getBody()).get(BRANCH_SESSION_MAP_KEY)).forEach((k,v)->{
-            BranchSession branchSession = new BranchSession();
-            branchSession.decode(v);
-            Assertions.assertEquals(globalSession.getXid(), branchSession.getXid());
-        });
-        ((Map<String, byte[]>)((Map<String, Object>)raftSnapshot1.getBody()).get(GLOBAL_SESSION_MAP_KEY)).forEach((k,v)->{
-            GlobalSession globalSession1 = new GlobalSession();
-            globalSession1.decode(v);
-            Assertions.assertEquals(globalSession.getXid(), globalSession1.getXid());
-        });
+        SessionSnapshot sessionSnapshot2 = (SessionSnapshot)raftSnapshot1.getBody();
+        Map<String, GlobalSession> map = sessionSnapshot2.convert2GlobalSession();
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertNotNull(map.get(globalSession.getXid()));
+        Assertions.assertEquals(1, map.get(globalSession.getXid()).getBranchSessions().size());
     }
 
 }
