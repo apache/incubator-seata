@@ -13,9 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# resolve links - $0 may be a softlink
+PRG="$0"
 
-. ./seata-setup.sh
-JAVA_OPT="${JAVA_OPT} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+PRGDIR=`dirname "$PRG"`
+BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
+BASEDIR=${BASEDIR//"//"/"/"}
+
+. ${BASEDIR}/bin/seata-setup.sh
+JAVA_OPT="${JAVA_OPT} -DBASEDIR=${BASEDIR} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
 JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
 
 CMD_LINE_ARGS=$@
@@ -23,6 +39,6 @@ CMD_LINE_ARGS=$@
 echo "Affected JVM parameters:$JAVA_OPT"
 
 # start
-echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
-echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > /dev/null 2>&1 &
+nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> /dev/null 2>&1 &
+echo "seata-server is starting, you can check the ${BASEDIR}/logs *.log"
