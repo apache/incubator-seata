@@ -34,9 +34,10 @@ public class RegistryNacosProperties {
     private String password;
     private String accessKey;
     private String secretKey;
-    private String application = "seata-server";
-    private String slbPattern;
-    private String contextPath;
+    private String application = "seata-server"; 
+    private String clientApplication = "";
+    private String slbPattern = "";  
+    private String contextPath; 
 
     public String getServerAddr() {
         return serverAddr;
@@ -115,6 +116,16 @@ public class RegistryNacosProperties {
 
     public RegistryNacosProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+        return this;
+    }
+
+
+    public String getClientApplication() {
+        return clientApplication;
+    }
+
+    public RegistryNacosProperties setClientApplication(String clientApplication) {
+        this.clientApplication = clientApplication;
         return this;
     }
 

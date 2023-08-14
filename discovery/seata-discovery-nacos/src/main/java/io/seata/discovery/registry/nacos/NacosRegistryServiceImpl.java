@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -62,6 +63,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String REGISTRY_TYPE = "nacos";
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String PRO_APPLICATION_KEY = "application";
+    private static final String PRO_CLIENT_APPLICATION = "clientApplication";
     private static final String PRO_GROUP_KEY = "group";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
@@ -124,7 +126,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
         LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
-                .add(listener);
+            .add(listener);
         getNamingInstance().subscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
@@ -135,8 +137,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         List<EventListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
         if (subscribeList != null) {
             List<EventListener> newSubscribeList = subscribeList.stream()
-                    .filter(eventListener -> !eventListener.equals(listener))
-                    .collect(Collectors.toList());
+                .filter(eventListener -> !eventListener.equals(listener))
+                .collect(Collectors.toList());
             LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
         }
         getNamingInstance().unsubscribe(getServiceName(), getServiceGroup(), clusters, listener);
@@ -176,9 +178,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     List<Instance> firstAllInstances = getNamingInstance().getAllInstances(getServiceName(), getServiceGroup(), clusters);
                     if (null != firstAllInstances) {
                         List<InetSocketAddress> newAddressList = firstAllInstances.stream()
-                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                .collect(Collectors.toList());
+                            .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                            .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                            .collect(Collectors.toList());
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
                     subscribe(clusterName, event -> {
@@ -187,9 +189,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                             LOGGER.info("receive empty server list,cluster:{}", clusterName);
                         } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
-                                    .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
-                                    .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                                    .collect(Collectors.toList());
+                                .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
+                                .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
+                                .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                         }
                     });
@@ -270,10 +272,17 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                     LOGGER.info("Nacos check auth with ak/sk.");
                 }
             }
-        }
+        } 
+        // nacos client subscribe application name is unknown
+        if (Objects.isNull(System.getProperty("project.name"))) {
+            String applicationId = FILE_CONFIG.getConfig(getClientApplication());
+            if (Objects.nonNull(applicationId)) {
+                System.setProperty("project.name", applicationId);
+            } 
         String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
+ 
         }
         return properties;
     }
@@ -326,6 +335,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
     }
 
+    public static String getClientApplication() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_CLIENT_APPLICATION);
+   }
     private static String getNacosUrlPatternOfSLB() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
     }
