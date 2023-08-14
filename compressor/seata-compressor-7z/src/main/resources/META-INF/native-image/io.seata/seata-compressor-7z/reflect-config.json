@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.compressor.Compressor"
+    },
+    "name": "io.seata.compressor.sevenz.SevenZCompressor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

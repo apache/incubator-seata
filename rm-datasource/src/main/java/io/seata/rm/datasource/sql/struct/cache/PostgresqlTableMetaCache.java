@@ -24,10 +24,10 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -108,6 +108,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         } else {
             tableName = tableName.toLowerCase();
         }
+        tm.setCaseSensitive(StringUtils.hasUpperCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -132,6 +133,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+                col.setCaseSensitive(StringUtils.hasUpperCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
@@ -158,7 +160,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("type"));
                     index.setOrdinalPosition(rsIndex.getShort("ordinal_position"));
                     index.setAscOrDesc(rsIndex.getString("asc_or_desc"));
-                    index.setCardinality(rsIndex.getInt("cardinality"));
+                    index.setCardinality(rsIndex.getLong("cardinality"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);

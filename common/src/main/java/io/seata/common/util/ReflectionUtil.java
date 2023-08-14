@@ -130,6 +130,25 @@ public final class ReflectionUtil {
         return clazz;
     }
 
+    public static boolean isJavaClass(Class<?> clazz) {
+        return clazz != null && clazz.getClassLoader() == null;
+    }
+
+    /**
+     * Whether the class exists
+     *
+     * @param className the class name
+     * @return the boolean
+     */
+    public static boolean existsClass(String className) {
+        try {
+            getClassByName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     //endregion
 
 
