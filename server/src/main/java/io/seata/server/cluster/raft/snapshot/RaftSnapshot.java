@@ -128,7 +128,7 @@ public class RaftSnapshot implements Serializable {
 
         session("session");
 
-        String type;
+        final String type;
 
         SnapshotType(String type) {
             this.type = type;

@@ -38,10 +38,6 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionSnapshotFile.class);
 
-    private static final String BRANCH_SESSION_MAP_KEY = "branchSessionMap";
-
-    private static final String GLOBAL_SESSION_MAP_KEY = "globalSessionMap";
-
     String group;
 
     String fileName = "session";
@@ -73,7 +69,7 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
         SessionSnapshot sessionSnapshot = new SessionSnapshot();
-        sessionMap.forEach((xid,session)-> sessionSnapshot.convert2GlobalSessionByte(session));
+        sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(sessionSnapshot);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.session);
