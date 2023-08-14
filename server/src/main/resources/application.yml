@@ -22,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${BASEDIR}/logs
+    path: ${BASEDIR:${user.home}}/logs
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
