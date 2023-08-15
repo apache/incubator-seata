@@ -161,6 +161,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType)) {
             initMysqlResourceId();
+        } else if (JdbcConstants.DM.equals(dbType)) {
+            initDMResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -239,6 +241,35 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             if (paramsBuilder.length() > 0) {
                 jdbcUrlBuilder.append("?");
                 jdbcUrlBuilder.append(paramsBuilder);
+            }
+            resourceId = jdbcUrlBuilder.toString();
+        } else {
+            resourceId = jdbcUrl;
+        }
+    }
+
+    private void initDMResourceId() {
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
+
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("schema")) {
+                    // remove the '"'
+                    if (urlParam.contains("\"")) {
+                        urlParam = urlParam.replaceAll("\"", "");
+                    }
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder.toString());
             }
             resourceId = jdbcUrlBuilder.toString();
         } else {
