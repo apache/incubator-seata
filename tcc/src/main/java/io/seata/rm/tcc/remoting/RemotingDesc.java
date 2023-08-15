@@ -33,14 +33,14 @@ public class RemotingDesc {
     private Object targetBean;
 
     /**
-     * the tcc interface tyep
+     * the tcc serviceClass type
      */
-    private Class<?> interfaceClass;
+    private Class<?> serviceClass;
 
     /**
-     * interface class name
+     * serviceClass name
      */
-    private String interfaceClassName;
+    private String serviceClassName;
 
     /**
      * rpc uniqueId: hsf, dubbo's version, sofa-rpc's uniqueId
@@ -76,39 +76,39 @@ public class RemotingDesc {
     }
 
     /**
-     * Gets interface class.
+     * Gets serviceClass.
      *
-     * @return the interface class
+     * @return the serviceClass
      */
-    public Class<?> getInterfaceClass() {
-        return interfaceClass;
+    public Class<?> getServiceClass() {
+        return serviceClass;
     }
 
     /**
-     * Sets interface class.
+     * Sets serviceClass.
      *
-     * @param interfaceClass the interface class
+     * @param serviceClass the serviceClass
      */
-    public void setInterfaceClass(Class<?> interfaceClass) {
-        this.interfaceClass = interfaceClass;
+    public void setServiceClass(Class<?> serviceClass) {
+        this.serviceClass = serviceClass;
     }
 
     /**
-     * Gets interface class name.
+     * Gets serviceClass name.
      *
-     * @return the interface class name
+     * @return the serviceClass name
      */
-    public String getInterfaceClassName() {
-        return interfaceClassName;
+    public String getServiceClassName() {
+        return serviceClassName;
     }
 
     /**
-     * Sets interface class name.
+     * Sets serviceClass name.
      *
-     * @param interfaceClassName the interface class name
+     * @param serviceClassName the serviceClass name
      */
-    public void setInterfaceClassName(String interfaceClassName) {
-        this.interfaceClassName = interfaceClassName;
+    public void setServiceClassName(String serviceClassName) {
+        this.serviceClassName = serviceClassName;
     }
 
     /**
@@ -182,4 +182,5 @@ public class RemotingDesc {
     public void setReference(boolean reference) {
         isReference = reference;
     }
+
 }

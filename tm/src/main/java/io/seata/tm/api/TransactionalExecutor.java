@@ -38,12 +38,15 @@ public interface TransactionalExecutor {
      */
     TransactionInfo getTransactionInfo();
 
-
     /**
      * The enum Code.
      */
     enum Code {
 
+        /**
+         * Unknown code.
+         */
+        Unknown,
         /**
          * Begin failure code.
          */
@@ -78,7 +81,7 @@ public interface TransactionalExecutor {
          * Rollback retrying code.
          */
         //
-        RollbackRetrying
+        Rollbacking
     }
 
     /**

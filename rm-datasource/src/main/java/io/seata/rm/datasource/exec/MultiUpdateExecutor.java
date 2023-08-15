@@ -32,12 +32,11 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.common.DefaultValues;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
@@ -82,15 +81,14 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) recognizer;
 
-            ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
-            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimit(parametersHolder, paramAppenderList))) {
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getLimitCondition())) {
                 throw new NotSupportYetException("Multi update SQL with limit condition is not support yet !");
             }
-            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderBy())) {
+            if (StringUtils.isNotBlank(sqlUpdateRecognizer.getOrderByCondition())) {
                 throw new NotSupportYetException("Multi update SQL with orderBy condition is not support yet !");
             }
 
-            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumns();
+            List<String> updateColumns = sqlUpdateRecognizer.getUpdateColumnsUnEscape();
             updateColumnsSet.addAll(updateColumns);
             if (noWhereCondition) {
                 continue;
@@ -157,7 +155,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         for (SQLRecognizer recognizer : sqlRecognizers) {
             sqlRecognizer = recognizer;
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
-            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumns());
+            updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumnsUnEscape());
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());

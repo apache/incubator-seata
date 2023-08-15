@@ -32,7 +32,7 @@ import org.springframework.core.annotation.AliasFor;
  * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
  *
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
- * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation) // the interceptor of GlobalLock
+ * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // the interceptor of GlobalLock
  * @see io.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of GlobalLockLogic and AT/XA mode
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -64,4 +64,5 @@ public @interface GlobalLock {
      * @return lock retry times
      */
     int lockRetryTimes() default -1;
+
 }

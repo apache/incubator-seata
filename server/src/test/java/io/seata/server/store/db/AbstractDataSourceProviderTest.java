@@ -15,16 +15,18 @@
  */
 package io.seata.server.store.db;
 
+import javax.sql.DataSource;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.store.db.DataSourceProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import javax.sql.DataSource;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * @author: will
  */
+@SpringBootTest
 public class AbstractDataSourceProviderTest {
 
     private final String dbcpDatasourceType = "dbcp";

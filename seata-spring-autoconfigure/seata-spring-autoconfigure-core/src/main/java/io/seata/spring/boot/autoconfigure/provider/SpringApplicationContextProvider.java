@@ -27,8 +27,11 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
  * The type spring application context provider
  */
 public class SpringApplicationContextProvider implements ApplicationContextAware {
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        System.setProperty("file.listener.enabled", "false");
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
     }
+
 }

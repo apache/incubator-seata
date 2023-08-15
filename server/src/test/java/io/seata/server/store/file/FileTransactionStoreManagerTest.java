@@ -15,30 +15,31 @@
  */
 package io.seata.server.store.file;
 
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionManager;
-import io.seata.server.storage.file.session.FileSessionManager;
-import io.seata.server.store.StoreConfig;
-import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.file.TransactionWriteStore;
-import io.seata.server.storage.file.store.FileTransactionStoreManager;
-import org.assertj.core.util.Files;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionManager;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.storage.file.store.FileTransactionStoreManager;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.TransactionStoreManager;
+import org.assertj.core.util.Files;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * @author ggndnn
  */
+@SpringBootTest
 public class FileTransactionStoreManagerTest {
     @Test
     public void testBigDataWrite() throws Exception {
@@ -139,6 +140,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // applicationDataBytes.length
                 + 4 // xidBytes.size
                 + 1 // statusCode
+                + 1 // lockstatus
                 + 1; //branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
@@ -161,6 +163,7 @@ public class FileTransactionStoreManagerTest {
         } else {
             byteBuffer.putInt(0);
         }
+        byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.flip();

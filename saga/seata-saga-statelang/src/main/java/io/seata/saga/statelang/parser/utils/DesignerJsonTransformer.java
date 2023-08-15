@@ -104,6 +104,7 @@ public class DesignerJsonTransformer {
         }
     }
 
+    @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
     private static void transformEdge(Map<String, Object> machineJsonObject, List<Object> nodes, Map<String, Object> nodeMap, Map<String, Object> edgeObj) {
         String sourceId = (String) edgeObj.get("source");
         String targetId = (String) edgeObj.get("target");
@@ -208,9 +209,11 @@ public class DesignerJsonTransformer {
 
     /**
      * Generate tracing graph json
-     * @param stateMachineInstance
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param jsonParser the json parser
+     * @return the tracing graph json
      */
+    @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
     public static String generateTracingGraphJson(StateMachineInstance stateMachineInstance, JsonParser jsonParser) {
 
         if (stateMachineInstance == null) {
@@ -276,7 +279,7 @@ public class DesignerJsonTransformer {
             }
         }
 
-        if (stateMachineJsonObj != null) {
+        if (stateMachineJsonObj != null) { /*lgtm[java/useless-null-check]*/
             return jsonParser.toJsonString(stateMachineJsonObj, true);
         }
         return "";

@@ -22,20 +22,27 @@ public class DurationUtilTest {
 
     @Test
     public void testParse() {
-        Assertions.assertNull(DurationUtil.parse("d"));
-        Assertions.assertNull(DurationUtil.parse("h"));
-        Assertions.assertNull(DurationUtil.parse("m"));
-        Assertions.assertNull(DurationUtil.parse("s"));
-        Assertions.assertNull(DurationUtil.parse("ms"));
-
         Assertions.assertEquals(-1L, DurationUtil.parse("").getSeconds());
         Assertions.assertEquals(0L, DurationUtil.parse("8").getSeconds());
+        Assertions.assertEquals(8L, DurationUtil.parse("8").toMillis());
         Assertions.assertEquals(0L, DurationUtil.parse("8ms").getSeconds());
+        Assertions.assertEquals(8L, DurationUtil.parse("8ms").toMillis());
         Assertions.assertEquals(8L, DurationUtil.parse("8s").getSeconds());
         Assertions.assertEquals(480L, DurationUtil.parse("8m").getSeconds());
         Assertions.assertEquals(28800L, DurationUtil.parse("8h").getSeconds());
-        Assertions.assertEquals(691200L,
-                DurationUtil.parse("8d").getSeconds());
+        Assertions.assertEquals(691200L, DurationUtil.parse("8d").getSeconds());
+
+        Assertions.assertEquals(172800L,DurationUtil.parse("P2D").getSeconds());
+        Assertions.assertEquals(20L,DurationUtil.parse("PT20.345S").getSeconds());
+        Assertions.assertEquals(20345L,DurationUtil.parse("PT20.345S").toMillis());
+        Assertions.assertEquals(900L,DurationUtil.parse("PT15M").getSeconds());
+        Assertions.assertEquals(36000L,DurationUtil.parse("PT10H").getSeconds());
+        Assertions.assertEquals(8L,DurationUtil.parse("PT8S").getSeconds());
+        Assertions.assertEquals(86460L,DurationUtil.parse("P1DT1M").getSeconds());
+        Assertions.assertEquals(183840L,DurationUtil.parse("P2DT3H4M").getSeconds());
+        Assertions.assertEquals(-21420L,DurationUtil.parse("PT-6H3M").getSeconds());
+        Assertions.assertEquals(-21780L,DurationUtil.parse("-PT6H3M").getSeconds());
+        Assertions.assertEquals(21420L,DurationUtil.parse("-PT-6H+3M").getSeconds());
     }
 
     @Test
@@ -46,5 +53,19 @@ public class DurationUtilTest {
         Assertions.assertThrows(UnsupportedOperationException.class,
                 () -> DurationUtil.parse("as"));
 
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> DurationUtil.parse("d"));
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> DurationUtil.parse("h"));
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> DurationUtil.parse("m"));
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> DurationUtil.parse("s"));
+
+        Assertions.assertThrows(UnsupportedOperationException.class,
+                () -> DurationUtil.parse("ms"));
     }
 }

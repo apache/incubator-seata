@@ -15,20 +15,25 @@
  */
 package io.seata.rm;
 
+import java.io.PrintWriter;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import javax.sql.DataSource;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.datasource.SeataDataSourceProxy;
 import io.seata.rm.datasource.xa.Holdable;
 import io.seata.rm.datasource.xa.Holder;
-
-import javax.sql.DataSource;
-import java.io.PrintWriter;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 /**
  * Base class of those DataSources working as Seata Resource.
@@ -49,7 +54,10 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
 
     protected Driver driver;
 
-    private ConcurrentHashMap<String, T> keeper = new ConcurrentHashMap<>();
+    private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
+            CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
+    private boolean shouldBeHeld = false;
+    private Map<String, T> keeper = new ConcurrentHashMap<>();
 
     /**
      * Gets target data source.
@@ -189,5 +197,31 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     @Override
     public T lookup(String key) {
         return keeper.get(key);
+    }
+
+    public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
+        BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
+    }
+
+    public static BranchStatus getBranchStatus(String xaBranchXid) {
+        return BRANCH_STATUS_CACHE.getIfPresent(xaBranchXid);
+    }
+
+    public static void remove(String xaBranchXid) {
+        if (StringUtils.isNotBlank(xaBranchXid)) {
+            BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
+        }
+    }
+
+    public Map<String, T> getKeeper() {
+        return keeper;
+    }
+
+    public boolean isShouldBeHeld() {
+        return shouldBeHeld;
+    }
+
+    public void setShouldBeHeld(boolean shouldBeHeld) {
+        this.shouldBeHeld = shouldBeHeld;
     }
 }

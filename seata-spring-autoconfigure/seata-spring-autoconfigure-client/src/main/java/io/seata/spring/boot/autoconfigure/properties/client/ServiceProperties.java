@@ -26,6 +26,7 @@ import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_GROUPLIST;
 import static io.seata.common.DefaultValues.DEFAULT_TC_CLUSTER;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**
@@ -89,6 +90,8 @@ public class ServiceProperties implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         if (0 == vgroupMapping.size()) {
             vgroupMapping.put(DEFAULT_TX_GROUP, DEFAULT_TC_CLUSTER);
+            //compatible with old value, will remove next version
+            vgroupMapping.put(DEFAULT_TX_GROUP_OLD, DEFAULT_TC_CLUSTER);
         }
         if (0 == grouplist.size()) {
             grouplist.put(DEFAULT_TC_CLUSTER, DEFAULT_GROUPLIST);

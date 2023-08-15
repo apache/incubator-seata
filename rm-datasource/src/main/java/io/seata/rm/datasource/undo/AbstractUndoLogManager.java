@@ -39,7 +39,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +49,7 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
+import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Unretriable;
 
 /**
  * @author jsbxyyx
@@ -81,6 +82,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     protected static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance().getConfig(
         ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+
+    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME + " LIMIT 1";
 
     protected static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
         + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID
@@ -195,7 +198,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     }
 
     protected String buildContext(String serializer, CompressorType compressorType) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(2, 1.01f);
         map.put(UndoLogConstants.SERIALIZER_KEY, serializer);
         map.put(UndoLogConstants.COMPRESSOR_TYPE_KEY, compressorType.name());
         return CollectionUtils.encodeMap(map);
@@ -252,6 +255,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
+        ConnectionProxy connectionProxy = null;
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
@@ -259,7 +263,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
         for (; ; ) {
             try {
-                conn = dataSourceProxy.getPlainConnection();
+                connectionProxy = dataSourceProxy.getConnection();
+                conn = connectionProxy.getTargetConnection();
 
                 // The entire undo process should run in a local transaction.
                 if (originalAutoCommit = conn.getAutoCommit()) {
@@ -309,7 +314,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                 dataSourceProxy.getDbType(), sqlUndoLog);
-                            undoExecutor.executeOn(conn);
+                            undoExecutor.executeOn(connectionProxy);
                         }
                     } finally {
                         // remove serializer name
@@ -356,9 +361,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new BranchTransactionException(BranchRollbackFailed_Retriable, String
-                    .format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
-                        branchId, e.getMessage()), e);
+                if (e instanceof SQLUndoDirtyException) {
+                    throw new BranchTransactionException(BranchRollbackFailed_Unretriable, String.format(
+                        "Branch session rollback failed because of dirty undo log, please delete the relevant undolog after manually calibrating the data. xid = %s branchId = %s",
+                        xid, branchId), e);
+                }
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
+                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid,
+                        branchId, e.getMessage()),
+                    e);
 
             } finally {
                 try {
@@ -372,7 +383,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         if (originalAutoCommit) {
                             conn.setAutoCommit(true);
                         }
-                        conn.close();
+                        connectionProxy.close();
                     }
                 } catch (SQLException closeEx) {
                     LOGGER.warn("Failed to close JDBC resource while undo ... ", closeEx);
@@ -409,8 +420,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     /**
      * RollbackInfo to bytes
      *
-     * @param rs
-     * @return
+     * @param rs result set
+     * @return rollback info
      * @throws SQLException SQLException
      */
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException  {
@@ -430,5 +441,20 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     protected boolean needCompress(byte[] undoLogContent) {
         return ROLLBACK_INFO_COMPRESS_ENABLE && undoLogContent.length > ROLLBACK_INFO_COMPRESS_THRESHOLD;
+    }
+
+    @Override
+    public boolean hasUndoLogTable(Connection conn) {
+        String checkExistSql = getCheckUndoLogTableExistSql();
+        try (PreparedStatement checkPst = conn.prepareStatement(checkExistSql)) {
+            checkPst.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    protected String getCheckUndoLogTableExistSql() {
+        return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
     }
 }

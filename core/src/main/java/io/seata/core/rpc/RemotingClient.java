@@ -18,7 +18,8 @@ package io.seata.core.rpc;
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.NettyClientConfig;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ExecutorService;
@@ -35,10 +36,12 @@ public interface RemotingClient {
 
     /**
      * client send sync request.
-     * In this request, if {@link NettyClientConfig#isEnableClientBatchSendRequest} is enabled,
-     * the message will be sent in batches.
+     * In this request, if
+     * {@link RmNettyRemotingClient#isEnableClientBatchSendRequest()}
+     * {@link TmNettyRemotingClient#isEnableClientBatchSendRequest()}
+     * is enabled, the message will be sent in batches.
      *
-     * @param msg transaction message {@link io.seata.core.protocol}
+     * @param msg transaction message {@code io.seata.core.protocol}
      * @return server result message
      * @throws TimeoutException TimeoutException
      */
@@ -48,7 +51,7 @@ public interface RemotingClient {
      * client send sync request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      * @return server result message
      * @throws TimeoutException TimeoutException
      */
@@ -58,7 +61,7 @@ public interface RemotingClient {
      * client send async request.
      *
      * @param channel client channel
-     * @param msg     transaction message {@link io.seata.core.protocol}
+     * @param msg     transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncRequest(Channel channel, Object msg);
 
@@ -67,7 +70,7 @@ public interface RemotingClient {
      *
      * @param serverAddress server address
      * @param rpcMessage    rpc message from server request
-     * @param msg           transaction message {@link io.seata.core.protocol}
+     * @param msg           transaction message {@code io.seata.core.protocol}
      */
     void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg);
 

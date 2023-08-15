@@ -21,11 +21,9 @@ import com.beust.jcommander.ParameterException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.server.env.ContainerHelper;
+import io.seata.server.store.StoreConfig;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_PORT;
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
 /**
@@ -45,7 +43,7 @@ public class ParameterParser {
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
-    private int port = SERVER_DEFAULT_PORT;
+    private int port;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db, redis", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
@@ -68,41 +66,47 @@ public class ParameterParser {
         this.init(args);
     }
 
+    /**
+     * startup args > docker env
+     * @param args
+     */
     private void init(String[] args) {
         try {
-            if (ContainerHelper.isRunningInContainer()) {
-                this.seataEnv = ContainerHelper.getEnv();
-                this.host = ContainerHelper.getHost();
-                this.port = ContainerHelper.getPort();
-                this.serverNode = ContainerHelper.getServerNode();
-                this.storeMode = ContainerHelper.getStoreMode();
-                this.sessionStoreMode = ContainerHelper.getSessionStoreMode();
-                this.lockStoreMode = ContainerHelper.getLockStoreMode();
-            } else {
-                JCommander jCommander = JCommander.newBuilder().addObject(this).build();
-                jCommander.parse(args);
-                if (help) {
-                    jCommander.setProgramName(PROGRAM_NAME);
-                    jCommander.usage();
-                    System.exit(0);
-                }
-            }
+            getCommandParameters(args);
+            getEnvParameters();
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
-            if (StringUtils.isBlank(storeMode)) {
-                storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
-            }
-            if (StringUtils.isBlank(sessionStoreMode)) {
-                sessionStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_SESSION_MODE, storeMode);
-            }
-            if (StringUtils.isBlank(lockStoreMode)) {
-                lockStoreMode = CONFIG.getConfig(ConfigurationKeys.STORE_LOCK_MODE, storeMode);
-            }
+            StoreConfig.setStartupParameter(storeMode, sessionStoreMode, lockStoreMode);
         } catch (ParameterException e) {
             printError(e);
         }
 
+    }
+
+    private void getCommandParameters(String[] args) {
+        JCommander jCommander = JCommander.newBuilder().addObject(this).build();
+        jCommander.parse(args);
+        if (help) {
+            jCommander.setProgramName(PROGRAM_NAME);
+            jCommander.usage();
+            System.exit(0);
+        }
+    }
+
+    private void getEnvParameters() {
+        if (StringUtils.isBlank(seataEnv)) {
+            seataEnv = ContainerHelper.getEnv();
+        }
+        if (StringUtils.isBlank(host)) {
+            host = ContainerHelper.getHost();
+        }
+        if (port == 0) {
+            port = ContainerHelper.getPort();
+        }
+        if (serverNode == null) {
+            serverNode = ContainerHelper.getServerNode();
+        }
     }
 
     private void printError(ParameterException e) {
@@ -135,7 +139,6 @@ public class ParameterParser {
      *
      * @return the store mode
      */
-    @Deprecated
     public String getStoreMode() {
         return storeMode;
     }
@@ -146,7 +149,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getLockStoreMode() {
-        return StringUtils.isNotEmpty(lockStoreMode) ? lockStoreMode : storeMode;
+        return lockStoreMode;
     }
 
     /**
@@ -155,7 +158,7 @@ public class ParameterParser {
      * @return the store mode
      */
     public String getSessionStoreMode() {
-        return StringUtils.isNotEmpty(sessionStoreMode) ? sessionStoreMode : storeMode;
+        return sessionStoreMode;
     }
 
     /**

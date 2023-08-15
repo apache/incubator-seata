@@ -39,4 +39,6 @@ public interface Registry {
     Timer getTimer(Id id);
 
     Iterable<Measurement> measure();
+
+    void clearUp();
 }

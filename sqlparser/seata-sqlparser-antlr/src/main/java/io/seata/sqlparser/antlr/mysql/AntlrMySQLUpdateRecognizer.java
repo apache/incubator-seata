@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser.antlr.mysql;
 
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -22,6 +23,7 @@ import io.seata.sqlparser.antlr.mysql.listener.UpdateSpecificationSqlListener;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import io.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import io.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -73,6 +75,12 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     }
 
     @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, JdbcConstants.MYSQL);
+    }
+
+    @Override
     public String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         return sqlContext.getWhereCondition();
     }
@@ -80,6 +88,26 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     @Override
     public String getWhereCondition() {
         return sqlContext.getWhereCondition();
+    }
+
+    @Override
+    public String getLimitCondition() {
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
     }
 
     @Override

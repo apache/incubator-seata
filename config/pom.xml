@@ -26,6 +26,8 @@
     <artifactId>seata-config</artifactId>
     <packaging>pom</packaging>
     <name>seata-config ${project.version}</name>
+    <description>config top parent for Seata built with Maven</description>
+
     <modules>
         <module>seata-config-core</module>
         <module>seata-config-custom</module>

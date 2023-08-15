@@ -15,9 +15,17 @@
  */
 package io.seata.server.coordinator;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
+
 import io.netty.channel.Channel;
+import io.seata.common.DefaultValues;
 import io.seata.common.XID;
-import io.seata.common.util.DurationUtil;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.config.Configuration;
@@ -33,19 +41,11 @@ import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.core.store.StoreMode;
+import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
+import io.seata.server.store.StoreConfig.SessionMode;
+import io.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -53,23 +53,26 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 /**
  * The type DefaultCoordinator test.
  *
  * @author leizhiyuan
  */
+@SpringBootTest
 public class DefaultCoordinatorTest {
     private static DefaultCoordinator defaultCoordinator;
 
     private static final String applicationId = "demo-child-app";
 
-    private static final String txServiceGroup = "my_test_tx_group";
+    private static final String txServiceGroup = "default_tx_group";
 
     private static final String txName = "tx-1";
 
@@ -89,14 +92,13 @@ public class DefaultCoordinatorTest {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-        DEFAULT_SESSION_STORE_FILE_DIR);
-
     @BeforeAll
-    public static void beforeClass() throws Exception {
+    public static void beforeClass(ApplicationContext context) throws Exception {
+        EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator = new DefaultCoordinator(remotingServer);
+        defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
+        defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
 
@@ -156,7 +158,13 @@ public class DefaultCoordinatorTest {
 
     }
 
+    private static void deleteAndCreateDataFile() throws IOException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.init(SessionMode.FILE);
+    }
+
     @Test
+    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -166,10 +174,10 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession.getBranchSessions());
         Assertions.assertNotNull(branchId);
 
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
-        defaultCoordinator.timeoutCheck();
+        globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
@@ -177,35 +185,7 @@ public class DefaultCoordinatorTest {
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
-        }
-    }
-
-    @Test
-    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
-        NoSuchFieldException, IllegalAccessException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
-
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        Assertions.assertNotNull(globalSession);
-        Assertions.assertNotNull(globalSession.getBranchSessions());
-        Assertions.assertNotNull(branchId);
-
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
-        TimeUnit.MILLISECONDS.sleep(100);
-
-        defaultCoordinator.timeoutCheck();
-        defaultCoordinator.handleRetryRollbacking();
-
-        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
-        try {
-            Assertions.assertTrue(lockSize == 0);
-        } finally {
-            globalSession.closeAndClean();
-            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
@@ -222,26 +202,39 @@ public class DefaultCoordinatorTest {
         }
     }
 
-    @AfterEach
-    public void tearDown() throws IOException {
-        SessionHolder.destroy();
-        deleteDataFile();
-    }
+    @Test
+    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
+        NoSuchFieldException, IllegalAccessException {
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
-    private static void deleteDataFile() throws IOException {
-        File directory = new File(sessionStorePath);
-        File[] files = directory.listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                Files.delete(Paths.get(file.getPath()));
-            }
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        Assertions.assertNotNull(globalSession.getBranchSessions());
+        Assertions.assertNotNull(branchId);
+
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
+        TimeUnit.MILLISECONDS.sleep(100);
+
+        globalSession.queueToRetryRollback();
+        defaultCoordinator.handleRetryRollbacking();
+
+        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
+        try {
+            Assertions.assertTrue(lockSize == 0);
+        } finally {
+            globalSession.closeAndClean();
+            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
+                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
-    private static void deleteAndCreateDataFile() throws IOException {
-        SessionHolder.destroy();
-        deleteDataFile();
-        SessionHolder.init(StoreMode.FILE.name());
+    @AfterEach
+    public void tearDown() throws IOException {
+        MetricsManager.get().getRegistry().clearUp();
+        StoreUtil.deleteDataFile();
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
@@ -256,7 +249,8 @@ public class DefaultCoordinatorTest {
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {
+        public Object sendSyncRequest(String resourceId, String clientId, Object message, boolean tryOtherApp)
+            throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);

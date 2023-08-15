@@ -40,8 +40,8 @@ public enum ProcessType {
     /**
      * get enum by code
      *
-     * @param code
-     * @return
+     * @param code the type code
+     * @return the process type
      */
     public static ProcessType getEnumByCode(String code) {
         for (ProcessType codetmp : ProcessType.values()) {
@@ -55,7 +55,7 @@ public enum ProcessType {
     /**
      * get code
      *
-     * @return
+     * @return the process type code
      */
     public String getCode() {
         return code;
@@ -64,7 +64,7 @@ public enum ProcessType {
     /**
      * get message
      *
-     * @return
+     * @return the process type message
      */
     public String getMessage() {
         return message;

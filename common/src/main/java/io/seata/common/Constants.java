@@ -47,6 +47,11 @@ public interface Constants {
     String ROW_LOCK_KEY_SPLIT_CHAR = ";";
 
     /**
+     * The constant HIDE_KEY_PREFIX_CHAR.
+     */
+    String HIDE_KEY_PREFIX_CHAR = ".";
+
+    /**
      * the start time of transaction
      */
     String START_TIME = "start-time";
@@ -92,21 +97,6 @@ public interface Constants {
     String HOST_NAME = "host-name";
 
     /**
-     * The constant TCC_METHOD_RESULT.
-     */
-    String TCC_METHOD_RESULT = "result";
-
-    /**
-     * The constant TCC_METHOD_ARGUMENTS.
-     */
-    String TCC_METHOD_ARGUMENTS = "arguments";
-
-    /**
-     * transaction context
-     */
-    String TCC_ACTIVITY_CONTEXT = "activityContext";
-
-    /**
      * branch context
      */
     String TCC_ACTION_CONTEXT = "actionContext";
@@ -124,6 +114,10 @@ public interface Constants {
      * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
      */
     String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
     /**
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
@@ -161,5 +155,20 @@ public interface Constants {
      * The constant UNDOLOG_DELETE
      */
     String UNDOLOG_DELETE = "UndologDelete";
+
+    /**
+     * The constant AUTO_COMMIT
+     */
+    String AUTO_COMMIT = "autoCommit";
+
+    /**
+     * The constant SKIP_CHECK_LOCK
+     */
+    String SKIP_CHECK_LOCK = "skipCheckLock";
+
+    /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
 
 }

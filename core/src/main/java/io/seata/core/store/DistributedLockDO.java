@@ -16,7 +16,7 @@
 package io.seata.core.store;
 
 /**
- * @description: Distributed lock DO
+ * Distributed lock DO
  * @author zhongxiang.wang 
  * @author chd
  */
@@ -59,4 +59,12 @@ public class DistributedLockDO {
         this.expireTime = expireTime;
     }
 
+    public DistributedLockDO() {
+    }
+
+    public DistributedLockDO(String lockKey, String lockValue, Long expireTime) {
+        this.lockKey = lockKey;
+        this.lockValue = lockValue;
+        this.expireTime = expireTime;
+    }
 }

@@ -25,9 +25,6 @@ import io.seata.common.exception.FrameworkException;
  */
 public class TCCFenceException extends FrameworkException {
 
-    public TCCFenceException() {
-    }
-
     public TCCFenceException(FrameworkErrorCode err) {
         super(err);
     }

@@ -19,12 +19,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * The type parameter parser test
  *
  * @author xingfudeshi@gmail.com
  */
+@SpringBootTest
 public class ParameterParserTest {
     private static ParameterParser parameterParser = null;
 
@@ -46,7 +48,7 @@ public class ParameterParserTest {
         parameterParser.cleanUp();
         parameterParser = new ParameterParser(args);
         //always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
-        Assertions.assertEquals("file", parameterParser.getStoreMode());
+        Assertions.assertNull(parameterParser.getStoreMode());
     }
 
     /**

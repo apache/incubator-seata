@@ -26,35 +26,44 @@ public interface JsonParser {
     /**
      * get Name
      *
-     * @return
+     * @return the json parser name
      */
     String getName();
 
     /**
      * Object to Json string
      *
-     * @param o
-     * @param prettyPrint
-     * @return
+     * @param o the input object
+     * @param prettyPrint is pretty and print
+     * @return the json result
      */
     String toJsonString(Object o, boolean prettyPrint);
 
+
+    /**
+     * Check json use auto type boolean.
+     *
+     * @param json the json
+     * @return the boolean
+     */
+    boolean useAutoType(String json);
+
     /**
      * Object to Json string
-     * @param o
-     * @param ignoreAutoType
-     * @param prettyPrint
-     * @return
+     * @param o the input object
+     * @param ignoreAutoType is ignore auto type
+     * @param prettyPrint is pretty and print
+     * @return the json result
      */
     String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint);
 
     /**
      * parse json string to Object
      *
-     * @param json
-     * @param type
-     * @param <T>
-     * @return
+     * @param json the parse input json
+     * @param type the class type
+     * @param <T> the object type
+     * @return the parse result
      */
     <T> T parse(String json, Class<T> type, boolean ignoreAutoType);
 }

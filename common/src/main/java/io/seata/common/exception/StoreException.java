@@ -24,12 +24,6 @@ public class StoreException extends FrameworkException {
 
     /**
      * Instantiates a new Store exception.
-     */
-    public StoreException() {
-    }
-
-    /**
-     * Instantiates a new Store exception.
      *
      * @param err the err
      */

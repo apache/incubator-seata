@@ -18,6 +18,7 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import io.seata.serializer.seata.protocol.BatchResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
 import io.seata.serializer.seata.protocol.RegisterRMRequestCodec;
@@ -46,6 +47,7 @@ import io.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageType;
@@ -132,6 +134,9 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_GLOBAL_REPORT:
                 msgCodec = new GlobalReportRequestCodec();
+                break;
+            case MessageType.TYPE_BATCH_RESULT_MSG:
+                msgCodec = new BatchResultMessageCodec();
                 break;
             default:
                 break;
@@ -260,6 +265,9 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_GLOBAL_REPORT_RESULT:
                 abstractMessage = new GlobalReportResponse();
+                break;
+            case MessageType.TYPE_BATCH_RESULT_MSG:
+                abstractMessage = new BatchResultMessage();
                 break;
             default:
                 break;

@@ -25,9 +25,9 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +43,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
  * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@AutoConfigureAfter({SeataCorePropertiesAutoConfiguration.class, SeataClientPropertiesAutoConfiguration.class})
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
@@ -56,7 +56,7 @@ public class SeataAutoConfiguration {
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
+    public static GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
             ConfigurableListableBeanFactory beanFactory,
             @Autowired(required = false) List<ScannerChecker> scannerCheckers) {
         if (LOGGER.isInfoEnabled()) {
@@ -76,10 +76,10 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.addScannablePackages(seataProperties.getScanPackages());
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
-
+        //set accessKey and secretKey
+        GlobalTransactionScanner.setAccessKey(seataProperties.getAccessKey());
+        GlobalTransactionScanner.setSecretKey(seataProperties.getSecretKey());
         // create global transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
-
-
 }

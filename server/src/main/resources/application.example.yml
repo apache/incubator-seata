@@ -1,5 +1,19 @@
+#  Copyright 1999-2019 Seata.io Group.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 server:
-  port: 9091
+  port: 7091
 
 spring:
   application:
@@ -8,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs
+    path: ${user.home}/logs/seata
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -26,10 +40,15 @@ seata:
       group: SEATA_GROUP
       username:
       password:
+      context-path:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key:
+      #secret-key:
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
       acl-token:
+      key: seata.properties
     apollo:
       appId: seata-server
       apollo-meta: http://192.168.1.204:8801
@@ -46,9 +65,11 @@ seata:
       node-path: /seata/seata.properties
     etcd3:
       server-addr: http://localhost:2379
+      key: seata.properties
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
+    preferred-networks: 30.240.*
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -57,6 +78,10 @@ seata:
       cluster: default
       username:
       password:
+      context-path:
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key:
+      #secret-key:
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
@@ -72,8 +97,8 @@ seata:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
       connect-timeout: 2000
-      username: ""
-      password: ""
+      username:
+      password:
     consul:
       cluster: default
       server-addr: 127.0.0.1:8500
@@ -91,19 +116,26 @@ seata:
       address-wait-time: 3000
 
   server:
+    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
-    enableCheckAuth: true
-    retryDeadThreshold: 130000
+    enable-check-auth: true
+    enable-parallel-request-handle: true
+    retry-dead-threshold: 130000
+    xaer-nota-retry-timeout: 60000
+    enableParallelRequestHandle: true
     recovery:
       committing-retry-period: 1000
-      asyn-committing-retry-period: 1000
+      async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
       log-delete-period: 86400000
+    session:
+      branch-async-queue-size: 5000 #branch async remove queue size
+      enable-branch-async-remove: false #enable to asynchronous remove branchSession
   store:
     # support: file 、 db 、 redis
     mode: file
@@ -125,22 +157,23 @@ seata:
       url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
       user: mysql
       password: mysql
-      min-conn: 5
+      min-conn: 10
       max-conn: 100
       global-table: global_table
       branch-table: branch_table
       lock-table: lock_table
-      query-limit: 100
+      distributed-lock-table: distributed_lock
+      query-limit: 1000
       max-wait: 5000
     redis:
       mode: single
       database: 0
-      min-conn: 1
-      max-conn: 10
+      min-conn: 10
+      max-conn: 100
       password:
       max-total: 100
-      query-limit: 100
-      sigle:
+      query-limit: 1000
+      single:
         host: 127.0.0.1
         port: 6379
       sentinel:
@@ -151,3 +184,12 @@ seata:
     registry-type: compact
     exporter-list: prometheus
     exporter-prometheus-port: 9898
+  transport:
+    rpc-tc-request-timeout: 15000
+    enable-tc-server-batch-send-response: false
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      boss-thread-size: 1

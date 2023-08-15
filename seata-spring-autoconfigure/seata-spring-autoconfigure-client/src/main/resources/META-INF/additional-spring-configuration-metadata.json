@@ -36,7 +36,6 @@
         "reason": "It may be removed in a future release, please configure to 'seata.tx-service-group'."
       }
     },
-
     {
       "name": "seata.client.rm.async-commit-buffer-limit",
       "type": "java.lang.Integer",
@@ -96,6 +95,12 @@
       "type": "java.lang.Integer",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
       "defaultValue": -2147482648
+    },
+    {
+      "name": "seata.client.rm.sql-parser-type",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": "druid"
     },
     {
       "name": "seata.client.rm.lock.retry-interval",
@@ -209,7 +214,7 @@
       "name": "seata.client.load-balance.type",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
-      "defaultValue": "RandomLoadBalance"
+      "defaultValue": "XID"
     },
     {
       "name": "seata.client.load-balance.virtual-nodes",
@@ -240,32 +245,78 @@
       }
     },
     {
-      "name": "seata.tcc-fence.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Whether enable tcc fence configuration.",
-      "sourceType": "io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration",
-      "defaultValue": false
-    },
-    {
-      "name": "seata.tcc-fence.config.log-table-name",
+      "name": "seata.tcc.fence.log-table-name",
       "type": "java.lang.String",
       "description": "TCC fence log table name.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
       "defaultValue": "tcc_fence_log"
     },
     {
-      "name": "seata.tcc-fence.config.clean-mode",
-      "type": "java.lang.String",
-      "description": "TCC fence log clean mode.",
+      "name": "seata.tcc.fence.clean-period",
+      "type": "java.time.Duration",
+      "description": "TCC fence log clean period. only duration type format are supported.",
       "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": "hour"
+      "defaultValue": "1d"
     },
     {
-      "name": "seata.tcc-fence.config.clean-period",
+      "name": "seata.saga.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable saga auto configuration.",
+      "sourceType": "io.seata.spring.boot.autoconfigure.SeataSagaAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.saga.state-machine.table-prefix",
+      "type": "java.lang.String",
+      "sourceType": "io.seata.saga.engine.config.DbStateMachineConfig",
+      "defaultValue": "seata_"
+    },
+    {
+      "name": "seata.saga.state-machine.enable-async",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable state machine async function.",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.saga.state-machine.charset",
+      "type": "java.lang.String",
+      "description": "State machine repository charset.",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": "UTF-8"
+    },
+    {
+      "name": "seata.saga.state-machine.default-tenant-id",
+      "type": "java.lang.String",
+      "description": "Default tenant id.",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": "000001"
+    },
+    {
+      "name": "seata.saga.state-machine.auto-register-resources",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable auto register state lang resources.",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.saga.state-machine.resources",
+      "type": "java.util.List<java.lang.String>",
+      "description": "State lang resources.",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": "classpath*:seata/saga/statelang/**/*.json"
+    },
+    {
+      "name": "seata.saga.state-machine.service-invoke-timeout",
       "type": "java.lang.Integer",
-      "description": "TCC fence log clean period.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
-      "defaultValue": 1
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": 300000
+    },
+    {
+      "name": "seata.saga.state-machine.trans-operation-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "io.seata.saga.engine.impl.DefaultStateMachineConfig",
+      "defaultValue": 1800000
     }
   ],
   "hints": [
@@ -297,7 +348,7 @@
       "name": "seata.client.load-balance.type",
       "values": [
         {
-          "value": "RandomLoadBalance",
+          "value": "XID",
           "description": "the default load balance."
         },
         {
@@ -308,6 +359,9 @@
         },
         {
           "value": "LeastActiveLoadBalance"
+        },
+        {
+          "value": "RandomLoadBalance"
         }
       ]
     },
@@ -320,6 +374,19 @@
         },
         {
           "value": "jackson"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.rm.sql-parser-type",
+      "values": [
+        {
+          "value": "druid",
+          "description": "the default type."
+        },
+        {
+          "value": "antlr",
+          "description": "'io.seata:seata-sqlparser-antlr' dependency must be referenced manually."
         }
       ]
     },
@@ -356,12 +423,23 @@
       ]
     },
     {
-      "name": "seata.tcc-fence.config.clean-mode",
+      "name": "seata.saga.state-machine.resources",
       "providers": [
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.rm.tcc.constant.TCCFenceCleanMode"
+            "target": "org.springframework.core.io.Resource"
+          }
+        }
+      ]
+    },
+    {
+      "name": "seata.saga.state-machine.charset",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
           }
         }
       ]

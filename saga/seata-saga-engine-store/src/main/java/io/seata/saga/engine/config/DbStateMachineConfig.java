@@ -52,6 +52,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource dataSource;
     private String applicationId;
     private String txServiceGroup;
+    private String accessKey;
+    private String secretKey;
     private String tablePrefix = "seata_";
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
@@ -68,6 +70,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+                this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY,null);
+                this.secretKey = configuration.getConfig(ConfigurationKeys.SECRET_KEY,null);
                 setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
                     DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
                 setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
@@ -110,6 +114,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
                 defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
+                defaultSagaTransactionalTemplate.setAccessKey(accessKey);
+                defaultSagaTransactionalTemplate.setSecretKey(secretKey);
                 defaultSagaTransactionalTemplate.afterPropertiesSet();
                 sagaTransactionalTemplate = defaultSagaTransactionalTemplate;
             }
@@ -160,6 +166,22 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     public void setSagaTransactionalTemplate(SagaTransactionalTemplate sagaTransactionalTemplate) {

@@ -15,21 +15,21 @@
  */
 package io.seata.rm.datasource.util;
 
-import com.alibaba.druid.util.JdbcUtils;
-import com.alibaba.druid.util.MySqlUtils;
-import com.alibaba.druid.util.PGUtils;
-import io.seata.rm.BaseDataSourceResource;
-import org.mariadb.jdbc.MariaDbConnection;
-import org.mariadb.jdbc.MariaXaConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.sql.XAConnection;
-import javax.transaction.xa.XAException;
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import javax.sql.XAConnection;
+import javax.transaction.xa.XAException;
+import com.alibaba.druid.util.JdbcUtils;
+import com.alibaba.druid.util.MySqlUtils;
+import com.alibaba.druid.util.PGUtils;
+import io.seata.rm.BaseDataSourceResource;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.mariadb.jdbc.MariaDbConnection;
+import org.mariadb.jdbc.MariaXaConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class XAUtils {
 
@@ -44,11 +44,11 @@ public class XAUtils {
     }
 
     public static XAConnection createXAConnection(Connection physicalConn, Driver driver, String dbType) throws SQLException {
-        if (JdbcUtils.MYSQL.equals(dbType)) {
+        if (JdbcConstants.MYSQL.equals(dbType)) {
             return MySqlUtils.createXAConnection(driver, physicalConn);
         } else {
             switch (dbType) {
-                case JdbcUtils.ORACLE:
+                case JdbcConstants.ORACLE:
                     try {
                         // https://github.com/alibaba/druid/issues/3707
                         // before Druid issue fixed, just make ORACLE XA connection in my way.
@@ -62,9 +62,9 @@ public class XAUtils {
                     } catch (XAException xae) {
                         throw new SQLException("create xaConnection error", xae);
                     }
-                case JdbcUtils.MARIADB:
+                case JdbcConstants.MARIADB:
                     return new MariaXaConnection((MariaDbConnection)physicalConn);
-                case JdbcUtils.POSTGRESQL:
+                case JdbcConstants.POSTGRESQL:
                     return PGUtils.createXAConnection(physicalConn);
                 default:
                     throw new SQLException("xa not support dbType: " + dbType);

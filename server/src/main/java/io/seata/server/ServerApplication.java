@@ -15,22 +15,35 @@
  */
 package io.seata.server;
 
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.server.env.PortHelper;
+import io.seata.common.aot.NativeUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @author spilledyear@outlook.com
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"io.seata"})
 public class ServerApplication {
-    public static void main(String[] args) {
-        // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
-        int port = PortHelper.getPort(args);
-        System.setProperty(ConfigurationKeys.SERVER_RPC_PORT, Integer.toString(port));
 
-        // run the spring-boot application
-        SpringApplication.run(ServerApplication.class, args);
+    public static void main(String[] args) throws Throwable {
+        try {
+            // run the spring-boot application
+            SpringApplication.run(ServerApplication.class, args);
+        } catch (Throwable t) {
+            // This exception is used to end `spring-boot-maven-plugin:process-aot`, so ignore it.
+            if ("org.springframework.boot.SpringApplication$AbandonedRunException".equals(t.getClass().getName())) {
+                throw t;
+            }
+
+            // In the `native-image`, if an exception occurs prematurely during the startup process, the exception log will not be recorded,
+            // so here we sleep for 20 seconds to observe the exception information.
+            if (NativeUtils.inNativeImage()) {
+                t.printStackTrace();
+                Thread.sleep(20000);
+            }
+
+            throw t;
+        }
     }
+
 }

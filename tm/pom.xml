@@ -27,6 +27,7 @@
     <artifactId>seata-tm</artifactId>
     <packaging>jar</packaging>
     <name>seata-tm ${project.version}</name>
+    <description>transaction manager for Seata built with Maven</description>
 
     <dependencies>
         <dependency>

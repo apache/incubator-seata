@@ -22,6 +22,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,4 +83,9 @@ public abstract class BaseDmRecognizer extends BaseRecognizer {
         executeVisit(where, new OracleOutputVisitor(sb));
         return sb.toString();
     }
+
+    public String getDbType() {
+        return JdbcConstants.DM;
+    }
+
 }

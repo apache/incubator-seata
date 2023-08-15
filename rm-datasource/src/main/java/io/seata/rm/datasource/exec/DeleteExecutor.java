@@ -22,11 +22,10 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLDeleteRecognizer;
 import io.seata.sqlparser.SQLRecognizer;
 
@@ -47,7 +46,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
+    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -63,18 +62,17 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
+        String orderByCondition = buildOrderCondition(visitor, paramAppenderList);
+        String limitCondition = buildLimitCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(WHERE).append(whereCondition);
         }
-        String orderBy = visitor.getOrderBy();
-        if (StringUtils.isNotBlank(orderBy)) {
-            suffix.append(orderBy);
+        if (StringUtils.isNotBlank(orderByCondition)) {
+            suffix.append(" ").append(orderByCondition);
         }
-        ParametersHolder parametersHolder = statementProxy instanceof ParametersHolder ? (ParametersHolder)statementProxy : null;
-        String limit = visitor.getLimit(parametersHolder, paramAppenderList);
-        if (StringUtils.isNotBlank(limit)) {
-            suffix.append(limit);
+        if (StringUtils.isNotBlank(limitCondition)) {
+            suffix.append(" ").append(limitCondition);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix.toString());

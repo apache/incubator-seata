@@ -15,6 +15,7 @@
  */
 package io.seata.config.file;
 
+import java.util.Map;
 
 /**
  * @author wangwei-ying
@@ -22,8 +23,13 @@ package io.seata.config.file;
 public interface FileConfig {
     /**
      * @param path path expression
+     * @return the config
      */
     String getString(String path);
 
+    /**
+     * @return the all config
+     */
+    Map<String, Object> getAllConfig();
 
 }

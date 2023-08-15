@@ -33,7 +33,10 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
+import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +62,7 @@ import static io.netty.util.CharsetUtil.UTF_8;
  * @author xingfudeshi@gmail.com
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String FILE_ROOT_REGISTRY = "registry";
@@ -126,6 +130,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
         doRegister(address);
+        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
     }
 
     /**
@@ -179,8 +184,13 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     public List<InetSocketAddress> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
         if (cluster == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
+        return lookupByCluster(cluster);
+    }
+
+    private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
         if (!listenerMap.containsKey(cluster)) {
             //1.refresh
             refreshCluster(cluster);
@@ -316,10 +326,53 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         return ByteSequence.from(NetUtil.toStringAddress(address), UTF_8);
     }
 
+    private static class Pair<K, V> {
+
+        /**
+         * Key of this <code>Pair</code>.
+         */
+        private K key;
+
+        /**
+         * Value of this this <code>Pair</code>.
+         */
+        private V value;
+
+        /**
+         * Creates a new pair
+         *
+         * @param key   The key for this pair
+         * @param value The value to use for this pair
+         */
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        /**
+         * Gets the key for this pair.
+         *
+         * @return key for this pair
+         */
+        public K getKey() {
+            return key;
+        }
+
+        /**
+         * Gets the value for this pair.
+         *
+         * @return value for this pair
+         */
+        public V getValue() {
+            return value;
+        }
+    }
+
     /**
      * the type etcd life keeper
      */
     private class EtcdLifeKeeper implements Callable<Boolean> {
+
         private final long leaseId;
         private final Lease leaseClient;
         private boolean running;
@@ -373,6 +426,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * the type etcd watcher
      */
     private class EtcdWatcher implements Runnable {
+
         private final Watch.Listener listener;
         private Watch.Watcher watcher;
         private String cluster;
@@ -400,40 +454,5 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         public void stop() {
             this.watcher.close();
         }
-    }
-
-    private static class Pair<K,V> {
-
-        /**
-         * Key of this <code>Pair</code>.
-         */
-        private K key;
-
-        /**
-         * Value of this this <code>Pair</code>.
-         */
-        private V value;
-
-        /**
-         * Creates a new pair
-         * @param key The key for this pair
-         * @param value The value to use for this pair
-         */
-        public Pair(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        /**
-         * Gets the key for this pair.
-         * @return key for this pair
-         */
-        public K getKey() { return key; }
-
-        /**
-         * Gets the value for this pair.
-         * @return value for this pair
-         */
-        public V getValue() { return value; }
     }
 }

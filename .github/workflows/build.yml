@@ -1,43 +1,66 @@
-name: build
+name: "build"
 
 on:
   push:
-    branches: [ develop,master ]
+    branches: [ 2.x, develop, master ]
   pull_request:
-    branches: [ develop,master ]
+    branches: [ 2.x, develop, master ]
 
 jobs:
+  # job 1: Test based on java 8 and 17. Do not checkstyle.
   build:
-
-    runs-on: ${{ matrix.os }}
+    name: "build"
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        java: [8, 11]
-        os: [ ubuntu-18.04 ]
+        java: [ 8, 17 ]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2.3.4
-      - name: Setup Java JDK
-        uses: actions/setup-java@v2.1.0
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v2.5.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      - name: Set up ENV
-        # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-        run: if [ "${{ matrix.java }}" == "8" ]; then
-                echo "IMAGE_NAME=openjdk:8u212-jre-alpine" >> $GITHUB_ENV;
-             elif [ "${{ matrix.java }}" == "11" ]; then
-                echo "IMAGE_NAME=openjdk:11-jre-stretch" >> $GITHUB_ENV;
-             fi
-      - name: Build with Maven
-        env:
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-        # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-        run: if [ "${{github.event_name}}" == "push" ] && [ "${{github.ref}}" == "refs/heads/develop" ]; then
-            ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-            else
-             ./mvnw clean install -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-             fi
-      - name: Codecov
-        uses: codecov/codecov-action@v1.5.0
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
+      - name: "Build with Maven"
+        run: |
+          if [ "${{ matrix.java }}" == "8" ]; then
+            ./mvnw -T 4C clean test -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          elif [ "${{ matrix.java }}" == "17" ]; then
+            ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
+      # step 5
+      - name: "Codecov"
+        if: matrix.java == '17'
+        uses: codecov/codecov-action@v2.1.0
+
+  # job 2: Test on 'arm64v8/ubuntu' OS.
+  build_arm64-binary:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
+    strategy:
+      fail-fast: false
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up QEMU"
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      # step 3
+      - name: "Build arm-binary"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            arm64v8/ubuntu:20.04 \
+            bash -exc 'apt-get update -y && \
+                       apt-get install maven -y && \
+                       mvn -version && \
+                       mvn -Prelease-seata -DskipTests clean install -U'

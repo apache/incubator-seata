@@ -15,29 +15,31 @@
  */
 package io.seata.server.store.db;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import org.apache.commons.dbcp2.BasicDataSource;
-
-import org.h2.store.fs.FileUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
+import io.seata.core.store.BranchTransactionDO;
+import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.h2.store.fs.FileUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
 
 /**
  * @author zhangsen
  */
+@SpringBootTest
 public class LogStoreDataBaseDAOTest {
 
     static LogStoreDataBaseDAO logStoreDataBaseDAO  = null;
@@ -45,7 +47,7 @@ public class LogStoreDataBaseDAOTest {
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start(){
+    public static void start(ApplicationContext context){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/log");
@@ -627,7 +629,8 @@ public class LogStoreDataBaseDAOTest {
     }
 
     @AfterAll
-    public static void clearStoreDB(){
+    public static void clearStoreDB() throws SQLException {
+        dataSource.close();
         FileUtils.deleteRecursive("db_store", true);
     }
 

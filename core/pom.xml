@@ -27,6 +27,7 @@
     <artifactId>seata-core</artifactId>
     <packaging>jar</packaging>
     <name>seata-core ${project.version}</name>
+    <description>core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -68,4 +69,25 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>icu.easyj.maven.plugins</groupId>
+                <artifactId>easyj-maven-plugin</artifactId>
+                <configuration>
+                    <mainPaths>
+                        <path>io/seata/core/protocol/VersionInfo.java.template</path>
+                    </mainPaths>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-java-by-template</id>
+                        <goals>
+                            <goal>replace-java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

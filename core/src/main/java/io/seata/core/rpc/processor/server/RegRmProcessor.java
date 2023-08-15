@@ -68,7 +68,11 @@ public class RegRmProcessor implements RemotingProcessor {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                }
+            } else {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -81,7 +85,7 @@ public class RegRmProcessor implements RemotingProcessor {
             response.setMsg(errorInfo);
         }
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
-        if (LOGGER.isInfoEnabled()) {
+        if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
                 message.getVersion());
         }

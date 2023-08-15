@@ -24,11 +24,15 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Table meta cache.
@@ -87,6 +91,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         } else {
             tableName = tableName.toUpperCase();
         }
+        tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -110,6 +115,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
+                col.setCaseSensitive(StringUtils.hasLowerCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
@@ -136,7 +142,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("TYPE"));
                     index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setCardinality(rsIndex.getLong("CARDINALITY"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);
@@ -147,19 +153,47 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
                 }
             }
-
-            while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getString("PK_NAME");
-                if (tm.getAllIndexes().containsKey(pkIndexName)) {
-                    IndexMeta index = tm.getAllIndexes().get(pkIndexName);
-                    index.setIndextype(IndexType.PRIMARY);
-                }
-            }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
             }
+            // when we create a primary key constraint oracle will uses and existing unique index.
+            // if we create a unique index before create a primary constraint in the same column will cause the problem
+            // that primary key constraint name was different from the unique name.
+            List<String> pkcol = new ArrayList<>();
+            while (rsPrimary.next()) {
+                String pkConstraintName = rsPrimary.getString("PK_NAME");
+                if (tm.getAllIndexes().containsKey(pkConstraintName)) {
+                    IndexMeta index = tm.getAllIndexes().get(pkConstraintName);
+                    index.setIndextype(IndexType.PRIMARY);
+                } else {
+                    //save the columns that constraint primary key name was different from unique index name
+                    pkcol.add(rsPrimary.getString("COLUMN_NAME"));
+                }
+            }
+            //find the index that belong to the primary key constraint
+            if (!pkcol.isEmpty()) {
+                int matchCols = 0;
+                for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
+                    IndexMeta index = entry.getValue();
+                    // only the unique index and all the unique index's columes same as primary key columes,
+                    // it belongs to primary key
+                    if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
+                        for (ColumnMeta col : index.getValues()) {
+                            if (pkcol.contains(col.getColumnName())) {
+                                matchCols++;
+                            }
+                        }
+                        if (matchCols == pkcol.size()) {
+                            index.setIndextype(IndexType.PRIMARY);
+                            // each table only has one primary key
+                            break;
+                        } else {
+                            matchCols = 0;
+                        }
+                    }
+                }
+            }
         }
-
         return tm;
     }
 }

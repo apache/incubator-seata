@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.netty.channel.Channel;
 import io.seata.common.util.NetUtil;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Version.
@@ -29,11 +31,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class Version {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Version.class);
+
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = "1.5.0-SNAPSHOT";
+    private static final String CURRENT = VersionInfo.VERSION;
     private static final String VERSION_0_7_1 = "0.7.1";
+    private static final String VERSION_1_5_0 = "1.5.0";
     private static final int MAX_VERSION_DOT = 3;
 
     /**
@@ -89,14 +94,37 @@ public class Version {
         }
     }
 
-    private static long convertVersion(String version) throws IncompatibleVersionException {
+    /**
+     * Determine whether the client version is greater than or equal to version 1.5.0
+     *
+     * @param version client version
+     * @return true: client version is above or equal version 1.5.0, false: on the contrary
+     */
+    public static boolean isAboveOrEqualVersion150(String version) {
+        boolean isAboveOrEqualVersion150 = false;
+        try {
+            long clientVersion = convertVersion(version);
+            long divideVersion = convertVersion(VERSION_1_5_0);
+            isAboveOrEqualVersion150 = clientVersion >= divideVersion;
+        } catch (Exception e) {
+            LOGGER.error("convert version error, clientVersion:{}", version, e);
+        }
+        return isAboveOrEqualVersion150;
+    }
+
+    public static long convertVersion(String version) throws IncompatibleVersionException {
+        if (StringUtils.isBlank(version)) {
+            throw new IllegalArgumentException("The version must not be blank.");
+        }
+
         String[] parts = StringUtils.split(version, '.');
-        long result = 0L;
-        int i = 1;
         int size = parts.length;
         if (size > MAX_VERSION_DOT + 1) {
             throw new IncompatibleVersionException("incompatible version format:" + version);
         }
+
+        long result = 0L;
+        int i = 1;
         size = MAX_VERSION_DOT + 1;
         for (String part : parts) {
             if (StringUtils.isNumeric(part)) {
@@ -111,6 +139,15 @@ public class Version {
             i++;
         }
         return result;
+    }
+
+    public static long convertVersionNotThrowException(String version) {
+        try {
+            return convertVersion(version);
+        } catch (Exception e) {
+            LOGGER.error("convert version error,version:{}", version, e);
+        }
+        return -1;
     }
 
     private static long calculatePartValue(String partNumeric, int size, int index) {

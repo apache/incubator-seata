@@ -72,7 +72,12 @@ public enum DBType {
     /**
      * Oceanbase db type.
      */
-    OCEANBASE;
+    OCEANBASE,
+
+    /**
+     * Maria db type.
+     */
+    MARIADB;
 
     /**
      * Valueof db type.

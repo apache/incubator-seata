@@ -17,13 +17,14 @@ package io.seata.tm.api;
 
 import java.util.concurrent.TimeUnit;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.GlobalStatus;
+
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
-    public void onRollbackRetrying(GlobalTransaction tx, Throwable originalException) {
+    public void onRollbacking(GlobalTransaction tx, Throwable originalException) {
         StackTraceLogger.warn(LOGGER, originalException, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
             TimeUnit.SECONDS);

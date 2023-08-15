@@ -22,11 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class StoreExceptionTest {
 
     @Test
-    public void testConstructorWithNoParameters() {
-        exceptionAsserts(new StoreException());
-    }
-
-    @Test
     public void testConstructorWithFrameworkErrorCode() {
         exceptionAsserts(new StoreException(FrameworkErrorCode.UnknownAppError));
     }

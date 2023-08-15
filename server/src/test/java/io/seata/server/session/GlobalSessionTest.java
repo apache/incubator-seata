@@ -15,17 +15,23 @@
  */
 package io.seata.server.session;
 
+import java.io.IOException;
+import java.util.stream.Stream;
+
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.storage.file.session.FileSessionManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
-import java.io.IOException;
-import java.util.stream.Stream;
+
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Global session test.
@@ -33,7 +39,14 @@ import java.util.stream.Stream;
  * @author tianming.xm @gmail.com
  * @since 2019 /1/23
  */
+@SpringBootTest
 public class GlobalSessionTest {
+
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context){
+
+    }
 
     /**
      * Can be committed async test.
@@ -59,15 +72,18 @@ public class GlobalSessionTest {
     }
 
     /**
-     * Change status test.
+     * Global session provider object [ ] [ ].
      *
-     * @param globalSession the global session
-     * @throws Exception the exception
+     * @return the object [ ] [ ]
      */
-    @ParameterizedTest
-    @MethodSource("globalSessionProvider")
-    public void changeStatusTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatus(GlobalStatus.Committed);
+    static Stream<Arguments> globalSessionProvider() throws IOException {
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        globalSession.setActive(true);
+        globalSession.addSessionLifecycleListener(new FileSessionManager("default", null));
+        return Stream.of(
+                Arguments.of(
+                        globalSession)
+        );
     }
 
     /**
@@ -121,17 +137,25 @@ public class GlobalSessionTest {
     }
 
     /**
-     * Remove branch test.
+     * Branch session provider object [ ] [ ].
      *
-     * @param globalSession the global session
-     * @param branchSession the branch session
-     * @throws Exception the exception
+     * @return the object [ ] [ ]
      */
-    @ParameterizedTest
-    @MethodSource("branchSessionProvider")
-    public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
-        globalSession.addBranch(branchSession);
-        globalSession.removeBranch(branchSession);
+    static Stream<Arguments> branchSessionProvider() {
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        BranchSession branchSession = new BranchSession();
+        branchSession.setTransactionId(globalSession.getTransactionId());
+        branchSession.setBranchId(1L);
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession.setResourceId("tb_1");
+        branchSession.setLockKey("t_1");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setApplicationData("{\"data\":\"test\"}");
+        globalSession.add(branchSession);
+        return Stream.of(
+                Arguments.of(
+                        globalSession, branchSession)
+        );
     }
 
     /**
@@ -154,54 +178,17 @@ public class GlobalSessionTest {
     }
 
     /**
-     * Global session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> globalSessionProvider() throws IOException {
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
-        globalSession.setActive(true);
-        globalSession.addSessionLifecycleListener(new FileSessionManager("default", null));
-        return Stream.of(
-                Arguments.of(
-                        globalSession)
-        );
-    }
-
-    /**
-     * Branch session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> branchSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
-        BranchSession branchSession = new BranchSession();
-        branchSession.setTransactionId(globalSession.getTransactionId());
-        branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
-        branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("t_1");
-        branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationData("{\"data\":\"test\"}");
-        globalSession.add(branchSession);
-        return Stream.of(
-                Arguments.of(
-                        globalSession, branchSession)
-        );
-    }
-
-    /**
      * Branch session mt provider object [ ] [ ].
      *
      * @return the object [ ] [ ]
      */
 
     static Stream<Arguments> branchSessionTCCProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.TCC);
@@ -210,5 +197,31 @@ public class GlobalSessionTest {
         return Stream.of(
                 Arguments.of(globalSession)
         );
+    }
+
+    /**
+     * Change status test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
+    public void changeStatusTest(GlobalSession globalSession) throws Exception {
+        globalSession.changeGlobalStatus(GlobalStatus.Committed);
+    }
+
+    /**
+     * Remove branch test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
+    public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
+        globalSession.addBranch(branchSession);
+        globalSession.removeAndUnlockBranch(branchSession);
     }
 }

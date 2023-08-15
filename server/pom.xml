@@ -26,21 +26,47 @@
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
     <name>seata-server ${project.version}</name>
+    <description>server for Seata built with Maven</description>
 
     <properties>
-        <spring-boot.version>2.3.10.RELEASE</spring-boot.version>
-        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
-        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+        <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
+        <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
+        <native-build-tools-plugin.version>0.9.20</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-framework-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework-for-server.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-parent</artifactId>
-                <version>${spring-boot.version}</version>
-                <scope>import</scope>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-for-server.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-framework-bom</artifactId>
+                    </exclusion>
+                </exclusions>
                 <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -50,8 +76,24 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-spring-autoconfigure-server</artifactId>
@@ -67,6 +109,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-all</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -90,6 +138,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-console</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- for database -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -107,6 +161,7 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -115,6 +170,14 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+        <!-- Copyright restrictions, do not reference this dependency.
+             You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
+        <dependency>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>-->
+
         <dependency>
             <groupId>com.beust</groupId>
             <artifactId>jcommander</artifactId>
@@ -133,8 +196,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.fppt</groupId>
-            <artifactId>jedis-mock</artifactId>
+            <groupId>com.github.microwww</groupId>
+            <artifactId>redis-server</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -148,66 +211,305 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
         <!-- logback appenders -->
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>${logstash-logback-encoder.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.danielwegener</groupId>
             <artifactId>logback-kafka-appender</artifactId>
-            <version>${kafka-appender.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>io.seata.server.ServerApplication</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <excludeTransitive>false</excludeTransitive>
+                            <stripVersion>false</stripVersion>
+                            <silent>true</silent>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <!--resolve slf4j-simple conflicts-->
+                            <includeScope>runtime</includeScope>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
+                            <skip>${dependencies.copy.skip}</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-mysql</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql.jdbc.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql8.jdbc.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/lib/jdbc
+                            </outputDirectory>
+                            <skip>${dependencies.copy.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>${image.name}</image>
+                        <platforms>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>amd64</architecture>
+                            </platform>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>arm64</architecture>
+                            </platform>
+                        </platforms>
+                    </from>
+                    <to>
+                        <image>docker.io/seataio/seata-server</image>
+                        <tags>${image.tags}</tags>
+                        <auth>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <appRoot>/seata-server</appRoot>
+                        <workingDirectory>/seata-server</workingDirectory>
+                        <mainClass>io.seata.server.ServerApplication</mainClass>
+                        <ports>
+                            <port>8091</port>
+                            <port>7091</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
+                            <jvmFlag>-server</jvmFlag>
+                            <jvmFlag>-Xss512k</jvmFlag>
+                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                            <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
+                            <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
+                            <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=256m</jvmFlag>
+                            <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
+                            <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
+                            <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
+                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
+                            <!--gc-->
+                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
+                            <jvmFlag>-XX:+UseG1GC</jvmFlag>
+                            <!--netty-->
+                            <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                            <!--log-->
+                            <jvmFlag>-Dlogback.color.disable-for-bat=true</jvmFlag>
+                        </jvmFlags>
+                        <labels>
+                            <name>seata-server</name>
+                        </labels>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>target/lib/jdbc</from>
+                                <into>/seata-server/libs/jdbc</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <skip>${image.publish.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
         <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot.version}</version>
+                        <executions>
+                            <execution>
+                                <id>repackage</id>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>process-aot</id>
+                                <goals>
+                                    <goal>process-aot</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>io.seata.server.ServerApplication</mainClass>
+                            <image>
+                                <builder>paketobuildpacks/builder:tiny</builder>
+                                <env>
+                                    <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                                </env>
+                            </image>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-build-tools-plugin.version}</version>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
+                            <requiredVersion>22.3</requiredVersion>
+                            <buildArgs>
+                                -H:+ReportExceptionStackTraces
+                                -H:+PrintAnalysisCallTree
+                                <!-- -H:+PrintImageObjectTree 会报空指针异常，已提交issue给官方，关注issue: https://github.com/graalvm/native-build-tools/issues/402 -->
+                                -H:+ExhaustiveHeapScan
+                            </buildArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>add-reachability-metadata</id>
+                                <goals>
+                                    <goal>add-reachability-metadata</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>nativeTest</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.junit.platform</groupId>
+                    <artifactId>junit-platform-launcher</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot.version}</version>
+                        <executions>
+                            <execution>
+                                <id>process-test-aot</id>
+                                <goals>
+                                    <goal>process-test-aot</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-build-tools-plugin.version}</version>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
+                            <requiredVersion>22.3</requiredVersion>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>native-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>release-seata</id>
+            <properties>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
             <build>
                 <finalName>seata-server</finalName>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jar-plugin</artifactId>
-                        <version>3.0.2</version>
-                    </plugin>
-                    <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot.version}</version>
                         <configuration>
                             <mainClass>io.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
+                            <attach>false</attach>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
                         </configuration>
                         <executions>
                             <execution>

@@ -16,9 +16,8 @@
 package io.seata.spring.tcc;
 
 import java.lang.reflect.Method;
-import java.util.Map;
+import javax.annotation.Nullable;
 
-import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
@@ -39,13 +38,13 @@ import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
-
 import static io.seata.core.constants.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 
 /**
  * TCC Interceptor
  *
  * @author zhangsen
+ * @author wang.liang
  */
 public class TccActionInterceptor implements MethodInterceptor, ConfigurationChangeListener, Ordered {
 
@@ -81,7 +80,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
         if (!RootContext.inGlobalTransaction() || disable || RootContext.inSagaBranch()) {
-            //not in transaction
+            //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = getActionInterfaceMethod(invocation);
@@ -97,14 +96,10 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 RootContext.bindBranchType(BranchType.TCC);
             }
             try {
-                Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect
-                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
+                //Handler the TCC Aspect, and return the business result
+                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessAction,
                         invocation::proceed);
-                //return the final result
-                return ret.get(Constants.TCC_METHOD_RESULT);
-            }
-            finally {
+            } finally {
                 //if not TCC, unbind branchType
                 if (BranchType.TCC != previousBranchType) {
                     RootContext.unbindBranchType();
@@ -113,6 +108,8 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+
+        //not TCC try method
         return invocation.proceed();
     }
 
@@ -123,25 +120,25 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
      * @return the action interface method
      */
     protected Method getActionInterfaceMethod(MethodInvocation invocation) {
-        Class<?> interfaceType = null;
+        Class<?> serviceType = null;
         try {
             if (remotingDesc == null) {
-                interfaceType = getProxyInterface(invocation.getThis());
+                serviceType = getProxyInterface(invocation.getThis());
             } else {
-                interfaceType = remotingDesc.getInterfaceClass();
+                serviceType = remotingDesc.getServiceClass();
             }
-            if (interfaceType == null && remotingDesc.getInterfaceClassName() != null) {
-                interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,
+            if (serviceType == null && remotingDesc != null && remotingDesc.getServiceClassName() != null) {
+                serviceType = Class.forName(remotingDesc.getServiceClassName(), true,
                     Thread.currentThread().getContextClassLoader());
             }
-            if (interfaceType == null) {
+            if (serviceType == null) {
                 return invocation.getMethod();
             }
-            return interfaceType.getMethod(invocation.getMethod().getName(),
+            return serviceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
         } catch (NoSuchMethodException e) {
-            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
-                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
+            if (serviceType != null && !"toString".equals(invocation.getMethod().getName())) {
+                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), serviceType.getName());
             }
             return invocation.getMethod();
         } catch (Exception e) {
@@ -157,6 +154,7 @@ public class TccActionInterceptor implements MethodInterceptor, ConfigurationCha
      * @return proxy interface
      * @throws Exception the exception
      */
+    @Nullable
     protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
         if (DubboUtil.isDubboProxyName(proxyBean.getClass().getName())) {
             //dubbo javaassist proxy

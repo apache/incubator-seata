@@ -16,9 +16,11 @@
 package io.seata.core.context;
 
 import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
@@ -45,6 +47,16 @@ public class RootContext {
      * The constant KEY_XID.
      */
     public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant HIDDEN_KEY_XID for sofa-rpc integration.
+     */
+    public static final String HIDDEN_KEY_XID = Constants.HIDE_KEY_PREFIX_CHAR + KEY_XID;
+
+    /**
+     * The constant KEY_TIMEOUT.
+     */
+    public static final String KEY_TIMEOUT = "TX_TIMEOUT";
 
     /**
      * The constant MDC_KEY_XID for logback
@@ -113,6 +125,14 @@ public class RootContext {
             }
             CONTEXT_HOLDER.put(KEY_XID, xid);
         }
+    }
+
+    public static Integer getTimeout() {
+        return (Integer) CONTEXT_HOLDER.get(KEY_TIMEOUT);
+    }
+
+    public static void setTimeout(Integer timeout) {
+        CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
     }
 
     /**
@@ -240,7 +260,8 @@ public class RootContext {
      */
     public static void assertNotInGlobalTransaction() {
         if (inGlobalTransaction()) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException(String.format("expect has not xid, but was:%s",
+                CONTEXT_HOLDER.get(KEY_XID)));
         }
     }
 

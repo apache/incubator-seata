@@ -17,6 +17,8 @@ package io.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
 
+import io.seata.config.ConfigurationKeys;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -29,18 +31,23 @@ public interface StarterConstants {
     String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
     String SERVICE_PREFIX = SEATA_PREFIX + ".service";
     String CLIENT_PREFIX = SEATA_PREFIX + ".client";
+    String SAGA_PREFIX = SEATA_PREFIX + ".saga";
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     String CLIENT_TM_PREFIX = CLIENT_PREFIX + ".tm";
     String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     String LOAD_BALANCE_PREFIX_KEBAB_STYLE = CLIENT_PREFIX + ".load-balance";
     String LOAD_BALANCE_PREFIX = CLIENT_PREFIX + ".loadBalance";
+    String HTTP_PREFIX = CLIENT_PREFIX + ".http";
     String LOG_PREFIX = SEATA_PREFIX + ".log";
     String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
-    String TCC_FENCE_PREFIX_KEBAB_STYLE = SEATA_PREFIX + ".tcc-fence";
-    String TCC_FENCE_CONFIG_PREFIX_KEBAB_STYLE = TCC_FENCE_PREFIX_KEBAB_STYLE + ".config";
+    String TCC_PREFIX = SEATA_PREFIX + ".tcc";
+    String TCC_FENCE_PREFIX = TCC_PREFIX + ".fence";
+    String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
+    String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
+    String REGISTRY_PREFERED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";
     String REGISTRY_REDIS_PREFIX = REGISTRY_PREFIX + ".redis";
@@ -75,6 +82,10 @@ public interface StarterConstants {
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
 
+    String SESSION_PREFIX = SERVER_PREFIX + ".session";
+
+    String REGEX_SPLIT_CHAR = ";";
+
 
     int MAP_CAPACITY = 64;
     HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
@@ -82,5 +93,6 @@ public interface StarterConstants {
      * The following special keys need to be normalized.
      */
     String SPECIAL_KEY_GROUPLIST = "grouplist";
+    String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
 }

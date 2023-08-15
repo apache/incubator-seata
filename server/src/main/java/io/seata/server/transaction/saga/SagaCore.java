@@ -16,10 +16,8 @@
 package io.seata.server.transaction.saga;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-
 import io.netty.channel.Channel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.GlobalTransactionException;
@@ -31,8 +29,8 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
-import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.netty.ChannelManager;
 import io.seata.server.coordinator.AbstractCore;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -106,13 +104,13 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Committed:
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     LOGGER.info("Successfully committed SAGA global[" + globalSession.getXid() + "]");
                     break;
                 case PhaseTwo_Rollbacked:
                     LOGGER.info("Successfully rollbacked SAGA global[" + globalSession.getXid() + "]");
-                    removeAllBranches(globalSession);
-                    SessionHelper.endRollbacked(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    SessionHelper.endRollbacked(globalSession, retrying);
                     return false;
                 case PhaseTwo_RollbackFailed_Retryable:
                     LOGGER.error("By [{}], failed to rollback SAGA global [{}], will retry later.", branchStatus,
@@ -122,8 +120,8 @@ public class SagaCore extends AbstractCore {
                     return false;
                 case PhaseOne_Failed:
                     LOGGER.error("By [{}], finish SAGA global [{}]", branchStatus, globalSession.getXid());
-                    removeAllBranches(globalSession);
-                    globalSession.changeStatus(GlobalStatus.Finished);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
+                    globalSession.changeGlobalStatus(GlobalStatus.Finished);
                     globalSession.end();
                     return false;
                 case PhaseTwo_CommitFailed_Unretryable:
@@ -132,18 +130,17 @@ public class SagaCore extends AbstractCore {
                                 globalSession.getXid());
                         break;
                     } else {
-                        SessionHelper.endCommitFailed(globalSession);
+                        SessionHelper.endCommitFailed(globalSession,retrying);
                         LOGGER.error("Finally, failed to commit SAGA global[{}]", globalSession.getXid());
                         return false;
                     }
                 default:
                     if (!retrying) {
                         globalSession.queueToRetryCommit();
-                        return false;
                     } else {
                         LOGGER.error("Failed to commit SAGA global[{}], will retry later.", globalSession.getXid());
-                        return false;
                     }
+                    return false;
             }
         } catch (Exception ex) {
             LOGGER.error("Failed to commit global[" + globalSession.getXid() + "]", ex);
@@ -164,11 +161,11 @@ public class SagaCore extends AbstractCore {
 
             switch (branchStatus) {
                 case PhaseTwo_Rollbacked:
-                    removeAllBranches(globalSession);
+                    SessionHelper.removeAllBranch(globalSession, !retrying);
                     LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
                     break;
                 case PhaseTwo_RollbackFailed_Unretryable:
-                    SessionHelper.endRollbackFailed(globalSession);
+                    SessionHelper.endRollbackFailed(globalSession, retrying);
                     LOGGER.error("Failed to rollback SAGA global[{}]", globalSession.getXid());
                     return false;
                 case PhaseTwo_CommitFailed_Retryable:
@@ -196,16 +193,16 @@ public class SagaCore extends AbstractCore {
     @Override
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
         if (GlobalStatus.Committed.equals(globalStatus)) {
-            removeAllBranches(globalSession);
-            SessionHelper.endCommitted(globalSession);
+            SessionHelper.removeAllBranch(globalSession, false);
+            SessionHelper.endCommitted(globalSession, false);
             LOGGER.info("Global[{}] committed", globalSession.getXid());
         } else if (GlobalStatus.Rollbacked.equals(globalStatus)
                 || GlobalStatus.Finished.equals(globalStatus)) {
-            removeAllBranches(globalSession);
-            SessionHelper.endRollbacked(globalSession);
+            SessionHelper.removeAllBranch(globalSession, false);
+            SessionHelper.endRollbacked(globalSession, false);
             LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
         } else {
-            globalSession.changeStatus(globalStatus);
+            globalSession.changeGlobalStatus(globalStatus);
             LOGGER.info("Global[{}] reporting is successfully done. status[{}]", globalSession.getXid(), globalSession.getStatus());
 
             if (GlobalStatus.RollbackRetrying.equals(globalStatus)
@@ -217,19 +214,6 @@ public class SagaCore extends AbstractCore {
                 globalSession.queueToRetryCommit();
                 LOGGER.info("Global[{}] will retry commit", globalSession.getXid());
             }
-        }
-    }
-
-    /**
-     * remove all branches
-     *
-     * @param globalSession the globalSession
-     * @throws TransactionException the TransactionException
-     */
-    private void removeAllBranches(GlobalSession globalSession) throws TransactionException {
-        ArrayList<BranchSession> branchSessions = globalSession.getSortedBranches();
-        for (BranchSession branchSession : branchSessions) {
-            globalSession.removeBranch(branchSession);
         }
     }
 

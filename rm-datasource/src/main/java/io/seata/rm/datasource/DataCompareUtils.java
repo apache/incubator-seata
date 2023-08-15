@@ -20,14 +20,17 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.model.Result;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -90,8 +93,26 @@ public class DataCompareUtils {
     private static void convertType(Field f0, Field f1) {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
+        if (f0Type == Types.DATE && f0.getValue().getClass().equals(String.class)) {
+            String[] strings = f0.getValue().toString().split(" ");
+            f0.setValue(Date.valueOf(strings[0]));
+        }
+        if (f1Type == Types.DATE && f1.getValue().getClass().equals(String.class)) {
+            String[] strings = f1.getValue().toString().split(" ");
+            f1.setValue(Date.valueOf(strings[0]));
+        }
+        if (f0Type == Types.TIME && f0.getValue().getClass().equals(String.class)) {
+            f0.setValue(Time.valueOf(f0.getValue().toString()));
+        }
+        if (f1Type == Types.TIME && f1.getValue().getClass().equals(String.class)) {
+            f1.setValue(Time.valueOf(f1.getValue().toString()));
+        }
         if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
-            f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            if (f1.getValue().getClass().equals(LocalDateTime.class)) {
+                f0.setValue(LocalDateTime.parse(f0.getValue().toString()));
+            } else {
+                f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+            }
         }
         if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
             f1.setValue(Timestamp.valueOf(f1.getValue().toString()));

@@ -15,10 +15,18 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.mysql.jdbc.ResultSetImpl;
-import com.mysql.jdbc.util.ResultSetUtil;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -26,9 +34,9 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockResultSet;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
@@ -41,17 +49,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -64,22 +61,17 @@ import static org.mockito.Mockito.when;
  */
 public class MySQLInsertExecutorTest {
 
-    private static final String ID_COLUMN = "id";
+    protected static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
-
-    private StatementProxy statementProxy;
-
-    private SQLInsertRecognizer sqlInsertRecognizer;
-
-    private TableMeta tableMeta;
-
-    private MySQLInsertExecutor insertExecutor;
-
-    private final int pkIndex = 0;
-    private HashMap<String,Integer> pkIndexMap;
+    protected final int pkIndex = 0;
+    protected StatementProxy statementProxy;
+    protected SQLInsertRecognizer sqlInsertRecognizer;
+    protected TableMeta tableMeta;
+    protected MySQLInsertExecutor insertExecutor;
+    protected HashMap<String,Integer> pkIndexMap;
 
     @BeforeEach
     public void init() throws SQLException {

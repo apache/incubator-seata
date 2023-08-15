@@ -22,17 +22,17 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.rpc.ShutdownHook;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
 import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.env.ContainerHelper;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
 /**
  * The type Server.
@@ -46,12 +46,6 @@ public class Server {
      * @param args the input arguments
      */
     public static void start(String[] args) {
-        // create logger
-        final Logger logger = LoggerFactory.getLogger(Server.class);
-        if (ContainerHelper.isRunningInContainer()) {
-            logger.info("The server is running in container.");
-        }
-
         //initialize the parameter parser
         //Note that the parameter parser should always be the first line to execute.
         //Because, here we need to parse the parameters needed for startup.
@@ -60,34 +54,35 @@ public class Server {
         //initialize the metrics
         MetricsManager.get().init();
 
-        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
-
         ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
                 NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        //server port
-        nettyRemotingServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(parameterParser.getServerNode());
-        //log store mode : file, db, redis
-        SessionHolder.init(parameterParser.getSessionStoreMode());
-        LockerManagerFactory.init(parameterParser.getLockStoreMode());
-        DefaultCoordinator coordinator = new DefaultCoordinator(nettyRemotingServer);
-        coordinator.init();
-        nettyRemotingServer.setHandler(coordinator);
-        // register ShutdownHook
-        ShutdownHook.getInstance().addDisposable(coordinator);
-        ShutdownHook.getInstance().addDisposable(nettyRemotingServer);
-
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
         } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
+            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERED_NETWORKS);
+            if (StringUtils.isNotBlank(preferredNetworks)) {
+                XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
+            } else {
+                XID.setIpAddress(NetUtil.getLocalIp());
+            }
         }
+
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
+        UUIDGenerator.init(parameterParser.getServerNode());
+        //log store mode : file, db, redis
+        SessionHolder.init();
+        LockerManagerFactory.init();
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
+        coordinator.init();
+        nettyRemotingServer.setHandler(coordinator);
+
+        // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
+        ServerRunner.addDisposable(coordinator);
 
         nettyRemotingServer.init();
     }

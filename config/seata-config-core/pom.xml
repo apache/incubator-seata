@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-core</artifactId>
     <name>seata-config-core ${project.version}</name>
+    <description>config-core for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -38,10 +39,6 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
         </dependency>
     </dependencies>
 

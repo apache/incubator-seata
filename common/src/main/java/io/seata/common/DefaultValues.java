@@ -15,6 +15,8 @@
  */
 package io.seata.common;
 
+import java.time.Duration;
+
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -28,7 +30,7 @@ public interface DefaultValues {
     int DEFAULT_TM_DEGRADE_CHECK_PERIOD = 2000;
     int DEFAULT_CLIENT_REPORT_RETRY_COUNT = 5;
     boolean DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE = false;
-    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = false;
+    boolean DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE = true;
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
@@ -45,7 +47,11 @@ public interface DefaultValues {
 
     String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
     String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
+    @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
+    boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
+    boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
@@ -75,11 +81,18 @@ public interface DefaultValues {
      */
     String DEFAULT_LOCK_DB_TABLE = "lock_table";
 
+    /**
+     * the constant DEFAULT_DISTRIBUTED_LOCK_DB_TABLE
+     */
+    String DEFAULT_DISTRIBUTED_LOCK_DB_TABLE = "distributed_lock";
+
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
     int DEFAULT_TM_ROLLBACK_RETRY_COUNT = 5;
     int DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = 60000;
 
-    String DEFAULT_TX_GROUP = "my_test_tx_group";
+    String DEFAULT_TX_GROUP = "default_tx_group";
+    @Deprecated
+    String DEFAULT_TX_GROUP_OLD = "my_test_tx_group";
     String DEFAULT_TC_CLUSTER = "default";
     String DEFAULT_GROUPLIST = "127.0.0.1:8091";
 
@@ -87,14 +100,21 @@ public interface DefaultValues {
 
     boolean DEFAULT_DISABLE_GLOBAL_TRANSACTION = false;
 
-    int SERVER_DEFAULT_PORT = 8091;
+    //currently not use and will be delete in the next version
+    @Deprecated
+    int SERVICE_DEFAULT_PORT = 8091;
+
+    int SERVICE_OFFSET_SPRING_BOOT = 1000;
+
+    String SERVER_PORT = "seata.server.port";
+
     String SERVER_DEFAULT_STORE_MODE = "file";
 
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;
 
-    String DEFAULT_LOAD_BALANCE = "RandomLoadBalance";
+    String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
     /**
@@ -121,9 +141,149 @@ public interface DefaultValues {
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
-  
+
     /**
      * the constant TCC_ACTION_INTERCEPTOR_ORDER
      */
     int TCC_ACTION_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
+
+    /**
+     * the constant DEFAULT_DISTRIBUTED_LOCK_EXPIRE
+     */
+    int DEFAULT_DISTRIBUTED_LOCK_EXPIRE = 10000;
+
+    /**
+     * the constant DEFAULT_TCC_FENCE_CLEAN_PERIOD
+     */
+    int DEFAULT_TCC_FENCE_CLEAN_PERIOD = 1;
+    /**
+     * the constant DEFAULT_TCC_FENCE_LOG_TABLE_NAME
+     */
+    String DEFAULT_TCC_FENCE_LOG_TABLE_NAME = "tcc_fence_log";
+    /**
+     * the constant TCC_FENCE_BEAN_NAME
+     */
+    String TCC_FENCE_BEAN_NAME = "tccFenceConfig";
+
+    /**
+     * the constant DEFAULT_RPC_RM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_RM_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TM_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TM_REQUEST_TIMEOUT = Duration.ofSeconds(30).toMillis();
+
+    /**
+     * the constant DEFAULT_RPC_TC_REQUEST_TIMEOUT
+     */
+    long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
+
+    /**
+     * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
+     */
+    int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    int DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT = 60000;
+
+    /**
+     * the constant DEFAULT_XA_TWO_PHASE_WAIT_TIMEOUT
+     */
+    int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
+
+    /**
+     * the constant DEFAULT_COMMITING_RETRY_PERIOD
+     */
+    int DEFAULT_COMMITING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD
+     */
+    int DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_ROLLBACKING_RETRY_PERIOD
+     */
+    int DEFAULT_ROLLBACKING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_TIMEOUT_RETRY_PERIOD
+     */
+    int DEFAULT_TIMEOUT_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_UNDO_LOG_DELETE_PERIOD
+     */
+    long DEFAULT_UNDO_LOG_DELETE_PERIOD = 24 * 60 * 60 * 1000;
+
+    /**
+     * the constant DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE
+     */
+    int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
+
+    /**
+     * the constant DEFAULT_PROMETHEUS_PORT
+     */
+    int DEFAULT_PROMETHEUS_PORT = 9898;
+
+    /**
+     * the const DEFAULT_METRICS_ENABLED
+     */
+    boolean DEFAULT_METRICS_ENABLED = false;
+
+    /**
+     * the const DEFAULT_METRICS_REGISTRY_TYPE
+     */
+    String DEFAULT_METRICS_REGISTRY_TYPE = "compact";
+
+    /**
+     * the const DEFAULT_METRICS_EXPORTER_LIST
+     */
+    String DEFAULT_METRICS_EXPORTER_LIST = "prometheus";
+
+    /**
+     * the const DEFAULT_MAX_COMMIT_RETRY_TIMEOUT
+     */
+    long DEFAULT_MAX_COMMIT_RETRY_TIMEOUT = -1L;
+
+    /**
+     * the const DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT
+     */
+    long DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT = -1L;
+
+    /**
+     * the const DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE
+     */
+    boolean DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = false;
+
+    /**
+     * DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME
+     */
+    long DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME = 10000;
+
+    /**
+     * DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE
+     */
+    boolean DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE = false;
+
+    int DEFAULT_DB_MAX_CONN = 100;
+
+    int DEFAULT_DB_MIN_CONN = 10;
+
+    int DEFAULT_REDIS_MAX_IDLE = 100;
+
+    int DEFAULT_REDIS_MAX_TOTAL = 100;
+
+    int DEFAULT_REDIS_MIN_IDLE = 10;
+
+    int DEFAULT_QUERY_LIMIT = 1000;
+
+    /**
+     * Default druid location in classpath
+     */
+    String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 }

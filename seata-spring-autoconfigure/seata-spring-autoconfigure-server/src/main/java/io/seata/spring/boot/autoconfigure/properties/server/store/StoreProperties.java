@@ -33,7 +33,7 @@ public class StoreProperties {
      */
     private String mode = "file";
 
-    private String publicKey = "";
+    private String publicKey;
 
     public String getMode() {
         return mode;
@@ -57,7 +57,7 @@ public class StoreProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_SESSION_PREFIX)
     public static class Session {
-        private String mode = "file";
+        private String mode;
 
         public String getMode() {
             return mode;
@@ -73,7 +73,7 @@ public class StoreProperties {
     @Component
     @ConfigurationProperties(prefix = STORE_LOCK_PREFIX)
     public static class Lock {
-        private String mode = "file";
+        private String mode;
 
         public String getMode() {
             return mode;

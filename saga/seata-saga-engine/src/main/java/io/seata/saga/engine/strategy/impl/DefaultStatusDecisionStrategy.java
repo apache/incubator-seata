@@ -90,9 +90,8 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     /**
      * set machine status based on state list
      *
-     * @param stateMachineInstance
-     * @param stateList
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param stateList the state instance list
      */
     public static void setMachineStatusBasedOnStateListAndException(StateMachineInstance stateMachineInstance,
                                                                     List<StateInstance> stateList, Exception exp) {
@@ -208,10 +207,10 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     /**
      * Determine the forward execution state of the state machine
      *
-     * @param stateMachineInstance
-     * @param exp
-     * @param specialPolicy
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param exp the exception
+     * @param specialPolicy the special policy
+     * @return the boolean
      */
     @Override
     public boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,

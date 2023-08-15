@@ -102,6 +102,10 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
         return list;
     }
 
+    @Override public List<String> getUpdateColumnsUnEscape() {
+        return null;
+    }
+
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
         final ArrayList<List<Object>> paramAppenderList) {
@@ -147,4 +151,28 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
         return sb.toString();
     }
 
+    @Override
+    public String getLimitCondition() {
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        return null;
+    }
+
+    @Override
+    protected SQLStatement getAst() {
+        return this.ast;
+    }
 }

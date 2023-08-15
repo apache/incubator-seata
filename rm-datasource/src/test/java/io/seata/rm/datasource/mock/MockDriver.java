@@ -60,6 +60,11 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
     private Object[][] mockPkMetasReturnValue;
 
     /**
+     *
+     */
+    private Object[][] mockOnUpdateColumnsReturnValue;
+
+    /**
      * the mock execute handler
      */
     private MockExecuteHandler mockExecuteHandler;
@@ -80,16 +85,21 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, new Object[][]{});
     }
 
+    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
+        this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue, new Object[][]{});
+    }
+
     /**
      * Instantiate a new MockDriver
      */
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
+    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue, Object[][] mockOnUpdateColumnsReturnValue) {
         this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
         this.mockPkMetasReturnValue = mockPkMetasReturnValue;
         this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
+        this.mockOnUpdateColumnsReturnValue = mockOnUpdateColumnsReturnValue;
     }
 
     /**
@@ -176,5 +186,13 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      */
     public void setMockExecuteHandler(MockExecuteHandler mockExecuteHandler){
         this.mockExecuteHandler = mockExecuteHandler;
+    }
+
+    public Object[][] getMockOnUpdateColumnsReturnValue() {
+        return mockOnUpdateColumnsReturnValue;
+    }
+
+    public void setMockOnUpdateColumnsReturnValue(Object[][] mockOnUpdateColumnsReturnValue) {
+        this.mockOnUpdateColumnsReturnValue = mockOnUpdateColumnsReturnValue;
     }
 }

@@ -1,22 +1,17 @@
-#!/bin/sh
-# ----------------------------------------------------------------------------
-#  Copyright 2001-2006 The Apache Software Foundation.
+#!/bin/bash
+# Copyright 1999-2019 Seata.io Group.
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# ----------------------------------------------------------------------------
-#
-#   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
-#   reserved.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 
 # resolve links - $0 may be a softlink
@@ -45,19 +40,19 @@ darwin=false;
 case "`uname`" in
   CYGWIN*) cygwin=true ;;
   Darwin*) darwin=true
-           if [ -z "$JAVA_VERSION" ] ; then
-             JAVA_VERSION="CurrentJDK"
-           else
-             echo "Using Java version: $JAVA_VERSION"
-           fi
-		   if [ -z "$JAVA_HOME" ]; then
-		      if [ -x "/usr/libexec/java_home" ]; then
-			      JAVA_HOME=`/usr/libexec/java_home`
-			  else
-			      JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
-			  fi
-           fi       
-           ;;
+    if [ -z "$JAVA_VERSION" ] ; then
+      JAVA_VERSION="CurrentJDK"
+    else
+      echo "Using Java version: $JAVA_VERSION"
+    fi
+    if [ -z "$JAVA_HOME" ]; then
+      if [ -x "/usr/libexec/java_home" ]; then
+        JAVA_HOME=`/usr/libexec/java_home`
+      else
+        JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
+      fi
+    fi
+  ;;
 esac
 
 if [ -z "$JAVA_HOME" ] ; then
@@ -117,11 +112,38 @@ if $cygwin; then
   [ -n "$REPO" ] && REPO=`cygpath --path --windows "$REPO"`
 fi
 
-JAVA_OPT="${JAVA_OPT} -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
-JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc"
+if [ "$SKYWALKING_ENABLE" = "true" ]; then
+  SKYWALKING_OPTS="-javaagent:${BASEDIR}/ext/apm-skywalking/skywalking-agent.jar -Dskywalking_config=${BASEDIR}/ext/apm-skywalking/config/agent.config -Dskywalking.logging.dir=${BASEDIR}/logs"
+  JAVA_OPT="${JAVA_OPT} $SKYWALKING_OPTS"
+  echo "apm-skywalking enabled opts: $SKYWALKING_OPTS"
+else
+  echo "apm-skywalking not enabled"
+fi
+JVM_XMX=$JVM_XMX
+JVM_XMS=$JVM_XMS
+JVM_XSS=$JVM_XSS
+JVM_MetaspaceSize=$JVM_MetaspaceSize
+JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
+JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
+LOADER_PATH=$LOADER_PATH
+JAVA_OPT="${JAVA_OPT} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
+JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC"
+
+JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $1}')
+if [[ "$JAVA_MAJOR_VERSION" -eq "1" ]] ; then
+  JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
+fi
+if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=102400"
+elif [[ "$JAVA_MAJOR_VERSION" -ge "17" ]] ; then
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc=trace:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=10M"
+else
+  JAVA_OPT="${JAVA_OPT} -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
+fi
+
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
-JAVA_OPT="${JAVA_OPT} -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
+JAVA_OPT="${JAVA_OPT} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
 JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
 
 
@@ -129,7 +151,9 @@ if [ ! -x "$BASEDIR"/logs ]; then
   mkdir "$BASEDIR"/logs
 fi
 
+CMD_LINE_ARGS=$@
+
 # start
-echo "$JAVACMD ${JAVA_OPT}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} >> ${BASEDIR}/logs/start.out 2>&1 &
+echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
+nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
 echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"

@@ -28,7 +28,6 @@ import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
-import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -47,14 +46,14 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 /**
  * The type Apollo configuration.
  *
- * @author: kl @kailing.pub
+ * @author kl @kailing.pub
  */
 public class ApolloConfiguration extends AbstractConfiguration {
 
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "appId";
     private static final String APOLLO_META = "apolloMeta";
-    private static final String APOLLO_SECRET = "apolloAccesskeySecret";
+    private static final String APOLLO_SECRET = "apolloAccessKeySecret";
     private static final String APOLLO_CLUSTER = "cluster";
     private static final String APOLLO_CONFIG_SERVICE = "apolloConfigService";
     private static final String PROP_APP_ID = "app.id";
@@ -73,6 +72,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
+    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking-init-order]")
     private ApolloConfiguration() {
         readyApolloConfig();
         if (config == null) {
@@ -117,10 +117,6 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = getConfigFromSysPro(dataId);
-        if (value != null) {
-            return value;
-        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
                 timeoutMills);
         configOperateExecutor.submit(() -> {
@@ -145,13 +141,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
         throw new NotSupportYetException("not support removeConfig");
     }
 
-    @Override
-    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (StringUtils.isBlank(dataId) || listener == null) {
-            return;
-        }
-        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> new ConcurrentSet<>())
-                .add(listener);
+    public static String getApolloMetaFileKey() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
     }
 
     @Override
@@ -213,28 +204,33 @@ public class ApolloConfiguration extends AbstractConfiguration {
         return REGISTRY_TYPE;
     }
 
-    private static String getApolloMetaFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
-    }
-
-    private static String getApolloSecretFileKey() {
+    public static String getApolloSecretFileKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_SECRET);
     }
 
-    private static String getApolloAppIdFileKey() {
+    public static String getApolloAppIdFileKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APP_ID);
     }
 
-    private static String getApolloNamespaceKey() {
+    public static String getApolloNamespaceKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
     }
 
-    private static String getApolloCluster() {
+    public static String getApolloCluster() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CLUSTER);
     }
 
-    private static String getApolloConfigService() {
+    public static String getApolloConfigService() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
+    }
+
+    @Override
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
+            return;
+        }
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
+                .add(listener);
     }
 
 

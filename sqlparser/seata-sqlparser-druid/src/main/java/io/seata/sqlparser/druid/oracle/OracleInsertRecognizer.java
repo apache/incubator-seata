@@ -18,7 +18,6 @@ package io.seata.sqlparser.druid.oracle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -32,8 +31,8 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.common.util.CollectionUtils;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
-import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
@@ -102,7 +101,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr)expr).getName());
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -133,7 +132,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
                     row.add(new SqlSequenceExpr(sequence, function));
                 } else {
                     if (primaryKeyIndex.contains(i)) {
-                        throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                        wrapSQLParsingException(expr);
                     }
                     row.add(NotPlaceholderExpr.get());
                 }
@@ -150,5 +149,16 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
+    }
+
+    @Override
+    protected SQLStatement getAst() {
+        return ast;
     }
 }

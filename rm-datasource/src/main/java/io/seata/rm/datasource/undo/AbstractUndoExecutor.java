@@ -34,16 +34,16 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
-import io.seata.rm.datasource.ColumnUtils;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.sql.serial.SerialArray;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,20 +110,22 @@ public abstract class AbstractUndoExecutor {
     /**
      * Execute on.
      *
-     * @param conn the conn
+     * @param connectionProxy the connection proxy
      * @throws SQLException the sql exception
      */
-    public void executeOn(Connection conn) throws SQLException {
-        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
+    public void executeOn(ConnectionProxy connectionProxy) throws SQLException {
+        Connection conn = connectionProxy.getTargetConnection();
+        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(connectionProxy)) {
             return;
         }
+        PreparedStatement undoPST = null;
         try {
             String undoSQL = buildUndoSQL();
-            PreparedStatement undoPST = conn.prepareStatement(undoSQL);
+            undoPST = conn.prepareStatement(undoSQL);
             TableRecords undoRows = getUndoRows();
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, getDbType(conn));
+                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, connectionProxy.getDbType());
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() != KeyType.PRIMARY_KEY) {
                         undoValues.add(field);
@@ -141,6 +143,10 @@ public abstract class AbstractUndoExecutor {
             } else {
                 throw new SQLException(ex);
             }
+        }
+        finally {
+            //important for oracle
+            IOUtil.close(undoPST);
         }
 
     }
@@ -167,7 +173,7 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
-            } else if (type == JDBCType.CLOB.getVendorTypeNumber()) {
+            } else if (type == JDBCType.CLOB.getVendorTypeNumber() || type == JDBCType.NCLOB.getVendorTypeNumber()) {
                 SerialClob serialClob = (SerialClob) value;
                 if (serialClob != null) {
                     undoPST.setClob(undoIndex, serialClob.getCharacterStream());
@@ -190,6 +196,8 @@ public abstract class AbstractUndoExecutor {
                     undoPST.setObject(undoIndex, null);
                 }
             } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, value);
+            } else if (undoValue.getType() == JDBCType.BIT.getVendorTypeNumber()) {
                 undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
@@ -221,7 +229,7 @@ public abstract class AbstractUndoExecutor {
      * @return return true if data validation is ok and need continue undo, and return false if no need continue undo.
      * @throws SQLException the sql exception such as has dirty data
      */
-    protected boolean dataValidationAndGoOn(Connection conn) throws SQLException {
+    protected boolean dataValidationAndGoOn(ConnectionProxy conn) throws SQLException {
 
         TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
         TableRecords afterRecords = sqlUndoLog.getAfterImage();
@@ -244,7 +252,7 @@ public abstract class AbstractUndoExecutor {
         Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
         if (!afterEqualsCurrentResult.getResult()) {
 
-            // If current data is not equivalent to the after data, then compare the current data with the before 
+            // If current data is not equivalent to the after data, then compare the current data with the before
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
             Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
             if (beforeEqualsCurrentResult.getResult()) {
@@ -261,12 +269,12 @@ public abstract class AbstractUndoExecutor {
                     }
                 }
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("check dirty datas failed, old and new data are not equal," +
+                    LOGGER.debug("check dirty data failed, old and new data are not equal, " +
                             "tableName:[" + sqlUndoLog.getTableName() + "]," +
                             "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
                             "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
-                throw new SQLException("Has dirty records when undo.");
+                throw new SQLUndoDirtyException("Has dirty records when undo.");
             }
         }
         return true;
@@ -275,11 +283,12 @@ public abstract class AbstractUndoExecutor {
     /**
      * Query current records.
      *
-     * @param conn the conn
+     * @param connectionProxy the connection proxy
      * @return the table records
      * @throws SQLException the sql exception
      */
-    protected TableRecords queryCurrentRecords(Connection conn) throws SQLException {
+    protected TableRecords queryCurrentRecords(ConnectionProxy connectionProxy) throws SQLException {
+        Connection conn = connectionProxy.getTargetConnection();
         TableRecords undoRecords = getUndoRows();
         TableMeta tableMeta = undoRecords.getTableMeta();
         //the order of element matters
@@ -294,7 +303,7 @@ public abstract class AbstractUndoExecutor {
         String firstKey = pkRowValues.keySet().stream().findFirst().get();
         int pkRowSize = pkRowValues.get(firstKey).size();
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(),
-                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, getDbType(conn)));
+                SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowSize, connectionProxy.getDbType()));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -371,17 +380,6 @@ public abstract class AbstractUndoExecutor {
         }
         Map<String, List<Field>> pkValueMap = pkFieldList.stream().collect(Collectors.groupingBy(Field::getName));
         return pkValueMap;
-    }
-
-    /**
-     * Get db type
-     *
-     * @param conn the connection
-     * @return the db type
-     * @throws SQLException SQLException
-     */
-    protected String getDbType(Connection conn) throws SQLException {
-        return JdbcUtils.getDbType(conn.getMetaData().getURL());
     }
 
 }

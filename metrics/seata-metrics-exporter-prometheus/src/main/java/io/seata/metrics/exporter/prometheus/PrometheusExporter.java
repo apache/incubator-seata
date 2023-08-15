@@ -30,6 +30,7 @@ import io.seata.metrics.Measurement;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.registry.Registry;
 
+import static io.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
 import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
 
 /**
@@ -46,7 +47,7 @@ public class PrometheusExporter extends Collector implements Collector.Describab
 
     public PrometheusExporter() throws IOException {
         int port = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9898);
+            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT);
         this.server = new HTTPServer(port, true);
         this.register();
     }
@@ -56,19 +57,19 @@ public class PrometheusExporter extends Collector implements Collector.Describab
         this.registry = registry;
     }
 
-    @Override
-    public List<MetricFamilySamples> collect() {
-        List<MetricFamilySamples> familySamples = new ArrayList<>();
-        if (registry != null) {
-            Iterable<Measurement> measurements = registry.measure();
-            List<Sample> samples = new ArrayList<>();
-            measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
-
-            if (!samples.isEmpty()) {
-                familySamples.add(new MetricFamilySamples("seata", Type.UNTYPED, "seata", samples));
-            }
+    /**
+     * Compatible with high and low versions of 'io.prometheus:simpleclient'
+     *
+     * @return the unknown collector type
+     */
+    public static Type getUnknownType() {
+        Type unknownType;
+        try {
+            unknownType = Type.valueOf("UNKNOWN");
+        } catch (IllegalArgumentException e) {
+            unknownType = Type.valueOf("UNTYPED");
         }
-        return familySamples;
+        return unknownType;
     }
 
     private Sample convertMeasurementToSample(Measurement measurement) {
@@ -81,6 +82,22 @@ public class PrometheusExporter extends Collector implements Collector.Describab
         }
         return new Sample(prometheusName, labelNames, labelValues, measurement.getValue(),
             (long)measurement.getTimestamp());
+    }
+
+    @Override
+    public List<MetricFamilySamples> collect() {
+        List<MetricFamilySamples> familySamples = new ArrayList<>();
+        if (registry != null) {
+            Iterable<Measurement> measurements = registry.measure();
+            List<Sample> samples = new ArrayList<>();
+            measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
+
+            if (!samples.isEmpty()) {
+                Type unknownType = getUnknownType();
+                familySamples.add(new MetricFamilySamples("seata", unknownType, "seata", samples));
+            }
+        }
+        return familySamples;
     }
 
     @Override

@@ -27,9 +27,11 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_
 @ConfigurationProperties(prefix = CONFIG_APOLLO_PREFIX)
 public class ConfigApolloProperties {
     private String appId = "seata-server";
-    private String apolloMeta = "http://192.168.1.204:8801";
+    private String apolloMeta;
     private String namespace = "application";
-    private String apolloAccesskeySecret = "";
+    private String apolloAccessKeySecret;
+    private String apolloConfigService;
+    private String cluster;
 
     public String getAppId() {
         return appId;
@@ -58,13 +60,30 @@ public class ConfigApolloProperties {
         return this;
     }
 
-    public String getApolloAccesskeySecret() {
-        return apolloAccesskeySecret;
+    public String getApolloAccessKeySecret() {
+        return apolloAccessKeySecret;
     }
 
-    public ConfigApolloProperties setApolloAccesskeySecret(String apolloAccesskeySecret) {
-        this.apolloAccesskeySecret = apolloAccesskeySecret;
+    public ConfigApolloProperties setApolloAccessKeySecret(String apolloAccessKeySecret) {
+        this.apolloAccessKeySecret = apolloAccessKeySecret;
         return this;
     }
 
+    public String getApolloConfigService() {
+        return apolloConfigService;
+    }
+
+    public ConfigApolloProperties setApolloConfigService(String apolloConfigService) {
+        this.apolloConfigService = apolloConfigService;
+        return this;
+    }
+
+    public String getCluster() {
+        return cluster;
+    }
+
+    public ConfigApolloProperties setCluster(String cluster) {
+        this.cluster = cluster;
+        return this;
+    }
 }

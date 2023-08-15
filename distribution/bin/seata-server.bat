@@ -1,21 +1,16 @@
-@REM ----------------------------------------------------------------------------
-@REM  Copyright 2001-2006 The Apache Software Foundation.
+@REM Copyright 1999-2019 Seata.io Group.
 @REM
-@REM  Licensed under the Apache License, Version 2.0 (the "License");
-@REM  you may not use this file except in compliance with the License.
-@REM  You may obtain a copy of the License at
+@REM Licensed under the Apache License, Version 2.0 (the "License");
+@REM you may not use this file except in compliance with the License.
+@REM You may obtain a copy of the License at
 @REM
-@REM       http://www.apache.org/licenses/LICENSE-2.0
+@REM      http://www.apache.org/licenses/LICENSE-2.0
 @REM
-@REM  Unless required by applicable law or agreed to in writing, software
-@REM  distributed under the License is distributed on an "AS IS" BASIS,
-@REM  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-@REM  See the License for the specific language governing permissions and
-@REM  limitations under the License.
-@REM ----------------------------------------------------------------------------
-@REM
-@REM   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
-@REM   reserved.
+@REM Unless required by applicable law or agreed to in writing, software
+@REM distributed under the License is distributed on an "AS IS" BASIS,
+@REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@REM See the License for the specific language governing permissions and
+@REM limitations under the License.
 
 @echo off
 
@@ -91,7 +86,14 @@ if exist %BASEDIR%/logs (
   md "%BASEDIR%/logs"
 )
 
-%JAVACMD% %JAVA_OPTS% -server -Xmx2048m -Xms2048m -Xmn1024m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -Xloggc:"%BASEDIR%"/logs/seata_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-server" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.location="%BASEDIR%"/conf/application.yml -Dlogging.config="%BASEDIR%"/conf/logback-spring.xml -jar "%BASEDIR%"/target/seata-server.jar %CMD_LINE_ARGS%
+if "%SKYWALKING_ENABLE%"=="true" (
+  set SKYWALKING_OPTS=-javaagent:"%BASEDIR%"/ext/apm-skywalking/skywalking-agent.jar -Dskywalking_config="%BASEDIR%"/ext/apm-skywalking/config/agent.config -Dskywalking.logging.dir="%BASEDIR%"/logs
+  echo "apm-skywalking enabled opts: %SKYWALKING_OPTS%"
+) else (
+  echo "apm-skywalking not enabled"
+)
+
+%JAVACMD% %JAVA_OPTS% %SKYWALKING_OPTS% -server -Dloader.path="%BASEDIR%"/lib -Xmx2048m -Xms2048m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -Xloggc:"%BASEDIR%"/logs/seata_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-server" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.additional-location="%BASEDIR%"/conf/ -Dspring.config.location="%BASEDIR%"/conf/application.yml -Dlogging.config="%BASEDIR%"/conf/logback-spring.xml -jar "%BASEDIR%"/target/seata-server.jar %CMD_LINE_ARGS%
 if %ERRORLEVEL% NEQ 0 goto error
 goto end
 

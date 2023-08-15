@@ -55,6 +55,7 @@ Prometheus发布器`PrometheusExporter`，将度量数据同步给Prometheus。
 ```text
 ## metrics settings
 metrics {
+  enable = true
   registry-type = "compact"
   # multi exporters use comma divided
   exporter-list = "prometheus"

@@ -79,6 +79,16 @@ public interface GlobalTransaction {
     SuspendedResourcesHolder suspend() throws TransactionException;
 
     /**
+     * Suspend the global transaction.
+     *
+     * @param clean the clean if true, clean the transaction context. otherwise,supend only
+     * @return the SuspendedResourcesHolder which holds the suspend resources
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * @see SuspendedResourcesHolder
+     */
+    SuspendedResourcesHolder suspend(boolean clean) throws TransactionException;
+
+    /**
      * Resume the global transaction.
      *
      * @param suspendedResourcesHolder the suspended resources to resume
@@ -131,4 +141,10 @@ public interface GlobalTransaction {
      */
     GlobalTransactionRole getGlobalTransactionRole();
 
+    /**
+     * get create time
+     *
+     * @return create time
+     */
+    long getCreateTime();
 }

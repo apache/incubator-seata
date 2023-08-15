@@ -67,7 +67,7 @@ class SeataAutoDataSourceProxyTest {
         doReturn(advices).when(creator).getAdvicesAndAdvisorsForBean(any(), anyString(), any());
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class ProxyConfiguration {
         @Bean
         public SeataAutoDataSourceProxyCreator seataAutoDataSourceProxyCreator() {
@@ -75,7 +75,7 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class DataSourceConfiguration1 {
 
         static DataSource origin = mock(DataSource.class);
@@ -88,7 +88,7 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class DataSourceConfiguration2 {
 
         static DataSource origin = mock(DataSource.class);
@@ -102,7 +102,7 @@ class SeataAutoDataSourceProxyTest {
         }
     }
 
-    @Configuration
+    @Configuration(proxyBeanMethods = false)
     static class DataSourceConfiguration3 {
 
         static DataSource origin = mock(DataSource.class);
