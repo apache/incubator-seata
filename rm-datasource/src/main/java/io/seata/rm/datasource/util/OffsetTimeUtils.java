@@ -42,36 +42,6 @@ public class OffsetTimeUtils {
 
     private static final Map<Integer, String> ZONE_ID_MAP = new HashMap<>(36);
 
-    static {
-        ZONE_ID_MAP.put(250, "Asia/Shanghai");
-        ZONE_ID_MAP.put(345, "Australia/Darwin");
-        ZONE_ID_MAP.put(352, "Australia/Sydney");
-        ZONE_ID_MAP.put(687, "America/Argentina/Buenos_Aires");
-        ZONE_ID_MAP.put(106, "America/Anchorage");
-        ZONE_ID_MAP.put(188, "America/Sao_Paulo");
-        ZONE_ID_MAP.put(756, "Asia/Dhaka");
-        ZONE_ID_MAP.put(80, "Africa/Harare");
-        ZONE_ID_MAP.put(118, "America/St_Johns");
-        ZONE_ID_MAP.put(101, "America/Chicago");
-        ZONE_ID_MAP.put(47, "Africa/Addis_Ababa");
-        ZONE_ID_MAP.put(382, "Europe/Paris");
-        ZONE_ID_MAP.put(1647, "America/Indiana/Indianapolis");
-        ZONE_ID_MAP.put(772, "Asia/Kolkata");
-        ZONE_ID_MAP.put(267, "Asia/Tokyo");
-        ZONE_ID_MAP.put(479, "Pacific/Apia");
-        ZONE_ID_MAP.put(241, "Asia/Yerevan");
-        ZONE_ID_MAP.put(471, "Pacific/Auckland");
-        ZONE_ID_MAP.put(284, "Asia/Karachi");
-        ZONE_ID_MAP.put(109, "America/Phoenix");
-        ZONE_ID_MAP.put(167, "America/Puerto_Rico");
-        ZONE_ID_MAP.put(103, "America/Los_Angeles");
-        ZONE_ID_MAP.put(481, "Pacific/Guadalcanal");
-        ZONE_ID_MAP.put(813, "Asia/Ho_Chi_Minh");
-        ZONE_ID_MAP.put(1474, "HST");
-        ZONE_ID_MAP.put(1636, "EST");
-        ZONE_ID_MAP.put(2662, "MST");
-    }
-
     public static String getRegion(int code) {
         return ZONE_ID_MAP.get(code);
     }
@@ -140,5 +110,35 @@ public class OffsetTimeUtils {
                 | (toUnsignedInt(bytes[9]) << 8) | toUnsignedInt(bytes[10]);
         }
         return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond);
+    }
+
+    static {
+        ZONE_ID_MAP.put(250, "Asia/Shanghai");
+        ZONE_ID_MAP.put(345, "Australia/Darwin");
+        ZONE_ID_MAP.put(352, "Australia/Sydney");
+        ZONE_ID_MAP.put(687, "America/Argentina/Buenos_Aires");
+        ZONE_ID_MAP.put(106, "America/Anchorage");
+        ZONE_ID_MAP.put(188, "America/Sao_Paulo");
+        ZONE_ID_MAP.put(756, "Asia/Dhaka");
+        ZONE_ID_MAP.put(80, "Africa/Harare");
+        ZONE_ID_MAP.put(118, "America/St_Johns");
+        ZONE_ID_MAP.put(101, "America/Chicago");
+        ZONE_ID_MAP.put(47, "Africa/Addis_Ababa");
+        ZONE_ID_MAP.put(382, "Europe/Paris");
+        ZONE_ID_MAP.put(1647, "America/Indiana/Indianapolis");
+        ZONE_ID_MAP.put(772, "Asia/Kolkata");
+        ZONE_ID_MAP.put(267, "Asia/Tokyo");
+        ZONE_ID_MAP.put(479, "Pacific/Apia");
+        ZONE_ID_MAP.put(241, "Asia/Yerevan");
+        ZONE_ID_MAP.put(471, "Pacific/Auckland");
+        ZONE_ID_MAP.put(284, "Asia/Karachi");
+        ZONE_ID_MAP.put(109, "America/Phoenix");
+        ZONE_ID_MAP.put(167, "America/Puerto_Rico");
+        ZONE_ID_MAP.put(103, "America/Los_Angeles");
+        ZONE_ID_MAP.put(481, "Pacific/Guadalcanal");
+        ZONE_ID_MAP.put(813, "Asia/Ho_Chi_Minh");
+        ZONE_ID_MAP.put(1474, "HST");
+        ZONE_ID_MAP.put(1636, "EST");
+        ZONE_ID_MAP.put(2662, "MST");
     }
 }

@@ -113,6 +113,77 @@ public class TableRecords implements java.io.Serializable {
     }
 
     /**
+     * Sets table meta.
+     *
+     * @param tableMeta the table meta
+     */
+    public void setTableMeta(TableMeta tableMeta) {
+        if (this.tableMeta != null) {
+            throw new ShouldNeverHappenException("tableMeta has already been set");
+        }
+        this.tableMeta = tableMeta;
+        this.tableName = tableMeta.getTableName();
+    }
+
+    /**
+     * Size int.
+     *
+     * @return the int
+     */
+    public int size() {
+        return rows.size();
+    }
+
+    /**
+     * Add.
+     *
+     * @param row the row
+     */
+    public void add(Row row) {
+        rows.add(row);
+    }
+
+    /**
+     * Pk rows list.
+     *
+     * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
+     */
+    public List<Map<String,Field>> pkRows() {
+        final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
+        List<Map<String,Field>> pkRows = new ArrayList<>();
+        for (Row row : rows) {
+            List<Field> fields = row.getFields();
+            Map<String,Field> rowMap = new HashMap<>(3);
+            for (Field field : fields) {
+                if (primaryKeyMap.containsKey(field.getName())) {
+                    rowMap.put(field.getName(),field);
+                }
+            }
+            pkRows.add(rowMap);
+        }
+        return pkRows;
+    }
+
+    /**
+     * Gets table meta.
+     *
+     * @return the table meta
+     */
+    public TableMeta getTableMeta() {
+        return tableMeta;
+    }
+
+    /**
+     * Empty table records.
+     *
+     * @param tableMeta the table meta
+     * @return the table records
+     */
+    public static TableRecords empty(TableMeta tableMeta) {
+        return new EmptyTableRecords(tableMeta);
+    }
+
+    /**
      * Build records table records.
      *
      * @param tmeta     the tmeta
@@ -194,64 +265,6 @@ public class TableRecords implements java.io.Serializable {
     }
 
     /**
-     * Size int.
-     *
-     * @return the int
-     */
-    public int size() {
-        return rows.size();
-    }
-
-    /**
-     * Add.
-     *
-     * @param row the row
-     */
-    public void add(Row row) {
-        rows.add(row);
-    }
-
-    /**
-     * Pk rows list.
-     *
-     * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
-     */
-    public List<Map<String,Field>> pkRows() {
-        final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
-        List<Map<String,Field>> pkRows = new ArrayList<>();
-        for (Row row : rows) {
-            List<Field> fields = row.getFields();
-            Map<String,Field> rowMap = new HashMap<>(3);
-            for (Field field : fields) {
-                if (primaryKeyMap.containsKey(field.getName())) {
-                    rowMap.put(field.getName(),field);
-                }
-            }
-            pkRows.add(rowMap);
-        }
-        return pkRows;
-    }
-
-    /**
-     * Gets table meta.
-     *
-     * @return the table meta
-     */
-    public TableMeta getTableMeta() {
-        return tableMeta;
-    }
-
-    /**
-     * Empty table records.
-     *
-     * @param tableMeta the table meta
-     * @return the table records
-     */
-    public static TableRecords empty(TableMeta tableMeta) {
-        return new EmptyTableRecords(tableMeta);
-    }
-
-    /**
      * check if the column is null and return
      *
      * @param tmeta the table meta
@@ -293,19 +306,6 @@ public class TableRecords implements java.io.Serializable {
             return new SerialClob(clob);
         }
         return data;
-    }
-
-    /**
-     * Sets table meta.
-     *
-     * @param tableMeta the table meta
-     */
-    public void setTableMeta(TableMeta tableMeta) {
-        if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException("tableMeta has already been set");
-        }
-        this.tableMeta = tableMeta;
-        this.tableName = tableMeta.getTableName();
     }
 
     public static class EmptyTableRecords extends TableRecords {

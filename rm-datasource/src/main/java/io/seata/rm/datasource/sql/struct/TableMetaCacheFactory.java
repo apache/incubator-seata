@@ -53,16 +53,18 @@ public class TableMetaCacheFactory {
     private static final long TABLE_META_REFRESH_INTERVAL_TIME = 1000L;
 
     private static final int MAX_QUEUE_SIZE = 2000;
-    /**
-     * Table meta checker interval
-     */
-    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance()
-        .getLong(ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
+
     /**
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance()
         .getBoolean(ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE);
+
+    /**
+     * Table meta checker interval
+     */
+    private static final long TABLE_META_CHECKER_INTERVAL = ConfigurationFactory.getInstance()
+        .getLong(ConfigurationKeys.CLIENT_TABLE_META_CHECKER_INTERVAL, DEFAULT_TABLE_META_CHECKER_INTERVAL);
 
 
     /**
@@ -98,11 +100,13 @@ public class TableMetaCacheFactory {
     }
 
     static class TableMetaRefreshHolder {
-        private final Executor tableMetaRefreshExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(), new NamedThreadFactory("tableMetaRefresh", 1, true));
         private long lastRefreshFinishTime;
         private DataSourceProxy dataSource;
         private BlockingQueue<Long> tableMetaRefreshQueue;
+
+
+        private final Executor tableMetaRefreshExecutor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("tableMetaRefresh", 1, true));
 
         TableMetaRefreshHolder(DataSourceProxy dataSource) {
             this.dataSource = dataSource;

@@ -42,7 +42,6 @@ public class KryoSerializerFactory {
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
-    private static final Map<Class, Serializer> TYPE_MAP = new ConcurrentHashMap<>();
     private Pool<Kryo> pool = new Pool<Kryo>(true, true) {
 
         @Override
@@ -74,6 +73,8 @@ public class KryoSerializerFactory {
         }
 
     };
+
+    private static final Map<Class, Serializer> TYPE_MAP = new ConcurrentHashMap<>();
 
     private KryoSerializerFactory() {}
 

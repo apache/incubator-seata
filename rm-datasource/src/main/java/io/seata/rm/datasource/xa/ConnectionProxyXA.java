@@ -48,14 +48,23 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private static final int BRANCH_EXECUTION_TIMEOUT = ConfigurationFactory.getInstance().getInt(XA_BRANCH_EXECUTION_TIMEOUT,
             DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT);
-    private static final Integer TIMEOUT = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+
     private volatile boolean currentAutoCommitStatus = true;
+
     private volatile XAXid xaBranchXid;
+
     private volatile boolean xaActive = false;
+
     private volatile boolean kept = false;
+
     private volatile boolean rollBacked = false;
+
     private volatile Long branchRegisterTime = null;
+
     private volatile Long prepareTime = null;
+
+    private static final Integer TIMEOUT = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+
     private boolean shouldBeHeld = false;
 
     /**
