@@ -69,7 +69,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
         TableMeta result = new TableMeta();
         result.setTableName(tableName);
 
-        TableNameMeta tableNameMeta = toTableNameMeta(tableName, dbmd.getUserName());
+        TableNameMeta tableNameMeta = toTableNameMeta(tableName, dbmd.getConnection().getSchema());
         try (ResultSet rsColumns = dbmd.getColumns("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, tableNameMeta.getSchema(), tableNameMeta.getTableName(), false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
@@ -87,10 +87,10 @@ public class DmTableMetaCache extends OracleTableMetaCache {
         return result;
     }
 
-    protected TableNameMeta toTableNameMeta(String tableName, String username) {
+    protected TableNameMeta toTableNameMeta(String tableName, String schemaFromConnection) {
         String[] schemaTable = tableName.split("\\.");
 
-        String schema = schemaTable.length > 1 ? schemaTable[0] : username;
+        String schema = schemaTable.length > 1 ? schemaTable[0] : schemaFromConnection;
         if (schema != null) {
             schema = schema.contains("\"") ? schema.replace("\"", "") : schema.toUpperCase();
         }
