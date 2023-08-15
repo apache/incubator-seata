@@ -32,6 +32,7 @@ import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.sqlparser.util.ColumnUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,10 +103,6 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
         return list;
     }
 
-    @Override public List<String> getUpdateColumnsUnEscape() {
-        return null;
-    }
-
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
         final ArrayList<List<Object>> paramAppenderList) {
@@ -169,6 +166,12 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
     @Override
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
         return null;
+    }
+
+    @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override
