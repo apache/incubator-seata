@@ -66,11 +66,16 @@ public class MySQLInsertExecutorTest {
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
-    protected final int pkIndex = 0;
+
     protected StatementProxy statementProxy;
+
     protected SQLInsertRecognizer sqlInsertRecognizer;
+
     protected TableMeta tableMeta;
+
     protected MySQLInsertExecutor insertExecutor;
+
+    protected final int pkIndex = 0;
     protected HashMap<String,Integer> pkIndexMap;
 
     @BeforeEach

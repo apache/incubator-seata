@@ -23,10 +23,14 @@ import java.util.TreeSet;
  */
 public class SupportSqlWhereMethod {
 
-    private final Set<String> supportMethodNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-
     public SupportSqlWhereMethod() {
         add("FIND_IN_SET");
+    }
+
+    private final Set<String> supportMethodNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+
+    private static class SupportSqlWhereMethodHolder {
+        private static final SupportSqlWhereMethod INSTANCE = new SupportSqlWhereMethod();
     }
 
     public static SupportSqlWhereMethod getInstance() {
@@ -38,15 +42,11 @@ public class SupportSqlWhereMethod {
     }
 
     /**
-     *
+     * 
      * @param methodName
      * @return boolean
      */
     public boolean checkIsSupport(String methodName) {
         return supportMethodNames.contains(methodName);
-    }
-
-    private static class SupportSqlWhereMethodHolder {
-        private static final SupportSqlWhereMethod INSTANCE = new SupportSqlWhereMethod();
     }
 }

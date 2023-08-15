@@ -39,15 +39,17 @@ import io.seata.sqlparser.util.ColumnUtils;
 public class TableMeta {
     private String tableName;
 
+    private boolean isCaseSensitive;
+
     /**
      * key: column name
      */
     private final Map<String, ColumnMeta> allColumns = new LowerCaseLinkHashMap<>();
+
     /**
      * key: index name
      */
     private final Map<String, IndexMeta> allIndexes = new LowerCaseLinkHashMap<>();
-    private boolean isCaseSensitive;
 
     /**
      * Gets table name.
