@@ -35,24 +35,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionInterceptorTest {
 
-    private static final String DEFAULT_XID = "XID_FOR_BRPC_TEST";
     /**
      * client and server with TM AND RM role
      */
     private static RpcServer rpcServerB;
 
-    @BeforeAll
-    public static void rpcInit() {
-
-        // ----------------------------- rpc server init -----------------------------
-        RpcServerOptions rpcServerBOptions = new RpcServerOptions();
-        rpcServerBOptions.setIoThreadNum(1);
-        rpcServerBOptions.setWorkThreadNum(1);
-        rpcServerB = new RpcServer(9999, rpcServerBOptions);
-        rpcServerB.registerService(new EchoServiceImpl());
-        rpcServerB.getInterceptors().add(new TransactionPropagationServerInterceptor());
-        rpcServerB.start();
-    }
+    private static final String DEFAULT_XID = "XID_FOR_BRPC_TEST";
 
     @Test
     public void testWithInterceptor() {
@@ -82,6 +70,20 @@ public class TransactionInterceptorTest {
         RpcClient rpcClient = new RpcClient("list://127.0.0.1:9999", rpcClientAOptions);
         rpcClient.getInterceptors().add(new TransactionPropagationClientInterceptor());
         return rpcClient;
+    }
+
+
+    @BeforeAll
+    public static void rpcInit() {
+
+        // ----------------------------- rpc server init -----------------------------
+        RpcServerOptions rpcServerBOptions = new RpcServerOptions();
+        rpcServerBOptions.setIoThreadNum(1);
+        rpcServerBOptions.setWorkThreadNum(1);
+        rpcServerB = new RpcServer(9999, rpcServerBOptions);
+        rpcServerB.registerService(new EchoServiceImpl());
+        rpcServerB.getInterceptors().add(new TransactionPropagationServerInterceptor());
+        rpcServerB.start();
     }
 
 

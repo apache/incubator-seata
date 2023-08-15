@@ -49,7 +49,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class TCCFenceHandler {
 
-    private static final int MAX_THREAD_CLEAN = 1;
+    private TCCFenceHandler() {
+        throw new IllegalStateException("Utility class");
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceHandler.class);
 
@@ -58,13 +60,20 @@ public class TCCFenceHandler {
     private static DataSource dataSource;
 
     private static TransactionTemplate transactionTemplate;
+
+    private static final int MAX_THREAD_CLEAN = 1;
+
     private static final int MAX_QUEUE_SIZE = 500;
+
     /**
      * limit of delete record by date (per sql)
      */
     private static final int LIMIT_DELETE = 1000;
+
     private static final LinkedBlockingQueue<FenceLogIdentity> LOG_QUEUE = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
+
     private static FenceLogCleanRunnable fenceLogCleanRunnable;
+
     private static ExecutorService logCleanExecutor;
 
     static {
@@ -73,10 +82,6 @@ public class TCCFenceHandler {
         } catch (Exception e) {
             LOGGER.error("init fence log clean executor error", e);
         }
-    }
-
-    private TCCFenceHandler() {
-        throw new IllegalStateException("Utility class");
     }
 
     public static DataSource getDataSource() {
@@ -384,12 +389,12 @@ public class TCCFenceHandler {
             return xid;
         }
 
-        public void setXid(String xid) {
-            this.xid = xid;
-        }
-
         public Long getBranchId() {
             return branchId;
+        }
+
+        public void setXid(String xid) {
+            this.xid = xid;
         }
 
         public void setBranchId(Long branchId) {

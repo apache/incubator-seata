@@ -141,8 +141,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
         throw new NotSupportYetException("not support removeConfig");
     }
 
-    public static String getApolloMetaFileKey() {
-        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
+    @Override
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
+            return;
+        }
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
+                .add(listener);
     }
 
     @Override
@@ -204,6 +209,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
         return REGISTRY_TYPE;
     }
 
+    public static String getApolloMetaFileKey() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
+    }
+
     public static String getApolloSecretFileKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_SECRET);
     }
@@ -222,15 +231,6 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     public static String getApolloConfigService() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
-    }
-
-    @Override
-    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (StringUtils.isBlank(dataId) || listener == null) {
-            return;
-        }
-        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
-                .add(listener);
     }
 
 

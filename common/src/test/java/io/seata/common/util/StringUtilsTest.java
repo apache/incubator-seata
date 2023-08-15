@@ -256,6 +256,10 @@ public class StringUtilsTest {
         void test();
     }
 
+    abstract class TestAbstractClass {
+        abstract void test();
+    }
+
     @TestAnnotation(test = true)
     static class TestClass {
         public static boolean hashCodeTriggered = false;
@@ -321,9 +325,5 @@ public class StringUtilsTest {
                     "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
                     ')';
         }
-    }
-
-    abstract class TestAbstractClass {
-        abstract void test();
     }
 }

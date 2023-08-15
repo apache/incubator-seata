@@ -19,53 +19,7 @@
 package io.seata.integration.brpc.dto;
 
 public final class Echo {
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
-  private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor;
-  private static final
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_io_seata_integration_brpc_dto_EchoResponse_fieldAccessorTable;
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
-
-  static {
-    java.lang.String[] descriptorData = {
-      "\n\031src/test/proto/Echo.proto\022\035io.seata.in" +
-      "tegration.brpc.dto\"\035\n\013EchoRequest\022\016\n\006req" +
-      "Msg\030\001 \002(\t\"?\n\014EchoResponse\022\013\n\003xid\030\001 \001(\t\022\022" +
-      "\n\nbranchType\030\002 \001(\t\022\016\n\006reqMsg\030\003 \002(\t"
-    };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
-    internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor,
-        new java.lang.String[] { "ReqMsg", });
-    internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_io_seata_integration_brpc_dto_EchoResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor,
-        new java.lang.String[] { "Xid", "BranchType", "ReqMsg", });
-  }
   private Echo() {}
-
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
   }
@@ -74,11 +28,6 @@ public final class Echo {
       com.google.protobuf.ExtensionRegistry registry) {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
   }
   public interface EchoRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:io.seata.integration.brpc.dto.EchoRequest)
@@ -97,6 +46,538 @@ public final class Echo {
      */
     com.google.protobuf.ByteString
         getReqMsgBytes();
+  }
+  /**
+   * Protobuf type {@code io.seata.integration.brpc.dto.EchoRequest}
+   */
+  public  static final class EchoRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:io.seata.integration.brpc.dto.EchoRequest)
+      EchoRequestOrBuilder {
+    // Use EchoRequest.newBuilder() to construct.
+    private EchoRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private EchoRequest() {
+      reqMsg_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private EchoRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000001;
+              reqMsg_ = bs;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              io.seata.integration.brpc.dto.Echo.EchoRequest.class, io.seata.integration.brpc.dto.Echo.EchoRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int REQMSG_FIELD_NUMBER = 1;
+    private volatile java.lang.Object reqMsg_;
+    /**
+     * <code>required string reqMsg = 1;</code>
+     */
+    public boolean hasReqMsg() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required string reqMsg = 1;</code>
+     */
+    public java.lang.String getReqMsg() {
+      java.lang.Object ref = reqMsg_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          reqMsg_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>required string reqMsg = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getReqMsgBytes() {
+      java.lang.Object ref = reqMsg_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        reqMsg_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasReqMsg()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, reqMsg_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, reqMsg_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof io.seata.integration.brpc.dto.Echo.EchoRequest)) {
+        return super.equals(obj);
+      }
+      io.seata.integration.brpc.dto.Echo.EchoRequest other = (io.seata.integration.brpc.dto.Echo.EchoRequest) obj;
+
+      boolean result = true;
+      result = result && (hasReqMsg() == other.hasReqMsg());
+      if (hasReqMsg()) {
+        result = result && getReqMsg()
+            .equals(other.getReqMsg());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptorForType().hashCode();
+      if (hasReqMsg()) {
+        hash = (37 * hash) + REQMSG_FIELD_NUMBER;
+        hash = (53 * hash) + getReqMsg().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(io.seata.integration.brpc.dto.Echo.EchoRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code io.seata.integration.brpc.dto.EchoRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:io.seata.integration.brpc.dto.EchoRequest)
+        io.seata.integration.brpc.dto.Echo.EchoRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                io.seata.integration.brpc.dto.Echo.EchoRequest.class, io.seata.integration.brpc.dto.Echo.EchoRequest.Builder.class);
+      }
+
+      // Construct using io.seata.integration.brpc.dto.Echo.EchoRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      public Builder clear() {
+        super.clear();
+        reqMsg_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
+      }
+
+      public io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstanceForType() {
+        return io.seata.integration.brpc.dto.Echo.EchoRequest.getDefaultInstance();
+      }
+
+      public io.seata.integration.brpc.dto.Echo.EchoRequest build() {
+        io.seata.integration.brpc.dto.Echo.EchoRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public io.seata.integration.brpc.dto.Echo.EchoRequest buildPartial() {
+        io.seata.integration.brpc.dto.Echo.EchoRequest result = new io.seata.integration.brpc.dto.Echo.EchoRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.reqMsg_ = reqMsg_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof io.seata.integration.brpc.dto.Echo.EchoRequest) {
+          return mergeFrom((io.seata.integration.brpc.dto.Echo.EchoRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(io.seata.integration.brpc.dto.Echo.EchoRequest other) {
+        if (other == io.seata.integration.brpc.dto.Echo.EchoRequest.getDefaultInstance()) return this;
+        if (other.hasReqMsg()) {
+          bitField0_ |= 0x00000001;
+          reqMsg_ = other.reqMsg_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasReqMsg()) {
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        io.seata.integration.brpc.dto.Echo.EchoRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (io.seata.integration.brpc.dto.Echo.EchoRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object reqMsg_ = "";
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public boolean hasReqMsg() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public java.lang.String getReqMsg() {
+        java.lang.Object ref = reqMsg_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            reqMsg_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getReqMsgBytes() {
+        java.lang.Object ref = reqMsg_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          reqMsg_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public Builder setReqMsg(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        reqMsg_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public Builder clearReqMsg() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        reqMsg_ = getDefaultInstance().getReqMsg();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required string reqMsg = 1;</code>
+       */
+      public Builder setReqMsgBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        reqMsg_ = value;
+        onChanged();
+        return this;
+      }
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:io.seata.integration.brpc.dto.EchoRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:io.seata.integration.brpc.dto.EchoRequest)
+    private static final io.seata.integration.brpc.dto.Echo.EchoRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new io.seata.integration.brpc.dto.Echo.EchoRequest();
+    }
+
+    public static io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<EchoRequest>
+        PARSER = new com.google.protobuf.AbstractParser<EchoRequest>() {
+      public EchoRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new EchoRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<EchoRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EchoRequest> getParserForType() {
+      return PARSER;
+    }
+
+    public io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
   }
 
   public interface EchoResponseOrBuilder extends
@@ -145,570 +626,6 @@ public final class Echo {
     com.google.protobuf.ByteString
         getReqMsgBytes();
   }
-
-  /**
-   * Protobuf type {@code io.seata.integration.brpc.dto.EchoRequest}
-   */
-  public  static final class EchoRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:io.seata.integration.brpc.dto.EchoRequest)
-      EchoRequestOrBuilder {
-    public static final int REQMSG_FIELD_NUMBER = 1;
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<EchoRequest>
-        PARSER = new com.google.protobuf.AbstractParser<EchoRequest>() {
-      public EchoRequest parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new EchoRequest(input, extensionRegistry);
-      }
-    };
-    private static final long serialVersionUID = 0L;
-    // @@protoc_insertion_point(class_scope:io.seata.integration.brpc.dto.EchoRequest)
-    private static final io.seata.integration.brpc.dto.Echo.EchoRequest DEFAULT_INSTANCE;
-
-    static {
-      DEFAULT_INSTANCE = new io.seata.integration.brpc.dto.Echo.EchoRequest();
-    }
-
-    private int bitField0_;
-    private volatile java.lang.Object reqMsg_;
-    private byte memoizedIsInitialized = -1;
-    // Use EchoRequest.newBuilder() to construct.
-    private EchoRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private EchoRequest() {
-      reqMsg_ = "";
-    }
-    private EchoRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              reqMsg_ = bs;
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(io.seata.integration.brpc.dto.Echo.EchoRequest prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    public static com.google.protobuf.Parser<EchoRequest> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              io.seata.integration.brpc.dto.Echo.EchoRequest.class, io.seata.integration.brpc.dto.Echo.EchoRequest.Builder.class);
-    }
-
-    /**
-     * <code>required string reqMsg = 1;</code>
-     */
-    public boolean hasReqMsg() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-
-    /**
-     * <code>required string reqMsg = 1;</code>
-     */
-    public java.lang.String getReqMsg() {
-      java.lang.Object ref = reqMsg_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          reqMsg_ = s;
-        }
-        return s;
-      }
-    }
-
-    /**
-     * <code>required string reqMsg = 1;</code>
-     */
-    public com.google.protobuf.ByteString
-        getReqMsgBytes() {
-      java.lang.Object ref = reqMsg_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        reqMsg_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      if (!hasReqMsg()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, reqMsg_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, reqMsg_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof io.seata.integration.brpc.dto.Echo.EchoRequest)) {
-        return super.equals(obj);
-      }
-      io.seata.integration.brpc.dto.Echo.EchoRequest other = (io.seata.integration.brpc.dto.Echo.EchoRequest) obj;
-
-      boolean result = true;
-      result = result && (hasReqMsg() == other.hasReqMsg());
-      if (hasReqMsg()) {
-        result = result && getReqMsg()
-            .equals(other.getReqMsg());
-      }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptorForType().hashCode();
-      if (hasReqMsg()) {
-        hash = (37 * hash) + REQMSG_FIELD_NUMBER;
-        hash = (53 * hash) + getReqMsg().hashCode();
-      }
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public Builder newBuilderForType() { return newBuilder(); }
-
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<EchoRequest> getParserForType() {
-      return PARSER;
-    }
-
-    public io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-    /**
-     * Protobuf type {@code io.seata.integration.brpc.dto.EchoRequest}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:io.seata.integration.brpc.dto.EchoRequest)
-        io.seata.integration.brpc.dto.Echo.EchoRequestOrBuilder {
-      private int bitField0_;
-      private java.lang.Object reqMsg_ = "";
-
-      // Construct using io.seata.integration.brpc.dto.Echo.EchoRequest.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                io.seata.integration.brpc.dto.Echo.EchoRequest.class, io.seata.integration.brpc.dto.Echo.EchoRequest.Builder.class);
-      }
-
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-
-      public Builder clear() {
-        super.clear();
-        reqMsg_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
-      }
-
-      public io.seata.integration.brpc.dto.Echo.EchoRequest getDefaultInstanceForType() {
-        return io.seata.integration.brpc.dto.Echo.EchoRequest.getDefaultInstance();
-      }
-
-      public io.seata.integration.brpc.dto.Echo.EchoRequest build() {
-        io.seata.integration.brpc.dto.Echo.EchoRequest result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public io.seata.integration.brpc.dto.Echo.EchoRequest buildPartial() {
-        io.seata.integration.brpc.dto.Echo.EchoRequest result = new io.seata.integration.brpc.dto.Echo.EchoRequest(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.reqMsg_ = reqMsg_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder clone() {
-        return (Builder) super.clone();
-      }
-
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
-      }
-
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
-      }
-
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
-      }
-
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
-      }
-
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof io.seata.integration.brpc.dto.Echo.EchoRequest) {
-          return mergeFrom((io.seata.integration.brpc.dto.Echo.EchoRequest)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(io.seata.integration.brpc.dto.Echo.EchoRequest other) {
-        if (other == io.seata.integration.brpc.dto.Echo.EchoRequest.getDefaultInstance()) return this;
-        if (other.hasReqMsg()) {
-          bitField0_ |= 0x00000001;
-          reqMsg_ = other.reqMsg_;
-          onChanged();
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        if (!hasReqMsg()) {
-          return false;
-        }
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        io.seata.integration.brpc.dto.Echo.EchoRequest parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (io.seata.integration.brpc.dto.Echo.EchoRequest) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public boolean hasReqMsg() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public java.lang.String getReqMsg() {
-        java.lang.Object ref = reqMsg_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            reqMsg_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public Builder setReqMsg(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        reqMsg_ = value;
-        onChanged();
-        return this;
-      }
-
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getReqMsgBytes() {
-        java.lang.Object ref = reqMsg_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          reqMsg_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public Builder setReqMsgBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        reqMsg_ = value;
-        onChanged();
-        return this;
-      }
-
-      /**
-       * <code>required string reqMsg = 1;</code>
-       */
-      public Builder clearReqMsg() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        reqMsg_ = getDefaultInstance().getReqMsg();
-        onChanged();
-        return this;
-      }
-
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:io.seata.integration.brpc.dto.EchoRequest)
-    }
-
-  }
-
   /**
    * Protobuf type {@code io.seata.integration.brpc.dto.EchoResponse}
    */
@@ -716,32 +633,6 @@ public final class Echo {
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:io.seata.integration.brpc.dto.EchoResponse)
       EchoResponseOrBuilder {
-    public static final int XID_FIELD_NUMBER = 1;
-    public static final int BRANCHTYPE_FIELD_NUMBER = 2;
-    public static final int REQMSG_FIELD_NUMBER = 3;
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<EchoResponse>
-        PARSER = new com.google.protobuf.AbstractParser<EchoResponse>() {
-      public EchoResponse parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-          return new EchoResponse(input, extensionRegistry);
-      }
-    };
-    private static final long serialVersionUID = 0L;
-    // @@protoc_insertion_point(class_scope:io.seata.integration.brpc.dto.EchoResponse)
-    private static final io.seata.integration.brpc.dto.Echo.EchoResponse DEFAULT_INSTANCE;
-
-    static {
-      DEFAULT_INSTANCE = new io.seata.integration.brpc.dto.Echo.EchoResponse();
-    }
-
-    private int bitField0_;
-    private volatile java.lang.Object xid_;
-    private volatile java.lang.Object branchType_;
-    private volatile java.lang.Object reqMsg_;
-    private byte memoizedIsInitialized = -1;
-
     // Use EchoResponse.newBuilder() to construct.
     private EchoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
@@ -750,6 +641,12 @@ public final class Echo {
       xid_ = "";
       branchType_ = "";
       reqMsg_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
     }
     private EchoResponse(
         com.google.protobuf.CodedInputStream input,
@@ -804,100 +701,9 @@ public final class Echo {
         makeExtensionsImmutable();
       }
     }
-
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor;
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-
-    public static Builder newBuilder(io.seata.integration.brpc.dto.Echo.EchoResponse prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-
-    public static io.seata.integration.brpc.dto.Echo.EchoResponse getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    public static com.google.protobuf.Parser<EchoResponse> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
     }
 
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -907,13 +713,15 @@ public final class Echo {
               io.seata.integration.brpc.dto.Echo.EchoResponse.class, io.seata.integration.brpc.dto.Echo.EchoResponse.Builder.class);
     }
 
+    private int bitField0_;
+    public static final int XID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object xid_;
     /**
      * <code>optional string xid = 1;</code>
      */
     public boolean hasXid() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
-
     /**
      * <code>optional string xid = 1;</code>
      */
@@ -922,7 +730,7 @@ public final class Echo {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -931,7 +739,6 @@ public final class Echo {
         return s;
       }
     }
-
     /**
      * <code>optional string xid = 1;</code>
      */
@@ -939,7 +746,7 @@ public final class Echo {
         getXidBytes() {
       java.lang.Object ref = xid_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         xid_ = b;
@@ -949,13 +756,14 @@ public final class Echo {
       }
     }
 
+    public static final int BRANCHTYPE_FIELD_NUMBER = 2;
+    private volatile java.lang.Object branchType_;
     /**
      * <code>optional string branchType = 2;</code>
      */
     public boolean hasBranchType() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
-
     /**
      * <code>optional string branchType = 2;</code>
      */
@@ -964,7 +772,7 @@ public final class Echo {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -973,7 +781,6 @@ public final class Echo {
         return s;
       }
     }
-
     /**
      * <code>optional string branchType = 2;</code>
      */
@@ -981,7 +788,7 @@ public final class Echo {
         getBranchTypeBytes() {
       java.lang.Object ref = branchType_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         branchType_ = b;
@@ -991,13 +798,14 @@ public final class Echo {
       }
     }
 
+    public static final int REQMSG_FIELD_NUMBER = 3;
+    private volatile java.lang.Object reqMsg_;
     /**
      * <code>required string reqMsg = 3;</code>
      */
     public boolean hasReqMsg() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
-
     /**
      * <code>required string reqMsg = 3;</code>
      */
@@ -1006,7 +814,7 @@ public final class Echo {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -1015,7 +823,6 @@ public final class Echo {
         return s;
       }
     }
-
     /**
      * <code>required string reqMsg = 3;</code>
      */
@@ -1023,7 +830,7 @@ public final class Echo {
         getReqMsgBytes() {
       java.lang.Object ref = reqMsg_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         reqMsg_ = b;
@@ -1033,6 +840,7 @@ public final class Echo {
       }
     }
 
+    private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
@@ -1079,6 +887,7 @@ public final class Echo {
       return size;
     }
 
+    private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -1133,8 +942,72 @@ public final class Echo {
       return hash;
     }
 
-    public Builder newBuilderForType() { return newBuilder(); }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
 
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(io.seata.integration.brpc.dto.Echo.EchoResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
@@ -1146,16 +1019,6 @@ public final class Echo {
       Builder builder = new Builder(parent);
       return builder;
     }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<EchoResponse> getParserForType() {
-      return PARSER;
-    }
-
-    public io.seata.integration.brpc.dto.Echo.EchoResponse getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
     /**
      * Protobuf type {@code io.seata.integration.brpc.dto.EchoResponse}
      */
@@ -1163,20 +1026,6 @@ public final class Echo {
         com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
         // @@protoc_insertion_point(builder_implements:io.seata.integration.brpc.dto.EchoResponse)
         io.seata.integration.brpc.dto.Echo.EchoResponseOrBuilder {
-      private int bitField0_;
-      private java.lang.Object xid_ = "";
-      private java.lang.Object branchType_ = "";
-      private java.lang.Object reqMsg_ = "";
-      // Construct using io.seata.integration.brpc.dto.Echo.EchoResponse.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return io.seata.integration.brpc.dto.Echo.internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor;
@@ -1189,12 +1038,21 @@ public final class Echo {
                 io.seata.integration.brpc.dto.Echo.EchoResponse.class, io.seata.integration.brpc.dto.Echo.EchoResponse.Builder.class);
       }
 
+      // Construct using io.seata.integration.brpc.dto.Echo.EchoResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
         }
       }
-
       public Builder clear() {
         super.clear();
         xid_ = "";
@@ -1247,35 +1105,29 @@ public final class Echo {
       public Builder clone() {
         return (Builder) super.clone();
       }
-
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
         return (Builder) super.setField(field, value);
       }
-
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
         return (Builder) super.clearField(field);
       }
-
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return (Builder) super.clearOneof(oneof);
       }
-
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, Object value) {
         return (Builder) super.setRepeatedField(field, index, value);
       }
-
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           Object value) {
         return (Builder) super.addRepeatedField(field, value);
       }
-
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof io.seata.integration.brpc.dto.Echo.EchoResponse) {
           return mergeFrom((io.seata.integration.brpc.dto.Echo.EchoResponse)other);
@@ -1331,14 +1183,15 @@ public final class Echo {
         }
         return this;
       }
+      private int bitField0_;
 
+      private java.lang.Object xid_ = "";
       /**
        * <code>optional string xid = 1;</code>
        */
       public boolean hasXid() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
-
       /**
        * <code>optional string xid = 1;</code>
        */
@@ -1356,7 +1209,22 @@ public final class Echo {
           return (java.lang.String) ref;
         }
       }
-
+      /**
+       * <code>optional string xid = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getXidBytes() {
+        java.lang.Object ref = xid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          xid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
       /**
        * <code>optional string xid = 1;</code>
        */
@@ -1370,24 +1238,15 @@ public final class Echo {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string xid = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getXidBytes() {
-        java.lang.Object ref = xid_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          xid_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+      public Builder clearXid() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        xid_ = getDefaultInstance().getXid();
+        onChanged();
+        return this;
       }
-
       /**
        * <code>optional string xid = 1;</code>
        */
@@ -1402,23 +1261,13 @@ public final class Echo {
         return this;
       }
 
-      /**
-       * <code>optional string xid = 1;</code>
-       */
-      public Builder clearXid() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        xid_ = getDefaultInstance().getXid();
-        onChanged();
-        return this;
-      }
-
+      private java.lang.Object branchType_ = "";
       /**
        * <code>optional string branchType = 2;</code>
        */
       public boolean hasBranchType() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
-
       /**
        * <code>optional string branchType = 2;</code>
        */
@@ -1436,7 +1285,22 @@ public final class Echo {
           return (java.lang.String) ref;
         }
       }
-
+      /**
+       * <code>optional string branchType = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getBranchTypeBytes() {
+        java.lang.Object ref = branchType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          branchType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
       /**
        * <code>optional string branchType = 2;</code>
        */
@@ -1450,24 +1314,15 @@ public final class Echo {
         onChanged();
         return this;
       }
-
       /**
        * <code>optional string branchType = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getBranchTypeBytes() {
-        java.lang.Object ref = branchType_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          branchType_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+      public Builder clearBranchType() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        branchType_ = getDefaultInstance().getBranchType();
+        onChanged();
+        return this;
       }
-
       /**
        * <code>optional string branchType = 2;</code>
        */
@@ -1482,16 +1337,7 @@ public final class Echo {
         return this;
       }
 
-      /**
-       * <code>optional string branchType = 2;</code>
-       */
-      public Builder clearBranchType() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        branchType_ = getDefaultInstance().getBranchType();
-        onChanged();
-        return this;
-      }
-
+      private java.lang.Object reqMsg_ = "";
       /**
        * <code>required string reqMsg = 3;</code>
        */
@@ -1515,7 +1361,22 @@ public final class Echo {
           return (java.lang.String) ref;
         }
       }
-
+      /**
+       * <code>required string reqMsg = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getReqMsgBytes() {
+        java.lang.Object ref = reqMsg_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          reqMsg_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
       /**
        * <code>required string reqMsg = 3;</code>
        */
@@ -1529,24 +1390,15 @@ public final class Echo {
         onChanged();
         return this;
       }
-
       /**
        * <code>required string reqMsg = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getReqMsgBytes() {
-        java.lang.Object ref = reqMsg_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          reqMsg_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+      public Builder clearReqMsg() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        reqMsg_ = getDefaultInstance().getReqMsg();
+        onChanged();
+        return this;
       }
-
       /**
        * <code>required string reqMsg = 3;</code>
        */
@@ -1560,17 +1412,6 @@ public final class Echo {
         onChanged();
         return this;
       }
-
-      /**
-       * <code>required string reqMsg = 3;</code>
-       */
-      public Builder clearReqMsg() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        reqMsg_ = getDefaultInstance().getReqMsg();
-        onChanged();
-        return this;
-      }
-
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
@@ -1585,6 +1426,89 @@ public final class Echo {
       // @@protoc_insertion_point(builder_scope:io.seata.integration.brpc.dto.EchoResponse)
     }
 
+    // @@protoc_insertion_point(class_scope:io.seata.integration.brpc.dto.EchoResponse)
+    private static final io.seata.integration.brpc.dto.Echo.EchoResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new io.seata.integration.brpc.dto.Echo.EchoResponse();
+    }
+
+    public static io.seata.integration.brpc.dto.Echo.EchoResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    @java.lang.Deprecated public static final com.google.protobuf.Parser<EchoResponse>
+        PARSER = new com.google.protobuf.AbstractParser<EchoResponse>() {
+      public EchoResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+          return new EchoResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<EchoResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<EchoResponse> getParserForType() {
+      return PARSER;
+    }
+
+    public io.seata.integration.brpc.dto.Echo.EchoResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_io_seata_integration_brpc_dto_EchoResponse_fieldAccessorTable;
+
+  public static com.google.protobuf.Descriptors.FileDescriptor
+      getDescriptor() {
+    return descriptor;
+  }
+  private static  com.google.protobuf.Descriptors.FileDescriptor
+      descriptor;
+  static {
+    java.lang.String[] descriptorData = {
+      "\n\031src/test/proto/Echo.proto\022\035io.seata.in" +
+      "tegration.brpc.dto\"\035\n\013EchoRequest\022\016\n\006req" +
+      "Msg\030\001 \002(\t\"?\n\014EchoResponse\022\013\n\003xid\030\001 \001(\t\022\022" +
+      "\n\nbranchType\030\002 \001(\t\022\016\n\006reqMsg\030\003 \002(\t"
+    };
+    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
+    com.google.protobuf.Descriptors.FileDescriptor
+      .internalBuildGeneratedFileFrom(descriptorData,
+        new com.google.protobuf.Descriptors.FileDescriptor[] {
+        }, assigner);
+    internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_io_seata_integration_brpc_dto_EchoRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_io_seata_integration_brpc_dto_EchoRequest_descriptor,
+        new java.lang.String[] { "ReqMsg", });
+    internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_io_seata_integration_brpc_dto_EchoResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_io_seata_integration_brpc_dto_EchoResponse_descriptor,
+        new java.lang.String[] { "Xid", "BranchType", "ReqMsg", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

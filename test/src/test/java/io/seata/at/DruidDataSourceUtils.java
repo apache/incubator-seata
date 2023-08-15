@@ -28,8 +28,11 @@ import java.sql.SQLException;
  */
 public class DruidDataSourceUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DruidDataSourceUtils.class);
+
     public static final int ORACLE = 1;
     public static final int POSTGRESQL = 2;
+
     /**
      * oracle: test1: url:jdbc:oracle:thin:@localhost:49161:xe name:system password:oracle
      *
@@ -39,6 +42,7 @@ public class DruidDataSourceUtils {
     public static final String ORACLE_USERNAME = "system";
     public static final String ORACLE_PASSWORD = "oracle";
     public static final String ORACLE_DRIVER_CLASSNAME = JdbcUtils.ORACLE_DRIVER;
+
     /**
      * PostgreSQL:
      *
@@ -47,7 +51,6 @@ public class DruidDataSourceUtils {
     public static final String POSTGRESQL_USERNAME = "";
     public static final String POSTGRESQL_PASSWORD = "";
     public static final String POSTGRESQL_DRIVER_CLASSNAME = JdbcUtils.POSTGRESQL_DRIVER;
-    private static final Logger LOGGER = LoggerFactory.getLogger(DruidDataSourceUtils.class);
 
     public static DruidDataSource createNewDruidDataSource(int type) throws Throwable {
         DruidDataSource druidDataSource = new DruidDataSource();

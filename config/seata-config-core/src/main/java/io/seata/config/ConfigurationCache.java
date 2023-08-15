@@ -81,10 +81,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         return ConfigurationCacheInstance.INSTANCE;
     }
 
-    public static void clear() {
-        CONFIG_CACHE.clear();
-    }
-
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
         ObjectWrapper oldWrapper = CONFIG_CACHE.get(event.getDataId());
@@ -101,10 +97,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         } else {
             CONFIG_CACHE.remove(event.getDataId());
         }
-    }
-
-    private static class ConfigurationCacheInstance {
-        private static final ConfigurationCache INSTANCE = new ConfigurationCache();
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
@@ -137,6 +129,14 @@ public class ConfigurationCache implements ConfigurationChangeListener {
         );
     }
 
+    private static class ConfigurationCacheInstance {
+        private static final ConfigurationCache INSTANCE = new ConfigurationCache();
+    }
+
+    public static void clear() {
+        CONFIG_CACHE.clear();
+    }
+
     private static class ObjectWrapper {
         private final Object data;
         private final ConfigType type;
@@ -154,14 +154,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
         public Object getData() {
             return data;
-        }
-
-        public static boolean supportType(String type) {
-            return getTypeByName(type) != null;
-        }
-
-        public static ConfigType getTypeByName(String postfix) {
-            return ConfigType.fromCode(postfix);
         }
 
         public ConfigType getType() {
@@ -191,6 +183,14 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 return String.valueOf(data);
             }
             return null;
+        }
+
+        public static boolean supportType(String type) {
+            return getTypeByName(type) != null;
+        }
+
+        public static ConfigType getTypeByName(String postfix) {
+            return ConfigType.fromCode(postfix);
         }
 
         /**
@@ -242,6 +242,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 this.code = code;
             }
 
+            public String getCode() {
+                return code;
+            }
+
             public static ConfigType fromCode(String code) {
                 ConfigType configType = CODE_TO_VALUE.get(code.toUpperCase());
                 return configType == null ? ConfigType.STRING : configType;
@@ -249,10 +253,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
             public static ConfigType fromName(String name) {
                 return ConfigType.valueOf(name);
-            }
-
-            public String getCode() {
-                return code;
             }
         }
     }

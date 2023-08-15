@@ -82,14 +82,14 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
     private final FailureHandler failureHandler;
     private volatile boolean disable;
     private int order;
-    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
+    protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
-    private static volatile ScheduledThreadPoolExecutor executor;
+    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
     private static int degradeCheckAllowTimes;
     private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
     private static final EventBus EVENT_BUS = new GuavaEventBus("degradeCheckEventBus", true);
-    protected AspectTransactional aspectTransactional;
+    private static volatile ScheduledThreadPoolExecutor executor;
     //region DEFAULT_GLOBAL_TRANSACTION_TIMEOUT
 
     private static int defaultGlobalTransactionTimeout = 0;
@@ -145,42 +145,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         this.initDefaultGlobalTransactionTimeout();
     }
 
-    /**
-     * stop auto degrade
-     */
-    private static void stopDegradeCheck() {
-        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(true, false)) {
-            return;
-        }
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
-    }
-
-    /**
-     * auto upgrade service detection
-     */
-    private static void startDegradeCheck() {
-        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(false, true)) {
-            return;
-        }
-        if (executor != null && !executor.isShutdown()) {
-            return;
-        }
-        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
-        executor.scheduleAtFixedRate(() -> {
-            if (ATOMIC_DEGRADE_CHECK.get()) {
-                try {
-                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
-                    TransactionManagerHolder.get().commit(xid);
-                    EVENT_BUS.post(new DegradeCheckEvent(true));
-                } catch (Exception e) {
-                    EVENT_BUS.post(new DegradeCheckEvent(false));
-                }
-            }
-        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
-    }
-
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
         Class<?> targetClass =
@@ -215,25 +179,6 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             }
         }
         return methodInvocation.proceed();
-    }
-
-    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
-    }
-
-    private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder(method.getName()).append("(");
-
-        Class<?>[] params = method.getParameterTypes();
-        int in = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++in < params.length) {
-                sb.append(", ");
-            }
-        }
-        return sb.append(")").toString();
     }
 
     private Object handleGlobalLock(final MethodInvocation methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
@@ -348,6 +293,25 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         }
     }
 
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
+    }
+
+    private String formatMethod(Method method) {
+        StringBuilder sb = new StringBuilder(method.getName()).append("(");
+
+        Class<?>[] params = method.getParameterTypes();
+        int in = 0;
+        for (Class<?> clazz : params) {
+            sb.append(clazz.getName());
+            if (++in < params.length) {
+                sb.append(", ");
+            }
+        }
+        return sb.append(")").toString();
+    }
+
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
@@ -363,6 +327,42 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 startDegradeCheck();
             }
         }
+    }
+
+    /**
+     * stop auto degrade
+     */
+    private static void stopDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(true, false)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdown();
+        }
+    }
+
+    /**
+     * auto upgrade service detection
+     */
+    private static void startDegradeCheck() {
+        if (!ATOMIC_DEGRADE_CHECK.compareAndSet(false, true)) {
+            return;
+        }
+        if (executor != null && !executor.isShutdown()) {
+            return;
+        }
+        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
+        executor.scheduleAtFixedRate(() -> {
+            if (ATOMIC_DEGRADE_CHECK.get()) {
+                try {
+                    String xid = TransactionManagerHolder.get().begin(null, null, "degradeCheck", 60000);
+                    TransactionManagerHolder.get().commit(xid);
+                    EVENT_BUS.post(new DegradeCheckEvent(true));
+                } catch (Exception e) {
+                    EVENT_BUS.post(new DegradeCheckEvent(false));
+                }
+            }
+        }, degradeCheckPeriod, degradeCheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private boolean isTimeoutException(Throwable th) {

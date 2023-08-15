@@ -46,11 +46,13 @@ public class TCCFenceConfig implements InitializingBean, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCFenceConfig.class);
 
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
+
     /**
      * TCC fence clean period max value. maximum interval is 68 years
      */
     private static final Duration MAX_PERIOD = Duration.ofSeconds(Integer.MAX_VALUE);
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
+
     /**
      * TCC fence clean period. only duration type format are supported
      */

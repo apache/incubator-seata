@@ -42,10 +42,12 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
 
     private boolean started = Boolean.FALSE;
 
-    private static final List<Disposable> DISPOSABLE_LIST = new CopyOnWriteArrayList<>();
     private int port;
+
     @Value("${logging.file.path}")
     private String logPath;
+
+    private static final List<Disposable> DISPOSABLE_LIST = new CopyOnWriteArrayList<>();
 
     public static void addDisposable(Disposable disposable) {
         DISPOSABLE_LIST.add(disposable);

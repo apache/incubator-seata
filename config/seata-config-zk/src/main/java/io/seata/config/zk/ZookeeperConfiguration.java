@@ -118,8 +118,30 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         return CONFIG_TYPE;
     }
 
-    private static String getZkDataType() {
-        return ConfigProcessor.resolverConfigDataType(getConfigPath());
+    @Override
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value = seataConfig.getProperty(dataId);
+        if (value != null) {
+            return value;
+        }
+        FutureTask<String> future = new FutureTask<>(() -> {
+            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+            if (!zkClient.exists(path)) {
+                LOGGER.warn("config {} is not existed, return defaultValue {} ",
+                        dataId, defaultValue);
+                return defaultValue;
+            }
+            String value1 = zkClient.readData(path);
+            return StringUtils.isNullOrEmpty(value1) ? defaultValue : value1;
+        });
+        CONFIG_EXECUTOR.execute(future);
+        try {
+            return future.get(timeoutMills, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            LOGGER.error("getConfig {} error or timeout, return defaultValue {}, exception:{} ",
+                    dataId, defaultValue, e.getMessage());
+            return defaultValue;
+        }
     }
 
     @Override
@@ -235,36 +257,6 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         }
     }
 
-    @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = seataConfig.getProperty(dataId);
-        if (value != null) {
-            return value;
-        }
-        FutureTask<String> future = new FutureTask<>(() -> {
-            String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-            if (!zkClient.exists(path)) {
-                LOGGER.warn("config {} is not existed, return defaultValue {} ",
-                        dataId, defaultValue);
-                return defaultValue;
-            }
-            String value1 = zkClient.readData(path);
-            return StringUtils.isNullOrEmpty(value1) ? defaultValue : value1;
-        });
-        CONFIG_EXECUTOR.execute(future);
-        try {
-            return future.get(timeoutMills, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            LOGGER.error("getConfig {} error or timeout, return defaultValue {}, exception:{} ",
-                    dataId, defaultValue, e.getMessage());
-            return defaultValue;
-        }
-    }
-
-    private static String getConfigPath() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
-    }
-
     private void initSeataConfig() {
         String configPath = getConfigPath();
         String config = zkClient.readData(configPath, true);
@@ -277,6 +269,14 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             ZKListener zkListener = new ZKListener(configPath, null);
             zkClient.subscribeDataChanges(configPath, zkListener);
         }
+    }
+
+    private static String getConfigPath() {
+        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + CONFIG_PATH_KEY, DEFAULT_CONFIG_PATH);
+    }
+
+    private static String getZkDataType() {
+        return ConfigProcessor.resolverConfigDataType(getConfigPath());
     }
 
     private static String getSeataConfigStr() {

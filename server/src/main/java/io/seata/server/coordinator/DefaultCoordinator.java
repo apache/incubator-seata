@@ -149,24 +149,34 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
-    private static volatile DefaultCoordinator instance;
+
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));
+
     private final ScheduledThreadPoolExecutor retryCommitting =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_COMMITTING, 1));
+
     private final ScheduledThreadPoolExecutor asyncCommitting =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(ASYNC_COMMITTING, 1));
+
     private final ScheduledThreadPoolExecutor timeoutCheck =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(TX_TIMEOUT_CHECK, 1));
+
     private final ScheduledThreadPoolExecutor undoLogDelete =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
+
     private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
         GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
+
     private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Committed};
 
-    private RemotingServer remotingServer;
     private final ThreadPoolExecutor branchRemoveExecutor;
+
+    private RemotingServer remotingServer;
+
     private final DefaultCore core;
+
+    private static volatile DefaultCoordinator instance;
 
     /**
      * Instantiates a new Default coordinator.

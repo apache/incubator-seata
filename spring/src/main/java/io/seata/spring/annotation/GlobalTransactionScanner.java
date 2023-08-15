@@ -206,16 +206,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().destroyAll();
     }
 
-    public static boolean isTccAutoProxy(Class<?> beanClass) {
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(beanClass);
-        for (Class<?> interClass : interfaceClasses) {
-            if (interClass.isAnnotationPresent(LocalTCC.class)) {
-                return true;
-            }
-        }
-        return beanClass.isAnnotationPresent(LocalTCC.class);
-    }
-
     private void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
@@ -254,6 +244,86 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+    }
+
+    /**
+     * The following will be scanned, and added corresponding interceptor:
+     *
+     * TM:
+     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
+     * Corresponding interceptor:
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
+     *
+     * GlobalLock:
+     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
+     * Corresponding interceptor:
+     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
+     *
+     * TCC mode:
+     * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
+     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
+     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
+     * Corresponding interceptor:
+     * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
+     */
+    @Override
+    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+        // do checkers
+        if (!doCheckers(bean, beanName)) {
+            return bean;
+        }
+
+        try {
+            synchronized (PROXYED_SET) {
+                if (PROXYED_SET.contains(beanName)) {
+                    return bean;
+                }
+                interceptor = null;
+                //check TCC proxy
+                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
+                    // init tcc fence clean task if enable useTccFence
+                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
+                    //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
+                    interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
+                    ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                            (ConfigurationChangeListener)interceptor);
+                } else {
+                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
+                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
+
+                    if (!existsAnnotation(serviceInterface)
+                            && !existsAnnotation(interfacesIfJdk)) {
+                        return bean;
+                    }
+
+                    if (globalTransactionalInterceptor == null) {
+                        globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                        ConfigurationCache.addConfigListener(
+                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                                (ConfigurationChangeListener)globalTransactionalInterceptor);
+                    }
+                    interceptor = globalTransactionalInterceptor;
+                }
+
+                LOGGER.info("Bean [{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
+                if (!AopUtils.isAopProxy(bean)) {
+                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                } else {
+                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
+                    int pos;
+                    for (Advisor avr : advisor) {
+                        // Find the position based on the advisor's order, and add to advisors by pos
+                        pos = findAddSeataAdvisorPosition(advised, avr);
+                        advised.addAdvisor(pos, avr);
+                    }
+                }
+                PROXYED_SET.add(beanName);
+                return bean;
+            }
+        } catch (Exception exx) {
+            throw new RuntimeException(exx);
+        }
     }
 
     private boolean doCheckers(Object bean, String beanName) {
@@ -393,89 +463,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     //endregion the methods about findAddSeataAdvisorPosition  END
 
-    /**
-     * The following will be scanned, and added corresponding interceptor:
-     *
-     * TM:
-     * @see io.seata.spring.annotation.GlobalTransactional // TM annotation
-     * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalTransaction(MethodInvocation, AspectTransactional) // TM handler
-     *
-     * GlobalLock:
-     * @see io.seata.spring.annotation.GlobalLock // GlobalLock annotation
-     * Corresponding interceptor:
-     * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#handleGlobalLock(MethodInvocation, GlobalLock)  // GlobalLock handler
-     *
-     * TCC mode:
-     * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation on interface
-     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction // TCC annotation on try method
-     * @see io.seata.rm.tcc.remoting.RemotingParser // Remote TCC service parser
-     * Corresponding interceptor:
-     * @see io.seata.spring.tcc.TccActionInterceptor // the interceptor of TCC mode
-     */
-    @Override
-    protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-        // do checkers
-        if (!doCheckers(bean, beanName)) {
-            return bean;
-        }
-
-        try {
-            synchronized (PROXYED_SET) {
-                if (PROXYED_SET.contains(beanName)) {
-                    return bean;
-                }
-                interceptor = null;
-                //check TCC proxy
-                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
-                    // init tcc fence clean task if enable useTccFence
-                    TCCBeanParserUtils.initTccFenceCleanTask(TCCBeanParserUtils.getRemotingDesc(beanName), applicationContext);
-                    //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
-                    interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
-                    ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                            (ConfigurationChangeListener)interceptor);
-                } else {
-                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
-
-                    if (!existsAnnotation(serviceInterface)
-                            && !existsAnnotation(interfacesIfJdk)) {
-                        return bean;
-                    }
-
-                    if (globalTransactionalInterceptor == null) {
-                        globalTransactionalInterceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                        ConfigurationCache.addConfigListener(
-                                ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                                (ConfigurationChangeListener)globalTransactionalInterceptor);
-                    }
-                    interceptor = globalTransactionalInterceptor;
-                }
-
-                LOGGER.info("Bean [{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
-                if (!AopUtils.isAopProxy(bean)) {
-                    bean = super.wrapIfNecessary(bean, beanName, cacheKey);
-                } else {
-                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
-                    Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
-                    int pos;
-                    for (Advisor avr : advisor) {
-                        // Find the position based on the advisor's order, and add to advisors by pos
-                        pos = findAddSeataAdvisorPosition(advised, avr);
-                        advised.addAdvisor(pos, avr);
-                    }
-                }
-                PROXYED_SET.add(beanName);
-                return bean;
-            }
-        } catch (Exception exx) {
-            throw new RuntimeException(exx);
-        }
-    }
-
-    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
-        return new MethodDesc(anno, method);
-    }
 
     private boolean existsAnnotation(Class<?>... classes) {
         if (CollectionUtils.isNotEmpty(classes)) {
@@ -502,6 +489,20 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             }
         }
         return false;
+    }
+
+    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
+        return new MethodDesc(anno, method);
+    }
+
+    public static boolean isTccAutoProxy(Class<?> beanClass) {
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(beanClass);
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
+                return true;
+            }
+        }
+        return beanClass.isAnnotationPresent(LocalTCC.class);
     }
 
     @Override

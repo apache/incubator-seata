@@ -26,49 +26,58 @@ import io.seata.tm.api.transaction.Propagation;
 public class AspectTransactional {
     
     /**
+     * Global transaction timeoutMills in MILLISECONDS.
+     */
+    private int timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+
+    /**
+     * Given name of the global transaction instance.
+     */
+    private String name = "";
+
+    /**
+     * roll back for the Class
+     */
+    private Class<? extends Throwable>[] rollbackFor = new Class[] {};
+
+    /**
+     * roll back for the class name
+     */
+    private String[] rollbackForClassName = {};
+
+    /**
+     * not roll back for the Class
+     */
+    private Class<? extends Throwable>[] noRollbackFor = new Class[] {};
+
+    /**
+     * not roll back for the class name
+     */
+    private String[] noRollbackForClassName = {};
+
+    /**
+     * the propagation of the global transaction
+     */
+    private Propagation propagation = Propagation.REQUIRED;
+
+    /**
      * customized global lock retry interval(unit: ms)
      * you may use this to override global config of "client.rm.lock.retryInterval"
      * note: 0 or negative number will take no effect(which mean fall back to global config)
      */
     int lockRetryInterval = 0;
+
     /**
      * customized global lock retry times
      * you may use this to override global config of "client.rm.lock.retryTimes"
      * note: negative number will take no effect(which mean fall back to global config)
      */
     int lockRetryTimes = -1;
+
     /**
      * lock strategy mode
      */
     LockStrategyMode lockStrategyMode;
-    /**
-     * Global transaction timeoutMills in MILLISECONDS.
-     */
-    private int timeoutMills = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
-    /**
-     * Given name of the global transaction instance.
-     */
-    private String name = "";
-    /**
-     * roll back for the Class
-     */
-    private Class<? extends Throwable>[] rollbackFor = new Class[] {};
-    /**
-     * roll back for the class name
-     */
-    private String[] rollbackForClassName = {};
-    /**
-     * not roll back for the Class
-     */
-    private Class<? extends Throwable>[] noRollbackFor = new Class[] {};
-    /**
-     * not roll back for the class name
-     */
-    private String[] noRollbackForClassName = {};
-    /**
-     * the propagation of the global transaction
-     */
-    private Propagation propagation = Propagation.REQUIRED;
 
     public AspectTransactional() {}
 

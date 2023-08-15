@@ -38,36 +38,41 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ReflectionUtil {
 
+    private ReflectionUtil() {
+    }
+
+
+    //region Constants
+
     /**
      * The constant EMPTY_FIELD_ARRAY
      */
     public static final Field[] EMPTY_FIELD_ARRAY = new Field[0];
 
-
-    //region Constants
     /**
      * The constant EMPTY_CLASS_ARRAY
      */
     public static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+
     /**
      * The constant EMPTY_ARGS
      */
     public static final Object[] EMPTY_ARGS = new Object[0];
+
     /**
      * The cache CLASS_FIELDS_CACHE
      */
     private static final Map<Class<?>, Field[]> CLASS_FIELDS_CACHE = new ConcurrentHashMap<>();
+
     /**
      * The cache FIELD_CACHE: Class -> fieldName -> Field
      */
     private static final Map<Class<?>, Map<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
+
     /**
      * The cache METHOD_CACHE: Class -> methodName|paramClassName1,paramClassName2,...,paramClassNameN -> Method
      */
     private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
-
-    private ReflectionUtil() {
-    }
 
     //endregion
 

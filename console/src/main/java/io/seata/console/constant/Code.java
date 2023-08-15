@@ -50,22 +50,6 @@ public enum Code {
     }
 
     /**
-     * Gets error msg.
-     *
-     * @param code the code
-     * @return the error msg
-     */
-    public static String getErrorMsg(String code) {
-        Code[] errorCodes = values();
-        for (Code errCode : errorCodes) {
-            if (errCode.getCode().equals(code)) {
-                return errCode.getMsg();
-            }
-        }
-        return null;
-    }
-
-    /**
      * Gets code.
      *
      * @return the code
@@ -99,6 +83,22 @@ public enum Code {
      */
     public void setMsg(String msg) {
         this.msg = msg;
+    }
+
+    /**
+     * Gets error msg.
+     *
+     * @param code the code
+     * @return the error msg
+     */
+    public static String getErrorMsg(String code) {
+        Code[] errorCodes = values();
+        for (Code errCode : errorCodes) {
+            if (errCode.getCode().equals(code)) {
+                return errCode.getMsg();
+            }
+        }
+        return null;
     }
 }
 

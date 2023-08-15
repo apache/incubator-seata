@@ -118,101 +118,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
         return CONFIG_TYPE;
     }
 
-    /**
-     * complete the future
-     *
-     * @param completableFuture
-     * @param configFuture
-     * @param <T>
-     */
-    private static <T> void complete(CompletableFuture<T> completableFuture, ConfigFuture configFuture) {
-        try {
-            T response = completableFuture.get();
-            if (response instanceof GetResponse) {
-                List<KeyValue> keyValues = ((GetResponse)response).getKvs();
-                if (CollectionUtils.isNotEmpty(keyValues)) {
-                    ByteSequence value = keyValues.get(0).getValue();
-                    if (value != null) {
-                        configFuture.setResult(value.toString(UTF_8));
-                    }
-                }
-            } else if (response instanceof PutResponse) {
-                configFuture.setResult(Boolean.TRUE);
-            } else if (response instanceof TxnResponse) {
-                boolean result = ((TxnResponse)response).isSucceeded();
-                //create key if file does not exist)
-                if (result) {
-                    configFuture.setResult(Boolean.TRUE);
-                }
-            } else if (response instanceof DeleteResponse) {
-                configFuture.setResult(Boolean.TRUE);
-            } else {
-                throw new ShouldNeverHappenException("unsupported response type");
-            }
-        } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
-        }
-    }
-
-    private static void initSeataConfig() {
-        String etcdConfigKey = getEtcdConfigKey();
-        CompletableFuture<GetResponse> future = getClient().getKVClient().get(ByteSequence.from(etcdConfigKey, UTF_8));
-        try {
-            GetResponse getResponse = future.get();
-            List<KeyValue> kvs = getResponse.getKvs();
-            if (!kvs.isEmpty()) {
-                seataConfig = ConfigProcessor.processConfig(new String(kvs.get(0).getValue().getBytes(), StandardCharsets.UTF_8), getEtcdDataType());
-
-                EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null);
-                CONFIG_LISTENERS_MAP.computeIfAbsent(etcdConfigKey, key -> new ConcurrentSet<>())
-                        .add(etcdListener);
-                etcdListener.onProcessEvent(new ConfigurationChangeEvent());
-            }
-        } catch (Exception e) {
-            LOGGER.error("init config properties error", e);
-        }
-    }
-
-    private static String getEtcdConfigKey() {
-        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
-    }
-
-    private static String getEtcdDataType() {
-        return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
-    }
-
-    private static String getSeataConfigStr() {
-        StringBuilder sb = new StringBuilder();
-
-        Enumeration<?> enumeration = seataConfig.propertyNames();
-        while (enumeration.hasMoreElements()) {
-            String key = (String) enumeration.nextElement();
-            String property = seataConfig.getProperty(key);
-            sb.append(key).append("=").append(property).append("\n");
-        }
-
-        return sb.toString();
-    }
-
-    @Override
-    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (StringUtils.isBlank(dataId) || listener == null) {
-            return;
-        }
-        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
-        if (CollectionUtils.isNotEmpty(configListeners)) {
-            ConfigurationChangeListener target;
-            for (ConfigurationChangeListener entry : configListeners) {
-                target = ((EtcdListener)entry).getTargetListener();
-                if (listener.equals(target)) {
-                    entry.onShutDown();
-                    configListeners.remove(entry);
-                    break;
-                }
-            }
-        }
-    }
-
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         String value = seataConfig.getProperty(dataId);
@@ -224,23 +129,6 @@ public class EtcdConfiguration extends AbstractConfiguration {
         etcdConfigExecutor.execute(
             () -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
         return (String)configFuture.get();
-    }
-
-    /**
-     * get client
-     *
-     * @return client
-     */
-    private static Client getClient() {
-        if (client == null) {
-            synchronized (EtcdConfiguration.class) {
-                if (client == null) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
-                        .build();
-                }
-            }
-        }
-        return client;
     }
 
     @Override
@@ -317,8 +205,118 @@ public class EtcdConfiguration extends AbstractConfiguration {
     }
 
     @Override
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
+            return;
+        }
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            ConfigurationChangeListener target;
+            for (ConfigurationChangeListener entry : configListeners) {
+                target = ((EtcdListener)entry).getTargetListener();
+                if (listener.equals(target)) {
+                    entry.onShutDown();
+                    configListeners.remove(entry);
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return CONFIG_LISTENERS_MAP.get(dataId);
+    }
+
+    /**
+     * get client
+     *
+     * @return client
+     */
+    private static Client getClient() {
+        if (client == null) {
+            synchronized (EtcdConfiguration.class) {
+                if (client == null) {
+                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
+                        .build();
+                }
+            }
+        }
+        return client;
+    }
+
+    /**
+     * complete the future
+     *
+     * @param completableFuture
+     * @param configFuture
+     * @param <T>
+     */
+    private static <T> void complete(CompletableFuture<T> completableFuture, ConfigFuture configFuture) {
+        try {
+            T response = completableFuture.get();
+            if (response instanceof GetResponse) {
+                List<KeyValue> keyValues = ((GetResponse)response).getKvs();
+                if (CollectionUtils.isNotEmpty(keyValues)) {
+                    ByteSequence value = keyValues.get(0).getValue();
+                    if (value != null) {
+                        configFuture.setResult(value.toString(UTF_8));
+                    }
+                }
+            } else if (response instanceof PutResponse) {
+                configFuture.setResult(Boolean.TRUE);
+            } else if (response instanceof TxnResponse) {
+                boolean result = ((TxnResponse)response).isSucceeded();
+                //create key if file does not exist)
+                if (result) {
+                    configFuture.setResult(Boolean.TRUE);
+                }
+            } else if (response instanceof DeleteResponse) {
+                configFuture.setResult(Boolean.TRUE);
+            } else {
+                throw new ShouldNeverHappenException("unsupported response type");
+            }
+        } catch (Exception e) {
+            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
+        }
+    }
+
+    private static void initSeataConfig() {
+        String etcdConfigKey = getEtcdConfigKey();
+        CompletableFuture<GetResponse> future = getClient().getKVClient().get(ByteSequence.from(etcdConfigKey, UTF_8));
+        try {
+            GetResponse getResponse = future.get();
+            List<KeyValue> kvs = getResponse.getKvs();
+            if (!kvs.isEmpty()) {
+                seataConfig = ConfigProcessor.processConfig(new String(kvs.get(0).getValue().getBytes(), StandardCharsets.UTF_8), getEtcdDataType());
+
+                EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null);
+                CONFIG_LISTENERS_MAP.computeIfAbsent(etcdConfigKey, key -> new ConcurrentSet<>())
+                        .add(etcdListener);
+                etcdListener.onProcessEvent(new ConfigurationChangeEvent());
+            }
+        } catch (Exception e) {
+            LOGGER.error("init config properties error", e);
+        }
+    }
+
+    private static String getEtcdConfigKey() {
+        return FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + ETCD_CONFIG_KEY, DEFAULT_ETCD_CONFIG_KEY_VALUE);
+    }
+    private static String getEtcdDataType() {
+        return ConfigProcessor.resolverConfigDataType(getEtcdConfigKey());
+    }
+    private static String getSeataConfigStr() {
+        StringBuilder sb = new StringBuilder();
+
+        Enumeration<?> enumeration = seataConfig.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            String key = (String) enumeration.nextElement();
+            String property = seataConfig.getProperty(key);
+            sb.append(key).append("=").append(property).append("\n");
+        }
+
+        return sb.toString();
     }
 
     /**

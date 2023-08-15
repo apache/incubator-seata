@@ -33,10 +33,7 @@ import io.seata.core.constants.ServerTableColumnsName;
  */
 public class AbstractLockStoreSql implements LockStoreSql {
 
-    /**
-     * The constant WHERE_PLACE_HOLD
-     */
-    protected static final String WHERE_PLACE_HOLD = " #where# ";
+    private static final int MAX_IN_SIZE = 1000;
 
     /**
      * The constant CONFIG.
@@ -48,17 +45,25 @@ public class AbstractLockStoreSql implements LockStoreSql {
      */
     protected static final String LOCK_TABLE_PLACE_HOLD = " #lock_table# ";
     /**
-     * The constant LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD.
+     * The constant WHERE_PLACE_HOLD
      */
-    protected static final String LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD = " #lock_table_pk_where_condition# ";
+    protected static final String WHERE_PLACE_HOLD = " #where# ";
     /**
      * The constant IN_PARAMS_PLACE_HOLD.
      */
     protected static final String IN_PARAMS_PLACE_HOLD = " #in_params# ";
+
+    /**
+     * The constant LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD.
+     */
+    protected static final String LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD = " #lock_table_pk_where_condition# ";
+
     /**
      * The constant LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD.
      */
     protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD = " #lock_table_branch_id_where_condition# ";
+
+
     /**
      * The constant ALL_COLUMNS.
      * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
@@ -69,13 +74,13 @@ public class AbstractLockStoreSql implements LockStoreSql {
             + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
             + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
             + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED + "," + ServerTableColumnsName.LOCK_TABLE_STATUS;
-    private static final int MAX_IN_SIZE = 1000;
 
     /**
      * The constant DELETE_LOCK_SQL.
      */
     private static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
         + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
+
     /**
      * The constant BATCH_DELETE_LOCK_SQL.
      */

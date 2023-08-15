@@ -103,6 +103,18 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     }
 
     /**
+     * use for mock
+     *
+     * @param listenPort the listen port
+     */
+    public void setListenPort(int listenPort) {
+        if (listenPort <= 0) {
+            throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
+        }
+        this.listenPort = listenPort;
+    }
+
+    /**
      * Gets listen port.
      *
      * @return the listen port
@@ -124,18 +136,6 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         }
         listenPort = port;
         return port;
-    }
-
-    /**
-     * use for mock
-     *
-     * @param listenPort the listen port
-     */
-    public void setListenPort(int listenPort) {
-        if (listenPort <= 0) {
-            throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
-        }
-        this.listenPort = listenPort;
     }
 
     @Override

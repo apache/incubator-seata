@@ -158,11 +158,6 @@ public class DefaultCoordinatorTest {
 
     }
 
-    private static void deleteAndCreateDataFile() throws IOException {
-        StoreUtil.deleteDataFile();
-        SessionHolder.init(SessionMode.FILE);
-    }
-
     @Test
     @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
@@ -186,19 +181,6 @@ public class DefaultCoordinatorTest {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
                 ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
-        }
-    }
-
-    @AfterAll
-    public static void afterClass() throws Exception {
-
-        Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
-        for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
-            asyncGlobalSession.closeAndClean();
-        }
-        for (GlobalSession globalSession : globalSessions) {
-            globalSession.closeAndClean();
         }
     }
 
@@ -229,6 +211,24 @@ public class DefaultCoordinatorTest {
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
                 ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
+    }
+
+    @AfterAll
+    public static void afterClass() throws Exception {
+
+        Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
+        for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
+            asyncGlobalSession.closeAndClean();
+        }
+        for (GlobalSession globalSession : globalSessions) {
+            globalSession.closeAndClean();
+        }
+    }
+
+    private static void deleteAndCreateDataFile() throws IOException {
+        StoreUtil.deleteDataFile();
+        SessionHolder.init(SessionMode.FILE);
     }
 
     @AfterEach

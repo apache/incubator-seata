@@ -74,6 +74,16 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
 
     private static final AtomicBoolean INIT = new AtomicBoolean(false);
 
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        init();
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
     public static void init() {
         if (INIT.compareAndSet(false, true)) {
             PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
@@ -101,16 +111,6 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
         }
-    }
-
-    @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        init();
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 
 }

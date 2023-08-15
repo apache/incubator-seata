@@ -261,6 +261,31 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         jedisPool.destroy();
     }
 
+    private static class NotifySub extends JedisPubSub {
+
+        private final List<RedisListener> redisListeners;
+
+        /**
+         * Instantiates a new Notify sub.
+         *
+         * @param redisListeners the redis listeners
+         */
+        NotifySub(List<RedisListener> redisListeners) {
+            this.redisListeners = redisListeners;
+        }
+
+        @Override
+        public void onMessage(String key, String msg) {
+            for (RedisListener listener : redisListeners) {
+                try {
+                    listener.onEvent(msg);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
+
     private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey) {
         ScanParams scanParams = new ScanParams();
         scanParams.count(10);
@@ -284,31 +309,6 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
         if (!newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
-        }
-    }
-
-    private static class NotifySub extends JedisPubSub {
-
-        private final List<RedisListener> redisListeners;
-
-        /**
-         * Instantiates a new Notify sub.
-         *
-         * @param redisListeners the redis listeners
-         */
-        NotifySub(List<RedisListener> redisListeners) {
-            this.redisListeners = redisListeners;
-        }
-
-        @Override
-        public void onMessage(String key, String msg) {
-            for (RedisListener listener : redisListeners) {
-                try {
-                    listener.onEvent(msg);
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-            }
         }
     }
 

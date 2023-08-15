@@ -99,102 +99,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
 
     /**
-     * Instantiates a new Global session.
-     */
-    public GlobalSession() {
-        this.lazyLoadBranch = false;
-    }
-
-    /**
-     * Remove boolean.
-     *
-     * @param branchSession the branch session
-     * @return the boolean
-     */
-    public boolean remove(BranchSession branchSession) {
-        return branchSessions.remove(branchSession);
-    }
-
-    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
-
-    /**
-     * Instantiates a new Global session.
-     *
-     * @param applicationId           the application id
-     * @param transactionServiceGroup the transaction service group
-     * @param transactionName         the transaction name
-     * @param timeout                 the timeout
-     * @param lazyLoadBranch          the lazy load branch
-     */
-    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, boolean lazyLoadBranch) {
-        this.transactionId = UUIDGenerator.generateUUID();
-        this.status = GlobalStatus.Begin;
-        this.lazyLoadBranch = lazyLoadBranch;
-        if (!lazyLoadBranch) {
-            this.branchSessions = new ArrayList<>();
-        }
-        this.applicationId = applicationId;
-        this.transactionServiceGroup = transactionServiceGroup;
-        this.transactionName = transactionName;
-        this.timeout = timeout;
-        this.xid = XID.generateXID(transactionId);
-    }
-
-    /**
-     * Instantiates a new Global session.
-     *
-     * @param applicationId           the application id
-     * @param transactionServiceGroup the transaction service group
-     * @param transactionName         the transaction name
-     * @param timeout                 the timeout
-     */
-    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
-        this(applicationId, transactionServiceGroup, transactionName, timeout, false);
-    }
-
-    /**
-     * Create global session global session.
-     *
-     * @param applicationId  the application id
-     * @param txServiceGroup the tx service group
-     * @param txName         the tx name
-     * @param timeout        the timeout
-     * @return the global session
-     */
-    public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
-        int timeout) {
-        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, false);
-        return session;
-    }
-
-    /**
-     * Is timeout boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isTimeout() {
-        return (System.currentTimeMillis() - beginTime) > timeout;
-    }
-
-    /**
-     * prevent could not handle committing and rollbacking transaction
-     * @return if true retry commit or roll back
-     */
-    public boolean isDeadSession() {
-        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
-    }
-
-    @Override
-    public void begin() throws TransactionException {
-        this.status = GlobalStatus.Begin;
-        this.beginTime = System.currentTimeMillis();
-        this.active = true;
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onBegin(this);
-        }
-    }
-
-    /**
      * Add boolean.
      *
      * @param branchSession the branch session
@@ -209,28 +113,17 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
-    @Override
-    public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
-        branchSession.setStatus(status);
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onBranchStatusChange(this, branchSession, status);
-        }
+    /**
+     * Remove boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     */
+    public boolean remove(BranchSession branchSession) {
+        return branchSessions.remove(branchSession);
     }
 
-    @Override
-    public boolean isActive() {
-        return active;
-    }
-
-    @Override
-    public void close() throws TransactionException {
-        if (active) {
-            for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-                lifecycleListener.onClose(this);
-            }
-        }
-    }
+    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
 
     /**
      * Can be committed async boolean.
@@ -278,30 +171,30 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * Add session lifecycle listener.
+     * Is timeout boolean.
      *
-     * @param sessionLifecycleListener the session lifecycle listener
+     * @return the boolean
      */
-    public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
-        lifecycleListeners.add(sessionLifecycleListener);
+    public boolean isTimeout() {
+        return (System.currentTimeMillis() - beginTime) > timeout;
     }
 
     /**
-     * Remove session lifecycle listener.
-     *
-     * @param sessionLifecycleListener the session lifecycle listener
+     * prevent could not handle committing and rollbacking transaction
+     * @return if true retry commit or roll back
      */
-    public void removeSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
-        lifecycleListeners.remove(sessionLifecycleListener);
+    public boolean isDeadSession() {
+        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
     }
 
     @Override
-    public void addBranch(BranchSession branchSession) throws TransactionException {
+    public void begin() throws TransactionException {
+        this.status = GlobalStatus.Begin;
+        this.beginTime = System.currentTimeMillis();
+        this.active = true;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onAddBranch(this, branchSession);
+            lifecycleListener.onBegin(this);
         }
-        branchSession.setStatus(BranchStatus.Registered);
-        add(branchSession);
     }
 
     @Override
@@ -312,6 +205,29 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
+        }
+    }
+
+    @Override
+    public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
+        throws TransactionException {
+        branchSession.setStatus(status);
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onBranchStatusChange(this, branchSession, status);
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public void close() throws TransactionException {
+        if (active) {
+            for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+                lifecycleListener.onClose(this);
+            }
         }
     }
 
@@ -346,6 +262,33 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (this.hasATBranch()) {
             clean();
         }
+    }
+
+    /**
+     * Add session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
+    public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
+        lifecycleListeners.add(sessionLifecycleListener);
+    }
+
+    /**
+     * Remove session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
+    public void removeSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
+        lifecycleListeners.remove(sessionLifecycleListener);
+    }
+
+    @Override
+    public void addBranch(BranchSession branchSession) throws TransactionException {
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onAddBranch(this, branchSession);
+        }
+        branchSession.setStatus(BranchStatus.Registered);
+        add(branchSession);
     }
 
     public void loadBranchs() {
@@ -411,6 +354,59 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public List<BranchSession> getSortedBranches() {
         return new ArrayList<>(getBranchSessions());
+    }
+
+    /**
+     * Gets reverse sorted branches.
+     *
+     * @return the reverse sorted branches
+     */
+    public List<BranchSession> getReverseSortedBranches() {
+        List<BranchSession> reversed = new ArrayList<>(getBranchSessions());
+        Collections.reverse(reversed);
+        return reversed;
+    }
+
+    /**
+     * Instantiates a new Global session.
+     */
+    public GlobalSession() {
+        this.lazyLoadBranch = false;
+    }
+
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     * @param lazyLoadBranch          the lazy load branch
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout, boolean lazyLoadBranch) {
+        this.transactionId = UUIDGenerator.generateUUID();
+        this.status = GlobalStatus.Begin;
+        this.lazyLoadBranch = lazyLoadBranch;
+        if (!lazyLoadBranch) {
+            this.branchSessions = new ArrayList<>();
+        }
+        this.applicationId = applicationId;
+        this.transactionServiceGroup = transactionServiceGroup;
+        this.transactionName = transactionName;
+        this.timeout = timeout;
+        this.xid = XID.generateXID(transactionId);
+    }
+
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+        this(applicationId, transactionServiceGroup, transactionName, timeout, false);
     }
 
     /**
@@ -539,19 +535,23 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.applicationData = applicationData;
     }
 
-    /**
-     * Gets reverse sorted branches.
-     *
-     * @return the reverse sorted branches
-     */
-    public List<BranchSession> getReverseSortedBranches() {
-        List<BranchSession> reversed = new ArrayList<>(getBranchSessions());
-        Collections.reverse(reversed);
-        return reversed;
-    }
-
     public boolean isLazyLoadBranch() {
         return lazyLoadBranch;
+    }
+
+    /**
+     * Create global session global session.
+     *
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     * @param txName         the tx name
+     * @param timeout        the timeout
+     * @return the global session
+     */
+    public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
+        int timeout) {
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, false);
+        return session;
     }
 
     /**

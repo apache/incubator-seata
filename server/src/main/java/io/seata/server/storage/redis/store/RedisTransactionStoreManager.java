@@ -101,10 +101,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
      * The constant CONFIG.
      */
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
-     * Map for LogOperation Global Operation
+     * The Log query limit.
      */
-    public static volatile ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> globalMap;
+    private int logQueryLimit;
 
     /**
      * Get the instance.
@@ -119,14 +120,6 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         }
         return instance;
     }
-    /**
-     * Map for LogOperation Branch Operation
-     */
-    public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
-    /**
-     * The Log query limit.
-     */
-    private int logQueryLimit;
 
     /**
      * init map to constructor
@@ -137,6 +130,17 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         initBranchMap();
         logQueryLimit = CONFIG.getInt(STORE_REDIS_QUERY_LIMIT, DEFAULT_QUERY_LIMIT);
     }
+
+    /**
+     * Map for LogOperation Global Operation
+     */
+    public static volatile ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> globalMap;
+
+    /**
+     * Map for LogOperation Branch Operation
+     */
+    public static volatile ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> branchMap;
+
 
     /**
      * init globalMap

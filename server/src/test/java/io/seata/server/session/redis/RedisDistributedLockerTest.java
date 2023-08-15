@@ -44,11 +44,11 @@ import static io.seata.server.store.StoreConfig.StoreMode;
 @SpringBootTest
 public class RedisDistributedLockerTest {
 
-    private static DistributedLocker distributedLocker;
-    private static Jedis jedis;
     private String retryRollbacking = "RetryRollbacking";
     private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
+    private static DistributedLocker distributedLocker;
+    private static Jedis jedis;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
@@ -57,14 +57,6 @@ public class RedisDistributedLockerTest {
         DistributedLockerFactory.cleanLocker();
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();
-    }
-
-    @AfterAll
-    public static void after() throws IOException {
-        EnhancedServiceLoader.unload(DistributedLocker.class);
-        DistributedLockerFactory.cleanLocker();
-        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
-        jedis.close();
     }
 
     @Test
@@ -138,6 +130,14 @@ public class RedisDistributedLockerTest {
         Assertions.assertEquals("OK",set);
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
         Assertions.assertFalse(acquire);
+    }
+
+    @AfterAll
+    public static void after() throws IOException {
+        EnhancedServiceLoader.unload(DistributedLocker.class);
+        DistributedLockerFactory.cleanLocker();
+        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
+        jedis.close();
     }
 
 }

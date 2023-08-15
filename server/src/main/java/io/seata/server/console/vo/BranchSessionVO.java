@@ -75,28 +75,6 @@ public class BranchSessionVO {
         this.applicationData = applicationData;
     }
 
-    public static BranchSessionVO convert(ResultSet rs) throws SQLException {
-        BranchSessionVO branchSessionVO = new BranchSessionVO();
-        branchSessionVO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
-        branchSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
-        branchSessionVO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
-        branchSessionVO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
-        branchSessionVO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
-        branchSessionVO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
-        branchSessionVO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
-        branchSessionVO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
-        branchSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
-        Date gmtCreateTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE);
-        if (gmtCreateTimestamp != null) {
-            branchSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
-        }
-        Date gmtModifiedTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED);
-        if (gmtModifiedTimestamp != null) {
-            branchSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
-        }
-        return branchSessionVO;
-    }
-
     public String getXid() {
         return xid;
     }
@@ -183,6 +161,28 @@ public class BranchSessionVO {
 
     public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public static BranchSessionVO convert(ResultSet rs) throws SQLException {
+        BranchSessionVO branchSessionVO = new BranchSessionVO();
+        branchSessionVO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
+        branchSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
+        branchSessionVO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
+        branchSessionVO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
+        branchSessionVO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
+        branchSessionVO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
+        branchSessionVO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
+        branchSessionVO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
+        branchSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
+        Date gmtCreateTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            branchSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Date gmtModifiedTimestamp = rs.getDate(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            branchSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
+        return branchSessionVO;
     }
 
     @Override

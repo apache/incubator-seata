@@ -163,6 +163,10 @@ public class StoreConfig {
             this.name = name;
         }
 
+        public String getName() {
+            return name;
+        }
+
         public static StoreMode get(String name) {
             for (StoreMode mode : StoreMode.values()) {
                 if (mode.getName().equalsIgnoreCase(name)) {
@@ -170,10 +174,6 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown store mode:" + name);
-        }
-
-        public String getName() {
-            return name;
         }
     }
 
@@ -197,6 +197,10 @@ public class StoreConfig {
             this.name = name;
         }
 
+        public String getName() {
+            return name;
+        }
+
         public static SessionMode get(String name) {
             for (SessionMode mode : SessionMode.values()) {
                 if (mode.getName().equalsIgnoreCase(name)) {
@@ -204,10 +208,6 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown session mode:" + name);
-        }
-
-        public String getName() {
-            return name;
         }
     }
 
@@ -231,6 +231,10 @@ public class StoreConfig {
             this.name = name;
         }
 
+        public String getName() {
+            return name;
+        }
+
         public static LockMode get(String name) {
             for (LockMode mode : LockMode.values()) {
                 if (mode.getName().equalsIgnoreCase(name)) {
@@ -238,10 +242,6 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown lock mode:" + name);
-        }
-
-        public String getName() {
-            return name;
         }
     }
 

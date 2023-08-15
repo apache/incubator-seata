@@ -61,12 +61,6 @@ public class DefaultCoreForEventBusTest {
         Thread.sleep(5000);
     }
 
-    @AfterAll
-    public static void setDown() throws InterruptedException {
-        Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
-        Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
-    }
-
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         class GlobalTransactionEventSubscriber {
@@ -93,12 +87,12 @@ public class DefaultCoreForEventBusTest {
                 }
             }
 
-            public CountDownLatch getDownLatch() {
-                return downLatch;
-            }
-
             public void setDownLatch(CountDownLatch countDownLatch) {
                 this.downLatch = countDownLatch;
+            }
+
+            public CountDownLatch getDownLatch() {
+                return downLatch;
             }
 
             public void resetDownLatch() {
@@ -161,6 +155,12 @@ public class DefaultCoreForEventBusTest {
                 EventBusManager.get().unregister(subscriber);
             }
         }
+    }
+
+    @AfterAll
+    public static void setDown() throws InterruptedException {
+        Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
+        Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
     }
 
 }

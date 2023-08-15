@@ -199,104 +199,6 @@ public class LockManagerTest {
                 .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
-    /**
-     * Branch session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> branchSessionProvider() {
-        BranchSession branchSession = new BranchSession();
-        branchSession.setTransactionId(UUIDGenerator.generateUUID());
-        branchSession.setBranchId(0L);
-        branchSession.setClientId("c1");
-        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
-        branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("t:0");
-        branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationData("{\"data\":\"test\"}");
-        branchSession.setBranchType(BranchType.AT);
-        return Stream.of(
-                Arguments.of(branchSession));
-    }
-
-    /**
-     * Branch session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static BranchSession[] baseBranchSession(String resource, String lockKey1, String lockKey2) {
-        BranchSession branchSession1 = new BranchSession();
-        branchSession1.setTransactionId(UUIDGenerator.generateUUID());
-        branchSession1.setBranchId(1L);
-        branchSession1.setClientId("c1");
-        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
-        branchSession1.setResourceId(resource);
-        branchSession1.setLockKey(lockKey1);
-        branchSession1.setBranchType(BranchType.AT);
-        branchSession1.setApplicationData("{\"data\":\"test\"}");
-        branchSession1.setBranchType(BranchType.AT);
-
-        BranchSession branchSession2 = new BranchSession();
-        branchSession2.setTransactionId(UUIDGenerator.generateUUID());
-        branchSession2.setBranchId(2L);
-        branchSession2.setClientId("c1");
-        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
-        branchSession2.setResourceId(resource);
-        branchSession2.setLockKey(lockKey2);
-        branchSession2.setBranchType(BranchType.AT);
-        branchSession2.setApplicationData("{\"data\":\"test\"}");
-        branchSession2.setBranchType(BranchType.AT);
-
-        return new BranchSession[]{branchSession1, branchSession2};
-    }
-
-    /**
-     * global sessions provider object [ ] [ ].
-     * @return the objects [ ] [ ]
-     */
-    static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {
-        final BranchSession[] branchSessions1 = baseBranchSession("department", "a:1,2", "e:1,2");
-
-        final BranchSession branchSession1 = branchSessions1[0];
-        branchSession1.setTransactionId(39721L);
-        final BranchSession branchSession2 = branchSessions1[1];
-        branchSession2.setTransactionId(89721L);
-
-        final BranchSession[] branchSessions2 = baseBranchSession("employee", "de:43,99", "df:33,66");
-        final BranchSession branchSession3 = branchSessions2[0];
-        branchSession3.setTransactionId(924823L);
-
-        final BranchSession branchSession4 = branchSessions2[1];
-        branchSession4.setTransactionId(493747292L);
-
-
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
-        globalSession1.setXid("xid1");
-        globalSession1.add(branchSession1);
-        globalSession1.add(branchSession2);
-        globalSession1.setBeginTime(dateFormat.parse("2022-1-1 03:00:00").getTime());
-
-        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
-        globalSession2.setXid("ddd1");
-        globalSession2.add(branchSession3);
-        globalSession2.add(branchSession4);
-        globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
-
-        return Stream.of(Arguments.of(globalSession1, globalSession2));
-    }
-
-    /**
-     * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> baseBranchSessionsProvider(String resource, String lockKey1, String lockKey2) {
-
-        return Stream.of(Arguments.of(baseBranchSession(resource, lockKey1, lockKey2)));
-    }
-
     @ParameterizedTest
     @MethodSource("duplicatePkBranchSessionsProvider")
     public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
@@ -444,6 +346,104 @@ public class LockManagerTest {
             sessionManager.removeGlobalSession(globalSessions2);
             sessionManager.destroy();
         }
+    }
+
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> branchSessionProvider() {
+        BranchSession branchSession = new BranchSession();
+        branchSession.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession.setBranchId(0L);
+        branchSession.setClientId("c1");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession.setResourceId("tb_1");
+        branchSession.setLockKey("t:0");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setApplicationData("{\"data\":\"test\"}");
+        branchSession.setBranchType(BranchType.AT);
+        return Stream.of(
+                Arguments.of(branchSession));
+    }
+
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static BranchSession[] baseBranchSession(String resource, String lockKey1, String lockKey2) {
+        BranchSession branchSession1 = new BranchSession();
+        branchSession1.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession1.setBranchId(1L);
+        branchSession1.setClientId("c1");
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession1.setResourceId(resource);
+        branchSession1.setLockKey(lockKey1);
+        branchSession1.setBranchType(BranchType.AT);
+        branchSession1.setApplicationData("{\"data\":\"test\"}");
+        branchSession1.setBranchType(BranchType.AT);
+
+        BranchSession branchSession2 = new BranchSession();
+        branchSession2.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession2.setBranchId(2L);
+        branchSession2.setClientId("c1");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession2.setResourceId(resource);
+        branchSession2.setLockKey(lockKey2);
+        branchSession2.setBranchType(BranchType.AT);
+        branchSession2.setApplicationData("{\"data\":\"test\"}");
+        branchSession2.setBranchType(BranchType.AT);
+
+        return new BranchSession[]{branchSession1, branchSession2};
+    }
+
+    /**
+     * global sessions provider object [ ] [ ].
+     * @return the objects [ ] [ ]
+     */
+    static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {
+        final BranchSession[] branchSessions1 = baseBranchSession("department", "a:1,2", "e:1,2");
+
+        final BranchSession branchSession1 = branchSessions1[0];
+        branchSession1.setTransactionId(39721L);
+        final BranchSession branchSession2 = branchSessions1[1];
+        branchSession2.setTransactionId(89721L);
+
+        final BranchSession[] branchSessions2 = baseBranchSession("employee", "de:43,99", "df:33,66");
+        final BranchSession branchSession3 = branchSessions2[0];
+        branchSession3.setTransactionId(924823L);
+
+        final BranchSession branchSession4 = branchSessions2[1];
+        branchSession4.setTransactionId(493747292L);
+
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
+        globalSession1.setXid("xid1");
+        globalSession1.add(branchSession1);
+        globalSession1.add(branchSession2);
+        globalSession1.setBeginTime(dateFormat.parse("2022-1-1 03:00:00").getTime());
+
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession2.setXid("ddd1");
+        globalSession2.add(branchSession3);
+        globalSession2.add(branchSession4);
+        globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(globalSession1, globalSession2));
+    }
+
+    /**
+     * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> baseBranchSessionsProvider(String resource, String lockKey1, String lockKey2) {
+
+        return Stream.of(Arguments.of(baseBranchSession(resource, lockKey1, lockKey2)));
     }
 
     /**

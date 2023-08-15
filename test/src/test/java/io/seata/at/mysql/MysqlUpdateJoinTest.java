@@ -54,6 +54,14 @@ public class MysqlUpdateJoinTest {
     private static final String mysql_password = "demo";
     private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
 
+
+    @Test
+    @Disabled
+    public void testUpdateJoin() throws Throwable {
+        doTestPhase2(false, "update t inner join t1 on t.a = t1.a set b = 3,t.c=3");
+        System.out.println("AT MODE Phase2 test for update join looks good!");
+    }
+
     private static void doPrepareData(String prepareSql) throws Throwable {
         // init DataSource: helper
         DruidDataSource helperDS = createNewDruidDataSource();
@@ -66,27 +74,6 @@ public class MysqlUpdateJoinTest {
         helperConn.close();
     }
 
-    private static DruidDataSource createNewDruidDataSource() throws Throwable {
-        DruidDataSource druidDataSource = new DruidDataSource();
-        initDruidDataSource(druidDataSource);
-        return druidDataSource;
-    }
-
-    private static void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
-        druidDataSource.setDbType(JdbcConstants.MYSQL);
-        druidDataSource.setUrl(mysql_jdbcUrl);
-        druidDataSource.setUsername(mysql_username);
-        druidDataSource.setPassword(mysql_password);
-        druidDataSource.setDriverClassName(mysql_driverClassName);
-        druidDataSource.init();
-    }
-
-    @Test
-    @Disabled
-    public void testUpdateJoin() throws Throwable {
-        doTestPhase2(false, "update t inner join t1 on t.a = t1.a set b = 3,t.c=3");
-        System.out.println("AT MODE Phase2 test for update join looks good!");
-    }
 
     private void doTestPhase2(boolean globalCommit, String updateSql) throws Throwable {
         // init DataSource: helper
@@ -160,5 +147,20 @@ public class MysqlUpdateJoinTest {
             }
         });
 
+    }
+
+    private static DruidDataSource createNewDruidDataSource() throws Throwable {
+        DruidDataSource druidDataSource = new DruidDataSource();
+        initDruidDataSource(druidDataSource);
+        return druidDataSource;
+    }
+
+    private static void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
+        druidDataSource.setDbType(JdbcConstants.MYSQL);
+        druidDataSource.setUrl(mysql_jdbcUrl);
+        druidDataSource.setUsername(mysql_username);
+        druidDataSource.setPassword(mysql_password);
+        druidDataSource.setDriverClassName(mysql_driverClassName);
+        druidDataSource.init();
     }
 }

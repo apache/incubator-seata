@@ -46,12 +46,12 @@ public class MockRedisServer {
         }));
     }
 
-    public static MockRedisServer getInstance() {
-        return Instance.mockredis;
-    }
-
     private static class Instance {
         private static final MockRedisServer mockredis = new MockRedisServer();
+    }
+
+    public static MockRedisServer getInstance() {
+        return Instance.mockredis;
     }
 
 }

@@ -86,25 +86,6 @@ public class GlobalLockVO {
         return globalLockVO;
     }
 
-    public static GlobalLockVO convert(ResultSet rs) throws SQLException {
-        GlobalLockVO globalLockVO = new GlobalLockVO();
-        globalLockVO.setRowKey(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
-        globalLockVO.setXid(rs.getString(ServerTableColumnsName.LOCK_TABLE_XID));
-        globalLockVO.setTransactionId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID));
-        globalLockVO.setBranchId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID));
-        globalLockVO.setResourceId(rs.getString(ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID));
-        globalLockVO.setTableName(rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME));
-        globalLockVO.setPk(rs.getString(ServerTableColumnsName.LOCK_TABLE_PK));
-        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE);
-        if (gmtCreateTimestamp != null) {
-            globalLockVO.setGmtCreate(gmtCreateTimestamp.getTime());
-        }
-        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED);
-        if (gmtModifiedTimestamp != null) {
-            globalLockVO.setGmtModified(gmtModifiedTimestamp.getTime());
-        }
-        return globalLockVO;
-    }
 
     public String getXid() {
         return xid;
@@ -176,6 +157,26 @@ public class GlobalLockVO {
 
     public void setGmtModified(Long gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public static GlobalLockVO convert(ResultSet rs) throws SQLException {
+        GlobalLockVO globalLockVO = new GlobalLockVO();
+        globalLockVO.setRowKey(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
+        globalLockVO.setXid(rs.getString(ServerTableColumnsName.LOCK_TABLE_XID));
+        globalLockVO.setTransactionId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID));
+        globalLockVO.setBranchId(rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID));
+        globalLockVO.setResourceId(rs.getString(ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID));
+        globalLockVO.setTableName(rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME));
+        globalLockVO.setPk(rs.getString(ServerTableColumnsName.LOCK_TABLE_PK));
+        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            globalLockVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            globalLockVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
+        return globalLockVO;
     }
 
     @Override

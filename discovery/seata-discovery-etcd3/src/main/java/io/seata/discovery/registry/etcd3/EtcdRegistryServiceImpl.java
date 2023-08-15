@@ -326,48 +326,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         return ByteSequence.from(NetUtil.toStringAddress(address), UTF_8);
     }
 
-    private static class Pair<K, V> {
-
-        /**
-         * Key of this <code>Pair</code>.
-         */
-        private K key;
-
-        /**
-         * Value of this this <code>Pair</code>.
-         */
-        private V value;
-
-        /**
-         * Creates a new pair
-         *
-         * @param key   The key for this pair
-         * @param value The value to use for this pair
-         */
-        public Pair(K key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        /**
-         * Gets the key for this pair.
-         *
-         * @return key for this pair
-         */
-        public K getKey() {
-            return key;
-        }
-
-        /**
-         * Gets the value for this pair.
-         *
-         * @return value for this pair
-         */
-        public V getValue() {
-            return value;
-        }
-    }
-
     /**
      * the type etcd life keeper
      */
@@ -453,6 +411,48 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
          */
         public void stop() {
             this.watcher.close();
+        }
+    }
+
+    private static class Pair<K, V> {
+
+        /**
+         * Key of this <code>Pair</code>.
+         */
+        private K key;
+
+        /**
+         * Value of this this <code>Pair</code>.
+         */
+        private V value;
+
+        /**
+         * Creates a new pair
+         *
+         * @param key   The key for this pair
+         * @param value The value to use for this pair
+         */
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        /**
+         * Gets the key for this pair.
+         *
+         * @return key for this pair
+         */
+        public K getKey() {
+            return key;
+        }
+
+        /**
+         * Gets the value for this pair.
+         *
+         * @return value for this pair
+         */
+        public V getValue() {
+            return value;
         }
     }
 }

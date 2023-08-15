@@ -179,6 +179,39 @@ public class ATModeSupportDataBaseDataTypeTest {
 
     }
 
+    private static class SqlClass {
+
+        private String tableName = "";
+        private String updateSql = "";
+        private String insertSql = "";
+
+        public SqlClass() {}
+
+        public String getTableName() {
+            return tableName;
+        }
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public String getUpdateSql() {
+            return updateSql;
+        }
+
+        public void setUpdateSql(String updateSql) {
+            this.updateSql = updateSql;
+        }
+
+        public String getInsertSql() {
+            return insertSql;
+        }
+
+        public void setInsertSql(String insertSql) {
+            this.insertSql = insertSql;
+        }
+    }
+
     private SqlClass dogetType(int sqlType, int type) {
         SqlClass sqlClass = new SqlClass();
         switch (sqlType) {
@@ -213,38 +246,5 @@ public class ATModeSupportDataBaseDataTypeTest {
                 throw new NotSupportYetException("not support");
         }
         return sqlClass;
-    }
-
-    private static class SqlClass {
-
-        private String tableName = "";
-        private String updateSql = "";
-        private String insertSql = "";
-
-        public SqlClass() {}
-
-        public String getTableName() {
-            return tableName;
-        }
-
-        public void setTableName(String tableName) {
-            this.tableName = tableName;
-        }
-
-        public String getUpdateSql() {
-            return updateSql;
-        }
-
-        public void setUpdateSql(String updateSql) {
-            this.updateSql = updateSql;
-        }
-
-        public String getInsertSql() {
-            return insertSql;
-        }
-
-        public void setInsertSql(String insertSql) {
-            this.insertSql = insertSql;
-        }
     }
 }

@@ -79,28 +79,6 @@ public class GlobalSessionVO {
         this.branchSessionVOs = branchSessionVOs;
     }
 
-    public static GlobalSessionVO convert(ResultSet rs) throws SQLException {
-        GlobalSessionVO globalSessionVO = new GlobalSessionVO();
-        globalSessionVO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
-        globalSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
-        globalSessionVO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
-        globalSessionVO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
-        globalSessionVO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
-        globalSessionVO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
-        globalSessionVO.setTimeout(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
-        globalSessionVO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
-        globalSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
-        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE);
-        if (gmtCreateTimestamp != null) {
-            globalSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
-        }
-        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED);
-        if (gmtModifiedTimestamp != null) {
-            globalSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
-        }
-        return globalSessionVO;
-    }
-
     public String getXid() {
         return xid;
     }
@@ -195,6 +173,28 @@ public class GlobalSessionVO {
 
     public void setBranchSessionVOs(Set<BranchSessionVO> branchSessionVOs) {
         this.branchSessionVOs = branchSessionVOs;
+    }
+
+    public static GlobalSessionVO convert(ResultSet rs) throws SQLException {
+        GlobalSessionVO globalSessionVO = new GlobalSessionVO();
+        globalSessionVO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
+        globalSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
+        globalSessionVO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
+        globalSessionVO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
+        globalSessionVO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalSessionVO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
+        globalSessionVO.setTimeout(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
+        globalSessionVO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
+        globalSessionVO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
+        Timestamp gmtCreateTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE);
+        if (gmtCreateTimestamp != null) {
+            globalSessionVO.setGmtCreate(gmtCreateTimestamp.getTime());
+        }
+        Timestamp gmtModifiedTimestamp = rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED);
+        if (gmtModifiedTimestamp != null) {
+            globalSessionVO.setGmtModified(gmtModifiedTimestamp.getTime());
+        }
+        return globalSessionVO;
     }
 
     @Override

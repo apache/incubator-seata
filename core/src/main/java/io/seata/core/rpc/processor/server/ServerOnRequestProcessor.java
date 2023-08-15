@@ -87,18 +87,21 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerOnRequestProcessor.class);
 
+    private final RemotingServer remotingServer;
+
+    private final TransactionMessageHandler transactionMessageHandler;
+
+    private ExecutorService batchResponseExecutorService;
+
+    private final ConcurrentMap<Channel, BlockingQueue<QueueItem>> basketMap = new ConcurrentHashMap<>();
+    protected final Object batchResponseLock = new Object();
+    private volatile boolean isResponding = false;
     private static final int MAX_BATCH_RESPONSE_MILLS = 1;
     private static final int MAX_BATCH_RESPONSE_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final String BATCH_RESPONSE_THREAD_PREFIX = "rpcBatchResponse";
     private static final boolean PARALLEL_REQUEST_HANDLE =
         ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_PARALLEL_REQUEST_HANDLE_KEY, true);
-    protected final Object batchResponseLock = new Object();
-    private final RemotingServer remotingServer;
-    private final TransactionMessageHandler transactionMessageHandler;
-    private final ConcurrentMap<Channel, BlockingQueue<QueueItem>> basketMap = new ConcurrentHashMap<>();
-    private ExecutorService batchResponseExecutorService;
-    private volatile boolean isResponding = false;
 
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
@@ -227,6 +230,48 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage))) {
             LOGGER.error("put message into basketMap offer failed, channel:{},rpcMessage:{},resultMessage:{}",
                 channel, rpcMessage, resultMessage);
+        }
+    }
+
+    /**
+     * batch response runnable
+     *
+     * @since 1.5.0
+     */
+    private class BatchResponseRunnable implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (batchResponseLock) {
+                    try {
+                        batchResponseLock.wait(MAX_BATCH_RESPONSE_MILLS);
+                    } catch (InterruptedException e) {
+                        LOGGER.error("BatchResponseRunnable Interrupted error", e);
+                    }
+                }
+                isResponding = true;
+                basketMap.forEach((channel, msgQueue) -> {
+                    if (msgQueue.isEmpty()) {
+                        return;
+                    }
+                    // Because the [serialization,compressor,rpcMessageId,headMap] of the response
+                    // needs to be the same as the [serialization,compressor,rpcMessageId,headMap] of the request.
+                    // Assemble by grouping according to the [serialization,compressor,rpcMessageId,headMap] dimensions.
+                    Map<ClientRequestRpcInfo, BatchResultMessage> batchResultMessageMap = new HashMap<>();
+                    while (!msgQueue.isEmpty()) {
+                        QueueItem item = msgQueue.poll();
+                        BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
+                            new ClientRequestRpcInfo(item.getRpcMessage()),
+                            key -> new BatchResultMessage());
+                        batchResultMessage.getResultMessages().add(item.getResultMessage());
+                        batchResultMessage.getMsgIds().add(item.getMsgId());
+                    }
+                    batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
+                        remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
+                            channel, batchResultMessage));
+                });
+                isResponding = false;
+            }
         }
     }
 
@@ -427,48 +472,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
         public void setRpcMessage(RpcMessage rpcMessage) {
             this.rpcMessage = rpcMessage;
-        }
-    }
-
-    /**
-     * batch response runnable
-     *
-     * @since 1.5.0
-     */
-    private class BatchResponseRunnable implements Runnable {
-        @Override
-        public void run() {
-            while (true) {
-                synchronized (batchResponseLock) {
-                    try {
-                        batchResponseLock.wait(MAX_BATCH_RESPONSE_MILLS);
-                    } catch (InterruptedException e) {
-                        LOGGER.error("BatchResponseRunnable Interrupted error", e);
-                    }
-                }
-                isResponding = true;
-                basketMap.forEach((channel, msgQueue) -> {
-                    if (msgQueue.isEmpty()) {
-                        return;
-                    }
-                    // Because the [serialization,compressor,rpcMessageId,headMap] of the response
-                    // needs to be the same as the [serialization,compressor,rpcMessageId,headMap] of the request.
-                    // Assemble by grouping according to the [serialization,compressor,rpcMessageId,headMap] dimensions.
-                    Map<ClientRequestRpcInfo, BatchResultMessage> batchResultMessageMap = new HashMap<>();
-                    while (!msgQueue.isEmpty()) {
-                        QueueItem item = msgQueue.poll();
-                        BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                            new ClientRequestRpcInfo(item.getRpcMessage()),
-                            key -> new BatchResultMessage());
-                        batchResultMessage.getResultMessages().add(item.getResultMessage());
-                        batchResultMessage.getMsgIds().add(item.getMsgId());
-                    }
-                    batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
-                        remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
-                            channel, batchResultMessage));
-                });
-                isResponding = false;
-            }
         }
     }
 

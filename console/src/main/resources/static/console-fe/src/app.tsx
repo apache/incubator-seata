@@ -59,6 +59,12 @@ class App extends React.Component<AppPropsType, AppStateType> {
     super(props);
   }
 
+  componentDidMount() {
+    console.log('this.props: ', this.props, history);
+    const language: string = getCurrentLanguage();
+    this.props.changeLanguage(language);
+  }
+
   get menu() {
     const { locale }: AppPropsType = this.props;
     const { MenuRouter = {} } = locale;
@@ -111,12 +117,6 @@ class App extends React.Component<AppPropsType, AppStateType> {
         </Switch>
       </Router>
     );
-  }
-
-  componentDidMount() {
-    console.log('this.props: ', this.props, history);
-    const language: string = getCurrentLanguage();
-    this.props.changeLanguage(language);
   }
 
   render() {

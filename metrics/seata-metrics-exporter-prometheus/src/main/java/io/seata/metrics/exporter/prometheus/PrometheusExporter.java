@@ -57,33 +57,6 @@ public class PrometheusExporter extends Collector implements Collector.Describab
         this.registry = registry;
     }
 
-    /**
-     * Compatible with high and low versions of 'io.prometheus:simpleclient'
-     *
-     * @return the unknown collector type
-     */
-    public static Type getUnknownType() {
-        Type unknownType;
-        try {
-            unknownType = Type.valueOf("UNKNOWN");
-        } catch (IllegalArgumentException e) {
-            unknownType = Type.valueOf("UNTYPED");
-        }
-        return unknownType;
-    }
-
-    private Sample convertMeasurementToSample(Measurement measurement) {
-        String prometheusName = measurement.getId().getName().replace(".", "_");
-        List<String> labelNames = new ArrayList<>();
-        List<String> labelValues = new ArrayList<>();
-        for (Entry<String, String> tag : measurement.getId().getTags()) {
-            labelNames.add(tag.getKey());
-            labelValues.add(tag.getValue());
-        }
-        return new Sample(prometheusName, labelNames, labelValues, measurement.getValue(),
-            (long)measurement.getTimestamp());
-    }
-
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> familySamples = new ArrayList<>();
@@ -98,6 +71,33 @@ public class PrometheusExporter extends Collector implements Collector.Describab
             }
         }
         return familySamples;
+    }
+
+    private Sample convertMeasurementToSample(Measurement measurement) {
+        String prometheusName = measurement.getId().getName().replace(".", "_");
+        List<String> labelNames = new ArrayList<>();
+        List<String> labelValues = new ArrayList<>();
+        for (Entry<String, String> tag : measurement.getId().getTags()) {
+            labelNames.add(tag.getKey());
+            labelValues.add(tag.getValue());
+        }
+        return new Sample(prometheusName, labelNames, labelValues, measurement.getValue(),
+            (long)measurement.getTimestamp());
+    }
+
+    /**
+     * Compatible with high and low versions of 'io.prometheus:simpleclient'
+     *
+     * @return the unknown collector type
+     */
+    public static Type getUnknownType() {
+        Type unknownType;
+        try {
+            unknownType = Type.valueOf("UNKNOWN");
+        } catch (IllegalArgumentException e) {
+            unknownType = Type.valueOf("UNTYPED");
+        }
+        return unknownType;
     }
 
     @Override

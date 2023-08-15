@@ -66,20 +66,6 @@ public class PageResult<T> extends Result<T> implements Serializable {
         this.data = data;
     }
 
-    public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG);
-        this.total = total;
-        this.pageNum = pageNum;
-        this.pageSize = pageSize;
-        this.data = data;
-
-        if (total % pageSize == 0) {
-            this.pages = total / pageSize;
-        } else {
-            this.pages = total / pageSize + 1;
-        }
-    }
-
     public static <T> PageResult<T> build(List<T> list, Integer pageNum, Integer pageSize) {
         // calculate pages
         int pages = list.size() / pageSize;
@@ -97,6 +83,20 @@ public class PageResult<T> extends Result<T> implements Serializable {
                 pageNum,
                 pageSize
         );
+    }
+
+    public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
+        super(SUCCESS_CODE, SUCCESS_MSG);
+        this.total = total;
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        this.data = data;
+
+        if (total % pageSize == 0) {
+            this.pages = total / pageSize;
+        } else {
+            this.pages = total / pageSize + 1;
+        }
     }
 
     public static <T> PageResult<T> failure(String code, String msg) {

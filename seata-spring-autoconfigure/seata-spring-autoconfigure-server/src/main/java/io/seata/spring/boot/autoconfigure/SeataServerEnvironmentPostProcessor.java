@@ -53,6 +53,16 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
 
     private static final AtomicBoolean INIT = new AtomicBoolean(false);
 
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        init();
+    }
+
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
+
     public static void init() {
         if (INIT.compareAndSet(false, true)) {
             PROPERTY_BEAN_MAP.put(SERVER_PREFIX, ServerProperties.class);
@@ -69,16 +79,6 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
             PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
         }
-    }
-
-    @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        init();
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 
 }

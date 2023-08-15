@@ -45,11 +45,6 @@ public class LoadBalancePropertiesTest {
         applicationContext = new AnnotationConfigApplicationContext(LoadBalancePropertiesTest.class);
     }
 
-    @AfterAll
-    public static void closeContext() {
-        applicationContext.close();
-    }
-
     @Bean
     LoadBalanceProperties loadBalanceProperties() {
         LoadBalanceProperties loadBalanceProperties = new LoadBalanceProperties();
@@ -66,5 +61,10 @@ public class LoadBalancePropertiesTest {
         assertEquals(30, currentConfiguration.getInt("client.loadBalance.virtualNodes"));
         System.setProperty("seata.client.loadBalance.type", "test");
         assertEquals("test", currentConfiguration.getConfig("client.loadBalance.type"));
+    }
+
+    @AfterAll
+    public static void closeContext() {
+        applicationContext.close();
     }
 }

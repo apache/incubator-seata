@@ -53,9 +53,21 @@ import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABL
 @LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class DataBaseDistributedLocker implements DistributedLocker {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseDistributedLocker.class);
+
+    private final String dbType;
+
+    private final String datasourceType;
+
+    private volatile String distributedLockTable;
+
+    private DataSource distributedLockDataSource;
+
     private static final String LOCK_WAIT_TIMEOUT_MYSQL_MESSAGE = "try restarting transaction";
+
     private static final int LOCK_WAIT_TIMEOUT_MYSQL_CODE = 1205;
+
     private static final Set<Integer> IGNORE_MYSQL_CODE = new HashSet<>();
+
     private static final Set<String> IGNORE_MYSQL_MESSAGE = new HashSet<>();
 
     static {
@@ -63,10 +75,6 @@ public class DataBaseDistributedLocker implements DistributedLocker {
         IGNORE_MYSQL_MESSAGE.add(LOCK_WAIT_TIMEOUT_MYSQL_MESSAGE);
     }
 
-    private final String dbType;
-    private final String datasourceType;
-    private volatile String distributedLockTable;
-    private DataSource distributedLockDataSource;
     /**
      * whether the distribute lock demotion
      * using for 1.5.0 only and will remove in 1.6.0

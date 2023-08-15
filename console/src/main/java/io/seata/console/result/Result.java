@@ -22,9 +22,11 @@ import java.io.Serializable;
  * @author zhongxiang.wang
  */
 public class Result<T>  implements Serializable {
+    private static final long serialVersionUID = 7761261124298767L;
+
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_MSG = "success";
-    private static final long serialVersionUID = 7761261124298767L;
+
     private String code = SUCCESS_CODE;
     private String message = SUCCESS_MSG;
 

@@ -73,11 +73,6 @@ public class RedisTransactionStoreManagerTest {
         sessionManager = redisSessionManager;
     }
 
-    @AfterAll
-    public static void close(){
-        redisTransactionStoreManager=null;
-    }
-
     @Test
     public synchronized void testBeginSortByTimeoutQuery() throws TransactionException, InterruptedException {
         GlobalSession session1 = GlobalSession.createGlobalSession("test1", "test2", "test001", 500);
@@ -276,6 +271,11 @@ public class RedisTransactionStoreManagerTest {
         redisTransactionStoreManager.setLogQueryLimit(20);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), true);
         LOGGER.info("the limit All Sessions result is:[{}]",globalSessions);
+    }
+
+    @AfterAll
+    public static void close(){
+        redisTransactionStoreManager=null;
     }
 
 }

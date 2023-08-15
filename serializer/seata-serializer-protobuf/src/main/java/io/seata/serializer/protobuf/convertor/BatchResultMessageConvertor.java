@@ -37,11 +37,6 @@ import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
  */
 public class BatchResultMessageConvertor implements PbConvertor<BatchResultMessage, BatchResultMessageProto> {
 
-    private static String getTypeNameFromTypeUrl(String typeUrl) {
-        int pos = typeUrl.lastIndexOf('/');
-        return pos == -1 ? "" : typeUrl.substring(pos + 1);
-    }
-
     @Override
     public BatchResultMessageProto convert2Proto(BatchResultMessage batchResultMessage) {
 
@@ -86,5 +81,10 @@ public class BatchResultMessageConvertor implements PbConvertor<BatchResultMessa
         });
         result.setMsgIds(batchResultMessageProto.getMsgIdsList());
         return result;
+    }
+
+    private static String getTypeNameFromTypeUrl(String typeUrl) {
+        int pos = typeUrl.lastIndexOf('/');
+        return pos == -1 ? "" : typeUrl.substring(pos + 1);
     }
 }

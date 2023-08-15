@@ -113,10 +113,6 @@ public class DataBaseSessionManagerTest {
         }
     }
 
-    @AfterAll
-    public static void setDown() throws SQLException {
-        dataSource.close();
-    }
 
     @Test
     public void test_addGlobalSession() throws TransactionException, SQLException {
@@ -150,6 +146,7 @@ public class DataBaseSessionManagerTest {
             }
         }
     }
+
 
     @Test
     public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
@@ -271,6 +268,7 @@ public class DataBaseSessionManagerTest {
         }
     }
 
+
     @Test
     public void test_addBranchSession() throws Exception {
         GlobalSession globalSession = GlobalSession.createGlobalSession("test",
@@ -314,6 +312,7 @@ public class DataBaseSessionManagerTest {
             }
         }
     }
+
 
     @Test
     public void test_updateBranchSessionStatus() throws Exception {
@@ -410,6 +409,7 @@ public class DataBaseSessionManagerTest {
             }
         }
     }
+
 
     @Test
     public void test_allSessions() throws Exception {
@@ -599,6 +599,11 @@ public class DataBaseSessionManagerTest {
                 conn.close();
             }
         }
+    }
+
+    @AfterAll
+    public static void setDown() throws SQLException {
+        dataSource.close();
     }
 
 }

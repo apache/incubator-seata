@@ -35,15 +35,16 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONME
  * @author slievrly
  */
 public class BasePropertiesTest {
+    protected static AnnotationConfigApplicationContext applicationContex;
     protected static final String STR_TEST_AAA = "aaa";
     protected static final String STR_TEST_BBB = "bbb";
     protected static final String STR_TEST_CCC = "ccc";
     protected static final String STR_TEST_DDD = "ddd";
     protected static final String STR_TEST_EEE = "eee";
     protected static final String STR_TEST_FFF = "fff";
+
     protected static final int LONG_TEST_ONE = 1;
     protected static final int LONG_TEST_TWO = 2;
-    protected static AnnotationConfigApplicationContext applicationContex;
 
     @BeforeEach
     public void setUp() throws IOException {

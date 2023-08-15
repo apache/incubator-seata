@@ -49,11 +49,6 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpExecutor.class);
 
-    @SuppressWarnings("lgtm[java/unsafe-deserialization]")
-    public static <T> Map<String, String> convertParamOfJsonString(String jsonStr, Class<T> returnType) {
-        return convertParamOfBean(JSON.parseObject(jsonStr, returnType));
-    }
-
     @Override
     public <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
         Args.notNull(returnType, "returnType");
@@ -81,30 +76,6 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
         return wrapHttpExecute(returnType, httpClient, httpPut, headers);
     }
-
-    @Override
-    public <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
-
-        Args.notNull(returnType, "returnType");
-        Args.notNull(host, "host");
-        Args.notNull(path, "path");
-
-        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
-
-        HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
-        Map<String, String> headers = new HashMap<>();
-
-        buildGetHeaders(headers, paramObject);
-        return wrapHttpExecute(returnType, httpClient, httpGet, headers);
-    }
-
-    private <T> CloseableHttpClient initHttpClientInstance(T paramObject) {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        buildClientEntity(httpClient, paramObject);
-        return httpClient;
-    }
-
-    protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
     private <T> StringEntity execute(String host, String path, T paramObject) {
         Args.notNull(host, "host");
@@ -135,21 +106,29 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         return buildEntity(entity, paramObject);
     }
 
-    protected abstract <T> void buildGetHeaders(Map<String, String> headers, T paramObject);
+    @Override
+    public <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
 
-    protected abstract String initGetUrl(String host, String path, Map<String, String> paramObject);
+        Args.notNull(returnType, "returnType");
+        Args.notNull(host, "host");
+        Args.notNull(path, "path");
 
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
 
-    protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
+        HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
+        Map<String, String> headers = new HashMap<>();
 
-    protected abstract <T> StringEntity buildEntity(StringEntity entity, T t);
-
-    protected abstract <K> K convertResult(HttpResponse response, Class<K> clazz);
-
-
-    public static Map<String, String> convertParamOfBean(Object sourceParam) {
-        return CollectionUtils.toStringMap(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
+        buildGetHeaders(headers, paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpGet, headers);
     }
+
+    private <T> CloseableHttpClient initHttpClientInstance(T paramObject) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        buildClientEntity(httpClient, paramObject);
+        return httpClient;
+    }
+
+    protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
     private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
                                   Map<String, String> headers) throws IOException {
@@ -171,5 +150,26 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         }
 
         return convertResult(response, returnType);
+    }
+
+    protected abstract <T> void buildGetHeaders(Map<String, String> headers, T paramObject);
+
+    protected abstract String initGetUrl(String host, String path, Map<String, String> paramObject);
+
+
+    protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
+
+    protected abstract <T> StringEntity buildEntity(StringEntity entity, T t);
+
+    protected abstract <K> K convertResult(HttpResponse response, Class<K> clazz);
+
+
+    public static Map<String, String> convertParamOfBean(Object sourceParam) {
+        return CollectionUtils.toStringMap(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
+    }
+
+    @SuppressWarnings("lgtm[java/unsafe-deserialization]")
+    public static <T> Map<String, String> convertParamOfJsonString(String jsonStr, Class<T> returnType) {
+        return convertParamOfBean(JSON.parseObject(jsonStr, returnType));
     }
 }

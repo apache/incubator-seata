@@ -22,13 +22,16 @@ package io.seata.common.aot;
  */
 public class NativeUtils {
 
-    public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
     /**
      * The native-image code
      *
      * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo.java</a>
      */
     private static final String NATIVE_IMAGE_CODE = System.getProperty("org.graalvm.nativeimage.imagecode");
+
+
+    public static final String SPRING_AOT_PROCESSING = "spring.aot.processing";
+
 
     /**
      * Whether Spring-AOT processing

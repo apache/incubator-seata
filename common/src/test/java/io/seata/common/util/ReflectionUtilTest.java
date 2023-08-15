@@ -154,9 +154,6 @@ public class ReflectionUtilTest {
 
     //region the test class and interface
 
-    interface TestInterface {
-    }
-
     class EmptyClass {
     }
 
@@ -183,6 +180,9 @@ public class ReflectionUtilTest {
         public void setF2(String f2) {
             this.f2 = f2;
         }
+    }
+
+    interface TestInterface {
     }
 
     //endregion

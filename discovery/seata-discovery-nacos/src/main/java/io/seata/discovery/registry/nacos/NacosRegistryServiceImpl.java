@@ -78,9 +78,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
-    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
-    private static final Object LOCK_OBJ = new Object();
     private static volatile NamingMaintainService namingMaintain;
+    private static final Object LOCK_OBJ = new Object();
+    private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
     private static volatile Boolean useSLBWay;
 
     private NacosRegistryServiceImpl() {
@@ -142,141 +142,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         getNamingInstance().unsubscribe(getServiceName(), getServiceGroup(), clusters, listener);
     }
 
-    public static NamingMaintainService getNamingMaintainInstance() throws Exception {
-        if (namingMaintain == null) {
-            synchronized (NacosRegistryServiceImpl.class) {
-                if (namingMaintain == null) {
-                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
-                }
-            }
-        }
-        return namingMaintain;
-    }
-
-    @Override
-    public void close() throws Exception {
-
-    }
-
-    /**
-     * Gets naming instance.
-     *
-     * @return the naming instance
-     * @throws Exception the exception
-     */
-    public static NamingService getNamingInstance() throws Exception {
-        if (naming == null) {
-            synchronized (NacosRegistryServiceImpl.class) {
-                if (naming == null) {
-                    naming = NacosFactory.createNamingService(getNamingProperties());
-                }
-            }
-        }
-        return naming;
-    }
-
-    private static Properties getNamingProperties() {
-        Properties properties = new Properties();
-        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
-        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
-        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
-            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
-        } else {
-            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
-            if (address != null) {
-                properties.setProperty(PRO_SERVER_ADDR_KEY, address);
-            }
-        }
-        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
-            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
-        } else {
-            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
-            if (namespace == null) {
-                namespace = DEFAULT_NAMESPACE;
-            }
-            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
-        }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
-        if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
-            if (StringUtils.isNotBlank(password)) {
-                properties.setProperty(USER_NAME, userName);
-                properties.setProperty(PASSWORD, password);
-            }
-        } else {
-            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
-            if (StringUtils.isNotBlank(accessKey)) {
-                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
-                if (StringUtils.isNotBlank(secretKey)) {
-                    properties.put(ACCESS_KEY, accessKey);
-                    properties.put(SECRET_KEY, secretKey);
-                    LOGGER.info("Nacos check auth with ak/sk.");
-                }
-            }
-        }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
-        if (StringUtils.isNotBlank(contextPath)) {
-            properties.setProperty(CONTEXT_PATH, contextPath);
-        }
-        return properties;
-    }
-
-    public static String getNacosAccessKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, ACCESS_KEY);
-    }
-
-    private static String getClusterName() {
-        return FILE_CONFIG.getConfig(getNacosClusterFileKey(), DEFAULT_CLUSTER);
-    }
-
-    private static String getServiceName() {
-        return FILE_CONFIG.getConfig(getNacosApplicationFileKey(), DEFAULT_APPLICATION);
-    }
-
-    private static String getServiceGroup() {
-        return FILE_CONFIG.getConfig(getNacosApplicationGroupKey(), DEFAULT_GROUP);
-    }
-
-    private static String getNacosAddrFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
-    }
-
-    private static String getNacosNameSpaceFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_NAMESPACE_KEY);
-    }
-
-    private static String getNacosClusterFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
-    }
-
-    private static String getNacosApplicationFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_APPLICATION_KEY);
-    }
-
-    private static String getNacosApplicationGroupKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_GROUP_KEY);
-    }
-
-    private static String getNacosUserName() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, USER_NAME);
-    }
-
-    private static String getNacosPassword() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PASSWORD);
-    }
-
-    public static String getNacosSecretKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
-    }
-
-    private static String getNacosUrlPatternOfSLB() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
-    }
-
-    private static String getNacosContextPathKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, CONTEXT_PATH);
-    }
-
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
@@ -332,6 +197,141 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             }
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
+    }
+
+    @Override
+    public void close() throws Exception {
+
+    }
+
+    /**
+     * Gets naming instance.
+     *
+     * @return the naming instance
+     * @throws Exception the exception
+     */
+    public static NamingService getNamingInstance() throws Exception {
+        if (naming == null) {
+            synchronized (NacosRegistryServiceImpl.class) {
+                if (naming == null) {
+                    naming = NacosFactory.createNamingService(getNamingProperties());
+                }
+            }
+        }
+        return naming;
+    }
+
+    public static NamingMaintainService getNamingMaintainInstance() throws Exception {
+        if (namingMaintain == null) {
+            synchronized (NacosRegistryServiceImpl.class) {
+                if (namingMaintain == null) {
+                    namingMaintain = NacosFactory.createMaintainService(getNamingProperties());
+                }
+            }
+        }
+        return namingMaintain;
+    }
+
+    private static Properties getNamingProperties() {
+        Properties properties = new Properties();
+        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
+        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
+        } else {
+            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
+            if (address != null) {
+                properties.setProperty(PRO_SERVER_ADDR_KEY, address);
+            }
+        }
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            if (namespace == null) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+            }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    properties.put(ACCESS_KEY, accessKey);
+                    properties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                }
+            }
+        }
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        if (StringUtils.isNotBlank(contextPath)) {
+            properties.setProperty(CONTEXT_PATH, contextPath);
+        }
+        return properties;
+    }
+
+    private static String getClusterName() {
+        return FILE_CONFIG.getConfig(getNacosClusterFileKey(), DEFAULT_CLUSTER);
+    }
+
+    private static String getServiceName() {
+        return FILE_CONFIG.getConfig(getNacosApplicationFileKey(), DEFAULT_APPLICATION);
+    }
+
+    private static String getServiceGroup() {
+        return FILE_CONFIG.getConfig(getNacosApplicationGroupKey(), DEFAULT_GROUP);
+    }
+
+    private static String getNacosAddrFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
+    }
+
+    private static String getNacosNameSpaceFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_NAMESPACE_KEY);
+    }
+
+    private static String getNacosClusterFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+    }
+
+    private static String getNacosApplicationFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_APPLICATION_KEY);
+    }
+
+    private static String getNacosApplicationGroupKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_GROUP_KEY);
+    }
+
+    private static String getNacosUserName() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, USER_NAME);
+    }
+
+    private static String getNacosPassword() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PASSWORD);
+    }
+
+    public static String getNacosAccessKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, ACCESS_KEY);
+    }
+
+    public static String getNacosSecretKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
+    }
+
+    private static String getNacosUrlPatternOfSLB() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SLB_PATTERN);
+    }
+
+    private static String getNacosContextPathKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, CONTEXT_PATH);
     }
 
 }

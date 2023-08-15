@@ -38,11 +38,8 @@ import io.seata.common.exception.ShouldNeverHappenException;
  */
 public class StringUtils {
 
-    /**
-     * Space string
-     */
-    public static final String SPACE = " ";
     private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
+    private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
 
     private StringUtils() {
     }
@@ -51,7 +48,11 @@ public class StringUtils {
      * empty string
      */
     public static final String EMPTY = "";
-    private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
+
+    /**
+     * Space string
+     */
+    public static final String SPACE = " ";
 
     /**
      * Is empty boolean.

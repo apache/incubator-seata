@@ -63,10 +63,12 @@ public class FileSessionManagerTest {
 
 
     private static volatile List<SessionManager> sessionManagerList;
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-            DEFAULT_SESSION_STORE_FILE_DIR);
+
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
+
+    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+            DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
@@ -231,95 +233,6 @@ public class FileSessionManagerTest {
                 sessionManager.removeGlobalSession(globalSession);
             }
         }
-    }
-
-    /**
-     * Global session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> globalSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
-
-        String xid = XID.generateXID(globalSession.getTransactionId());
-        globalSession.setXid(xid);
-
-        return Stream.of(
-                Arguments.of(globalSession)
-        );
-    }
-
-    /**
-     * Global sessions provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> globalSessionsProvider() {
-        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
-        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
-        return Stream.of(
-                Arguments.of(Arrays.asList(globalSession1, globalSession2))
-        );
-    }
-
-    /**
-     * Global sessions provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> globalSessionsWithPageResultProvider() throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 60000);
-        globalSession1.setBeginTime(dateFormat.parse("2220-1-1 08:02:00").getTime());
-
-        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 60000);
-        globalSession2.setBeginTime(dateFormat.parse("2220-1-1 08:04:00").getTime());
-
-        GlobalSession globalSession3 = new GlobalSession("with-branchSession-app", DEFAULT_TX_GROUP, "test3", 60000);
-        globalSession3.setBeginTime(dateFormat.parse("2220-1-1 08:20:00").getTime());
-        globalSession3.setStatus(GlobalStatus.CommitFailed);
-
-
-        final BranchSession branchSession = new BranchSession();
-        branchSession.setApplicationData("applicationData");
-        branchSession.setResourceGroupId("applicationData");
-        branchSession.setClientId("clientId");
-        branchSession.setResourceId("resourceId");
-        branchSession.setLockKey("lockKey");
-        branchSession.setBranchType(BranchType.AT);
-        branchSession.setStatus(BranchStatus.Registered);
-        branchSession.setTransactionId(11L);
-        branchSession.setBranchId(22L);
-        branchSession.setXid("xid");
-        branchSession.setLockStatus(LockStatus.Locked);
-        globalSession3.add(branchSession);
-
-
-        return Stream.of(
-                Arguments.of(Arrays.asList(globalSession1, globalSession2, globalSession3))
-        );
-    }
-
-    /**
-     * Branch session provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> branchSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
-        globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
-        BranchSession branchSession = new BranchSession();
-        branchSession.setTransactionId(globalSession.getTransactionId());
-        branchSession.setBranchId(1L);
-        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
-        branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("t_1");
-        branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationData("{\"data\":\"test\"}");
-        return Stream.of(
-                Arguments.of(globalSession, branchSession)
-        );
     }
 
     /**
@@ -582,6 +495,95 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onSuccessEnd(globalSession);
         }
+    }
+
+    /**
+     * Global session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> globalSessionProvider() {
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
+        return Stream.of(
+                Arguments.of(globalSession)
+        );
+    }
+
+    /**
+     * Global sessions provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> globalSessionsProvider() {
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        return Stream.of(
+                Arguments.of(Arrays.asList(globalSession1, globalSession2))
+        );
+    }
+
+    /**
+     * Global sessions provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> globalSessionsWithPageResultProvider() throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 60000);
+        globalSession1.setBeginTime(dateFormat.parse("2220-1-1 08:02:00").getTime());
+
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 60000);
+        globalSession2.setBeginTime(dateFormat.parse("2220-1-1 08:04:00").getTime());
+
+        GlobalSession globalSession3 = new GlobalSession("with-branchSession-app", DEFAULT_TX_GROUP, "test3", 60000);
+        globalSession3.setBeginTime(dateFormat.parse("2220-1-1 08:20:00").getTime());
+        globalSession3.setStatus(GlobalStatus.CommitFailed);
+
+
+        final BranchSession branchSession = new BranchSession();
+        branchSession.setApplicationData("applicationData");
+        branchSession.setResourceGroupId("applicationData");
+        branchSession.setClientId("clientId");
+        branchSession.setResourceId("resourceId");
+        branchSession.setLockKey("lockKey");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setStatus(BranchStatus.Registered);
+        branchSession.setTransactionId(11L);
+        branchSession.setBranchId(22L);
+        branchSession.setXid("xid");
+        branchSession.setLockStatus(LockStatus.Locked);
+        globalSession3.add(branchSession);
+
+
+        return Stream.of(
+                Arguments.of(Arrays.asList(globalSession1, globalSession2, globalSession3))
+        );
+    }
+
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> branchSessionProvider() {
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
+        BranchSession branchSession = new BranchSession();
+        branchSession.setTransactionId(globalSession.getTransactionId());
+        branchSession.setBranchId(1L);
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession.setResourceId("tb_1");
+        branchSession.setLockKey("t_1");
+        branchSession.setBranchType(BranchType.AT);
+        branchSession.setApplicationData("{\"data\":\"test\"}");
+        return Stream.of(
+                Arguments.of(globalSession, branchSession)
+        );
     }
 
 }

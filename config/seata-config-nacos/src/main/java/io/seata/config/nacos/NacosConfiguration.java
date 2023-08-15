@@ -102,54 +102,18 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
-    private static Properties getConfigProperties() {
-        Properties properties = new Properties();
-        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
-        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
-        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
-            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
-        } else {
-            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
-            if (address != null) {
-                properties.setProperty(PRO_SERVER_ADDR_KEY, address);
+    @Override
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value = seataConfig.getProperty(dataId);
+        if (null == value) {
+            try {
+                value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
+            } catch (NacosException exx) {
+                LOGGER.error(exx.getErrMsg());
             }
         }
 
-        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
-            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
-        } else {
-            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
-            if (namespace == null) {
-                namespace = DEFAULT_NAMESPACE;
-            }
-            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
-        }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
-        if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
-            if (StringUtils.isNotBlank(password)) {
-                properties.setProperty(USER_NAME, userName);
-                properties.setProperty(PASSWORD, password);
-                LOGGER.info("Nacos check auth with userName/password.");
-            }
-        } else {
-            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
-                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
-            if (StringUtils.isNotBlank(accessKey)) {
-                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
-                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
-                if (StringUtils.isNotBlank(secretKey)) {
-                    properties.put(ACCESS_KEY, accessKey);
-                    properties.put(SECRET_KEY, secretKey);
-                    LOGGER.info("Nacos check auth with ak/sk.");
-                }
-            }
-        }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
-        if (StringUtils.isNotBlank(contextPath)) {
-            properties.setProperty(CONTEXT_PATH, contextPath);
-        }
-        return properties;
+        return value == null ? defaultValue : value;
     }
 
     @Override
@@ -238,6 +202,56 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
+    private static Properties getConfigProperties() {
+        Properties properties = new Properties();
+        properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
+        properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
+        if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
+            properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
+        } else {
+            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
+            if (address != null) {
+                properties.setProperty(PRO_SERVER_ADDR_KEY, address);
+            }
+        }
+
+        if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            if (namespace == null) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                properties.setProperty(USER_NAME, userName);
+                properties.setProperty(PASSWORD, password);
+                LOGGER.info("Nacos check auth with userName/password.");
+            }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
+                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
+                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    properties.put(ACCESS_KEY, accessKey);
+                    properties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                }
+            }
+        }
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        if (StringUtils.isNotBlank(contextPath)) {
+            properties.setProperty(CONTEXT_PATH, contextPath);
+        }
+        return properties;
+    }
+
     public static String getNacosNameSpaceFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
     }
@@ -272,10 +286,6 @@ public class NacosConfiguration extends AbstractConfiguration {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
     }
 
-    private static String getNacosDataType() {
-        return ConfigProcessor.resolverConfigDataType(getNacosDataId());
-    }
-
     private static String getNacosGroup() {
         return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
@@ -284,8 +294,8 @@ public class NacosConfiguration extends AbstractConfiguration {
         return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
     }
 
-    private static String getNacosContextPathKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
+    private static String getNacosDataType() {
+        return ConfigProcessor.resolverConfigDataType(getNacosDataId());
     }
 
     private static String getSeataConfigStr() {
@@ -301,6 +311,10 @@ public class NacosConfiguration extends AbstractConfiguration {
         return sb.toString();
     }
 
+    private static String getNacosContextPathKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
+    }
+
     private static void initSeataConfig() {
         try {
             String nacosDataId = getNacosDataId();
@@ -314,20 +328,6 @@ public class NacosConfiguration extends AbstractConfiguration {
         } catch (NacosException | IOException e) {
             LOGGER.error("init config properties error", e);
         }
-    }
-
-    @Override
-    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value = seataConfig.getProperty(dataId);
-        if (null == value) {
-            try {
-                value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
-            } catch (NacosException exx) {
-                LOGGER.error(exx.getErrMsg());
-            }
-        }
-
-        return value == null ? defaultValue : value;
     }
 
 
