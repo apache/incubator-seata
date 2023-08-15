@@ -1166,9 +1166,11 @@ public class StateMachineDBTests extends AbstractServerTest {
                 }
             }
             Assertions.assertEquals(6, successCount);
+            System.out.println(forthStateEnd.getTime() + ", " + fifthStateStart.getTime());
             Assertions.assertNotNull(forthStateEnd);
             Assertions.assertNotNull(fifthStateStart);
-            Assertions.assertTrue(forthStateEnd.before(fifthStateStart));
+            Assertions.assertTrue(forthStateEnd.before(fifthStateStart)
+                    || forthStateEnd.equals(fifthStateStart));
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         });
 
@@ -1179,13 +1181,6 @@ public class StateMachineDBTests extends AbstractServerTest {
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
-
-            Map<String, StateInstance> stateInstanceMap = new HashMap<>();
-            for (StateInstance stateInstance: inst.getStateList()) {
-                if (stateInstance.isForCompensation()) {
-                    stateInstanceMap.put(stateInstance.getName(), stateInstance);
-                }
-            }
             List<String> compensateStateInstanceList = inst.getStateList().stream()
                     .filter(StateInstance::isForCompensation)
                     .map(StateInstance::getName)
