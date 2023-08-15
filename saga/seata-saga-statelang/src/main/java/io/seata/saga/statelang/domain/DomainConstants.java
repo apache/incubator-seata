@@ -78,10 +78,6 @@ public interface DomainConstants {
     // region of loop
     String LOOP_COUNTER = "loopCounter";
     String LOOP_SEMAPHORE = "loopSemaphore";
-    String LOOP_RESULT = "loopResult";
-    String NUMBER_OF_INSTANCES = "nrOfInstances";
-    String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
-    String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
     // endregion
 
     // region of parallel

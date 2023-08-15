@@ -143,6 +143,13 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         loop.setCollection((String)loopMap.get("Collection"));
         loop.setElementVariableName((String)loopMap.getOrDefault("ElementVariableName", "loopElement"));
         loop.setElementIndexName((String)loopMap.getOrDefault("ElementIndexName", "loopCounter"));
+        loop.setResultName((String) loopMap.getOrDefault("ResultName", "loopResult"));
+        loop.setNumberOfInstancesName((String) loopMap.getOrDefault("NumberOfInstancesName",
+                "nrOfInstances"));
+        loop.setNumberOfActiveInstancesName((String) loopMap.getOrDefault("NumberOfActiveInstancesName",
+                "nrOfActiveInstances"));
+        loop.setNumberOfCompletedInstancesName((String) loopMap.getOrDefault("NumberOfCompletedInstancesName",
+                "nrOfCompletedInstances"));
         loop.setCompletionCondition(
             (String)loopMap.getOrDefault("CompletionCondition", "[nrOfInstances] == [nrOfCompletedInstances]"));
         return loop;

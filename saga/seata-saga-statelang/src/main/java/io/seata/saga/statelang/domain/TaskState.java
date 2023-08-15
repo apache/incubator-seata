@@ -220,5 +220,33 @@ public interface TaskState extends State {
          * @return the completion condition
          */
         String getCompletionCondition();
+
+        /**
+         * get the name of loop result, default loopResult
+         *
+         * @return the result name
+         */
+        String getResultName();
+
+        /**
+         * get the name of number of instances, default nrOfInstances
+         *
+         * @return the number of instances name
+         */
+        String getNumberOfInstancesName();
+
+        /**
+         * get the name of number of active instances, default nrOfActiveInstances
+         *
+         * @return the number of active instances name
+         */
+        String getNumberOfActiveInstancesName();
+
+        /**
+         * get the name of number of completed instances, default nrOfCompletedInstances
+         *
+         * @return the number of completed instances name
+         */
+        String getNumberOfCompletedInstancesName();
     }
 }

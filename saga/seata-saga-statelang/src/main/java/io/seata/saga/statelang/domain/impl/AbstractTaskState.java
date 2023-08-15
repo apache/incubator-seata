@@ -262,7 +262,11 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         private String collection;
         private String elementVariableName;
         private String elementIndexName;
+        private String resultName;
         private String completionCondition;
+        private String numberOfInstancesName;
+        private String numberOfActiveInstancesName;
+        private String numberOfCompletedInstancesName;
 
         @Override
         public int getParallel() {
@@ -298,6 +302,42 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
         public void setElementIndexName(String elementIndexName) {
             this.elementIndexName = elementIndexName;
+        }
+
+        @Override
+        public String getResultName() {
+            return resultName;
+        }
+
+        public void setResultName(String resultName) {
+            this.resultName = resultName;
+        }
+
+        @Override
+        public String getNumberOfInstancesName() {
+            return numberOfInstancesName;
+        }
+
+        public void setNumberOfInstancesName(String numberOfInstancesName) {
+            this.numberOfInstancesName = numberOfInstancesName;
+        }
+
+        @Override
+        public String getNumberOfActiveInstancesName() {
+            return numberOfActiveInstancesName;
+        }
+
+        public void setNumberOfActiveInstancesName(String numberOfActiveInstancesName) {
+            this.numberOfActiveInstancesName = numberOfActiveInstancesName;
+        }
+
+        @Override
+        public String getNumberOfCompletedInstancesName() {
+            return numberOfCompletedInstancesName;
+        }
+
+        public void setNumberOfCompletedInstancesName(String numberOfCompletedInstancesName) {
+            this.numberOfCompletedInstancesName = numberOfCompletedInstancesName;
         }
 
         @Override
