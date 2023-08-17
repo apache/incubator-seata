@@ -55,8 +55,8 @@ public class TransactionContextProviderFilter extends Filter {
         }
         boolean bind = false;
         if (xid != null) {
-            RpcInternalContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcInternalContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
+            RpcInternalContext.getContext().setAttachment(RootContext.HIDDEN_KEY_XID, xid);
+            RpcInternalContext.getContext().setAttachment(RootContext.HIDDEN_KEY_BRANCH_TYPE, branchType.name());
         } else {
             if (null != rpcXid) {
                 RootContext.bind(rpcXid);
@@ -72,6 +72,10 @@ public class TransactionContextProviderFilter extends Filter {
         try {
             return filterInvoker.invoke(sofaRequest);
         } finally {
+            if (xid != null) {
+                RpcInternalContext.getContext().removeAttachment(RootContext.HIDDEN_KEY_XID);
+                RpcInternalContext.getContext().removeAttachment(RootContext.HIDDEN_KEY_BRANCH_TYPE);
+            }
             if (bind) {
                 String unbindXid = RootContext.unbind();
                 if (LOGGER.isDebugEnabled()) {

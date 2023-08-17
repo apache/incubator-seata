@@ -160,7 +160,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("type"));
                     index.setOrdinalPosition(rsIndex.getShort("ordinal_position"));
                     index.setAscOrDesc(rsIndex.getString("asc_or_desc"));
-                    index.setCardinality(rsIndex.getInt("cardinality"));
+                    index.setCardinality(rsIndex.getLong("cardinality"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);
