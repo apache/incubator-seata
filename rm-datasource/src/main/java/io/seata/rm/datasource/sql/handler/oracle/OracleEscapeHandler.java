@@ -15,16 +15,16 @@
  */
 package io.seata.rm.datasource.sql.handler.oracle;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
-
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The type oracle sql keyword checker.
@@ -509,10 +509,6 @@ public class OracleEscapeHandler implements EscapeHandler {
             return false;
         }
         columnName = columnName.trim();
-
-        if (columnName.contains(DOT)) {
-            columnName = columnName.substring(columnName.lastIndexOf(DOT) + 1);
-        }
 
         if (containsEscape(columnName)) {
             return false;
