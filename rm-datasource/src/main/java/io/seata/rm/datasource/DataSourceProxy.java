@@ -249,6 +249,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initDMResourceId() {
+        LOGGER.warn("support for the dameng database is currently an experimental feature ");
         if (jdbcUrl.contains("?")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
             jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
