@@ -15,7 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.serializer.seata.protocol.v1.SeataV1Serializer;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public class GlobalCommitRequestCodecTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataV1Serializer seataSerializer = new SeataV1Serializer();
 
     /**
      * Test codec.

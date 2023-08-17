@@ -13,46 +13,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.loader;
+package io.seata.core.rpc.netty.v0;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import io.netty.buffer.ByteBuf;
 
 /**
- * The interface Load level.
+ * The interface Message codec.
  *
- * @author slievrly
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-public @interface LoadLevel {
+public interface MessageCodecV0 {
     /**
-     * Name string.
+     * Gets type code.
      *
-     * @return the string
+     * @return the type code
      */
-    String name();
+    short getTypeCode();
 
     /**
-     * Order int.
+     * Encode byte [ ].
      *
-     * @return the int
+     * @return the byte [ ]
      */
-    int order() default 0;
+    byte[] encode();
 
     /**
-     * version int.
+     * Decode boolean.
      *
-     * @return the int
+     * @param in the in
+     * @return the boolean
      */
-    byte version() default -1;
-
-    /**
-     * Scope enum.
-     */
-    Scope scope() default Scope.SINGLETON;
+    boolean decode(ByteBuf in);
 }

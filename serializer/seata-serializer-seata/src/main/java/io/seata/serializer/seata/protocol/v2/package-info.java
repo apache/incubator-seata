@@ -1,1 +1,0 @@
-package io.seata.serializer.seata.protocol.v2;

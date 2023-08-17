@@ -15,22 +15,18 @@
  */
 package io.seata.core.rpc.netty;
 
+import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.seata.core.compressor.Compressor;
-import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.exception.DecodeException;
-import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.old.ProtocolOldDecoder;
+import io.seata.core.rpc.netty.v0.ProtocolV0Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
-import io.seata.core.serializer.Serializer;
-import io.seata.core.serializer.SerializerServiceLoader;
-import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * <pre>
@@ -62,10 +58,15 @@ import org.slf4j.LoggerFactory;
 public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompatibleProtocolDecoder.class);
+    private static Map<Byte, ProtocolDecoder> protocolDecoderMap;
 
     public CompatibleProtocolDecoder() {
         // default is 8M
         this(ProtocolConstants.MAX_FRAME_LENGTH);
+        protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
+                .put(ProtocolConstants.VERSION_0, new ProtocolV0Decoder())
+                .put(ProtocolConstants.VERSION_1, new ProtocolV1Decoder())
+                .build();
     }
 
     public CompatibleProtocolDecoder(int maxFrameLength) {
@@ -85,18 +86,15 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         try {
             decoded = super.decode(ctx, in);
             if (decoded instanceof ByteBuf) {
-                ByteBuf frame = (ByteBuf)decoded;
+                ByteBuf frame = (ByteBuf) decoded;
                 try {
                     byte version = decideVersion(frame);
-                    if(version == ProtocolConstants.OLD_VERSION){
-                        return ProtocolOldDecoder.decodeFrame(frame);
-                    }else if(version == ProtocolConstants.VERSION){
-                        // todo spi?
-                        return ProtocolV1Decoder.decodeFrame(frame);
-                    }else {
-                        throw new IllegalArgumentException("Unknown version: " + version );
+                    ProtocolDecoder decoder = protocolDecoderMap.get(version);
+                    if (decoder == null) {
+                        // todo 要不要适配当前版本？
+                        throw new IllegalArgumentException("Unknown version: " + version);
                     }
-
+                    return decoder.decodeFrame(frame);
                 } finally {
                     frame.release();
                 }
@@ -123,22 +121,4 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
     }
 
 
-    public static Object getBody(ByteBuf frame, byte messageType, byte compressorType, byte codecType, int bodyLength) {
-        Object body = null;
-        if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
-            body = HeartbeatMessage.PING;
-        } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
-            body = HeartbeatMessage.PONG;
-        } else {
-            if (bodyLength > 0) {
-                byte[] bs = new byte[bodyLength];
-                frame.readBytes(bs);
-                Compressor compressor = CompressorFactory.getCompressor(compressorType);
-                bs = compressor.decompress(bs);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType));
-                body = serializer.deserialize(bs);
-            }
-        }
-        return body;
-    }
 }

@@ -15,7 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
-import io.seata.serializer.seata.SeataSerializer;
+import io.seata.serializer.seata.protocol.v1.SeataV1Serializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
@@ -33,7 +33,7 @@ public class BranchRegisterResponseSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataV1Serializer seataSerializer = new SeataV1Serializer();
 
     /**
      * Test codec.

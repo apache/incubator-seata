@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty.old;
+package io.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -45,15 +45,15 @@ import org.slf4j.LoggerFactory;
  * <li>requestid: request id</li>
  * </p>
  *
- * @author minghua.xie
- * @see ProtocolOldDecoder
+ * @author Bughue
+ * @see ProtocolV0Decoder
  * @since 2.0.0
  */
-public class ProtocolOldEncoder  {
+public class ProtocolV0Encoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolOldEncoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV0Encoder.class);
 
-    public static void encode(ChannelHandlerContext ctx, RpcMessage rpcMessage, ByteBuf out) {
+    public static void encode(ChannelHandlerContext ctx, ProtocolV0RpcMessage rpcMessage, ByteBuf out) {
         try {
             // todo 按照旧协议方式encode
         } catch (Throwable e) {

@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -86,6 +87,11 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
+    }
+
+
+    public static <S> S load(Class<S> service, String activateName,int version) throws EnhancedServiceNotFoundException {
+        return InnerEnhancedServiceLoader.getServiceLoader(service).loadExtension(activateName, findClassLoader(), null, null, version);
     }
 
     /**
@@ -407,13 +413,13 @@ public class EnhancedServiceLoader {
 
         @SuppressWarnings("rawtypes")
         private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
-                                Object[] args) {
+                                Object[] args, int version) {
             if (StringUtils.isEmpty(activateName)) {
                 throw new IllegalArgumentException("the name of service provider for [" + type.getName() + "] name is null");
             }
             try {
                 loadAllExtensionClass(loader);
-                ExtensionDefinition<S> cachedExtensionDefinition = getCachedExtensionDefinition(activateName);
+                ExtensionDefinition<S> cachedExtensionDefinition = getCachedExtensionDefinition(activateName, version);
                 return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
@@ -424,6 +430,13 @@ public class EnhancedServiceLoader {
                                     .getFullStackTrace(e));
                 }
             }
+        }
+
+
+        @SuppressWarnings("rawtypes")
+        private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
+                                Object[] args) {
+            return loadExtension(activateName,loader,argTypes,args, -1);
         }
 
         private S getExtensionInstance(ExtensionDefinition<S> definition, ClassLoader loader, Class<?>[] argTypes,
@@ -615,8 +628,14 @@ public class EnhancedServiceLoader {
             return CollectionUtils.getLast(currentDefinitions);
         }
 
-        private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName) {
+        private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName, int version) {
             List<ExtensionDefinition<S>> definitions = nameToDefinitionsMap.get(activateName);
+            if (version < 0) {
+                Optional<ExtensionDefinition<S>> first = definitions.stream().filter(d -> d.getVersion() == version).findFirst();
+                if (first.isPresent()) {
+                    return first.get();
+                }
+            }
             return CollectionUtils.getLast(definitions);
         }
 

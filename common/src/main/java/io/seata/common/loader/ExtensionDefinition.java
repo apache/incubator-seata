@@ -28,10 +28,14 @@ final class ExtensionDefinition<S> {
     private final String name;
     private final Class<S> serviceClass;
     private final Integer order;
+    private final Integer version;
     private final Scope scope;
 
     public Integer getOrder() {
         return this.order;
+    }
+    public Integer getVersion() {
+        return this.version;
     }
 
     public Class<S> getServiceClass() {
@@ -43,12 +47,16 @@ final class ExtensionDefinition<S> {
     }
 
     public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz) {
+        this(name,order,scope,clazz,0);
+    }
+
+    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz,int version) {
         this.name = name;
         this.order = order;
+        this.version = version;
         this.scope = scope;
         this.serviceClass = clazz;
     }
-
     @Override
     public int hashCode() {
         final int prime = 31;

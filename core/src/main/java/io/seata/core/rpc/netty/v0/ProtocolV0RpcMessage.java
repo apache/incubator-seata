@@ -1,0 +1,179 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.core.rpc.netty.v0;
+
+import io.seata.common.util.StringUtils;
+import io.seata.core.compressor.CompressorType;
+import io.seata.core.protocol.ProtocolConstants;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.ProtocolRpcMessage;
+import io.seata.core.serializer.SerializerType;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * ?
+ *
+ * @author minghua.xie
+ * @date 2023/8/1
+ **/
+public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
+
+    private static AtomicLong NEXT_ID = new AtomicLong(0);
+
+    /**
+     * Gets next message id.
+     *
+     * @return the next message id
+     */
+    public static long getNextMessageId() {
+        return NEXT_ID.incrementAndGet();
+    }
+
+    private long id;
+    private boolean isAsync;
+    private boolean isRequest;
+    private boolean isHeartbeat;
+    private Object body;
+
+    private boolean isSeataCodec;
+
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    /**
+     * Is async boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isAsync() {
+        return isAsync;
+    }
+
+    /**
+     * Sets async.
+     *
+     * @param async the async
+     */
+    public void setAsync(boolean async) {
+        isAsync = async;
+    }
+
+    /**
+     * Is request boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isRequest() {
+        return isRequest;
+    }
+
+    /**
+     * Sets request.
+     *
+     * @param request the request
+     */
+    public void setRequest(boolean request) {
+        isRequest = request;
+    }
+
+    /**
+     * Is heartbeat boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isHeartbeat() {
+        return isHeartbeat;
+    }
+
+    /**
+     * Sets heartbeat.
+     *
+     * @param heartbeat the heartbeat
+     */
+    public void setHeartbeat(boolean heartbeat) {
+        isHeartbeat = heartbeat;
+    }
+
+    /**
+     * Gets body.
+     *
+     * @return the body
+     */
+    public Object getBody() {
+        return body;
+    }
+
+    /**
+     * Sets body.
+     *
+     * @param body the body
+     */
+    public void setBody(Object body) {
+        this.body = body;
+    }
+
+    public boolean isSeataCodec() {
+        return isSeataCodec;
+    }
+
+    public void setSeataCodec(boolean seataCodec) {
+        isSeataCodec = seataCodec;
+    }
+
+    @Override
+    public RpcMessage convert2RpcMsg(){
+        RpcMessage rpcMessage = new RpcMessage();
+        // todo 基础配置
+        rpcMessage.setCompressor(CompressorType.NONE.getCode());
+
+        byte codecType = isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
+        rpcMessage.setCodec(codecType);
+
+        if(isHeartbeat){
+            if(isRequest){
+                rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
+            }else {
+                rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE);
+            }
+        }else {
+            if(isRequest){
+                rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+            }else {
+                rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+            }
+        }
+
+        return rpcMessage;
+    }
+}

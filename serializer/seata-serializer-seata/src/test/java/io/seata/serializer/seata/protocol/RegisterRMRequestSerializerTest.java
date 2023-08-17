@@ -15,8 +15,8 @@
  */
 package io.seata.serializer.seata.protocol;
 
-import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.serializer.seata.protocol.v1.SeataV1Serializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +31,7 @@ public class RegisterRMRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataV1Serializer seataSerializer = new SeataV1Serializer();
 
     /**
      * Test codec.

@@ -33,6 +33,8 @@ import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
+import io.seata.core.rpc.netty.v0.ProtocolV0RpcMessage;
+import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -163,10 +165,19 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (!(msg instanceof RpcMessage)) {
-                return;
+            RpcMessage rpcMessage= convert(msg);
+            if (rpcMessage != null) {
+                processMessage(ctx, rpcMessage);
+            } else {
+                //todo 正常会有这种情况吗？打日志还是抛异常？
             }
-            processMessage(ctx, (RpcMessage) msg);
+        }
+
+        private RpcMessage convert(Object msg) {
+            if(msg instanceof ProtocolRpcMessage){
+                return ((ProtocolRpcMessage) msg).convert2RpcMsg();
+            }
+            return null;
         }
 
         @Override

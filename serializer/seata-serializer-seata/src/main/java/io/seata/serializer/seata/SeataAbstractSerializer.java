@@ -15,21 +15,42 @@
  */
 package io.seata.serializer.seata;
 
+import com.sun.tools.javac.util.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.seata.common.loader.LoadLevel;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Seata codec.
  *
  * @author zhangsen
  */
-@LoadLevel(name = "SEATA")
-public class SeataSerializer implements Serializer {
+public abstract class SeataAbstractSerializer implements Serializer {
+
+    protected Map<Short, Pair<Class<? extends MessageSeataCodec>,Class<? extends AbstractMessage>>> classMap = new HashMap();
+
+    public Class<? extends MessageSeataCodec> getCodecClass(short typeCode){
+        Pair<Class<? extends MessageSeataCodec>, Class<? extends AbstractMessage>> pair = classMap.get(typeCode);
+        if(pair !=null && pair.fst !=null){
+            return pair.fst;
+        }else {
+            return null;
+        }
+    }
+
+    public Class<? extends AbstractMessage> getMessageClass(short typeCode){
+        Pair<Class<? extends MessageSeataCodec>, Class<? extends AbstractMessage>> pair = classMap.get(typeCode);
+        if(pair !=null && pair.snd !=null){
+            return pair.snd;
+        }else {
+            return null;
+        }
+    }
 
     @Override
     public <T> byte[] serialize(T t) {
@@ -40,7 +61,7 @@ public class SeataSerializer implements Serializer {
         //typecode
         short typecode = abstractMessage.getTypeCode();
         //msg codec
-        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = getCodecByType(typecode);
         //get empty ByteBuffer
         ByteBuf out = Unpooled.buffer(1024);
         //msg encode
@@ -75,12 +96,32 @@ public class SeataSerializer implements Serializer {
         byteBuffer.get(body);
         ByteBuffer in = ByteBuffer.wrap(body);
         //new Messgae
-        AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
+        AbstractMessage abstractMessage = getMessageByType(typecode);
         //get messageCodec
-        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = getCodecByType(typecode);
         //decode
         messageCodec.decode(abstractMessage, in);
         return (T)abstractMessage;
+    }
+
+    private AbstractMessage getMessageByType(short typecode) {
+        try {
+            return getMessageClass(typecode).newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private MessageSeataCodec getCodecByType(short typecode) {
+        try {
+            return getCodecClass(typecode).newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

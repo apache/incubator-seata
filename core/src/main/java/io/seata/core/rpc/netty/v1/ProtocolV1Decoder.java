@@ -16,13 +16,14 @@
 package io.seata.core.rpc.netty.v1;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.rpc.netty.CompatibleProtocolDecoder;
-import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.rpc.netty.CompatibleProtocolDecoder;
 import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.ProtocolDecoder;
+import io.seata.core.rpc.netty.ProtocolRpcMessage;
+import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
@@ -57,11 +58,12 @@ import java.util.Map;
  * @see ProtocolV1Encoder
  * @since 0.7.0
  */
-public class ProtocolV1Decoder{
+public class ProtocolV1Decoder  implements ProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
 
-    public static Object decodeFrame(ByteBuf frame) {
+    @Override
+    public ProtocolRpcMessage decodeFrame(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
@@ -70,7 +72,6 @@ public class ProtocolV1Decoder{
         }
 
         byte version = frame.readByte();
-        // TODO  check version compatible here
 
         int fullLength = frame.readInt();
         short headLength = frame.readShort();
@@ -79,7 +80,7 @@ public class ProtocolV1Decoder{
         byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
-        RpcMessage rpcMessage = new RpcMessage();
+        ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);
@@ -94,7 +95,18 @@ public class ProtocolV1Decoder{
 
         // read body
         int bodyLength = fullLength - headLength;
-        rpcMessage.setBody(CompatibleProtocolDecoder.getBody(frame, messageType, compressorType, codecType, bodyLength));
+        if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
+            rpcMessage.setBody(HeartbeatMessage.PING);
+        } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+            rpcMessage.setBody(HeartbeatMessage.PONG);
+        } else if (bodyLength > 0) {
+            byte[] bs = new byte[bodyLength];
+            frame.readBytes(bs);
+            Compressor compressor = CompressorFactory.getCompressor(compressorType);
+            bs = compressor.decompress(bs);
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType),version);
+            return serializer.deserialize(bs);
+        }
 
         return rpcMessage;
     }
