@@ -33,9 +33,5 @@ public class DruidDbTypeParserTest {
         Assertions.assertEquals(DruidDelegatingDbTypeParser.class, dbTypeParser.getClass());
         String dbType = dbTypeParser.parseFromJdbcUrl(jdbcUrl);
         Assertions.assertEquals("mysql", dbType);
-
-        DruidLoader druidLoaderForTest = new DruidLoaderForTest();
-        dbTypeParser.setClassLoader(new DruidIsolationClassLoader(druidLoaderForTest));
-        Assertions.assertThrows(NoClassDefFoundError.class, () -> dbTypeParser.parseFromJdbcUrl(jdbcUrl));
     }
 }

@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -44,21 +44,21 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
-                        <id>copy-druid</id>
-                        <phase>compile</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <includeGroupIds>com.alibaba</includeGroupIds>
-                            <includeArtifactIds>druid</includeArtifactIds>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>
-                                ${project.build.outputDirectory}/lib/sqlparser
-                            </outputDirectory>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.alibaba.druid</pattern>
+                                    <shadedPattern>io.seata.shaded.druid</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>

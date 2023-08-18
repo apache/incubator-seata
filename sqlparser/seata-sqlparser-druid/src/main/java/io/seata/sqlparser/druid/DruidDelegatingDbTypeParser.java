@@ -19,8 +19,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 
-import java.lang.reflect.Constructor;
-
 /**
  * @author ggndnn
  */
@@ -29,27 +27,7 @@ public class DruidDelegatingDbTypeParser implements DbTypeParser {
     private DbTypeParser dbTypeParserImpl;
 
     public DruidDelegatingDbTypeParser() {
-        setClassLoader(DruidIsolationClassLoader.get());
-    }
-
-    /**
-     * Only for unit test
-     *
-     * @param classLoader classLoader
-     */
-    void setClassLoader(ClassLoader classLoader) {
-        try {
-            Class<?> druidDbTypeParserImplClass = classLoader.loadClass("io.seata.sqlparser.druid.DruidDbTypeParserImpl");
-            Constructor<?> implConstructor = druidDbTypeParserImplClass.getDeclaredConstructor();
-            implConstructor.setAccessible(true);
-            try {
-                dbTypeParserImpl = (DbTypeParser) implConstructor.newInstance();
-            } finally {
-                implConstructor.setAccessible(false);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        dbTypeParserImpl = new DruidDbTypeParserImpl();
     }
 
     @Override
