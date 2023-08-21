@@ -8,6 +8,7 @@ import io.seata.core.protocol.RpcMessage;
  * @author Bughue
  */
 public interface ProtocolRpcMessage {
-    RpcMessage convert2RpcMsg();
+    RpcMessage protocolMsg2RpcMsg();
 
+    void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
 }

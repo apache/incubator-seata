@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 
 import io.seata.core.protocol.MessageType;
@@ -26,13 +26,13 @@ import java.io.Serializable;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /10/15
  */
-public class RegisterTMRequest extends AbstractIdentifyRequest implements Serializable {
+public class RegisterTMRequestV0 extends AbstractIdentifyRequestV0 implements Serializable {
     private static final long serialVersionUID = -5929081344190543690L;
 
     /**
      * Instantiates a new Register tm request.
      */
-    public RegisterTMRequest() {
+    public RegisterTMRequestV0() {
         this(null, null);
     }
 
@@ -43,7 +43,7 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
      * @param transactionServiceGroup the transaction service group
      * @param extraData               the extra data
      */
-    public RegisterTMRequest(String applicationId, String transactionServiceGroup, String extraData) {
+    public RegisterTMRequestV0(String applicationId, String transactionServiceGroup, String extraData) {
         super(applicationId, transactionServiceGroup, extraData);
 
     }
@@ -54,7 +54,7 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
      */
-    public RegisterTMRequest(String applicationId, String transactionServiceGroup) {
+    public RegisterTMRequestV0(String applicationId, String transactionServiceGroup) {
         super(applicationId, transactionServiceGroup);
     }
 

@@ -13,9 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,9 @@ import java.nio.ByteBuffer;
  *
  * @author sharajava
  */
-public abstract class AbstractIdentifyRequest extends AbstractMessageV0 {
+public abstract class AbstractIdentifyRequestV0 extends AbstractMessageV0<AbstractIdentifyRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIdentifyRequest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIdentifyRequestV0.class);
 
     /**
      * The Version.
@@ -57,7 +58,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessageV0 {
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
      */
-    public AbstractIdentifyRequest(String applicationId, String transactionServiceGroup) {
+    public AbstractIdentifyRequestV0(String applicationId, String transactionServiceGroup) {
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
     }
@@ -69,7 +70,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessageV0 {
      * @param transactionServiceGroup the transaction service group
      * @param extraData               the extra data
      */
-    public AbstractIdentifyRequest(String applicationId, String transactionServiceGroup, String extraData) {
+    public AbstractIdentifyRequestV0(String applicationId, String transactionServiceGroup, String extraData) {
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
         this.extraData = extraData;
@@ -213,7 +214,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessageV0 {
         return flushEncode();
     }
 
-    @Override
+//    @Override
     public boolean decode(ByteBuf in) {
 
         short len;
@@ -262,6 +263,63 @@ public abstract class AbstractIdentifyRequest extends AbstractMessageV0 {
             bs = new byte[len];
             in.readBytes(bs);
             this.setExtraData(new String(bs, UTF8));
+        } else {
+            //maybe null
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean decode(ByteBuf in,AbstractIdentifyRequest req) {
+
+
+        short len;
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        byte[] bs = new byte[len];
+        in.readBytes(bs);
+        req.setVersion(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        bs = new byte[len];
+        in.readBytes(bs);
+        req.setApplicationId(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        bs = new byte[len];
+        in.readBytes(bs);
+        req.setTransactionServiceGroup(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() >= len) {
+            bs = new byte[len];
+            in.readBytes(bs);
+            req.setExtraData(new String(bs, UTF8));
         } else {
             //maybe null
         }

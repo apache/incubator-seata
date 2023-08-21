@@ -16,11 +16,9 @@
 package io.seata.core.rpc.netty.v1;
 
 import io.seata.common.util.StringUtils;
-import io.seata.core.compressor.CompressorType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
-import io.seata.core.serializer.SerializerType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -177,11 +175,25 @@ public class ProtocolV1RpcMessage implements ProtocolRpcMessage {
     }
 
     @Override
-    public RpcMessage convert2RpcMsg(){
+    public RpcMessage protocolMsg2RpcMsg(){
         RpcMessage rpcMessage = new RpcMessage();
-        // todo
-
-
+        rpcMessage.setId(this.id);
+        rpcMessage.setMessageType(this.messageType);
+        rpcMessage.setCodec(this.codec);
+        rpcMessage.setCompressor(this.compressor);
+        rpcMessage.setHeadMap(this.headMap);
+        rpcMessage.setBody(this.body);
+        rpcMessage.setProtocolVersion(ProtocolConstants.VERSION_1);
         return rpcMessage;
+    }
+
+    @Override
+    public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
+        this.body = rpcMessage.getBody();
+        this.headMap = rpcMessage.getHeadMap();
+        this.id = rpcMessage.getId();
+        this.messageType = rpcMessage.getMessageType();
+        this.codec = rpcMessage.getCodec();
+        this.compressor = rpcMessage.getCompressor();
     }
 }

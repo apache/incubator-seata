@@ -34,6 +34,8 @@ public class RpcMessage {
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
+    private byte protocolVersion;
+
     /**
      * Gets id.
      *
@@ -166,6 +168,14 @@ public class RpcMessage {
      */
     public void setMessageType(byte messageType) {
         this.messageType = messageType;
+    }
+
+    public byte getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(byte protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     @Override

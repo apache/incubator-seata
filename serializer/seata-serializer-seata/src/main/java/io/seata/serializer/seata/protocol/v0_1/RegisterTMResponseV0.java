@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 
 import io.seata.core.protocol.MessageType;
@@ -21,33 +21,33 @@ import io.seata.core.protocol.MessageType;
 import java.io.Serializable;
 
 /**
- * The type Register rm response.
+ * The type Register tm response.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @date 2018 /10/15
  */
-public class RegisterRMResponse extends AbstractIdentifyResponse implements Serializable {
-    private static final long serialVersionUID = 6391375605848221420L;
+public class RegisterTMResponseV0 extends AbstractIdentifyResponseV0 implements Serializable {
+    private static final long serialVersionUID = 3629846050062228749L;
 
     /**
-     * Instantiates a new Register rm response.
+     * Instantiates a new Register tm response.
      */
-    public RegisterRMResponse() {
+    public RegisterTMResponseV0() {
         this(true);
     }
 
     /**
-     * Instantiates a new Register rm response.
+     * Instantiates a new Register tm response.
      *
      * @param result the result
      */
-    public RegisterRMResponse(boolean result) {
+    public RegisterTMResponseV0(boolean result) {
         super();
         setIdentified(result);
     }
 
     @Override
     public short getTypeCode() {
-        return MessageType.TYPE_REG_RM_RESULT;
+        return MessageType.TYPE_REG_CLT_RESULT;
     }
 }

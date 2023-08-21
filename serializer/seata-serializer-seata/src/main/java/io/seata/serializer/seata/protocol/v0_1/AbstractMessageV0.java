@@ -13,11 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.Constants;
+import io.seata.core.protocol.AbstractIdentifyRequest;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.rpc.netty.v0.MessageCodecV0;
 
 import java.io.Serializable;
@@ -29,7 +31,7 @@ import java.nio.charset.Charset;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /9/14
  */
-public abstract class AbstractMessageV0 implements MessageCodecV0, Serializable {
+public abstract class AbstractMessageV0<T> implements MessageCodecV0<T>, Serializable {
     private static final long serialVersionUID = -1441020418526899889L;
 
     /**
@@ -72,7 +74,7 @@ public abstract class AbstractMessageV0 implements MessageCodecV0, Serializable 
     }
 
     @Override
-    public boolean decode(ByteBuf in) {
+    public boolean decode(ByteBuf in, T req){
         return false;
     }
 

@@ -42,6 +42,8 @@ public class RpcContext {
 
     private String version;
 
+    private byte protocolVersion;
+
     private String applicationId;
 
     private String transactionServiceGroup;
@@ -318,6 +320,14 @@ public class RpcContext {
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public byte getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public void setProtocolVersion(byte protocolVersion) {
+        this.protocolVersion = protocolVersion;
     }
 
     @Override

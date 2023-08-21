@@ -13,10 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.ResultCode;
 
 import java.nio.ByteBuffer;
@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /9/14
  */
-public abstract class AbstractResultMessageV0 extends AbstractMessageV0 implements MergedMessageV0 {
+public abstract class AbstractResultMessageV0 extends AbstractMessageV0<AbstractResultMessage> implements MergedMessageV0 {
     private static final long serialVersionUID = 6540352050650203313L;
 
     private ResultCode resultCode;
@@ -131,11 +131,11 @@ public abstract class AbstractResultMessageV0 extends AbstractMessageV0 implemen
     }
 
     @Override
-    public boolean decode(ByteBuf in) {
+    public boolean decode(ByteBuf in,AbstractResultMessage resultMessage) {
         if (in.readableBytes() < 1) {
             return false;
         }
-        setResultCode(ResultCode.get(in.readByte()));
+        resultMessage.setResultCode(ResultCode.get(in.readByte()));
         if (resultCode == ResultCode.Failed) {
             if (in.readableBytes() < 2) {
                 return false;
@@ -147,7 +147,7 @@ public abstract class AbstractResultMessageV0 extends AbstractMessageV0 implemen
             if (len > 0) {
                 byte[] msg = new byte[len];
                 in.readBytes(msg);
-                this.setMsg(new String(msg, UTF8));
+                resultMessage.setMsg(new String(msg, UTF8));
             }
         }
         return true;

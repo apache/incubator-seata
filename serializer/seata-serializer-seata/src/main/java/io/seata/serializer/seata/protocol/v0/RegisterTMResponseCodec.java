@@ -13,11 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package io.seata.serializer.seata.protocol.v0;
 
-import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.RpcMessage;
 
-public interface ProtocolEncoder {
-    void encode(RpcMessage rpcMessage, ByteBuf out);
+import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.serializer.seata.protocol.v1.AbstractIdentifyResponseCodec;
+
+/**
+ * The type Register tm response codec.
+ *
+ * @author zhangsen
+ */
+public class RegisterTMResponseCodec extends AbstractIdentifyResponseCodec {
+
+    @Override
+    public Class<?> getMessageClassType() {
+        return RegisterTMResponse.class;
+    }
+
 }

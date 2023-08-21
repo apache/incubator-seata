@@ -105,7 +105,8 @@ public class ProtocolV1Decoder  implements ProtocolDecoder {
             Compressor compressor = CompressorFactory.getCompressor(compressorType);
             bs = compressor.decompress(bs);
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType),version);
-            return serializer.deserialize(bs);
+            rpcMessage.setBody(serializer.deserialize(bs));
+            return rpcMessage;
         }
 
         return rpcMessage;

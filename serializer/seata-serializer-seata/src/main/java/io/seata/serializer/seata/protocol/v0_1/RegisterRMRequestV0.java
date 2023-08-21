@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 import io.netty.buffer.ByteBuf;
 
@@ -27,7 +27,7 @@ import static io.seata.core.protocol.MessageType.TYPE_REG_RM;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /10/10
  */
-public class RegisterRMRequest extends AbstractIdentifyRequest implements Serializable {
+public class RegisterRMRequestV0 extends AbstractIdentifyRequestV0 implements Serializable {
     private static final long serialVersionUID = 7539732523682335742L;
 
     private String resourceIds;
@@ -35,7 +35,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
     /**
      * Instantiates a new Register rm request.
      */
-    public RegisterRMRequest() {
+    public RegisterRMRequestV0() {
         this(null, null);
     }
 
@@ -45,7 +45,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
      * @param applicationId           the application id
      * @param transactionServiceGroup the transaction service group
      */
-    public RegisterRMRequest(String applicationId, String transactionServiceGroup) {
+    public RegisterRMRequestV0(String applicationId, String transactionServiceGroup) {
         super(applicationId, transactionServiceGroup);
     }
 

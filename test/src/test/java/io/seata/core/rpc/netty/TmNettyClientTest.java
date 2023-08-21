@@ -80,6 +80,44 @@ public class TmNettyClientTest extends AbstractServerTest {
         tmNettyRemotingClient.destroy();
     }
 
+
+    @Test
+    public void testDoConnectOnlyServer() throws Exception {
+        ThreadPoolExecutor workingThreads = initMessageExecutor();
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        //start services server first
+        Thread thread = new Thread(() -> {
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+            // set registry
+            XID.setIpAddress(NetUtil.getLocalIp());
+            XID.setPort(8091);
+            // init snowflake for transactionId, branchId
+            UUIDGenerator.init(1L);
+            System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
+            nettyRemotingServer.init();
+        });
+        thread.start();
+
+        //then test client
+        Thread.sleep(3000000);
+
+
+    }
+
+    @Test
+    public void testDoConnectOnlyClient() throws Exception {
+
+        String applicationId = "app 1";
+        String transactionServiceGroup = "group A";
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+
+        tmNettyRemotingClient.init();
+        String serverAddress = "0.0.0.0:8091";
+        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
+        Assertions.assertNotNull(channel);
+        tmNettyRemotingClient.destroy();
+    }
+
     /**
      * Client rely on server's starting first
      *

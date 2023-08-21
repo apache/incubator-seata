@@ -63,10 +63,6 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
     public CompatibleProtocolDecoder() {
         // default is 8M
         this(ProtocolConstants.MAX_FRAME_LENGTH);
-        protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
-                .put(ProtocolConstants.VERSION_0, new ProtocolV0Decoder())
-                .put(ProtocolConstants.VERSION_1, new ProtocolV1Decoder())
-                .build();
     }
 
     public CompatibleProtocolDecoder(int maxFrameLength) {
@@ -78,17 +74,29 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
+        protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
+                .put(ProtocolConstants.VERSION_0, new ProtocolV0Decoder())
+                .put(ProtocolConstants.VERSION_1, new ProtocolV1Decoder())
+                .build();
     }
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        ByteBuf frame;
         Object decoded;
+        byte version;
         try {
-            decoded = super.decode(ctx, in);
+            if (isV0(in)) {
+                decoded = in;
+                version = ProtocolConstants.VERSION_0;
+            } else {
+                decoded = super.decode(ctx, in);
+                version = decideVersion(decoded);
+            }
+
             if (decoded instanceof ByteBuf) {
-                ByteBuf frame = (ByteBuf) decoded;
+                frame = (ByteBuf) decoded;
                 try {
-                    byte version = decideVersion(frame);
                     ProtocolDecoder decoder = protocolDecoderMap.get(version);
                     if (decoder == null) {
                         // todo 要不要适配当前版本？
@@ -96,29 +104,57 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     }
                     return decoder.decodeFrame(frame);
                 } finally {
-                    frame.release();
+                    if(!isV0(version)){
+                        frame.release();
+                    }
                 }
             }
         } catch (Exception exx) {
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
+            //todo
+            exx.printStackTrace();
             throw new DecodeException(exx);
         }
         return decoded;
     }
 
-    protected byte decideVersion(ByteBuf frame) {
-        frame.markReaderIndex();
-        byte b0 = frame.readByte();
-        byte b1 = frame.readByte();
-        if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
-                || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
-            throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
-        }
+    protected byte decideVersion(Object in) {
+        if (in instanceof ByteBuf) {
+            ByteBuf frame = (ByteBuf) in;
+            frame.markReaderIndex();
+            byte b0 = frame.readByte();
+            byte b1 = frame.readByte();
+            if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
+                    || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
+                throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
+            }
 
-        byte version = frame.readByte();
-        frame.resetReaderIndex();
-        return version;
+            byte version = frame.readByte();
+            frame.resetReaderIndex();
+            return version;
+        }
+        // todo
+        return -1;
     }
 
 
+    protected boolean isV0(ByteBuf in) {
+        boolean isV0 = false;
+        in.markReaderIndex();
+        byte b0 = in.readByte();
+        byte b1 = in.readByte();
+        byte version = in.readByte();
+        if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
+                && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1
+                && isV0(version)) {
+            isV0 = true;
+        }
+
+        in.resetReaderIndex();
+        return isV0;
+    }
+
+    protected boolean isV0(byte version) {
+        return version == ProtocolConstants.VERSION_0;
+    }
 }

@@ -15,125 +15,86 @@
  */
 package io.seata.serializer.seata.protocol.v0;
 
+import com.sun.tools.javac.util.Pair;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageType;
-import io.seata.core.rpc.netty.v0.MessageCodecV0;
-import io.seata.core.rpc.netty.v0.SerializerV0;
+import io.seata.core.protocol.ProtocolConstants;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.serializer.seata.MessageSeataCodec;
+import io.seata.serializer.seata.SeataAbstractSerializer;
+
+import java.nio.ByteBuffer;
 
 /**
- * The Seata codec v0.
+ * The Seata codec v1.
  *
  * @author Bughue
  */
-public class SeataV0Serializer implements SerializerV0 {
+@LoadLevel(name = "SEATA", version = ProtocolConstants.VERSION_0)
+public class SeataV0Serializer extends SeataAbstractSerializer {
 
     public SeataV0Serializer() {
+        classMap.put(MessageType.TYPE_REG_CLT, new Pair<>(RegisterTMRequestCodec.class, RegisterTMRequest.class));
+        classMap.put(MessageType.TYPE_REG_CLT_RESULT, new Pair<>(RegisterTMResponseCodec.class, RegisterTMResponse.class));
+//        classMap.put(MessageType.TYPE_REG_RM, new Pair<>(RegisterRMRequestCodec.class, RegisterRMRequest.class));
+//        classMap.put(MessageType.TYPE_REG_RM_RESULT, new Pair<>(RegisterRMResponseCodec.class, RegisterRMResponse.class));
 
     }
-
 
     @Override
-    public MessageCodecV0 getMsgInstanceByCode(short typeCode) {
-        MessageCodecV0 msgCodec = null;
-        switch (typeCode) {
-//            case MessageType.TYPE_SEATA_MERGE:
-//                msgCodec = new MergedWarpMessage();
-//                break;
-//            case MessageType.TYPE_SEATA_MERGE_RESULT:
-//                msgCodec = new MergeResultMessage();
-//                break;
-            case MessageType.TYPE_REG_CLT:
-                msgCodec = new RegisterTMRequest();
-                break;
-            case MessageType.TYPE_REG_CLT_RESULT:
-                msgCodec = new RegisterTMResponse();
-                break;
-            case MessageType.TYPE_REG_RM:
-                msgCodec = new RegisterRMRequest();
-                break;
-            case MessageType.TYPE_REG_RM_RESULT:
-                msgCodec = new RegisterRMResponse();
-                break;
-//            case MessageType.TYPE_BRANCH_COMMIT:
-//                msgCodec = new BranchCommitRequest();
-//                break;
-//            case MessageType.TYPE_BRANCH_ROLLBACK:
-//                msgCodec = new BranchRollbackRequest();
-//                break;
-            default:
-                break;
+    public <T> byte[] serialize(T t) {
+        if (t == null || !(t instanceof AbstractMessage)) {
+            throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
+        AbstractMessage abstractMessage = (AbstractMessage)t;
+        //typecode
+        short typecode = abstractMessage.getTypeCode();
+        //msg codec
+        MessageSeataCodec messageCodec = getCodecByType(typecode);
+        //get empty ByteBuffer
+        ByteBuf out = Unpooled.buffer(1024);
+        //msg encode
+        messageCodec.encode(t, out);
+        byte[] body = new byte[out.readableBytes()];
+        out.readBytes(body);
 
-        if (null != msgCodec) {
-            return msgCodec;
-        }
+        //typecode + body
+        ByteBuffer byteBuffer = ByteBuffer.allocate(body.length);
+        byteBuffer.put(body);
 
-        try {
-            msgCodec = (MessageCodecV0) getMergeRequestInstanceByCode(typeCode);
-        } catch (Exception exx) {
-
-        }
-        if (null != msgCodec) {
-            return msgCodec;
-        }
-
-        return (MessageCodecV0)getMergeResponseInstanceByCode(typeCode);
+        byteBuffer.flip();
+        byte[] content = new byte[byteBuffer.limit()];
+        byteBuffer.get(content);
+        return content;
     }
 
-    /**
-     * Gets merge request instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge request instance by code
-     */
-    public static MergedMessageV0 getMergeRequestInstanceByCode(int typeCode) {
-        switch (typeCode) {
-//            case MessageType.TYPE_GLOBAL_BEGIN:
-//                return new GlobalBeginRequest();
-//            case MessageType.TYPE_GLOBAL_COMMIT:
-//                return new GlobalCommitRequest();
-//            case MessageType.TYPE_GLOBAL_ROLLBACK:
-//                return new GlobalRollbackRequest();
-//            case MessageType.TYPE_GLOBAL_STATUS:
-//                return new GlobalStatusRequest();
-//            case MessageType.TYPE_GLOBAL_LOCK_QUERY:
-//                return new GlobalLockQueryRequest();
-//            case MessageType.TYPE_BRANCH_REGISTER:
-//                return new BranchRegisterRequest();
-//            case MessageType.TYPE_BRANCH_STATUS_REPORT:
-//                return new BranchReportRequest();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
+    @Override
+    public <T> T deserialize(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            throw new IllegalArgumentException("Nothing to decode.");
         }
+        if (bytes.length < 2) {
+            throw new IllegalArgumentException("The byte[] isn't available for decode.");
+        }
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        //typecode
+        short typecode = byteBuffer.getShort();
+        //msg body
+        byte[] body = new byte[byteBuffer.remaining()];
+        byteBuffer.get(body);
+        ByteBuffer in = ByteBuffer.wrap(body);
+        //new Messgae
+        AbstractMessage abstractMessage = getMessageByType(typecode);
+        //get messageCodec
+        MessageSeataCodec messageCodec = getCodecByType(typecode);
+        //decode
+        messageCodec.decode(abstractMessage, in);
+        return (T)abstractMessage;
     }
 
-    /**
-     * Gets merge response instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge response instance by code
-     */
-    public static MergedMessageV0 getMergeResponseInstanceByCode(int typeCode) {
-        switch (typeCode) {
-//            case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
-//                return new GlobalBeginResponse();
-//            case MessageType.TYPE_GLOBAL_COMMIT_RESULT:
-//                return new GlobalCommitResponse();
-//            case MessageType.TYPE_GLOBAL_ROLLBACK_RESULT:
-//                return new GlobalRollbackResponse();
-//            case MessageType.TYPE_GLOBAL_STATUS_RESULT:
-//                return new GlobalStatusResponse();
-//            case MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT:
-//                return new GlobalLockQueryResponse();
-//            case MessageType.TYPE_BRANCH_REGISTER_RESULT:
-//                return new BranchRegisterResponse();
-//            case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
-//                return new BranchReportResponse();
-//            case MessageType.TYPE_BRANCH_COMMIT_RESULT:
-//                return new BranchCommitResponse();
-//            case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
-//                return new BranchRollbackResponse();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
-        }
-    }
+
 }

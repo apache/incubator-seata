@@ -19,8 +19,12 @@ import io.netty.buffer.ByteBuf;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.protocol.HeartbeatMessage;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
 import io.seata.core.rpc.netty.ProtocolDecoder;
+import io.seata.core.serializer.Serializer;
+import io.seata.core.serializer.SerializerServiceLoader;
+import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +67,7 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
 
     @Override
     public ProtocolV0RpcMessage decodeFrame(ByteBuf in) {
+        ProtocolV0RpcMessage rpcMessage = new ProtocolV0RpcMessage();
         // todo 旧版本是直接返回跳过了，我们需要保留这个逻辑？【特殊】
         if (in.readableBytes() < ProtocolV0Constants.HEAD_LENGTH) {
             throw new IllegalArgumentException("Nothing to decode.");
@@ -79,7 +84,7 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
         boolean isHeartbeat = (ProtocolV0Constants.FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (ProtocolV0Constants.FLAG_REQUEST & flag) > 0;
         boolean isSeataCodec = (ProtocolV0Constants.FLAG_SEATA_CODEC & flag) > 0;
-
+        rpcMessage.setSeataCodec(isSeataCodec);
 
         short bodyLength = 0;
         short typeCode = 0;
@@ -89,9 +94,8 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
             typeCode = in.readShort();
         }
         long msgId = in.readLong();
+        rpcMessage.setId(msgId);
         if (isHeartbeat) {
-            ProtocolV0RpcMessage rpcMessage = new ProtocolV0RpcMessage();
-            rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
             rpcMessage.setHeartbeat(isHeartbeat);
             rpcMessage.setRequest(isRequest);
@@ -110,19 +114,31 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
             throw new IllegalArgumentException("readableBytes < bodyLength");
         }
 
-        ProtocolV0RpcMessage rpcMessage = new ProtocolV0RpcMessage();
-        rpcMessage.setId(msgId);
         rpcMessage.setAsync((ProtocolV0Constants.FLAG_ASYNC & flag) > 0);
         rpcMessage.setHeartbeat(false);
         rpcMessage.setRequest(isRequest);
 
         try {
+            // v0_1
             // todo serializer==null
-            MessageCodecV0 msgCodec = serializer.getMsgInstanceByCode(typeCode);
-            if (!msgCodec.decode(in)) {
-                throw new IllegalArgumentException("decode fail.");
-            }
-            rpcMessage.setBody(msgCodec);
+//            MessageCodecV0 msgCodec = serializer.getMsgInstanceByCode(typeCode);
+//            if (!msgCodec.decode(in)) {
+//                throw new IllegalArgumentException("decode fail.");
+//            }
+//            rpcMessage.setBody(msgCodec);
+
+            // v0_2
+            int length = in.readableBytes();
+            byte[] bs = new byte[length];
+            in.readBytes(bs);
+            byte[] bs2 = new byte[2 + length];
+            bs2[0] = (byte) (0x00FF & (typeCode>>8));
+            bs2[1] = (byte) (0x00FF & typeCode);
+            System.arraycopy(bs,0,bs2,2, length);
+            byte codecType = isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType), ProtocolConstants.VERSION_0);
+            rpcMessage.setBody(serializer.deserialize(bs2));
+
         } catch (Exception e) {
             LOGGER.error("decode error", "", e);
             throw e;

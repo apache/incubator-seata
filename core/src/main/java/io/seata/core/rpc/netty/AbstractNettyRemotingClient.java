@@ -56,8 +56,6 @@ import io.seata.core.protocol.transaction.BranchReportRequest;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.rpc.RemotingClient;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.v0.ProtocolV0RpcMessage;
-import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
@@ -417,7 +415,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
             RpcMessage rpcMessage = null;
             if (msg instanceof ProtocolRpcMessage) {
-                rpcMessage = ((ProtocolRpcMessage) msg).convert2RpcMsg();
+                rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
             }
 
             if (rpcMessage != null) {

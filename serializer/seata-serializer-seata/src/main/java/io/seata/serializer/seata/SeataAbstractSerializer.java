@@ -104,7 +104,7 @@ public abstract class SeataAbstractSerializer implements Serializer {
         return (T)abstractMessage;
     }
 
-    private AbstractMessage getMessageByType(short typecode) {
+    protected AbstractMessage getMessageByType(short typecode) {
         try {
             return getMessageClass(typecode).newInstance();
         } catch (InstantiationException e) {
@@ -114,7 +114,7 @@ public abstract class SeataAbstractSerializer implements Serializer {
         }
     }
 
-    private MessageSeataCodec getCodecByType(short typecode) {
+    protected MessageSeataCodec getCodecByType(short typecode) {
         try {
             return getCodecClass(typecode).newInstance();
         } catch (InstantiationException e) {

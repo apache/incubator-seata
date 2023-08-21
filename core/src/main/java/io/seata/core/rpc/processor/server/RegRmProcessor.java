@@ -64,7 +64,7 @@ public class RegRmProcessor implements RemotingProcessor {
         String errorInfo = StringUtils.EMPTY;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
-                ChannelManager.registerRMChannel(message, ctx.channel());
+                ChannelManager.registerRMChannel(message, ctx.channel(), rpcMessage.getProtocolVersion());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.serializer.seata.protocol.v0_1;
 
 import io.netty.buffer.ByteBuf;
 import io.seata.core.protocol.Version;
@@ -23,7 +23,7 @@ import io.seata.core.protocol.Version;
  *
  * @author sharajava
  */
-public abstract class AbstractIdentifyResponse extends AbstractResultMessageV0 {
+public abstract class AbstractIdentifyResponseV0 extends AbstractResultMessageV0 {
 
     protected String version = Version.getCurrent();
 

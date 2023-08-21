@@ -50,7 +50,7 @@ public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
     private boolean isRequest;
     private boolean isHeartbeat;
     private Object body;
-
+    private byte messageType;
     private boolean isSeataCodec;
 
     /**
@@ -151,29 +151,58 @@ public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
         isSeataCodec = seataCodec;
     }
 
+    public byte getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(byte messageType) {
+        this.messageType = messageType;
+    }
+
     @Override
-    public RpcMessage convert2RpcMsg(){
+    public RpcMessage protocolMsg2RpcMsg(){
         RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setMessageType(this.messageType);
         // todo 基础配置
         rpcMessage.setCompressor(CompressorType.NONE.getCode());
 
-        byte codecType = isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
+        byte codecType = this.isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
         rpcMessage.setCodec(codecType);
 
-        if(isHeartbeat){
-            if(isRequest){
+        if(this.isHeartbeat){
+            if(this.isRequest){
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
             }else {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE);
             }
         }else {
-            if(isRequest){
+            if(this.isRequest){
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
             }else {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
             }
         }
-
+        rpcMessage.setBody(this.body);
+        rpcMessage.setId((int) this.id);
         return rpcMessage;
+    }
+
+    @Override
+    public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
+        this.body = rpcMessage.getBody();
+        this.id = rpcMessage.getId();
+        this.isRequest = isRequest(rpcMessage.getMessageType());
+        this.isHeartbeat = isHeartbeat(rpcMessage.getMessageType());
+        this.isSeataCodec = rpcMessage.getCodec() ==SerializerType.SEATA.getCode();
+        this.messageType = rpcMessage.getMessageType();
+    }
+
+    private boolean isHeartbeat(byte msgType){
+        return msgType==ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                || msgType ==ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE;
+    }
+    private boolean isRequest(byte msgType){
+        return msgType==ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY
+                || msgType ==ProtocolConstants.MSGTYPE_RESQUEST_SYNC;
     }
 }

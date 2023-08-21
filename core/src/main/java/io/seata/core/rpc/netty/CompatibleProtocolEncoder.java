@@ -15,12 +15,21 @@
  */
 package io.seata.core.rpc.netty;
 
+import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.v0.ProtocolV0Decoder;
+import io.seata.core.rpc.netty.v0.ProtocolV0Encoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * <pre>
@@ -39,11 +48,30 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompatibleProtocolEncoder.class);
 
+    private static Map<Byte, ProtocolEncoder> protocolEncoderMap;
+
+    public CompatibleProtocolEncoder(){
+        super();
+        protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
+                .put(ProtocolConstants.VERSION_0, new ProtocolV0Encoder())
+                .put(ProtocolConstants.VERSION_1, new ProtocolV1Encoder())
+                .build();
+    }
+
     @Override
     public void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
         try {
             if (msg instanceof RpcMessage) {
-                // todo 调用子类进行encode，公共逻辑现在没有抽取
+                RpcMessage rpcMessage = (RpcMessage) msg;
+                byte version = rpcMessage.getProtocolVersion();
+                ProtocolEncoder encoder = protocolEncoderMap.get(version);
+                if (encoder == null) {
+                    // todo 要不要适配当前版本？
+                    throw new IllegalArgumentException("Unknown version: " + version);
+                }
+
+                encoder.encode(rpcMessage,out);
+
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }

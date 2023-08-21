@@ -33,8 +33,6 @@ import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.netty.v0.ProtocolV0RpcMessage;
-import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import io.seata.core.rpc.processor.Pair;
 import io.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -72,6 +70,20 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        return superSendSync(channel, rpcMessage);
+    }
+
+    private void superSendAsync(Channel channel, RpcMessage rpcMessage) {
+        //todo 优化，是否为空
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
+        super.sendAsync(channel, rpcMessage);
+    }
+
+    private Object superSendSync(Channel channel, RpcMessage rpcMessage) throws TimeoutException {
+        //todo 优化，是否为空
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -81,7 +93,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+        return superSendSync(channel, rpcMessage);
     }
 
     @Override
@@ -90,8 +102,10 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             throw new RuntimeException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        super.sendAsync(channel, rpcMessage);
+        superSendAsync(channel, rpcMessage);
     }
+
+
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
@@ -103,7 +117,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
-            super.sendAsync(clientChannel, rpcMsg);
+            superSendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
         }
@@ -165,7 +179,10 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            RpcMessage rpcMessage= convert(msg);
+            RpcMessage rpcMessage = null;
+            if (msg instanceof ProtocolRpcMessage) {
+                rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
+            }
             if (rpcMessage != null) {
                 processMessage(ctx, rpcMessage);
             } else {
@@ -173,12 +190,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             }
         }
 
-        private RpcMessage convert(Object msg) {
-            if(msg instanceof ProtocolRpcMessage){
-                return ((ProtocolRpcMessage) msg).convert2RpcMsg();
-            }
-            return null;
-        }
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {

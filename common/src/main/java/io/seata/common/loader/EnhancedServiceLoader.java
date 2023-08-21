@@ -594,13 +594,15 @@ public class EnhancedServiceLoader {
                 String serviceName = null;
                 int priority = 0;
                 Scope scope = Scope.SINGLETON;
+                byte version = -1;
                 LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
                 if (loadLevel != null) {
                     serviceName = loadLevel.name();
                     priority = loadLevel.order();
                     scope = loadLevel.scope();
+                    version = loadLevel.version();
                 }
-                ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass);
+                ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass, version);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
                     CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
@@ -630,7 +632,7 @@ public class EnhancedServiceLoader {
 
         private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName, int version) {
             List<ExtensionDefinition<S>> definitions = nameToDefinitionsMap.get(activateName);
-            if (version < 0) {
+            if (version >= 0) {
                 Optional<ExtensionDefinition<S>> first = definitions.stream().filter(d -> d.getVersion() == version).findFirst();
                 if (first.isPresent()) {
                     return first.get();
