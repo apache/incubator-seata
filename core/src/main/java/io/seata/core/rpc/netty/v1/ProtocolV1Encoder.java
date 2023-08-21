@@ -65,6 +65,8 @@ public class ProtocolV1Encoder implements ProtocolEncoder {
 
     public void encode(RpcMessage message, ByteBuf out) {
         try {
+//            if (msg instanceof RpcMessage) {
+
             ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
             rpcMessage.rpcMsg2ProtocolMsg(message);
 
