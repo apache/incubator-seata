@@ -65,11 +65,11 @@ public class ProtocolV1Encoder implements ProtocolEncoder {
 
     public void encode(RpcMessage message, ByteBuf out) {
         try {
-//            if (msg instanceof RpcMessage) {
 
             ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
             rpcMessage.rpcMsg2ProtocolMsg(message);
 
+//            if (msg instanceof RpcMessage) {
             int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
             int headLength = ProtocolConstants.V1_HEAD_LENGTH;
 
