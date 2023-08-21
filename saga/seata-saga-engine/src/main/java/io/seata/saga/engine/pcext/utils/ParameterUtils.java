@@ -17,8 +17,6 @@ package io.seata.saga.engine.pcext.utils;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.expression.Expression;
-import io.seata.saga.engine.expression.ExpressionFactory;
-import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.expression.seq.SequenceExpression;
 import io.seata.saga.statelang.domain.StateInstance;
