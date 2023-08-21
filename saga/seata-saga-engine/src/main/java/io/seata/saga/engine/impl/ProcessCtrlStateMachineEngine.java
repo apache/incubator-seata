@@ -378,7 +378,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 if (CollectionUtils.isNotEmpty(state.getOutput())) {
                     try {
                         Map<String, Object> outputVariablesToContext = ParameterUtils
-                                .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
+                                .createOutputParams(stateMachineConfig.getExpressionResolver(), state,
                                         serviceOutputParams);
                         if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                             contextVariables.putAll(outputVariablesToContext);

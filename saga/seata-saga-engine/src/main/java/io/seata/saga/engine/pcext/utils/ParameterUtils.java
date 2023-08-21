@@ -19,6 +19,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
+import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.expression.seq.SequenceExpression;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
@@ -38,7 +39,7 @@ import java.util.Map;
  */
 public class ParameterUtils {
 
-    public static List<Object> createInputParams(ExpressionFactoryManager expressionFactoryManager,
+    public static List<Object> createInputParams(ExpressionResolver expressionResolver,
                                                  StateInstanceImpl stateInstance,
                                                  AbstractTaskState serviceTaskState, Object variablesFrom) {
         List<Object> inputAssignments = serviceTaskState.getInput();
@@ -53,7 +54,7 @@ public class ParameterUtils {
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
                     for (Object inputAssignment : inputAssignments) {
-                        inputExpressions.add(createValueExpression(expressionFactoryManager, inputAssignment));
+                        inputExpressions.add(createValueExpression(expressionResolver, inputAssignment));
                     }
                 }
                 serviceTaskState.setInputExpressions(inputExpressions);
@@ -68,7 +69,7 @@ public class ParameterUtils {
         return inputValues;
     }
 
-    public static Map<String, Object> createOutputParams(ExpressionFactoryManager expressionFactoryManager,
+    public static Map<String, Object> createOutputParams(ExpressionResolver expressionResolver,
                                                          AbstractTaskState serviceTaskState, Object variablesFrom) {
         Map<String, Object> outputAssignments = serviceTaskState.getOutput();
         if (CollectionUtils.isEmpty(outputAssignments)) {
@@ -83,7 +84,7 @@ public class ParameterUtils {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
                     for (Map.Entry<String, Object> entry : outputAssignments.entrySet()) {
                         outputExpressions.put(entry.getKey(),
-                                createValueExpression(expressionFactoryManager, entry.getValue()));
+                                createValueExpression(expressionResolver, entry.getValue()));
                     }
                 }
                 serviceTaskState.setOutputExpressions(outputExpressions);
@@ -126,8 +127,8 @@ public class ParameterUtils {
         }
     }
 
-    public static Object createValueExpression(ExpressionFactoryManager expressionFactoryManager,
-                                                Object paramAssignment) {
+    public static Object createValueExpression(ExpressionResolver expressionResolver,
+                                               Object paramAssignment) {
 
         Object valueExpression;
 
@@ -137,38 +138,18 @@ public class ParameterUtils {
             Map<String, Object> paramMapAssignment = (Map<String, Object>)paramAssignment;
             Map<String, Object> paramMap = new LinkedHashMap<>(paramMapAssignment.size());
             paramMapAssignment.forEach((paramName, valueAssignment) -> {
-                paramMap.put(paramName, createValueExpression(expressionFactoryManager, valueAssignment));
+                paramMap.put(paramName, createValueExpression(expressionResolver, valueAssignment));
             });
             valueExpression = paramMap;
         } else if (paramAssignment instanceof List) {
             List<Object> paramListAssignment = (List<Object>)paramAssignment;
             List<Object> paramList = new ArrayList<>(paramListAssignment.size());
             for (Object aParamAssignment : paramListAssignment) {
-                paramList.add(createValueExpression(expressionFactoryManager, aParamAssignment));
+                paramList.add(createValueExpression(expressionResolver, aParamAssignment));
             }
             valueExpression = paramList;
         } else if (paramAssignment instanceof String && ((String)paramAssignment).startsWith("$")) {
-
-            String expressionStr = (String)paramAssignment;
-            int expTypeStart = expressionStr.indexOf("$");
-            int expTypeEnd = expressionStr.indexOf(".", expTypeStart);
-
-            String expressionType = null;
-            if (expTypeStart >= 0 && expTypeEnd > expTypeStart) {
-                expressionType = expressionStr.substring(expTypeStart + 1, expTypeEnd);
-            }
-
-            int expEnd = expressionStr.length();
-            String expressionContent = null;
-            if (expTypeEnd > 0 && expEnd > expTypeEnd) {
-                expressionContent = expressionStr.substring(expTypeEnd + 1, expEnd);
-            }
-
-            ExpressionFactory expressionFactory = expressionFactoryManager.getExpressionFactory(expressionType);
-            if (expressionFactory == null) {
-                throw new IllegalArgumentException("Cannot get ExpressionFactory by Type[" + expressionType + "]");
-            }
-            valueExpression = expressionFactory.createExpression(expressionContent);
+            valueExpression = expressionResolver.getExpression((String) paramAssignment);
         } else {
             valueExpression = paramAssignment;
         }

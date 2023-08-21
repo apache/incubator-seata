@@ -13,16 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.evaluation;
 
-import java.util.Map;
+package io.seata.saga.engine.expression;
+
+import io.seata.saga.proctrl.ProcessContext;
 
 /**
- * Evaluator
+ * Expression structure resolver
  *
- * @author lorne.cl
+ * @author ptyin
  */
-public interface Evaluator {
+public interface ExpressionResolver {
+    Expression getExpression(String expressionStr);
 
-    boolean evaluate(Map<String, Object> variables);
+    <T extends Expression> Object getDefaultElContext(ProcessContext context, Class<T> expressionClass);
+
+    <T extends Expression> Object getStatusEvaluationElContext(ProcessContext context, Class<T> expressionClass);
+
+    ExpressionFactoryManager getExpressionFactoryManager();
+
+    void setExpressionFactoryManager(ExpressionFactoryManager expressionFactoryManager);
 }
