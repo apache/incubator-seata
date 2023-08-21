@@ -60,7 +60,7 @@ import java.util.Map;
  */
 public class ProtocolV1Encoder implements ProtocolEncoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV0Encoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Encoder.class);
 
 
     public void encode(RpcMessage message, ByteBuf out) {
