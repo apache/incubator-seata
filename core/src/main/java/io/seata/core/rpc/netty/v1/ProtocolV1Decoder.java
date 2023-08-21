@@ -94,19 +94,20 @@ public class ProtocolV1Decoder  implements ProtocolDecoder {
         }
 
         // read body
-        int bodyLength = fullLength - headLength;
         if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
             rpcMessage.setBody(HeartbeatMessage.PING);
         } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
             rpcMessage.setBody(HeartbeatMessage.PONG);
-        } else if (bodyLength > 0) {
-            byte[] bs = new byte[bodyLength];
-            frame.readBytes(bs);
-            Compressor compressor = CompressorFactory.getCompressor(compressorType);
-            bs = compressor.decompress(bs);
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType),version);
-            rpcMessage.setBody(serializer.deserialize(bs));
-            return rpcMessage;
+        } else {
+            int bodyLength = fullLength - headLength;
+            if (bodyLength > 0) {
+                byte[] bs = new byte[bodyLength];
+                frame.readBytes(bs);
+                Compressor compressor = CompressorFactory.getCompressor(compressorType);
+                bs = compressor.decompress(bs);
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), version);
+                rpcMessage.setBody(serializer.deserialize(bs));
+            }
         }
 
         return rpcMessage;
