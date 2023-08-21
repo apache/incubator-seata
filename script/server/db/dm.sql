@@ -1,4 +1,5 @@
 -- -------------------------------- The script used when storeMode is 'db' --------------------------------
+
 -- the table to store GlobalSession data
 CREATE TABLE "SEATA"."GLOBAL_TABLE"
 (
@@ -19,6 +20,7 @@ CREATE TABLE "SEATA"."GLOBAL_TABLE"
 CREATE  INDEX "IDX_GMT_MODIFIED_STATUS" ON "SEATA"."GLOBAL_TABLE"("GMT_MODIFIED" ASC,"STATUS" ASC);
 CREATE  INDEX "IDX_TRANSACTION_ID" ON "SEATA"."GLOBAL_TABLE"("TRANSACTION_ID" ASC);
 
+
 -- the table to store BranchSession data
 CREATE TABLE "SEATA"."BRANCH_TABLE"
 (
@@ -37,6 +39,7 @@ CREATE TABLE "SEATA"."BRANCH_TABLE"
 );
 
 CREATE INDEX "IDX_XID" ON "SEATA"."BRANCH_TABLE"("XID" ASC);
+
 
 -- the table to store lock data
 CREATE TABLE "SEATA"."LOCK_TABLE"
@@ -67,4 +70,7 @@ CREATE TABLE "SEATA"."DISTRIBUTED_LOCK"
     PRIMARY KEY ("LOCK_KEY")
 );
 
-INSERT INTO "SEATA"."DISTRIBUTED_LOCK" ("LOCK_KEY", "LOCK_VALUE", "EXPIRE") VALUES ('HandleAllSession', ' ', 0);
+INSERT INTO "SEATA"."DISTRIBUTED_LOCK" ("LOCK_KEY", "LOCK_VALUE", "EXPIRE") VALUES ('AsyncCommitting', ' ', 0);
+INSERT INTO "SEATA"."DISTRIBUTED_LOCK" ("LOCK_KEY", "LOCK_VALUE", "EXPIRE") VALUES ('RetryCommitting', ' ', 0);
+INSERT INTO "SEATA"."DISTRIBUTED_LOCK" ("LOCK_KEY", "LOCK_VALUE", "EXPIRE") VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO "SEATA"."DISTRIBUTED_LOCK" ("LOCK_KEY", "LOCK_VALUE", "EXPIRE") VALUES ('TxTimeoutCheck', ' ', 0);
