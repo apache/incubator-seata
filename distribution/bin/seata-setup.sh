@@ -128,19 +128,23 @@ JVM_MetaspaceSize=$JVM_MetaspaceSize
 JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
 JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
 LOADER_PATH=$LOADER_PATH
-JAVA_OPT="${JAVA_OPT} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
-JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof -XX:+DisableExplicitGC"
+LOG_HOME=$LOG_HOME
+if [ -z "$LOG_HOME" ]; then
+    LOG_HOME="$HOME/logs/seata"
+fi
+JAVA_OPT="${JAVA_OPT} -Dlog.home=${LOG_HOME} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xss${JVM_XSS:="512k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
+JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_HOME}/java_heapdump.hprof -XX:+DisableExplicitGC"
 
 JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $1}')
 if [[ "$JAVA_MAJOR_VERSION" -eq "1" ]] ; then
   JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
 fi
 if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
-  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=102400"
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${LOG_HOME}/seata_gc.log:time,tags:filecount=10,filesize=102400"
 elif [[ "$JAVA_MAJOR_VERSION" -ge "17" ]] ; then
-  JAVA_OPT="${JAVA_OPT} -Xlog:gc=trace:file=${BASEDIR}/logs/seata_gc.log:time,tags:filecount=10,filesize=10M"
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc=trace:file=${LOG_HOME}/seata_gc.log:time,tags:filecount=10,filesize=10M"
 else
-  JAVA_OPT="${JAVA_OPT} -Xloggc:${BASEDIR}/logs/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
+  JAVA_OPT="${JAVA_OPT} -Xloggc:${LOG_HOME}/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 fi
 
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
