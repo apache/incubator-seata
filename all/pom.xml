@@ -140,6 +140,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-namingserver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-brpc</artifactId>
             <version>${project.version}</version>
         </dependency>
