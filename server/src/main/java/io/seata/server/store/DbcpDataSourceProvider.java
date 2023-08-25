@@ -20,6 +20,7 @@ import io.seata.core.store.db.AbstractDataSourceProvider;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 
 /**
  * The dbcp datasource provider
@@ -51,6 +52,7 @@ public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
         ds.setTestWhileIdle(true);
         ds.setValidationQuery(getValidationQuery(getDBType()));
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
+        ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
         return ds;
     }
 }

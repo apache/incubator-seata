@@ -17,6 +17,7 @@ package io.seata.server.store;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.util.IsolationLevel;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceProvider;
 
@@ -55,6 +56,7 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider {
         config.setAutoCommit(true);
         config.setConnectionTimeout(getMaxWait());
         config.setInitializationFailTimeout(-1);
+        config.setTransactionIsolation(IsolationLevel.TRANSACTION_READ_COMMITTED.name());
         return new HikariDataSource(config);
     }
 }
