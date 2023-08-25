@@ -14,7 +14,7 @@
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5766](https://github.com/seata/seata/pull/5766)] 修复序列化漏洞
 
 ### test:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX

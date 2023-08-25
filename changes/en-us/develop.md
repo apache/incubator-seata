@@ -15,7 +15,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5766](https://github.com/seata/seata/pull/5766)] fix some serializer vulnerabilities
 
 ### test:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
