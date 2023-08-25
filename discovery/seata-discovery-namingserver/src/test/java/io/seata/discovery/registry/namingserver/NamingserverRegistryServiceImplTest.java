@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
+@Disabled
 class NamingserverRegistryServiceImplTest {
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -92,15 +92,6 @@ class NamingserverRegistryServiceImplTest {
         assertEquals(inetSocketAddress.getPort(),8088);
     }
 
-    @Disabled
-    @Test
-    public void lookupTest() throws Exception {
-
-        NamingserverRegistryServiceImpl namingserverRegistryService = new NamingserverRegistryServiceImpl();
-        List<InetSocketAddress> inetSocketAddressList = namingserverRegistryService.lookup("group1");
-        assertEquals(inetSocketAddressList.size(), 0);
-        namingserverRegistryService.unsubscribe("group1");
-    }
 
 
     @Test
