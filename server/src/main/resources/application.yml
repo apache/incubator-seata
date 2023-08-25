@@ -40,7 +40,15 @@ seata:
     type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: file
+    type: namingserver
+    metadata:
+      cluster-type: default
+      weight: 1
+    namingserver:
+      server-addr:
+        - 127.0.0.1:8080
+      cluster: cluster2
+      namespace: public
   store:
     # support: file 、 db 、 redis
     mode: file
