@@ -11,7 +11,7 @@
 - [[#5769](https://github.com/seata/seata/pull/5769)] 修复不满足 sofa-rpc 中 setAttachment 方法的参数前缀要求问题
 
 ### optimize:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5804](https://github.com/seata/seata/pull/5804)] 优化docker镜像的默认时区
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] 修复Java依赖漏洞
