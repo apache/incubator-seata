@@ -73,6 +73,8 @@ public interface DomainConstants {
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
+    String VAR_NAME_IS_IN_PARALLEL_BRANCH = "_is_in_parallel_branch_";
+    String VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER = "_current_parallel_context_holder_";
     //endregion
 
     // region of loop

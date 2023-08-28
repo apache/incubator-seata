@@ -16,13 +16,19 @@
 
 package io.seata.saga.engine.pcext.utils;
 
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.SideEffectFreeProcessContextImpl;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.*;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 
@@ -39,12 +45,9 @@ public class ParallelTaskUtils {
      * @param parentContext parent context
      * @return child context
      */
-    public static ProcessContext forkProcessContext(ProcessContext parentContext, State branchState,
-                                                    CountDownLatch latch, Semaphore semaphore) {
+    public static ProcessContext forkProcessContext(ProcessContext parentContext, State branchState) {
         SideEffectFreeProcessContextImpl childContext = new SideEffectFreeProcessContextImpl();
         childContext.setParent(parentContext);
-        childContext.setVariable(DomainConstants.PARALLEL_LATCH, latch);
-        childContext.setVariable(DomainConstants.PARALLEL_SEMAPHORE, semaphore);
 
         StateInstruction parentInstruction = parentContext.getInstruction(StateInstruction.class);
         StateInstruction copiedInstruction = copyInstruction(parentInstruction);
@@ -79,5 +82,88 @@ public class ParallelTaskUtils {
         }
     }
 
+    /**
+     * Forward branch context to last executed state in branch.
+     *
+     * @param branchContext Branch context
+     * @param forkState     Fork state
+     * @return The state to forward
+     */
+    public static State forwardBranch(ProcessContext branchContext, ForkState forkState) {
+        StateInstruction instruction = branchContext.getInstruction(StateInstruction.class);
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) branchContext.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
+        return forwardBranch(instruction.getState(branchContext), stateMachineInstance, forkState);
+    }
+
+
+    /**
+     * Forward branch context to last executed state in branch.
+     *
+     * @param branchInitialState   Branch initial state
+     * @param stateMachineInstance Statemachine instance
+     * @param forkState            Fork state
+     * @return The state to forward
+     */
+    public static State forwardBranch(State branchInitialState, StateMachineInstance stateMachineInstance,
+                                      ForkState forkState) {
+        Set<String> branchStates = forkState.getAllBranchStates().get(branchInitialState.getName());
+
+        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
+            return branchInitialState;
+        }
+
+        // Forward to the last state
+        StateInstance lastForwardStateInstance = null;
+
+        for (StateInstance stateInstance : stateInstanceList) {
+            // If it is not in the branch or has been compensated, then continue
+            if (!branchStates.contains(EngineUtils.getOriginStateName(stateInstance))
+                    || ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
+                continue;
+            } else if (stateInstance.isForCompensation()) {
+                throw new ForwardInvalidException(String.format("Compensation state instance exists in branch [%s] " +
+                                "execution, Operation [forward] denied, stateInstanceId: %s",
+                        branchInitialState.getName(), stateInstance.getId()), FrameworkErrorCode.OperationDenied);
+            } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
+                throw new ForwardInvalidException(
+                        String.format("Last forward execution state instance compensation status is [UN], " +
+                                "Operation [forward] denied, stateInstanceId: %s", stateInstance.getId()),
+                        FrameworkErrorCode.OperationDenied);
+            }
+
+            lastForwardStateInstance = stateInstance;
+        }
+
+        State toForwardState = branchInitialState;
+        if (lastForwardStateInstance != null) {
+            String lastForwardStateName = EngineUtils.getOriginStateName(lastForwardStateInstance);
+            State lastForwardState = stateMachineInstance.getStateMachine().getState(lastForwardStateName);
+
+            // If last forward state successfully executed, then forward to the next
+            if (ExecutionStatus.SU.equals(lastForwardStateInstance.getStatus())) {
+                String nextOfForward = lastForwardState.getNext();
+
+                if (StringUtils.isBlank(nextOfForward)) {
+                    throw new ForwardInvalidException(String.format("Last forward state instance [%s] in branch [%s] " +
+                                    "succeeded, and it has no next, should refer to join state [%s]",
+                            lastForwardStateInstance.getId(), branchInitialState.getName(),
+                            forkState.getPairedJoinState()));
+                }
+
+                State nextStateOfForward = stateMachineInstance.getStateMachine().getState(nextOfForward);
+                if (nextStateOfForward == null) {
+                    throw new EngineExecutionException(String.format("Cannot find next [%s] of last forward state [%s]",
+                            nextOfForward, lastForwardStateName), FrameworkErrorCode.ObjectNotExists);
+                }
+                toForwardState = nextStateOfForward;
+            } else {
+                toForwardState = lastForwardState;
+            }
+        }
+
+        return toForwardState;
+    }
 }

@@ -17,6 +17,8 @@
 package io.seata.saga.statelang.domain;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Fork state for multi-branch parallel execution
@@ -29,4 +31,14 @@ public interface ForkState extends State {
     int getParallel();
 
     int getAwaitTimeout();
+
+    String getPairedJoinState();
+
+    /**
+     * Get all branch states map with branch initial state as key and branch states as value.
+     * Note that values of the map do not include states inside branches of sub fork state.
+     *
+     * @return all branch states
+     */
+    Map<String, Set<String>> getAllBranchStates();
 }

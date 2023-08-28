@@ -19,6 +19,7 @@ package io.seata.saga.engine.pcext.handlers;
 
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.engine.pcext.utils.ParallelTaskUtils;
 import io.seata.saga.proctrl.ProcessContext;
 
@@ -30,6 +31,11 @@ import io.seata.saga.proctrl.ProcessContext;
 public class JoinStateHandler implements StateHandler {
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
-        ParallelTaskUtils.endBranch(context);
+        ParallelContextHolder parallelContextHolder = ParallelContextHolder.getCurrent(context);
+        if (parallelContextHolder != null) {
+            parallelContextHolder.complete();
+        } else {
+            ParallelTaskUtils.endBranch(context);
+        }
     }
 }

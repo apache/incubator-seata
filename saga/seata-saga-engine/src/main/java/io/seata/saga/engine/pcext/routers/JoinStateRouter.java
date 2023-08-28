@@ -16,16 +16,19 @@
 
 package io.seata.saga.engine.pcext.routers;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateRouter;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.StateRouterInterceptor;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +45,34 @@ public class JoinStateRouter implements StateRouter, InterceptableStateRouter {
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
+        ParallelContextHolder parallelContextHolder = ParallelContextHolder.getCurrent(context);
+        if (parallelContextHolder != null) {
+            // Route to another branch if parallel execution has not all launched, otherwise route to the next state.
+            String nextStateName = parallelContextHolder.next();
+            if (nextStateName == null) {
+                return endBranchRouting(instruction);
+            }
+            if (parallelContextHolder.isFinished()) {
+                context.removeVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER);
+            }
+
+            State nextState = state.getStateMachine().getState(nextStateName);
+            if (nextState == null) {
+                throw new EngineExecutionException(String.format("Next state [%s] dose not exist", state.getNext()),
+                        FrameworkErrorCode.ObjectNotExists);
+            }
+            instruction.setStateName(nextStateName);
+            // Check if next state is loop task
+            if (null != LoopTaskUtils.getLoopConfig(context, nextState)) {
+                instruction.setTemporaryState(new LoopStartStateImpl());
+            }
+            return instruction;
+        } else {
+            return endBranchRouting(instruction);
+        }
+    }
+
+    private static Instruction endBranchRouting(StateInstruction instruction) {
         instruction.setEnd(true);
         return null;
     }

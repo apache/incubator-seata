@@ -26,8 +26,9 @@ import io.seata.saga.engine.pcext.StateRouterInterceptor;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ForkState;
 import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,11 +50,16 @@ public class ForkStateRouter implements StateRouter, InterceptableStateRouter {
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_IN_PARALLEL_BRANCH)) {
+            // If this fork is inside a parallel branch, ends directly.
+            stateInstruction.setEnd(true);
+            return null;
+        }
 
-        String pairedJoinStateName = ((ForkStateImpl) state).getPairedJoinState();
+        String pairedJoinStateName = ((ForkState) state).getPairedJoinState();
         State pairedJoinState = state.getStateMachine().getState(pairedJoinStateName);
         if (pairedJoinState == null) {
-            throw new EngineExecutionException(String.format("No paired join state for fork state [%s]",
+            throw new EngineExecutionException(String.format("No paired join state [%s] for fork state",
                     pairedJoinStateName), FrameworkErrorCode.ObjectNotExists);
         }
         String stateNameAfterJoin = pairedJoinState.getNext();

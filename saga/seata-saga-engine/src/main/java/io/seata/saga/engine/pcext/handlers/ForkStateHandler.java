@@ -18,25 +18,24 @@ package io.seata.saga.engine.pcext.handlers;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
-import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.engine.pcext.utils.ParallelTaskUtils;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
-import io.seata.saga.statelang.domain.*;
-import io.seata.saga.statelang.domain.impl.ForkStateImpl;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ForkState;
+import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -54,12 +53,7 @@ public class ForkStateHandler implements StateHandler {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         ForkState forkState = (ForkState) instruction.getState(context);
         List<String> branches = forkState.getBranches();
-        if (CollectionUtils.isEmpty(branches)) {
-            throw new EngineExecutionException(
-                    "State [" + forkState.getName() + "] parallel branch should have at least one",
-                    FrameworkErrorCode.ParameterRequired
-            );
-        }
+        checkBranches(forkState, branches);
 
         StateMachineConfig stateMachineConfig =
                 (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
@@ -74,6 +68,23 @@ public class ForkStateHandler implements StateHandler {
         publishBranches(stateMachineConfig.getAsyncProcessCtrlEventPublisher(), context, forkState);
     }
 
+    protected static void checkBranches(State forkState, List<String> branches) {
+        if (CollectionUtils.isEmpty(branches)) {
+            throw new EngineExecutionException(
+                    "State [" + forkState.getName() + "] parallel branch should have at least one",
+                    FrameworkErrorCode.ParameterRequired
+            );
+        }
+        StateMachine stateMachine = forkState.getStateMachine();
+        for (String branch: branches) {
+            State branchState = stateMachine.getState(branch);
+            if (branchState == null) {
+                throw new EngineExecutionException(String.format("Fork state [%s] branch [%s] cannot be found",
+                        forkState.getName(), branch), FrameworkErrorCode.ObjectNotExists);
+            }
+        }
+    }
+
     /**
      * Publish branch context to event bus.
      *
@@ -83,6 +94,59 @@ public class ForkStateHandler implements StateHandler {
      */
     protected static void publishBranches(ProcessCtrlEventPublisher publisher,
                                           ProcessContext context, ForkState state) {
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_IN_PARALLEL_BRANCH)) {
+            // If this fork is inside a parallel branch, it does not block.
+            publishBranchesNonBlocking(publisher, context, state);
+        } else {
+            // Otherwise it keeps blocked until all branches join.
+            publishBranchesBlocking(publisher, context, state);
+        }
+    }
+
+    /**
+     * Publish branch context to event bus in a non-blocking manner.
+     * Use this method under the circumstance that the current fork
+     * state is inside a parallel branch published by an outer fork.
+     * This method can prevent deadlock in a nesting fork setup.
+     *
+     * @param publisher Event publisher
+     * @param context   Current context
+     * @param state     Current fork state
+     */
+    protected static void publishBranchesNonBlocking(ProcessCtrlEventPublisher publisher,
+                                                     ProcessContext context, ForkState state) {
+        List<String> branches = state.getBranches();
+        int totalBranches = branches.size();
+        int maxBranches = state.getParallel() == 0 ? totalBranches : Math.min(totalBranches, state.getParallel());
+        StateMachine stateMachine = state.getStateMachine();
+
+        ParallelContextHolder parallelContextHolder = ParallelContextHolder.getInstance(context, state);
+        for (int i = 0; i < maxBranches; i++) {
+            State branchState = stateMachine.getState(parallelContextHolder.next());
+            if (branchState == null) {
+                throw new EngineExecutionException(String.format("Fork state [%s] branch [%s] cannot be found",
+                        state.getName(), branches.get(i)), FrameworkErrorCode.ObjectNotExists);
+            }
+
+            // Fork context
+            ProcessContext childContext = ParallelTaskUtils.forkProcessContext(context, branchState);
+            childContext.setVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER, parallelContextHolder);
+            // Publish it to async event bus
+            publisher.publish(childContext);
+        }
+    }
+
+    /**
+     * Publish branch context to event bus in a blocking manner.
+     * Use this method under the circumstance that the current fork state is inside the caller thread.
+     * This method can prevent early termination of caller thread when starting state machine synchronously.
+     *
+     * @param publisher Event publisher
+     * @param context   Current context
+     * @param state     Current fork state
+     */
+    protected static void publishBranchesBlocking(ProcessCtrlEventPublisher publisher,
+                                                  ProcessContext context, ForkState state) {
         List<String> branches = state.getBranches();
         int totalBranches = branches.size();
         int maxBranches = state.getParallel() == 0 ? totalBranches : Math.min(totalBranches, state.getParallel());
@@ -96,15 +160,19 @@ public class ForkStateHandler implements StateHandler {
                 .equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME));
         for (String branch : branches) {
             State branchState = stateMachine.getState(branch);
-            if (branchState == null) {
-                throw new EngineExecutionException(String.format("Fork state [%s] branch [%s] cannot be found",
-                        state.getName(), branch), FrameworkErrorCode.ObjectNotExists);
-            }
-
             // Fork context
-            ProcessContext childContext = ParallelTaskUtils.forkProcessContext(context, branchState, latch, semaphore);
+            ProcessContext childContext = ParallelTaskUtils.forkProcessContext(context, branchState);
+            childContext.setVariable(DomainConstants.PARALLEL_LATCH, latch);
+            childContext.setVariable(DomainConstants.PARALLEL_SEMAPHORE, semaphore);
+            childContext.setVariable(DomainConstants.VAR_NAME_IS_IN_PARALLEL_BRANCH, true);
             if (Boolean.TRUE.equals(isForward)) {
-                forwardBranch(childContext, (ForkStateImpl) state);
+                StateInstruction instruction = childContext.getInstruction(StateInstruction.class);
+                State toForwardState = ParallelTaskUtils.forwardBranch(childContext, state);
+                instruction.setStateName(toForwardState.getName());
+
+                if (LoopTaskUtils.getLoopConfig(childContext, toForwardState) != null) {
+                    instruction.setTemporaryState(new LoopStartStateImpl());
+                }
             }
             try {
                 boolean acquired = semaphore.tryAcquire(state.getAwaitTimeout(), TimeUnit.MILLISECONDS);
@@ -129,79 +197,6 @@ public class ForkStateHandler implements StateHandler {
         } catch (InterruptedException e) {
             throw new EngineExecutionException(e, String.format("Waiting join branches for fork state [%s] is " +
                     "interrupted, message: [%s]", state.getName(), e.getMessage()));
-        }
-    }
-
-    /**
-     * Forward branch context to last executed state in branch.
-     *
-     * @param branchContext Context of child branch
-     * @param forkState     Fork state
-     */
-    protected static void forwardBranch(ProcessContext branchContext, ForkStateImpl forkState) {
-        StateInstruction instruction = branchContext.getInstruction(StateInstruction.class);
-        State branchInitialState = instruction.getState(branchContext);
-        Set<String> branchStates = forkState.getAllBranchStates().get(branchInitialState.getName());
-
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) branchContext.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
-        if (CollectionUtils.isEmpty(stateInstanceList)) {
-            return;
-        }
-
-        // Forward to the last state
-        StateInstance lastForwardStateInstance = null;
-
-        for (StateInstance stateInstance : stateInstanceList) {
-            // If it is not in the branch or has been compensated, then continue
-            if (!branchStates.contains(EngineUtils.getOriginStateName(stateInstance))
-                    || ExecutionStatus.SU.equals(stateInstance.getCompensationStatus())) {
-                continue;
-            } else if (stateInstance.isForCompensation()) {
-                throw new ForwardInvalidException(String.format("Compensation state instance exists in branch [%s] " +
-                                "execution, Operation [forward] denied, stateInstanceId: %s",
-                        branchInitialState.getName(), stateInstance.getId()), FrameworkErrorCode.OperationDenied);
-            } else if (ExecutionStatus.UN.equals(stateInstance.getCompensationStatus())) {
-                throw new ForwardInvalidException(
-                        String.format("Last forward execution state instance compensation status is [UN], " +
-                                "Operation [forward] denied, stateInstanceId: %s", stateInstance.getId()),
-                        FrameworkErrorCode.OperationDenied);
-            }
-
-            lastForwardStateInstance = stateInstance;
-        }
-
-        State toForwardState = branchInitialState;
-        if (lastForwardStateInstance != null) {
-            String lastForwardStateName = EngineUtils.getOriginStateName(lastForwardStateInstance);
-            State lastForwardState = stateMachineInstance.getStateMachine().getState(lastForwardStateName);
-
-            // If last forward state successfully executed, then forward to the next
-            if (ExecutionStatus.SU.equals(lastForwardStateInstance.getStatus())) {
-                String nextOfForward = lastForwardState.getNext();
-
-                if (StringUtils.isBlank(nextOfForward)) {
-                    throw new ForwardInvalidException(String.format("Last forward state instance [%s] in branch [%s] " +
-                                    "succeeded, and it has no next, should refer to join state [%s]",
-                            lastForwardStateInstance.getId(), branchInitialState.getName(),
-                            forkState.getPairedJoinState()));
-                }
-
-                State nextStateOfForward = stateMachineInstance.getStateMachine().getState(nextOfForward);
-                if (nextStateOfForward == null) {
-                    throw new EngineExecutionException(String.format("Cannot find next [%s] of last forward state [%s]",
-                            nextOfForward, lastForwardStateName), FrameworkErrorCode.ObjectNotExists);
-                }
-                toForwardState = nextStateOfForward;
-            } else {
-                toForwardState = lastForwardState;
-            }
-        }
-
-        instruction.setStateName(toForwardState.getName());
-        if (LoopTaskUtils.getLoopConfig(branchContext, toForwardState) != null) {
-            instruction.setTemporaryState(new LoopStartStateImpl());
         }
     }
 }

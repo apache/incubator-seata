@@ -73,6 +73,7 @@ public class ForkStateImpl extends BaseState implements ForkState {
         this.awaitTimeout = awaitTimeout;
     }
 
+    @Override
     public String getPairedJoinState() {
         return pairedJoinState;
     }
@@ -81,12 +82,7 @@ public class ForkStateImpl extends BaseState implements ForkState {
         this.pairedJoinState = pairedJoinState;
     }
 
-    /**
-     * Get all branch states map with branch initial state as key and branch states as value.
-     * Note that values of the map do not include states inside branches of sub fork state.
-     *
-     * @return all branch states
-     */
+    @Override
     public Map<String, Set<String>> getAllBranchStates() {
         return allBranchStates;
     }
