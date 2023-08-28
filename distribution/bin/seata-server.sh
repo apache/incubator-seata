@@ -36,9 +36,7 @@ JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
 
 CMD_LINE_ARGS=$@
 
-echo "Affected JVM parameters:$JAVA_OPT"
-
 # start
-echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > /dev/null 2>&1 &
+echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> /dev/null 2>&1 &"
 nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> /dev/null 2>&1 &
-echo "seata-server is starting, you can check the ${BASEDIR}/logs *.log"
+echo "seata-server is starting, you can check the ${LOG_HOME}/ *.log"
