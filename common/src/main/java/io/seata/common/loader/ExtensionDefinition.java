@@ -47,10 +47,10 @@ final class ExtensionDefinition<S> {
     }
 
     public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz) {
-        this(name,order,scope,clazz,0);
+        this(name,order,scope,clazz,-1);
     }
 
-    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz,int version) {
+    public ExtensionDefinition(String name, Integer order, Scope scope, Class<S> clazz, int version) {
         this.name = name;
         this.order = order;
         this.version = version;

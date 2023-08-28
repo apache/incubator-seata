@@ -30,7 +30,7 @@ import io.seata.serializer.seata.SeataAbstractSerializer;
 import java.nio.ByteBuffer;
 
 /**
- * The Seata codec v1.
+ * The Seata codec v0.
  *
  * @author Bughue
  */

@@ -24,7 +24,6 @@ import io.seata.core.protocol.RegisterTMRequest;
  * @author zhangsen
  */
 public class RegisterTMRequestCodec extends AbstractIdentifyRequestCodec {
-
     @Override
     public Class<?> getMessageClassType() {
         return RegisterTMRequest.class;

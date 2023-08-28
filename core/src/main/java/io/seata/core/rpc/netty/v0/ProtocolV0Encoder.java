@@ -17,15 +17,11 @@ package io.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.core.compressor.Compressor;
-import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolEncoder;
-import io.seata.core.rpc.netty.ProtocolRpcMessage;
-import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
@@ -66,15 +62,6 @@ public class ProtocolV0Encoder implements ProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV0Encoder.class);
 
-    public static void encode(ChannelHandlerContext ctx, ProtocolV0RpcMessage rpcMessage, ByteBuf out) {
-        try {
-            // todo 按照旧协议方式encode
-            System.out.println();
-        } catch (Throwable e) {
-            LOGGER.error("Encode request error!", e);
-        }
-    }
-
     @Override
     public void encode(RpcMessage message, ByteBuf out) {
         try {
@@ -95,8 +82,6 @@ public class ProtocolV0Encoder implements ProtocolEncoder {
                 out.writeLong(msg.getId());
                 return;
             }
-
-
 
             byte[] bodyBytes = null;
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codec), ProtocolConstants.VERSION_0);

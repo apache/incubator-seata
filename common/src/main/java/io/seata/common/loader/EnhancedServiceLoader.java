@@ -638,6 +638,7 @@ public class EnhancedServiceLoader {
                     return first.get();
                 }
             }
+            // todo [5738-discuss][class-loader] 实在找不到的话还要随便找个版本吗？这样不太严谨？
             return CollectionUtils.getLast(definitions);
         }
 

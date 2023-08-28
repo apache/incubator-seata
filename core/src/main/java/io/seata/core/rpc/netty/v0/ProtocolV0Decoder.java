@@ -68,12 +68,12 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
     @Override
     public ProtocolV0RpcMessage decodeFrame(ByteBuf in) {
         ProtocolV0RpcMessage rpcMessage = new ProtocolV0RpcMessage();
-        // todo 旧版本是直接返回跳过了，我们需要保留这个逻辑？【特殊】
+        // todo [5738-discuss][decode] 旧版本是直接返回跳过了，我们需要保留这个逻辑？【特殊】
         if (in.readableBytes() < ProtocolV0Constants.HEAD_LENGTH) {
             throw new IllegalArgumentException("Nothing to decode.");
         }
 
-        // todo 这里是为了bodyLength不满足要求时reset，意义是什么？【特殊】
+        // todo [5738-discuss][decode] 这里是为了bodyLength不满足要求时reset，意义是什么？【特殊】
         in.markReaderIndex();
 
         // todo 外层已经判断过了，这里可以跳过
@@ -109,7 +109,7 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
         }
 
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
-            // todo 【特殊】
+            // todo [5738-discuss][兼容] 这种情况要允许吗？
             in.resetReaderIndex();
             throw new IllegalArgumentException("readableBytes < bodyLength");
         }
@@ -119,7 +119,8 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
         rpcMessage.setRequest(isRequest);
 
         try {
-            // v0_1
+            // v0 方案1（未完整实现
+            // todo [5738-discuss][decode] 旧方式完全分离出来更难改
             // todo serializer==null
 //            MessageCodecV0 msgCodec = serializer.getMsgInstanceByCode(typeCode);
 //            if (!msgCodec.decode(in)) {
@@ -127,18 +128,18 @@ public class ProtocolV0Decoder implements ProtocolDecoder {
 //            }
 //            rpcMessage.setBody(msgCodec);
 
-            // v0_2
+            // v0 方案2（已实现
             int length = in.readableBytes();
             byte[] bs = new byte[length];
             in.readBytes(bs);
+            // todo [5738-discuss][decode] 旧版本协议在这里是有messageType的，所以这里要补
             byte[] bs2 = new byte[2 + length];
-            bs2[0] = (byte) (0x00FF & (typeCode>>8));
+            bs2[0] = (byte) (0x00FF & (typeCode >> 8));
             bs2[1] = (byte) (0x00FF & typeCode);
-            System.arraycopy(bs,0,bs2,2, length);
-            byte codecType = isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
+            System.arraycopy(bs, 0, bs2, 2, length);
+            byte codecType = isSeataCodec ? SerializerType.SEATA.getCode() : SerializerType.HESSIAN.getCode();
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType), ProtocolConstants.VERSION_0);
             rpcMessage.setBody(serializer.deserialize(bs2));
-
         } catch (Exception e) {
             LOGGER.error("decode error", "", e);
             throw e;

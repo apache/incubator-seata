@@ -16,14 +16,12 @@
 package io.seata.core.rpc.netty.v1;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolEncoder;
-import io.seata.core.rpc.netty.ProtocolRpcMessage;
-import io.seata.core.rpc.netty.v0.ProtocolV0Encoder;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.ProtocolConstants;
+import io.seata.core.protocol.RpcMessage;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
@@ -69,7 +67,6 @@ public class ProtocolV1Encoder implements ProtocolEncoder {
             ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
             rpcMessage.rpcMsg2ProtocolMsg(message);
 
-//            if (msg instanceof RpcMessage) {
             int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
             int headLength = ProtocolConstants.V1_HEAD_LENGTH;
 

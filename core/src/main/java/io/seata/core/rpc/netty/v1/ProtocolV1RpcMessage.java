@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ?
+ * protocol v1 rpc message
  *
  * @author minghua.xie
  * @date 2023/8/1

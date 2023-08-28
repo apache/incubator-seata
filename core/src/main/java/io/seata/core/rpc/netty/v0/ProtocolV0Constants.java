@@ -16,7 +16,7 @@
 package io.seata.core.rpc.netty.v0;
 
 /**
- * ?
+ * protocol v0 constants
  *
  * @author Bughue
  * @date 2023/7/18

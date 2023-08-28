@@ -17,7 +17,6 @@ package io.seata.serializer.seata.protocol.v0;
 
 
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.serializer.seata.protocol.v1.AbstractIdentifyResponseCodec;
 
 /**
  * The type Register tm response codec.
@@ -25,7 +24,6 @@ import io.seata.serializer.seata.protocol.v1.AbstractIdentifyResponseCodec;
  * @author zhangsen
  */
 public class RegisterTMResponseCodec extends AbstractIdentifyResponseCodec {
-
     @Override
     public Class<?> getMessageClassType() {
         return RegisterTMResponse.class;

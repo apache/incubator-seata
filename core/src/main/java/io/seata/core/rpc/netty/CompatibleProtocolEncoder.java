@@ -21,11 +21,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.v0.ProtocolV0Decoder;
 import io.seata.core.rpc.netty.v0.ProtocolV0Encoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1RpcMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +63,11 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
                 byte version = rpcMessage.getProtocolVersion();
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
                 if (encoder == null) {
-                    // todo 要不要适配当前版本？
+                    // todo [5738-discuss][encode] 要不要适配当前版本？
                     throw new IllegalArgumentException("Unknown version: " + version);
                 }
 
                 encoder.encode(rpcMessage,out);
-
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }

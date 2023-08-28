@@ -87,6 +87,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         byte version;
         try {
             if (isV0(in)) {
+                // todo [5738-discuss][decode] 旧版本连super都不会走，会不会有其他问题？
                 decoded = in;
                 version = ProtocolConstants.VERSION_0;
             } else {
@@ -99,7 +100,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 try {
                     ProtocolDecoder decoder = protocolDecoderMap.get(version);
                     if (decoder == null) {
-                        // todo 要不要适配当前版本？
+                        // todo [5738-discuss][兼容] 要不要适配当前版本？
                         throw new IllegalArgumentException("Unknown version: " + version);
                     }
                     return decoder.decodeFrame(frame);
@@ -111,8 +112,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
             }
         } catch (Exception exx) {
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
-            //todo
-            exx.printStackTrace();
+            // todo [5738-discuss][优化] 这里抛出去之后似乎没有地方打印了？
             throw new DecodeException(exx);
         }
         return decoded;
@@ -133,7 +133,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
             frame.resetReaderIndex();
             return version;
         }
-        // todo
+        // todo [5738-discuss][兼容] 类型不一致的情况要允许吗？
         return -1;
     }
 

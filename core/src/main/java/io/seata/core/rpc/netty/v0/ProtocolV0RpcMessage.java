@@ -15,19 +15,16 @@
  */
 package io.seata.core.rpc.netty.v0;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.compressor.CompressorType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
 import io.seata.core.serializer.SerializerType;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * ?
+ * the protocol v0 rpc message
  *
  * @author minghua.xie
  * @date 2023/8/1
@@ -163,7 +160,7 @@ public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
     public RpcMessage protocolMsg2RpcMsg(){
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(this.messageType);
-        // todo 基础配置
+        // todo 基础配置补充完整
         rpcMessage.setCompressor(CompressorType.NONE.getCode());
 
         byte codecType = this.isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();

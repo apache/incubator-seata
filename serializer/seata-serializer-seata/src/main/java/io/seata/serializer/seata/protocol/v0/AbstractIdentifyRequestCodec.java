@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
  * The type Abstract identify request codec.
  */
 public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec {
+    // todo [5738-discuss][codec] 像这种父类如果是这次的新旧版本都一样，要写成继承吗
+    // todo [5738-discuss][codec] 这些codec类只依靠包区分是否足够？
 
     @Override
     public Class<?> getMessageClassType() {

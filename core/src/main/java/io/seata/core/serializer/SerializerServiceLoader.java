@@ -39,7 +39,7 @@ public final class SerializerServiceLoader {
      * @return the service of {@link Serializer}
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static Serializer load(SerializerType type,int version) throws EnhancedServiceNotFoundException {
+    public static Serializer load(SerializerType type, int version) throws EnhancedServiceNotFoundException {
         if (type == SerializerType.PROTOBUF) {
             try {
                 ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);

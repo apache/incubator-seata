@@ -18,6 +18,12 @@ package io.seata.core.rpc.netty;
 import io.netty.buffer.ByteBuf;
 import io.seata.core.protocol.RpcMessage;
 
+/**
+ * the protocol encoder
+ *
+ * @author minghua.xie
+ * @date 2023/8/1
+ **/
 public interface ProtocolEncoder {
     void encode(RpcMessage rpcMessage, ByteBuf out);
 }

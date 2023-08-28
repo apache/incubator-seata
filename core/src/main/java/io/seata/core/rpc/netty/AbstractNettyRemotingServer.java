@@ -74,15 +74,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     private void superSendAsync(Channel channel, RpcMessage rpcMessage) {
-        //todo 优化，是否为空
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        // todo [5738-discuss][兼容] ，目前看到用这个方法的地方都没有做空判断
         rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
         super.sendAsync(channel, rpcMessage);
     }
 
     private Object superSendSync(Channel channel, RpcMessage rpcMessage) throws TimeoutException {
-        //todo 优化，是否为空
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        // todo [5738-discuss][兼容] ，目前看到用这个方法的地方都没有做空判断
         rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
@@ -104,8 +104,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         superSendAsync(channel, rpcMessage);
     }
-
-
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
@@ -186,10 +184,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             if (rpcMessage != null) {
                 processMessage(ctx, rpcMessage);
             } else {
-                //todo 正常会有这种情况吗？打日志还是抛异常？
+                // todo [5738-discuss][兼容] 正常会有这种情况吗？打日志还是抛异常？
             }
         }
-
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {

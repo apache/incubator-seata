@@ -83,7 +83,7 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
  * @author zhangsen
  */
 public class MessageCodecFactory {
-
+// todo [5738-discuss][codec] 这个工厂类的大部分职责都被我改成serialize父类的map了，剩下的merge和batch看如何处理？
     /**
      * The constant UTF8.
      */

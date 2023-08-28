@@ -49,6 +49,7 @@ public @interface LoadLevel {
      *
      * @return the int
      */
+    // todo [5738-discuss][class-loader] 由于0也是个版本，所以现在默认是-1
     byte version() default -1;
 
     /**

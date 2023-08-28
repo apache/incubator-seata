@@ -421,7 +421,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             if (rpcMessage != null) {
                 processMessage(ctx, rpcMessage);
             } else {
-                //todo 会有这种情况吗？？【特殊】
+                // todo [5738-discuss][类型] 会有这种情况吗？？按之前的就是不处理？
                 //打日志？
             }
         }

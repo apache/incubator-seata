@@ -112,5 +112,4 @@ public class ProtocolV1Decoder  implements ProtocolDecoder {
 
         return rpcMessage;
     }
-
 }
