@@ -15,10 +15,12 @@
  */
 package io.seata.core.protocol;
 
+import java.io.Serializable;
+
 /**
  * The interface Merge message.
  *
  * @author slievrly
  */
-public interface MergeMessage {
+public interface MergeMessage extends Serializable {
 }
