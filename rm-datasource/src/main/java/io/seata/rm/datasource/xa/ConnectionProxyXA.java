@@ -22,7 +22,6 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.DefaultValues;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -32,6 +31,7 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.util.SeataXAResource;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

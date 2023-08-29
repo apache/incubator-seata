@@ -68,7 +68,7 @@ public final class JdbcUtils {
             dataSourceResource.setResourceId(buildResourceId(jdbcUrl));
             String driverClassName = com.alibaba.druid.util.JdbcUtils.getDriverClassName(jdbcUrl);
             dataSourceResource.setDriver(loadDriver(driverClassName));
-            dataSourceResource.setDbType(com.alibaba.druid.util.JdbcUtils.getDbType(jdbcUrl, driverClassName));
+            dataSourceResource.setDbType(JdbcUtils.getDbType(jdbcUrl));
         } catch (SQLException e) {
             throw new IllegalStateException("can not init DataSourceResource with " + dataSource, e);
         }
@@ -84,7 +84,7 @@ public final class JdbcUtils {
                 dataSourceResource.setResourceId(buildResourceId(jdbcUrl));
                 String driverClassName = com.alibaba.druid.util.JdbcUtils.getDriverClassName(jdbcUrl);
                 dataSourceResource.setDriver(loadDriver(driverClassName));
-                dataSourceResource.setDbType(com.alibaba.druid.util.JdbcUtils.getDbType(jdbcUrl, driverClassName));
+                dataSourceResource.setDbType(JdbcUtils.getDbType(jdbcUrl));
             } finally {
                 if (xaConnection != null) {
                     xaConnection.close();
