@@ -37,7 +37,7 @@ public class RegistryNacosProperties {
     private String application = "seata-server";
     private String slbPattern;
     private String contextPath;
-
+    private String clientApplication;
     public String getServerAddr() {
         return serverAddr;
     }
@@ -134,5 +134,13 @@ public class RegistryNacosProperties {
     public RegistryNacosProperties setContextPath(String contextPath) {
         this.contextPath = contextPath;
         return this;
+    }
+
+    public String getClientApplication() {
+        return clientApplication;
+    }
+
+    public void setClientApplication(String clientApplication) {
+        this.clientApplication = clientApplication;
     }
 }

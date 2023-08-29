@@ -126,6 +126,7 @@ seata:
       username:
       password:
       context-path:
+      client-application: ${spring.application.name}
       ##if use MSE Nacos with auth, mutex with username/password attribute
       #access-key:
       #secret-key:
