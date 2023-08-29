@@ -77,7 +77,122 @@ public enum DBType {
     /**
      * Maria db type.
      */
-    MARIADB;
+    MARIADB,
+
+    /**
+     * JTDS db type.
+     */
+    JTDS,
+
+    /**
+     * HyperSQL db type.
+     */
+    HSQL,
+
+    /**
+     * Sybase db type.
+     */
+    SYBASE,
+
+    /**
+     * Derby db type.
+     */
+    DERBY,
+
+    /**
+     * HBase db type.
+     */
+    HBASE,
+
+    /**
+     * Hive db type.
+     */
+    HIVE,
+
+    /**
+     * DM db type.
+     */
+    DM,
+
+    /**
+     * Kingbase db type.
+     */
+    KINGBASE,
+
+    /**
+     * GBase db type.
+     */
+    GBASE,
+
+    /**
+     * Xugu db type.
+     */
+    XUGU,
+
+    /**
+     * OceanBase_Oracle db type.
+     */
+    OCEANBASE_ORACLE,
+
+    /**
+     * Informix db type.
+     */
+    INFORMIX,
+
+    /**
+     * ODPS db type.
+     */
+    ODPS,
+
+    /**
+     * Teradata db type.
+     */
+    TERADATA,
+
+    /**
+     * Log4jdbc db type.
+     */
+    LOG4JDBC,
+
+    /**
+     * Phoenix db type.
+     */
+    PHOENIX,
+
+    /**
+     * EDB db type.
+     */
+    EDB,
+
+    /**
+     * Kylin db type.
+     */
+    KYLIN,
+
+    /**
+     * Presto db type.
+     */
+    PRESTO,
+
+    /**
+     * Elasticsearch db type.
+     */
+    ELASTIC_SEARCH,
+
+    /**
+     * ClickHouse db type.
+     */
+    CLICKHOUSE,
+
+    /**
+     * kdb db type.
+     */
+    KDB,
+
+    /**
+     * PolarDB db type.
+     */
+    POLARDB;
 
     /**
      * Valueof db type.
