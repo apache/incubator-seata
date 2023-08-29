@@ -9,6 +9,7 @@
 - [[#5749](https://github.com/seata/seata/pull/5749)] 修复在某些情况下，业务sql中主键字段名大小写与表元数据中的不一致，导致回滚失败
 - [[#5762](https://github.com/seata/seata/pull/5762)] 修复TableMetaCache的一些字段类型，避免溢出
 - [[#5769](https://github.com/seata/seata/pull/5769)] 修复不满足 sofa-rpc 中 setAttachment 方法的参数前缀要求问题
+- [[#5814](https://github.com/seata/seata/pull/5814)] 修复druid依赖冲突导致的XA事务开始异常与回滚失败
 
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] 优化docker镜像的默认时区
