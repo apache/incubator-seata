@@ -13,16 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# entrypoint for server
 
-. ./seata-setup.sh
-JAVA_OPT="${JAVA_OPT} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml"
-JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
-
-CMD_LINE_ARGS=$@
-
+. /seata-setup.sh
+JAVA_OPT=${JAVA_OPT//"//"/"/"}
 echo "Affected JVM parameters:$JAVA_OPT"
-
-# start
-echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
-echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+exec java $JAVA_OPT \
+  -cp $( cat /seata-server/jib-classpath-file ) \
+  $( cat /seata-server/jib-main-class-file )
