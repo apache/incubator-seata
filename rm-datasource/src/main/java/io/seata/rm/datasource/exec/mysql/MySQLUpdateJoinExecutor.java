@@ -131,7 +131,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix.append(GROUP_BY);
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
@@ -201,7 +201,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix += buildGroupBy(pkColumns, needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         needUpdateColumns.forEach(selectSQLJoiner::add);
