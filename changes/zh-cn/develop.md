@@ -13,6 +13,7 @@
 
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] 优化docker镜像的默认时区
+- [[#5815](https://github.com/seata/seata/pull/5815)] 支持 Nacos applicationName 属性
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] 修复Java依赖漏洞
@@ -29,5 +30,6 @@
 - [robynron](https://github.com/robynron)
 - [dmego](https://github.com/dmego)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [hadoop835](https://github.com/hadoop835)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
