@@ -13,6 +13,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] optimize docker default timezone
+- [[#5815](https://github.com/seata/seata/pull/5815)] support the nacos application name property
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] fix some dependencies vulnerability
@@ -29,6 +30,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [robynron](https://github.com/robynron)
 - [dmego](https://github.com/dmego)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [hadoop835](https://github.com/hadoop835)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
