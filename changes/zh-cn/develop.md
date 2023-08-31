@@ -14,6 +14,7 @@
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] 优化docker镜像的默认时区
 - [[#5815](https://github.com/seata/seata/pull/5815)] 支持 Nacos applicationName 属性
+- [[#5820](https://github.com/seata/seata/pull/5820)] 统一日志输出目录
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] 修复Java依赖漏洞

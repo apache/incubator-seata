@@ -14,6 +14,7 @@ Add changes here for all PR submitted to the develop branch.
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] optimize docker default timezone
 - [[#5815](https://github.com/seata/seata/pull/5815)] support the nacos application name property
+- [[#5820](https://github.com/seata/seata/pull/5820)] unified log output directory
 
 ### security:
 - [[#5728](https://github.com/seata/seata/pull/5728)] fix some dependencies vulnerability
