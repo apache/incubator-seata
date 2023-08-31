@@ -10,7 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5762](https://github.com/seata/seata/pull/5762)] change some fields type of TableMetaCache to avoid integer overflow
 - [[#5769](https://github.com/seata/seata/pull/5769)] fix the problem that the parameter prefix requirement of the setAttachment method in sofa-rpc is not met
 - [[#5814](https://github.com/seata/seata/pull/5814)] fix XA transaction start exception and rollback failure
-- [[#5821](https://github.com/seata/seata/pull/5821)] insert executor keywords unescape
+- [[#5771](https://github.com/seata/seata/pull/5771)] insert executor keywords unescape
 - [[#5819](https://github.com/seata/seata/pull/5814)] fix oracle column alias cannot find
 
 ### optimize:
