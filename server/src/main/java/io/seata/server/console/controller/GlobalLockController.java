@@ -17,10 +17,12 @@ package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Global Lock Controller
+ *
  * @author zhongxiang.wang
  */
 @RestController
@@ -40,6 +43,7 @@ public class GlobalLockController {
 
     /**
      * Query locks by param
+     *
      * @param param the param
      * @return the list of GlobalLockVO
      */
@@ -48,4 +52,15 @@ public class GlobalLockController {
         return globalLockService.query(param);
     }
 
+    /**
+     * Delete global locks
+     *
+     * @param xid      the lock of xid
+     * @param branchId the lock of branchId
+     * @return ingleResult<Void>
+     */
+    @DeleteMapping("delete")
+    public SingleResult<Void> query(String xid, String branchId) {
+        return globalLockService.deleteLock(xid, branchId);
+    }
 }

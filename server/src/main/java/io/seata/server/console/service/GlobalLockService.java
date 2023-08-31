@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.service;
 
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.console.result.PageResult;
@@ -33,5 +34,12 @@ public interface GlobalLockService {
      */
     PageResult<GlobalLockVO> query(GlobalLockParam param);
 
-
+    /**
+     * Delete lock by xid and branchId
+     *
+     * @param xid      xid
+     * @param branchId branch id
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> deleteLock(String xid, String branchId);
 }

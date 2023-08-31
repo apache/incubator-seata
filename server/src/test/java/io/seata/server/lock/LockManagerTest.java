@@ -27,6 +27,7 @@ import javax.annotation.Resource;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
+import io.seata.console.result.SingleResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
@@ -64,7 +65,7 @@ public class LockManagerTest {
     private GlobalLockService globalLockService;
 
     @BeforeAll
-    public static void setUp(ApplicationContext context){
+    public static void setUp(ApplicationContext context) {
 
     }
 
@@ -146,7 +147,7 @@ public class LockManagerTest {
      */
     @ParameterizedTest
     @MethodSource("deadlockBranchSessionsProvider")
-    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2)  throws Exception {
+    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
         LockManager lockManager = new FileLockManagerForTest();
         try {
             final AtomicBoolean first = new AtomicBoolean();
@@ -254,9 +255,9 @@ public class LockManagerTest {
 
             // query all data
             final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
-            Assertions.assertEquals(1,fullQueryTestResult.getPages());
-            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
-            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
+            Assertions.assertEquals(1, fullQueryTestResult.getPages());
+            Assertions.assertEquals(8, fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8, fullQueryTestResult.getData().size());
 
             // test paging
             param.setPageSize(1);
@@ -337,10 +338,42 @@ public class LockManagerTest {
             param2.setPageSize(10);
 
             final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param2);
-            Assertions.assertEquals(1,fullQueryTestResult2.getPages());
-            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
-            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
+            Assertions.assertEquals(1, fullQueryTestResult2.getPages());
+            Assertions.assertEquals(4, fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4, fullQueryTestResult2.getData().size());
 
+        } finally {
+            sessionManager.removeGlobalSession(globalSessions1);
+            sessionManager.removeGlobalSession(globalSessions2);
+            sessionManager.destroy();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void lockDeleteTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init(SessionMode.FILE);
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            // make sure sessionManager is empty
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            sessionManager.addGlobalSession(globalSessions1);
+            sessionManager.addGlobalSession(globalSessions2);
+            // wrong param for xid
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalLockService.deleteLock("testXid", "testBranchId"));
+            // wrong param for branch id
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalLockService.deleteLock(globalSessions1.getXid(), "testBranchId"));
+            SingleResult<Void> singleResult = globalLockService.deleteLock(globalSessions1.getXid(),
+                    String.valueOf(globalSessions1.getBranchSessions().get(0).getBranchId()));
+            Assertions.assertEquals(singleResult.getCode(), "200");
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
             sessionManager.removeGlobalSession(globalSessions2);
@@ -401,6 +434,7 @@ public class LockManagerTest {
 
     /**
      * global sessions provider object [ ] [ ].
+     *
      * @return the objects [ ] [ ]
      */
     static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {

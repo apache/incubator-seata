@@ -35,6 +35,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.console.vo.GlobalLockVO;
@@ -53,7 +54,7 @@ import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
-public class GlobalLockDBServiceImpl implements GlobalLockService {
+public class GlobalLockDBServiceImpl extends AbstractLockService implements GlobalLockService {
 
     private String lockTable;
 

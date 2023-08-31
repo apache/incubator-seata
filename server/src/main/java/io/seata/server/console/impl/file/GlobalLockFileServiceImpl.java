@@ -24,6 +24,9 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.console.constant.Code;
+import io.seata.console.result.SingleResult;
+import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
@@ -34,6 +37,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +55,10 @@ import static java.util.Objects.isNull;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
-public class GlobalLockFileServiceImpl implements GlobalLockService {
+public class GlobalLockFileServiceImpl extends AbstractLockService implements GlobalLockService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockFileServiceImpl.class);
+
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -72,10 +80,23 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
     }
 
+    @Override
+    public SingleResult<Void> deleteLock(String xid, String branchId) {
+        CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
+        try {
+            BranchSession branchSession = checkResult.getBranchSession();
+            return lockManager.releaseLock(branchSession) ?
+                    SingleResult.success() : SingleResult.failure(Code.ERROR);
+        } catch (Exception e) {
+            LOGGER.error("release lock fail, reason: {}", e.getMessage(), e);
+            throw new IllegalStateException("delete lock fail, please try again");
+        }
+    }
+
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param the query param
+     * @param param         the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */
