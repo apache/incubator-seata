@@ -35,7 +35,6 @@ import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Update executor.
