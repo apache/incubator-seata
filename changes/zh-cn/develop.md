@@ -10,6 +10,7 @@
 - [[#5762](https://github.com/seata/seata/pull/5762)] 修复TableMetaCache的一些字段类型，避免溢出
 - [[#5769](https://github.com/seata/seata/pull/5769)] 修复不满足 sofa-rpc 中 setAttachment 方法的参数前缀要求问题
 - [[#5814](https://github.com/seata/seata/pull/5814)] 修复druid依赖冲突导致的XA事务开始异常与回滚失败
+- [[#5819](https://github.com/seata/seata/pull/5814)] 修复oracle alias 解析异常
 
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] 优化docker镜像的默认时区
@@ -32,5 +33,6 @@
 - [dmego](https://github.com/dmego)
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [hadoop835](https://github.com/hadoop835)
+- [DroidEye2ONGU](https://github.com/DroidEye2ONGU)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
