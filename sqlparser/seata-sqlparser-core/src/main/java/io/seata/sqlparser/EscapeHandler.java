@@ -77,7 +77,12 @@ public interface EscapeHandler {
      * @return colName
      */
     default String addColNameEscape(String colName, TableMeta tableMeta) {
-        boolean needEscape = checkIfNeedEscape(colName, tableMeta);
+        String colNameToCheck = colName;
+        if (colName.contains(DOT)) {
+            colNameToCheck = colName.substring(colName.lastIndexOf(DOT) + 1);
+        }
+
+        boolean needEscape = checkIfNeedEscape(colNameToCheck, tableMeta);
         if (!needEscape) {
             return colName;
         }

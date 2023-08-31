@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5762](https://github.com/seata/seata/pull/5762)] change some fields type of TableMetaCache to avoid integer overflow
 - [[#5769](https://github.com/seata/seata/pull/5769)] fix the problem that the parameter prefix requirement of the setAttachment method in sofa-rpc is not met
 - [[#5814](https://github.com/seata/seata/pull/5814)] fix XA transaction start exception and rollback failure
+- [[#5819](https://github.com/seata/seata/pull/5814)] fix oracle column alias cannot find
 
 ### optimize:
 - [[#5804](https://github.com/seata/seata/pull/5804)] optimize docker default timezone
@@ -31,6 +32,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [dmego](https://github.com/dmego)
 - [xingfudeshi](https://github.com/xingfudeshi)
 - [hadoop835](https://github.com/hadoop835)
+- [DroidEye2ONGU](https://github.com/DroidEye2ONGU)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
