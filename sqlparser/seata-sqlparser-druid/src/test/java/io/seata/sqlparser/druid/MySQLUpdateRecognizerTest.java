@@ -275,8 +275,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateColumns();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -306,8 +306,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateColumns();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -336,8 +336,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setValue(new MySqlOrderingExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateValues();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateValues();
         });
     }
 
