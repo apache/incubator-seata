@@ -47,9 +47,6 @@ show_usage() {
 echo "Affected JVM parameters:$JAVA_OPT"
 
 # start
-#echo "$JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-#nohup $JAVACMD ${JAVA_OPT} ${CMD_LINE_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
-#echo "seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
 
 function validate_host() {
     local host=$1
@@ -179,9 +176,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 function start_server() {
-  echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS}" > ${BASEDIR}/logs/start.out 2>&1 &
-  nohup $JAVACMD ${JAVA_OPT} ${NEW_ARGS} >> ${BASEDIR}/logs/start.out 2>&1 &
-  echo "The seata-server is starting, you can check the ${BASEDIR}/logs/start.out"
+  echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS} >> /dev/null 2>&1 &"
+  nohup $JAVACMD ${JAVA_OPT} ${NEW_ARGS} >> /dev/null 2>&1 &
+  echo "seata-server is starting, you can check the ${LOG_HOME}/ *.log"
 }
 
 function stop_server() {
