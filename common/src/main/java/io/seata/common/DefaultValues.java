@@ -290,6 +290,8 @@ public interface DefaultValues {
 
     int DEFAULT_QUERY_LIMIT = 1000;
 
+    long DEFAULT_AUTO_RESTART_TIME = 24 * 60 * 60 * 1000;
+
     /**
      * Default druid location in classpath
      */

@@ -26,8 +26,11 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
@@ -241,4 +244,18 @@ public abstract class AbstractCore implements Core {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
 
     }
+
+    @Override
+    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TimeoutException {
+        BranchDeleteRequest request = new BranchDeleteRequest();
+        request.setBranchType(branchSession.getBranchType());
+        request.setResourceId(branchSession.getResourceId());
+        request.setXid(globalSession.getXid());
+        request.setBranchId(branchSession.getBranchId());
+        BranchDeleteResponse response = (BranchDeleteResponse) remotingServer.sendSyncRequest(
+                branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
+        return ResultCode.Success.equals(response.getResultCode());
+    }
+
+
 }

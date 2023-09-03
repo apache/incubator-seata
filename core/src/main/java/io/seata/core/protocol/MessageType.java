@@ -70,6 +70,14 @@ public interface MessageType {
      * The constant TYPE_GLOBAL_LOCK_QUERY_RESULT.
      */
     short TYPE_GLOBAL_LOCK_QUERY_RESULT = 22;
+    /**
+     * The constant TYPE_BRANCH_DELETE.
+     */
+    short TYPE_BRANCH_DELETE = 23;
+    /**
+     * The constant TYPE_BRANCH_DELETE_RESULT.
+     */
+    short TYPE_BRANCH_DELETE_RESULT = 24;
 
     /**
      * The constant TYPE_BRANCH_COMMIT.

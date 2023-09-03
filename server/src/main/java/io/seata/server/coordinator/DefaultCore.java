@@ -18,6 +18,7 @@ package io.seata.server.coordinator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
@@ -131,6 +132,11 @@ public class DefaultCore implements Core {
     }
 
     @Override
+    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TimeoutException {
+        return getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
+    }
+
+    @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(applicationId, transactionServiceGroup, name, timeout);
@@ -210,6 +216,10 @@ public class DefaultCore implements Core {
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
                     SessionHelper.removeBranch(globalSession, branchSession, !retrying);
+                    return CONTINUE;
+                }
+                // skip the branch session if not retry
+                if (BranchStatus.STOP_RETRY.equals(currentStatus)) {
                     return CONTINUE;
                 }
                 try {
@@ -318,6 +328,10 @@ public class DefaultCore implements Core {
                     SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                     return CONTINUE;
                 }
+                // skip the branch session if not retry
+                if (BranchStatus.STOP_RETRY.equals(currentBranchStatus)) {
+                    return CONTINUE;
+                }
                 try {
                     BranchStatus branchStatus = branchRollback(globalSession, branchSession);
                     if (isXaerNotaTimeout(globalSession, branchStatus)) {
@@ -358,7 +372,7 @@ public class DefaultCore implements Core {
 
         // In db mode, lock and branch data residual problems may occur.
         // Therefore, execution needs to be delayed here and cannot be executed synchronously.
-        if (success) {
+        if (success && globalSession.getBranchSessions().isEmpty()) {
             SessionHelper.endRollbacked(globalSession, retrying);
             LOGGER.info("Rollback global transaction successfully, xid = {}.", globalSession.getXid());
         }

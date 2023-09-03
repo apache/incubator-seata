@@ -16,6 +16,7 @@
 package io.seata.server.console.impl.file;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.server.console.impl.AbstractBranchService;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.service.BranchSessionService;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${sessionMode}')}")
-public class BranchSessionFileServiceImpl implements BranchSessionService {
+public class BranchSessionFileServiceImpl extends AbstractBranchService implements BranchSessionService {
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "branchType.proto";
+import "abstractTransactionRequest.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "BranchDeleteRequest";
+option java_package = "io.seata.serializer.protobuf.generated";
+
+
+// PublishRequest is a publish request.
+message BranchDeleteRequestProto {
+  AbstractTransactionRequestProto abstractTransactionRequest = 1;
+  string xid = 2;
+
+  int64 branchId = 3;
+
+  BranchTypeProto branchType = 4;
+
+  string resourceId = 5;
+}

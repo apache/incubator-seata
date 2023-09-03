@@ -324,6 +324,11 @@ public class SpringFenceHandler implements FenceHandler {
 
     }
 
+    @Override
+    public boolean deleteFenceByXidAndBranchId(String xid, Long branchId) {
+        return deleteFence(xid, branchId);
+    }
+
     private static void initLogCleanExecutor() {
         logCleanExecutor = new ThreadPoolExecutor(MAX_THREAD_CLEAN, MAX_THREAD_CLEAN, Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),

@@ -55,6 +55,7 @@ public class SessionConverter {
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
+        session.setGmtModified(globalTransactionDO.getGmtModified());
         return session;
     }
 

@@ -18,6 +18,8 @@ package io.seata.serializer.seata;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.serializer.seata.protocol.BatchResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergeResultMessageCodec;
 import io.seata.serializer.seata.protocol.MergedWarpMessageCodec;
@@ -27,6 +29,8 @@ import io.seata.serializer.seata.protocol.RegisterTMRequestCodec;
 import io.seata.serializer.seata.protocol.RegisterTMResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.BranchCommitRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.BranchCommitResponseCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchDeleteRequestCodec;
+import io.seata.serializer.seata.protocol.transaction.BranchDeleteResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.BranchRegisterRequestCodec;
 import io.seata.serializer.seata.protocol.transaction.BranchRegisterResponseCodec;
 import io.seata.serializer.seata.protocol.transaction.BranchReportRequestCodec;
@@ -137,6 +141,12 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_BATCH_RESULT_MSG:
                 msgCodec = new BatchResultMessageCodec();
+                break;
+            case MessageType.TYPE_BRANCH_DELETE:
+                msgCodec = new BranchDeleteRequestCodec();
+                break;
+            case MessageType.TYPE_BRANCH_DELETE_RESULT:
+                msgCodec = new BranchDeleteResponseCodec();
                 break;
             default:
                 break;
@@ -268,6 +278,12 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_BATCH_RESULT_MSG:
                 abstractMessage = new BatchResultMessage();
+                break;
+            case MessageType.TYPE_BRANCH_DELETE:
+                abstractMessage = new BranchDeleteRequest();
+                break;
+            case MessageType.TYPE_BRANCH_DELETE_RESULT:
+                abstractMessage = new BranchDeleteResponse();
                 break;
             default:
                 break;

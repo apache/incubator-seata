@@ -27,6 +27,8 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.RMInboundHandler;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RpcContext;
@@ -77,6 +79,11 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public void handle(UndoLogDeleteRequest request) {
         // https://github.com/seata/seata/issues/2226
+    }
+
+    @Override
+    public BranchDeleteResponse handle(BranchDeleteRequest request) {
+        return null;
     }
 
     /**

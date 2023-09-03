@@ -518,6 +518,11 @@ public interface ConfigurationKeys {
     String DISTRIBUTED_LOCK_EXPIRE_TIME = SERVER_PREFIX + "distributedLockExpireTime";
 
     /**
+     * the constant AUTO_RESTART_TIME
+     */
+    String AUTO_RESTART_TIME = SERVER_PREFIX + "autoRestartTime";
+
+    /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
     String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";

@@ -29,6 +29,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -378,7 +379,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // The function of this 'return' is 'continue'.
                     return;
                 }
-                if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
+                if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getGmtModified().getTime())) {
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
@@ -416,7 +417,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     // The function of this 'return' is 'continue'.
                     return;
                 }
-                if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
+                if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getGmtModified().getTime())) {
 
                     // commit retry timeout event
                     SessionHelper.endCommitFailed(committingSession, true, true);
@@ -636,5 +637,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+    }
+
+    public DefaultCore getCore() {
+        return core;
     }
 }

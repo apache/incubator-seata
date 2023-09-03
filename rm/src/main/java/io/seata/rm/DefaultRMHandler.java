@@ -23,9 +23,13 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.List;
@@ -38,6 +42,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author zhangsen
  */
 public class DefaultRMHandler extends AbstractRMHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRMHandler.class);
+
 
     protected static Map<BranchType, AbstractRMHandler> allRMHandlersMap = new ConcurrentHashMap<>();
 
@@ -71,6 +78,11 @@ public class DefaultRMHandler extends AbstractRMHandler {
     @Override
     public void handle(UndoLogDeleteRequest request) {
         getRMHandler(request.getBranchType()).handle(request);
+    }
+
+    @Override
+    public BranchDeleteResponse handle(BranchDeleteRequest request) {
+        return getRMHandler(request.getBranchType()).handle(request);
     }
 
     protected AbstractRMHandler getRMHandler(BranchType branchType) {

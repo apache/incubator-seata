@@ -16,20 +16,73 @@
 package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
+
+import io.seata.console.result.PageResult;
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.service.BranchSessionService;
+import io.seata.server.console.vo.BranchSessionVO;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Branch Session Controller
+ *
  * @author zhongxiang.wang
  */
 @RestController
-@RequestMapping("console/branchSession")
+@RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
 
+    /**
+     * Query the branch session
+     *
+     * @param xid the branch session in xid
+     * @return PageResult<BranchSessionVO>
+     */
+    @GetMapping("query")
+    public PageResult<BranchSessionVO> query(String xid) {
+        return branchSessionService.queryByXid(xid);
+    }
 
+    /**
+     * Delete branch transaction
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @DeleteMapping("deleteBranchSession")
+    public SingleResult<Void> deleteBranchSession(String xid, String branchId) {
+        return branchSessionService.deleteBranchSession(xid, branchId);
+    }
+
+    /**
+     * Stop branch transaction retry
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @PutMapping("stopBranchSession")
+    public SingleResult<Void> stopBranchSession(String xid, String branchId) {
+        return branchSessionService.stopBranchRetry(xid, branchId);
+    }
+
+    /**
+     * Start branch transaction retry
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @PutMapping("startBranchSession")
+    public SingleResult<Void> startBranchRetry(String xid, String branchId) {
+        return branchSessionService.startBranchRetry(xid, branchId);
+    }
 }

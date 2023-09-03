@@ -44,4 +44,12 @@ public interface RMInboundHandler {
      * @param request the request
      */
     void handle(UndoLogDeleteRequest request);
+
+    /**
+     * Handle branch delete .
+     *
+     * @param request the request
+     * @return
+     */
+    BranchDeleteResponse handle(BranchDeleteRequest request);
 }
