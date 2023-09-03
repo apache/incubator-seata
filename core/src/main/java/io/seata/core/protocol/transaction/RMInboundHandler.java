@@ -49,7 +49,7 @@ public interface RMInboundHandler {
      * Handle branch delete .
      *
      * @param request the request
-     * @return
+     * @return the branch delete response
      */
     BranchDeleteResponse handle(BranchDeleteRequest request);
 }

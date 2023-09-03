@@ -50,5 +50,15 @@ public interface TransactionCoordinatorOutbound {
      */
     BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 
+    /**
+     * Delete a branch transaction.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @return delete success or failed
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     *                              out.
+     */
+    Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 
 }
