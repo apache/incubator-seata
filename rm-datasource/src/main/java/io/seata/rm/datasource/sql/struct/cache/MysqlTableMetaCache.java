@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -56,7 +56,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
-            LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
+            logger.error("Could not get connection, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -68,7 +68,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 cacheKey.append(defaultTableName.toLowerCase());
             }
         } catch (SQLException e) {
-            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
+            logger.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -88,7 +88,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
+    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
         throws SQLException {
         //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
@@ -169,7 +169,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("TYPE"));
                     index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setCardinality(rsIndex.getLong("CARDINALITY"));
                     index.getValues().add(col);
                     if ("PRIMARY".equalsIgnoreCase(indexName)) {
                         index.setIndextype(IndexType.PRIMARY);

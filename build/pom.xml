@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.7.0</revision>
+        <revision>1.7.1</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
