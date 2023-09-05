@@ -15,23 +15,9 @@
  */
 package io.seata.serializer.kryo;
 
-import java.lang.reflect.InvocationHandler;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.UUID;
-import java.util.regex.Pattern;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import com.esotericsoftware.kryo.util.Pool;
-import de.javakaffee.kryoserializers.BitSetSerializer;
-import de.javakaffee.kryoserializers.JdkProxySerializer;
-import de.javakaffee.kryoserializers.RegexSerializer;
-import de.javakaffee.kryoserializers.URISerializer;
-import de.javakaffee.kryoserializers.UUIDSerializer;
-import io.seata.core.serializer.SerializerClassRegistry;
+import io.seata.core.serializer.SerializerSecurityRegistry;
 
 /**
  * @author jsbxyyx
@@ -46,20 +32,12 @@ public class KryoSerializerFactory {
         protected Kryo create() {
             Kryo kryo = new Kryo();
             kryo.setReferences(true);
-            kryo.setRegistrationRequired(false);
 
-            // register serializer
-            kryo.register(Arrays.asList("").getClass());
-            kryo.register(InvocationHandler.class, new JdkProxySerializer());
-            kryo.register(BigDecimal.class, new DefaultSerializers.BigDecimalSerializer());
-            kryo.register(BigInteger.class, new DefaultSerializers.BigIntegerSerializer());
-            kryo.register(Pattern.class, new RegexSerializer());
-            kryo.register(BitSet.class, new BitSetSerializer());
-            kryo.register(URI.class, new URISerializer());
-            kryo.register(UUID.class, new UUIDSerializer());
+            //Serialization whitelist
+            kryo.setRegistrationRequired(true);
 
-            // register commonly class
-            SerializerClassRegistry.getRegisteredClasses().keySet().forEach(kryo::register);
+            // register allow class
+            SerializerSecurityRegistry.getAllowClassType().forEach(kryo::register);
             return kryo;
         }
     };
