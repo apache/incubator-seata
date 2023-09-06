@@ -1,0 +1,64 @@
+name: "test-druid"
+
+on:
+  push:
+    branches: [ test*, "*.*.*" ]
+  pull_request:
+    branches: [ 2.x, develop, master ] # TODO: 暂时加着，用于在PR中测试
+
+jobs:
+  test-druid:
+    name: "test-druid"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 8, 17 ]
+        druid: [
+          1.2.19,
+          1.2.18,
+          1.2.17,
+          1.2.16,
+          1.2.15,
+          1.2.14,
+          1.2.13,
+          1.2.12,
+          1.2.11,
+          1.2.10,
+          1.2.9,
+          1.2.8,
+          1.2.7,
+          1.2.6,
+          1.2.5,
+          1.2.4,
+          1.2.3,
+          1.2.2,
+          1.2.1,
+          1.2.0,
+          1.1.24,
+          1.1.23,
+          1.1.22,
+          1.1.21,
+          1.1.20
+        ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
+      - name: "Test with Maven"
+        run: |
+          if [ "${{ matrix.java }}" == "8" ]; then
+            ./mvnw -T 4C clean test -Ddruid.version=${{ matrix.druid }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean test -Ddruid.version=${{ matrix.druid }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
