@@ -16,8 +16,8 @@ jobs:
         java: [ 8, 11, 17 ]
         druid: [
           1.2.19,
-          1.2.18,
-          1.2.17,
+          #1.2.18, # Unit test will get stuck
+          #1.2.17, # Unit test will get stuck
           1.2.16,
           1.2.15,
           1.2.14,
