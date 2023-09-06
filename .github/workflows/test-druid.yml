@@ -3,8 +3,6 @@ name: "test-druid"
 on:
   push:
     branches: [ test*, "*.*.*" ]
-  pull_request:
-    branches: [ 2.x, develop, master ] # TODO: 暂时加着，用于在PR中测试
 
 jobs:
   test-druid:
