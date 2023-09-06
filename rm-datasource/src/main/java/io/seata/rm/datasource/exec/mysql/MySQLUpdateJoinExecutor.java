@@ -55,11 +55,11 @@ import org.slf4j.LoggerFactory;
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUpdateJoinExecutor.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
-    private final boolean isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
+    protected boolean isLowerSupportGroupByPksVersion;
     private String sqlMode = "";
 
     /**
@@ -72,6 +72,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     public MySQLUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
         SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
     }
 
     @Override
@@ -130,7 +131,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix.append(GROUP_BY);
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
@@ -200,7 +201,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix += buildGroupBy(pkColumns, needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         needUpdateColumns.forEach(selectSQLJoiner::add);
@@ -295,7 +296,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
         } catch (Exception e) {
             groupByPks = false;
-            LOGGER.warn("determine group by pks or all columns error:{}",e.getMessage());
+            logger.warn("determine group by pks or all columns error:{}",e.getMessage());
         }
         List<String> groupByColumns = groupByPks ? pkColumns : allSelectColumns;
         StringBuilder groupByStr = new StringBuilder();
