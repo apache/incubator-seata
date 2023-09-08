@@ -29,6 +29,9 @@ import io.seata.rm.datasource.exec.mariadb.MariadbInsertOnDuplicateUpdateExecuto
 import io.seata.rm.datasource.exec.mariadb.MariadbUpdateJoinExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
+import io.seata.rm.datasource.exec.sqlserver.SqlServerDeleteExecutor;
+import io.seata.rm.datasource.exec.sqlserver.SqlServerSelectForUpdateExecutor;
+import io.seata.rm.datasource.exec.sqlserver.SqlServerUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -98,13 +101,25 @@ public class ExecuteTemplate {
                                     new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
-                        executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                            executor = new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        } else {
+                            executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        }
                         break;
                     case DELETE:
-                        executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                            executor = new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        } else {
+                            executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        }
                         break;
                     case SELECT_FOR_UPDATE:
-                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                            executor = new SqlServerSelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        } else {
+                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                        }
                         break;
                     case INSERT_ON_DUPLICATE_UPDATE:
                         switch (dbType) {
