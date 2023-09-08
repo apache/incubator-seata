@@ -105,14 +105,14 @@ public class TransactionContextConsumerFilter extends Filter {
      * @return
      */
     private String getRpcXid() {
-        String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID);
+        String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID);
         if (rpcXid == null) {
-            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
+            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID.toLowerCase());
         }
         return rpcXid;
     }
     private String getBranchType() {
-        return (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
+        return (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_BRANCH_TYPE);
     }
 
 }

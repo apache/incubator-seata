@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -91,26 +92,49 @@ public class TransactionContextFilterTest {
             helloService.sayHello("xxx", 22);
             // check C
             Assertions.assertNull(helloServiceImpl.getXid());
+            Assertions.assertNull(helloServiceImpl.getBranchType());
             // check B
             Assertions.assertNull(helloServiceProxy.getXid());
+            Assertions.assertNull(helloServiceProxy.getBranchType());
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SofaRpcException);
         } finally {
             Assertions.assertNull(RootContext.unbind());
+            Assertions.assertNull(RootContext.unbindBranchType());
         }
 
         RootContext.bind("xidddd");
+        RootContext.bindBranchType(BranchType.AT);
         try {
             helloService.sayHello("xxx", 22);
             // check C
             Assertions.assertEquals(helloServiceImpl.getXid(), "xidddd");
+            Assertions.assertEquals(helloServiceImpl.getBranchType(), BranchType.AT);
             // check B
             Assertions.assertEquals(helloServiceProxy.getXid(), "xidddd");
+            Assertions.assertEquals(helloServiceProxy.getBranchType(), BranchType.AT);
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SofaRpcException);
         } finally {
             Assertions.assertEquals("xidddd", RootContext.unbind());
+            Assertions.assertEquals(BranchType.AT, RootContext.unbindBranchType());
         }
+    }
+
+    @Test
+    public void testSetAttachment() {
+        Exception exception = null;
+        try {
+            RpcInternalContext.getContext().setAttachment(RootContext.KEY_XID, "xidddd");
+        } catch (Exception e) {
+            exception = e;
+        }
+        Assertions.assertNotNull(exception);
+        Assertions.assertTrue(exception instanceof IllegalArgumentException);
+        RpcInternalContext.getContext().setAttachment(RootContext.HIDDEN_KEY_XID, "xidddd");
+        Object xid = RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID);
+        Assertions.assertEquals("xidddd", xid);
+        Assertions.assertNotNull(RpcInternalContext.getContext().removeAttachment(RootContext.HIDDEN_KEY_XID));
     }
 
     @BeforeAll
