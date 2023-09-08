@@ -16,24 +16,21 @@
 package io.seata.server.raft;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
-import io.seata.server.cluster.raft.msg.RaftSyncMessage;
-import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
+import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
-import io.seata.server.cluster.raft.snapshot.session.SessionSnapshot;
-import io.seata.server.session.BranchSession;
+import io.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -78,13 +75,13 @@ public class RaftSyncMessageTest {
         sessionMap.put(globalSession.getXid(), globalSession);
         globalSession
             .addBranch(SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, "!23", null, "123", "123"));
-        SessionSnapshot sessionSnapshot = new SessionSnapshot();
+        RaftSessionSnapshot sessionSnapshot = new RaftSessionSnapshot();
         sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(sessionSnapshot);
         byte[] msg = RaftSnapshotSerializer.encode(raftSnapshot);
         RaftSnapshot raftSnapshot1 = RaftSnapshotSerializer.decode(msg);
-        SessionSnapshot sessionSnapshot2 = (SessionSnapshot)raftSnapshot1.getBody();
+        RaftSessionSnapshot sessionSnapshot2 = (RaftSessionSnapshot)raftSnapshot1.getBody();
         Map<String, GlobalSession> map = sessionSnapshot2.convert2GlobalSession();
         Assertions.assertEquals(1, map.size());
         Assertions.assertNotNull(map.get(globalSession.getXid()));

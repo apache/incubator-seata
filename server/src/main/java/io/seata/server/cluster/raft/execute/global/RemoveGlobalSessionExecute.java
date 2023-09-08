@@ -23,7 +23,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**

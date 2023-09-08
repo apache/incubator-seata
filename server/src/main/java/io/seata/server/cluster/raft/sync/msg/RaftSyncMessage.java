@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.cluster.raft.msg;
+package io.seata.server.cluster.raft.sync.msg;
 
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;

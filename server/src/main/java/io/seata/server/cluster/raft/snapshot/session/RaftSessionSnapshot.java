@@ -30,9 +30,11 @@ import io.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SessionSnapshot {
+public class RaftSessionSnapshot implements java.io.Serializable  {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionSnapshot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftSessionSnapshot.class);
+
+    private static final long serialVersionUID = -2257327786007900291L;
 
     private Map<byte[]/*global session*/, List<byte[]>/*branch sessions*/> globalsessions = new ConcurrentHashMap<>();
 

@@ -22,7 +22,7 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.server.cluster.raft.snapshot.session.SessionSnapshot;
+import io.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -59,16 +59,16 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         }
     }
 
-    public SessionSnapshot load(String path) throws IOException {
+    public RaftSessionSnapshot load(String path) throws IOException {
         RaftSnapshot raftSnapshot = RaftSnapshotSerializer.decode(FileUtils.readFileToByteArray(new File(path)));
-        return (SessionSnapshot)raftSnapshot.getBody();
+        return (RaftSessionSnapshot)raftSnapshot.getBody();
     }
 
     @Override
     public Status save(SnapshotWriter writer) {
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
         Map<String, GlobalSession> sessionMap = raftSessionManager.getSessionMap();
-        SessionSnapshot sessionSnapshot = new SessionSnapshot();
+        RaftSessionSnapshot sessionSnapshot = new RaftSessionSnapshot();
         sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(sessionSnapshot);
@@ -94,7 +94,7 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            SessionSnapshot sessionSnapshot = load(path);
+            RaftSessionSnapshot sessionSnapshot = load(path);
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             // be sure to clear the data before loading it, because this is a full overwrite update

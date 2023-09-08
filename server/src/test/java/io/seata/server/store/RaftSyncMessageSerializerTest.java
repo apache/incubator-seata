@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
-import io.seata.server.cluster.raft.msg.RaftSyncMessage;
+import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 
 /**
  * @author funkye

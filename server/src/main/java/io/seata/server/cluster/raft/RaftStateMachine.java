@@ -49,24 +49,24 @@ import io.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
 import io.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
-import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.server.storage.raft.RaftSessionSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.RELEASE_BRANCH_SESSION_LOCK;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.RELEASE_GLOBAL_SESSION_LOCK;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye

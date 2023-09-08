@@ -21,7 +21,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**

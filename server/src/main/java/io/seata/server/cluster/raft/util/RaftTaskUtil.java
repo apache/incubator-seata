@@ -26,9 +26,9 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
-import io.seata.server.cluster.raft.msg.RaftSyncMessageSerializer;
-import io.seata.server.cluster.raft.msg.RaftSyncMessage;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 
 /**
  * @author funkye

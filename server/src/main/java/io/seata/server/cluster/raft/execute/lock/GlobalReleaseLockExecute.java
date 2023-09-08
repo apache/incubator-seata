@@ -18,7 +18,7 @@ package io.seata.server.cluster.raft.execute.lock;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.storage.raft.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 
 /**
  * @author jianbin.chen

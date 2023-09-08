@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.cluster.raft.msg;
+package io.seata.server.cluster.raft.sync;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,6 +25,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerType;
+import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

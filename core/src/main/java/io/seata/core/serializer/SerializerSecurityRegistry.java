@@ -54,6 +54,10 @@ public class SerializerSecurityRegistry {
 
     private static final String REQUEST_CLASS_ID = "Request";
 
+    private static final String RAFT_CLASS_ID = "Raft";
+    
+    private static final String Transaction_CLASS_ID = "Transaction";
+
     private static final String RESPONSE_CLASS_ID = "Response";
 
     private static final String MESSAGE_CLASS_ID = "Message";
@@ -61,7 +65,10 @@ public class SerializerSecurityRegistry {
     static {
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getBasicClassType()));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getCollectionClassType()));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType());
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.protocol"));
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.snapshot.session"));
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.sync.msg"));
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.store"));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getProtocolInnerFields()));
 
         for (Class<?> clazz : ALLOW_CLAZZ_SET) {
@@ -102,9 +109,8 @@ public class SerializerSecurityRegistry {
         return new String[] {"javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*"};
     }
 
-    private static Set<Class<?>> getProtocolType() {
+    private static Set<Class<?>> getProtocolType(String packageName) {
         Enumeration<URL> packageDir = null;
-        String packageName = "io.seata.core.protocol";
         Set<Class<?>> classNameSet = new HashSet<>();
         try {
             packageDir = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
@@ -117,7 +123,7 @@ public class SerializerSecurityRegistry {
         return classNameSet;
     }
 
-    private static void findProtocolClassByPackage(String classPath, String rootPackageName, Set classNameSet) {
+    private static void findProtocolClassByPackage(String classPath, String rootPackageName, Set<Class<?>> classNameSet) {
         File file = new File(classPath);
         if (!file.exists()) {
             return;
@@ -156,10 +162,8 @@ public class SerializerSecurityRegistry {
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }
-        if (fileName.contains(REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID)) {
-            return true;
-        }
-        return false;
+        return fileName.contains(Transaction_CLASS_ID) || fileName.contains(RAFT_CLASS_ID) || fileName.contains(
+            REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID);
     }
 
     private static Class<?>[] getProtocolInnerFields() {
