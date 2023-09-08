@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * branch_id, xid, context, rollback_info, log_status, log_created, log_modified
@@ -56,8 +56,8 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size {}", deleteRows);
+            if (logger.isDebugEnabled()) {
+                logger.debug("batch delete undo log size {}", deleteRows);
             }
             return deleteRows;
         } catch (Exception e) {

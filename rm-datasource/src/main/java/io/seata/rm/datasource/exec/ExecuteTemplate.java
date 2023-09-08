@@ -25,11 +25,10 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.mariadb.MariadbInsertOnDuplicateUpdateExecutor;
+import io.seata.rm.datasource.exec.mariadb.MariadbUpdateJoinExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
 import io.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
-import io.seata.rm.datasource.exec.sqlserver.SqlServerDeleteExecutor;
-import io.seata.rm.datasource.exec.sqlserver.SqlServerSelectForUpdateExecutor;
-import io.seata.rm.datasource.exec.sqlserver.SqlServerUpdateExecutor;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -99,32 +98,23 @@ public class ExecuteTemplate {
                                     new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
+                        executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case DELETE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
+                        executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case SELECT_FOR_UPDATE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerSelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
+                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case INSERT_ON_DUPLICATE_UPDATE:
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
-                            case JdbcConstants.MARIADB:
                                 executor =
                                     new MySQLInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                break;
+                            case JdbcConstants.MARIADB:
+                                executor =
+                                    new MariadbInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
@@ -134,6 +124,9 @@ public class ExecuteTemplate {
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
                                 executor = new MySQLUpdateJoinExecutor<>(statementProxy,statementCallback,sqlRecognizer);
+                                break;
+                            case JdbcConstants.MARIADB:
+                                executor = new MariadbUpdateJoinExecutor<>(statementProxy,statementCallback,sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to " + SQLType.UPDATE_JOIN.name());
