@@ -126,6 +126,9 @@ public class RaftSnapshot implements Serializable {
 
     public enum SnapshotType {
 
+        /**
+         * session snapshot
+         */
         session("session");
 
         final String type;
