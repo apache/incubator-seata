@@ -46,8 +46,8 @@ public class StateBuilderTests {
                         .and()
                     .build(ChoiceStateBuilder.class)
                         .withName("ChoiceState")
-                        .put("[a] == 1", "SecondState")
-                        .put("[a] == 2", "ThirdState")
+                        .withChoice("[a] == 1", "SecondState")
+                        .withChoice("[a] == 2", "ThirdState")
                         .and()
                     .configure()
                 .build();

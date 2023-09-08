@@ -38,11 +38,17 @@ public class ChoiceStateBuilderImpl
     }
 
     @Override
-    public ChoiceStateBuilder put(String expression, String next) {
+    public ChoiceStateBuilder withChoice(String expression, String next) {
         ChoiceStateImpl.ChoiceImpl choice = new ChoiceStateImpl.ChoiceImpl();
         choice.setExpression(expression);
         choice.setNext(next);
         state.getChoices().add(choice);
+        return this;
+    }
+
+    @Override
+    public ChoiceStateBuilder withDefault(String defaultChoice) {
+        state.setDefaultChoice(defaultChoice);
         return this;
     }
 

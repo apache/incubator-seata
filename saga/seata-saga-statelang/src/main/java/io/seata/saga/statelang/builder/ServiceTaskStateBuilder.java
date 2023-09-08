@@ -6,8 +6,8 @@ import io.seata.saga.statelang.domain.ServiceTaskState;
  *
  * @author ptyin
  */
-public interface ServiceTaskStateBuilder extends StateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-{
+public interface ServiceTaskStateBuilder extends StateBuilder<ServiceTaskStateBuilder, ServiceTaskState>,
+        TaskStateBuilder<ServiceTaskStateBuilder> {
 
     /**
      * Configure service method.

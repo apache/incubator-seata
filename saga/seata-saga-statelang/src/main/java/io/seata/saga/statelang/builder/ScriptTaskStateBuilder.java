@@ -6,6 +6,7 @@ import io.seata.saga.statelang.domain.ScriptTaskState;
  *
  * @author ptyin
  */
-public interface ScriptTaskStateBuilder extends StateBuilder<ScriptTaskStateBuilder, ScriptTaskState>
-{
+public interface ScriptTaskStateBuilder extends StateBuilder<ScriptTaskStateBuilder, ScriptTaskState>,
+        TaskStateBuilder<ScriptTaskStateBuilder> {
+
 }
