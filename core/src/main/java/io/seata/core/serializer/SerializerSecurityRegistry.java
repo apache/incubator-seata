@@ -56,7 +56,7 @@ public class SerializerSecurityRegistry {
 
     private static final String RAFT_CLASS_ID = "Raft";
     
-    private static final String Transaction_CLASS_ID = "Transaction";
+    private static final String TRANSACTION_CLASS_ID = "Transaction";
 
     private static final String RESPONSE_CLASS_ID = "Response";
 
@@ -162,7 +162,7 @@ public class SerializerSecurityRegistry {
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }
-        return fileName.contains(Transaction_CLASS_ID) || fileName.contains(RAFT_CLASS_ID) || fileName.contains(
+        return fileName.contains(TRANSACTION_CLASS_ID) || fileName.contains(RAFT_CLASS_ID) || fileName.contains(
             REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID);
     }
 
