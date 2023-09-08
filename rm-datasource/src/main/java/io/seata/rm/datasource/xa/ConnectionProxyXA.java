@@ -274,6 +274,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // the framework layer does not actively call ROLLBACK when setAutoCommit throws an SQL exception
             xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
             xaRollback(xaBranchXid);
+            try {
+                // Branch Report to TC: Failed
+                DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
+                        BranchStatus.PhaseOne_Failed, null);
+            } catch (TransactionException te) {
+                LOGGER.warn("Failed to report XA branch start-failure on " + xid + "-" + xaBranchXid.getBranchId()
+                        + " since " + te.getCode() + ":" + te.getMessage());
+            }
             throw  e;
         }
     }
