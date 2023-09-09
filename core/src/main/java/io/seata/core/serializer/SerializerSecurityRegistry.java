@@ -67,8 +67,6 @@ public class SerializerSecurityRegistry {
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getBasicClassType()));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getCollectionClassType()));
         ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.protocol"));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.snapshot.session"));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.sync.msg"));
         ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.store"));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getProtocolInnerFields()));
 
@@ -76,7 +74,9 @@ public class SerializerSecurityRegistry {
             ALLOW_CLAZZ_PATTERN.add(clazz.getCanonicalName());
         }
         ALLOW_CLAZZ_PATTERN.add(getSeataClassPattern());
-
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.snapshot.session"));
+        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.sync.msg"));
+        ALLOW_CLAZZ_SET.add(byte[].class);
         DENY_CLAZZ_PATTERN.addAll(Arrays.asList(getDenyClassPatternList()));
     }
 
@@ -94,7 +94,7 @@ public class SerializerSecurityRegistry {
 
     private static Class<?>[] getBasicClassType() {
         return new Class[] {Boolean.class, Byte.class, Character.class, Double.class, Float.class, Integer.class,
-            Long.class, Short.class, Number.class, Class.class, String.class, byte[].class};
+            Long.class, Short.class, Number.class, Class.class, String.class};
     }
 
     private static Class<?>[] getCollectionClassType() {
@@ -115,11 +115,11 @@ public class SerializerSecurityRegistry {
         Set<Class<?>> classNameSet = new HashSet<>();
         try {
             packageDir = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
+            while (packageDir.hasMoreElements()) {
+                String filePath = packageDir.nextElement().getFile();
+                findProtocolClassByPackage(filePath, packageName, classNameSet);
+            }
         } catch (IOException ignore) {
-        }
-        while (packageDir.hasMoreElements()) {
-            String filePath = packageDir.nextElement().getFile();
-            findProtocolClassByPackage(filePath, packageName, classNameSet);
         }
         return classNameSet;
     }
