@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -93,11 +94,11 @@ public class SerializerSecurityRegistry {
 
     private static Class<?>[] getBasicClassType() {
         return new Class[] {Boolean.class, Byte.class, Character.class, Double.class, Float.class, Integer.class,
-            Long.class, Short.class, Number.class, Class.class, String.class};
+            Long.class, Short.class, Number.class, Class.class, String.class, byte[].class};
     }
 
     private static Class<?>[] getCollectionClassType() {
-        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class,
+        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class, ConcurrentHashMap.class,
             LinkedHashSet.class, TreeSet.class, HashMap.class, LinkedHashMap.class, TreeMap.class};
     }
 
