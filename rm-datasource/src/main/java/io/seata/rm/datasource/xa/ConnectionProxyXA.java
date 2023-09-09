@@ -357,7 +357,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     private void reportStatusToTC(BranchStatus status) {
         try {
-            // Branch Report to TC: Failed
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
                     status, null);
         } catch (TransactionException te) {
