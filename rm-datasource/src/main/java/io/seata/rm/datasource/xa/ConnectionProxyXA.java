@@ -212,15 +212,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             setPrepareTime(now);
             xaResource.prepare(xaBranchXid);
         } catch (XAException xe) {
-            try {
-                // Branch Report to TC: Failed
-                DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
-                    BranchStatus.PhaseOne_Failed, null);
-            } catch (TransactionException te) {
-                LOGGER.warn("Failed to report XA branch commit-failure on " + xid + "-" + xaBranchXid.getBranchId()
-                    + " since " + te.getCode() + ":" + te.getMessage() + " and XAException:" + xe.getMessage());
-
-            }
+            // Branch Report to TC: Failed
+            reportStatusToTC(BranchStatus.PhaseOne_Failed);
             throw new SQLException(
                 "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId() + " since " + xe
                     .getMessage(), xe);
@@ -245,16 +238,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
-            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
-                BranchStatus.PhaseOne_Failed, null);
+            reportStatusToTC(BranchStatus.PhaseOne_Failed);
             LOGGER.info(xaBranchXid + " was rollbacked");
         } catch (XAException xe) {
             throw new SQLException("Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId()
                 + " since " + xe.getMessage(), xe);
-        } catch (TransactionException te) {
-            // log and ignore the report failure
-            LOGGER.warn("Failed to report XA branch rollback on " + xid + "-" + xaBranchXid.getBranchId() + " since "
-                + te.getCode() + ":" + te.getMessage());
         } finally {
             cleanXABranchContext();
         }
@@ -274,14 +262,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // the framework layer does not actively call ROLLBACK when setAutoCommit throws an SQL exception
             xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
             xaRollback(xaBranchXid);
-            try {
-                // Branch Report to TC: Failed
-                DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
-                        BranchStatus.PhaseOne_Failed, null);
-            } catch (TransactionException te) {
-                LOGGER.warn("Failed to report XA branch start-failure on " + xid + "-" + xaBranchXid.getBranchId()
-                        + " since " + te.getCode() + ":" + te.getMessage());
-            }
+            // Branch Report to TC: Failed
+            reportStatusToTC(BranchStatus.PhaseOne_Failed);
             throw  e;
         }
     }
@@ -365,6 +347,22 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             releaseIfNecessary();
             throw new SQLException("failed xa branch " + xid
                     + " the global transaction has finish, branch status: " + branchStatus.getCode());
+        }
+    }
+
+    /**
+     * Report branch status to TC
+     *
+     * @param status branch status
+     */
+    private void reportStatusToTC(BranchStatus status) {
+        try {
+            // Branch Report to TC: Failed
+            DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
+                    status, null);
+        } catch (TransactionException te) {
+            LOGGER.warn("Failed to report XA branch " + status + " on " + xid + "-" + xaBranchXid.getBranchId()
+                    + " since " + te.getCode() + ":" + te.getMessage());
         }
     }
 
