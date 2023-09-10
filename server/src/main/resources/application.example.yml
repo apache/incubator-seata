@@ -127,7 +127,7 @@ seata:
       election-timeout-ms: 1000
       reporter-enabled: false
       reporter-initial-delay: 60
-      serialization: kryo
+      serialization: jackson
       compressor: none
       sync: true # sync log&snapshot to disk
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'

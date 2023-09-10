@@ -24,7 +24,6 @@ import io.seata.core.serializer.SerializerType;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SERIALIZATION;
 
 /**
  * @author funkye
@@ -32,9 +31,8 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_SERIALIZATIO
 public class RaftSyncMessage implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;
-    private byte codec = SerializerType
-        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SERIALIZATION, DEFAULT_RAFT_SERIALIZATION))
-        .getCode();
+    private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();
+
     private byte compressor = CompressorType
         .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
         .getCode();

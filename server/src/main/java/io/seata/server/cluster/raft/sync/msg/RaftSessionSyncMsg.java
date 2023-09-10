@@ -25,27 +25,26 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
  */
 public class RaftSessionSyncMsg implements java.io.Serializable {
 
-    private static final long serialVersionUID = -6737504033652157760L;
-
+    private static final long serialVersionUID = -8577994371969898054L;
     private GlobalTransactionDO globalSession;
 
     private BranchTransactionDO branchSession;
 
     private String group = DEFAULT_SEATA_GROUP;
 
-    private MsgType msgType;
+    private RaftSyncMsgType msgType;
 
-    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession) {
+    public RaftSessionSyncMsg(RaftSyncMsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
     }
 
-    public RaftSessionSyncMsg(MsgType msgType, BranchTransactionDO branchSession) {
+    public RaftSessionSyncMsg(RaftSyncMsgType msgType, BranchTransactionDO branchSession) {
         this.msgType = msgType;
         this.branchSession = branchSession;
     }
 
-    public RaftSessionSyncMsg(MsgType msgType, GlobalTransactionDO globalSession, BranchTransactionDO branchSession) {
+    public RaftSessionSyncMsg(RaftSyncMsgType msgType, GlobalTransactionDO globalSession, BranchTransactionDO branchSession) {
         this.msgType = msgType;
         this.globalSession = globalSession;
         this.branchSession = branchSession;
@@ -69,11 +68,11 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
         this.branchSession = branchSession;
     }
 
-    public MsgType getMsgType() {
+    public RaftSyncMsgType getMsgType() {
         return this.msgType;
     }
 
-    public void setMsgType(MsgType msgType) {
+    public void setMsgType(RaftSyncMsgType msgType) {
         this.msgType = msgType;
     }
 
@@ -83,45 +82,6 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public enum MsgType {
-        /**
-         * addGlobalSession
-         */
-        ADD_GLOBAL_SESSION,
-        /**
-         * removeGlobalSession
-         */
-        REMOVE_GLOBAL_SESSION,
-        /**
-         *
-         */
-        ADD_BRANCH_SESSION,
-        /**
-         * addBranchSession
-         */
-        REMOVE_BRANCH_SESSION,
-        /**
-         * updateGlobalSessionStatus
-         */
-        UPDATE_GLOBAL_SESSION_STATUS,
-        /**
-         * updateBranchSessionStatus
-         */
-        UPDATE_BRANCH_SESSION_STATUS,
-        /**
-         * releaseGlobalSessionLock
-         */
-        RELEASE_GLOBAL_SESSION_LOCK,
-        /**
-         * releaseBranchSessionLock
-         */
-        RELEASE_BRANCH_SESSION_LOCK,
-        /**
-         * ServerOnRequestProcessor
-         */
-        SERVER_ON_REQUEST
     }
 
     @Override

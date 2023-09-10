@@ -78,7 +78,7 @@ public class GlobalTransactionDO implements java.io.Serializable {
      *
      * @return the status
      */
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
@@ -150,7 +150,7 @@ public class GlobalTransactionDO implements java.io.Serializable {
      *
      * @return the timeout
      */
-    public int getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
@@ -168,7 +168,7 @@ public class GlobalTransactionDO implements java.io.Serializable {
      *
      * @return the begin time
      */
-    public long getBeginTime() {
+    public Long getBeginTime() {
         return beginTime;
     }
 
@@ -186,7 +186,7 @@ public class GlobalTransactionDO implements java.io.Serializable {
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 

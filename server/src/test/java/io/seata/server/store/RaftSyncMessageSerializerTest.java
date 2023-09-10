@@ -15,6 +15,7 @@
  */
 package io.seata.server.store;
 
+import io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ public class RaftSyncMessageSerializerTest {
     @Test
     public void testSerializerTest() throws Exception {
         RaftSessionSyncMsg raftSessionSyncMsg = new RaftSessionSyncMsg();
-        raftSessionSyncMsg.setMsgType(RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION);
+        raftSessionSyncMsg.setMsgType(RaftSyncMsgType.ADD_GLOBAL_SESSION);
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         raftSessionSyncMsg.setGlobalSession(SessionConverter.convertGlobalTransactionDO(session));
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
@@ -49,6 +50,7 @@ public class RaftSyncMessageSerializerTest {
         RaftSyncMessage raftSyncMessage2 = RaftSyncMessageSerializer.decode(bytes);
         RaftSessionSyncMsg raftSessionSyncMsg2 = (RaftSessionSyncMsg) raftSyncMessage2.getBody();
         Assertions.assertTrue(raftSessionSyncMsg2.getGlobalSession().getXid().equals(session.getXid()));
+        Assertions.assertTrue(raftSessionSyncMsg.getMsgType().equals(raftSessionSyncMsg2.getMsgType()));
     }
 
 }

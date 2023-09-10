@@ -106,7 +106,7 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
             }
             return true;
         } catch (final Exception e) {
-            LOGGER.error("fail to load snapshot from {}", path);
+            LOGGER.error("fail to load snapshot from {}", path, e);
             return false;
         }
     }

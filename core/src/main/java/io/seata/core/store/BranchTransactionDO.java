@@ -83,7 +83,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, jav
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 
@@ -101,7 +101,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, jav
      *
      * @return the branch id
      */
-    public long getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
@@ -173,7 +173,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, jav
      *
      * @return the status
      */
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 

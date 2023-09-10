@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -55,10 +54,6 @@ public class SerializerSecurityRegistry {
 
     private static final String REQUEST_CLASS_ID = "Request";
 
-    private static final String RAFT_CLASS_ID = "Raft";
-    
-    private static final String TRANSACTION_CLASS_ID = "Transaction";
-
     private static final String RESPONSE_CLASS_ID = "Response";
 
     private static final String MESSAGE_CLASS_ID = "Message";
@@ -66,17 +61,14 @@ public class SerializerSecurityRegistry {
     static {
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getBasicClassType()));
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getCollectionClassType()));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.protocol"));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.core.store"));
+        ALLOW_CLAZZ_SET.addAll(getProtocolType());
         ALLOW_CLAZZ_SET.addAll(Arrays.asList(getProtocolInnerFields()));
 
         for (Class<?> clazz : ALLOW_CLAZZ_SET) {
             ALLOW_CLAZZ_PATTERN.add(clazz.getCanonicalName());
         }
         ALLOW_CLAZZ_PATTERN.add(getSeataClassPattern());
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.snapshot.session"));
-        ALLOW_CLAZZ_SET.addAll(getProtocolType("io.seata.server.cluster.raft.sync.msg"));
-        ALLOW_CLAZZ_SET.add(byte[].class);
+
         DENY_CLAZZ_PATTERN.addAll(Arrays.asList(getDenyClassPatternList()));
     }
 
@@ -98,7 +90,7 @@ public class SerializerSecurityRegistry {
     }
 
     private static Class<?>[] getCollectionClassType() {
-        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class, ConcurrentHashMap.class,
+        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class,
             LinkedHashSet.class, TreeSet.class, HashMap.class, LinkedHashMap.class, TreeMap.class};
     }
 
@@ -110,21 +102,22 @@ public class SerializerSecurityRegistry {
         return new String[] {"javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*"};
     }
 
-    private static Set<Class<?>> getProtocolType(String packageName) {
+    private static Set<Class<?>> getProtocolType() {
         Enumeration<URL> packageDir = null;
+        String packageName = "io.seata.core.protocol";
         Set<Class<?>> classNameSet = new HashSet<>();
         try {
             packageDir = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
-            while (packageDir.hasMoreElements()) {
-                String filePath = packageDir.nextElement().getFile();
-                findProtocolClassByPackage(filePath, packageName, classNameSet);
-            }
         } catch (IOException ignore) {
+        }
+        while (packageDir.hasMoreElements()) {
+            String filePath = packageDir.nextElement().getFile();
+            findProtocolClassByPackage(filePath, packageName, classNameSet);
         }
         return classNameSet;
     }
 
-    private static void findProtocolClassByPackage(String classPath, String rootPackageName, Set<Class<?>> classNameSet) {
+    private static void findProtocolClassByPackage(String classPath, String rootPackageName, Set classNameSet) {
         File file = new File(classPath);
         if (!file.exists()) {
             return;
@@ -163,8 +156,10 @@ public class SerializerSecurityRegistry {
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }
-        return fileName.contains(TRANSACTION_CLASS_ID) || fileName.contains(RAFT_CLASS_ID) || fileName.contains(
-            REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID);
+        if (fileName.contains(REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID)) {
+            return true;
+        }
+        return false;
     }
 
     private static Class<?>[] getProtocolInnerFields() {

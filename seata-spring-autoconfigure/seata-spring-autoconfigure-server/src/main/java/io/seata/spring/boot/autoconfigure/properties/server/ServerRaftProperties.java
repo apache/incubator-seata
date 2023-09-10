@@ -50,7 +50,7 @@ public class ServerRaftProperties {
 
     private Integer reporterInitialDelay = 60;
 
-    private String serialization = "kryo";
+    private String serialization = "jackson";
 
     private String compressor = "none";
 

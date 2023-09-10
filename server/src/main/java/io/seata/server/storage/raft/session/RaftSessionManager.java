@@ -34,12 +34,12 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.cluster.raft.util.RaftTaskUtil;
 
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.ADD_BRANCH_SESSION;
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.REMOVE_BRANCH_SESSION;
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.REMOVE_GLOBAL_SESSION;
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg.MsgType.UPDATE_GLOBAL_SESSION_STATUS;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  * @author funkye

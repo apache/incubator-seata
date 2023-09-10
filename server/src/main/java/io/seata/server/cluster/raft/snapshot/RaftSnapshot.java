@@ -23,7 +23,6 @@ import io.seata.core.protocol.Version;
 import io.seata.core.serializer.SerializerType;
 
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SERIALIZATION;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 
@@ -32,13 +31,12 @@ import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
  */
 public class RaftSnapshot implements Serializable {
 
-    private byte codec = SerializerType
-            .getByName(
-                    ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SERIALIZATION, DEFAULT_RAFT_SERIALIZATION))
-            .getCode();
+    private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();
+
     private byte compressor = CompressorType
-            .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
-            .getCode();
+        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
+        .getCode();
+
     private Object body;
     
     private String version = Version.getCurrent();
