@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2023 Liber Group.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import io.seata.core.serializer.Serializer;
 @LoadLevel(name = "JACKSON")
 public class JacksonSerializer implements Serializer {
 
-	ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public <T> byte[] serialize(T t) {
@@ -49,35 +49,34 @@ public class JacksonSerializer implements Serializer {
         }
     }
 
-	static class JsonInfo {
-		
-		byte[] obj;
-		
-		Class<?> clz;
+    static class JsonInfo {
 
-		public JsonInfo() {
-		}
+        byte[] obj;
 
-		public JsonInfo(byte[] obj, Class<?> clz) {
-			this.obj = obj;
-			this.clz = clz;
-		}
+        Class<?> clz;
 
-		public byte[] getObj() {
-			return obj;
-		}
+        public JsonInfo() {}
 
-		public void setObj(byte[] obj) {
-			this.obj = obj;
-		}
+        public JsonInfo(byte[] obj, Class<?> clz) {
+            this.obj = obj;
+            this.clz = clz;
+        }
 
-		public Class<?> getClz() {
-			return clz;
-		}
+        public byte[] getObj() {
+            return obj;
+        }
 
-		public void setClz(Class<?> clz) {
-			this.clz = clz;
-		}
-	}
-	
+        public void setObj(byte[] obj) {
+            this.obj = obj;
+        }
+
+        public Class<?> getClz() {
+            return clz;
+        }
+
+        public void setClz(Class<?> clz) {
+            this.clz = clz;
+        }
+    }
+
 }
