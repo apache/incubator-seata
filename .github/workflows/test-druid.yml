@@ -14,8 +14,8 @@ jobs:
         java: [ 8, 11, 17 ]
         druid: [
           1.2.19,
-          #1.2.18, # Unit test will get stuck
-          #1.2.17, # Unit test will get stuck
+          #1.2.18, # Unit test triggered a bug in Druid, see the commit https://github.com/alibaba/druid/commit/6c493f852852fb287ed5fd31ee16c27ead0ea5cf
+          #1.2.17, # Unit test triggered a bug in Druid, see the commit https://github.com/alibaba/druid/commit/6c493f852852fb287ed5fd31ee16c27ead0ea5cf
           1.2.16,
           1.2.15,
           1.2.14,
@@ -39,7 +39,7 @@ jobs:
           #1.1.23,
           #1.1.22,
           #1.1.21,
-          #1.1.20
+          #1.1.20,
         ]
     steps:
       # step 1
