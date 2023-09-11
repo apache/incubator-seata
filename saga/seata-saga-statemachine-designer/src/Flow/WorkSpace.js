@@ -10,6 +10,8 @@ const nodeIndexes = {
   ServiceTask: 1,
   ScriptTask: 1,
   Compensation: 1,
+  Fork: 1,
+  Join: 1,
   Choice: 1,
   Succeed: 1,
   Fail: 1,

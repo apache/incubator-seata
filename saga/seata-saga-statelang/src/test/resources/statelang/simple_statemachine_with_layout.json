@@ -183,6 +183,86 @@
       "x": 513.375,
       "y": 491.5,
       "id": "d21d24c9"
+    },
+    {
+      "type": "node",
+      "size": "80*72",
+      "shape": "flow-rhombus",
+      "color": "#FA8C16",
+      "label": "ForkState",
+      "stateId": "ForkState",
+      "stateType": "Fork",
+      "stateProps": {
+        "Parallel": 0,
+        "AwaitTimeout": 3600
+      },
+      "x": 513.7249999999997,
+      "y": 341.5,
+      "id": "56d8c871",
+      "index": 27
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-rect",
+      "color": "#1890FF",
+      "label": "ThirdState",
+      "stateId": "ThirdState",
+      "stateType": "ServiceTask",
+      "stateProps": {
+        "ServiceName": "demoService",
+        "ServiceMethod": "foo",
+        "Input": [
+          {
+            "fooInput": "$.[a]"
+          }
+        ],
+        "Output": {
+          "fooResult": "$.#root"
+        }
+      },
+      "x": 678.0249999999997,
+      "y": 280,
+      "id": "fa965abb",
+      "index": 28
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-rect",
+      "color": "#1890FF",
+      "label": "ForthState",
+      "stateId": "ForthState",
+      "stateType": "ServiceTask",
+      "stateProps": {
+        "ServiceName": "demoService",
+        "ServiceMethod": "bar",
+        "Input": [
+          {
+            "fooInput": "$.[a]"
+          }
+        ],
+        "Output": {
+          "fooResult": "$.#root"
+        }
+      },
+      "x": 678.5249999999997,
+      "y": 403,
+      "id": "8c0f6f65",
+      "index": 29
+    },
+    {
+      "type": "node",
+      "size": "80*72",
+      "shape": "flow-rhombus",
+      "color": "#FA8C16",
+      "label": "JoinState",
+      "stateId": "JoinState",
+      "stateType": "Join",
+      "x": 829.4249999999997,
+      "y": 344.99999999999994,
+      "id": "68a619fd",
+      "index": 6
     }
   ],
   "edges": [
@@ -212,6 +292,30 @@
       },
       "label": "",
       "shape": "flow-smooth"
+    },
+    {
+      "source": "fa965abb",
+      "sourceAnchor": 1,
+      "target": "68a619fd",
+      "targetAnchor": 3,
+      "id": "7d42d376",
+      "shape": "flow-polyline-round"
+    },
+    {
+      "source": "8c0f6f65",
+      "sourceAnchor": 1,
+      "target": "68a619fd",
+      "targetAnchor": 3,
+      "id": "90a0af11",
+      "shape": "flow-polyline-round"
+    },
+    {
+      "source": "68a619fd",
+      "sourceAnchor": 1,
+      "target": "2fd4c8de",
+      "targetAnchor": 1,
+      "id": "ff701171",
+      "shape": "flow-polyline-round"
     },
     {
       "source": "af5591f9",
@@ -283,6 +387,35 @@
       "target": "d21d24c9",
       "targetAnchor": 3,
       "id": "16d809ce"
+    },
+    {
+      "source": "5610fa37",
+      "sourceAnchor": 1,
+      "target": "56d8c871",
+      "targetAnchor": 3,
+      "id": "b59e313d",
+      "shape": "flow-polyline-round",
+      "stateProps": {
+        "Expression": "[a] == 3",
+        "Default": false
+      },
+      "label": ""
+    },
+    {
+      "source": "56d8c871",
+      "sourceAnchor": 1,
+      "target": "fa965abb",
+      "targetAnchor": 3,
+      "id": "15bbda68",
+      "shape": "flow-polyline-round"
+    },
+    {
+      "source": "56d8c871",
+      "sourceAnchor": 1,
+      "target": "8c0f6f65",
+      "targetAnchor": 3,
+      "id": "2739a68d",
+      "shape": "flow-polyline-round"
     }
   ]
 }
