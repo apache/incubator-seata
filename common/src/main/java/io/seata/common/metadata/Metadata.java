@@ -31,11 +31,11 @@ import io.seata.common.util.StringUtils;
  */
 public class Metadata {
 
-    private final Map<String/*clusterName*/, Map<String/*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();
+    private final Map<String/*vgroup*/, Map<String/*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();
 
-    private final Map<String/*clusterName*/, Map<String/*raft-group*/, Long>> clusterTerm = new ConcurrentHashMap<>();
+    private final Map<String/*vgroup*/, Map<String/*raft-group*/, Long/*term*/>> clusterTerm = new ConcurrentHashMap<>();
 
-    private final Map<String/*clusterName*/, Map<String/*raft-group*/, List<Node>>> clusterNodes =
+    private final Map<String/*vgroup*/, Map<String/*raft-group*/, List<Node>>> clusterNodes =
         new ConcurrentHashMap<>();
 
     private StoreMode storeMode = StoreMode.FILE;
