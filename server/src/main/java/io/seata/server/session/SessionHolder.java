@@ -96,9 +96,18 @@ public class SessionHolder {
             sessionMode = StoreConfig.getSessionMode();
         }
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+        RaftServerFactory.getInstance().init();
+        if (RaftServerFactory.getInstance().isRaftMode()) {
+            if (SessionMode.DB.equals(sessionMode) || SessionMode.REDIS.equals(sessionMode)) {
+                throw new StoreException("raft mode only support file store mode");
+            }
+            sessionMode = SessionMode.RAFT;
+        }
         LOGGER.info("use session store mode: {}", sessionMode.getName());
+        DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
+            reload(sessionMode);
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
@@ -108,27 +117,20 @@ public class SessionHolder {
             if (SessionMode.RAFT.equals(sessionMode)) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
+                SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
+                RaftServerFactory.getInstance().start();
             } else {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                reload(sessionMode);
             }
-            SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
+            reload(sessionMode);
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        RaftServerFactory.getInstance().init();
-        if (RaftServerFactory.getInstance().getRaftServer(group) != null) {
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.RAFT.getName());
-        } else {
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
-        }
-        if (RaftServerFactory.getInstance().isRaftMode()) {
-            return;
-        }
-        reload(sessionMode);
     }
 
     /**

@@ -19,7 +19,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RouteTable;
@@ -43,18 +42,28 @@ public class RaftServer implements Disposable, Closeable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final RaftStateMachine raftStateMachine;
-    private final RaftGroupService raftGroupService;
-    private final Node node;
-    private final CliService cliService;
+    private final String groupId;
+    private final String groupPath;
+    private final NodeOptions nodeOptions;
+    private final PeerId serverId;
+    private final RpcServer rpcServer;
+    private RaftGroupService raftGroupService;
+    private Node node;
 
     public RaftServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions, final RpcServer rpcServer)
         throws IOException {
-        String groupPath = dataPath + File.separator + groupId;
-        // Initialization path
-        FileUtils.forceMkdir(new File(groupPath));
-
+        this.groupId = groupId;
+        this.groupPath = dataPath + File.separator + groupId;
         // Initialize the state machine
         this.raftStateMachine = new RaftStateMachine(groupId);
+        this.nodeOptions = nodeOptions;
+        this.serverId = serverId;
+        this.rpcServer = rpcServer;
+    }
+
+    public void start() throws IOException {
+        // Initialization path
+        FileUtils.forceMkdir(new File(groupPath));
         // Set the state machine to startup parameters
         nodeOptions.setFsm(this.raftStateMachine);
         // Set the storage path
@@ -68,9 +77,8 @@ public class RaftServer implements Disposable, Closeable {
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer, true);
-        this.cliService = RaftServerFactory.getCliServiceInstance();
         this.node = this.raftGroupService.start(false);
-        RouteTable.getInstance().updateConfiguration(groupId, nodeOptions.getInitialConf());
+        RouteTable.getInstance().updateConfiguration(groupId, node.getOptions().getInitialConf());
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
                 .outputTo(logger).convertRatesTo(TimeUnit.SECONDS)
@@ -84,9 +92,6 @@ public class RaftServer implements Disposable, Closeable {
         return this.node;
     }
 
-    public CliService getCliService() {
-        return cliService;
-    }
 
     public RaftStateMachine getRaftStateMachine() {
         return raftStateMachine;
@@ -101,9 +106,6 @@ public class RaftServer implements Disposable, Closeable {
     public void destroy() {
         if (raftGroupService != null) {
             raftGroupService.shutdown();
-        }
-        if (cliService != null) {
-            cliService.shutdown();
         }
     }
 

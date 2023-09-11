@@ -35,6 +35,9 @@ console:
     username: seata
     password: seata
 seata:
+  server:
+    raft:
+      serialization: jackson
   config:
     # support: nacos, consul, apollo, zk, etcd3
     type: file

@@ -19,40 +19,41 @@ package io.seata.server.cluster.raft.sync.msg;
  * @author jianbin.chen
  */
 public enum RaftSyncMsgType {
-	/**
-	 * addGlobalSession
-	 */
-	ADD_GLOBAL_SESSION,
-	/**
-	 * removeGlobalSession
-	 */
-	REMOVE_GLOBAL_SESSION,
-	/**
-	 *
-	 */
-	ADD_BRANCH_SESSION,
-	/**
-	 * addBranchSession
-	 */
-	REMOVE_BRANCH_SESSION,
-	/**
-	 * updateGlobalSessionStatus
-	 */
-	UPDATE_GLOBAL_SESSION_STATUS,
-	/**
-	 * updateBranchSessionStatus
-	 */
-	UPDATE_BRANCH_SESSION_STATUS,
-	/**
-	 * releaseGlobalSessionLock
-	 */
-	RELEASE_GLOBAL_SESSION_LOCK,
-	/**
-	 * releaseBranchSessionLock
-	 */
-	RELEASE_BRANCH_SESSION_LOCK,
-	/**
-	 * ServerOnRequestProcessor
-	 */
-	SERVER_ON_REQUEST
+
+    /**
+     * addGlobalSession
+     */
+    ADD_GLOBAL_SESSION,
+    /**
+     * removeGlobalSession
+     */
+    REMOVE_GLOBAL_SESSION,
+    /**
+     *
+     */
+    ADD_BRANCH_SESSION,
+    /**
+     * addBranchSession
+     */
+    REMOVE_BRANCH_SESSION,
+    /**
+     * updateGlobalSessionStatus
+     */
+    UPDATE_GLOBAL_SESSION_STATUS,
+    /**
+     * updateBranchSessionStatus
+     */
+    UPDATE_BRANCH_SESSION_STATUS,
+    /**
+     * releaseGlobalSessionLock
+     */
+    RELEASE_GLOBAL_SESSION_LOCK,
+    /**
+     * releaseBranchSessionLock
+     */
+    RELEASE_BRANCH_SESSION_LOCK,
+    /**
+     * ServerOnRequestProcessor
+     */
+    SERVER_ON_REQUEST
 }

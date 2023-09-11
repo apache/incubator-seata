@@ -70,6 +70,8 @@ public class RaftServerFactory {
 
     private Boolean raftMode = false;
 
+    private RpcServer rpcServer;
+
     private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
 
     public static RaftServerFactory getInstance() {
@@ -123,16 +125,27 @@ public class RaftServerFactory {
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         try {
             // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this separately
-            final RpcServer rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
-            RaftServer raftServer = new RaftServer(dataPath, group, serverId, initNodeOptions(initConf), rpcServer);
-            if (!rpcServer.init(null)) {
-                throw new RuntimeException("start raft group: " + group + " fail!");
-            }
+            this.rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
+            RaftServer raftServer = new RaftServer(dataPath, group, serverId, initNodeOptions(initConf), this.rpcServer);
             // as the foundation for multi raft group in the future
             RAFT_SERVER_MAP.put(group, raftServer);
-            LOGGER.info("started seata server raft cluster, group: {} ", group);
         } catch (IOException e) {
             throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage(), e);
+        }
+    }
+
+    public void start() {
+        RAFT_SERVER_MAP.forEach((group, raftServer) -> {
+            try {
+                raftServer.start();
+            } catch (IOException e) {
+                LOGGER.error("start seata server raft cluster error, group: {} ", group, e);
+                throw new RuntimeException(e);
+            }
+            LOGGER.info("started seata server raft cluster, group: {} ", group);
+        });
+        if (!this.rpcServer.init(null)) {
+            throw new RuntimeException("start raft node fail!");
         }
     }
 
