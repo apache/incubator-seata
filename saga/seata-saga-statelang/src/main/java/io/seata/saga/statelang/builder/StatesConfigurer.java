@@ -16,7 +16,7 @@ public interface StatesConfigurer
      * @param <B> builder type
      * @return builder for chaining
      */
-    <B extends StateBuilder<B, ?>> B build(Class<B> clazz);
+    <B extends StateBuilder<?>> B build(Class<B> clazz);
 
     /**
      * Add a built state

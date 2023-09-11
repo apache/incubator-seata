@@ -16,31 +16,28 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
-import io.seata.saga.statelang.domain.ServiceTaskState;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.builder.JoinStateBuilder;
+import io.seata.saga.statelang.domain.JoinState;
+import io.seata.saga.statelang.domain.impl.JoinStateImpl;
 
 /**
- * Default implementation for {@link ServiceTaskStateBuilder}
+ * Default implementation for {@link JoinStateBuilder}
  *
  * @author ptyin
  */
-public class ServiceTaskStateBuilderImpl
-        extends AbstractServiceTaskStateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-        implements ServiceTaskStateBuilder {
+public class JoinStateBuilderImpl
+        extends BaseStateBuilder<JoinStateBuilder, JoinState>
+        implements JoinStateBuilder {
 
-    protected ServiceTaskStateImpl state;
+    protected JoinStateImpl state = new JoinStateImpl();
 
     @Override
-    protected ServiceTaskStateBuilder getPropertyBuilder() {
+    protected JoinStateBuilder getPropertyBuilder() {
         return this;
     }
 
     @Override
-    protected ServiceTaskState getState() {
-        if (state == null) {
-            state = new ServiceTaskStateImpl();
-        }
+    protected JoinState getState() {
         return state;
     }
 }

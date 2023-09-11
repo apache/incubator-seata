@@ -16,16 +16,17 @@
 
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.builder.prop.FailEndPropertyBuilder;
+import io.seata.saga.statelang.domain.FailEndState;
+
 /**
- * Build exception.
+ * Fail end state builder for {@link FailEndState}
  *
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
-
-    public BuildException(String message) {
-        super(message);
-    }
+public interface FailEndStateBuilder extends
+        StateBuilder<FailEndState>,
+        BasicPropertyBuilder<FailEndStateBuilder>,
+        FailEndPropertyBuilder<FailEndStateBuilder> {
 }

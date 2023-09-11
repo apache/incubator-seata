@@ -16,16 +16,15 @@
 
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.domain.JoinState;
+
 /**
- * Build exception.
+ * Join state builder for {@link JoinState}
  *
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
-
-    public BuildException(String message) {
-        super(message);
-    }
+public interface JoinStateBuilder extends
+        StateBuilder<JoinState>,
+        BasicPropertyBuilder<JoinStateBuilder> {
 }

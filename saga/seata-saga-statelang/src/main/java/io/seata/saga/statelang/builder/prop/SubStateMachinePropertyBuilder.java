@@ -14,18 +14,20 @@
  *  limitations under the License.
  */
 
-package io.seata.saga.statelang.builder;
+package io.seata.saga.statelang.builder.prop;
 
 /**
- * Build exception.
+ * SubStateMachine property builder
  *
+ * @param <P> property builder type
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
-
-    public BuildException(String message) {
-        super(message);
-    }
+public interface SubStateMachinePropertyBuilder<P extends SubStateMachinePropertyBuilder<P>> {
+    /**
+     * Configure sub statemachine name
+     *
+     * @param stateMachineName name of state machine
+     * @return builder for chaining
+     */
+    P withStateMachineName(String stateMachineName);
 }

@@ -16,31 +16,28 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
-import io.seata.saga.statelang.domain.ServiceTaskState;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.builder.SuccessEndStateBuilder;
+import io.seata.saga.statelang.domain.SucceedEndState;
+import io.seata.saga.statelang.domain.impl.SucceedEndStateImpl;
 
 /**
- * Default implementation for {@link ServiceTaskStateBuilder}
+ * Default implementation for {@link SuccessEndStateBuilder}
  *
  * @author ptyin
  */
-public class ServiceTaskStateBuilderImpl
-        extends AbstractServiceTaskStateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-        implements ServiceTaskStateBuilder {
+public class SuccessEndStateBuilderImpl
+        extends BaseStateBuilder<SuccessEndStateBuilder, SucceedEndState>
+        implements SuccessEndStateBuilder {
 
-    protected ServiceTaskStateImpl state;
+    SucceedEndStateImpl state = new SucceedEndStateImpl();
 
     @Override
-    protected ServiceTaskStateBuilder getPropertyBuilder() {
+    protected SuccessEndStateBuilder getPropertyBuilder() {
         return this;
     }
 
     @Override
-    protected ServiceTaskState getState() {
-        if (state == null) {
-            state = new ServiceTaskStateImpl();
-        }
+    protected SucceedEndState getState() {
         return state;
     }
 }

@@ -16,31 +16,28 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
-import io.seata.saga.statelang.domain.ServiceTaskState;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.builder.CompensationTriggerStateBuilder;
+import io.seata.saga.statelang.domain.CompensationTriggerState;
+import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
 
 /**
- * Default implementation for {@link ServiceTaskStateBuilder}
+ * Default implementation for {@link CompensationTriggerStateBuilder}
  *
  * @author ptyin
  */
-public class ServiceTaskStateBuilderImpl
-        extends AbstractServiceTaskStateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-        implements ServiceTaskStateBuilder {
+public class CompensationTriggerStateBuilderImpl
+        extends BaseStateBuilder<CompensationTriggerStateBuilder, CompensationTriggerState>
+        implements CompensationTriggerStateBuilder{
 
-    protected ServiceTaskStateImpl state;
+    protected CompensationTriggerStateImpl state = new CompensationTriggerStateImpl();
 
     @Override
-    protected ServiceTaskStateBuilder getPropertyBuilder() {
+    protected CompensationTriggerStateBuilder getPropertyBuilder() {
         return this;
     }
 
     @Override
-    protected ServiceTaskState getState() {
-        if (state == null) {
-            state = new ServiceTaskStateImpl();
-        }
+    protected CompensationTriggerState getState() {
         return state;
     }
 }

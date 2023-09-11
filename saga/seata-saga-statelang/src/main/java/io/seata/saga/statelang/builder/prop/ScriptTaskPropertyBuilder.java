@@ -14,18 +14,28 @@
  *  limitations under the License.
  */
 
-package io.seata.saga.statelang.builder;
+package io.seata.saga.statelang.builder.prop;
 
-/**
- * Build exception.
+/***
+ * Script task state property builder
  *
+ * @param <P> property builder type
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
+public interface ScriptTaskPropertyBuilder<P extends ScriptTaskPropertyBuilder<P>> {
+    /**
+     * Configure script type such as groovy.
+     *
+     * @param scriptType type of script
+     * @return builder for chaining
+     */
+    P withScriptType(String scriptType);
 
-    public BuildException(String message) {
-        super(message);
-    }
+    /**
+     * Configure script content.
+     *
+     * @param scriptContent content of script
+     * @return builder for chaining
+     */
+    P withScriptContent(String scriptContent);
 }

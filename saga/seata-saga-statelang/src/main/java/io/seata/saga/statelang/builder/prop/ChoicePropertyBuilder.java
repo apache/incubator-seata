@@ -14,18 +14,29 @@
  *  limitations under the License.
  */
 
-package io.seata.saga.statelang.builder;
+package io.seata.saga.statelang.builder.prop;
 
 /**
- * Build exception.
+ * Choice state property builder
  *
+ * @param <P> property builder type
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
+public interface ChoicePropertyBuilder<P extends ChoicePropertyBuilder<P>> {
+    /**
+     * Put (expression, next state) pair into choices.
+     *
+     * @param expression expression to evaluate
+     * @param next name of next state
+     * @return builder for chaining
+     */
+    P withChoice(String expression, String next);
 
-    public BuildException(String message) {
-        super(message);
-    }
+    /**
+     * Configure default choice when no valid choices.
+     *
+     * @param defaultChoice default choice
+     * @return builder for chaining
+     */
+    P withDefault(String defaultChoice);
 }

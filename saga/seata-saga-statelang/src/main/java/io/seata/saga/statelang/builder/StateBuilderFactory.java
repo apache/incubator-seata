@@ -16,12 +16,10 @@
 
 package io.seata.saga.statelang.builder;
 
-import io.seata.saga.statelang.builder.impl.ChoiceStateBuilderImpl;
-import io.seata.saga.statelang.builder.impl.ServiceTaskStateBuilderImpl;
-import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.builder.impl.*;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * State builder factory.
@@ -29,17 +27,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author ptyin
  */
 public class StateBuilderFactory {
-    protected static Map<Class<? extends StateBuilder<?, ?>>, Class<? extends StateBuilder<?, ?>>> stateBuilderMap =
-            new ConcurrentHashMap<>();
+    protected static Map<Class<? extends StateBuilder<?>>, Class<? extends StateBuilder<?>>> stateBuilderMap
+            = new HashMap<>();
 
     static {
-        stateBuilderMap.put(ServiceTaskStateBuilder.class, ServiceTaskStateBuilderImpl.class);
         stateBuilderMap.put(ChoiceStateBuilder.class, ChoiceStateBuilderImpl.class);
+        stateBuilderMap.put(CompensateSubStateMachineStateBuilder.class,
+                CompensateSubStateMachineStateBuilderImpl.class);
+        stateBuilderMap.put(CompensationTriggerStateBuilder.class,
+                CompensationTriggerStateBuilderImpl.class);
+        stateBuilderMap.put(FailEndStateBuilder.class, FailEndStateBuilderImpl.class);
+        stateBuilderMap.put(ForkStateBuilder.class, ForkStateBuilderImpl.class);
+        stateBuilderMap.put(JoinStateBuilder.class, JoinStateBuilderImpl.class);
+        stateBuilderMap.put(ScriptTaskStateBuilder.class, ScriptTaskStateBuilderImpl.class);
+        stateBuilderMap.put(ServiceTaskStateBuilder.class, ServiceTaskStateBuilderImpl.class);
+        stateBuilderMap.put(SubStateMachineBuilder.class, SubStateMachineBuilderImpl.class);
+        stateBuilderMap.put(SuccessEndStateBuilder.class, SuccessEndStateBuilderImpl.class);
     }
 
-    public static StateBuilder<?, ?> getStateBuilder(Class<? extends StateBuilder<?, ?>> clazz)
+    public static StateBuilder<?> getStateBuilder(Class<? extends StateBuilder<?>> clazz)
             throws InstantiationException, IllegalAccessException {
-        Class<? extends StateBuilder<?, ?>> implClazz = stateBuilderMap.getOrDefault(clazz, clazz);
+        Class<? extends StateBuilder<?>> implClazz = stateBuilderMap.getOrDefault(clazz, clazz);
         return implClazz.newInstance();
     }
 }

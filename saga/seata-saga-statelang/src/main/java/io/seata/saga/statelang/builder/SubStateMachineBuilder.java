@@ -16,16 +16,20 @@
 
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.builder.prop.SubStateMachinePropertyBuilder;
+import io.seata.saga.statelang.builder.prop.TaskPropertyBuilder;
+import io.seata.saga.statelang.domain.SubStateMachine;
+
 /**
- * Build exception.
+ * SubStateMachine builder for {@link SubStateMachine}
  *
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
+public interface SubStateMachineBuilder extends
+        StateBuilder<SubStateMachine>,
+        BasicPropertyBuilder<SubStateMachineBuilder>,
+        TaskPropertyBuilder<SubStateMachineBuilder>,
+        SubStateMachinePropertyBuilder<SubStateMachineBuilder> {
 
-    public BuildException(String message) {
-        super(message);
-    }
 }

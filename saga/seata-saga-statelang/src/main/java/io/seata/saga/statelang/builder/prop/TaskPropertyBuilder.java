@@ -14,24 +14,24 @@
  *  limitations under the License.
  */
 
-package io.seata.saga.statelang.builder;
+package io.seata.saga.statelang.builder.prop;
 
 import java.util.Collection;
 
 /***
- * Task state builder.
+ * Task property builder.
  *
- * @param <B> builder type
+ * @param <P> property builder type
  * @author ptyin
  */
-public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
+public interface TaskPropertyBuilder<P extends TaskPropertyBuilder<P>> {
     /**
      * Configure compensation state.
      *
      * @param compensationState name of compensation state
      * @return builder for chaining
      */
-    B withCompensationState(String compensationState);
+    P withCompensationState(String compensationState);
 
     /**
      * Configure if this state is used to compensate another state.
@@ -39,7 +39,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
      * @param forCompensation if is for compensation or not
      * @return builder for chaining
      */
-    B withForCompensation(boolean forCompensation);
+    P withForCompensation(boolean forCompensation);
 
     /**
      * Configure if this state will update data
@@ -47,7 +47,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
      * @param forUpdate if is for update
      * @return builder for chaining
      */
-    B withForUpdate(boolean forUpdate);
+    P withForUpdate(boolean forUpdate);
 
     /**
      * Configure retry strategy. If the state has multiple retry strategies, use following way to build:
@@ -67,7 +67,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
      *
      * @return retry builder
      */
-    RetryBuilder<B> withOneRetry();
+    TaskPropertyBuilder.RetryBuilder<P> withOneRetry();
 
     /**
      * Configure exception catching rules. If the state has multiple catching rules, use following way to build:
@@ -87,7 +87,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
      *
      * @return exception match builder
      */
-    ExceptionMatchBuilder<B> withOneCatch();
+    TaskPropertyBuilder.ExceptionMatchBuilder<P> withOneCatch();
 
     /**
      * Configure execution status.
@@ -96,14 +96,14 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
      * @param status matched status
      * @return builder for chaining
      */
-    B withOneStatus(String expression, String status);
+    P withOneStatus(String expression, String status);
 
     /**
      * Configure loop strategy.
      *
      * @return builder for chaining
      */
-    LoopBuilder<B> withLoop();
+    TaskPropertyBuilder.LoopBuilder<P> withLoop();
 
     interface ChildBuilder<B> {
         /**
@@ -114,14 +114,14 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
         B and();
     }
 
-    interface RetryBuilder<B> extends ChildBuilder<B> {
+    interface RetryBuilder<B> extends TaskPropertyBuilder.ChildBuilder<B> {
         /**
          * Configure exception classes to capture
          *
          * @param exceptions exception classes
          * @return retry builder for chaining
          */
-        RetryBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions);
+        TaskPropertyBuilder.RetryBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions);
 
         /**
          * Configure interval
@@ -129,7 +129,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param intervalSeconds interval in seconds
          * @return retry builder for chaining
          */
-        RetryBuilder<B> withIntervalSeconds(double intervalSeconds);
+        TaskPropertyBuilder.RetryBuilder<B> withIntervalSeconds(double intervalSeconds);
 
         /**
          * Configure max attempts
@@ -137,7 +137,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param maxAttempts max count of attempts
          * @return retry builder for chaining
          */
-        RetryBuilder<B> withMaxAttempts(int maxAttempts);
+        TaskPropertyBuilder.RetryBuilder<B> withMaxAttempts(int maxAttempts);
 
         /**
          * Configure backoff rate
@@ -145,17 +145,17 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param backoffRate backoff rate
          * @return retry builder for chaining
          */
-        RetryBuilder<B> withBackoffRate(double backoffRate);
+        TaskPropertyBuilder.RetryBuilder<B> withBackoffRate(double backoffRate);
     }
 
-    interface ExceptionMatchBuilder<B> extends ChildBuilder<B> {
+    interface ExceptionMatchBuilder<B> extends TaskPropertyBuilder.ChildBuilder<B> {
         /**
          * Configure exception classes to capture.
          *
          * @param exceptions exception classes
          * @return exception match builder for chaining
          */
-        ExceptionMatchBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions);
+        TaskPropertyBuilder.ExceptionMatchBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions);
 
         /**
          * Configure next state when exception matched.
@@ -163,17 +163,17 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param next name of next state
          * @return exception match builder for chaining
          */
-        ExceptionMatchBuilder<B> withNext(String next);
+        TaskPropertyBuilder.ExceptionMatchBuilder<B> withNext(String next);
     }
 
-    interface LoopBuilder<B> extends ChildBuilder<B> {
+    interface LoopBuilder<B> extends TaskPropertyBuilder.ChildBuilder<B> {
         /**
          * Configure max parallelism.
          *
          * @param parallel max parallelism, i.e. max count of threads at a specific moment
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withParallel(int parallel);
+        TaskPropertyBuilder.LoopBuilder<B> withParallel(int parallel);
 
         /**
          * Configure collection object name.
@@ -181,7 +181,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param collection collection name
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withCollection(String collection);
+        TaskPropertyBuilder.LoopBuilder<B> withCollection(String collection);
 
         /**
          * Configure element variable name.
@@ -189,7 +189,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param elementVariableName element variable name
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withElementVariableName(String elementVariableName);
+        TaskPropertyBuilder.LoopBuilder<B> withElementVariableName(String elementVariableName);
 
         /**
          * Configure element variable index name, default loopCounter.
@@ -197,7 +197,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param elementIndexName element index name
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withElementIndexName(String elementIndexName);
+        TaskPropertyBuilder.LoopBuilder<B> withElementIndexName(String elementIndexName);
 
         /**
          * Configure completion condition, default nrOfInstances == nrOfCompletedInstances.
@@ -205,7 +205,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param completionCondition completion condition
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withCompletionCondition(String completionCondition);
+        TaskPropertyBuilder.LoopBuilder<B> withCompletionCondition(String completionCondition);
 
         /**
          * Configure the name of loop result, default loopResult.
@@ -213,7 +213,7 @@ public interface TaskStateBuilder<B extends TaskStateBuilder<B>> {
          * @param resultName result name
          * @return loop builder for chaining
          */
-        LoopBuilder<B> withResultName(String resultName);
+        TaskPropertyBuilder.LoopBuilder<B> withResultName(String resultName);
 
         /**
          * Configure the name of number of instances, default nrOfInstances.

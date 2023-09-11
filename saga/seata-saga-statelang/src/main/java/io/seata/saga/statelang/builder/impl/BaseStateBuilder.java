@@ -18,6 +18,7 @@ package io.seata.saga.statelang.builder.impl;
 
 import io.seata.saga.statelang.builder.StateBuilder;
 import io.seata.saga.statelang.builder.StatesConfigurer;
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.impl.BaseState;
 
@@ -28,26 +29,26 @@ import io.seata.saga.statelang.domain.impl.BaseState;
  * @param <S> state type
  * @author ptyin
  */
-public abstract class BaseStateBuilder<B extends StateBuilder<B, S>, S extends State>
-        implements StateBuilder<B, S> {
+public abstract class BaseStateBuilder<B extends BasicPropertyBuilder<B>, S extends State>
+        implements StateBuilder<S>, BasicPropertyBuilder<B> {
     private StatesConfigurer parent;
 
     @Override
     public B withName(String name) {
         ((BaseState) getState()).setName(name);
-        return getBuilder();
+        return getPropertyBuilder();
     }
 
     @Override
     public B withComment(String comment) {
         ((BaseState) getState()).setComment(comment);
-        return getBuilder();
+        return getPropertyBuilder();
     }
 
     @Override
     public B withNext(String next) {
         ((BaseState) getState()).setNext(next);
-        return getBuilder();
+        return getPropertyBuilder();
     }
 
     @Override
@@ -65,7 +66,7 @@ public abstract class BaseStateBuilder<B extends StateBuilder<B, S>, S extends S
         this.parent = parent;
     }
 
-    protected abstract B getBuilder();
+    protected abstract B getPropertyBuilder();
 
     protected abstract S getState();
 }

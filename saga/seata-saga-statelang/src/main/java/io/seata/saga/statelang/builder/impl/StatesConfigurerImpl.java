@@ -34,7 +34,7 @@ public class StatesConfigurerImpl implements StatesConfigurer {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <B extends StateBuilder<B, ?>> B build(Class<B> clazz) {
+    public <B extends StateBuilder<?>> B build(Class<B> clazz) {
         B builder;
         try {
             builder = (B) StateBuilderFactory.getStateBuilder(clazz);
@@ -43,7 +43,7 @@ public class StatesConfigurerImpl implements StatesConfigurer {
         } catch (ClassCastException e) {
             throw new FrameworkException(e, "StateBuilderFactory got a wrong state builder.");
         }
-        ((BaseStateBuilder<B, ?>) builder).setParent(this);
+        ((BaseStateBuilder<?, ?>) builder).setParent(this);
         return builder;
     }
 

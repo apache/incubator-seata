@@ -16,16 +16,17 @@
 
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.builder.prop.ForkPropertyBuilder;
+import io.seata.saga.statelang.domain.ForkState;
+
 /**
- * Build exception.
+ * Fork state builder for {@link ForkState}
  *
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
-
-    public BuildException(String message) {
-        super(message);
-    }
+public interface ForkStateBuilder extends
+        StateBuilder<ForkState>,
+        BasicPropertyBuilder<ForkStateBuilder>,
+        ForkPropertyBuilder<ForkStateBuilder> {
 }

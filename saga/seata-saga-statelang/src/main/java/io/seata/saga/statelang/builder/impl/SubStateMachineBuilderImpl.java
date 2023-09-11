@@ -16,30 +16,36 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
-import io.seata.saga.statelang.domain.ServiceTaskState;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.builder.SubStateMachineBuilder;
+import io.seata.saga.statelang.domain.SubStateMachine;
+import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 
 /**
- * Default implementation for {@link ServiceTaskStateBuilder}
+ * Default implementation for {@link SubStateMachineBuilder}
  *
  * @author ptyin
  */
-public class ServiceTaskStateBuilderImpl
-        extends AbstractServiceTaskStateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-        implements ServiceTaskStateBuilder {
+public class SubStateMachineBuilderImpl
+        extends AbstractTaskStateBuilder<SubStateMachineBuilder, SubStateMachine>
+        implements SubStateMachineBuilder{
 
-    protected ServiceTaskStateImpl state;
+    protected SubStateMachineImpl state;
 
     @Override
-    protected ServiceTaskStateBuilder getPropertyBuilder() {
+    public SubStateMachineBuilder withStateMachineName(String stateMachineName) {
+        state.setStateMachineName(stateMachineName);
         return this;
     }
 
     @Override
-    protected ServiceTaskState getState() {
+    protected SubStateMachineBuilder getPropertyBuilder() {
+        return this;
+    }
+
+    @Override
+    protected SubStateMachine getState() {
         if (state == null) {
-            state = new ServiceTaskStateImpl();
+            state = new SubStateMachineImpl();
         }
         return state;
     }

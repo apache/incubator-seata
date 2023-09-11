@@ -14,18 +14,28 @@
  *  limitations under the License.
  */
 
-package io.seata.saga.statelang.builder;
+package io.seata.saga.statelang.builder.prop;
 
 /**
- * Build exception.
+ * Fail end property builder
  *
+ * @param <P> property builder type
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
+public interface FailEndPropertyBuilder<P extends FailEndPropertyBuilder<P>> {
+    /**
+     * Configure the state error code
+     *
+     * @param errorCode error code
+     * @return builder for chaining
+     */
+    P withErrorCode(String errorCode);
 
-    public BuildException(String message) {
-        super(message);
-    }
+    /**
+     * Configure the state error message
+     *
+     * @param message error message
+     * @return builder for chaining
+     */
+    P withMessage(String message);
 }

@@ -16,16 +16,15 @@
 
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.domain.CompensationTriggerState;
+
 /**
- * Build exception.
+ * Compensation trigger state builder for {@link CompensationTriggerState}
  *
  * @author ptyin
  */
-public class BuildException extends RuntimeException {
-    public BuildException() {
-    }
-
-    public BuildException(String message) {
-        super(message);
-    }
+public interface CompensationTriggerStateBuilder extends
+        StateBuilder<CompensationTriggerState>,
+        BasicPropertyBuilder<CompensationTriggerStateBuilder> {
 }

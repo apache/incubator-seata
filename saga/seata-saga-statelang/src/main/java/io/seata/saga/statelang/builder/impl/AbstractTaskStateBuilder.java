@@ -16,8 +16,8 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.StateBuilder;
-import io.seata.saga.statelang.builder.TaskStateBuilder;
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
+import io.seata.saga.statelang.builder.prop.TaskPropertyBuilder;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 
@@ -29,17 +29,17 @@ import java.util.stream.Collectors;
 /**
  * Abstract task state builder to inherit.
  *
- * @param <B> builder type
+ * @param <P> builder type
  * @param <S> state type
  * @author ptyin
  */
-public abstract class AbstractTaskStateBuilder<B extends TaskStateBuilder<B> & StateBuilder<B, S>, S extends State>
-        extends BaseStateBuilder<B, S> implements TaskStateBuilder<B> {
-
-    protected AbstractTaskState state;
+public abstract class AbstractTaskStateBuilder
+        <P extends BasicPropertyBuilder<P> & TaskPropertyBuilder<P>, S extends State>
+        extends BaseStateBuilder<P, S>
+        implements BasicPropertyBuilder<P>, TaskPropertyBuilder<P> {
 
     public AbstractTaskStateBuilder() {
-        state = (AbstractTaskState) getState();
+        AbstractTaskState state = (AbstractTaskState) getState();
         // Do some default setup
         state.setForCompensation(false);
         state.setForUpdate(false);
@@ -50,114 +50,117 @@ public abstract class AbstractTaskStateBuilder<B extends TaskStateBuilder<B> & S
     }
 
     @Override
-    public B withCompensationState(String compensationState) {
-        state.setCompensateState(compensationState);
-        return getBuilder();
+    public P withCompensationState(String compensationState) {
+        ((AbstractTaskState) getState()).setCompensateState(compensationState);
+        return getPropertyBuilder();
     }
 
     @Override
-    public B withForCompensation(boolean forCompensation) {
-        state.setForUpdate(forCompensation);
-        return getBuilder();
+    public P withForCompensation(boolean forCompensation) {
+        ((AbstractTaskState) getState()).setForUpdate(forCompensation);
+        return getPropertyBuilder();
     }
 
     @Override
-    public B withForUpdate(boolean forUpdate) {
-        state.setForUpdate(forUpdate);
-        return getBuilder();
+    public P withForUpdate(boolean forUpdate) {
+        ((AbstractTaskState) getState()).setForUpdate(forUpdate);
+        return getPropertyBuilder();
     }
 
     @Override
-    public RetryBuilder<B> withOneRetry() {
+    public RetryBuilder<P> withOneRetry() {
         return new RetryBuilderImpl();
     }
 
     @Override
-    public ExceptionMatchBuilder<B> withOneCatch() {
+    public ExceptionMatchBuilder<P> withOneCatch() {
         return new ExceptionMatchBuilderImpl();
     }
 
     @Override
-    public B withOneStatus(String expression, String status) {
+    public P withOneStatus(String expression, String status) {
+        AbstractTaskState state = ((AbstractTaskState) getState());
         if (state.getStatus() == null) {
             state.setStatus(new HashMap<>());
         }
         state.getStatus().put(expression, status);
-        return getBuilder();
+        return getPropertyBuilder();
     }
 
     @Override
-    public LoopBuilder<B> withLoop() {
+    public LoopBuilder<P> withLoop() {
         return new LoopBuilderImpl();
     }
 
-    public class RetryBuilderImpl implements TaskStateBuilder.RetryBuilder<B> {
+    public class RetryBuilderImpl implements RetryBuilder<P> {
 
         private final AbstractTaskState.RetryImpl oneRetry = new AbstractTaskState.RetryImpl();
 
         @Override
-        public B and() {
+        public P and() {
+            AbstractTaskState state = ((AbstractTaskState) getState());
             if (state.getRetry() == null) {
                 state.setRetry(new ArrayList<>());
             }
             state.getRetry().add(oneRetry);
-            return getBuilder();
+            return getPropertyBuilder();
         }
 
         @Override
-        public RetryBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions) {
+        public RetryBuilder<P> withExceptions(Collection<Class<? extends Exception>> exceptions) {
             oneRetry.setExceptions(exceptions.stream().map(Class::getName).collect(Collectors.toList()));
             oneRetry.setExceptionClasses(new ArrayList<>(exceptions));
             return this;
         }
 
         @Override
-        public RetryBuilder<B> withIntervalSeconds(double intervalSeconds) {
+        public RetryBuilder<P> withIntervalSeconds(double intervalSeconds) {
             oneRetry.setIntervalSeconds(intervalSeconds);
             return this;
         }
 
         @Override
-        public RetryBuilder<B> withMaxAttempts(int maxAttempts) {
+        public RetryBuilder<P> withMaxAttempts(int maxAttempts) {
             oneRetry.setMaxAttempts(maxAttempts);
             return this;
         }
 
         @Override
-        public RetryBuilder<B> withBackoffRate(double backoffRate) {
+        public RetryBuilder<P> withBackoffRate(double backoffRate) {
             oneRetry.setBackoffRate(backoffRate);
             return this;
         }
     }
 
-    public class ExceptionMatchBuilderImpl implements TaskStateBuilder.ExceptionMatchBuilder<B> {
+    public class ExceptionMatchBuilderImpl implements ExceptionMatchBuilder<P> {
 
         private final AbstractTaskState.ExceptionMatchImpl oneCatch = new AbstractTaskState.ExceptionMatchImpl();
 
         @Override
-        public B and() {
+        public P and() {
+            AbstractTaskState state = ((AbstractTaskState) getState());
             if (state.getCatches() == null) {
                 state.setCatches(new ArrayList<>());
             }
             state.getCatches().add(oneCatch);
-            return getBuilder();
+            return getPropertyBuilder();
         }
 
         @Override
-        public ExceptionMatchBuilder<B> withExceptions(Collection<Class<? extends Exception>> exceptions) {
+        public ExceptionMatchBuilder<P> withExceptions(Collection<Class<? extends Exception>> exceptions) {
             oneCatch.setExceptions(exceptions.stream().map(Class::getName).collect(Collectors.toList()));
             oneCatch.setExceptionClasses(new ArrayList<>(exceptions));
             return this;
         }
 
         @Override
-        public ExceptionMatchBuilder<B> withNext(String next) {
+        public ExceptionMatchBuilder<P> withNext(String next) {
             oneCatch.setNext(next);
             return this;
         }
     }
 
-    public class LoopBuilderImpl implements LoopBuilder<B> {
+    public class LoopBuilderImpl implements LoopBuilder<P> {
 
         private final AbstractTaskState.LoopImpl loop = new AbstractTaskState.LoopImpl();
 
@@ -174,61 +177,62 @@ public abstract class AbstractTaskStateBuilder<B extends TaskStateBuilder<B> & S
         }
 
         @Override
-        public B and() {
+        public P and() {
+            AbstractTaskState state = ((AbstractTaskState) getState());
             state.setLoop(loop);
-            return getBuilder();
+            return getPropertyBuilder();
         }
 
         @Override
-        public LoopBuilder<B> withParallel(int parallel) {
+        public LoopBuilder<P> withParallel(int parallel) {
             loop.setParallel(parallel);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withCollection(String collection) {
+        public LoopBuilder<P> withCollection(String collection) {
             loop.setCollection(collection);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withElementVariableName(String elementVariableName) {
+        public LoopBuilder<P> withElementVariableName(String elementVariableName) {
             loop.setElementVariableName(elementVariableName);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withElementIndexName(String elementIndexName) {
+        public LoopBuilder<P> withElementIndexName(String elementIndexName) {
             loop.setElementIndexName(elementIndexName);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withCompletionCondition(String completionCondition) {
+        public LoopBuilder<P> withCompletionCondition(String completionCondition) {
             loop.setCompletionCondition(completionCondition);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withResultName(String resultName) {
+        public LoopBuilder<P> withResultName(String resultName) {
             loop.setResultName(resultName);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withNumberOfInstancesName(String numberOfInstancesName) {
+        public LoopBuilder<P> withNumberOfInstancesName(String numberOfInstancesName) {
             loop.setNumberOfInstancesName(numberOfInstancesName);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withNumberOfActiveInstancesName(String numberOfActiveInstancesName) {
+        public LoopBuilder<P> withNumberOfActiveInstancesName(String numberOfActiveInstancesName) {
             loop.setNumberOfActiveInstancesName(numberOfActiveInstancesName);
             return this;
         }
 
         @Override
-        public LoopBuilder<B> withNumberOfCompletedInstancesName(String numberOfCompletedInstancesName) {
+        public LoopBuilder<P> withNumberOfCompletedInstancesName(String numberOfCompletedInstancesName) {
             loop.setNumberOfCompletedInstancesName(numberOfCompletedInstancesName);
             return this;
         }

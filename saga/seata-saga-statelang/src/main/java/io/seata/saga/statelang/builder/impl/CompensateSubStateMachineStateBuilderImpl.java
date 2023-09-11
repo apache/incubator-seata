@@ -16,30 +16,30 @@
 
 package io.seata.saga.statelang.builder.impl;
 
-import io.seata.saga.statelang.builder.ServiceTaskStateBuilder;
-import io.seata.saga.statelang.domain.ServiceTaskState;
-import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
+import io.seata.saga.statelang.builder.CompensateSubStateMachineStateBuilder;
+import io.seata.saga.statelang.domain.CompensateSubStateMachineState;
+import io.seata.saga.statelang.domain.impl.CompensateSubStateMachineStateImpl;
 
 /**
- * Default implementation for {@link ServiceTaskStateBuilder}
+ * Default implementation for {@link CompensateSubStateMachineStateBuilder}
  *
  * @author ptyin
  */
-public class ServiceTaskStateBuilderImpl
-        extends AbstractServiceTaskStateBuilder<ServiceTaskStateBuilder, ServiceTaskState>
-        implements ServiceTaskStateBuilder {
+public class CompensateSubStateMachineStateBuilderImpl
+        extends AbstractServiceTaskStateBuilder<CompensateSubStateMachineStateBuilder, CompensateSubStateMachineState>
+        implements CompensateSubStateMachineStateBuilder {
 
-    protected ServiceTaskStateImpl state;
+    protected CompensateSubStateMachineStateImpl state;
 
     @Override
-    protected ServiceTaskStateBuilder getPropertyBuilder() {
+    protected CompensateSubStateMachineStateBuilder getPropertyBuilder() {
         return this;
     }
 
     @Override
-    protected ServiceTaskState getState() {
+    protected CompensateSubStateMachineState getState() {
         if (state == null) {
-            state = new ServiceTaskStateImpl();
+            state = new CompensateSubStateMachineStateImpl();
         }
         return state;
     }

@@ -1,27 +1,17 @@
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.builder.prop.ChoicePropertyBuilder;
+import io.seata.saga.statelang.builder.prop.BasicPropertyBuilder;
 import io.seata.saga.statelang.domain.ChoiceState;
 
 /***
+ * Choice state builder for {@link ChoiceState}
  *
  * @author ptyin
  */
-public interface ChoiceStateBuilder extends StateBuilder<ChoiceStateBuilder, ChoiceState> {
+public interface ChoiceStateBuilder extends
+        StateBuilder<ChoiceState>,
+        BasicPropertyBuilder<ChoiceStateBuilder>,
+        ChoicePropertyBuilder<ChoiceStateBuilder> {
 
-    /**
-     * Put (expression, next state) pair into choices.
-     *
-     * @param expression expression to evaluate
-     * @param next name of next state
-     * @return builder for chaining
-     */
-    ChoiceStateBuilder withChoice(String expression, String next);
-
-    /**
-     * Configure default choice when no valid choices.
-     *
-     * @param defaultChoice default choice
-     * @return builder for chaining
-     */
-    ChoiceStateBuilder withDefault(String defaultChoice);
 }

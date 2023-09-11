@@ -53,7 +53,7 @@ public class ChoiceStateBuilderImpl
     }
 
     @Override
-    protected ChoiceStateBuilder getBuilder() {
+    protected ChoiceStateBuilder getPropertyBuilder() {
         return this;
     }
 
