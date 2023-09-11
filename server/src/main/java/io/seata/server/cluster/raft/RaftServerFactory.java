@@ -112,14 +112,23 @@ public class RaftServerFactory {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
         int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "0"));
-        if (port > 0) {
-            port = port + SERVICE_OFFSET_SPRING_BOOT;
-        } else {
-            throw new IllegalArgumentException(
-                "raft port need server.servicePort, For local debugging, use -Dserver.servicePort to specify the service port");
-        }
+        PeerId serverId = null;
         String host = XID.getIpAddress();
-        PeerId serverId = new PeerId(host, port);
+        if (port <= 0) {
+            // Highly available deployments require different nodes
+            for (PeerId peer : initConf.getPeers()) {
+                if (StringUtils.equals(peer.getIp(), host)) {
+                    if (serverId != null) {
+                        throw new IllegalArgumentException(
+                            "server.raft.cluster has duplicate ip, For local debugging, use -Dserver.raftPort to specify the raft port");
+                    }
+                    serverId = peer;
+                }
+            }
+        } else {
+            // Local debugging use
+            serverId = new PeerId(host, port);
+        }
         final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
             + separator + "raft" + separator + serverId.getPort();
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
