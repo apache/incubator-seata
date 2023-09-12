@@ -96,8 +96,7 @@ public class RMHandlerAT extends AbstractRMHandler {
             branchDeleteResponse.setResultCode(ResultCode.Success);
         } catch (Exception e) {
             branchDeleteResponse.setResultCode(ResultCode.Failed);
-            LOGGER.error("delete undo log fail, xid:{}, branchId:{}, reason: {}",request.getXid(),
-                    request.getBranchId(), e.getMessage(), e);
+            LOGGER.error("delete undo log fail, xid:{}, branchId:{}, ",request.getXid(), request.getBranchId(),  e);
         }
         return branchDeleteResponse;
     }
