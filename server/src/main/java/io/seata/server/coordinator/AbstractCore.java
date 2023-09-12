@@ -46,6 +46,7 @@ import org.slf4j.MDC;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
+import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchDeleteRequest;
 import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
 import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
@@ -246,15 +247,23 @@ public abstract class AbstractCore implements Core {
     }
 
     @Override
-    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TimeoutException {
+    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (BranchType.SAGA == branchSession.getBranchType()) {
+            return true;
+        }
         BranchDeleteRequest request = new BranchDeleteRequest();
-        request.setBranchType(branchSession.getBranchType());
-        request.setResourceId(branchSession.getResourceId());
-        request.setXid(globalSession.getXid());
-        request.setBranchId(branchSession.getBranchId());
-        BranchDeleteResponse response = (BranchDeleteResponse) remotingServer.sendSyncRequest(
-                branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
-        return ResultCode.Success.equals(response.getResultCode());
+        try {
+            request.setBranchType(branchSession.getBranchType());
+            request.setResourceId(branchSession.getResourceId());
+            request.setXid(globalSession.getXid());
+            request.setBranchId(branchSession.getBranchId());
+            BranchDeleteResponse response = (BranchDeleteResponse) remotingServer.sendSyncRequest(
+                    branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
+            return ResultCode.Success.equals(response.getResultCode());
+        } catch (TimeoutException e) {
+            throw new BranchTransactionException(FailedToSendBranchDeleteRequest, String.format("Send branch delete failed," +
+                            " xid = %s branchId = %s", branchSession.getXid(), branchSession.getBranchId()), e);
+        }
     }
 
 

@@ -15,7 +15,7 @@
  */
 package io.seata.server.console.impl;
 
-import io.seata.common.ConfigurationKeys;
+import io.seata.common.exception.FrameworkException;
 import io.seata.console.result.SingleResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -23,23 +23,13 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static io.seata.common.DefaultValues.DEFAULT_AUTO_RESTART_TIME;
-
 public abstract class AbstractBranchService extends AbstractService implements BranchSessionService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBranchService.class);
-
-    protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.AUTO_RESTART_TIME,
-            DEFAULT_AUTO_RESTART_TIME);
 
     @Override
     public SingleResult<Void> stopBranchRetry(String xid, String branchId) {
@@ -54,20 +44,28 @@ public abstract class AbstractBranchService extends AbstractService implements B
         BranchStatus branchStatus = branchSession.getStatus();
         if (branchStatus != BranchStatus.Unknown && branchStatus != BranchStatus.Registered &&
                 branchStatus != BranchStatus.PhaseOne_Done) {
-            throw new IllegalArgumentException("current branch is not currently in progress");
+            throw new IllegalArgumentException("current branch session is not support to stop");
         }
-        BranchStatus newStatus = RETRY_STATUS.contains(globalSession.getStatus()) ? BranchStatus.STOP_RETRY : null;
+        if (branchStatus.getCode() == BranchStatus.STOP_RETRY.getCode()) {
+            throw new IllegalArgumentException("current branch session already stop");
+        }
+        GlobalStatus status = globalSession.getStatus();
+        BranchStatus newStatus = RETRY_STATUS.contains(status) || GlobalStatus.Rollbacking.equals(status) ||
+                GlobalStatus.Committing.equals(status) || GlobalStatus.StopRollbackRetry.equals(status) ||
+                GlobalStatus.StopCommitRetry.equals(status) ? BranchStatus.STOP_RETRY : null;
         if (newStatus == null) {
-            throw new IllegalArgumentException("wrong status for global status, only for" + RETRY_STATUS);
+            throw new IllegalArgumentException("wrong status for global status");
         }
         branchSession.setStatus(newStatus);
         try {
             globalSession.changeBranchStatus(branchSession, newStatus);
         } catch (TransactionException e) {
             LOGGER.error("change branch session status fail, xid:{}, branchId:{}", xid, branchId, e);
-            throw new IllegalStateException("change branch session status fail, please try again");
+            throw new FrameworkException(e);
+        } catch (Exception e) {
+            LOGGER.error("change branch session status fail, xid:{}, branchId:{}", xid, branchId, e);
+            throw e;
         }
-        autoRestartRetry.schedule(() -> autoRestart(xid, branchId), TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
         return SingleResult.success();
     }
 
@@ -93,35 +91,21 @@ public abstract class AbstractBranchService extends AbstractService implements B
         }
         GlobalStatus globalStatus = globalSession.getStatus();
         BranchSession branchSession = checkResult.getBranchSession();
-        if (FAIL_STATUS.contains(globalStatus) || RETRY_STATUS.contains(globalStatus) ||
-                FINISH_STATUS.contains(globalStatus)) {
+        if (FAIL_STATUS.contains(globalStatus) || RETRY_STATUS.contains(globalStatus)
+                || FINISH_STATUS.contains(globalStatus) || GlobalStatus.StopRollbackRetry == globalStatus
+                || GlobalStatus.StopCommitRetry == globalStatus) {
             try {
                 boolean deleted = doDeleteBranch(globalSession, branchSession);
                 return deleted ? SingleResult.success() :
                         SingleResult.failure("delete branch fail, please retry again");
-            } catch (TransactionException | TimeoutException e) {
+            } catch (TransactionException | TimeoutException | RuntimeException e) {
                 LOGGER.error("Delete lock fail, xid:{}, branchId:{}, reason: {}", xid, branchId, e.getMessage(), e);
-                throw new RuntimeException(e);
+                throw new FrameworkException(e);
             } catch (Exception e) {
                 LOGGER.error("Delete lock fail, xid:{}, branchId:{}", xid, branchId, e);
-                throw new RuntimeException(e);
+                throw e;
             }
         }
         throw new IllegalArgumentException("current global transaction is not support delete branch transaction");
     }
-
-    private void autoRestart(String xid, String branchId) {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        if (Objects.nonNull(globalSession)) {
-            List<BranchSession> branchSessions = globalSession.getBranchSessions();
-            Long paramBranchId = Long.valueOf(branchId);
-            branchSessions.forEach(branchSession -> {
-                LOGGER.info("Auto restart the branch session to retry,xid: {}, branchId: {}", xid, branchId);
-                if (paramBranchId.equals(branchSession.getBranchId())) {
-                    doStartBranchRetry(globalSession, branchSession);
-                }
-            });
-        }
-    }
-
 }

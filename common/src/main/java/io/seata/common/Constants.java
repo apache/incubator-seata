@@ -161,6 +161,11 @@ public interface Constants {
     String AUTO_COMMIT = "autoCommit";
 
     /**
+     * The constant AUTO_RESTART_SESSION
+     */
+    String AUTO_RESTART_SESSION = "autoRestartSession";
+
+    /**
      * The constant SKIP_CHECK_LOCK
      */
     String SKIP_CHECK_LOCK = "skipCheckLock";
