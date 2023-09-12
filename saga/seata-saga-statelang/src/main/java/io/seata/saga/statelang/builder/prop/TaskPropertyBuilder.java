@@ -17,6 +17,7 @@
 package io.seata.saga.statelang.builder.prop;
 
 import java.util.Collection;
+import java.util.Map;
 
 /***
  * Task property builder.
@@ -48,6 +49,31 @@ public interface TaskPropertyBuilder<P extends TaskPropertyBuilder<P>> {
      * @return builder for chaining
      */
     P withForUpdate(boolean forUpdate);
+
+    /**
+     * Configure if this state should be persistent, default true
+     *
+     * @param persist persistent or not
+     * @return builder for chaining
+     */
+    P withPersist(boolean persist);
+
+    /**
+     * Configure if update origin or append new retryStateInstLog, default false
+     *
+     * @param retryPersistModeUpdate append new retryStateInstLog or not
+     * @return builder for chaining
+     */
+    P withRetryPersistModeUpdate(boolean retryPersistModeUpdate);
+
+
+    /**
+     * Configure if update origin or append new compensateStateInstLog, default false
+     *
+     * @param compensatePersistModeUpdate append new compensateStateInstLog or not
+     * @return builder for chaining
+     */
+    P withCompensatePersistModeUpdate(boolean compensatePersistModeUpdate);
 
     /**
      * Configure retry strategy. If the state has multiple retry strategies, use following way to build:
@@ -88,6 +114,39 @@ public interface TaskPropertyBuilder<P extends TaskPropertyBuilder<P>> {
      * @return exception match builder
      */
     TaskPropertyBuilder.ExceptionMatchBuilder<P> withOneCatch();
+
+    /**
+     * Configure input list of task
+     *
+     * @param input input list
+     * @return builder for chaining
+     */
+    P withInput(Collection<Object> input);
+
+    /**
+     * Configure output mapping for task
+     *
+     * @param output output map
+     * @return builder for chaining
+     */
+    P withOutput(Map<String, Object> output);
+
+    /**
+     * Configure one output mapping for task
+     *
+     * @param variable name of variable
+     * @param expression expression to evaluated and then assigned to the variable
+     * @return builder for chaining
+     */
+    P withOneOutput(String variable, Object expression);
+
+    /**
+     * Configure execution status.
+     *
+     * @param status status mapping
+     * @return builder for chaining
+     */
+    P withStatus(Map<String, String> status);
 
     /**
      * Configure execution status.

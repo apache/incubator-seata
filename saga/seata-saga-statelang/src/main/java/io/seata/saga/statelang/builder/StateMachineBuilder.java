@@ -15,6 +15,7 @@
  */
 package io.seata.saga.statelang.builder;
 
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.StateMachine;
 
 /**
@@ -69,4 +70,37 @@ public interface StateMachineBuilder
      * @return builder for chaining
      */
     StateMachineBuilder withStartState(String stateName);
+
+    /**
+     * Configure recover strategy
+     *
+     * @param recoverStrategy recover strategy
+     * @return builder for chaining
+     */
+    StateMachineBuilder withRecoverStrategy(RecoverStrategy recoverStrategy);
+
+    /**
+     * Configure if this state should be persistent, default true
+     *
+     * @param persist persistent or not
+     * @return builder for chaining
+     */
+    StateMachineBuilder withPersist(boolean persist);
+
+    /**
+     * Configure if update origin or append new retryStateInstLog, default false
+     *
+     * @param retryPersistModeUpdate append new retryStateInstLog or not
+     * @return builder for chaining
+     */
+    StateMachineBuilder withRetryPersistModeUpdate(boolean retryPersistModeUpdate);
+
+
+    /**
+     * Configure if update origin or append new compensateStateInstLog, default false
+     *
+     * @param compensatePersistModeUpdate append new compensateStateInstLog or not
+     * @return builder for chaining
+     */
+    StateMachineBuilder withCompensatePersistModeUpdate(boolean compensatePersistModeUpdate);
 }

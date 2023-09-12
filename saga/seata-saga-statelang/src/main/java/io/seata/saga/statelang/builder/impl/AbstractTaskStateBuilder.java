@@ -21,9 +21,7 @@ import io.seata.saga.statelang.builder.prop.TaskPropertyBuilder;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +66,24 @@ public abstract class AbstractTaskStateBuilder
     }
 
     @Override
+    public P withPersist(boolean persist) {
+        ((AbstractTaskState) getState()).setPersist(persist);
+        return getPropertyBuilder();
+    }
+
+    @Override
+    public P withRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+        ((AbstractTaskState) getState()).setRetryPersistModeUpdate(retryPersistModeUpdate);
+        return getPropertyBuilder();
+    }
+
+    @Override
+    public P withCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+        ((AbstractTaskState) getState()).setCompensatePersistModeUpdate(compensatePersistModeUpdate);
+        return getPropertyBuilder();
+    }
+
+    @Override
     public RetryBuilder<P> withOneRetry() {
         return new RetryBuilderImpl();
     }
@@ -75,6 +91,42 @@ public abstract class AbstractTaskStateBuilder
     @Override
     public ExceptionMatchBuilder<P> withOneCatch() {
         return new ExceptionMatchBuilderImpl();
+    }
+
+    @Override
+    public P withInput(Collection<Object> input) {
+        ((AbstractTaskState) getState()).setInput(new ArrayList<>(input));
+        return getPropertyBuilder();
+    }
+
+    @Override
+    public P withOutput(Map<String, Object> output) {
+        AbstractTaskState state = ((AbstractTaskState) getState());
+        if (state.getOutput() == null) {
+            state.setOutput(new HashMap<>());
+        }
+        state.getOutput().putAll(output);
+        return getPropertyBuilder();
+    }
+
+    @Override
+    public P withOneOutput(String variable, Object expression) {
+        AbstractTaskState state = ((AbstractTaskState) getState());
+        if (state.getOutput() == null) {
+            state.setOutput(new HashMap<>());
+        }
+        state.getOutput().put(variable, expression);
+        return getPropertyBuilder();
+    }
+
+    @Override
+    public P withStatus(Map<String, String> status) {
+        AbstractTaskState state = ((AbstractTaskState) getState());
+        if (state.getStatus() == null) {
+            state.setStatus(new HashMap<>());
+        }
+        state.getStatus().putAll(status);
+        return getPropertyBuilder();
     }
 
     @Override

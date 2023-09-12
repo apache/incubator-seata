@@ -18,6 +18,7 @@ package io.seata.saga.statelang.builder.impl;
 
 import io.seata.saga.statelang.builder.StateMachineBuilder;
 import io.seata.saga.statelang.builder.StatesConfigurer;
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 
@@ -64,6 +65,30 @@ public class StateMachineBuilderImpl implements StateMachineBuilder {
     @Override
     public StateMachineBuilder withStartState(String stateName) {
         stateMachine.setStartState(stateName);
+        return this;
+    }
+
+    @Override
+    public StateMachineBuilder withRecoverStrategy(RecoverStrategy recoverStrategy) {
+        stateMachine.setRecoverStrategy(recoverStrategy);
+        return this;
+    }
+
+    @Override
+    public StateMachineBuilder withPersist(boolean persist) {
+        stateMachine.setPersist(persist);
+        return this;
+    }
+
+    @Override
+    public StateMachineBuilder withRetryPersistModeUpdate(boolean retryPersistModeUpdate) {
+        stateMachine.setRetryPersistModeUpdate(retryPersistModeUpdate);
+        return this;
+    }
+
+    @Override
+    public StateMachineBuilder withCompensatePersistModeUpdate(boolean compensatePersistModeUpdate) {
+        stateMachine.setCompensatePersistModeUpdate(compensatePersistModeUpdate);
         return this;
     }
 }
