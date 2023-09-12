@@ -31,6 +31,12 @@ public class ScriptTaskStateBuilderImpl
 
     protected ScriptTaskStateImpl state;
 
+    public ScriptTaskStateBuilderImpl() {
+        state.setForCompensation(false);
+        state.setForUpdate(false);
+        state.setPersist(false);
+    }
+
     @Override
     public ScriptTaskStateBuilder withScriptType(String scriptType) {
         state.setScriptType(scriptType);

@@ -21,7 +21,10 @@ import io.seata.saga.statelang.builder.prop.TaskPropertyBuilder;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -41,9 +44,6 @@ public abstract class AbstractTaskStateBuilder
         // Do some default setup
         state.setForCompensation(false);
         state.setForUpdate(false);
-        state.setRetryPersistModeUpdate(false);
-        state.setCompensatePersistModeUpdate(false);
-
         state.setPersist(true);
     }
 
@@ -55,7 +55,7 @@ public abstract class AbstractTaskStateBuilder
 
     @Override
     public P withForCompensation(boolean forCompensation) {
-        ((AbstractTaskState) getState()).setForUpdate(forCompensation);
+        ((AbstractTaskState) getState()).setForCompensation(forCompensation);
         return getPropertyBuilder();
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractTaskStateBuilder
     public P withOutput(Map<String, Object> output) {
         AbstractTaskState state = ((AbstractTaskState) getState());
         if (state.getOutput() == null) {
-            state.setOutput(new HashMap<>());
+            state.setOutput(new LinkedHashMap<>());
         }
         state.getOutput().putAll(output);
         return getPropertyBuilder();
@@ -113,7 +113,7 @@ public abstract class AbstractTaskStateBuilder
     public P withOneOutput(String variable, Object expression) {
         AbstractTaskState state = ((AbstractTaskState) getState());
         if (state.getOutput() == null) {
-            state.setOutput(new HashMap<>());
+            state.setOutput(new LinkedHashMap<>());
         }
         state.getOutput().put(variable, expression);
         return getPropertyBuilder();
@@ -123,7 +123,7 @@ public abstract class AbstractTaskStateBuilder
     public P withStatus(Map<String, String> status) {
         AbstractTaskState state = ((AbstractTaskState) getState());
         if (state.getStatus() == null) {
-            state.setStatus(new HashMap<>());
+            state.setStatus(new LinkedHashMap<>());
         }
         state.getStatus().putAll(status);
         return getPropertyBuilder();
@@ -133,7 +133,7 @@ public abstract class AbstractTaskStateBuilder
     public P withOneStatus(String expression, String status) {
         AbstractTaskState state = ((AbstractTaskState) getState());
         if (state.getStatus() == null) {
-            state.setStatus(new HashMap<>());
+            state.setStatus(new LinkedHashMap<>());
         }
         state.getStatus().put(expression, status);
         return getPropertyBuilder();
@@ -161,7 +161,6 @@ public abstract class AbstractTaskStateBuilder
         @Override
         public RetryBuilder<P> withExceptions(Collection<Class<? extends Exception>> exceptions) {
             oneRetry.setExceptions(exceptions.stream().map(Class::getName).collect(Collectors.toList()));
-            oneRetry.setExceptionClasses(new ArrayList<>(exceptions));
             return this;
         }
 
@@ -201,7 +200,6 @@ public abstract class AbstractTaskStateBuilder
         @Override
         public ExceptionMatchBuilder<P> withExceptions(Collection<Class<? extends Exception>> exceptions) {
             oneCatch.setExceptions(exceptions.stream().map(Class::getName).collect(Collectors.toList()));
-            oneCatch.setExceptionClasses(new ArrayList<>(exceptions));
             return this;
         }
 

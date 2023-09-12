@@ -16,9 +16,13 @@
 
 package io.seata.saga.statelang.builder.impl;
 
+import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.builder.StatesConfigurer;
 import io.seata.saga.statelang.builder.SubStateMachineBuilder;
+import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
+import io.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
 
 /**
  * Default implementation for {@link SubStateMachineBuilder}
@@ -35,6 +39,28 @@ public class SubStateMachineBuilderImpl
     public SubStateMachineBuilder withStateMachineName(String stateMachineName) {
         state.setStateMachineName(stateMachineName);
         return this;
+    }
+
+    protected void beforeBuilt() {
+        if (StringUtils.isBlank(state.getCompensateState())) {
+            CompensateSubStateMachineStateParser compensateSubStateMachineStateParser
+                    = new CompensateSubStateMachineStateParser();
+            ServiceTaskState subStateMachineCompenState = compensateSubStateMachineStateParser.parse(null);
+            state.setCompensateStateObject(subStateMachineCompenState);
+            state.setCompensateState(subStateMachineCompenState.getName());
+        }
+    }
+
+    @Override
+    public StatesConfigurer and() {
+        beforeBuilt();
+        return super.and();
+    }
+
+    @Override
+    public SubStateMachine build() {
+        beforeBuilt();
+        return super.build();
     }
 
     @Override
