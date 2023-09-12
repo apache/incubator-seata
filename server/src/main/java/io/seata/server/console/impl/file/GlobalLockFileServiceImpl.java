@@ -22,10 +22,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
+import io.seata.core.exception.TransactionException;
 import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
@@ -56,9 +58,7 @@ import static java.util.Objects.isNull;
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
 public class GlobalLockFileServiceImpl extends AbstractLockService implements GlobalLockService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockFileServiceImpl.class);
-
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -85,11 +85,13 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
         CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
         try {
             BranchSession branchSession = checkResult.getBranchSession();
-            return lockManager.releaseLock(branchSession) ?
-                    SingleResult.success() : SingleResult.failure(Code.ERROR);
+            return lockManager.releaseLock(branchSession) ? SingleResult.success() : SingleResult.failure(Code.ERROR);
+        } catch (TransactionException e) {
+            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
+            throw new FrameworkException(e);
         } catch (Exception e) {
-            LOGGER.error("release lock fail, reason: {}", e.getMessage(), e);
-            throw new IllegalStateException("delete lock fail, please try again");
+            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
+            throw e;
         }
     }
 

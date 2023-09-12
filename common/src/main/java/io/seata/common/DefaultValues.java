@@ -292,6 +292,8 @@ public interface DefaultValues {
 
     long DEFAULT_AUTO_RESTART_TIME = 24 * 60 * 60 * 1000;
 
+    long DEFAULT_AUTO_RESTART_PERIOD = 60 * 60 * 1000;
+
     /**
      * Default druid location in classpath
      */

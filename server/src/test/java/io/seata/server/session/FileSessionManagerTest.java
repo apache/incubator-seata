@@ -35,6 +35,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
@@ -417,6 +418,123 @@ public class FileSessionManagerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void stopGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init(SessionMode.FILE);
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            // make sure sessionManager is empty
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            for (GlobalSession globalSession : globalSessions) {
+                sessionManager.addGlobalSession(globalSession);
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.stopGlobalRetry(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.setStatus(GlobalStatus.CommitRetrying);
+            String xid = globalSession.getXid();
+            globalSessionService.stopGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.StopCommitRetry);
+
+            globalSession.setStatus(GlobalStatus.RollbackRetrying);
+            globalSessionService.stopGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.StopRollbackRetry);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.end();
+            }
+            SessionHolder.destroy();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init(SessionMode.FILE);
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            // make sure sessionManager is empty
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            for (GlobalSession globalSession : globalSessions) {
+                sessionManager.addGlobalSession(globalSession);
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.changeGlobalStatus(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.setStatus(GlobalStatus.CommitFailed);
+            String xid = globalSession.getXid();
+            globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.CommitRetrying);
+
+            globalSession.setStatus(GlobalStatus.RollbackFailed);
+            globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.RollbackRetrying);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.end();
+            }
+            SessionHolder.destroy();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void startGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        SessionHolder.getRootSessionManager().destroy();
+        SessionHolder.init(SessionMode.FILE);
+        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        Collection<GlobalSession> sessions = sessionManager.allSessions();
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            // make sure sessionManager is empty
+            for (GlobalSession session : sessions) {
+                sessionManager.removeGlobalSession(session);
+            }
+        }
+        try {
+            for (GlobalSession globalSession : globalSessions) {
+                sessionManager.addGlobalSession(globalSession);
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.startGlobalRetry(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.setStatus(GlobalStatus.StopCommitRetry);
+            String xid = globalSession.getXid();
+            globalSessionService.startGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.CommitRetrying);
+
+            globalSession.setStatus(GlobalStatus.StopRollbackRetry);
+            globalSessionService.startGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.RollbackRetrying);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.end();
+            }
+            SessionHolder.destroy();
+        }
+    }
+
     /**
      * On branch status change test.
      *
@@ -566,7 +684,7 @@ public class FileSessionManagerTest {
             // wrong status for branch transaction
             Assertions.assertThrows(IllegalArgumentException.class,
                     () -> branchSessionService.startBranchRetry(globalSession.getXid(),
-                    String.valueOf(branchSessions.get(0).getBranchId())));
+                            String.valueOf(branchSessions.get(0).getBranchId())));
             // success
             branchSessionService.startBranchRetry(globalSession.getXid(),
                     String.valueOf(branchSessions.get(2).getBranchId()));
@@ -645,6 +763,46 @@ public class FileSessionManagerTest {
         return Stream.of(
                 Arguments.of(Arrays.asList(globalSession1, globalSession2, globalSession3))
         );
+    }
+
+    static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {
+        BranchSession branchSession1 = new BranchSession();
+        branchSession1.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession1.setBranchId(1L);
+        branchSession1.setClientId("c1");
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession1.setResourceId("department");
+        branchSession1.setLockKey("a:1,2");
+        branchSession1.setBranchType(BranchType.AT);
+        branchSession1.setApplicationData("{\"data\":\"test\"}");
+        branchSession1.setBranchType(BranchType.AT);
+
+        BranchSession branchSession2 = new BranchSession();
+        branchSession2.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession2.setBranchId(2L);
+        branchSession2.setClientId("c1");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession2.setResourceId("department");
+        branchSession2.setLockKey("e:3,4");
+        branchSession2.setBranchType(BranchType.AT);
+        branchSession2.setApplicationData("{\"data\":\"test\"}");
+        branchSession2.setBranchType(BranchType.AT);
+
+        branchSession1.setTransactionId(397215L);
+        branchSession2.setTransactionId(92482L);
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
+        globalSession1.setXid("xid1");
+        globalSession1.add(branchSession1);
+        globalSession1.setBeginTime(dateFormat.parse("2022-1-1 03:00:00").getTime());
+
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession2.setXid("ddd1");
+        globalSession2.add(branchSession2);
+        globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(Arrays.asList(globalSession1, globalSession2)));
     }
 
     /**

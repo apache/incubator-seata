@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import io.seata.common.util.CollectionUtils;
+import io.seata.server.console.impl.AbstractLockService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import io.seata.common.util.BeanUtils;
@@ -45,7 +46,7 @@ import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
-public class GlobalLockRedisServiceImpl implements GlobalLockService {
+public class GlobalLockRedisServiceImpl extends AbstractLockService implements GlobalLockService {
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {

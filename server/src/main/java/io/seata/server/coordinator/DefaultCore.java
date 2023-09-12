@@ -18,7 +18,6 @@ package io.seata.server.coordinator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
@@ -132,7 +131,7 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TimeoutException {
+    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         return getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
     }
 
@@ -219,7 +218,7 @@ public class DefaultCore implements Core {
                     return CONTINUE;
                 }
                 // skip the branch session if not retry
-                if (BranchStatus.STOP_RETRY.equals(currentStatus)) {
+                if (retrying && BranchStatus.STOP_RETRY.equals(currentStatus)) {
                     return CONTINUE;
                 }
                 try {
@@ -329,7 +328,7 @@ public class DefaultCore implements Core {
                     return CONTINUE;
                 }
                 // skip the branch session if not retry
-                if (BranchStatus.STOP_RETRY.equals(currentBranchStatus)) {
+                if (retrying && BranchStatus.STOP_RETRY.equals(currentBranchStatus)) {
                     return CONTINUE;
                 }
                 try {

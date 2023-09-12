@@ -38,6 +38,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
+import io.seata.server.console.impl.AbstractGlobalService;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
@@ -57,7 +58,7 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
-public class GlobalSessionDBServiceImpl implements GlobalSessionService {
+public class GlobalSessionDBServiceImpl extends AbstractGlobalService implements GlobalSessionService {
 
     private String globalTable;
 

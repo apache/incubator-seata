@@ -15,23 +15,18 @@
  */
 package io.seata.server.console.impl;
 
+import io.seata.common.exception.FrameworkException;
 import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
+import io.seata.core.exception.TransactionException;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public abstract class AbstractLockService extends AbstractService implements GlobalLockService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockService.class);
 
-    /**
-     * @param xid
-     * @param branchId
-     * @return
-     */
     @Override
     public SingleResult<Void> deleteLock(String xid, String branchId) {
         LOGGER.debug("start to delete global lock , xid:{}, branchId:{}", xid, branchId);
@@ -41,12 +36,13 @@ public abstract class AbstractLockService extends AbstractService implements Glo
             BranchSession branchSession = new BranchSession();
             branchSession.setBranchId(Long.parseLong(branchId));
             branchSession.setXid(xid);
-            // todo：检测锁重入问题
-            return lockManager.releaseLock(branchSession) ?
-                    SingleResult.success() : SingleResult.failure(Code.ERROR);
+            return lockManager.releaseLock(branchSession) ? SingleResult.success() : SingleResult.failure(Code.ERROR);
+        } catch (TransactionException e) {
+            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
+            throw new FrameworkException(e);
         } catch (Exception e) {
-            LOGGER.error("release lock fail, reason: {}", e.getMessage(), e);
-            throw new IllegalStateException("delete lock fail, please try again");
+            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
+            throw e;
         }
     }
 }

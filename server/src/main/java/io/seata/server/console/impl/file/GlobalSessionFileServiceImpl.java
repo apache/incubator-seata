@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.seata.server.console.impl.AbstractGlobalService;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalSessionVO;
@@ -43,7 +44,7 @@ import static java.util.Objects.isNull;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${sessionMode}')}")
-public class GlobalSessionFileServiceImpl implements GlobalSessionService {
+public class GlobalSessionFileServiceImpl extends AbstractGlobalService implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {

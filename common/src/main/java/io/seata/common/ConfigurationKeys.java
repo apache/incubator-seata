@@ -523,6 +523,11 @@ public interface ConfigurationKeys {
     String AUTO_RESTART_TIME = SERVER_PREFIX + "autoRestartTime";
 
     /**
+     * the constant AUTO_RESTART_PERIOD
+     */
+    String AUTO_RESTART_PERIOD = SERVER_PREFIX + "autoRestartPeriod";
+
+    /**
      * The constant MIN_SERVER_POOL_SIZE.
      */
     String MIN_SERVER_POOL_SIZE = TRANSPORT_PREFIX + "minServerPoolSize";
