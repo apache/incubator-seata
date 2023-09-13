@@ -319,17 +319,12 @@
                         </platforms>
                     </from>
                     <to>
-                        <!--
                         <image>docker.io/seataio/seata-server</image>
-                        -->
-                        <image>registry.cn-hangzhou.aliyuncs.com/truthai/seata-server</image>
                         <tags>${image.tags}</tags>
-                        <!--
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
                             <password>${REGISTRY_PASSWORD}</password>
                         </auth>
-                        -->
                     </to>
                     <container>
                         <appRoot>/seata-server</appRoot>
