@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input } from '@alicloud/console-components';
+import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input, Dialog, Message } from '@alicloud/console-components';
 import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
-import getData, { GlobalLockParam } from '@/service/globalLockInfo';
+import getData, { deleteData, GlobalLockParam } from '@/service/globalLockInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
-
+import {get} from "lodash";
 const { RangePicker } = DatePicker;
 const FormItem = Form.Item;
 
@@ -147,12 +147,45 @@ type GlobalLockInfoState = {
     this.search();
   }
 
+  deleteCell = (val: string, index: number, record: any) => {
+    const {locale = {}} = this.props;
+    const {
+      deleteGlobalLockTitle
+    } = locale;
+    return (
+      <Actions style={{width: '80px'}}>
+        <Button onClick={() => {
+          Dialog.confirm({
+            title: 'Confirm',
+            content: 'Are you sure you want to delete the global lock',
+            onOk: () => {
+              Dialog.confirm({
+                title: 'Warnning',
+                content: 'Warnning',
+                onOk: () => {
+                  deleteData(record).then((rsp) => {
+                    Message.success("Delete success")
+                    this.search()
+                  }).catch((rsp) => {
+                    Message.error(get(rsp, 'data.message'))
+                  })
+                }
+              });
+            }
+          });
+        }}>
+          {deleteGlobalLockTitle}
+        </Button>
+      </Actions>)
+  }
+
   render() {
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
       inputFilterPlaceholder,
       searchButtonLabel,
       resetButtonLabel,
+      operateTitle
     } = locale;
     return (
       <Page
@@ -220,27 +253,31 @@ type GlobalLockInfoState = {
         </Form>
         {/* global lock table */}
         <div>
-        <Table dataSource={this.state.list} loading={this.state.loading}>
-          <Table.Column title="xid" dataIndex="xid" />
-          <Table.Column title="transactionId" dataIndex="transactionId" />
-          <Table.Column title="branchId" dataIndex="branchId" />
-          <Table.Column title="resourceId" dataIndex="resourceId" />
-          <Table.Column title="tableName" dataIndex="tableName" />
-          <Table.Column title="pk" dataIndex="pk" />
-          <Table.Column title="rowKey" dataIndex="rowKey" />
-          <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
-          <Table.Column title="gmtModified" dataIndex="gmtModified" />
-        </Table>
-        <Pagination
-          total={this.state.total}
-          defaultCurrent={1}
-          current={this.state.globalLockParam.pageNum}
-          onChange={this.paginationOnChange}
-          pageSize={this.state.globalLockParam.pageSize}
-          pageSizeSelector="dropdown"
-          pageSizeList={[10, 20, 30, 40, 50]}
-          onPageSizeChange={this.paginationOnPageSizeChange}
-        />
+          <Table dataSource={this.state.list} loading={this.state.loading}>
+            <Table.Column title="xid" dataIndex="xid" />
+            <Table.Column title="transactionId" dataIndex="transactionId" />
+            <Table.Column title="branchId" dataIndex="branchId" />
+            <Table.Column title="resourceId" dataIndex="resourceId" />
+            <Table.Column title="tableName" dataIndex="tableName" />
+            <Table.Column title="pk" dataIndex="pk" />
+            <Table.Column title="rowKey" dataIndex="rowKey" />
+            <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
+            <Table.Column title="gmtModified" dataIndex="gmtModified" />
+            <Table.Column
+              title={operateTitle}
+              cell={this.deleteCell}
+            />
+          </Table>
+          <Pagination
+            total={this.state.total}
+            defaultCurrent={1}
+            current={this.state.globalLockParam.pageNum}
+            onChange={this.paginationOnChange}
+            pageSize={this.state.globalLockParam.pageSize}
+            pageSizeSelector="dropdown"
+            pageSizeList={[10, 20, 30, 40, 50]}
+            onPageSizeChange={this.paginationOnPageSizeChange}
+          />
         </div>
       </Page>
     );

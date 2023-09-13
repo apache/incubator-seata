@@ -60,6 +60,14 @@ const enUs: ILocale = {
     operateTitle: 'operate',
     showBranchSessionTitle: 'View branch session',
     showGlobalLockTitle: 'View global lock',
+    deleteGlobalSessionTitle: 'Delete global session',
+    stopGlobalSessionTitle: 'Stop global session retry',
+    startGlobalSessionTitle: 'Start global session retry',
+    sendGlobalSessionTitle: 'Send global session commit or rollback',
+    changeGlobalSessionTitle: 'Change global session status',
+    deleteBranchSessionTitle: 'Delete branch session',
+    stopBranchSessionTitle: 'Stop branch session retry',
+    startBranchSessionTitle: 'Start branch session retry',
     branchSessionDialogTitle: 'Branch session info',
   },
   GlobalLockInfo: {
@@ -69,6 +77,8 @@ const enUs: ILocale = {
     inputFilterPlaceholder: 'Please enter filter criteria',
     resetButtonLabel: 'Reset',
     searchButtonLabel: 'Search',
+    operateTitle: 'operate',
+    deleteGlobalLockTitle: 'Delete global lock',
   },
 };
 

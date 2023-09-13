@@ -17,12 +17,9 @@ package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
-import io.seata.console.result.PageResult;
 import io.seata.console.result.SingleResult;
 import io.seata.server.console.service.BranchSessionService;
-import io.seata.server.console.vo.BranchSessionVO;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,17 +35,6 @@ public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
-
-    /**
-     * Query the branch session
-     *
-     * @param xid the branch session in xid
-     * @return PageResult<BranchSessionVO>
-     */
-    @GetMapping("query")
-    public PageResult<BranchSessionVO> query(String xid) {
-        return branchSessionService.queryByXid(xid);
-    }
 
     /**
      * Delete branch transaction

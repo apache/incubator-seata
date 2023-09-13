@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Switch, Pagination, Dialog, Input, Select } from '@alicloud/console-components';
+import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Switch, Pagination, Dialog, Input, Select, Message } from '@alicloud/console-components';
 import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
-import getData, { GlobalSessionParam } from '@/service/transactionInfo';
+import getData, { changeGlobalData, deleteBranchData, deleteGlobalData, GlobalSessionParam, sendGlobalCommitOrRollback, startBranchData, startGlobalData, stopBranchData, stopGlobalData } from '@/service/transactionInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
+import { get as lodashGet} from "lodash";
 
 const { RangePicker } = DatePicker;
 const FormItem = Form.Item;
@@ -154,6 +155,24 @@ const statusList:Array<StatusType> = [
     iconType: 'warning',
     iconColor: '#FFA003',
   },
+  {
+    label: 'Deleting',
+    value: 18,
+    iconType: 'warning',
+    iconColor: '#FFA003',
+  },
+  {
+    label: 'StopCommitRetry',
+    value: 19,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
+  {
+    label: 'StopRollbackRetry',
+    value: 20,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
 ];
 
 const branchSessionStatusList:Array<StatusType> = [
@@ -223,7 +242,19 @@ const branchSessionStatusList:Array<StatusType> = [
     iconType: 'error',
     iconColor: '#FF3333',
   },
+  {
+    label: 'STOP_RETRY',
+    value: 13,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
 ];
+
+const warnning = new Map([
+  ['stopBranchSession', new Map([['AT', 'ATwarnning'], ['XA', 'XAwarnning'],['TCC', 'TCCwarnning'], ['SAGA', 'SAGAwarnning']])],
+  ['deleteBranchSession', new Map([['AT', 'ATwarnning'], ['XA', 'XAwarnning'],['TCC', 'TCCwarnning'], ['SAGA', 'SAGAwarnning']])],
+  ['deleteGlobalSession', new Map([['AT', 'ATwarnning'], ['XA', 'XAwarnning'],['TCC', 'TCCwarnning'], ['SAGA', 'SAGAwarnning']])],
+])
 
 class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState> {
   static displayName = 'TransactionInfo';
@@ -356,15 +387,20 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     const {
       showBranchSessionTitle,
       showGlobalLockTitle,
+      deleteGlobalSessionTitle,
+      stopGlobalSessionTitle,
+      startGlobalSessionTitle,
+      sendGlobalSessionTitle,
+      changeGlobalSessionTitle,
     } = locale;
     return (
-      <Actions style={{ width: '200px' }}>
+      <Actions style={{width: '350px'}}>
         {/* {when withBranch false, hide 'View branch session' button} */}
         {this.state.globalSessionParam.withBranch ? (
           <LinkButton
             onClick={this.showBranchSessionDialog(val, index, record)}
           >
-          {showBranchSessionTitle}
+            {showBranchSessionTitle}
           </LinkButton>
         ) : null}
 
@@ -379,16 +415,121 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         >
           {showGlobalLockTitle}
         </LinkButton>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to delete global transactions?',
+              onOk: () => {
+                Dialog.confirm({
+                  title: 'Warnning',
+                  content: 'Warnning',
+                  onOk: () => {
+                      deleteGlobalData(record).then((rsp) => {
+                        Message.success("Delete successfully")
+                        this.search()
+                      }).catch((rsp) => {
+                        Message.error(lodashGet(rsp, 'data.message'))
+                      })
+                    }
+                  });
+              }
+            });
+          }}
+        >
+          {deleteGlobalSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to stop stop global transactions',
+                onOk: () => {
+                  stopGlobalData(record).then((rsp) => {
+                    Message.success("Stop successfully")
+                    this.search()
+                  }).catch((rsp) => {
+                    Message.error(lodashGet(rsp, 'data.message'))
+                  })
+                }
+            });
+          }}
+        >
+          {stopGlobalSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to stop restart global transactions',
+              onOk: () => {
+                startGlobalData(record).then((rsp) => {
+                  Message.success("Start successfully")
+                  this.search()
+                }).catch((rsp) => {
+                  Message.error(lodashGet(rsp, 'data.message'))
+                })
+              }
+            });
+          }}
+        >
+          {startGlobalSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to send commit or rollback to global transactions',
+              onOk: () => {
+                sendGlobalCommitOrRollback(record).then((rsp) => {
+                  Message.success("Send successfully")
+                  this.search()
+                }).catch((rsp) => {
+                  Message.error(lodashGet(rsp, 'data.message'))
+                })
+              }
+            });
+          }}
+        >
+          {sendGlobalSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to change the global transactions status',
+              onOk: () => {
+                changeGlobalData(record).then((rsp) => {
+                  Message.success("Change successfully")
+                  this.search()
+                }).catch((rsp) => {
+                  Message.error(lodashGet(rsp, 'data.message'))
+                })
+              }
+            });
+
+          }}
+        >
+          {changeGlobalSessionTitle}
+        </Button>
       </Actions>);
   }
 
   branchSessionDialogOperateCell = (val: string, index: number, record: any) => {
-    const { locale = {}, history } = this.props;
+    const {locale = {}, history} = this.props;
     const {
       showGlobalLockTitle,
+      deleteBranchSessionTitle,
+      stopBranchSessionTitle,
+      startBranchSessionTitle,
     } = locale;
     return (
-      <Actions style={{ width: '80px' }}>
+      <Actions style={{width: '350px'}}>
         <LinkButton
           onClick={() => {
             history.push({
@@ -400,6 +541,78 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         >
           {showGlobalLockTitle}
         </LinkButton>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to delete branch transactions',
+              onOk: () => {
+                let warnMessage = warnning.get('deleteBranchSession')!.get(record.branchType);
+                Dialog.confirm({
+                  title: 'Warnning',
+                  content: warnMessage,
+                  onOk: () => {
+                    deleteBranchData(record).then((rsp) => {
+                      Message.success("Delete successfully")
+                      this.search()
+                    }).catch((rsp) => {
+                      Message.error(lodashGet(rsp, 'data.message'))
+                    })
+                  }
+                });
+              }
+            });
+          }}
+        >
+          {deleteBranchSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to stop branch transactions retry',
+              onOk: () => {
+                let warnMessage = warnning.get('deleteBranchSession')!.get(record.branchType);
+                Dialog.confirm({
+                  title: 'Warnning',
+                  content: warnMessage,
+                  onOk: () => {
+                    stopBranchData(record).then((rsp) => {
+                      Message.success("Stop successfully")
+                      this.search()
+                    }).catch((rsp) => {
+                      Message.error(lodashGet(rsp, 'data.message'))
+                    })
+                  }
+                });
+              }
+            });
+          }}
+        >
+          {stopBranchSessionTitle}
+        </Button>
+
+        <Button
+          onClick={() => {
+            Dialog.confirm({
+              title: 'Confirm',
+              content: 'Are you sure you want to stop branch transactions retry',
+              onOk: () => {
+                startBranchData(record).then((rsp) => {
+                  Message.success("Start successfully")
+                  this.search()
+                }).catch((rsp) => {
+                  Message.error(lodashGet(rsp, 'data.message'))
+                })
+              }
+            });
+          }}
+        >
+          {startBranchSessionTitle}
+        </Button>
+
       </Actions>);
   }
 
@@ -545,7 +758,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
         {/* branch session dialog */}
         <Dialog visible={this.state.branchSessionDialogVisible} title={branchSessionDialogTitle} footer={false} onClose={this.closeBranchSessionDialog} style={{ overflowX: 'auto' }}>
-          <Table dataSource={this.state.currentBranchSession}>
+          <Table dataSource={this.state.currentBranchSession} loading={this.state.loading} style={{ overflowX: 'auto' }} >
             <Table.Column title="transactionId" dataIndex="transactionId" />
             <Table.Column title="branchId" dataIndex="branchId" />
             <Table.Column title="resourceGroupId" dataIndex="resourceGroupId" />
