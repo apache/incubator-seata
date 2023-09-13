@@ -38,8 +38,8 @@ jobs:
           fi
       # step 5
       - name: "Codecov"
-        if: matrix.java == '17'
-        uses: codecov/codecov-action@v2.1.0
+        if: matrix.java == '8'
+        uses: codecov/codecov-action@v3.1.4
 
   # job 2: Test on 'arm64v8/ubuntu' OS.
   build_arm64-binary:
