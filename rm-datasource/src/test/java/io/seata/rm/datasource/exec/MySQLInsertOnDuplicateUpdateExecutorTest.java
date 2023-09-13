@@ -52,22 +52,17 @@ import static org.mockito.Mockito.when;
  */
 public class MySQLInsertOnDuplicateUpdateExecutorTest {
 
-    private static final String ID_COLUMN = "id";
-    private static final String USER_ID_COLUMN = "user_id";
-    private static final String USER_NAME_COLUMN = "user_name";
-    private static final String USER_STATUS_COLUMN = "user_status";
-    private static final Integer PK_VALUE = 100;
-
-    private StatementProxy statementProxy;
-
-    private SQLInsertRecognizer sqlInsertRecognizer;
-
-    private TableMeta tableMeta;
-
-    private MySQLInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;
-
-    private final int pkIndex = 0;
-    private HashMap<String,Integer> pkIndexMap;
+    protected static final String ID_COLUMN = "id";
+    protected static final String USER_ID_COLUMN = "user_id";
+    protected static final String USER_NAME_COLUMN = "user_name";
+    protected static final String USER_STATUS_COLUMN = "user_status";
+    protected static final Integer PK_VALUE = 100;
+    protected final int pkIndex = 0;
+    protected StatementProxy statementProxy;
+    protected SQLInsertRecognizer sqlInsertRecognizer;
+    protected TableMeta tableMeta;
+    protected MySQLInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;
+    protected HashMap<String,Integer> pkIndexMap;
 
     @BeforeEach
     public void init() {
@@ -168,7 +163,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         });
     }
 
-    private void mockAllIndexes(){
+    protected void mockAllIndexes(){
         Map<String, IndexMeta> allIndex = new HashMap<>();
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
@@ -188,7 +183,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
 
 
 
-    private List<String> mockInsertColumns() {
+    protected List<String> mockInsertColumns() {
         List<String> columns = new ArrayList<>();
         columns.add(ID_COLUMN);
         columns.add(USER_ID_COLUMN);
@@ -202,7 +197,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
      * all insert params is variable
      * {1=[100], 2=[userId1], 3=[userName1], 4=[userStatus1], 5=[101], 6=[userId2], 7=[userName2], 8=[userStatus2]}
      */
-    private void mockParameters() {
+    protected void mockParameters() {
         Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
@@ -236,7 +231,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
      * exist insert parms is constant
      * {1=[100], 2=[userId1], 3=[userName1], 4=[101], 5=[userId2], 6=[userName2]}
      */
-    private void mockImageParameterMap_contain_constant() {
+    protected void mockImageParameterMap_contain_constant() {
         Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
@@ -260,7 +255,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         when(psp.getParameters()).thenReturn(paramters);
     }
 
-    private Map<String, ArrayList<Object>> mockImageParameterMap(){
+    protected Map<String, ArrayList<Object>> mockImageParameterMap(){
         Map<String, ArrayList<Object>> imageParameterMap = new LinkedHashMap<>();
         ArrayList<Object> idList = new ArrayList<>();
         idList.add("100");
@@ -281,7 +276,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         return imageParameterMap;
     }
 
-    private void mockParametersOfOnePk() {
+    protected void mockParametersOfOnePk() {
         Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
@@ -290,7 +285,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         when(psp.getParameters()).thenReturn(paramters);
     }
 
-    private void mockInsertRows() {
+    protected void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
