@@ -3,8 +3,6 @@ name: "test-druid"
 on:
   push:
     branches: [ test*, "*.*.*" ]
-  pull_request:
-    branches: [ 2.x ] #TODO: 测试用，等下移除掉。
 
 jobs:
   test-druid:
@@ -36,7 +34,7 @@ jobs:
           1.2.1,
           1.2.0,
 
-          # not support druid:1.x
+          # not support druid:1.1.x
           #1.1.24,
           #1.1.23,
           #1.1.22,
