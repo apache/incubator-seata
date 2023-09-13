@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.registry;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_RAFT_PREFIX;
 
 
