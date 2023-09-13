@@ -297,7 +297,8 @@ public class SessionHolder {
     }
 
     public static SessionManager getRootSessionManager(String group) {
-        return StringUtils.isNotBlank(group) ? SESSION_MANAGER_MAP.get(group) : ROOT_SESSION_MANAGER;
+        return StringUtils.isNotBlank(group) ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER)
+            : ROOT_SESSION_MANAGER;
     }
 
     //endregion
