@@ -55,16 +55,6 @@ public class DmTableMetaCache extends OracleTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        try {
-            return resultSetMetaToSchema(connection.getMetaData(), tableName);
-        } catch (SQLException sqlEx) {
-            throw sqlEx;
-        } catch (Exception e) {
-            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
-        }
-    }
-
     protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta result = new TableMeta();
         result.setTableName(tableName);
