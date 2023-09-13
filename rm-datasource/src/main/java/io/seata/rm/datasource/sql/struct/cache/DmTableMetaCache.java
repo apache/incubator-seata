@@ -36,8 +36,8 @@ import java.sql.SQLException;
 @LoadLevel(name = JdbcConstants.DM)
 public class DmTableMetaCache extends OracleTableMetaCache {
     public static class TableNameMeta {
-        private String schema;
-        private String tableName;
+        private final String schema;
+        private final String tableName;
 
         public TableNameMeta(String schema, String tableName) {
             this.schema = schema;
@@ -64,7 +64,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
             processColumns(result, rsColumns);
 
-            processIndexs(result, rsIndex);
+            processIndexes(result, rsIndex);
 
             processPrimaries(result, rsPrimary);
 
@@ -97,7 +97,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
         }
     }
 
-    protected void processIndexs(TableMeta tableMeta, ResultSet rs) throws SQLException {
+    protected void processIndexes(TableMeta tableMeta, ResultSet rs) throws SQLException {
         while (rs.next()) {
             String indexName = rs.getString("INDEX_NAME");
             if (StringUtils.isNullOrEmpty(indexName)) {
