@@ -41,7 +41,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.MultiRegistryFactory;
 import io.seata.discovery.registry.RegistryService;
-import io.seata.discovery.registry.SeataRegistryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +90,7 @@ public class RaftServerFactory {
         StoreMode storeMode = StoreMode.get(mode);
         if (storeMode.equals(StoreMode.RAFT)) {
             for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof SeataRegistryServiceImpl)) {
+                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof RaftServerFactory)) {
                     throw new IllegalArgumentException("Raft store mode not support other Registration Center");
                 }
             }
