@@ -80,7 +80,7 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
                     list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
@@ -97,7 +97,7 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
+                wrapSQLParsingException(expr);
             }
         }
         return list;
