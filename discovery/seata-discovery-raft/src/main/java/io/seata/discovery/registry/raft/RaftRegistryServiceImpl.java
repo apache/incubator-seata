@@ -402,7 +402,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         CURRENT_TRANSACTION_CLUSTER_NAME = clusterName;
         if (!METADATA.containsGroup(clusterName)) {
             String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
-            if(StringUtils.isNotBlank(raftClusterAddress)) {
+            if (StringUtils.isNotBlank(raftClusterAddress)) {
                 List<InetSocketAddress> list = new ArrayList<>();
                 String[] addresses = raftClusterAddress.split(",");
                 for (String address : addresses) {
