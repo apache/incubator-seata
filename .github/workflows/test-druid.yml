@@ -3,6 +3,8 @@ name: "test-druid"
 on:
   push:
     branches: [ test*, "*.*.*" ]
+  pull_request:
+    branches: [ 2.x ] #TODO: 测试用，等下移除掉。
 
 jobs:
   test-druid:
