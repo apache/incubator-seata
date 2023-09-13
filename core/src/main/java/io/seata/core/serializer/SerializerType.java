@@ -61,7 +61,7 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 5)
      */
-    JACKSON((byte)0x20),
+    JACKSON((byte)0x32),
     ;
 
     private final byte code;
