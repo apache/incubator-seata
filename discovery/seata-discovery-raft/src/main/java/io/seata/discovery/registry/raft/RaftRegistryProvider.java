@@ -13,18 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry;
+package io.seata.discovery.registry.raft;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.discovery.registry.RegistryProvider;
+import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author funkye
  */
-@LoadLevel(name = "Seata", order = 1)
-public class SeataRegistryProvider implements RegistryProvider {
+@LoadLevel(name = "Raft", order = 1)
+public class RaftRegistryProvider implements RegistryProvider {
 
     @Override
     public RegistryService<?> provide() {
-        return SeataRegistryServiceImpl.getInstance();
+        return RaftRegistryServiceImpl.getInstance();
     }
 }

@@ -1,2 +1,1 @@
 io.seata.discovery.registry.FileRegistryProvider
-io.seata.discovery.registry.SeataRegistryProvider

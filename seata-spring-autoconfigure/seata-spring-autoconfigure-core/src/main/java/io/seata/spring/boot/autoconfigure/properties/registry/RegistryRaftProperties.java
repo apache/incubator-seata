@@ -13,20 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.client;
+package io.seata.spring.boot.autoconfigure.properties.registry;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_RAFT_PREFIX;
+
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
-
 /**
- * @author funkye
+ * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CLIENT_PREFIX)
-public class ClientProperties {
-
+@ConfigurationProperties(prefix = REGISTRY_RAFT_PREFIX)
+public class RegistryRaftProperties {
+    private String serverAddr;
     private Long metadataMaxAgeMs = 30000L;
 
     public Long getMetadataMaxAgeMs() {
@@ -35,6 +37,15 @@ public class ClientProperties {
 
     public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
         this.metadataMaxAgeMs = metadataMaxAgeMs;
+    }
+
+    public String getServerAddr() {
+        return serverAddr;
+    }
+
+    public RegistryRaftProperties setServerAddr(String serverAddr) {
+        this.serverAddr = serverAddr;
+        return this;
     }
 
 }

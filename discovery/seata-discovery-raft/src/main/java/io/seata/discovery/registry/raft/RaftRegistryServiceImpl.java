@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry;
+package io.seata.discovery.registry.raft;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.Metadata;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
@@ -44,6 +45,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -63,23 +65,23 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS;
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
-
 /**
  * The type File registry service.
  *
  * @author funkye
  */
-public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
+public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
    
-    private static final Logger LOGGER = LoggerFactory.getLogger(SeataRegistryServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftRegistryServiceImpl.class);
 
-    private static volatile SeataRegistryServiceImpl instance;
+    private static final String REGISTRY_TYPE = "raft";
+
+    private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+
+    private static volatile RaftRegistryServiceImpl instance;
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final RegistryService<?> FILE_REGISTRY_SERVICE = FileRegistryServiceImpl.getInstance();
 
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
@@ -110,18 +112,18 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
     }
 
-    private SeataRegistryServiceImpl() {}
+    private RaftRegistryServiceImpl() {}
 
     /**
      * Gets instance.
      *
      * @return the instance
      */
-    static SeataRegistryServiceImpl getInstance() {
+    static RaftRegistryServiceImpl getInstance() {
         if (instance == null) {
-            synchronized (SeataRegistryServiceImpl.class) {
+            synchronized (RaftRegistryServiceImpl.class) {
                 if (instance == null) {
-                    instance = new SeataRegistryServiceImpl();
+                    instance = new RaftRegistryServiceImpl();
                 }
             }
         }
@@ -155,7 +157,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
                     REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
                     REFRESH_METADATA_EXECUTOR.execute(() -> {
-                        long metadataMaxAgeMs = CONFIG.getLong(CLIENT_METADATA_MAX_AGE_MS, 30000L);
+                        long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (true) {
                             // Forced refresh of metadata information after set age
@@ -225,19 +227,16 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
                 Node node = map.get(host);
-                if (node != null) {
-                    return host + IP_PORT_SPLIT_CHAR + node.getHttpPort();
-                } else {
-                    // http port = netty port - 1000
-                    return host + IP_PORT_SPLIT_CHAR + (inetSocketAddress.getPort() - SERVICE_OFFSET_SPRING_BOOT);
-                }
+                return host + IP_PORT_SPLIT_CHAR + (node != null ? node.getHttpPort() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
     }
 
-    @Override
-    public void close() throws Exception {}
+    private static String getRaftAddrFileKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
+    }
 
     private InetSocketAddress convertInetSocketAddress(Node node) {
         String host = node.getHost();
@@ -246,28 +245,7 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
-        String clusterName = getServiceGroup(key);
-        if (clusterName == null) {
-            return null;
-        }
-        CURRENT_TRANSACTION_SERVICE_GROUP = key;
-        CURRENT_TRANSACTION_CLUSTER_NAME = clusterName;
-        if (!METADATA.containsGroup(clusterName)) {
-            List<InetSocketAddress> list = FILE_REGISTRY_SERVICE.lookup(key);
-            if (CollectionUtils.isEmpty(list)) {
-                return null;
-            }
-            INIT_ADDRESSES.put(clusterName, list);
-            // Refresh the metadata by initializing the address
-            acquireClusterMetaDataByClusterName(clusterName);
-            startQueryMetadata();
-        }
-        List<Node> nodes = METADATA.getNodes(clusterName);
-        if (CollectionUtils.isNotEmpty(nodes)) {
-            return nodes.parallelStream().map(this::convertInetSocketAddress).collect(Collectors.toList());
-        }
-        return Collections.emptyList();
+    public void close() {
     }
 
     @Override
@@ -412,6 +390,41 @@ public class SeataRegistryServiceImpl implements RegistryService<ConfigChangeLis
             LOGGER.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    @Override
+    public List<InetSocketAddress> lookup(String key) throws Exception {
+        String clusterName = getServiceGroup(key);
+        if (clusterName == null) {
+            return null;
+        }
+        CURRENT_TRANSACTION_SERVICE_GROUP = key;
+        CURRENT_TRANSACTION_CLUSTER_NAME = clusterName;
+        if (!METADATA.containsGroup(clusterName)) {
+            String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
+            if(StringUtils.isNotBlank(raftClusterAddress)) {
+                List<InetSocketAddress> list = new ArrayList<>();
+                String[] addresses = raftClusterAddress.split(",");
+                for (String address : addresses) {
+                    String[] endpoint = address.split(":");
+                    String host = endpoint[0];
+                    int port = Integer.parseInt(endpoint[1]);
+                    list.add(new InetSocketAddress(host, port));
+                }
+                if (CollectionUtils.isEmpty(list)) {
+                    return null;
+                }
+                INIT_ADDRESSES.put(clusterName, list);
+                // Refresh the metadata by initializing the address
+                acquireClusterMetaDataByClusterName(clusterName);
+                startQueryMetadata();
+            }
+        }
+        List<Node> nodes = METADATA.getNodes(clusterName);
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            return nodes.parallelStream().map(this::convertInetSocketAddress).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
 }
