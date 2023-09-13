@@ -83,5 +83,4 @@ public interface JdbcConstants {
     String KDB = "kdb";
 
     String POLARDB = "polardb";
-
 }

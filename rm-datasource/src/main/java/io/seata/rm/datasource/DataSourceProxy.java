@@ -268,7 +268,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
             if (paramsBuilder.length() > 0) {
                 jdbcUrlBuilder.append("?");
-                jdbcUrlBuilder.append(paramsBuilder.toString());
+                jdbcUrlBuilder.append(paramsBuilder);
             }
             resourceId = jdbcUrlBuilder.toString();
         } else {

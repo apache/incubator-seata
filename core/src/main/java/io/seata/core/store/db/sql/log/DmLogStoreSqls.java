@@ -20,8 +20,9 @@ import io.seata.common.loader.LoadLevel;
 /**
  * Database log store DaMeng sql
  *
- * @author 1.7.1
+ * @author wang.liang
+ * @since 1.7.1
  */
 @LoadLevel(name = "dm")
-public class DaMengLogStoreSqls extends MysqlLogStoreSqls {
+public class DmLogStoreSqls extends MysqlLogStoreSqls {
 }
