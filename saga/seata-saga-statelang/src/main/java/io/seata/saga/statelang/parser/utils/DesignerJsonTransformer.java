@@ -160,8 +160,8 @@ public class DesignerJsonTransformer {
                         }
                     }
                 } else if ("Fork".equals(sourceType)) {
-                    List<Object> branches = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Branches",
-                            key -> new ArrayList<>());
+                    List<Object> branches = (List<Object>) CollectionUtils.computeIfAbsent(
+                            sourceState, "Branches", key -> new ArrayList<>());
                     branches.add(targetNode.get("stateId"));
                 } else {
                     sourceState.put("Next", targetStateId);

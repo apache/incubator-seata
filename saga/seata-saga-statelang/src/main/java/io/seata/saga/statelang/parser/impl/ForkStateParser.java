@@ -25,7 +25,6 @@ import io.seata.saga.statelang.parser.StateParser;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Fork state parser

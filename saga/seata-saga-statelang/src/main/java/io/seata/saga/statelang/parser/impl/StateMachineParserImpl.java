@@ -17,7 +17,10 @@ package io.seata.saga.statelang.parser.impl;
 
 import java.util.Map;
 import io.seata.common.util.StringUtils;
-import io.seata.saga.statelang.domain.*;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.RecoverStrategy;
+import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.BaseState;
 import io.seata.saga.statelang.domain.impl.ForkStateImpl;

@@ -18,11 +18,23 @@ package io.seata.saga.statelang.parser.utils;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.StringUtils;
-import io.seata.saga.statelang.domain.*;
+import io.seata.saga.statelang.domain.ChoiceState;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ForkState;
+import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.TaskState;
 import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.parser.ParserException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +108,7 @@ public class StateMachineUtils {
         Set<String> subsequentStates = new HashSet<>();
         // Next state
         subsequentStates.add(state.getNext());
-        switch ((state.getType())) {
+        switch (state.getType()) {
             case DomainConstants.STATE_TYPE_SCRIPT_TASK:
             case DomainConstants.STATE_TYPE_SERVICE_TASK:
             case DomainConstants.STATE_TYPE_SUB_STATE_MACHINE:
@@ -118,6 +130,8 @@ public class StateMachineUtils {
                 // All branches in child parallel task
                 subsequentStates.addAll(((ForkState) state).getBranches());
                 break;
+            default:
+                // Otherwise do nothing
         }
         return subsequentStates;
     }

@@ -19,7 +19,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.parser.impl.*;
+import io.seata.saga.statelang.parser.impl.ChoiceStateParser;
+import io.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
+import io.seata.saga.statelang.parser.impl.CompensationTriggerStateParser;
+import io.seata.saga.statelang.parser.impl.FailEndStateParser;
+import io.seata.saga.statelang.parser.impl.ForkStateParser;
+import io.seata.saga.statelang.parser.impl.JoinStateParser;
+import io.seata.saga.statelang.parser.impl.ScriptTaskStateParser;
+import io.seata.saga.statelang.parser.impl.ServiceTaskStateParser;
+import io.seata.saga.statelang.parser.impl.SubStateMachineParser;
+import io.seata.saga.statelang.parser.impl.SucceedEndStateParser;
 
 /**
  * A simple factory of state parser

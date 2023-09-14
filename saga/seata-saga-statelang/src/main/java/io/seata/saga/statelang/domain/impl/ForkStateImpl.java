@@ -18,7 +18,6 @@ package io.seata.saga.statelang.domain.impl;
 
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ForkState;
-import io.seata.saga.statelang.domain.JoinState;
 
 import java.util.List;
 import java.util.Map;
