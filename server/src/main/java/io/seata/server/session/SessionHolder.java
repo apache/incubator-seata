@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
@@ -78,7 +79,7 @@ public class SessionHolder {
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
-    private static final Map<String, SessionManager> SESSION_MANAGER_MAP = new HashMap<>();
+    private static volatile Map<String, SessionManager> SESSION_MANAGER_MAP;
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
@@ -117,6 +118,7 @@ public class SessionHolder {
             if (SessionMode.RAFT.equals(sessionMode)) {
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
+                SESSION_MANAGER_MAP = new ConcurrentHashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
                 RaftServerFactory.getInstance().start();
             } else {
@@ -297,8 +299,8 @@ public class SessionHolder {
     }
 
     public static SessionManager getRootSessionManager(String group) {
-        return StringUtils.isNotBlank(group) ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER)
-            : ROOT_SESSION_MANAGER;
+        return StringUtils.isNotBlank(group) && SESSION_MANAGER_MAP != null
+            ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER) : ROOT_SESSION_MANAGER;
     }
 
     //endregion
