@@ -118,10 +118,10 @@ public class DmTableMetaCache extends OracleTableMetaCache {
 
     protected void processPrimaries(TableMeta tableMeta, ResultSet rs) throws SQLException {
         while (rs.next()) {
-            String pkName = rs.getString("PK_NAME");
+            String pkColName = rs.getString("COLUMN_NAME");
             for (IndexMeta i : tableMeta.getAllIndexes().values()) {
                 i.getValues().stream()
-                        .filter(c -> pkName.equals(c.getColumnName()))
+                        .filter(c -> pkColName.equals(c.getColumnName()))
                         .forEach(c -> i.setIndextype(IndexType.PRIMARY));
             }
         }
