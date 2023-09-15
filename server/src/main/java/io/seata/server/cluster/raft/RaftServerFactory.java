@@ -44,8 +44,8 @@ import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
-import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -109,7 +109,7 @@ public class RaftServerFactory {
         if (!initConf.parse(initConfStr)) {
             throw new IllegalArgumentException("fail to parse initConf:" + initConfStr);
         }
-        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "0"));
+        int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
         PeerId serverId = null;
         String host = XID.getIpAddress();
         if (port <= 0) {

@@ -365,6 +365,11 @@ public interface ConfigurationKeys {
     String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
 
     /**
+     * The constant SERVER_RAFT_PORT.
+     */
+    String SERVER_RAFT_PORT_CAMEL = SERVER_PREFIX + "raftPort";
+
+    /**
      * The constant SERVER_SERVICE_PORT_CONFIG.
      */
     String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";

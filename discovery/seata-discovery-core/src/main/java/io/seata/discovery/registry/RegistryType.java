@@ -26,9 +26,9 @@ public enum RegistryType {
      */
     File,
     /**
-     * Seata registry type.
+     * Raft registry type.
      */
-    Seata,
+    Raft,
     /**
      * ZK registry type.
      */
