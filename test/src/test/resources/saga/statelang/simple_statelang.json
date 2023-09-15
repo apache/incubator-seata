@@ -8,20 +8,12 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "foo",
-            "Next": "ChoiceState"
+            "Next": "SecondState"
         },
-        "ChoiceState": {
-            "Type": "Choice",
-            "Choices": [
-                {
-                    "Expression":"[a] == 1",
-                    "Next":"SecondState"
-                },
-                {
-                    "Expression":"[a] == 2",
-                    "Next":"ThirdState"
-                }
-            ]
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar"
         }
     }
 }
