@@ -27,7 +27,7 @@ import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
  */
 public class CompensationTriggerStateBuilderImpl
         extends BaseStateBuilder<CompensationTriggerStateBuilder, CompensationTriggerState>
-        implements CompensationTriggerStateBuilder{
+        implements CompensationTriggerStateBuilder {
 
     protected CompensationTriggerStateImpl state = new CompensationTriggerStateImpl();
 

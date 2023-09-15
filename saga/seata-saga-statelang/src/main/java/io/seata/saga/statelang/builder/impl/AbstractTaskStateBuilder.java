@@ -101,7 +101,7 @@ public abstract class AbstractTaskStateBuilder
 
     @Override
     public P withOutput(Map<String, Object> output) {
-        AbstractTaskState state = ((AbstractTaskState) getState());
+        AbstractTaskState state = (AbstractTaskState) getState();
         if (state.getOutput() == null) {
             state.setOutput(new LinkedHashMap<>());
         }
@@ -111,7 +111,7 @@ public abstract class AbstractTaskStateBuilder
 
     @Override
     public P withOneOutput(String variable, Object expression) {
-        AbstractTaskState state = ((AbstractTaskState) getState());
+        AbstractTaskState state = (AbstractTaskState) getState();
         if (state.getOutput() == null) {
             state.setOutput(new LinkedHashMap<>());
         }
@@ -121,7 +121,7 @@ public abstract class AbstractTaskStateBuilder
 
     @Override
     public P withStatus(Map<String, String> status) {
-        AbstractTaskState state = ((AbstractTaskState) getState());
+        AbstractTaskState state = (AbstractTaskState) getState();
         if (state.getStatus() == null) {
             state.setStatus(new LinkedHashMap<>());
         }
@@ -131,7 +131,7 @@ public abstract class AbstractTaskStateBuilder
 
     @Override
     public P withOneStatus(String expression, String status) {
-        AbstractTaskState state = ((AbstractTaskState) getState());
+        AbstractTaskState state = (AbstractTaskState) getState();
         if (state.getStatus() == null) {
             state.setStatus(new LinkedHashMap<>());
         }
@@ -150,7 +150,7 @@ public abstract class AbstractTaskStateBuilder
 
         @Override
         public P and() {
-            AbstractTaskState state = ((AbstractTaskState) getState());
+            AbstractTaskState state = (AbstractTaskState) getState();
             if (state.getRetry() == null) {
                 state.setRetry(new ArrayList<>());
             }
@@ -189,7 +189,7 @@ public abstract class AbstractTaskStateBuilder
 
         @Override
         public P and() {
-            AbstractTaskState state = ((AbstractTaskState) getState());
+            AbstractTaskState state = (AbstractTaskState) getState();
             if (state.getCatches() == null) {
                 state.setCatches(new ArrayList<>());
             }
@@ -228,7 +228,7 @@ public abstract class AbstractTaskStateBuilder
 
         @Override
         public P and() {
-            AbstractTaskState state = ((AbstractTaskState) getState());
+            AbstractTaskState state = (AbstractTaskState) getState();
             state.setLoop(loop);
             return getPropertyBuilder();
         }

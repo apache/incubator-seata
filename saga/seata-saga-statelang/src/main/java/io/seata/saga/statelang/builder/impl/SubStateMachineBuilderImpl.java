@@ -31,7 +31,7 @@ import io.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
  */
 public class SubStateMachineBuilderImpl
         extends AbstractTaskStateBuilder<SubStateMachineBuilder, SubStateMachine>
-        implements SubStateMachineBuilder{
+        implements SubStateMachineBuilder {
 
     protected SubStateMachineImpl state;
 
