@@ -6,7 +6,7 @@
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### bugfix:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: 修复当 XA 事务失败回滚后，TC 还会继续重试回滚的问题
 
 ### optimize:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
@@ -21,5 +21,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [capthua](https://github.com/capthua)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
