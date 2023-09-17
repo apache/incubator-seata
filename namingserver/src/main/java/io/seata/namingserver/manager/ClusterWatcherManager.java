@@ -16,14 +16,11 @@
 package io.seata.namingserver.manager;
 
 import io.seata.common.thread.NamedThreadFactory;
-
 import io.seata.namingserver.listener.ClusterChangeEvent;
 import io.seata.namingserver.listener.ClusterChangeListener;
 import io.seata.namingserver.listener.Watcher;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -31,7 +28,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -41,9 +37,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author funkye,ggbocoder
+ * @author funkye
+ * @author ggbocoder
  */
-
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
 

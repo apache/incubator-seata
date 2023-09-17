@@ -19,7 +19,10 @@ import org.springframework.context.ApplicationEvent;
 
 import java.time.Clock;
 
-
+/**
+ * @author funkye
+ * @author ggbocoder
+ */
 
 public class ClusterChangeEvent extends ApplicationEvent {
 

@@ -1,34 +1,32 @@
 package io.seata.namingserver.pojo;
 
-import io.seata.discovery.registry.namingserver.NamingInstance;
+
+import io.seata.common.metadata.Node;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public abstract class AbstractClusterData {
-    public List<NamingInstance> getInstanceListByVgroup(String vgroup) {
-        return null;
-    }
+    /**
+     * register instance in cluster
+     * @param node node msg
+     * @param unitName unit Name
+     */
+    public void registerInstance(Node node, String unitName){}
 
-    public void registerInstance(NamingInstance instance){}
-
-    public List<NamingInstance> getInstanceList() {
+    /**
+     * get all nodes in cluster
+     * @return all nodes in cluster
+     */
+    public List<Node> getInstanceList() {
         return Collections.EMPTY_LIST;
     }
 
-    public void removeInstance(NamingInstance instance) {
-    }
-
-    public void addvGroup(String vGroup){}
-
-    public void removeGroup(String vGroup){}
-
-    public boolean hasVgroup(String vgroup) {
-        return false;
-    }
-
-    public Set<String> getVgroups(){
-        return null;
+    /**
+     * remove instacne in cluster
+     * @param node node msg
+     * @param unitName unit Name
+     */
+    public void removeInstance(Node node, String unitName) {
     }
 }

@@ -16,9 +16,6 @@
 package io.seata.discovery.registry.namingserver;
 
 
-
-
-
 public interface NamingListener {
     /**
      * on event

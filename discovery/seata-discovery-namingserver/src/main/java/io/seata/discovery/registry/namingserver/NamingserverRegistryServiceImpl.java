@@ -16,17 +16,17 @@
 package io.seata.discovery.registry.namingserver;
 
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.metadata.Instance;
+import io.seata.common.metadata.MetaResponse;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.http.HttpServlet;
+import io.seata.discovery.registry.RegistryService;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -35,34 +35,33 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.RegistryService;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.PropertySource;
-
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 public class NamingserverRegistryServiceImpl implements RegistryService<NamingListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingserverRegistryServiceImpl.class);
 
     public static volatile NamingserverRegistryServiceImpl instance;
-    private static final String DEFAULT_CLUSTER_NAME = "default";
-    private static final String CLUSTER_NAME_KEY = "cluster";
     private static final String NAMESPACE_KEY = "namespace";
     private static final String VGROUP_KEY = "vGroup";
-    private static final String CLIENT_TERM_KEY ="clientTerm";
+    private static final String CLIENT_TERM_KEY = "clientTerm";
     private static final String DEFAULT_NAMESPACE = "public";
     private static final String NAMING_SERVICE_URL_KEY = "server-addr";
     private static final String NAMING_SERVER_CLIENT_URL = "serverAddr";
@@ -73,7 +72,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String TIME_OUT_KEY = "timeout";
     private static final int HEARTBEAT_PERIOD = 30 * 1000;
     private static final int PULL_PERIOD = 30 * 1000;
-    private static final int LONG_POLL_TIME_OUT_PERIOD =  1000;
+    private static final int LONG_POLL_TIME_OUT_PERIOD = 1000;
     private static final int THREAD_POOL_NUM = 1;
     private volatile long term = 0;
     private ScheduledFuture<?> heartBeatScheduledFuture;
@@ -109,17 +108,14 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     @Override
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
-        NamingInstance instance = new NamingInstance();
+        Instance instance = Instance.getInstance();
         instance.setIp(address.getAddress().getHostAddress());
         instance.setPort(address.getPort());
-        instance.setClusterName(getClusterName());
-        instance.setMetadata(getMetaData());
-        instance.setNamespace(getNamespace());
 
         instance.setTimeStamp(System.currentTimeMillis());
-        doRegister(instance,getNamingAddrs());
+        doRegister(instance, getNamingAddrs());
 
-        heartBeatScheduledFuture=this.heartBeatExecutorService.scheduleAtFixedRate(() -> {
+        heartBeatScheduledFuture = this.heartBeatExecutorService.scheduleAtFixedRate(() -> {
             try {
                 instance.setTimeStamp(System.currentTimeMillis());
                 doRegister(instance, getNamingAddrs());
@@ -130,10 +126,16 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     }
 
-    public void doRegister(NamingInstance instance, List<String> urlList) {
+    public void doRegister(Instance instance, List<String> urlList) {
         for (String urlSuffix : urlList) {
-            String url = HTTP_PREFIX + urlSuffix + "/naming/v1/register";
+            String url = HTTP_PREFIX + urlSuffix + "/naming/v1/register?";
+            String namespace = instance.getNamespace();
+            String clusterName = instance.getClusterName();
+            String unit = instance.getUnit();
             String jsonBody = instance.toJsonString();
+            String params = "namespace=" + namespace + "&clusterName=" + clusterName + "&unit=" + unit;
+            url += params;
+
             HttpResponse response = HttpServlet.doPost(url, jsonBody);
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -151,16 +153,16 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     @Override
     public void unregister(InetSocketAddress address) {
         NetUtil.validAddress(address);
-        NamingInstance instance = new NamingInstance();
+        Instance instance = Instance.getInstance();
         instance.setIp(address.getAddress().getHostAddress());
         instance.setPort(address.getPort());
-        instance.setClusterName(getClusterName());
-        instance.setMetadata(getMetaData());
-        instance.setNamespace(getNamespace());
 
         for (String urlSuffix : getNamingAddrs()) {
-            String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister";
+            String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister?";
+            String unit = instance.getUnit();
             String jsonBody = instance.toJsonString();
+            String params = "unit=" + unit;
+            url += params;
             HttpResponse response = HttpServlet.doPost(url, jsonBody);
             try {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -173,7 +175,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 LOGGER.error("instance has been unregistered failed in namingserver {}", url);
             }
         }
-        // stop sending heartbeats
+        // stop heartbeat
 
         if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
             heartBeatScheduledFuture.cancel(false);
@@ -185,17 +187,17 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     }
 
-    public void subscribe(NamingListener listener, String vGroup)  {
+    public void subscribe(NamingListener listener, String vGroup) throws Exception {
         LISTENER_SERVICE_MAP.computeIfAbsent(vGroup, key -> new ArrayList<>())
                 .add(listener);
-        isSubscribed=true;
+        isSubscribed = true;
         notifierExecutor.execute(() -> {
             long currentTime = System.currentTimeMillis();
             while (isSubscribed) {
-                //scheduled pull
+                // pull
                 boolean needFetch = System.currentTimeMillis() - currentTime > PULL_PERIOD;
                 if (!needFetch) {
-                    //real-time push
+                    // push
                     needFetch = watch(vGroup);
                 }
                 if (needFetch) {
@@ -240,8 +242,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     }
 
-    public void unsubscribe(NamingListener listener,String vGroup) throws Exception {
-        // remove listener
+    public void unsubscribe(NamingListener listener, String vGroup) throws Exception {
+        // remove watchers
         List<NamingListener> listeners = LISTENER_SERVICE_MAP.get(vGroup);
         if (listeners != null) {
             listeners.remove(listener);
@@ -252,28 +254,27 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
         // close subscribe thread
 
-        isSubscribed=false;
+        isSubscribed = false;
 
     }
 
     public void unsubscribe(String vGroup) throws Exception {
         LISTENER_SERVICE_MAP.remove(vGroup);
-        isSubscribed=false;
+        isSubscribed = false;
     }
 
     /**
-     *
-     * @param key 事务分组名称
-     * @return List<InetSocketAddress> 可用的实例列表
+     * @param key vGroup name
+     * @return List<InetSocketAddress> available instance list
      * @throws Exception
      */
 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        //update the list of instances corresponding to the transaction group
+        // get available instanceList by vGroup
         refreshGroup(key);
-        //subscribe the transaction group
+        // subscribe the vGroup
         subscribe(vGroup -> {
             try {
                 refreshGroup(vGroup);
@@ -296,22 +297,23 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             }
             String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
             response.close();
-            // Deserialize the jsonResponse into a List<NamingInstance>
+            // jsonResponse -> MetaResponse
             ObjectMapper objectMapper = new ObjectMapper();
-            ClusterResponse clusterResponse = objectMapper.readValue(jsonResponse, new TypeReference<ClusterResponse>() {
+            MetaResponse metaResponse = objectMapper.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
-            List<NamingInstance> instanceList = clusterResponse.getNamingInstanceList();
-            term = clusterResponse.getTerm();
-            if (null != instanceList) {
-                List<InetSocketAddress> newAddressList = instanceList.stream()
-                        .filter(Objects::nonNull)
-                        .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
-                        .collect(Collectors.toList());
-                VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
-            }
+            // MetaResponse -> endpoint list
+            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream()
+                    .flatMap(cluster -> cluster.getUnitData().stream())
+                    .flatMap(unit -> unit.getNamingInstanceList().stream())
+                    .map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort()))
+                    .collect(Collectors.toList());
+            term = metaResponse.getTerm();
+
+            VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
 
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RemoteException();
         }
 
@@ -338,14 +340,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
     }
 
-    public String getClusterName() {
-        String clusterNameKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, CLUSTER_NAME_KEY);
-        String clusterName = FILE_CONFIG.getConfig(clusterNameKey);
-        if (StringUtils.isBlank(clusterName)) {
-            clusterName = DEFAULT_CLUSTER_NAME;
-        }
-        return clusterName;
-    }
 
     public String getNamespace() {
         String namespaceKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMESPACE_KEY);
@@ -372,42 +366,14 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
      * @return url List
      */
     public List<String> getNamingAddrs() {
-        String namingAddrKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMING_SERVICE_URL_KEY);
-        List<String> urlList = new ArrayList<>();
-        int idx = 0;
-        //acquire spring environment config
-        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        while (environment.containsProperty("seata." + namingAddrKey + '[' + idx + ']')) {
-            String urlStr = environment.getProperty("seata."+namingAddrKey + '[' + idx + ']');
-            urlList.add(urlStr);
-            idx++;
-        }
-        if (CollectionUtils.isEmpty(urlList)) {
+        String namingAddrsKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMING_SERVICE_URL_KEY);
+
+        String urlListStr = FILE_CONFIG.getConfig(namingAddrsKey);
+        if (urlListStr.isEmpty()) {
             throw new NamingRegistryException("Naming server url can not be null!");
         }
-        return urlList;
-    }
-
-    public Map<String, Object> getMetaData() {
-        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-
-        Map<String, Object> meta = new HashMap<>();
-        String prefix = "seata.registry.metadata.";
-        if(environment==null){
-            LOGGER.warn(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT+"environment configuration is null!");
-            return meta;
-        }
-        for (PropertySource<?> propertySource : environment.getPropertySources()) {
-            if (propertySource instanceof EnumerablePropertySource) {
-                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
-                for (String propertyName : enumerablePropertySource.getPropertyNames()) {
-                    if (propertyName.startsWith(prefix)) {
-                        meta.put(propertyName.substring(prefix.length()), enumerablePropertySource.getProperty(propertyName));
-                    }
-                }
-            }
-        }
-        return meta;
+        return Arrays.stream(urlListStr.split(","))
+                .collect(Collectors.toList());
     }
 
 

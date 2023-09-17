@@ -3,6 +3,10 @@ package io.seata.namingserver.listener;
 
 import static io.seata.namingserver.listener.Watcher.Protocol.HTTP;
 
+/**
+ * @author funkye
+ * @author ggbocoder
+ */
 
 public class Watcher<T> {
 

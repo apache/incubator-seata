@@ -1,0 +1,2 @@
+io.seata.server.storage.db.store.DataBaseVGroupMappingStoreManager
+io.seata.server.storage.file.store.FileVGroupMappingStoreManager

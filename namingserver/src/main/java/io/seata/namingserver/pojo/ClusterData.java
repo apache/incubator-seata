@@ -1,42 +1,40 @@
 package io.seata.namingserver.pojo;
 
 
-import io.seata.discovery.registry.namingserver.NamingInstance;
-import io.seata.namingserver.listener.ClusterChangeEvent;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import io.seata.common.metadata.Cluster;
+import io.seata.common.metadata.Node;
+import io.seata.common.metadata.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 @Component
-public class ClusterData extends AbstractClusterData implements ApplicationContextAware {
+public class ClusterData extends AbstractClusterData {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterData.class);
     private String clusterName;
-    private final List<NamingInstance> instanceSet;
-    private final Set<String> vgroupSet;
-    private volatile long term = 0L;
-    private static ApplicationContext applicationContext;
-
-
-
-    public List<NamingInstance> getInstanceSet() {
-        return instanceSet;
-    }
-
-    public void removeInstance(NamingInstance namingInstance) {
-        instanceSet.remove(namingInstance);
-        term = System.currentTimeMillis();
-        for (String vGroup : vgroupSet) {
-            applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
-        }
-    }
+    private String clusterType;
+    private final HashMap<String, Unit> unitData;
 
 
     public ClusterData() {
-        instanceSet = new ArrayList<>(32) ;
-        vgroupSet = new HashSet<>(32);
+        unitData = new HashMap<>(32);
+    }
+
+    public ClusterData(String clusterName) {
+        unitData = new HashMap<>(32);
+        this.clusterName = clusterName;
+    }
+
+    public ClusterData(String clusterName, String clusterType) {
+        unitData = new HashMap<>(32);
+        this.clusterName = clusterName;
+        this.clusterType = clusterType;
     }
 
     public String getClusterName() {
@@ -48,57 +46,61 @@ public class ClusterData extends AbstractClusterData implements ApplicationConte
     }
 
     public String getClusterType() {
-        return "default";
+        return clusterType;
     }
 
-    public List<NamingInstance> getInstanceList() {
-        return instanceSet;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 
 
-    public Set<String> getVgroups(){
-        return  vgroupSet;
+    public HashMap<String, Unit> getUnitData() {
+        return unitData;
     }
 
-    public boolean hasVgroup(String vgroup) {
-        return vgroupSet.contains(vgroup);
-    }
-
-    public void addvGroup(String vgroup) {
-        vgroupSet.add(vgroup);
-        term = System.currentTimeMillis();
-        applicationContext.publishEvent(new ClusterChangeEvent(this, vgroup, term));
-    }
-
-    public void removeGroup(String vgroup) {
-        vgroupSet.remove(vgroup);
-        term = System.currentTimeMillis();
-        applicationContext.publishEvent(new ClusterChangeEvent(this, vgroup, term));
-    }
-
-    public List<NamingInstance> getInstanceListByVgroup(String vgroup) {
-        if (!hasVgroup(vgroup)) {
-            return null;
+    public void removeInstance(Node node, String unitName) {
+        Unit unit = unitData.get(unitName);
+        if(Objects.isNull(unit)){
+            LOGGER.warn("unit {} is null",unitName);
+            return;
         }
-        return new ArrayList<>(instanceSet);
-    }
-
-    public void registerInstance(NamingInstance instance) {
-        instanceSet.remove(instance);
-        instanceSet.add(instance);
-        term = System.currentTimeMillis();
-        for (String vGroup : vgroupSet) {
-            applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
+        unit.removeInstance(node);
+        if(unit.getNamingInstanceList()==null||unit.getNamingInstanceList().size()==0){
+            unitData.remove(unitName);
         }
     }
 
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        ClusterData.applicationContext = applicationContext;
+    public List<Node> getInstanceList() {
+        return unitData.values().stream()
+                .map(Unit::getNamingInstanceList)
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
+
+    public Cluster getClusterByUnit(String unitName) {
+        Cluster clusterResponse = new Cluster();
+        clusterResponse.setClusterName(clusterName);
+        clusterResponse.setClusterType(clusterType);
+        if (unitName == null) {
+            clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
+        } else {
+            List<Unit> unitList = new ArrayList<>();
+            unitList.add(unitData.get(unitName));
+            clusterResponse.setUnitData(unitList);
+        }
+
+        return clusterResponse;
     }
+
+    public void registerInstance(Node instance, String unitName) {
+        List<Node> instances = new ArrayList<>();
+        instances.add(instance);
+        Unit unit = new Unit();
+        unit.setUnitName(unitName);
+        unit.setNamingInstanceList(instances);
+        unitData.put(unitName, unit);
+    }
+
+
 }

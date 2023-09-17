@@ -15,8 +15,10 @@
  */
 package io.seata.namingserver.listener;
 
-
-
+/**
+ * @author funkye
+ * @author ggbocoder
+ */
 public interface ClusterChangeListener {
 
     /**

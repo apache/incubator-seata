@@ -1,4 +1,4 @@
-package io.seata.discovery.registry.namingserver;
+package io.seata.common.metadata;
 
 
 import java.util.HashMap;
@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 
 
-public class NamingInstance {
-    private String namespace;
-    private String clusterName;
-    private String unit;
+public class Node {
+
     private String ip;
     private int port;
     private int nettyPort;
@@ -23,32 +21,10 @@ public class NamingInstance {
     private Map<String, Object> metadata = new HashMap<>();
 
 
-    public NamingInstance() {
+    public Node() {
     }
 
 
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
-    public String getClusterName() {
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
     public String getRole() {
         return role;
     }
@@ -89,6 +65,7 @@ public class NamingInstance {
     public void setHealthy(boolean healthy) {
         this.healthy = healthy;
     }
+
     public long getTimeStamp() {
         return timeStamp;
     }
@@ -137,18 +114,15 @@ public class NamingInstance {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        NamingInstance node = (NamingInstance) o;
+        Node node = (Node) o;
         return Objects.equals(ip, node.ip) && Objects.equals(nettyPort, node.nettyPort)
-                && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(port, node.port)
-                && Objects.equals(unit, node.unit);
+                && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(port, node.port);
     }
 
-    // 将对象转换为JSON字符串
+    // convert to String
     public String toJsonString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"namespace\": \"").append(namespace).append("\", ");
-        sb.append("\"clusterName\": \"").append(clusterName).append("\", ");
         sb.append("\"ip\": \"").append(ip).append("\", ");
         sb.append("\"port\": ").append(port).append(", ");
         sb.append("\"weight\": ").append(weight).append(", ");
@@ -156,7 +130,7 @@ public class NamingInstance {
         sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
         sb.append("\"metadata\": {");
 
-        // 处理 metadata 的键值对
+        // handle metadata k-v map
         int i = 0;
         for (Map.Entry<String, Object> entry : metadata.entrySet()) {
             if (i > 0) {
@@ -171,8 +145,8 @@ public class NamingInstance {
     }
 
 
-    // 从JSON字符串反序列化得到对象
-    public static NamingInstance fromJsonString(String jsonString) {
+    // convert String to Object
+    public static Node fromJsonString(String jsonString) {
         return null;
     }
 
