@@ -26,7 +26,13 @@ import io.seata.namingserver.manager.NamingManager;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
@@ -70,7 +76,7 @@ public class NamingController {
                 clusterWatcherManager.getTermByvGroup(vGroup));
     }
 
-    @GetMapping("/changeGroup")
+    @PostMapping("/changeGroup")
     public Result<?> changeGroup(@RequestParam String namespace,
                                  @RequestParam String clusterName,
                                  @RequestParam String unitName,
