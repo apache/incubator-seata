@@ -33,10 +33,24 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 
-import java.util.*;
 
-import static io.seata.common.ConfigurationKeys.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.UUID;
+
+
+import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
+import static io.seata.common.ConfigurationKeys.SERVER_PREFIX;
+import static io.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static io.seata.common.ConfigurationKeys.METRICS_PREFIX;
+import static io.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static io.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
+import static io.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -114,8 +128,8 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         }
 
         // load vgroup mapping relationship
-        String storeType = ConfigurationFactory.getInstance().getConfig("store.mode","db");
-        if(storeType.equals("db") || storeType.equals("raft")){
+        String storeType = ConfigurationFactory.getInstance().getConfig("store.mode", "db");
+        if (storeType.equals("db") || storeType.equals("raft")) {
             VGroupMappingStoreManager vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
             instance.addMetadata("vGroup", vGroupMappingStoreManager.load());
         }

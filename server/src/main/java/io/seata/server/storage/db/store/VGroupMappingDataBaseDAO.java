@@ -37,7 +37,7 @@ public class VGroupMappingDataBaseDAO {
 
     protected String vMapping;
 
-    private final String DEFAULT_VGROUP_MAPPING = "mapping_tbl";
+    private static final String DEFAULT_VGROUP_MAPPING = "mapping_tbl";
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 

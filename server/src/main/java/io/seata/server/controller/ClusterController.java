@@ -33,14 +33,17 @@ import javax.annotation.PostConstruct;
 @RequestMapping("/naming/v1")
 public class ClusterController {
 
-    private VGroupMappingStoreManager VGroupMappingStoreManager;
+    private VGroupMappingStoreManager vGroupMappingStoreManager;
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @PostConstruct
     private void init() {
         String storeType = CONFIG.getConfig("store.mode", "db");
-        VGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
+        if (storeType.equals("db") || storeType.equals("raft")) {
+            vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
+        }
+
     }
 
     /**
@@ -57,13 +60,13 @@ public class ClusterController {
         mappingDO.setCluster(Instance.getInstance().getClusterName());
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
-        boolean rst = VGroupMappingStoreManager.addVGroup(mappingDO);
+        boolean rst = vGroupMappingStoreManager.addVGroup(mappingDO);
         if (!rst) {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
         }
         // push the newest mapping relationship
-        VGroupMappingStoreManager.notifyMapping();
+        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 
@@ -76,13 +79,13 @@ public class ClusterController {
     @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
-        boolean rst = VGroupMappingStoreManager.removeVGroup(vGroup);
+        boolean rst = vGroupMappingStoreManager.removeVGroup(vGroup);
         if (!rst) {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");
         }
         // push the newest mapping relationship
-        VGroupMappingStoreManager.notifyMapping();
+        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 

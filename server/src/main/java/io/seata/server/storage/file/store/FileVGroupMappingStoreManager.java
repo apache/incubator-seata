@@ -36,13 +36,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileVGroupMappingStoreManager.class);
 
-    private final String STORE_KEY = "store";
+    private static final String STORE_KEY = "store";
 
-    private final String RAFT_KEY = "raft";
+    private static final String RAFT_KEY = "raft";
 
-    private final String FILE_VGROUP_MAPPING_KEY = "file_vgroup_mapping";
+    private static final String FILE_VGROUP_MAPPING_KEY = "file_vgroup_mapping";
 
-    private ReentrantLock writeLock = new ReentrantLock();
+    private final ReentrantLock writeLock = new ReentrantLock();
 
     private final String path;
 
@@ -56,9 +56,9 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     @Override
     public boolean addVGroup(MappingDO mappingDO) {
-        HashMap<String, Object> VGroupMapping = load();
-        VGroupMapping.put(mappingDO.getVGroup(), mappingDO.getUnit());
-        boolean isSaved = save(VGroupMapping);
+        HashMap<String, Object> vGroupMapping = load();
+        vGroupMapping.put(mappingDO.getVGroup(), mappingDO.getUnit());
+        boolean isSaved = save(vGroupMapping);
         if (!isSaved) {
             LOGGER.error("add mapping relationship failed!");
         }
@@ -67,9 +67,9 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     @Override
     public boolean removeVGroup(String vGroup) {
-        HashMap<String, Object> VGroupMapping = load();
-        VGroupMapping.remove(vGroup);
-        boolean isSaved = save(VGroupMapping);
+        HashMap<String, Object> vGroupMapping = load();
+        vGroupMapping.remove(vGroup);
+        boolean isSaved = save(vGroupMapping);
         if (!isSaved) {
             LOGGER.error("remove mapping relationship failed!");
         }
@@ -78,7 +78,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     @Override
     public HashMap<String, Object> load() {
-        HashMap<String, Object> VGroupMapping = new HashMap<>();
+        HashMap<String, Object> vGroupMapping = new HashMap<>();
         try {
             File fileToLoad = new File(path);
             if (!fileToLoad.exists()) {
@@ -87,21 +87,21 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
             String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
             ObjectMapper objectMapper = new ObjectMapper();
-            VGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
+            vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
             });
 
         } catch (Exception e) {
             LOGGER.error("mapping relationship load failed! ", e);
         }
-        return VGroupMapping;
+        return vGroupMapping;
     }
 
 
-    public boolean save(HashMap<String, Object> VGroupMapping) {
+    public boolean save(HashMap<String, Object> vGroupMapping) {
         writeLock.lock();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            String jsonMapping = objectMapper.writeValueAsString(VGroupMapping);
+            String jsonMapping = objectMapper.writeValueAsString(vGroupMapping);
             FileUtils.writeStringToFile(new File(path), jsonMapping, "UTF-8");
             return true;
         } catch (IOException e) {
