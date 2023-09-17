@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -59,6 +60,6 @@ public interface TransactionCoordinatorOutbound {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      *                              out.
      */
-    Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
+    BranchDeleteResponse branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 
 }

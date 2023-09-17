@@ -19,7 +19,7 @@ import io.seata.core.protocol.transaction.BranchDeleteResponse;
 
 import java.io.Serializable;
 
-public class BranchDeleteResponseCodec extends AbstractTransactionResponseCodec implements Serializable {
+public class BranchDeleteResponseCodec extends AbstractBranchEndResponseCodec implements Serializable {
     @Override
     public Class<?> getMessageClassType() {
         return BranchDeleteResponse.class;

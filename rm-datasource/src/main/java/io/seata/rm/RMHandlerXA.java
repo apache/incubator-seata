@@ -49,10 +49,13 @@ public class RMHandlerXA extends AbstractRMHandler {
                     request.getBranchId(), request.getResourceId(), "");
             ResultCode code = branchStatus == BranchStatus.PhaseTwo_Rollbacked ? ResultCode.Success : ResultCode.Failed;
             branchDeleteResponse.setResultCode(code);
+            branchDeleteResponse.setBranchStatus(branchStatus);
         } catch (Exception e) {
             branchDeleteResponse.setResultCode(ResultCode.Failed);
             LOGGER.error("XA branch delete fail, reason: {}", e.getMessage(), e);
         }
+        branchDeleteResponse.setXid(request.getXid());
+        branchDeleteResponse.setBranchId(request.getBranchId());
         return branchDeleteResponse;
     }
 

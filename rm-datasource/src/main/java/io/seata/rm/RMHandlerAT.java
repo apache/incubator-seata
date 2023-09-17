@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.DateUtil;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.ResultCode;
@@ -98,6 +99,10 @@ public class RMHandlerAT extends AbstractRMHandler {
             branchDeleteResponse.setResultCode(ResultCode.Failed);
             LOGGER.error("delete undo log fail, xid:{}, branchId:{}, ",request.getXid(), request.getBranchId(),  e);
         }
+        branchDeleteResponse.setXid(request.getXid());
+        branchDeleteResponse.setBranchId(request.getBranchId());
+        // this branch status is no importance
+        branchDeleteResponse.setBranchStatus(BranchStatus.Unknown);
         return branchDeleteResponse;
     }
 

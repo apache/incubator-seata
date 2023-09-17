@@ -23,6 +23,7 @@ import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,11 +127,19 @@ public abstract class AbstractGlobalService extends AbstractService implements G
             boolean res;
             if (RETRY_COMMIT_STATUS.contains(globalStatus) || GlobalStatus.Committing.equals(globalStatus)
                     || GlobalStatus.StopCommitRetry.equals(globalStatus)) {
-                //  res = doGlobalCommit(globalSession);
                 res = DefaultCoordinator.getInstance().getCore().doGlobalCommit(globalSession, false);
+                if (res && globalSession.hasBranch() && globalSession.hasATBranch()) {
+                    globalSession.clean();
+                    globalSession.asyncCommit();
+                }
             } else if (RETRY_ROLLBACK_STATUS.contains(globalStatus) || GlobalStatus.Rollbacking.equals(globalStatus)
                     || GlobalStatus.StopRollbackRetry.equals(globalStatus)) {
                 res = DefaultCoordinator.getInstance().getCore().doGlobalRollback(globalSession, false);
+                // the record is not deleted
+                if (res && SessionHolder.findGlobalSession(xid) != null) {
+                    globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
+                    globalSession.end();
+                }
             } else {
                 throw new IllegalArgumentException("current global transaction status is not support to do");
             }

@@ -1,6 +1,7 @@
 package io.seata.serializer.seata.protocol.transaction;
 
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.serializer.seata.SeataSerializer;
@@ -24,6 +25,7 @@ public class BranchDeleteResponseCodecTest {
         branchDeleteResponse.setMsg("test");
         branchDeleteResponse.setResultCode(ResultCode.Failed);
         branchDeleteResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchTransactionNotExist);
+        branchDeleteResponse.setBranchStatus(BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable);
 
         byte[] bytes = seataSerializer.serialize(branchDeleteResponse);
 
@@ -32,5 +34,6 @@ public class BranchDeleteResponseCodecTest {
         assertThat(branchDeleteResponse2.getMsg()).isEqualTo(branchDeleteResponse.getMsg());
         assertThat(branchDeleteResponse2.getResultCode()).isEqualTo(branchDeleteResponse.getResultCode());
         assertThat(branchDeleteResponse2.getTransactionExceptionCode()).isEqualTo(branchDeleteResponse.getTransactionExceptionCode());
+        assertThat(branchDeleteResponse2.getBranchStatus()).isEqualTo(branchDeleteResponse.getBranchStatus());
     }
 }

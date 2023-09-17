@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "abstractTransactionResponse.proto";
+import "abstractBranchEndResponse.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "BranchDeleteResponse";
@@ -10,5 +10,5 @@ option java_package = "io.seata.serializer.protobuf.generated";
 
 // PublishRequest is a publish request.
 message BranchDeleteResponseProto {
-  AbstractTransactionResponseProto abstractTransactionResponse = 1;
+  AbstractBranchEndResponseProto abstractBranchEndResponse = 1;
 }

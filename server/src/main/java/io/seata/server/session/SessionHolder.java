@@ -157,6 +157,9 @@ public class SessionHolder {
                         case AsyncCommitting:
                         case Committing:
                         case CommitRetrying:
+                        case StopCommitRetry:
+                        case StopRollbackRetry:
+                        case Deleting:
                             break;
                         default: {
                             lockBranchSessions(globalSession.getSortedBranches());

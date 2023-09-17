@@ -30,6 +30,8 @@ import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.session.BranchSession;
@@ -131,8 +133,25 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+    public BranchDeleteResponse branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         return getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
+    }
+
+    @Override
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (globalSession.isSaga()) {
+            return true;
+        }
+        BranchDeleteResponse response = getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
+        if (isXaerNotaTimeout(globalSession, response.getBranchStatus())) {
+            LOGGER.info("Delete branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+            return true;
+        }
+        if (response.getBranchStatus() == BranchStatus.PhaseTwo_RollbackFailed_Unretryable) {
+            LOGGER.error("Delete branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+            return true;
+        }
+        return ResultCode.Success.equals(response.getResultCode());
     }
 
     @Override

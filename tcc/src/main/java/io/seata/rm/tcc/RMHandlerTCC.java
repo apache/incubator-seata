@@ -15,6 +15,7 @@
  */
 package io.seata.rm.tcc;
 
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.ResultCode;
@@ -53,11 +54,14 @@ public class RMHandlerTCC extends AbstractRMHandler {
                     deleteFenceByXidAndBranchId(request.getXid(), request.getBranchId());
             ResultCode code = result ? ResultCode.Success : ResultCode.Failed;
             branchDeleteResponse.setResultCode(code);
-            return branchDeleteResponse;
         } catch (Exception e) {
             LOGGER.error("Delete tcc fence fail, xid:{}, branchId:{}", request.getXid(), request.getBranchId(), e);
             branchDeleteResponse.setResultCode(ResultCode.Failed);
         }
+        branchDeleteResponse.setXid(request.getXid());
+        branchDeleteResponse.setBranchId(request.getBranchId());
+        // this branch status is no importance
+        branchDeleteResponse.setBranchStatus(BranchStatus.Unknown);
         return branchDeleteResponse;
     }
 

@@ -26,7 +26,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchDeleteRequest;
@@ -247,24 +246,23 @@ public abstract class AbstractCore implements Core {
     }
 
     @Override
-    public Boolean branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        if (BranchType.SAGA == branchSession.getBranchType()) {
-            return true;
-        }
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return null;
+    }
+
+    @Override
+    public BranchDeleteResponse branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         BranchDeleteRequest request = new BranchDeleteRequest();
         try {
             request.setBranchType(branchSession.getBranchType());
             request.setResourceId(branchSession.getResourceId());
             request.setXid(globalSession.getXid());
             request.setBranchId(branchSession.getBranchId());
-            BranchDeleteResponse response = (BranchDeleteResponse) remotingServer.sendSyncRequest(
+            return (BranchDeleteResponse) remotingServer.sendSyncRequest(
                     branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isAT());
-            return ResultCode.Success.equals(response.getResultCode());
         } catch (TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchDeleteRequest, String.format("Send branch delete failed," +
-                            " xid = %s branchId = %s", branchSession.getXid(), branchSession.getBranchId()), e);
+                    " xid = %s branchId = %s", branchSession.getXid(), branchSession.getBranchId()), e);
         }
     }
-
-
 }

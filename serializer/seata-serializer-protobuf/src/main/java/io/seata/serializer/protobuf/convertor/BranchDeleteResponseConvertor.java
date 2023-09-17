@@ -16,12 +16,15 @@
 package io.seata.serializer.protobuf.convertor;
 
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchDeleteResponse;
+import io.seata.serializer.protobuf.generated.AbstractBranchEndResponseProto;
 import io.seata.serializer.protobuf.generated.AbstractMessageProto;
 import io.seata.serializer.protobuf.generated.AbstractResultMessageProto;
 import io.seata.serializer.protobuf.generated.AbstractTransactionResponseProto;
 import io.seata.serializer.protobuf.generated.BranchDeleteResponseProto;
+import io.seata.serializer.protobuf.generated.BranchStatusProto;
 import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.serializer.protobuf.generated.ResultCodeProto;
 import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
@@ -44,19 +47,28 @@ public class BranchDeleteResponseConvertor implements PbConvertor<BranchDeleteRe
                         TransactionExceptionCodeProto.valueOf(branchDeleteResponse.getTransactionExceptionCode().name()))
                 .build();
 
-        return BranchDeleteResponseProto.newBuilder().setAbstractTransactionResponse(
-                abstractTransactionResponseProto).build();
+        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto.newBuilder().
+                setAbstractTransactionResponse(abstractTransactionResponseProto).setXid(branchDeleteResponse.getXid())
+                .setBranchId(branchDeleteResponse.getBranchId()).setBranchStatus(
+                        BranchStatusProto.forNumber(branchDeleteResponse.getBranchStatus().getCode())).build();
+
+        return BranchDeleteResponseProto.newBuilder().setAbstractBranchEndResponse(
+                abstractBranchEndResponse).build();
     }
 
     @Override
     public BranchDeleteResponse convert2Model(BranchDeleteResponseProto branchDeleteResponseProto) {
         BranchDeleteResponse branchDeleteResponse = new BranchDeleteResponse();
-        final AbstractResultMessageProto abstractResultMessage = branchDeleteResponseProto
-                .getAbstractTransactionResponse().getAbstractResultMessage();
-        branchDeleteResponse.setMsg(abstractResultMessage.getMsg());
-        branchDeleteResponse.setResultCode(ResultCode.valueOf(abstractResultMessage.getResultCode().name()));
+        final AbstractBranchEndResponseProto abstractResultMessage = branchDeleteResponseProto.getAbstractBranchEndResponse();
+        branchDeleteResponse.setBranchId(branchDeleteResponseProto.getAbstractBranchEndResponse().getBranchId());
+        branchDeleteResponse.setBranchStatus(
+                BranchStatus.get(branchDeleteResponseProto.getAbstractBranchEndResponse().getBranchStatusValue()));
+        branchDeleteResponse.setXid(branchDeleteResponseProto.getAbstractBranchEndResponse().getXid());
+
+        branchDeleteResponse.setMsg(abstractResultMessage.getAbstractTransactionResponse().getAbstractResultMessage().getMsg());
+        branchDeleteResponse.setResultCode(ResultCode.valueOf(abstractResultMessage.getAbstractTransactionResponse().getAbstractResultMessage().getResultCode().name()));
         branchDeleteResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-                branchDeleteResponseProto.getAbstractTransactionResponse().getTransactionExceptionCode().name()));
+                abstractResultMessage.getAbstractTransactionResponse().getTransactionExceptionCode().name()));
         return branchDeleteResponse;
     }
 }

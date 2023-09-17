@@ -42,6 +42,7 @@ type TransactionInfoState = {
   total: number;
   loading: boolean;
   branchSessionDialogVisible: boolean;
+  xid : string;
   currentBranchSession: Array<any>;
   globalSessionParam : GlobalSessionParam;
 }
@@ -269,6 +270,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     total: 0,
     loading: false,
     branchSessionDialogVisible: false,
+    xid: '',
     currentBranchSession: [],
     globalSessionParam: {
       withBranch: false,
@@ -312,6 +314,13 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         element.beginTime = (element.beginTime == null || element.beginTime === '') ? null : moment(Number(element.beginTime)).format('YYYY-MM-DD HH:mm:ss');
       });
 
+      if (this.state.branchSessionDialogVisible) {
+        data.data.forEach((item:any) => {
+          if (item.xid == this.state.xid) {
+            this.state.currentBranchSession = item.branchSessionVOs
+          }
+        })
+      }
       this.setState({
         list: data.data,
         total: data.total,
@@ -420,7 +429,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           onClick={() => {
             Dialog.confirm({
               title: 'Confirm',
-              content: 'Are you sure you want to delete global transactions?',
+              content: 'Are you sure you want to delete global transactions',
               onOk: () => {
                 Dialog.confirm({
                   title: 'Warnning',
@@ -636,6 +645,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       this.setState({
         branchSessionDialogVisible: true,
         currentBranchSession: record.branchSessionVOs,
+        xid: record.xid,
       });
   }
 
@@ -643,6 +653,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     this.setState({
       branchSessionDialogVisible: false,
       currentBranchSession: [],
+      xid: '',
     });
   }
 

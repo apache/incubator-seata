@@ -61,7 +61,7 @@ const zhCn: ILocale = {
     showBranchSessionTitle: '查看分支信息',
     showGlobalLockTitle: '查看全局锁',
     deleteGlobalSessionTitle: '删除全局事务',
-    stopGlobalSessionTitle: '停止全局事务重启',
+    stopGlobalSessionTitle: '停止全局事务重试',
     startGlobalSessionTitle: '开启全局事务重试',
     sendGlobalSessionTitle: '发送单次提交或回滚',
     changeGlobalSessionTitle: '更新全局事务状态',
