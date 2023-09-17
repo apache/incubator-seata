@@ -98,7 +98,7 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param         the query param
+     * @param param the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */

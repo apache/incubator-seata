@@ -253,31 +253,31 @@ type GlobalLockInfoState = {
         </Form>
         {/* global lock table */}
         <div>
-          <Table dataSource={this.state.list} loading={this.state.loading}>
-            <Table.Column title="xid" dataIndex="xid" />
-            <Table.Column title="transactionId" dataIndex="transactionId" />
-            <Table.Column title="branchId" dataIndex="branchId" />
-            <Table.Column title="resourceId" dataIndex="resourceId" />
-            <Table.Column title="tableName" dataIndex="tableName" />
-            <Table.Column title="pk" dataIndex="pk" />
-            <Table.Column title="rowKey" dataIndex="rowKey" />
-            <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
-            <Table.Column title="gmtModified" dataIndex="gmtModified" />
-            <Table.Column
-              title={operateTitle}
-              cell={this.deleteCell}
-            />
-          </Table>
-          <Pagination
-            total={this.state.total}
-            defaultCurrent={1}
-            current={this.state.globalLockParam.pageNum}
-            onChange={this.paginationOnChange}
-            pageSize={this.state.globalLockParam.pageSize}
-            pageSizeSelector="dropdown"
-            pageSizeList={[10, 20, 30, 40, 50]}
-            onPageSizeChange={this.paginationOnPageSizeChange}
+        <Table dataSource={this.state.list} loading={this.state.loading}>
+          <Table.Column title="xid" dataIndex="xid" />
+          <Table.Column title="transactionId" dataIndex="transactionId" />
+          <Table.Column title="branchId" dataIndex="branchId" />
+          <Table.Column title="resourceId" dataIndex="resourceId" />
+          <Table.Column title="tableName" dataIndex="tableName" />
+          <Table.Column title="pk" dataIndex="pk" />
+          <Table.Column title="rowKey" dataIndex="rowKey" />
+          <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
+          <Table.Column title="gmtModified" dataIndex="gmtModified" />
+          <Table.Column
+            title={operateTitle}
+            cell={this.deleteCell}
           />
+        </Table>
+        <Pagination
+          total={this.state.total}
+          defaultCurrent={1}
+          current={this.state.globalLockParam.pageNum}
+          onChange={this.paginationOnChange}
+          pageSize={this.state.globalLockParam.pageSize}
+          pageSizeSelector="dropdown"
+          pageSizeList={[10, 20, 30, 40, 50]}
+          onPageSizeChange={this.paginationOnPageSizeChange}
+        />
         </div>
       </Page>
     );

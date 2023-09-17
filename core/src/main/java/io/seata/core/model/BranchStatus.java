@@ -132,7 +132,7 @@ public enum BranchStatus {
      * @return the branch status
      */
     public static BranchStatus get(byte code) {
-        return get((int) code);
+        return get((int)code);
     }
 
     /**

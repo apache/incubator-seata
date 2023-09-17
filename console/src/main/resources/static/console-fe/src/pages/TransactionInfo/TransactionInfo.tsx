@@ -400,7 +400,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           <LinkButton
             onClick={this.showBranchSessionDialog(val, index, record)}
           >
-            {showBranchSessionTitle}
+          {showBranchSessionTitle}
           </LinkButton>
         ) : null}
 
@@ -521,7 +521,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   branchSessionDialogOperateCell = (val: string, index: number, record: any) => {
-    const {locale = {}, history} = this.props;
+    const { locale = {}, history } = this.props;
     const {
       showGlobalLockTitle,
       deleteBranchSessionTitle,

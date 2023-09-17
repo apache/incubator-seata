@@ -65,7 +65,7 @@ public class LockManagerTest {
     private GlobalLockService globalLockService;
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {
+    public static void setUp(ApplicationContext context){
 
     }
 
@@ -147,7 +147,7 @@ public class LockManagerTest {
      */
     @ParameterizedTest
     @MethodSource("deadlockBranchSessionsProvider")
-    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
+    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2)  throws Exception {
         LockManager lockManager = new FileLockManagerForTest();
         try {
             final AtomicBoolean first = new AtomicBoolean();
@@ -255,9 +255,9 @@ public class LockManagerTest {
 
             // query all data
             final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
-            Assertions.assertEquals(1, fullQueryTestResult.getPages());
-            Assertions.assertEquals(8, fullQueryTestResult.getTotal());
-            Assertions.assertEquals(8, fullQueryTestResult.getData().size());
+            Assertions.assertEquals(1,fullQueryTestResult.getPages());
+            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
 
             // test paging
             param.setPageSize(1);
@@ -338,9 +338,9 @@ public class LockManagerTest {
             param2.setPageSize(10);
 
             final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param2);
-            Assertions.assertEquals(1, fullQueryTestResult2.getPages());
-            Assertions.assertEquals(4, fullQueryTestResult2.getTotal());
-            Assertions.assertEquals(4, fullQueryTestResult2.getData().size());
+            Assertions.assertEquals(1,fullQueryTestResult2.getPages());
+            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
 
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
