@@ -23,6 +23,7 @@ public interface ClusterChangeListener {
 
     /**
      * cluster change event
+     *
      * @param event event
      */
     void onChangeEvent(ClusterChangeEvent event);

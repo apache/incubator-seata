@@ -20,8 +20,6 @@ import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
 
-
-
 @LoadLevel(name = "Namingserver", order = 1)
 public class NamingserverRegistryProvider implements RegistryProvider {
     @Override

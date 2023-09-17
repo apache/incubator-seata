@@ -15,7 +15,7 @@
  */
 package io.seata.namingserver;
 
-public class ClusterNotFoundException extends RuntimeException{
+public class ClusterNotFoundException extends RuntimeException {
 
     /**
      * cluster not found exception.

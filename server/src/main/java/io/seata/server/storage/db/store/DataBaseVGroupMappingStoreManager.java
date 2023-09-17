@@ -28,17 +28,17 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 
-@LoadLevel(name="db")
+@LoadLevel(name = "db")
 public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreManager {
     protected VGroupMappingDataBaseDAO vGroupMappingDataBaseDAO;
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    public DataBaseVGroupMappingStoreManager(){
+    public DataBaseVGroupMappingStoreManager() {
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
         DataSource vGroupMappingDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
-        vGroupMappingDataBaseDAO=new VGroupMappingDataBaseDAO(vGroupMappingDataSource);
+        vGroupMappingDataBaseDAO = new VGroupMappingDataBaseDAO(vGroupMappingDataSource);
     }
 
     @Override
@@ -53,10 +53,10 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
 
     @Override
     public HashMap<String, Object> load() {
-        List<MappingDO> mappingDOS=vGroupMappingDataBaseDAO.queryMappingDO();
-        HashMap<String,Object> mappings=new HashMap<>();
-        for(MappingDO mappingDO:mappingDOS){
-            mappings.put(mappingDO.getVGroup(),null);
+        List<MappingDO> mappingDOS = vGroupMappingDataBaseDAO.queryMappingDO();
+        HashMap<String, Object> mappings = new HashMap<>();
+        for (MappingDO mappingDO : mappingDOS) {
+            mappings.put(mappingDO.getVGroup(), null);
         }
         return mappings;
     }

@@ -24,13 +24,16 @@ import java.util.List;
 public abstract class AbstractClusterData {
     /**
      * register instance in cluster
-     * @param node node msg
+     *
+     * @param node     node msg
      * @param unitName unit Name
      */
-    public void registerInstance(Node node, String unitName){}
+    public void registerInstance(Node node, String unitName) {
+    }
 
     /**
      * get all nodes in cluster
+     *
      * @return all nodes in cluster
      */
     public List<Node> getInstanceList() {
@@ -39,7 +42,8 @@ public abstract class AbstractClusterData {
 
     /**
      * remove instacne in cluster
-     * @param node node msg
+     *
+     * @param node     node msg
      * @param unitName unit Name
      */
     public void removeInstance(Node node, String unitName) {

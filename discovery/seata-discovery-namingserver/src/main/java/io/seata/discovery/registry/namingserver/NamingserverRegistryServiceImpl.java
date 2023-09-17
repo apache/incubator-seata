@@ -80,12 +80,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final ConcurrentMap<String/* vgroup */, List<InetSocketAddress>> VGROUP_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<NamingListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
-    protected final ScheduledExecutorService heartBeatExecutorService = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("heartBeatScheduledExcuter", THREAD_POOL_NUM, true));
+    protected final ScheduledExecutorService heartBeatExecutorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatScheduledExcuter", THREAD_POOL_NUM, true));
 
-    private final ExecutorService notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("serviceNamingNotifier", THREAD_POOL_NUM));
+    private final ExecutorService notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("serviceNamingNotifier", THREAD_POOL_NUM));
 
 
     /**
@@ -188,8 +185,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     }
 
     public void subscribe(NamingListener listener, String vGroup) throws Exception {
-        LISTENER_SERVICE_MAP.computeIfAbsent(vGroup, key -> new ArrayList<>())
-                .add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(vGroup, key -> new ArrayList<>()).add(listener);
         isSubscribed = true;
         notifierExecutor.execute(() -> {
             long currentTime = System.currentTimeMillis();
@@ -302,11 +298,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             MetaResponse metaResponse = objectMapper.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
             // MetaResponse -> endpoint list
-            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream()
-                    .flatMap(cluster -> cluster.getUnitData().stream())
-                    .flatMap(unit -> unit.getNamingInstanceList().stream())
-                    .map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort()))
-                    .collect(Collectors.toList());
+            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream().flatMap(cluster -> cluster.getUnitData().stream()).flatMap(unit -> unit.getNamingInstanceList().stream()).map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort())).collect(Collectors.toList());
             term = metaResponse.getTerm();
 
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
@@ -372,8 +364,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (urlListStr.isEmpty()) {
             throw new NamingRegistryException("Naming server url can not be null!");
         }
-        return Arrays.stream(urlListStr.split(","))
-                .collect(Collectors.toList());
+        return Arrays.stream(urlListStr.split(",")).collect(Collectors.toList());
     }
 
 

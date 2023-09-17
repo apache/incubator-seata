@@ -47,9 +47,9 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
     private static final String DEFAULT_NAMESPACE = "public";
     private static final String CLUSTER_NAME_KEY = "cluster";
     private static final String DEFAULT_CLUSTER_NAME = "default";
-    
+
     List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX,
-        STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
+            STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -60,11 +60,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         if (CollectionUtils.isNotEmpty(configs)) {
             Optional<FileConfiguration> originFileInstance = ConfigurationFactory.getOriginFileInstance();
             originFileInstance
-                .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
+                    .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
             Properties properties = new Properties();
             configs.forEach((k, v) -> {
                 if (v instanceof String) {
-                    if (StringUtils.isEmpty((String)v)) {
+                    if (StringUtils.isEmpty((String) v)) {
                         return;
                     }
                 }
@@ -93,13 +93,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         instance.setClusterName(clusterName);
 
         // load cluster type
-        String clusterType=environment.getProperty("seata.store.mode","default");
-        instance.addMetadata("cluster-type",clusterType.equals("raft")?clusterType:"default");
+        String clusterType = environment.getProperty("seata.store.mode", "default");
+        instance.addMetadata("cluster-type", clusterType.equals("raft") ? clusterType : "default");
 
         // load unit name
         instance.setUnit(String.valueOf(UUID.randomUUID()));
-
-
 
 
         // load metadata
@@ -116,9 +114,12 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         }
 
         // load vgroup mapping relationship
-        String storeType= ConfigurationFactory.getInstance().getConfig("store.mode","db");
-        VGroupMappingStoreManager vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
-        instance.addMetadata("vGroup", vGroupMappingStoreManager.load());
+        String storeType = ConfigurationFactory.getInstance().getConfig("store.mode","db");
+        if(storeType.equals("db") || storeType.equals("raft")){
+            VGroupMappingStoreManager vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
+            instance.addMetadata("vGroup", vGroupMappingStoreManager.load());
+        }
+
 
     }
 

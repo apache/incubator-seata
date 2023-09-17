@@ -75,12 +75,12 @@ public class ClusterData extends AbstractClusterData {
 
     public void removeInstance(Node node, String unitName) {
         Unit unit = unitData.get(unitName);
-        if(Objects.isNull(unit)){
-            LOGGER.warn("unit {} is null",unitName);
+        if (Objects.isNull(unit)) {
+            LOGGER.warn("unit {} is null", unitName);
             return;
         }
         unit.removeInstance(node);
-        if(unit.getNamingInstanceList()==null||unit.getNamingInstanceList().size()==0){
+        if (unit.getNamingInstanceList() == null || unit.getNamingInstanceList().size() == 0) {
             unitData.remove(unitName);
         }
     }

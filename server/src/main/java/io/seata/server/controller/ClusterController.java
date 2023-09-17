@@ -39,7 +39,7 @@ public class ClusterController {
 
     @PostConstruct
     private void init() {
-        String storeType=CONFIG.getConfig("store.mode","db");
+        String storeType = CONFIG.getConfig("store.mode", "db");
         VGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
     }
 
@@ -50,15 +50,15 @@ public class ClusterController {
      * @return
      */
     @GetMapping("/addVGroup")
-    public Result<?> addVGroup(@RequestParam String vGroup,@RequestParam String unit) {
+    public Result<?> addVGroup(@RequestParam String vGroup, @RequestParam String unit) {
         Result<?> result = new Result<>();
         MappingDO mappingDO = new MappingDO();
         mappingDO.setNamespace(Instance.getInstance().getNamespace());
         mappingDO.setCluster(Instance.getInstance().getClusterName());
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
-        boolean rst=VGroupMappingStoreManager.addVGroup(mappingDO);
-        if(!rst){
+        boolean rst = VGroupMappingStoreManager.addVGroup(mappingDO);
+        if (!rst) {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
         }
@@ -76,8 +76,8 @@ public class ClusterController {
     @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
-        boolean rst=VGroupMappingStoreManager.removeVGroup(vGroup);
-        if(!rst){
+        boolean rst = VGroupMappingStoreManager.removeVGroup(vGroup);
+        if (!rst) {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");
         }
@@ -85,7 +85,6 @@ public class ClusterController {
         VGroupMappingStoreManager.notifyMapping();
         return result;
     }
-
 
 
 }

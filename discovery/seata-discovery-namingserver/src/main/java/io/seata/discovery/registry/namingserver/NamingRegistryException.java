@@ -15,7 +15,7 @@
  */
 package io.seata.discovery.registry.namingserver;
 
-public class NamingRegistryException extends RuntimeException{
+public class NamingRegistryException extends RuntimeException {
 
     /**
      * naming registry exception.

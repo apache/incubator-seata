@@ -51,7 +51,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     public FileVGroupMappingStoreManager() {
         String mappingPath = System.getProperty("user.dir") + "mapping.json";
-        path = CONFIG.getConfig(STORE_KEY+RAFT_KEY+ FILE_VGROUP_MAPPING_KEY,mappingPath);
+        path = CONFIG.getConfig(STORE_KEY + RAFT_KEY + FILE_VGROUP_MAPPING_KEY, mappingPath);
     }
 
     @Override
@@ -87,7 +87,8 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
             String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
             ObjectMapper objectMapper = new ObjectMapper();
-            VGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {});
+            VGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
+            });
 
         } catch (Exception e) {
             LOGGER.error("mapping relationship load failed! ", e);
