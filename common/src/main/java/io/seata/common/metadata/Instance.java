@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.common.metadata;
 
 
@@ -142,6 +157,11 @@ public class Instance {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(ip, nettyPort, grpcPort, port);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -166,7 +186,7 @@ public class Instance {
             sb.append("\"").append(entry.getKey()).append("\": ");
             if (entry.getValue() instanceof HashMap) {
                 HashMap<String, Object> objectHashMap = (HashMap<String, Object>) entry.getValue();
-                sb.append(MapToJsonString((objectHashMap)));
+                sb.append(MapToJsonString(objectHashMap));
             } else if (entry.getValue() instanceof String) {
                 sb.append("\"");
                 sb.append(entry.getValue());
