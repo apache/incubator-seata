@@ -127,7 +127,11 @@ public class RaftSnapshot implements Serializable {
         /**
          * session snapshot
          */
-        session("session");
+        session("session"),
+        /**
+         * leader metadata snapshot
+         */
+        leader_metadata("leader_metadata");
 
         final String type;
 

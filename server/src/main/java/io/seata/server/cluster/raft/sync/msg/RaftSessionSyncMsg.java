@@ -23,7 +23,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 /**
  * @author funkye
  */
-public class RaftSessionSyncMsg implements java.io.Serializable {
+public class RaftSessionSyncMsg extends RaftBaseMsg {
 
     private static final long serialVersionUID = -8577994371969898054L;
     private GlobalTransactionDO globalSession;
@@ -31,8 +31,6 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
     private BranchTransactionDO branchSession;
 
     private String group = DEFAULT_SEATA_GROUP;
-
-    private RaftSyncMsgType msgType;
 
     public RaftSessionSyncMsg(RaftSyncMsgType msgType, GlobalTransactionDO globalSession) {
         this.msgType = msgType;
@@ -66,14 +64,6 @@ public class RaftSessionSyncMsg implements java.io.Serializable {
 
     public void setBranchSession(BranchTransactionDO branchSession) {
         this.branchSession = branchSession;
-    }
-
-    public RaftSyncMsgType getMsgType() {
-        return this.msgType;
-    }
-
-    public void setMsgType(RaftSyncMsgType msgType) {
-        this.msgType = msgType;
     }
 
     public String getGroup() {

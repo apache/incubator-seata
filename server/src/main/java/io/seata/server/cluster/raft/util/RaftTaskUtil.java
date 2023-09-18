@@ -35,7 +35,7 @@ import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
  */
 public class RaftTaskUtil {
 
-    public static boolean createTask(Closure done, RaftSessionSyncMsg data, CompletableFuture<Boolean> completableFuture)
+    public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)
         throws TransactionException {
         final Task task = new Task();
         if (data != null) {

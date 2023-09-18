@@ -15,44 +15,27 @@
  */
 package io.seata.common.metadata;
 
-import java.util.Objects;
-
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author funkye
  */
 public class Node {
 
-    private String host;
-
-    private int nettyPort;
-
-    private int grpcPort;
-
-    private int httpPort;
-
+    Map<String,Object> metadata = new HashMap<>();
+    private Endpoint httpEndpoint;
+    private Endpoint grpcEndpoint;
+    private Endpoint nettyEndpoint;
+    
     private String group;
-
-    public Node(int nettyPort, int raftPort) {
-        this.nettyPort = nettyPort;
-        if (this.nettyPort <= 0) {
-            this.nettyPort = raftPort - SERVICE_OFFSET_SPRING_BOOT;
-        }
-        this.httpPort = this.nettyPort - SERVICE_OFFSET_SPRING_BOOT;
-    }
+    private ClusterRole role = ClusterRole.MEMBER;
 
     public Node() {
     }
 
-    private ClusterRole role = ClusterRole.MEMBER;
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
+    public Endpoint createEndpoint(String host, int port) {
+        return new Endpoint(host, port);
     }
 
     public String getGroup() {
@@ -71,47 +54,76 @@ public class Node {
         this.role = role;
     }
 
-    public int getNettyPort() {
-        return nettyPort;
+    public Map<String, Object> getMetadata() {
+        return metadata;
     }
 
-    public void setNettyPort(int nettyPort) {
-        this.nettyPort = nettyPort;
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 
-    public int getGrpcPort() {
-        return grpcPort;
+    public Endpoint getHttpEndpoint() {
+        return httpEndpoint;
     }
 
-    public void setGrpcPort(int grpcPort) {
-        this.grpcPort = grpcPort;
+    public void setHttpEndpoint(Endpoint httpEndpoint) {
+        this.httpEndpoint = httpEndpoint;
     }
 
-    public int getHttpPort() {
-        return httpPort;
+    public Endpoint getGrpcEndpoint() {
+        return grpcEndpoint;
     }
 
-    public void setHttpPort(int httpPort) {
-        this.httpPort = httpPort;
+    public void setGrpcEndpoint(Endpoint grpcEndpoint) {
+        this.grpcEndpoint = grpcEndpoint;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    public Endpoint getNettyEndpoint() {
+        return nettyEndpoint;
+    }
+
+    public void setNettyEndpoint(Endpoint nettyEndpoint) {
+        this.nettyEndpoint = nettyEndpoint;
+    }
+
+    public static class Endpoint {
+
+        private String host;
+
+        private int port;
+
+        public Endpoint() {
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Node node = (Node)o;
-        return Objects.equals(host, node.host) && Objects.equals(nettyPort, node.nettyPort)
-            && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(httpPort, node.httpPort)
-            && Objects.equals(group, node.group);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(host, nettyPort, grpcPort, httpPort, group);
+        public Endpoint(String host, int port) {
+            this.host=host;
+            this.port=port;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String createAddress() {
+            return host + ":" + port;
+        }
+
+        @Override
+        public String toString() {
+            return "Endpoint{" + "host='" + host + '\'' + ", port=" + port + '}';
+        }
     }
 
 }

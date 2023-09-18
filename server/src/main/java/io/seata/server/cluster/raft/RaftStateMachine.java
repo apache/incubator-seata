@@ -37,7 +37,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.common.ConfigurationKeys;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
-import io.seata.server.cluster.raft.snapshot.SessionSnapshotFile;
+import io.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
+import io.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.cluster.raft.execute.RaftMsgExecute;
 import io.seata.server.cluster.raft.execute.branch.AddBranchSessionExecute;
@@ -50,9 +51,11 @@ import io.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
+import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftLeaderMetadata;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
+import io.seata.server.cluster.raft.util.RaftTaskUtil;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +64,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_LEADER_METADATA;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
@@ -83,6 +87,8 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Map<RaftSyncMsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
+    private volatile RaftLeaderMetadata raftLeaderMetadata;
+    
     /**
      * Leader term
      */
@@ -100,6 +106,15 @@ public class RaftStateMachine extends StateMachineAdapter {
     public RaftStateMachine(String group) {
         this.group = group;
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        EXECUTES.put(REFRESH_LEADER_METADATA, syncMsg -> {
+            raftLeaderMetadata = (RaftLeaderMetadata)syncMsg;
+            ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                .publishEvent(new ClusterChangeEvent(this, group, raftLeaderMetadata.getTerm(), this.isLeader()));
+            LOGGER.info("groupId: {}, refresh leader metadata: {}", group, raftLeaderMetadata);
+            return null;
+        });
+        registryStoreSnapshotFile(new SessionSnapshotFile(group));
+        registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
         if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
@@ -124,8 +139,8 @@ public class RaftStateMachine extends StateMachineAdapter {
                 ByteBuffer byteBuffer = iterator.getData();
                 // if data is empty, it is only a heartbeat event and can be ignored
                 if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                    RaftSessionSyncMsg msg =
-                        (RaftSessionSyncMsg) RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
+                    RaftBaseMsg msg =
+                        (RaftBaseMsg) RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
                     // follower executes the corresponding task
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("sync msg: {}", msg);
@@ -182,12 +197,22 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.leaderTerm.set(term);
         LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
         this.currentTerm.set(term);
+        SeataClusterContext.bindGroup(group);
+        try {
+            RaftLeaderMetadata leaderMetadata = new RaftLeaderMetadata(term);
+            RaftTaskUtil.createTask(status -> raftLeaderMetadata = leaderMetadata, leaderMetadata, null);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        } finally {
+            SeataClusterContext.unbindGroup();
+        }
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("groupId: {}, session map: {} ", group,
                     SessionHolder.getRootSessionManager().allSessions().size());
                 SeataClusterContext.bindGroup(group);
                 try {
+                    // become the leader again,reloading global session
                     SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(),
                         StoreConfig.SessionMode.RAFT, false);
                 } finally {
@@ -195,17 +220,12 @@ public class RaftStateMachine extends StateMachineAdapter {
                 }
             });
         }
-        // become the leader again,reloading global session
-        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group, term, true));
     }
 
     @Override
     public void onLeaderStop(final Status status) {
         this.leaderTerm.set(-1);
         LOGGER.info("groupId: {}, onLeaderStop: status={}.", group, status);
-        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group, -1, false));
     }
 
     @Override
@@ -217,19 +237,15 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
-        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this, group, ctx.getTerm(),false));
     }
 
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
-        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-            .publishEvent(new ClusterChangeEvent(this,group, currentTerm.get(), isLeader()));
     }
 
-    private void onExecuteRaft(RaftSessionSyncMsg msg) {
+    private void onExecuteRaft(RaftBaseMsg msg) {
         RaftMsgExecute<?> execute = EXECUTES.get(msg.getMsgType());
         if (execute == null) {
             throw new RuntimeException(
@@ -252,4 +268,11 @@ public class RaftStateMachine extends StateMachineAdapter {
         snapshotFiles.add(storeSnapshotFile);
     }
 
+    public RaftLeaderMetadata getRaftLeaderMetadata() {
+        return raftLeaderMetadata;
+    }
+
+    public void setRaftLeaderMetadata(RaftLeaderMetadata raftLeaderMetadata) {
+        this.raftLeaderMetadata = raftLeaderMetadata;
+    }
 }

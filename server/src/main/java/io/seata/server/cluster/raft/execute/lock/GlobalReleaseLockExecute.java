@@ -16,6 +16,7 @@
 package io.seata.server.cluster.raft.execute.lock;
 
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
@@ -26,7 +27,8 @@ import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 public class GlobalReleaseLockExecute extends AbstractRaftMsgExecute {
 
     @Override
-    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
+    public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
+        RaftSessionSyncMsg  sessionSyncMsg = (RaftSessionSyncMsg)syncMsg;
         GlobalSession globalSession =
             SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getGlobalSession().getXid());
         if (globalSession != null) {

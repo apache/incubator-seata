@@ -15,9 +15,12 @@
  */
 package io.seata.server.cluster.raft.snapshot;
 
+import java.io.File;
+import java.io.IOException;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import org.apache.commons.io.FileUtils;
 
 /**
  * @author funkye
@@ -39,5 +42,24 @@ public interface StoreSnapshotFile {
      * @return true if load succeed
      */
     boolean load(final SnapshotReader reader);
+
+    default boolean save(final RaftSnapshot value, String path) throws IOException {
+        try {
+            FileUtils.writeByteArrayToFile(new File(path), RaftSnapshotSerializer.encode(value));
+            return true;
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    /**
+     * Save value to snapshot file.
+     */
+    default Object load(String path) throws IOException {
+        RaftSnapshot raftSnapshot = RaftSnapshotSerializer.decode(FileUtils.readFileToByteArray(new File(path)));
+        return raftSnapshot.getBody();
+    }
+
+
 
 }

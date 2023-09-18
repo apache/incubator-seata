@@ -18,6 +18,7 @@ package io.seata.server.cluster.raft.serializer;
 import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 
@@ -27,7 +28,7 @@ import io.seata.core.serializer.Serializer;
 @LoadLevel(name = "JACKSON")
 public class JacksonSerializer implements Serializer {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public <T> byte[] serialize(T t) {

@@ -18,42 +18,18 @@ package io.seata.server.cluster.raft.sync.msg;
 /**
  * @author jianbin.chen
  */
-public enum RaftSyncMsgType {
+public class RaftBaseMsg implements java.io.Serializable {
 
-    /**
-     * addGlobalSession
-     */
-    ADD_GLOBAL_SESSION,
-    /**
-     * removeGlobalSession
-     */
-    REMOVE_GLOBAL_SESSION,
-    /**
-     *
-     */
-    ADD_BRANCH_SESSION,
-    /**
-     * addBranchSession
-     */
-    REMOVE_BRANCH_SESSION,
-    /**
-     * updateGlobalSessionStatus
-     */
-    UPDATE_GLOBAL_SESSION_STATUS,
-    /**
-     * updateBranchSessionStatus
-     */
-    UPDATE_BRANCH_SESSION_STATUS,
-    /**
-     * releaseGlobalSessionLock
-     */
-    RELEASE_GLOBAL_SESSION_LOCK,
-    /**
-     * releaseBranchSessionLock
-     */
-    RELEASE_BRANCH_SESSION_LOCK,
-    /**
-     * refresh leader metadata
-     */
-    REFRESH_LEADER_METADATA;
+	private static final long serialVersionUID = -1439073440621259777L;
+
+	protected RaftSyncMsgType msgType;
+
+	public RaftSyncMsgType getMsgType() {
+		return msgType;
+	}
+
+	public void setMsgType(RaftSyncMsgType msgType) {
+		this.msgType = msgType;
+	}
+
 }

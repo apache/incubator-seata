@@ -105,7 +105,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     /**
      * Service node health check
      */
-    private static final Map<String,List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
+    private static final Map<String, List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -207,7 +207,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (CollectionUtils.isNotEmpty(nodeList)) {
             List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
             if (CollectionUtils.isEmpty(inetSocketAddresses)) {
-                addressList = nodeList.stream().map(node -> node.getHost() + IP_PORT_SPLIT_CHAR + node.getHttpPort())
+                addressList = nodeList.stream().map(node -> node.getHttpEndpoint().createAddress())
                     .collect(Collectors.toList());
             } else {
                 stream = inetSocketAddresses.stream();
@@ -219,15 +219,15 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         } else {
             Map<String, Node> map = new HashMap<>();
-            if (CollectionUtils.isNotEmpty(map)) {
+            if (CollectionUtils.isNotEmpty(nodeList)) {
                 for (Node node : nodeList) {
-                    map.put(node.getHost(), node);
+                    map.put(node.getNettyEndpoint().getHost(), node);
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
                 Node node = map.get(host);
-                return host + IP_PORT_SPLIT_CHAR + (node != null ? node.getHttpPort() : inetSocketAddress.getPort());
+                return host + IP_PORT_SPLIT_CHAR + (node != null ? node.getHttpEndpoint() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
@@ -239,9 +239,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private InetSocketAddress convertInetSocketAddress(Node node) {
-        String host = node.getHost();
-        int port = node.getNettyPort();
-        return new InetSocketAddress(host, port);
+        Node.Endpoint endpoint = node.getNettyEndpoint();
+        return new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
     }
 
     @Override
@@ -254,7 +253,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             String clusterName = getServiceGroup(transactionServiceGroup);
             Node leader = METADATA.getLeader(clusterName);
             if (leader != null) {
-                return Collections.singletonList(new InetSocketAddress(leader.getHost(), leader.getNettyPort()));
+                return Collections.singletonList(convertInetSocketAddress(leader));
             }
         }
         return RegistryService.super.aliveLookup(transactionServiceGroup);
@@ -291,13 +290,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
-            String host = leader.getHost();
-            int port = leader.getNettyPort();
+            InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
             return ALIVE_NODES.put(transactionServiceGroup,
                 aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
                     // Since only follower will turn into leader, only the follower node needs to be listened to
-                    return inetSocketAddress.getPort() != port
-                        || !inetSocketAddress.getAddress().getHostAddress().equals(host);
+                    return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
+                        .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
                 }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);

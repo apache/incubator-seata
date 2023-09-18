@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.cluster.raft.snapshot;
+package io.seata.server.cluster.raft.snapshot.session;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +22,12 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
+import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
+import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.session.RaftSessionManager;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,24 +46,6 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         this.group = group;
     }
 
-    /**
-     * Save value to snapshot file.
-     */
-    public boolean save(final RaftSnapshot value, String path) {
-        try {
-            FileUtils.writeByteArrayToFile(new File(path), RaftSnapshotSerializer.encode(value));
-            return true;
-        } catch (IOException e) {
-            LOGGER.error("Fail to save snapshot", e);
-            return false;
-        }
-    }
-
-    public RaftSessionSnapshot load(String path) throws IOException {
-        RaftSnapshot raftSnapshot = RaftSnapshotSerializer.decode(FileUtils.readFileToByteArray(new File(path)));
-        return (RaftSessionSnapshot)raftSnapshot.getBody();
-    }
-
     @Override
     public Status save(SnapshotWriter writer) {
         RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
@@ -75,12 +57,16 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         raftSnapshot.setType(RaftSnapshot.SnapshotType.session);
         LOGGER.info("groupId: {}, global session size: {}", group, sessionSnapshot.getGlobalsessions().size());
         String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
-        if (save(raftSnapshot, path)) {
-            if (writer.addFile(fileName)) {
-                return Status.OK();
-            } else {
-                return new Status(RaftError.EIO, "Fail to add file to writer");
+        try {
+            if (save(raftSnapshot, path)) {
+                if (writer.addFile(fileName)) {
+                    return Status.OK();
+                } else {
+                    return new Status(RaftError.EIO, "Fail to add file to writer");
+                }
             }
+        } catch (IOException e) {
+            LOGGER.error("Fail to save groupId: {} snapshot {}", group, path, e);
         }
         return new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path);
     }
@@ -94,7 +80,7 @@ public class SessionSnapshotFile implements StoreSnapshotFile {
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            RaftSessionSnapshot sessionSnapshot = load(path);
+            RaftSessionSnapshot sessionSnapshot = (RaftSessionSnapshot)load(path);
             RaftSessionManager raftSessionManager = (RaftSessionManager)SessionHolder.getRootSessionManager(group);
             Map<String, GlobalSession> rootSessionMap = raftSessionManager.getSessionMap();
             // be sure to clear the data before loading it, because this is a full overwrite update

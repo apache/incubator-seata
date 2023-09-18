@@ -39,6 +39,7 @@ import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.sync.msg.RaftLeaderMetadata;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,34 +109,10 @@ public class ClusterController {
                 PeerId leader = routeTable.selectLeader(group);
                 if (leader != null) {
                     Set<Node> nodes = new HashSet<>();
-                    Node leaderNode = new Node(leader.getIdx(), leader.getPort());
-                    leaderNode.setRole(ClusterRole.LEADER);
-                    leaderNode.setGroup(group);
-                    leaderNode.setHost(leader.getIp());
+                    RaftLeaderMetadata raftLeaderMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                    Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getNode();
                     nodes.add(leaderNode);
-                    Configuration configuration = routeTable.getConfiguration(group);
-                    int nettyPort = XID.getPort();
-                    int httpPort = serverProperties.getPort();
-                    String finalGroup = group;
-                    nodes.addAll(configuration.getLearners().stream().map(learner -> {
-                        Node node = new Node(learner.getIdx(), learner.getPort());
-                        node.setGroup(finalGroup);
-                        node.setRole(ClusterRole.LEARNER);
-                        node.setHost(learner.getIp());
-                        node.setNettyPort(nettyPort);
-                        node.setHttpPort(httpPort);
-                        return node;
-                    }).collect(Collectors.toList()));
-                    nodes.addAll(configuration.getPeers().stream().map(follower -> {
-                        Node node = new Node(follower.getIdx(), follower.getPort());
-                        node.setGroup(finalGroup);
-                        node.setRole(ClusterRole.FOLLOWER);
-                        node.setHost(follower.getIp());
-                        node.setNettyPort(nettyPort);
-                        node.setHttpPort(httpPort);
-                        return node;
-                    }).collect(Collectors.toList()));
-                    metadataResponse.setTerm(raftServer.getRaftStateMachine().getCurrentTerm().get());
+                    metadataResponse.setTerm(raftLeaderMetadata.getTerm());
                     metadataResponse.setNodes(new ArrayList<>(nodes));
                 }
             } catch (Exception e) {

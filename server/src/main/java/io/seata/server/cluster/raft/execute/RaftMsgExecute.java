@@ -15,7 +15,7 @@
  */
 package io.seata.server.cluster.raft.execute;
 
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 
 /**
  * @author jianbin.chen
@@ -25,10 +25,10 @@ public interface RaftMsgExecute<T> {
     /**
      * Execute t.
      *
-     * @param sessionSyncMsg the sessionSyncMsg
+     * @param syncMsg the sessionSyncMsg
      * @return the t
      * @throws Throwable the throwable
      */
-    T execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable;
+    T execute(RaftBaseMsg syncMsg) throws Throwable;
 
 }

@@ -19,6 +19,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
+import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
@@ -30,7 +31,8 @@ import io.seata.server.storage.raft.session.RaftSessionManager;
 public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
-    public Boolean execute(RaftSessionSyncMsg sessionSyncMsg) throws Throwable {
+    public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
+        RaftSessionSyncMsg  sessionSyncMsg = (RaftSessionSyncMsg)syncMsg;
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalTransactionDO globalTransactionDO = sessionSyncMsg.getGlobalSession();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(globalTransactionDO.getXid());
