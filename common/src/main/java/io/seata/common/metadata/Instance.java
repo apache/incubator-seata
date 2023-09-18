@@ -175,7 +175,7 @@ public class Instance {
                 && Objects.equals(unit, instance.unit);
     }
 
-    public String MapToJsonString(Map<String, Object> map) {
+    public String mapToJsonString(Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         int i = 0;
@@ -186,7 +186,7 @@ public class Instance {
             sb.append("\"").append(entry.getKey()).append("\": ");
             if (entry.getValue() instanceof HashMap) {
                 HashMap<String, Object> objectHashMap = (HashMap<String, Object>) entry.getValue();
-                sb.append(MapToJsonString(objectHashMap));
+                sb.append(mapToJsonString(objectHashMap));
             } else if (entry.getValue() instanceof String) {
                 sb.append("\"");
                 sb.append(entry.getValue());
@@ -215,12 +215,11 @@ public class Instance {
         sb.append("\"metadata\": ");
 
         // handle metadata kv map
-        sb.append(MapToJsonString(metadata));
+        sb.append(mapToJsonString(metadata));
 
         sb.append("}");
         return sb.toString();
     }
-
 
 
 }

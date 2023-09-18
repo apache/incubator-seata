@@ -46,7 +46,6 @@ public class HttpServlet {
 
             CloseableHttpResponse response = httpClient.execute(httpPost);
 
-            httpClient.close();
 
             return response;
         } catch (Exception e) {
@@ -78,7 +77,6 @@ public class HttpServlet {
             httpGet.setHeader("Content-Type", "application/json");
 
             CloseableHttpResponse response = httpClient.execute(httpGet);
-            httpClient.close();
 
             return response;
         } catch (Exception e) {

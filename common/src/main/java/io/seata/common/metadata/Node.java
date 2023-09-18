@@ -139,6 +139,28 @@ public class Node {
                 && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(port, node.port);
     }
 
+    public boolean isTotalEqual(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        Node otherNode = (Node) obj;
+
+        // check each member variable
+        return Objects.equals(ip, otherNode.ip) &&
+                port == otherNode.port &&
+                nettyPort == otherNode.nettyPort &&
+                grpcPort == otherNode.grpcPort &&
+                Double.compare(otherNode.weight, weight) == 0 &&
+                healthy == otherNode.healthy &&
+                Objects.equals(role, otherNode.role) &&
+                Objects.equals(metadata, otherNode.metadata);
+    }
+
     // convert to String
     public String toJsonString() {
         StringBuilder sb = new StringBuilder();

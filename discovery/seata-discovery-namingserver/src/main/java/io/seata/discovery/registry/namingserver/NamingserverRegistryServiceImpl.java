@@ -298,7 +298,10 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             MetaResponse metaResponse = objectMapper.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
             // MetaResponse -> endpoint list
-            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream().flatMap(cluster -> cluster.getUnitData().stream()).flatMap(unit -> unit.getNamingInstanceList().stream()).map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort())).collect(Collectors.toList());
+            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream()
+                    .flatMap(cluster -> cluster.getUnitData().stream())
+                    .flatMap(unit -> unit.getNamingInstanceList().stream())
+                    .map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort())).collect(Collectors.toList());
             term = metaResponse.getTerm();
 
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);

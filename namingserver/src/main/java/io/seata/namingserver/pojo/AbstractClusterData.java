@@ -27,8 +27,10 @@ public abstract class AbstractClusterData {
      *
      * @param node     node msg
      * @param unitName unit Name
+     * @return true if the node has changed, false if there is no change.
      */
-    public void registerInstance(Node node, String unitName) {
+    public boolean registerInstance(Node node, String unitName) {
+        return false;
     }
 
     /**

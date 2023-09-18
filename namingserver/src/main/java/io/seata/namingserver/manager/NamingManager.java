@@ -113,7 +113,7 @@ public class NamingManager {
 
             // add instance in cluster
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName, k -> new ClusterData(clusterName, (String) node.getMetadata().get("cluster-type")));
-            clusterData.registerInstance(node, unitName);
+            boolean hasChanged = clusterData.registerInstance(node, unitName);
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Object mappingObj = node.getMetadata().get("vGroup");
@@ -125,7 +125,9 @@ public class NamingManager {
                         }
                 );
             }
-            notifyClusterChange(namespace, clusterName, unitName);
+            if (hasChanged) {
+                notifyClusterChange(namespace, clusterName, unitName);
+            }
             instanceLiveTable.put(new InetSocketAddress(node.getIp(), node.getPort()), System.currentTimeMillis());
         } catch (Exception e) {
             LOGGER.error("Instance registered failed!", e);

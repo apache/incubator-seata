@@ -108,13 +108,19 @@ public class ClusterData extends AbstractClusterData {
         return clusterResponse;
     }
 
-    public void registerInstance(Node instance, String unitName) {
-        List<Node> instances = new ArrayList<>();
-        instances.add(instance);
-        Unit unit = new Unit();
-        unit.setUnitName(unitName);
-        unit.setNamingInstanceList(instances);
-        unitData.put(unitName, unit);
+
+    public boolean registerInstance(Node instance, String unitName) {
+        Unit unit = unitData.get(unitName);
+        if (unit == null) {
+            unit = new Unit();
+            List<Node> instances = new ArrayList<>();
+            instances.add(instance);
+            unit.setUnitName(unitName);
+            unit.setNamingInstanceList(instances);
+            unitData.put(unitName, unit);
+            return true;
+        }
+        return unit.addInstance(instance);
     }
 
 

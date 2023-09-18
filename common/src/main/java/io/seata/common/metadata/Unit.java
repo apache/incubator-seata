@@ -45,5 +45,23 @@ public class Unit {
         }
     }
 
+    /**
+     * @param node
+     * @return true if the node has changed, false if there is no change.
+     */
+    public boolean addInstance(Node node) {
+        if (nodeList.contains(node)) {
+            Node node1 = nodeList.get(nodeList.indexOf(node));
+            if (node.isTotalEqual(node1)) {
+                return false;
+            } else {
+                nodeList.remove(node);
+            }
+        }
+        nodeList.add(node);
+        return true;
+
+    }
+
 
 }

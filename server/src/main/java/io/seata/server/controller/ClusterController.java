@@ -40,7 +40,7 @@ public class ClusterController {
     @PostConstruct
     private void init() {
         String storeType = CONFIG.getConfig("store.mode", "db");
-        if (storeType.equals("db") || storeType.equals("raft")) {
+        if ("db".equals(storeType) || "raft".equals(storeType)) {
             vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
         }
 
