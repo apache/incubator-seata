@@ -98,11 +98,6 @@ public enum TransactionExceptionCode {
     FailedToSendBranchRollbackRequest,
 
     /**
-     * Failed to send branch rollback request transaction exception code.
-     */
-    FailedToSendBranchDeleteRequest,
-
-    /**
      * Failed to add branch transaction exception code.
      */
     FailedToAddBranch,
@@ -140,7 +135,12 @@ public enum TransactionExceptionCode {
     /**
      * Broken transaction exception code.
      */
-    Broken;
+    Broken,
+
+    /**
+     * Failed to send branch rollback request transaction exception code.
+     */
+    FailedToSendBranchDeleteRequest;
 
 
     /**
