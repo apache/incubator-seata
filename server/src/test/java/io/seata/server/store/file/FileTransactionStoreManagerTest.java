@@ -60,15 +60,18 @@ public class FileTransactionStoreManagerTest {
             fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
             BranchSession branchSessionA = Mockito.mock(BranchSession.class);
             GlobalSession global = new GlobalSession();
+            global.setGmtModified(System.currentTimeMillis());
             Mockito.when(branchSessionA.encode())
                     .thenReturn(createBigBranchSessionData(global, (byte) 'A'));
             Mockito.when(branchSessionA.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'A')));
+            Mockito.when(branchSessionA.getGmtModified()).thenReturn(global.getGmtModified());
             BranchSession branchSessionB = Mockito.mock(BranchSession.class);
             Mockito.when(branchSessionB.encode())
                     .thenReturn(createBigBranchSessionData(global, (byte) 'B'));
             Mockito.when(branchSessionB.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'B')));
+            Mockito.when(branchSessionB.getGmtModified()).thenReturn(global.getGmtModified());
             Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
             Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
             List<TransactionWriteStore> list = fileTransactionStoreManager.readWriteStore(2000, false);
@@ -76,8 +79,10 @@ public class FileTransactionStoreManagerTest {
             Assertions.assertEquals(2, list.size());
             BranchSession loadedBranchSessionA = (BranchSession) list.get(0).getSessionRequest();
             Assertions.assertEquals(branchSessionA.getApplicationData(), loadedBranchSessionA.getApplicationData());
+            Assertions.assertEquals(branchSessionA.getGmtModified(), loadedBranchSessionA.getGmtModified());
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
+            Assertions.assertEquals(branchSessionB.getGmtModified(), loadedBranchSessionB.getGmtModified());
         } finally {
             if (fileTransactionStoreManager != null) {
                 fileTransactionStoreManager.shutdown();
@@ -97,6 +102,7 @@ public class FileTransactionStoreManagerTest {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
                 GlobalSession globalSession = new GlobalSession("", "", "", 60000);
+                globalSession.setGmtModified(System.currentTimeMillis());
                 BranchSession branchSessionA = Mockito.mock(BranchSession.class);
                 Mockito.when(branchSessionA.encode())
                         .thenReturn(createBigBranchSessionData(globalSession, (byte) 'A'));
@@ -151,7 +157,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // applicationDataBytes.length
                 + 4 // xidBytes.size
                 + 1 // statusCode
-                + 1 // lockstatus
+                + 8 // gmtModified
                 + 1; //branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
@@ -176,7 +182,7 @@ public class FileTransactionStoreManagerTest {
         }
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 0);
+        byteBuffer.putLong(global.getGmtModified());
         byteBuffer.flip();
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);

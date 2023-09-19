@@ -290,8 +290,6 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
 
         try {
             for (GlobalSession globalSession : globalSessions) {
@@ -382,7 +380,6 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
 
     }
@@ -421,8 +418,6 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
     public void stopGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         Collection<GlobalSession> sessions = sessionManager.allSessions();
         if (CollectionUtils.isNotEmpty(sessions)) {
@@ -453,15 +448,12 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
     }
 
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
     public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         Collection<GlobalSession> sessions = sessionManager.allSessions();
         if (CollectionUtils.isNotEmpty(sessions)) {
@@ -492,15 +484,12 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
     }
 
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
     public void startGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         Collection<GlobalSession> sessions = sessionManager.allSessions();
         if (CollectionUtils.isNotEmpty(sessions)) {
@@ -531,7 +520,6 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
     }
 
@@ -622,8 +610,6 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("branchSessionsProvider")
     public void stopBranchRetryTest(GlobalSession globalSession) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         Collection<GlobalSession> sessions = sessionManager.allSessions();
         if (CollectionUtils.isNotEmpty(sessions)) {
@@ -660,15 +646,12 @@ public class FileSessionManagerTest {
         } finally {
             globalSession.end();
             sessionManager.removeGlobalSession(globalSession);
-            sessionManager.destroy();
         }
     }
 
     @ParameterizedTest
     @MethodSource("branchSessionsProvider")
     public void restartBranchFailRetryTest(GlobalSession globalSession) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         // make sure sessionMaanager is empty
         Collection<GlobalSession> sessions = sessionManager.allSessions();
@@ -693,7 +676,6 @@ public class FileSessionManagerTest {
         } finally {
             globalSession.end();
             sessionManager.removeGlobalSession(globalSession);
-            sessionManager.destroy();
         }
     }
 
