@@ -15,7 +15,7 @@
  */
 package io.seata.core.http;
 
-import org.apache.http.client.config.RequestConfig;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
