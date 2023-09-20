@@ -175,7 +175,7 @@ public class ForkStateHandler implements StateHandler {
                 }
             }
             try {
-                boolean acquired = semaphore.tryAcquire(state.getAwaitTimeout(), TimeUnit.MILLISECONDS);
+                boolean acquired = semaphore.tryAcquire(state.getTimeout(), TimeUnit.MILLISECONDS);
                 if (!acquired) {
                     LOGGER.warn(String.format("Fork state [%s] branch [%s] waiting time out. " +
                             "Parallel execution exceeds parallelism limits.", state.getName(), branch));
@@ -189,7 +189,7 @@ public class ForkStateHandler implements StateHandler {
         }
 
         try {
-            boolean executed = latch.await(state.getAwaitTimeout(), TimeUnit.MILLISECONDS);
+            boolean executed = latch.await(state.getTimeout(), TimeUnit.MILLISECONDS);
             if (!executed) {
                 throw new EngineExecutionException(String.format("Executing fork state [%s]: execution timeout",
                         state.getName()));

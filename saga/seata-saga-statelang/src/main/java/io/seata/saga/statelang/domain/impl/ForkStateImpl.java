@@ -31,11 +31,9 @@ import java.util.Set;
 public class ForkStateImpl extends BaseState implements ForkState {
     private List<String> branches;
 
-    // Default max parallel thread count is 0 which stands for no limits.
     private int parallel = 0;
 
-    // Default timeout
-    private int awaitTimeout = DomainConstants.DEFAULT_FORK_AWAIT_TIME;
+    private long timeout = 0;
 
     private String pairedJoinState;
 
@@ -64,12 +62,12 @@ public class ForkStateImpl extends BaseState implements ForkState {
     }
 
     @Override
-    public int getAwaitTimeout() {
-        return awaitTimeout;
+    public long getTimeout() {
+        return timeout;
     }
 
-    public void setAwaitTimeout(int awaitTimeout) {
-        this.awaitTimeout = awaitTimeout;
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
 
     @Override

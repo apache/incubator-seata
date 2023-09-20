@@ -51,9 +51,9 @@ public class ForkStateParser extends BaseStatePaser implements StateParser<ForkS
         if (parallel != null) {
             forkState.setParallel(parallel);
         }
-        Integer awaitTimeout = (Integer) nodeMap.get("AwaitTimeout");
-        if (awaitTimeout != null) {
-            forkState.setAwaitTimeout(awaitTimeout);
+        Integer timeout = (Integer) nodeMap.get("Timeout");
+        if (timeout != null) {
+            forkState.setTimeout(timeout);
         }
 
         return forkState;

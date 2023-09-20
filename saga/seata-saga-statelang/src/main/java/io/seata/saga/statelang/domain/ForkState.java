@@ -26,12 +26,32 @@ import java.util.Set;
  * @author ptyin
  */
 public interface ForkState extends State {
+    /**
+     * Get branch list.
+     *
+     * @return branch list
+     */
     List<String> getBranches();
 
+    /**
+     * Get parallelism, i.e. max thread count. The default is 0 stands for no limit.
+     *
+     * @return parallelism
+     */
     int getParallel();
 
-    int getAwaitTimeout();
+    /**
+     * Get timeout. The default is 0, i.e. no timeout.
+     *
+     * @return timeout
+     */
+    long getTimeout();
 
+    /**
+     * Get paired join state name.
+     *
+     * @return name of paired join state
+     */
     String getPairedJoinState();
 
     /**
