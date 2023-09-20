@@ -320,6 +320,9 @@ public class StateMachineTests {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("forthSleepTime", 1000);
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            while (inst.isRunning()) {
+                Thread.sleep(1000);
+            }
             StateMachine stateMachine = inst.getStateMachine();
             ForkStateImpl outerForkState = (ForkStateImpl) stateMachine.getState("OuterForkState");
             Map<String, Set<String>> outerForkBranchStates = outerForkState.getAllBranchStates();
@@ -355,6 +358,9 @@ public class StateMachineTests {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("forthThrowException", "true");
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            while (inst.isRunning()) {
+                Thread.sleep(1000);
+            }
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
             List<String> compensateStateInstanceList = inst.getStateList().stream()

@@ -37,6 +37,7 @@ import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
 import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParallelContextHolder;
 import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
@@ -78,14 +79,22 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
+        String timeoutMessage = null;
+        ParallelContextHolder parallelContextHolder = ParallelContextHolder.getCurrent(context);
+        if (parallelContextHolder != null && parallelContextHolder.isTimeout()) {
+            timeoutMessage = String.format("State machine instance [%s] violates parallel execution timeout.",
+                    stateMachineInstance.getId());
+        }
         if (EngineUtils.isTimeout(stateMachineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
-            String message = "Saga Transaction [stateMachineInstanceId:" + stateMachineInstance.getId()
+            timeoutMessage = "Saga Transaction [stateMachineInstanceId:" + stateMachineInstance.getId()
                     + "] has timed out, stop execution now.";
+        }
+        if (timeoutMessage != null) {
+            LOGGER.error(timeoutMessage);
 
-            LOGGER.error(message);
-
-            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(null,
-                    FrameworkErrorCode.StateMachineExecutionTimeout, message, stateMachineInstance, instruction.getStateName());
+            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
+                    null, FrameworkErrorCode.StateMachineExecutionTimeout, timeoutMessage,
+                    stateMachineInstance, instruction.getStateName());
 
             EngineUtils.failStateMachine(context, exception);
 

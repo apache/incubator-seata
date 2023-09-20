@@ -17,7 +17,8 @@
         "SecondState",
         "ThirdState"
       ],
-      "Parallel": 2
+      "Parallel": 2,
+      "Timeout": 2000
     },
     "SecondState": {
       "Type": "ServiceTask",

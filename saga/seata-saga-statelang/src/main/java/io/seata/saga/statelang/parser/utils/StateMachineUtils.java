@@ -54,6 +54,10 @@ public class StateMachineUtils {
         StateMachine stateMachine = forkState.getStateMachine();
 
         if (allBranchStates != null) {
+            if (forkState.getPairedJoinState() == null) {
+                throw new ParserException(String.format("Fork state [%s] has no paired join state which is mandatory",
+                        forkState.getName()));
+            }
             return;
         }
         allBranchStates = new HashMap<>();
@@ -101,7 +105,10 @@ public class StateMachineUtils {
         }
         // Set all branch states of fork state
         forkState.setAllBranchStates(allBranchStates);
-
+        if (forkState.getPairedJoinState() == null) {
+            throw new ParserException(String.format("Fork state [%s] has no paired join state which is mandatory",
+                    forkState.getName()));
+        }
     }
 
     public static Set<String> getAllPossibleSubsequentStates(State state) {

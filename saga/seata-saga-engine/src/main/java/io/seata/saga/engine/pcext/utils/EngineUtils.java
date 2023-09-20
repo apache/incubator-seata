@@ -95,7 +95,6 @@ public class EngineUtils {
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         synchronized (stateMachineInstance) {
             if (!stateMachineInstance.isRunning()) {
-                ParallelTaskUtils.endBranch(context);
                 return;
             }
             stateMachineInstance.setGmtEnd(new Date());
@@ -132,8 +131,6 @@ public class EngineUtils {
                 }
             }
         }
-
-        ParallelTaskUtils.endBranch(context);
     }
 
     /**
@@ -155,7 +152,6 @@ public class EngineUtils {
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         synchronized (stateMachineInstance) {
             if (!stateMachineInstance.isRunning()) {
-                ParallelTaskUtils.endBranch(context);
                 return;
             }
             StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
@@ -179,8 +175,6 @@ public class EngineUtils {
                 callback.onError(context, stateMachineInstance, exp);
             }
         }
-
-        ParallelTaskUtils.endBranch(context);
     }
 
     /**

@@ -43,6 +43,9 @@ public class ParallelContextHolder {
     private AtomicInteger completedCount;
     private volatile boolean finished = false;
     private final AtomicBoolean alreadyGenerateJoinNext = new AtomicBoolean(false);
+    private ParallelContextHolder parent;
+    private long startTime;
+    private long timeout;
 
     public static ParallelContextHolder getCurrent(ProcessContext context) {
         return (ParallelContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER);
@@ -76,6 +79,10 @@ public class ParallelContextHolder {
         parallelContextHolder.joinNext = pairedJoinState.getNext();
         parallelContextHolder.startedIndex = new AtomicInteger(0);
         parallelContextHolder.completedCount = new AtomicInteger(0);
+        parallelContextHolder.parent = (ParallelContextHolder) context.getVariable(
+                DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER);
+        parallelContextHolder.startTime = System.currentTimeMillis();
+        parallelContextHolder.timeout = forkState.getTimeout();
         return parallelContextHolder;
     }
 
@@ -101,5 +108,15 @@ public class ParallelContextHolder {
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public boolean isTimeout() {
+        if (timeout > 0 && System.currentTimeMillis() - startTime > timeout) {
+            return true;
+        }
+        if (parent != null) {
+            return parent.isTimeout();
+        }
+        return false;
     }
 }

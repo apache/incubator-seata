@@ -16,20 +16,14 @@
 
 package io.seata.saga.engine.pcext.routers;
 
-import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateRouter;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.StateRouterInterceptor;
-import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
 import io.seata.saga.proctrl.Instruction;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ForkState;
 import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,36 +44,8 @@ public class ForkStateRouter implements StateRouter, InterceptableStateRouter {
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_IN_PARALLEL_BRANCH)) {
-            // If this fork is inside a parallel branch, ends directly.
-            stateInstruction.setEnd(true);
-            return null;
-        }
-
-        String pairedJoinStateName = ((ForkState) state).getPairedJoinState();
-        State pairedJoinState = state.getStateMachine().getState(pairedJoinStateName);
-        if (pairedJoinState == null) {
-            throw new EngineExecutionException(String.format("No paired join state [%s] for fork state",
-                    pairedJoinStateName), FrameworkErrorCode.ObjectNotExists);
-        }
-        String stateNameAfterJoin = pairedJoinState.getNext();
-        if (StringUtils.isBlank(stateNameAfterJoin)) {
-            LOGGER.debug("No subsequent state for join state {}", pairedJoinState.getName());
-            return null;
-        }
-        State stateAfterJoin = state.getStateMachine().getState(stateNameAfterJoin);
-        if (stateAfterJoin == null) {
-            throw new EngineExecutionException(String.format("Next state [%s] is not exits", stateNameAfterJoin),
-                    FrameworkErrorCode.ObjectNotExists);
-        }
-        stateInstruction.setStateName(stateNameAfterJoin);
-
-        // Check if next state is loop task
-        if (null != LoopTaskUtils.getLoopConfig(context, stateAfterJoin)) {
-            stateInstruction.setTemporaryState(new LoopStartStateImpl());
-        }
-
-        return stateInstruction;
+        stateInstruction.setEnd(true);
+        return null;
     }
 
     @Override

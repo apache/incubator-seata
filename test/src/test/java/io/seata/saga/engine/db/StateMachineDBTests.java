@@ -1144,6 +1144,9 @@ public class StateMachineDBTests extends AbstractServerTest {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("forthSleepTime", 1000);
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            while (inst.isRunning()) {
+                Thread.sleep(1000);
+            }
             StateMachine stateMachine = inst.getStateMachine();
             ForkStateImpl outerForkState = (ForkStateImpl) stateMachine.getState("OuterForkState");
             Map<String, Set<String>> outerForkBranchStates = outerForkState.getAllBranchStates();
@@ -1179,6 +1182,9 @@ public class StateMachineDBTests extends AbstractServerTest {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("forthThrowException", "true");
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            while (inst.isRunning()) {
+                Thread.sleep(1000);
+            }
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
             List<String> compensateStateInstanceList = inst.getStateList().stream()
@@ -1193,6 +1199,19 @@ public class StateMachineDBTests extends AbstractServerTest {
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
             Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
+        });
+
+        // Test timeout
+        SagaCostPrint.executeAndPrint("3-40-3", () -> {
+            HashMap<String, Object> paramMap = new HashMap<>();
+            paramMap.put("forthSleepTime", 3000);
+            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+            while (inst.isRunning()) {
+                Thread.sleep(1000);
+            }
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+            EngineExecutionException e = (EngineExecutionException) inst.getException();
+            Assertions.assertEquals(FrameworkErrorCode.StateMachineExecutionTimeout, e.getErrcode());
         });
     }
 }

@@ -24,7 +24,6 @@ import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.SideEffectFreeProcessContextImpl;
-import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.ForkState;
 import io.seata.saga.statelang.domain.State;
@@ -34,8 +33,6 @@ import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
 
 /**
  * Parallel task util
@@ -74,34 +71,6 @@ public class ParallelTaskUtils {
         copiedInstruction.setTenantId(instruction.getTenantId());
         return copiedInstruction;
     }
-
-    public static void endBranch(ProcessContext context) {
-        if (context.hasVariable(DomainConstants.PARALLEL_SEMAPHORE)) {
-            Semaphore semaphore = (Semaphore) context.getVariable(DomainConstants.PARALLEL_SEMAPHORE);
-            semaphore.release();
-        }
-
-        if (context.hasVariable(DomainConstants.PARALLEL_LATCH)) {
-            CountDownLatch latch = (CountDownLatch) context.getVariable(DomainConstants.PARALLEL_LATCH);
-            latch.countDown();
-        }
-    }
-
-    /**
-     * Forward branch context to last executed state in branch.
-     *
-     * @param branchContext Branch context
-     * @param forkState     Fork state
-     * @return The state to forward
-     */
-    public static State forwardBranch(ProcessContext branchContext, ForkState forkState) {
-        StateInstruction instruction = branchContext.getInstruction(StateInstruction.class);
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) branchContext.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_INST);
-
-        return forwardBranch(instruction.getState(branchContext), stateMachineInstance, forkState);
-    }
-
 
     /**
      * Forward branch context to last executed state in branch.

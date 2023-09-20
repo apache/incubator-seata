@@ -50,7 +50,8 @@ public class JoinStateRouter implements StateRouter, InterceptableStateRouter {
             // Route to another branch if parallel execution has not all launched, otherwise route to the next state.
             String nextStateName = parallelContextHolder.next();
             if (nextStateName == null) {
-                return endBranchRouting(instruction);
+                instruction.setEnd(true);
+                return null;
             }
             if (parallelContextHolder.isFinished()) {
                 context.removeVariable(DomainConstants.VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER);
@@ -68,13 +69,9 @@ public class JoinStateRouter implements StateRouter, InterceptableStateRouter {
             }
             return instruction;
         } else {
-            return endBranchRouting(instruction);
+            throw new EngineExecutionException("Join state has no parallel context, " +
+                    "make sure it gets a paired fork state.");
         }
-    }
-
-    private static Instruction endBranchRouting(StateInstruction instruction) {
-        instruction.setEnd(true);
-        return null;
     }
 
     @Override
