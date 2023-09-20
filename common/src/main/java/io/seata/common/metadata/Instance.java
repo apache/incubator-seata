@@ -156,8 +156,8 @@ public class Instance {
         return metadata;
     }
 
-    public void removeMetadata(String key){
-        if(metadata.containsKey(key)){
+    public void removeMetadata(String key) {
+        if (metadata.containsKey(key)) {
             metadata.remove(key);
         }
     }

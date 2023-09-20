@@ -50,8 +50,8 @@ class NamingserverRegistryServiceImplTest {
 
     @BeforeAll
     public static void beforeClass() throws Exception {
-        System.setProperty("registry.namingserver.namespace","dev");
-        System.setProperty("registry.namingserver.cluster","cluster1");
+        System.setProperty("registry.namingserver.namespace", "dev");
+        System.setProperty("registry.namingserver.cluster", "cluster1");
         System.setProperty("registry.namingserver.serverAddr", "127.0.0.1:8080");
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
@@ -63,53 +63,48 @@ class NamingserverRegistryServiceImplTest {
 
         PropertiesPropertySource customPropertySource = new PropertiesPropertySource("customSource", customProperties);
         propertySources.addLast(customPropertySource);
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT,environment);
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
 
     }
 
 
     @Test
     public void unregister1() throws Exception {
-        NamingserverRegistryServiceImpl namingserverRegistryService=new NamingserverRegistryServiceImpl();
-        InetSocketAddress inetSocketAddress=new InetSocketAddress("127.0.0.1",8080);
+        NamingserverRegistryServiceImpl namingserverRegistryService = NamingserverRegistryServiceImpl.getInstance();
+        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8080);
         namingserverRegistryService.register(inetSocketAddress);
         namingserverRegistryService.unregister(inetSocketAddress);
     }
 
 
-
-
-
     @Test
-    public void getNamingAddrsTest(){
-        NamingserverRegistryServiceImpl namingserverRegistryService = new NamingserverRegistryServiceImpl();
-        List<String> list=namingserverRegistryService.getNamingAddrs();
-        assertEquals(list.size(),1);
+    public void getNamingAddrsTest() {
+        NamingserverRegistryServiceImpl namingserverRegistryService = NamingserverRegistryServiceImpl.getInstance();
+        List<String> list = namingserverRegistryService.getNamingAddrs();
+        assertEquals(list.size(), 1);
     }
 
 
     @Test
-    public void getNamingAddrTest(){
-        NamingserverRegistryServiceImpl namingserverRegistryService = new NamingserverRegistryServiceImpl();
-        String addr=namingserverRegistryService.getNamingAddr();
-        assertEquals(addr,"127.0.0.1:8080");
+    public void getNamingAddrTest() {
+        NamingserverRegistryServiceImpl namingserverRegistryService = NamingserverRegistryServiceImpl.getInstance();
+        String addr = namingserverRegistryService.getNamingAddr();
+        assertEquals(addr, "127.0.0.1:8080");
     }
 
 
     @Test
-    public void convertTest(){
-        InetSocketAddress inetSocketAddress=new InetSocketAddress("127.0.0.1",8088);
-        assertEquals(inetSocketAddress.getAddress().getHostAddress(),"127.0.0.1");
-        assertEquals(inetSocketAddress.getPort(),8088);
+    public void convertTest() {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8088);
+        assertEquals(inetSocketAddress.getAddress().getHostAddress(), "127.0.0.1");
+        assertEquals(inetSocketAddress.getPort(), 8088);
     }
-
 
 
     @Test
     public void testRegister1() throws Exception {
 
         RegistryService registryService = new NamingserverRegistryProvider().provide();
-
 
 
         InetSocketAddress inetSocketAddress1 = new InetSocketAddress("127.0.0.1", 8088);
@@ -189,8 +184,6 @@ class NamingserverRegistryServiceImplTest {
     }
 
 
-
-
     @Test
     public void testUnregister() throws Exception {
         RegistryService registryService = new NamingserverRegistryProvider().provide();
@@ -217,7 +210,7 @@ class NamingserverRegistryServiceImplTest {
     }
 
 
-//    @Disabled
+    //    @Disabled
     @Test
     public void testWatch() throws Exception {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
@@ -257,10 +250,10 @@ class NamingserverRegistryServiceImplTest {
 
     }
 
-//    @Disabled
+    //    @Disabled
     @Test
     public void testSubscribe() throws Exception {
-        NamingserverRegistryServiceImpl registryService=new NamingserverRegistryServiceImpl();
+        NamingserverRegistryServiceImpl registryService = NamingserverRegistryServiceImpl.getInstance();
 
         AtomicBoolean isNotified = new AtomicBoolean(false);
         //1.subscribe
@@ -289,8 +282,7 @@ class NamingserverRegistryServiceImplTest {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
 
 
-
-        NamingListenerimpl namingListenerimpl=new NamingListenerimpl();
+        NamingListenerimpl namingListenerimpl = new NamingListenerimpl();
 
         //1.subscribe
         registryService.subscribe(namingListenerimpl, "group1");
@@ -306,13 +298,13 @@ class NamingserverRegistryServiceImplTest {
         namingListenerimpl.setNotified(false);
 
         //4.unsubscribe
-        registryService.unsubscribe(namingListenerimpl,"group1");
+        registryService.unsubscribe(namingListenerimpl, "group1");
 
         //5.unregister
 
         registryService.unregister(inetSocketAddress);
         //5.check
-        assertEquals(namingListenerimpl.isNotified,false);
+        assertEquals(namingListenerimpl.isNotified, false);
 
 
     }
@@ -345,7 +337,7 @@ class NamingserverRegistryServiceImplTest {
 
         @Override
         public void onEvent(String vGroup) {
-            isNotified=true;
+            isNotified = true;
         }
     }
 
