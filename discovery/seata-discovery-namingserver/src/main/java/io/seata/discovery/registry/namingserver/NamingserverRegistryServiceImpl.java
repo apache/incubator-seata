@@ -27,7 +27,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.http.HttpServlet;
 import io.seata.discovery.registry.RegistryService;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -52,7 +51,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -65,7 +63,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String CLIENT_TERM_KEY = "clientTerm";
     private static final String DEFAULT_NAMESPACE = "public";
     private static final String NAMING_SERVICE_URL_KEY = "server-addr";
-    private static final String NAMING_SERVER_CLIENT_URL = "serverAddr";
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "namingserver";
@@ -93,8 +90,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         List<String> urlList = getNamingAddrs();
         AVAILABLE_NAMINGSERVER_MAP = urlList.stream()
                 .collect(Collectors.toConcurrentMap(
-                        key -> key,
-                        value -> 0
+                    key -> key,
+                    value -> 0
                 ));
         this.healthCheckExecutorService.scheduleAtFixedRate(() -> {
             try {
