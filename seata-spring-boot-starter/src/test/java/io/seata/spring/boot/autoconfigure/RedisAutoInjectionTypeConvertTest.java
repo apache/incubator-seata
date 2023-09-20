@@ -20,7 +20,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.config.FileConfiguration;
 import io.seata.config.springcloud.SpringApplicationContextProvider;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

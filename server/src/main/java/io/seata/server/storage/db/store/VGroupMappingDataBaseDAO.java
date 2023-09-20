@@ -39,6 +39,8 @@ public class VGroupMappingDataBaseDAO {
 
     private static final String DEFAULT_VGROUP_MAPPING = "mapping_tbl";
 
+    private static final String REGISTRY_NAMINGSERVER_CLUSTER = "registry.namingserver.cluster";
+
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     public VGroupMappingDataBaseDAO(DataSource vGroupMappingDataSource) {
@@ -88,7 +90,8 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public List<MappingDO> queryMappingDO() {
-        String sql = "SELECT vgroup,namespace, cluster FROM " + vMapping;
+        String sql = "SELECT vgroup,namespace, cluster FROM " + vMapping
+                + " WHERE cluster = ?";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -97,6 +100,7 @@ public class VGroupMappingDataBaseDAO {
         try {
             conn = vGroupMappingDataSource.getConnection();
             ps = conn.prepareStatement(sql);
+            ps.setString(1, CONFIG.getConfig(REGISTRY_NAMINGSERVER_CLUSTER));
             rs = ps.executeQuery();
 
             while (rs.next()) {

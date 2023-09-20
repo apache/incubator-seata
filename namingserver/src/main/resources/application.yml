@@ -13,8 +13,11 @@
 #  limitations under the License.
 
 server:
-  port: 8080
+  port: 8081
 
 spring:
   application:
-    name: namingserver
+    name: naming server
+
+threshold:
+  heartbeat: 2000

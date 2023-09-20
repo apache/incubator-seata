@@ -60,7 +60,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 Optional.ofNullable(WATCHERS.remove(group))
                         .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                             if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                notify(watcher);
+                                notify(watcher, 304);
                             }
                             if (!watcher.isDone()) {
                                 // Re-register
@@ -85,13 +85,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     }
 
     private void notify(Watcher<?> watcher) {
+        notify(watcher, HttpServletResponse.SC_OK);
+    }
+
+    private void notify(Watcher<?> watcher, int statusCode) {
         AsyncContext asyncContext = (AsyncContext) watcher.getAsyncContext();
         HttpServletResponse httpServletResponse = (HttpServletResponse) asyncContext.getResponse();
         watcher.setDone(true);
         if (logger.isDebugEnabled()) {
             logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
         }
-        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+        httpServletResponse.setStatus(statusCode);
         asyncContext.complete();
     }
 

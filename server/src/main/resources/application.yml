@@ -44,11 +44,13 @@ seata:
     metadata:
       weight: 1
     namingserver:
-      server-addr: 127.0.0.1:8080
-      cluster: cluster2
+      #      server-addr: 127.0.0.1:8081
+      server-addr: 127.0.0.1:8080,127.0.0.1:8081
+      cluster: cluster1
       namespace: public
   store:
     # support: file 、 db 、 redis
+    mode: db
     db:
       datasource: druid
       db-type: mysql

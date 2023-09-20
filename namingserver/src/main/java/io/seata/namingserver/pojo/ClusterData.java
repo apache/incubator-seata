@@ -97,7 +97,7 @@ public class ClusterData extends AbstractClusterData {
         Cluster clusterResponse = new Cluster();
         clusterResponse.setClusterName(clusterName);
         clusterResponse.setClusterType(clusterType);
-        if (unitName == null) {
+        if (unitName == null || unitName.equals("")) {
             clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
         } else {
             List<Unit> unitList = new ArrayList<>();

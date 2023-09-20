@@ -52,6 +52,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -71,19 +72,44 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String HTTP_PREFIX = "http://";
     private static final String TIME_OUT_KEY = "timeout";
     private static final int HEARTBEAT_PERIOD = 30 * 1000;
+    private static final int HEALTHCHECK_PERIOD = 3 * 1000;
     private static final int PULL_PERIOD = 30 * 1000;
-    private static final int LONG_POLL_TIME_OUT_PERIOD = 1000;
+    private static final int LONG_POLL_TIME_OUT_PERIOD = 30 * 1000;
     private static final int THREAD_POOL_NUM = 1;
+    private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
     private volatile long term = 0;
     private ScheduledFuture<?> heartBeatScheduledFuture;
     private volatile boolean isSubscribed = false;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private static ConcurrentMap<String /* namingserver address */, Integer /* Number of Health Check Continues Failures */> AVAILABLE_NAMINGSERVER_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<InetSocketAddress>> VGROUP_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<NamingListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     protected final ScheduledExecutorService heartBeatExecutorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatScheduledExcuter", THREAD_POOL_NUM, true));
-
+    protected final ScheduledExecutorService healthCheckExecutorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("healthCheckScheduledExcuter", THREAD_POOL_NUM, true));
     private final ExecutorService notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("serviceNamingNotifier", THREAD_POOL_NUM));
 
+
+    private NamingserverRegistryServiceImpl() {
+        List<String> urlList = getNamingAddrs();
+        AVAILABLE_NAMINGSERVER_MAP = urlList.stream()
+                .collect(Collectors.toConcurrentMap(
+                        key -> key,
+                        value -> 0
+                ));
+        this.healthCheckExecutorService.scheduleAtFixedRate(() -> {
+            try {
+                for (String url : urlList) {
+                    boolean isHealthy = doHealthCheck(url);
+                    if (!isHealthy) {
+                        Integer unHealthCount = AVAILABLE_NAMINGSERVER_MAP.getOrDefault(url, 0);
+                        AVAILABLE_NAMINGSERVER_MAP.put(url, unHealthCount + 1);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("Naming server health check Exception", e);
+            }
+        }, 0, HEALTHCHECK_PERIOD, TimeUnit.MILLISECONDS);
+    }
 
     /**
      * Gets instance.
@@ -104,6 +130,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
+        unregister(address);
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setIp(address.getAddress().getHostAddress());
@@ -111,6 +138,10 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
         instance.setTimeStamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
+
+        if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
+            heartBeatScheduledFuture.cancel(false);
+        }
 
         heartBeatScheduledFuture = this.heartBeatExecutorService.scheduleAtFixedRate(() -> {
             try {
@@ -133,8 +164,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String params = "namespace=" + namespace + "&clusterName=" + clusterName + "&unit=" + unit;
             url += params;
 
-            HttpResponse response = HttpServlet.doPost(url, jsonBody);
-            try {
+            try (CloseableHttpResponse response = HttpServlet.doPost(url, jsonBody)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been registered successfully:{}", statusCode);
@@ -144,6 +174,17 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             } catch (Exception e) {
                 LOGGER.error("instance has been registered failed in namingserver {}", url);
             }
+        }
+    }
+
+    public boolean doHealthCheck(String url) {
+        url = HTTP_PREFIX + url + "/naming/v1/health";
+        try (CloseableHttpResponse response = HttpServlet.doGet(url, null)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            return statusCode == 200;
+        } catch (Exception e) {
+            LOGGER.error("health check failed in namingserver {}", url);
+            return false;
         }
     }
 
@@ -160,8 +201,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String jsonBody = instance.toJsonString();
             String params = "unit=" + unit;
             url += params;
-            HttpResponse response = HttpServlet.doPost(url, jsonBody);
-            try {
+
+            try (CloseableHttpResponse response = HttpServlet.doPost(url, jsonBody)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
@@ -213,12 +254,13 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     public boolean watch(String vGroup) {
         Map<String, String> param = new HashMap<>();
+        String namingAddr = getNamingAddr();
         param.put(VGROUP_KEY, vGroup);
         param.put(CLIENT_TERM_KEY, String.valueOf(term));
         param.put(TIME_OUT_KEY, String.valueOf(LONG_POLL_TIME_OUT_PERIOD));
-        String watchAddr = HTTP_PREFIX + getNamingAddr() + "/naming/v1/watch";
-        HttpResponse response = HttpServlet.doGet(watchAddr, param);
-        try {
+        String watchAddr = HTTP_PREFIX + namingAddr + "/naming/v1/watch";
+
+        try (CloseableHttpResponse response = HttpServlet.doGet(watchAddr, param)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -249,7 +291,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         }
 
         // close subscribe thread
-
         isSubscribed = false;
 
     }
@@ -268,25 +309,29 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        // get available instanceList by vGroup
-        refreshGroup(key);
-        // subscribe the vGroup
-        subscribe(vGroup -> {
-            try {
-                refreshGroup(vGroup);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }, key);
+        if (!isSubscribed) {
+            // get available instanceList by vGroup
+            refreshGroup(key);
+            // subscribe the vGroup
+            subscribe(vGroup -> {
+                try {
+                    refreshGroup(vGroup);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, key);
+        }
+
         return VGROUP_ADDRESS_MAP.get(key);
     }
 
 
     public List<InetSocketAddress> refreshGroup(String vGroup) throws IOException {
         Map<String, String> paraMap = new HashMap<>();
+        String namingAddr = getNamingAddr();
         paraMap.put(VGROUP_KEY, vGroup);
         paraMap.put(NAMESPACE_KEY, getNamespace());
-        String url = HTTP_PREFIX + getNamingAddr() + "/naming/v1/discovery";
+        String url = HTTP_PREFIX + namingAddr + "/naming/v1/discovery";
         try (CloseableHttpResponse response = HttpServlet.doGet(url, paraMap)) {
             if (response == null) {
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup);
@@ -303,6 +348,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                     .flatMap(unit -> unit.getNamingInstanceList().stream())
                     .map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort())).collect(Collectors.toList());
             term = metaResponse.getTerm();
+            System.err.println(newAddressList);
 
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
 
@@ -346,17 +392,24 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     }
 
     /**
-     * get a namingserver url config in client
+     * get one namingserver url
      *
      * @return url
      */
     public String getNamingAddr() {
-        String namingAddrKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMING_SERVER_CLIENT_URL);
-        return FILE_CONFIG.getConfig(namingAddrKey);
+        for (ConcurrentMap.Entry<String, Integer> entry : AVAILABLE_NAMINGSERVER_MAP.entrySet()) {
+            String namingServerAddress = entry.getKey();
+            Integer numberOfFailures = entry.getValue();
+
+            if (numberOfFailures < HEALTH_CHECK_THRESHOLD) {
+                return namingServerAddress;
+            }
+        }
+        throw new NamingRegistryException("no available namingserver address!");
     }
 
     /**
-     * get all namingserver urlList config in server
+     * get all namingserver urlList
      *
      * @return url List
      */

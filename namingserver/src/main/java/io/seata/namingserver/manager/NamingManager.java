@@ -20,13 +20,16 @@ import io.seata.common.metadata.Cluster;
 import io.seata.common.metadata.Node;
 import io.seata.common.metadata.Unit;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.namingserver.ClusterNotFoundException;
 import io.seata.namingserver.listener.ClusterChangeEvent;
 import io.seata.namingserver.pojo.AbstractClusterData;
 import io.seata.namingserver.pojo.ClusterData;
+import io.seata.namingserver.vo.monitor.ClusterVO;
 import javafx.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +51,7 @@ public class NamingManager {
     private final HashMap<InetSocketAddress, Long> instanceLiveTable;
     private final HashMap<String/* VGroup */, HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
     private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> NamespaceClusterDataMap;
+    @Value("${threshold.heartbeat}")
     private final long HEARTBEAT_TIME_THRESHOLD = 30 * 1000;
     protected final ScheduledExecutorService heartBeatCheckService = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
@@ -71,6 +75,36 @@ public class NamingManager {
         }, 0, HEARTBEAT_TIME_THRESHOLD, TimeUnit.MILLISECONDS);
     }
 
+    public List<ClusterVO> monitorCluster(String namespace) {
+        HashMap<String, ClusterVO> clusterVOHashMap = new HashMap<>();
+        HashMap<String, ClusterData> clusterDataMap = NamespaceClusterDataMap.get(namespace);
+
+        if (clusterDataMap != null) {
+            for (Map.Entry<String, ClusterData> entry : clusterDataMap.entrySet()) {
+                String clusterName = entry.getKey();
+                ClusterData clusterData = entry.getValue();
+                clusterVOHashMap.put(clusterName, ClusterVO.convertFromClusterData(clusterData));
+            }
+        } else {
+            LOGGER.warn("no cluster in namespace:" + namespace);
+        }
+
+        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : VGroupMap.entrySet()) {
+            String vGroup = entry.getKey();
+            HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
+            Pair<String, String> pair = namespaceMap.get(namespace);
+            String clusterName = pair.getKey();
+            String unitName = pair.getValue();
+            ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
+            if (clusterVO != null) {
+                clusterVO.addMapping(vGroup, unitName);
+            }
+        }
+
+        return new ArrayList<>(clusterVOHashMap.values());
+
+    }
+
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
             Pair<String, String> pair = new Pair<>(clusterName, unitName);
@@ -91,7 +125,7 @@ public class NamingManager {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
 
-            // 内部HashMap的遍历
+            // Iterating through an internal HashMap
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
                 String namespace1 = innerEntry.getKey();
                 Pair<String, String> pair = innerEntry.getValue();
@@ -113,7 +147,6 @@ public class NamingManager {
 
             // add instance in cluster
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName, k -> new ClusterData(clusterName, (String) node.getMetadata().get("cluster-type")));
-            boolean hasChanged = clusterData.registerInstance(node, unitName);
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Object mappingObj = node.getMetadata().get("vGroup");
@@ -124,7 +157,10 @@ public class NamingManager {
                             changeGroup(namespace, clusterName, (String) unitObj, vGroup);
                         }
                 );
+                node.getMetadata().remove("vGroup");
             }
+
+            boolean hasChanged = clusterData.registerInstance(node, unitName);
             if (hasChanged) {
                 notifyClusterChange(namespace, clusterName, unitName);
             }
@@ -157,7 +193,7 @@ public class NamingManager {
 
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
-        //找到事务分组所在的集群
+        // find the cluster where the transaction group is located
         List<Cluster> clusterList = new ArrayList<>();
         try {
             Pair<String, String> clusterUnitPair = VGroupMap.get(vGroup).get(namespace);
@@ -166,7 +202,7 @@ public class NamingManager {
             ClusterData clusterData = NamespaceClusterDataMap.get(namespace).get(clusterName);
             clusterList.add(clusterData.getClusterByUnit(unitName));
         } catch (NullPointerException e) {
-            LOGGER.warn("no cluster mapping for vGroup: {}", vGroup);
+            LOGGER.error("no cluster mapping for vGroup: " + vGroup);
         }
         return clusterList;
     }

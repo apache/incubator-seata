@@ -69,11 +69,7 @@ public class HttpServlet {
 
             HttpGet httpGet = new HttpGet(uriBuilder.build());
 
-            RequestConfig requestConfig = RequestConfig.custom()
-                    .setConnectTimeout(5000)
-                    .setSocketTimeout(5000)
-                    .build();
-            httpGet.setConfig(requestConfig);
+
             httpGet.setHeader("Content-Type", "application/json");
 
             CloseableHttpResponse response = httpClient.execute(httpGet);

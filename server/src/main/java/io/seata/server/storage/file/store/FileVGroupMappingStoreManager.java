@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-@LoadLevel(name = "raft")
+@LoadLevel(name = "file")
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileVGroupMappingStoreManager.class);
 

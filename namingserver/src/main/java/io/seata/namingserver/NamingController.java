@@ -23,6 +23,7 @@ import io.seata.core.model.Result;
 import io.seata.namingserver.listener.Watcher;
 import io.seata.namingserver.manager.ClusterWatcherManager;
 import io.seata.namingserver.manager.NamingManager;
+import io.seata.namingserver.vo.monitor.ClusterVO;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +38,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import static io.seata.core.http.HttpServlet.doGet;
 
@@ -49,6 +50,8 @@ import static io.seata.core.http.HttpServlet.doGet;
 @RequestMapping("/naming/v1")
 public class NamingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingController.class);
+
+    private static final String OK = "200";
 
     @Resource
     private NamingManager namingManager;
@@ -70,6 +73,16 @@ public class NamingController {
         namingManager.unregisterInstance(unit, registerBody);
     }
 
+    @GetMapping("/monitor")
+    public List<ClusterVO> monitorCluster(String namespace){
+        return namingManager.monitorCluster(namespace);
+    }
+
+    @GetMapping("/health")
+    public String healthCheck() {
+        return OK;
+    }
+
     @GetMapping("/discovery")
     public MetaResponse discovery(@RequestParam String vGroup, @RequestParam String namespace) {
         return new MetaResponse(namingManager.getClusterListByVgroup(vGroup, namespace),
@@ -81,12 +94,20 @@ public class NamingController {
                                  @RequestParam String clusterName,
                                  @RequestParam String unitName,
                                  @RequestParam String vGroup) {
+
         List<Cluster> clusterList = namingManager.getClusterListByVgroup(vGroup, namespace);
+        namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
+        if (clusterList == null || clusterList.size() == 0) {
+            return Result.build(200, "no instance in cluster for storing mapping relationship");
+        }
+
         // remove vGroup in old cluster
         for (Cluster cluster : clusterList) {
             if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
                 Unit unit = cluster.getUnitData().get(0);
-                if (unit.getNamingInstanceList() != null && unit.getNamingInstanceList().size() > 0) {
+                if (unit != null
+                        && unit.getNamingInstanceList() != null
+                        && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
                     String httpUrl = "http://"
                             + node.getIp()
@@ -97,9 +118,12 @@ public class NamingController {
                     params.put("vGroup", vGroup);
                     params.put("unit", unitName);
 
-                    CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params);
-                    if (Objects.requireNonNull(closeableHttpResponse).getStatusLine().getStatusCode() != 200) {
-                        LOGGER.warn("remove vGroup in old cluster failed");
+                    try (CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params)) {
+                        if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                            LOGGER.warn("remove vGroup in old cluster failed");
+                        }
+                    } catch (IOException e) {
+                        LOGGER.error("remove vGroup in new cluster failed");
                     }
                 }
             }
@@ -115,16 +139,25 @@ public class NamingController {
             String httpUrl = "http://"
                     + inetSocketAddress.getAddress().getHostAddress()
                     + ":"
+                    //TODO:
                     + (inetSocketAddress.getPort() - 1000)
                     + "/naming/v1/addVGroup?";
             HashMap<String, String> params = new HashMap<>();
             params.put("vGroup", vGroup);
             params.put("unit", unitName);
-            CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params);
-            if (Objects.requireNonNull(closeableHttpResponse).getStatusLine().getStatusCode() != 200) {
-                return Result.build(500, "add vGroup in new cluster failed");
+
+            try (CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params)) {
+                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    return Result.build(500, "add vGroup in new cluster failed");
+                }
+            } catch (IOException e) {
+                LOGGER.error("add vGroup in new cluster failed");
             }
+
         }
+
+
+
 
         return Result.ok();
     }

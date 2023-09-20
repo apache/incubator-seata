@@ -152,8 +152,14 @@ public class Instance {
         this.metadata = metadata;
     }
 
-    public Map<String, Object> getMetadata() {
+    public Map<String, Object> getMetadata(String vGroup) {
         return metadata;
+    }
+
+    public void removeMetadata(String key){
+        if(metadata.containsKey(key)){
+            metadata.remove(key);
+        }
     }
 
     @Override

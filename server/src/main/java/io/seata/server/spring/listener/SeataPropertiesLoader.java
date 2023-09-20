@@ -129,10 +129,8 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
 
         // load vgroup mapping relationship
         String storeType = ConfigurationFactory.getInstance().getConfig("store.mode", "db");
-        if ("db".equals(storeType) || "raft".equals(storeType)) {
-            VGroupMappingStoreManager vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
-            instance.addMetadata("vGroup", vGroupMappingStoreManager.load());
-        }
+        VGroupMappingStoreManager vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
+        instance.addMetadata("vGroup", vGroupMappingStoreManager.load());
 
 
     }
