@@ -89,9 +89,9 @@ jobs:
       fail-fast: false
       matrix:
         springboot: [
-          2.7.9          -Dspring-framework.version=5.3.25,
-          2.6.14         -Dspring-framework.version=5.3.24,
-          2.5.14         -Dspring-framework.version=5.3.20,
+          2.7.15         -Dspring-framework.version=5.3.29,
+          2.6.15         -Dspring-framework.version=5.3.27,
+          2.5.15         -Dspring-framework.version=5.3.27,
           2.4.13         -Dspring-framework.version=5.3.13,
           2.3.12.RELEASE -Dspring-framework.version=5.2.15.RELEASE,
           2.2.13.RELEASE -Dspring-framework.version=5.2.12.RELEASE,
