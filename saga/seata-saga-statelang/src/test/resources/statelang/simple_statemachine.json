@@ -35,6 +35,10 @@
         {
           "Expression": "foo == 2",
           "Next": "SecondMatchState"
+        },
+        {
+          "Expression": "foo == 3",
+          "Next": "ThirdMatchState"
         }
       ],
       "Default": "FailState"
@@ -124,6 +128,27 @@
       "Output": {
         "firstMatchStateResult": "$.#root"
       },
+      "Next": "SuccessState"
+    },
+    "ThirdMatchState": {
+      "Type": "Fork",
+      "Branches": [
+        "FirstParallel",
+        "SecondParallel"
+      ],
+      "Timeout": 1000,
+      "Parallel": 2
+    },
+    "FirstParallel": {
+      "Type": "ServiceTask",
+      "Next": "JoinState"
+    },
+    "SecondParallel": {
+      "Type": "ServiceTask",
+      "Next": "JoinState"
+    },
+    "JoinState": {
+      "Type": "Join",
       "Next": "SuccessState"
     },
     "FailState": {

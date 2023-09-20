@@ -21,6 +21,7 @@ import io.seata.saga.statelang.builder.StatesConfigurer;
 import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
+import io.seata.saga.statelang.parser.utils.StateMachineUtils;
 
 /**
  * Default implementation for {@link StateMachineBuilder}.
@@ -33,6 +34,7 @@ public class StateMachineBuilderImpl implements StateMachineBuilder {
 
     @Override
     public StateMachine build() {
+        StateMachineUtils.parseAfterAll(stateMachine);
         return stateMachine;
     }
 

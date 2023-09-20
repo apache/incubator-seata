@@ -44,8 +44,8 @@ public interface ForkPropertyBuilder<P extends ForkPropertyBuilder<P>> {
     /**
      * Configure max await timeout, default 12 hours.
      *
-     * @param awaitTimeout await timeout
+     * @param timeout await timeout
      * @return builder for chaining
      */
-    P withAwaitTimeout(int awaitTimeout);
+    P withTimeout(long timeout);
 }

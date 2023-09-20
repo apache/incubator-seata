@@ -24,6 +24,7 @@ import io.seata.saga.statelang.domain.ForkState;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.TaskState;
+import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.parser.ParserException;
 
@@ -163,5 +164,24 @@ public class StateMachineUtils {
             }
         }
         return stateNameToParentForkMap;
+    }
+
+    public static void parseAfterAll(StateMachine stateMachine) {
+        Map<String, State> stateMap = stateMachine.getStates();
+        for (State state : stateMap.values()) {
+            if (state instanceof AbstractTaskState) {
+                AbstractTaskState taskState = (AbstractTaskState) state;
+                if (StringUtils.isNotBlank(taskState.getCompensateState())) {
+                    taskState.setForUpdate(true);
+
+                    State compState = stateMap.get(taskState.getCompensateState());
+                    if (compState instanceof AbstractTaskState) {
+                        ((AbstractTaskState) compState).setForCompensation(true);
+                    }
+                }
+            } else if (state instanceof ForkStateImpl) {
+                StateMachineUtils.generateBranchStatesAndPairedJoin((ForkStateImpl) state);
+            }
+        }
     }
 }

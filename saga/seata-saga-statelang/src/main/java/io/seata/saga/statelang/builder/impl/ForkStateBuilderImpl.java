@@ -56,8 +56,8 @@ public class ForkStateBuilderImpl
     }
 
     @Override
-    public ForkStateBuilder withAwaitTimeout(int awaitTimeout) {
-        state.setAwaitTimeout(awaitTimeout);
+    public ForkStateBuilder withTimeout(long timeout) {
+        state.setTimeout(timeout);
         return this;
     }
 
