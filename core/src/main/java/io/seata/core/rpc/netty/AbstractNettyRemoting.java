@@ -28,6 +28,7 @@ import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.Version;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.hook.RpcHook;
 import io.seata.core.rpc.processor.Pair;
@@ -231,15 +232,14 @@ public abstract class AbstractNettyRemoting implements Disposable {
             }
         });
     }
-
-    protected RpcMessage buildRequestMessage(Object msg, byte messageType) {
+    protected RpcMessage buildRequestMessage(Object msg, byte messageType, String version) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(getNextMessageId());
         rpcMessage.setMessageType(messageType);
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.setProtocolVersion(ProtocolConstants.VERSION_CURRENT);
+        rpcMessage.setVersion(version);
         return rpcMessage;
     }
 

@@ -69,31 +69,21 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return superSendSync(channel, rpcMessage);
-    }
-
-    private void superSendAsync(Channel channel, RpcMessage rpcMessage) {
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
-        // todo [5738-discuss][兼容] ，目前看到用这个方法的地方都没有做空判断
-        rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
-        super.sendAsync(channel, rpcMessage);
-    }
-
-    private Object superSendSync(Channel channel, RpcMessage rpcMessage) throws TimeoutException {
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
-        // todo [5738-discuss][兼容] ，目前看到用这个方法的地方都没有做空判断
-        rpcMessage.setProtocolVersion(rpcContext.getProtocolVersion());
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcContext.getVersion());
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
+
+
 
     @Override
     public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return superSendSync(channel, rpcMessage);
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcContext.getVersion());
+        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
     @Override
@@ -101,8 +91,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        superSendAsync(channel, rpcMessage);
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY, rpcContext.getVersion());
+        super.sendAsync(channel, rpcMessage);
     }
 
     @Override
@@ -115,7 +106,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
-            superSendAsync(clientChannel, rpcMsg);
+            super.sendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");
         }
@@ -180,11 +171,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             RpcMessage rpcMessage = null;
             if (msg instanceof ProtocolRpcMessage) {
                 rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
-            }
-            if (rpcMessage != null) {
                 processMessage(ctx, rpcMessage);
-            } else {
-                // todo [5738-discuss][兼容] 正常会有这种情况吗？打日志还是抛异常？
+            }else {
+                LOGGER.error("rpcMessage type error");
             }
         }
 

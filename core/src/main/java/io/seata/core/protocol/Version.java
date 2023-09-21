@@ -37,7 +37,7 @@ public class Version {
      * The constant CURRENT.
      */
     private static final String CURRENT = VersionInfo.VERSION;
-    private static final String VERSION_0_7_1 = "0.7.1";
+    public static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final int MAX_VERSION_DOT = 3;
 
@@ -150,6 +150,16 @@ public class Version {
             LOGGER.error("convert version error,version:{}", version, e);
         }
         return -1;
+    }
+
+    public static byte calcProtocolVersion(String sdkVersion) throws IncompatibleVersionException {
+        long version = convertVersion(sdkVersion);
+        long v0 = convertVersion(VERSION_0_7_1);
+        if (version <= v0) {
+            return ProtocolConstants.VERSION_0;
+        }else {
+            return ProtocolConstants.VERSION_1;
+        }
     }
 
     private static long calculatePartValue(String partNumeric, int size, int index) {

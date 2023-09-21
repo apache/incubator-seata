@@ -53,18 +53,18 @@ import java.util.Map;
  * https://github.com/seata/seata/issues/893
  *
  * @author Geng Zhang
- * @see ProtocolV1Decoder
+ * @see ProtocolDecoderV1
  * @since 0.7.0
  */
-public class ProtocolV1Encoder implements ProtocolEncoder {
+public class ProtocolEncoderV1 implements ProtocolEncoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Encoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV1.class);
 
 
     public void encode(RpcMessage message, ByteBuf out) {
         try {
 
-            ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
+            ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
             rpcMessage.rpcMsg2ProtocolMsg(message);
 
             int fullLength = ProtocolConstants.V1_HEAD_LENGTH;

@@ -21,8 +21,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.v0.ProtocolV0Encoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
+import io.seata.core.protocol.Version;
+import io.seata.core.rpc.netty.v0.ProtocolEncoderV0;
+import io.seata.core.rpc.netty.v1.ProtocolEncoderV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +51,8 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
     public CompatibleProtocolEncoder(){
         super();
         protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
-                .put(ProtocolConstants.VERSION_0, new ProtocolV0Encoder())
-                .put(ProtocolConstants.VERSION_1, new ProtocolV1Encoder())
+                .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1())
                 .build();
     }
 
@@ -60,10 +61,9 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
         try {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
-                byte version = rpcMessage.getProtocolVersion();
+                byte version = Version.calcProtocolVersion(rpcMessage.getVersion());
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
                 if (encoder == null) {
-                    // todo [5738-discuss][encode] 要不要适配当前版本？
                     throw new IllegalArgumentException("Unknown version: " + version);
                 }
 

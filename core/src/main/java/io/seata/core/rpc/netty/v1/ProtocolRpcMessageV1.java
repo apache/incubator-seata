@@ -16,7 +16,6 @@
 package io.seata.core.rpc.netty.v1;
 
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
 
@@ -26,10 +25,10 @@ import java.util.Map;
 /**
  * protocol v1 rpc message
  *
- * @author minghua.xie
+ * @author Bughue
  * @date 2023/8/1
  **/
-public class ProtocolV1RpcMessage implements ProtocolRpcMessage {
+public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
 
     private int id;
     private byte messageType;
@@ -183,7 +182,6 @@ public class ProtocolV1RpcMessage implements ProtocolRpcMessage {
         rpcMessage.setCompressor(this.compressor);
         rpcMessage.setHeadMap(this.headMap);
         rpcMessage.setBody(this.body);
-        rpcMessage.setProtocolVersion(ProtocolConstants.VERSION_1);
         return rpcMessage;
     }
 
@@ -195,5 +193,6 @@ public class ProtocolV1RpcMessage implements ProtocolRpcMessage {
         this.messageType = rpcMessage.getMessageType();
         this.codec = rpcMessage.getCodec();
         this.compressor = rpcMessage.getCompressor();
+        rpcMessage.getVersion();
     }
 }

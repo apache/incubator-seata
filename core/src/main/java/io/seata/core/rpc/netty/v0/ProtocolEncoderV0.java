@@ -16,7 +16,6 @@
 package io.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageTypeAware;
 import io.seata.core.protocol.ProtocolConstants;
@@ -27,8 +26,6 @@ import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.ByteBuffer;
 
 /**
  * <pre>
@@ -55,25 +52,25 @@ import java.nio.ByteBuffer;
  * </p>
  *
  * @author Bughue
- * @see ProtocolV0Decoder
+ * @see ProtocolDecoderV0
  * @since 2.0.0
  */
-public class ProtocolV0Encoder implements ProtocolEncoder {
+public class ProtocolEncoderV0 implements ProtocolEncoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV0Encoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV0.class);
 
     @Override
     public void encode(RpcMessage message, ByteBuf out) {
         try {
             byte codec = message.getCodec();
-            ProtocolV0RpcMessage msg = new ProtocolV0RpcMessage();
+            ProtocolRpcMessageV0 msg = new ProtocolRpcMessageV0();
             msg.rpcMsg2ProtocolMsg(message);
 
-            out.writeShort(ProtocolV0Constants.MAGIC);
-            int flag = (msg.isAsync() ? ProtocolV0Constants.FLAG_ASYNC : 0)
-                    | (msg.isHeartbeat() ? ProtocolV0Constants.FLAG_HEARTBEAT : 0)
-                    | (msg.isRequest() ? ProtocolV0Constants.FLAG_REQUEST : 0)
-                    | (msg.isSeataCodec() ? ProtocolV0Constants.FLAG_SEATA_CODEC : 0);
+            out.writeShort(ProtocolConstantsV0.MAGIC);
+            int flag = (msg.isAsync() ? ProtocolConstantsV0.FLAG_ASYNC : 0)
+                    | (msg.isHeartbeat() ? ProtocolConstantsV0.FLAG_HEARTBEAT : 0)
+                    | (msg.isRequest() ? ProtocolConstantsV0.FLAG_REQUEST : 0)
+                    | (msg.isSeataCodec() ? ProtocolConstantsV0.FLAG_SEATA_CODEC : 0);
 
             out.writeShort((short) flag);
 

@@ -24,8 +24,8 @@ import io.netty.buffer.Unpooled;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
-import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
+import io.seata.serializer.seata.MessageCodecFactory;
 
 /**
  * the type batch result message codec
@@ -35,6 +35,7 @@ import io.seata.serializer.seata.MessageSeataCodec;
  */
 public class BatchResultMessageCodec extends AbstractMessageCodec {
 
+    protected MessageCodecFactory factory = new MessageCodecFactoryV1();
     @Override
     public Class<?> getMessageClassType() {
         return BatchResultMessage.class;
@@ -53,7 +54,7 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -106,8 +107,8 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         List<Integer> msgIds = new ArrayList<>();
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
-            AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            AbstractMessage abstractResultMessage = factory.getMessage(typeCode);
+            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs.add((AbstractResultMessage) abstractResultMessage);
         }

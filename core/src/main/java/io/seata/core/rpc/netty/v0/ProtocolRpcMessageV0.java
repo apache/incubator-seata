@@ -26,10 +26,10 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * the protocol v0 rpc message
  *
- * @author minghua.xie
+ * @author Bughue
  * @date 2023/8/1
  **/
-public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
+public class ProtocolRpcMessageV0 implements ProtocolRpcMessage {
 
     private static AtomicLong NEXT_ID = new AtomicLong(0);
 
@@ -160,7 +160,6 @@ public class ProtocolV0RpcMessage implements ProtocolRpcMessage {
     public RpcMessage protocolMsg2RpcMsg(){
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(this.messageType);
-        // todo 基础配置补充完整
         rpcMessage.setCompressor(CompressorType.NONE.getCode());
 
         byte codecType = this.isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();

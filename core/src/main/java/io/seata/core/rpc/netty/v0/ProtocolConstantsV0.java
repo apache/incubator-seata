@@ -13,21 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0_1;
-
-import java.nio.ByteBuffer;
+package io.seata.core.rpc.netty.v0;
 
 /**
- * The interface Merged message.
+ * protocol v0 constants
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/17
- */
-public interface MergedMessageV0 {
-    /**
-     * Decode.
-     *
-     * @param byteBuffer the byte buffer
-     */
-    void decode(ByteBuffer byteBuffer);
+ * @author Bughue
+ * @date 2023/7/18
+ **/
+public class ProtocolConstantsV0 {
+    public static short MAGIC = (short)0xdada;
+
+    public static int HEAD_LENGTH = 14;
+    public static final short FLAG_REQUEST = 0x80;
+    public static final short FLAG_ASYNC = 0x40;
+    public static final short FLAG_HEARTBEAT = 0x20;
+    public static final short FLAG_SEATA_CODEC = 0x10;
 }

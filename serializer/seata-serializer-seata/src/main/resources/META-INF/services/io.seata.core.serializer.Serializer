@@ -1,2 +1,1 @@
-io.seata.serializer.seata.protocol.v1.SeataV1Serializer
-io.seata.serializer.seata.protocol.v0.SeataV0Serializer
+io.seata.serializer.seata.SeataSerializer

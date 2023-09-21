@@ -39,7 +39,7 @@ public final class SerializerServiceLoader {
      * @return the service of {@link Serializer}
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static Serializer load(SerializerType type, int version) throws EnhancedServiceNotFoundException {
+    public static Serializer load(SerializerType type, byte version) throws EnhancedServiceNotFoundException {
         if (type == SerializerType.PROTOBUF) {
             try {
                 ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
@@ -48,6 +48,10 @@ public final class SerializerServiceLoader {
                         "Please manually reference 'io.seata:seata-serializer-protobuf' dependency ", e);
             }
         }
-        return EnhancedServiceLoader.load(Serializer.class, type.name(), version);
+        if (type == SerializerType.SEATA) {
+            return EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
+        }else {
+            return EnhancedServiceLoader.load(Serializer.class, type.name());
+        }
     }
 }

@@ -120,7 +120,7 @@ public class ChannelManager {
      * @param channel the channel
      * @throws IncompatibleVersionException the incompatible version exception
      */
-    public static void registerTMChannel(RegisterTMRequest request, Channel channel, byte protocolVersion)
+    public static void registerTMChannel(RegisterTMRequest request, Channel channel)
         throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
         RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
@@ -133,7 +133,6 @@ public class ChannelManager {
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = CollectionUtils.computeIfAbsent(TM_CHANNELS,
             clientIdentified, key -> new ConcurrentHashMap<>());
         rpcContext.holdInClientChannels(clientIdentifiedMap);
-        rpcContext.setProtocolVersion(protocolVersion);
     }
 
     /**
@@ -143,7 +142,7 @@ public class ChannelManager {
      * @param channel                the channel
      * @throws IncompatibleVersionException the incompatible  version exception
      */
-    public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel, byte protocolVersion)
+    public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
         throws IncompatibleVersionException {
         Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
@@ -167,7 +166,6 @@ public class ChannelManager {
             rpcContext.holdInResourceManagerChannels(resourceId, portMap);
             updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
         }
-        rpcContext.setProtocolVersion(protocolVersion);
     }
 
     private static void updateChannelsResource(String resourceId, String clientIp, String applicationId) {

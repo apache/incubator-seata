@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBuf;
 /**
  * the protocol decoder
  *
- * @author minghua.xie
+ * @author Bughue
  * @date 2023/8/1
  **/
 public interface ProtocolDecoder {

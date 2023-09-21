@@ -34,8 +34,6 @@ import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.rpc.RemotingBootstrap;
-import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

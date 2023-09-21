@@ -21,7 +21,7 @@ import io.seata.core.protocol.RpcMessage;
 /**
  * the protocol encoder
  *
- * @author minghua.xie
+ * @author Bughue
  * @date 2023/8/1
  **/
 public interface ProtocolEncoder {

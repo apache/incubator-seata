@@ -45,14 +45,6 @@ public @interface LoadLevel {
     int order() default 0;
 
     /**
-     * version int.
-     *
-     * @return the int
-     */
-    // todo [5738-discuss][class-loader] 由于0也是个版本，所以现在默认是-1
-    byte version() default -1;
-
-    /**
      * Scope enum.
      */
     Scope scope() default Scope.SINGLETON;

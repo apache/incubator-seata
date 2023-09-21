@@ -21,8 +21,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.seata.core.exception.DecodeException;
 import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.rpc.netty.v0.ProtocolV0Decoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
+import io.seata.core.rpc.netty.v0.ProtocolDecoderV0;
+import io.seata.core.rpc.netty.v1.ProtocolDecoderV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +75,8 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         */
         super(maxFrameLength, 3, 4, -7, 0);
         protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
-                .put(ProtocolConstants.VERSION_0, new ProtocolV0Decoder())
-                .put(ProtocolConstants.VERSION_1, new ProtocolV1Decoder())
+                .put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
                 .build();
     }
 
@@ -87,7 +87,6 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         byte version;
         try {
             if (isV0(in)) {
-                // todo [5738-discuss][decode] 旧版本连super都不会走，会不会有其他问题？
                 decoded = in;
                 version = ProtocolConstants.VERSION_0;
             } else {
@@ -100,7 +99,6 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 try {
                     ProtocolDecoder decoder = protocolDecoderMap.get(version);
                     if (decoder == null) {
-                        // todo [5738-discuss][兼容] 要不要适配当前版本？
                         throw new IllegalArgumentException("Unknown version: " + version);
                     }
                     return decoder.decodeFrame(frame);
@@ -112,7 +110,6 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
             }
         } catch (Exception exx) {
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
-            // todo [5738-discuss][优化] 这里抛出去之后似乎没有地方打印了？
             throw new DecodeException(exx);
         }
         return decoded;
@@ -133,7 +130,6 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
             frame.resetReaderIndex();
             return version;
         }
-        // todo [5738-discuss][兼容] 类型不一致的情况要允许吗？
         return -1;
     }
 

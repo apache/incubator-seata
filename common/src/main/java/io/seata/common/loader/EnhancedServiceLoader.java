@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -87,11 +86,6 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
-    }
-
-
-    public static <S> S load(Class<S> service, String activateName,int version) throws EnhancedServiceNotFoundException {
-        return InnerEnhancedServiceLoader.getServiceLoader(service).loadExtension(activateName, findClassLoader(), null, null, version);
     }
 
     /**
@@ -413,13 +407,13 @@ public class EnhancedServiceLoader {
 
         @SuppressWarnings("rawtypes")
         private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
-                                Object[] args, int version) {
+                                Object[] args) {
             if (StringUtils.isEmpty(activateName)) {
                 throw new IllegalArgumentException("the name of service provider for [" + type.getName() + "] name is null");
             }
             try {
                 loadAllExtensionClass(loader);
-                ExtensionDefinition<S> cachedExtensionDefinition = getCachedExtensionDefinition(activateName, version);
+                ExtensionDefinition<S> cachedExtensionDefinition = getCachedExtensionDefinition(activateName);
                 return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
@@ -430,13 +424,6 @@ public class EnhancedServiceLoader {
                                     .getFullStackTrace(e));
                 }
             }
-        }
-
-
-        @SuppressWarnings("rawtypes")
-        private S loadExtension(String activateName, ClassLoader loader, Class[] argTypes,
-                                Object[] args) {
-            return loadExtension(activateName,loader,argTypes,args, -1);
         }
 
         private S getExtensionInstance(ExtensionDefinition<S> definition, ClassLoader loader, Class<?>[] argTypes,
@@ -594,15 +581,13 @@ public class EnhancedServiceLoader {
                 String serviceName = null;
                 int priority = 0;
                 Scope scope = Scope.SINGLETON;
-                byte version = -1;
                 LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
                 if (loadLevel != null) {
                     serviceName = loadLevel.name();
                     priority = loadLevel.order();
                     scope = loadLevel.scope();
-                    version = loadLevel.version();
                 }
-                ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass, version);
+                ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
                     CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
@@ -630,15 +615,8 @@ public class EnhancedServiceLoader {
             return CollectionUtils.getLast(currentDefinitions);
         }
 
-        private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName, int version) {
+        private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName) {
             List<ExtensionDefinition<S>> definitions = nameToDefinitionsMap.get(activateName);
-            if (version >= 0) {
-                Optional<ExtensionDefinition<S>> first = definitions.stream().filter(d -> d.getVersion() == version).findFirst();
-                if (first.isPresent()) {
-                    return first.get();
-                }
-            }
-            // todo [5738-discuss][class-loader] 实在找不到的话还要随便找个版本吗？这样不太严谨？
             return CollectionUtils.getLast(definitions);
         }
 

@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.rpc.netty.CompatibleProtocolDecoder;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.rpc.netty.ProtocolDecoder;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
@@ -55,12 +54,12 @@ import java.util.Map;
  * https://github.com/seata/seata/issues/893
  *
  * @author Geng Zhang
- * @see ProtocolV1Encoder
+ * @see ProtocolEncoderV1
  * @since 0.7.0
  */
-public class ProtocolV1Decoder  implements ProtocolDecoder {
+public class ProtocolDecoderV1 implements ProtocolDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
 
     @Override
     public ProtocolRpcMessage decodeFrame(ByteBuf frame) {
@@ -80,7 +79,7 @@ public class ProtocolV1Decoder  implements ProtocolDecoder {
         byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
-        ProtocolV1RpcMessage rpcMessage = new ProtocolV1RpcMessage();
+        ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);
