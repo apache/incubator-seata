@@ -17,6 +17,7 @@ package io.seata.core.protocol;
 
 import io.seata.common.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import java.util.Map;
  *
  * @author slievrly
  */
-public class RpcMessage {
+public class RpcMessage implements Serializable {
 
     private int id;
     private byte messageType;
