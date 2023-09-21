@@ -47,6 +47,11 @@ public interface Constants {
     String ROW_LOCK_KEY_SPLIT_CHAR = ";";
 
     /**
+     * The constant HIDE_KEY_PREFIX_CHAR.
+     */
+    String HIDE_KEY_PREFIX_CHAR = ".";
+
+    /**
      * the start time of transaction
      */
     String START_TIME = "start-time";
