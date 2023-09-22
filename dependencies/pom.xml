@@ -82,6 +82,10 @@
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
 
+        <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
+        <httpcore.version>4.4.16</httpcore.version>
+        <httpclient.version>4.5.14</httpclient.version>
+
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.2.9</logback.version>
@@ -701,6 +705,16 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-security</artifactId>
                 <version>${jetty-version}</version>
@@ -717,28 +731,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <profiles>
-        <profile>
-            <id>dependencies-for-springboot3-1-or-above</id>
-            <properties>
-                <httpcore.version>4.4.16</httpcore.version>
-                <httpclient.version>4.5.14</httpclient.version>
-            </properties>
-            <dependencyManagement>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpcore</artifactId>
-                        <version>${httpcore.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.httpcomponents</groupId>
-                        <artifactId>httpclient</artifactId>
-                        <version>${httpclient.version}</version>
-                    </dependency>
-                </dependencies>
-            </dependencyManagement>
-        </profile>
-    </profiles>
 </project>
