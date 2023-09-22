@@ -725,18 +725,20 @@
                 <httpcore.version>4.4.16</httpcore.version>
                 <httpclient.version>4.5.14</httpclient.version>
             </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
-                    <version>${httpcore.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                    <version>${httpclient.version}</version>
-                </dependency>
-            </dependencies>
+            <dependencyManagement>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                        <version>${httpcore.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                        <version>${httpclient.version}</version>
+                    </dependency>
+                </dependencies>
+            </dependencyManagement>
         </profile>
     </profiles>
 </project>
