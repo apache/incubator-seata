@@ -714,7 +714,7 @@
 
     <profiles>
         <profile>
-            <id>dependencies-for-springboot3.1-or-above</id>
+            <id>dependencies-for-springboot3-1-or-above</id>
             <properties>
                 <httpcore.version>4.4.16</httpcore.version>
                 <httpclient.version>4.5.14</httpclient.version>
