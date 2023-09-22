@@ -2,7 +2,7 @@ name: "build"
 
 on:
   push:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, test-java21 ]
   pull_request:
     branches: [ 2.x, develop, master ]
 
