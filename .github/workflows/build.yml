@@ -2,9 +2,7 @@ name: "build"
 
 on:
   push:
-    branches: [ 2.x, develop, master, test-java21 ]
-  pull_request:
-    branches: [ 2.x, develop, master ]
+    branches: [ test-java21 ] # TODO: 测试java21，合并PR前恢复
 
 jobs:
   # job 1: Test based on java 8 and 17. Do not checkstyle.
@@ -14,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 11, 17, 21 ] # TODO: 测试java21，后面恢复成8,17
+        java: [ 8, 11, 17, 21 ] # TODO: 测试java21，合并PR前恢复
     steps:
       # step 1
       - name: "Checkout"

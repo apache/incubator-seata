@@ -159,7 +159,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17,java21
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -185,7 +185,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17,java21
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);

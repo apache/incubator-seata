@@ -43,7 +43,7 @@ import java.lang.reflect.Modifier;
  *
  * @author ggndnn
  */
-@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17,java21
+@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above
 public class ConnectionProxyTest {
     private DataSourceProxy dataSourceProxy;
 
