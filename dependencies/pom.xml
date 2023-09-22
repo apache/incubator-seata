@@ -70,8 +70,6 @@
         <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
-        <httpcore.version>4.4.16</httpcore.version>
-        <httpclient.version>4.5.14</httpclient.version>
 
         <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
@@ -171,16 +169,6 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${sofa.hessian.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${httpcore.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -723,4 +711,26 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>dependencies-for-springboot3.1-or-above</id>
+            <properties>
+                <httpcore.version>4.4.16</httpcore.version>
+                <httpclient.version>4.5.14</httpclient.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                    <version>${httpcore.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                    <version>${httpclient.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
