@@ -98,6 +98,7 @@
         <postgresql.version>42.3.3</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
+        <dm.version>8.1.2.192</dm.version>
         <!-- db connection pool -->
         <druid.version>1.2.7</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
@@ -214,6 +215,11 @@
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
                 <version>${mariadb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmJdbcDriver18</artifactId>
+                <version>${dm.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
