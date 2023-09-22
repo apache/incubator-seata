@@ -44,7 +44,7 @@ import java.util.Collections;
  *
  * @author ggndnn
  */
-@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above
+@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
 public class AbstractDMLBaseExecutorTest {
     private ConnectionProxy connectionProxy;
 
