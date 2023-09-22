@@ -2,7 +2,7 @@ name: "build"
 
 on:
   push:
-    branches: [ test-java21 ] # TODO: 测试java21，合并PR前恢复
+    branches: [ test-java21* ] # TODO: 测试java21，合并PR前恢复
 
 jobs:
   # job 1: Test based on java 8 and 17. Do not checkstyle.
