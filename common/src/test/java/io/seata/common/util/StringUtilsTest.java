@@ -128,6 +128,7 @@ public class StringUtilsTest {
         try {
             Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
         } catch (AssertionFailedError e) {
+            // for java21 and above
             Assertions.assertEquals("Thread[#" + Thread.currentThread().getId() + ",main,5,main]", StringUtils.toString(Thread.currentThread()));
         }
 
