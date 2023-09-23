@@ -24,9 +24,8 @@ import java.util.Map;
 public class Node {
 
     Map<String,Object> metadata = new HashMap<>();
-    private Endpoint httpEndpoint;
-    private Endpoint grpcEndpoint;
-    private Endpoint nettyEndpoint;
+    private Endpoint control;
+    private Endpoint transaction;
     
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;
@@ -34,7 +33,7 @@ public class Node {
     public Node() {
     }
 
-    public Endpoint createEndpoint(String host, int port) {
+    public Endpoint createEndpoint(String host, int port, String protocol) {
         return new Endpoint(host, port);
     }
 
@@ -62,34 +61,26 @@ public class Node {
         this.metadata = metadata;
     }
 
-    public Endpoint getHttpEndpoint() {
-        return httpEndpoint;
+    public Endpoint getControl() {
+        return control;
     }
 
-    public void setHttpEndpoint(Endpoint httpEndpoint) {
-        this.httpEndpoint = httpEndpoint;
+    public void setControl(Endpoint control) {
+        this.control = control;
     }
 
-    public Endpoint getGrpcEndpoint() {
-        return grpcEndpoint;
+    public Endpoint getTransaction() {
+        return transaction;
     }
 
-    public void setGrpcEndpoint(Endpoint grpcEndpoint) {
-        this.grpcEndpoint = grpcEndpoint;
-    }
-
-    public Endpoint getNettyEndpoint() {
-        return nettyEndpoint;
-    }
-
-    public void setNettyEndpoint(Endpoint nettyEndpoint) {
-        this.nettyEndpoint = nettyEndpoint;
+    public void setTransaction(Endpoint transaction) {
+        this.transaction = transaction;
     }
 
     public static class Endpoint {
 
         private String host;
-
+        private String protocol;
         private int port;
 
         public Endpoint() {

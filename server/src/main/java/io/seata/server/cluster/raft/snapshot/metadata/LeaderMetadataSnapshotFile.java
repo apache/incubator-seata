@@ -44,39 +44,43 @@ public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSn
 		this.group = group;
 	}
 
-	@Override public Status save(SnapshotWriter writer) {
-		RaftSnapshot raftSnapshot = new RaftSnapshot();
-		RaftLeaderMetadata raftLeaderMetadata = RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
-		raftSnapshot.setBody(raftLeaderMetadata);
-		raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
-		String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
-		try {
-			if (save(raftSnapshot, path)) {
-				if (writer.addFile(fileName)) {
-					return Status.OK();
-				} else {
-					return new Status(RaftError.EIO, "Fail to add file to writer");
-				}
-			}
-		} catch (IOException e) {
-			LOGGER.error("Fail to save groupId: {} snapshot {}", group, path, e);
-		}
-		return new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path);
-	}
+    @Override
+    public Status save(SnapshotWriter writer) {
+        RaftSnapshot raftSnapshot = new RaftSnapshot();
+        RaftLeaderMetadata raftLeaderMetadata =
+            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
+        raftSnapshot.setBody(raftLeaderMetadata);
+        raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
+        String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
+        try {
+            if (save(raftSnapshot, path)) {
+                if (writer.addFile(fileName)) {
+                    return Status.OK();
+                } else {
+                    return new Status(RaftError.EIO, "Fail to add file to writer");
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Fail to save groupId: {} snapshot {}", group, path, e);
+        }
+        return new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path);
+    }
 
-	@Override public boolean load(SnapshotReader reader) {
-		if (reader.getFileMeta(fileName) == null) {
-			LOGGER.error("Fail to find data file in {}", reader.getPath());
-			return false;
-		}
-		String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
-		try {
-			RaftLeaderMetadata raftLeaderMetadata  = (RaftLeaderMetadata)load(path);
-			RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().setRaftLeaderMetadata(raftLeaderMetadata);
-			return true;
-		} catch (final Exception e) {
-			LOGGER.error("fail to load snapshot from {}", path, e);
-			return false;
-		}
-	}
+    @Override
+    public boolean load(SnapshotReader reader) {
+        if (reader.getFileMeta(fileName) == null) {
+            LOGGER.error("Fail to find data file in {}", reader.getPath());
+            return false;
+        }
+        String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
+        try {
+            RaftLeaderMetadata raftLeaderMetadata = (RaftLeaderMetadata)load(path);
+            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine()
+                .setRaftLeaderMetadata(raftLeaderMetadata);
+            return true;
+        } catch (final Exception e) {
+            LOGGER.error("fail to load snapshot from {}", path, e);
+            return false;
+        }
+    }
 }

@@ -111,6 +111,7 @@ public class ClusterController {
                     Set<Node> nodes = new HashSet<>();
                     RaftLeaderMetadata raftLeaderMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
                     Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getNode();
+                    leaderNode.setGroup(group);
                     nodes.add(leaderNode);
                     metadataResponse.setTerm(raftLeaderMetadata.getTerm());
                     metadataResponse.setNodes(new ArrayList<>(nodes));

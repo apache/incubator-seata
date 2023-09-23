@@ -44,12 +44,8 @@ public interface StoreSnapshotFile {
     boolean load(final SnapshotReader reader);
 
     default boolean save(final RaftSnapshot value, String path) throws IOException {
-        try {
-            FileUtils.writeByteArrayToFile(new File(path), RaftSnapshotSerializer.encode(value));
-            return true;
-        } catch (IOException e) {
-            throw e;
-        }
+        FileUtils.writeByteArrayToFile(new File(path), RaftSnapshotSerializer.encode(value));
+        return true;
     }
 
     /**

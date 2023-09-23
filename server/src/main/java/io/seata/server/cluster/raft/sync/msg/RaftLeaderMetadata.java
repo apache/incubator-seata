@@ -47,10 +47,10 @@ public class RaftLeaderMetadata extends RaftBaseMsg {
 	public RaftLeaderMetadata(long term, Map<String, Object> metadata) {
 		this.term = term;
         Node node = new Node();
-        node.setNettyEndpoint(node.createEndpoint(XID.getIpAddress(), XID.getPort()));
-        node.setHttpEndpoint(node.createEndpoint(XID.getIpAddress(),
+        node.setTransaction(node.createEndpoint(XID.getIpAddress(), XID.getPort(), "seata"));
+        node.setControl(node.createEndpoint(XID.getIpAddress(),
             Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                .getProperty("server.port", String.valueOf(8088)))));
+                .getProperty("server.port", String.valueOf(8088))),"http"));
 	    node.setRole(ClusterRole.LEADER);
         Optional.ofNullable(metadata).ifPresent(node::setMetadata);
 		this.msgType = RaftSyncMsgType.REFRESH_LEADER_METADATA;

@@ -113,7 +113,6 @@ public class RaftStateMachine extends StateMachineAdapter {
             LOGGER.info("groupId: {}, refresh leader metadata: {}", group, raftLeaderMetadata);
             return null;
         });
-        registryStoreSnapshotFile(new SessionSnapshotFile(group));
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
         if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
