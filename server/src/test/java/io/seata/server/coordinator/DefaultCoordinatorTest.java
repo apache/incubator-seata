@@ -34,9 +34,13 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.RemotingServer;
@@ -122,6 +126,7 @@ public class DefaultCoordinatorTest {
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
         globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.setStatus(GlobalStatus.Committed);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
@@ -138,6 +143,23 @@ public class DefaultCoordinatorTest {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+    }
+
+    @Test
+    public void branchDelete() {
+        try {
+            String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+            Long branchIdAt = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+            Long branchIdXA = core.branchRegister(BranchType.XA, resourceId, clientId, xid, applicationData, null);
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+            Assertions.assertTrue(core.doBranchDelete(globalSession, globalSession.getBranch(branchIdAt)));
+            Assertions.assertTrue(core.doBranchDelete(globalSession, globalSession.getBranch(branchIdXA)));
+            globalSession.setStatus(GlobalStatus.Deleting);
+            globalSession.end();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
     }
 
 
@@ -215,6 +237,21 @@ public class DefaultCoordinatorTest {
         }
     }
 
+    @Test
+    public void test_handleRetryRollbackingButSkip() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.TCC, "abcd", clientId, xid, applicationData, "");
+
+        Assertions.assertNotNull(branchId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.getBranch(branchId).setStatus(BranchStatus.STOP_RETRY);
+        defaultCoordinator.handleRetryRollbacking();
+
+        globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        globalSession.end();
+    }
+
     @AfterAll
     public static void afterClass() throws Exception {
 
@@ -261,6 +298,11 @@ public class DefaultCoordinatorTest {
                 final BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
                 branchRollbackResponse.setBranchStatus(BranchStatus.PhaseTwo_Rollbacked);
                 return branchRollbackResponse;
+            } else if (message instanceof BranchDeleteRequest) {
+                final BranchDeleteResponse branchDeleteResponse = new BranchDeleteResponse();
+                branchDeleteResponse.setResultCode(ResultCode.Success);
+                branchDeleteResponse.setBranchStatus(BranchStatus.PhaseTwo_RollbackFailed_Unretryable);
+                return branchDeleteResponse;
             } else {
                 return null;
             }
