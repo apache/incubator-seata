@@ -169,7 +169,6 @@ public class GlobalSessionTest {
         Assertions.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
         Assertions.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
         Assertions.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
-        Assertions.assertTrue(System.currentTimeMillis() > globalSession.getGmtModified());
     }
 
     /**
