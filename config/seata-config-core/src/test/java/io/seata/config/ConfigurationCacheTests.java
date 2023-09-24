@@ -53,7 +53,7 @@ public class ConfigurationCacheTests {
         configuration.getLong("eee", 0);
         ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("eee", "1"));
         long eee = configuration.getLong("eee", 0);
-        Assertions.assertEquals((long) 1, eee);
+        Assertions.assertEquals(1, eee);
     }
 
 }
