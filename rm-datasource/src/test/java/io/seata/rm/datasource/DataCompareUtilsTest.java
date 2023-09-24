@@ -181,7 +181,7 @@ public class DataCompareUtilsTest {
         rows.add(row3);
 
         Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
-        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(result.keySet().iterator().next(),"1");
 
     }
@@ -216,7 +216,7 @@ public class DataCompareUtilsTest {
         rows.add(row3);
 
         Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
-        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(result.keySet().iterator().next(),"1_2");
 
     }

@@ -128,7 +128,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
-        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
+        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);

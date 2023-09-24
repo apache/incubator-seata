@@ -30,16 +30,23 @@ public class SessionStatusValidatorTest {
 
     @Test
     public void testValidateUpdateStatus(){
-        Assertions.assertEquals(true, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Begin, GlobalStatus.Committing));
-        Assertions.assertEquals(true, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Committed));
+        Assertions.assertTrue(SessionStatusValidator.validateUpdateStatus(GlobalStatus.Begin, GlobalStatus.Committing));
+        Assertions.assertTrue(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Committed));
 
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.TimeoutRollbacking));
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.TimeoutRollbacking, GlobalStatus.Committing));
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Rollbacking));
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Rollbacking, GlobalStatus.Committing));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.TimeoutRollbacking));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.TimeoutRollbacking, GlobalStatus.Committing));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Rollbacking));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Rollbacking, GlobalStatus.Committing));
 
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.Rollbacked));
-        Assertions.assertEquals(false, SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.TimeoutRollbacking));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.Rollbacked));
+        Assertions.assertFalse(
+            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.TimeoutRollbacking));
 
     }
 }

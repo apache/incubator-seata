@@ -36,8 +36,8 @@ class YamlConfigurationFactoryTest {
         ConfigurationFactory.reload();
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-test-yaml.conf");
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testBlank"), "");
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"), null);
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"), null);
+        Assertions.assertNull(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"));
+        Assertions.assertNull(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"));
         Configuration instance = ConfigurationFactory.getInstance();
         Assertions.assertEquals(instance.getConfig("service.disableGlobalTransaction"), "true");
         Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8093");

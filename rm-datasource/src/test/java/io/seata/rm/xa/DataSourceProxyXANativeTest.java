@@ -52,9 +52,9 @@ public class DataSourceProxyXANativeTest {
 
         Assertions.assertTrue(connFromDataSourceProxyXANative instanceof ConnectionProxyXA);
         XAConnection xaConnectionFromProxy = ((ConnectionProxyXA)connFromDataSourceProxyXANative).getWrappedXAConnection();
-        Assertions.assertTrue(xaConnection == xaConnectionFromProxy);
+        Assertions.assertSame(xaConnection, xaConnectionFromProxy);
         Connection connectionFromProxy = ((ConnectionProxyXA)connFromDataSourceProxyXANative).getWrappedConnection();
-        Assertions.assertTrue(connection == connectionFromProxy);
+        Assertions.assertSame(connection, connectionFromProxy);
 
     }
 }

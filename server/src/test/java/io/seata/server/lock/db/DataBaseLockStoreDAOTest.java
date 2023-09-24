@@ -104,7 +104,7 @@ public class DataBaseLockStoreDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
         } finally {
             IOUtil.close(conn);
@@ -141,7 +141,7 @@ public class DataBaseLockStoreDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
         } finally {
             IOUtil.close(conn);
@@ -180,7 +180,7 @@ public class DataBaseLockStoreDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
             rs.close();
 
@@ -189,7 +189,7 @@ public class DataBaseLockStoreDAOTest {
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }else {
                 Assertions.assertTrue(true);
             }
@@ -250,7 +250,7 @@ public class DataBaseLockStoreDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
         } finally {
             IOUtil.close(conn);
@@ -270,7 +270,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2);
-        Assertions.assertTrue(!ret2);
+        Assertions.assertFalse(ret2);
 
     }
 

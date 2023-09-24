@@ -50,7 +50,7 @@ public abstract class AbstractServerTest {
                     file.delete();
                 }
 
-                ParameterParser parameterParser = new ParameterParser(new String[]{});
+                ParameterParser parameterParser = new ParameterParser();
 
                 //initialize the metrics
                 MetricsManager.get().init();

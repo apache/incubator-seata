@@ -58,7 +58,7 @@ public class ConfigurationCacheTests {
         configuration.getLong("eee", 0);
         ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("eee", "1"));
         long eee = configuration.getLong("eee", 0);
-        Assertions.assertEquals((long) 1, eee);
+        Assertions.assertEquals(1, eee);
 
         // test null
         configuration.getConfig("test", null);
@@ -71,7 +71,7 @@ public class ConfigurationCacheTests {
         Assertions.assertNull(test);
     }
 
-    // FIXME: 2023/2/19 wait bugfix 
+    // FIXME: 2023/2/19 wait bugfix
     // @Test
     public void testConfigListener() throws Exception {
         Configuration configuration = new FileConfiguration("registry");

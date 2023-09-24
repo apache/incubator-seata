@@ -87,7 +87,7 @@ public class RollbackRuleTest {
         RollbackRule otherRollbackRuleByName = new RollbackRule(Exception.class.getName());
         RollbackRule otherRollbackRuleByName2 = new NoRollbackRule(Exception.class.getName());
 
-        Assertions.assertNotEquals("", otherRollbackRuleByName);
+        Assertions.assertNotEquals("", otherRollbackRuleByName.getExceptionName());
         Assertions.assertEquals(otherRollbackRuleByName, otherRollbackRuleByName);
         Assertions.assertEquals(otherRollbackRuleByName, otherRollbackRuleByName2);
 

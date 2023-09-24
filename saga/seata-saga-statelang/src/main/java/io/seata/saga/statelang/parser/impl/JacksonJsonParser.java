@@ -96,7 +96,7 @@ public class JacksonJsonParser implements JsonParser {
     @Override
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
         try {
-            if (json != null && "[]".equals(json)) {
+            if ("[]".equals(json)) {
                 return (T) (new ArrayList(0));
             }
             if (ignoreAutoType) {

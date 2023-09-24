@@ -139,7 +139,7 @@ public class TaskStateRouter implements StateRouter {
 
             StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
             State state = stateMachine.getState(EngineUtils.getOriginStateName(stateToBeCompensated));
-            if (state != null && state instanceof AbstractTaskState) {
+            if (state instanceof AbstractTaskState) {
 
                 AbstractTaskState taskState = (AbstractTaskState)state;
 
