@@ -1,0 +1,426 @@
+#  Copyright 1999-2019 Seata.io Group.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+seata:
+  config:
+    type:
+      value-type: enum
+      value-range: [ nacos, consul, apollo, zk, etcd3 ]
+      dynamic-config: true
+    nacos:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      namespace:
+        value-type: string
+        dynamic-config: true
+      group:
+        value-type: string
+        dynamic-config: true
+      username:
+        value-type: string
+        dynamic-config: true
+      password:
+        value-type: string
+        dynamic-config: true
+      context-path:
+        value-type: string
+        dynamic-config: true
+      access-key:
+        value-type: string
+        dynamic-config: true
+      secret-key:
+        value-type: string
+        dynamic-config: true
+      data-id:
+        value-type: string
+        dynamic-config: true
+    consul:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      acl-token:
+        value-type: string
+        dynamic-config: true
+      key:
+        value-type: string
+        dynamic-config: true
+    apollo:
+      appId:
+        value-type: string
+        dynamic-config: true
+      apollo-meta:
+        value-type: string
+        dynamic-config: true
+      apollo-config-service:
+        value-type: string
+        dynamic-config: true
+      namespace:
+        value-type: string
+        dynamic-config: true
+      apollo-access-key-secret:
+        value-type: string
+        dynamic-config: true
+      cluster:
+        value-type: string
+        dynamic-config: true
+    zk:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      session-timeout:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+      connect-timeout:
+        value-type: integer
+        dynamic-config: true
+        value-min: 0
+      username:
+        value-type: string
+        dynamic-config: true
+      password:
+        value-type: string
+        dynamic-config: true
+      node-path:
+        value-type: string
+        dynamic-config: true
+    etcd3:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      key:
+        value-type: string
+        dynamic-config: true
+  registry:
+    type:
+      value-type: enum
+      value-range: [ nacos, eureka, redis, zk, consul, etcd3, sofa ]
+      dynamic-config: true
+    preferred-networks:
+      value-type: string
+      dynamic-config: true
+    nacos:
+      application:
+        value-type: string
+        dynamic-config: true
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      group:
+        value-type: string
+        dynamic-config: true
+      namespace:
+        value-type: string
+        dynamic-config: true
+      cluster:
+        value-type: string
+        dynamic-config: true
+      username:
+        value-type: string
+        dynamic-config: true
+      password:
+        value-type: string
+        dynamic-config: true
+      context-path:
+        value-type: string
+        dynamic-config: true
+      access-key:
+        value-type: string
+        dynamic-config: true
+      secret-key:
+        value-type: string
+        dynamic-config: true
+    eureka:
+      service-url:
+        value-type: string
+        dynamic-config: true
+      application:
+        value-type: string
+        dynamic-config: true
+      weight:
+        value-type: integer
+        value-min: 1
+        dynamic-config: true
+    redis:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      db:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+      password:
+        value-type: string
+        dynamic-config: true
+      cluster:
+        value-type: string
+        dynamic-config: true
+      timeout:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+    zk:
+      cluster:
+        value-type: string
+        dynamic-config: true
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      session-timeout:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+      connect-timeout:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+      username:
+        value-type: string
+        dynamic-config: true
+      password:
+        value-type: string
+        dynamic-config: true
+    consul:
+      cluster:
+        value-type: string
+        dynamic-config: true
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      acl-token:
+        value-type: string
+        dynamic-config: true
+    etcd3:
+      cluster:
+        value-type: string
+        dynamic-config: true
+      server-addr:
+        value-type: string
+        dynamic-config: true
+    sofa:
+      server-addr:
+        value-type: string
+        dynamic-config: true
+      application:
+        value-type: string
+        dynamic-config: true
+      region:
+        value-type: string
+        dynamic-config: true
+      datacenter:
+        value-type: string
+        dynamic-config: true
+      cluster:
+        value-type: string
+        dynamic-config: true
+      group:
+        value-type: string
+        dynamic-config: true
+      address-wait-time:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+  server:
+    service-port:
+      value-type: integer
+      value-min: 1
+      value-max: 65535
+    max-commit-retry-timeout:
+      value-type: integer
+      value-min: -1
+      dynamic-config: true
+    max-rollback-retry-timeout:
+      value-type: integer
+      value-min: -1
+      dynamic-config: true
+    rollback-retry-timeout-unlock-enable:
+      value-type: boolean
+      dynamic-config: true
+    enable-check-auth:
+      value-type: boolean
+      dynamic-config: true
+    enable-parallel-request-handle:
+      value-type: boolean
+    enable-parallel-handle-branch:
+      value-type: boolean
+    retry-dead-threshold:
+      value-type: integer
+      value-min: 0
+      dynamic-config: true
+    xaer-nota-retry-timeout:
+      value-type: integer
+      value-min: 0
+      dynamic-config: true
+    enableParallelRequestHandle:
+      value-type: boolean
+    recovery:
+      committing-retry-period:
+        value-type: integer
+        value-min: 0
+      async-committing-retry-period:
+        value-type: integer
+        value-min: 0
+      rollbacking-retry-period:
+        value-type: integer
+        value-min: 0
+      timeout-retry-period:
+        value-type: integer
+        value-min: 0
+    undo:
+      log-save-days:
+        value-type: integer
+        value-min: 0
+        dynamic-config: true
+      log-delete-period:
+        value-type: integer
+        value-min: 0
+    session:
+      branch-async-queue-size:
+        value-type: integer
+        value-min: 0
+      enable-branch-async-remove:
+        value-type: boolean
+  store:
+    mode:
+      value-type: enum
+      value-range: [ file, db, redis ]
+    session:
+      mode:
+        value-type: enum
+        value-range: [ file, db, redis ]
+    lock:
+      mode:
+        value-type: enum
+        value-range: [ file, db, redis ]
+    file:
+      dir:
+        value-type: string
+      max-branch-session-size:
+        value-type: integer
+        value-min: 0
+      max-global-session-size:
+        value-type: integer
+        value-min: 0
+      file-write-buffer-cache-size:
+        value-type: integer
+        value-min: 0
+      session-reload-read-size:
+        value-type: integer
+        value-min: 0
+      flush-disk-mode:
+        value-type: enum
+        value-range: [ async ]
+    db:
+      datasource:
+        value-type: enum
+        value-range: [ druid ]
+      db-type:
+        value-type: enum
+        value-range: [ mysql ]
+      driver-class-name:
+        value-type: string
+      url:
+        value-type: string
+      user:
+        value-type: string
+      password:
+        value-type: string
+      min-conn:
+        value-type: integer
+        value-min: 0
+      max-conn:
+        value-type: integer
+        value-min: 0
+      global-table:
+        value-type: string
+      branch-table:
+        value-type: string
+      lock-table:
+        value-type: string
+      distributed-lock-table:
+        value-type: string
+      query-limit:
+        value-type: integer
+        value-min: 0
+      max-wait:
+        value-type: integer
+        value-min: 0
+    redis:
+      mode:
+        value-type: enum
+        value-range: [ single ]
+      type:
+        value-type: enum
+        value-range: [ lua, pipeline ]
+      database:
+        value-type: integer
+        value-min: 0
+      min-conn:
+        value-type: integer
+        value-min: 0
+      max-conn:
+        value-type: integer
+        value-min: 0
+      password:
+        value-type: string
+      max-total:
+        value-type: integer
+        value-min: 0
+      query-limit:
+        value-type: integer
+        value-min: 0
+      single:
+        host:
+          value-type: string
+        port:
+          value-type: integer
+          value-min: 1
+          value-max: 65535
+      sentinel:
+        master-name:
+          value-type: string
+        sentinel-hosts:
+          value-type: string
+  metrics:
+    enabled:
+      value-type: boolean
+    registry-type:
+      value-type: enum
+      value-range: [ compact ]
+    exporter-list:
+      value-type: enum
+      value-range: [ prometheus ]
+    exporter-prometheus-port:
+      value-type: integer
+      value-min: 1
+      value-max: 65535
+  transport:
+    rpc-tc-request-timeout:
+      value-type: integer
+      value-min: 0
+    enable-tc-server-batch-send-response:
+      value-type: boolean
+    shutdown:
+      wait:
+        value-type: integer
+        value-min: 0
+    thread-factory:
+      boss-thread-prefix:
+        value-type: string
+      worker-thread-prefix:
+        value-type: string
+      boss-thread-size:
+        value-type: int
+        value-min: 0

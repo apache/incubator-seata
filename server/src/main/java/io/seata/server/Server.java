@@ -40,6 +40,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFE
  * @author slievrly
  */
 public class Server {
+
+    private static NettyRemotingServer nettyRemotingServer;
+
     /**
      * The entry point of application.
      *
@@ -71,7 +74,7 @@ public class Server {
             }
         }
 
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file, db, redis
@@ -85,5 +88,9 @@ public class Server {
         ServerRunner.addDisposable(coordinator);
 
         nettyRemotingServer.init();
+    }
+
+    public static NettyRemotingServer getNettyRemotingServer() {
+        return nettyRemotingServer;
     }
 }

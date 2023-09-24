@@ -123,6 +123,8 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             // create FileConfiguration for read file.conf
             ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
+        } else {
+            ORIGIN_FILE_INSTANCE = null;
         }
     }
 
@@ -177,7 +179,7 @@ public final class ConfigurationFactory {
         return null == extConfiguration ? configuration : extConfiguration;
     }
 
-    protected static void reload() {
+    public static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();

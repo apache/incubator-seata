@@ -28,7 +28,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
  */
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
-    private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
+    private static Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
@@ -50,4 +50,12 @@ public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandl
     }
 
     public abstract boolean doRegResourceManagerCheck(RegisterRMRequest request);
+
+    /**
+     * Only be called after configuration is reloaded.
+     */
+    public static void reloadConfiguration() {
+        ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
+                ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
+    }
 }

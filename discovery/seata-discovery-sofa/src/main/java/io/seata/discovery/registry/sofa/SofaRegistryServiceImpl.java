@@ -164,6 +164,10 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
+        return lookupByCluster(clusterName);
+    }
+
+    private List<InetSocketAddress> lookupByCluster(String clusterName) throws Exception {
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             CountDownLatch respondRegistries = new CountDownLatch(1);
             subscribe(clusterName, (dataId, data) -> {
@@ -183,6 +187,17 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
+        return lookupByCluster(clusterName);
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     private List<InetSocketAddress> flatData(Map<String, List<String>> instances) {

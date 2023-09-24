@@ -17,11 +17,7 @@ package io.seata.discovery.registry.redis;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -225,6 +221,15 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         return lookupByCluster(clusterName);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(clusterName);
+    }
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     // default visible for test

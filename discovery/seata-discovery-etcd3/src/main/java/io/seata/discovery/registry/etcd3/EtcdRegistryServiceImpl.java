@@ -41,11 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -188,6 +184,16 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         return lookupByCluster(cluster);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {

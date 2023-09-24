@@ -37,6 +37,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String POSTFIX_GROUPLIST = ".grouplist";
     private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String IP_PORT_SPLIT_CHAR = ":";
+    private static final String REGISTRY_TYPE = "file";
 
     private FileRegistryServiceImpl() {
     }
@@ -84,6 +85,20 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
+        return lookupByCluster(clusterName);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster("");
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
+    }
+
+    public List<InetSocketAddress> lookupByCluster(String clusterName) throws Exception {
         String endpointStr = getGroupListFromConfig(clusterName);
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
         List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();

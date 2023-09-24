@@ -19,7 +19,7 @@ import io.seata.config.ConfigChangeListener;
 import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.*;
 
 public class CustomRegistryServiceForTest implements RegistryService<ConfigChangeListener> {
     @Override
@@ -45,6 +45,16 @@ public class CustomRegistryServiceForTest implements RegistryService<ConfigChang
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getType() {
+        return "";
     }
 
     @Override

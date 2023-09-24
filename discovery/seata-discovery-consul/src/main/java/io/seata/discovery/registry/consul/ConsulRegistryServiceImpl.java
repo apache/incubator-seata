@@ -16,10 +16,7 @@
 package io.seata.discovery.registry.consul;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -169,6 +166,16 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         }
         return lookupByCluster(cluster);
 
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {

@@ -36,9 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
@@ -135,7 +133,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
-        String clusterUpperName = clusterName.toUpperCase();
+        return lookupByCluster(clusterName);
+    }
+
+    private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
+        String clusterUpperName = cluster.toUpperCase();
         if (!LISTENER_SERVICE_MAP.containsKey(clusterUpperName)) {
             Object lock = CLUSTER_LOCK.computeIfAbsent(clusterUpperName, k -> new Object());
             synchronized (lock) {
@@ -148,6 +150,16 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             }
         }
         return CLUSTER_ADDRESS_MAP.get(clusterUpperName);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getApplicationName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     @Override
@@ -181,12 +193,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         }
         eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
 
-        String weight = FILE_CONFIG.getConfig(getEurekaInstanceWeightFileKey());
-        if (StringUtils.isNotBlank(weight)) {
-            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, weight);
-        } else {
-            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, DEFAULT_WEIGHT);
-        }
+        eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, getWeight());
 
         if (!needRegister) {
             eurekaProperties.setProperty(EUREKA_CONFIG_SHOULD_REGISTER, "false");
@@ -201,6 +208,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             application = DEFAULT_APPLICATION;
         }
         return application;
+    }
+
+    private String getWeight() {
+        String weight = FILE_CONFIG.getConfig(getEurekaInstanceWeightFileKey());
+        return StringUtils.isNotBlank(weight) ? weight : DEFAULT_WEIGHT;
     }
 
     private EurekaClient getEurekaClient(boolean needRegister) throws EurekaRegistryException {
