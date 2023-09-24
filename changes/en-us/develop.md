@@ -12,7 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
 
 ### test:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
