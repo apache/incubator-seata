@@ -42,7 +42,7 @@ public class RegistryController {
     @Autowired
     private ConfigurationService configurationService;
 
-    private final Object SET_CONF_LOCK = new Object();
+    private final Object setConfLock = new Object();
 
     @RequestMapping(method = RequestMethod.GET)
     SingleResult<Map<String, String>> getRegistryConf(String key) {
@@ -65,7 +65,7 @@ public class RegistryController {
     SingleResult<Map<String, String>> setRegistryConf(@RequestBody Map<String, String> properties) {
         Map<String, String> result = new HashMap<>(properties.size());
 
-        synchronized (SET_CONF_LOCK) {
+        synchronized (setConfLock) {
             for (String key : properties.keySet()) {
                 ConfigValidator.ValidateResult validateResult = ConfigValidator.validateRegistryConf(key, properties.get(key));
                 if (!validateResult.getValid())

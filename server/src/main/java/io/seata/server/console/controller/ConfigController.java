@@ -39,7 +39,7 @@ import java.util.Set;
 @RequestMapping("/api/v1/admin/configuration")
 public class ConfigController {
 
-    private final Object SET_CONF_LOCK = new Object();
+    private final Object setConfLock = new Object();
 
     @Autowired
     private ConfigurationService configurationService;
@@ -63,7 +63,7 @@ public class ConfigController {
     SingleResult<Map<String, String>> setConf(@RequestBody Map<String, String> properties) {
         Map<String, String> result = new HashMap<>(properties.size());
 
-        synchronized (SET_CONF_LOCK) {
+        synchronized (setConfLock) {
             for (String key: properties.keySet()) {
                 ConfigValidator.ValidateResult validateResult = ConfigValidator.validateConfiguration(key, properties.get(key));
                 if (!validateResult.getValid())

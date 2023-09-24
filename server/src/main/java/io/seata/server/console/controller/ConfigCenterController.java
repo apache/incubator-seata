@@ -39,7 +39,7 @@ import java.util.Set;
 @RequestMapping("/api/v1/admin/config-center")
 public class ConfigCenterController {
 
-    private final Object SET_CONF_LOCK = new Object();
+    private final Object setConfLock = new Object();
 
     @Autowired
     private ConfigurationService configurationService;
@@ -73,7 +73,7 @@ public class ConfigCenterController {
             result.put(key, properties.get(key));
         }
 
-        synchronized (SET_CONF_LOCK) {
+        synchronized (setConfLock) {
             for (String key: result.keySet()) {
                 System.setProperty(key, properties.get(key));
             }

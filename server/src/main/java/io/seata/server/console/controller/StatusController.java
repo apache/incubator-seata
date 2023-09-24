@@ -39,6 +39,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static io.seata.server.console.Constant.UNKNOWN_SERVER_STATUS;
+import static io.seata.server.console.Constant.URI_HEALTH;
+import static io.seata.server.console.Constant.HTTP_PROTOCOL;
+
 /**
  * @author Junduo Dong
  */
@@ -47,20 +51,14 @@ import java.util.Map;
 public class StatusController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRegistryFactory.class);
 
-    private final String UNKNOWN_STATUS = "UNKNOWN";
-
     @Autowired
     private RestTemplate restTemplate;
-
-    private String HTTP_PROTOCOL = "http://";
-
-    private String URI_HEALTH = "/health";
 
     @Value("${server.port}")
     private int serverPort;
 
     @RequestMapping
-    SingleResult<List<NodeStatus>> checkClusterHealth(@RequestHeader Map<String, String> headers){
+    SingleResult<List<NodeStatus>> checkClusterHealth(@RequestHeader Map<String, String> headers) {
         List<NodeStatus> statuses = new ArrayList<>();
         List<RegistryService> registryServices = MultiRegistryFactory.getInstances();
         for (RegistryService registryService: registryServices) {
@@ -77,10 +75,10 @@ public class StatusController {
                         if (result.getStatusCodeValue() == 200) {
                             statuses.add(new NodeStatus(ipAndPort, result.getBody(), registryService.getType()));
                         } else {
-                            statuses.add(new NodeStatus(ipAndPort, UNKNOWN_STATUS, registryService.getType()));
+                            statuses.add(new NodeStatus(ipAndPort, UNKNOWN_SERVER_STATUS, registryService.getType()));
                         }
                     } catch (Exception e) {
-                        statuses.add(new NodeStatus(ipAndPort, UNKNOWN_STATUS, registryService.getType()));
+                        statuses.add(new NodeStatus(ipAndPort, UNKNOWN_SERVER_STATUS, registryService.getType()));
                     }
                 });
             } catch (Exception e) {

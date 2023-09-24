@@ -28,6 +28,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static io.seata.server.console.Constant.DEMO_APP_NAME;
+import static io.seata.server.console.Constant.DEMO_GROUP_NAME;
+import static io.seata.server.console.Constant.DEMO_TXN_NAME;
+
 /**
  * @author Junduo Dong
  */
@@ -36,12 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class TxnTryController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TxnTryController.class);
-
-    private final String DEMO_APP_NAME = "demo-app";
-
-    private final String DEMO_GROUP_NAME = "demo-group";
-
-    private final String DEMO_TXN_NAME = "txn-name";
 
     @RequestMapping
     public SingleResult<String> tryASimpleTxn() {
