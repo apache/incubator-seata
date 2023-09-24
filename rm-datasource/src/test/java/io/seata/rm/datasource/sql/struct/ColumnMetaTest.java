@@ -31,9 +31,6 @@ public class ColumnMetaTest {
         Assertions.assertEquals(columnMeta, new ColumnMeta());
         columnMeta.setIsAutoincrement("Yes");
         Assertions.assertTrue(columnMeta.isAutoincrement());
-        Assertions.assertEquals(columnMeta, columnMeta);
-        Assertions.assertEquals(columnMeta.hashCode(), columnMeta.hashCode());
-        Assertions.assertNotEquals(columnMeta, "");
 
         ColumnMeta other = new ColumnMeta();
         other.setTableCat("");

@@ -205,7 +205,7 @@ public class DefaultCoordinatorTest {
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
-            Assertions.assertTrue(lockSize == 0);
+            Assertions.assertEquals(0, lockSize);
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",

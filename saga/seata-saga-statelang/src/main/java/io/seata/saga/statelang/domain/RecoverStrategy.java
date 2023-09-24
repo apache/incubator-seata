@@ -30,5 +30,5 @@ public enum RecoverStrategy {
     /**
      * Forward
      */
-    Forward;
+    Forward
 }

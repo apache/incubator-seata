@@ -104,7 +104,7 @@ public class PostgresqlInsertRecognizerTest {
 
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) SQLVisitorFactory.get(sql, DB_TYPE).get(0);
         List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
-        Assertions.assertTrue(insertRows.size() == 1);
+        Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {

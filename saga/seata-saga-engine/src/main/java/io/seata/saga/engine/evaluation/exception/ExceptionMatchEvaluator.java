@@ -44,7 +44,7 @@ public class ExceptionMatchEvaluator implements Evaluator {
     public boolean evaluate(Map<String, Object> variables) {
 
         Object eObj = variables.get(getRootObjectName());
-        if (eObj != null && (eObj instanceof Exception) && StringUtils.hasText(exceptionString)) {
+        if ((eObj instanceof Exception) && StringUtils.hasText(exceptionString)) {
 
             Exception e = (Exception)eObj;
 

@@ -60,7 +60,7 @@ public class DeflaterUtil {
         Inflater inflater = new Inflater();
         inflater.setInput(bytes);
         byte[] outputBytes = new byte[BUFFER_SIZE];
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();) {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             while (!inflater.finished()) {
                 length = inflater.inflate(outputBytes);
                 if (length == 0) {
