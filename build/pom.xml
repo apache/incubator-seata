@@ -384,11 +384,11 @@
             </properties>
         </profile>
 
-        <!-- profile: args-for-test-by-jdk17 -->
+        <!-- profile: args-for-test-by-jdk17-and-above -->
         <profile>
-            <id>args-for-test-by-jdk17</id>
+            <id>args-for-test-by-jdk17-and-above</id>
             <activation>
-                <jdk>17</jdk>
+                <jdk>[17,)</jdk>
             </activation>
             <properties>
                 <maven.surefire.argLine>
