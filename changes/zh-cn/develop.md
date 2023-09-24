@@ -12,7 +12,7 @@
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
 
 ### test:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
