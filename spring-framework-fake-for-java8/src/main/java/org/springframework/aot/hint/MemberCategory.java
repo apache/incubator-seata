@@ -48,6 +48,6 @@ public enum MemberCategory {
 
     PUBLIC_CLASSES,
 
-    DECLARED_CLASSES;
+    DECLARED_CLASSES
 
 }

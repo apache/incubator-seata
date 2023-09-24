@@ -92,21 +92,21 @@ public interface EscapeHandler {
             String str = escapeChar + DOT;
             int dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(colName.substring(0, dotIndex + str.length())).append(escapeChar)
+                return new StringBuilder().append(colName, 0, dotIndex + str.length()).append(escapeChar)
                     .append(colName.substring(dotIndex + str.length())).append(escapeChar).toString();
             }
             // like scheme."id" scheme.`id`
             str = DOT + escapeChar;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar).append(colName.substring(0, dotIndex)).append(escapeChar)
+                return new StringBuilder().append(escapeChar).append(colName, 0, dotIndex).append(escapeChar)
                     .append(colName.substring(dotIndex)).toString();
             }
 
             str = DOT;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar).append(colName.substring(0, dotIndex)).append(escapeChar)
+                return new StringBuilder().append(escapeChar).append(colName, 0, dotIndex).append(escapeChar)
                     .append(DOT).append(escapeChar).append(colName.substring(dotIndex + str.length())).append(
                         escapeChar).toString();
             }
