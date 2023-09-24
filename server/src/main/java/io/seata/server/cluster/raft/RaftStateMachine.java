@@ -17,11 +17,13 @@ package io.seata.server.cluster.raft;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.RouteTable;
@@ -31,7 +33,10 @@ import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import io.seata.common.XID;
 import io.seata.common.holder.ObjectHolder;
+import io.seata.common.metadata.ClusterRole;
+import io.seata.common.metadata.Node;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -52,7 +57,7 @@ import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
-import io.seata.server.cluster.raft.sync.msg.RaftLeaderMetadata;
+import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
 import io.seata.server.cluster.raft.util.RaftTaskUtil;
 import io.seata.server.session.SessionHolder;
@@ -60,11 +65,15 @@ import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.env.Environment;
+
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
-import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_LEADER_METADATA;
+import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
@@ -87,7 +96,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Map<RaftSyncMsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
-    private volatile RaftLeaderMetadata raftLeaderMetadata;
+    private volatile RaftClusterMetadata raftClusterMetadata;
     
     /**
      * Leader term
@@ -106,11 +115,8 @@ public class RaftStateMachine extends StateMachineAdapter {
     public RaftStateMachine(String group) {
         this.group = group;
         mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
-        EXECUTES.put(REFRESH_LEADER_METADATA, syncMsg -> {
-            raftLeaderMetadata = (RaftLeaderMetadata)syncMsg;
-            ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                .publishEvent(new ClusterChangeEvent(this, group, raftLeaderMetadata.getTerm(), this.isLeader()));
-            LOGGER.info("groupId: {}, refresh leader metadata: {}", group, raftLeaderMetadata);
+        EXECUTES.put(REFRESH_CLUSTER_METADATA, syncMsg -> {
+            refreshClusterMetadata(syncMsg);
             return null;
         });
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
@@ -198,8 +204,8 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.currentTerm.set(term);
         SeataClusterContext.bindGroup(group);
         try {
-            RaftLeaderMetadata leaderMetadata = new RaftLeaderMetadata(term);
-            RaftTaskUtil.createTask(status -> raftLeaderMetadata = leaderMetadata, leaderMetadata, null);
+            RaftClusterMetadata clusterMetadata = createNewRaftClusterMetadata();
+            RaftTaskUtil.createTask(status -> refreshClusterMetadata(clusterMetadata), clusterMetadata, null);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         } finally {
@@ -267,11 +273,47 @@ public class RaftStateMachine extends StateMachineAdapter {
         snapshotFiles.add(storeSnapshotFile);
     }
 
-    public RaftLeaderMetadata getRaftLeaderMetadata() {
-        return raftLeaderMetadata;
+    public RaftClusterMetadata getRaftLeaderMetadata() {
+        return raftClusterMetadata;
     }
 
-    public void setRaftLeaderMetadata(RaftLeaderMetadata raftLeaderMetadata) {
-        this.raftLeaderMetadata = raftLeaderMetadata;
+    public void setRaftLeaderMetadata(RaftClusterMetadata raftClusterMetadata) {
+        this.raftClusterMetadata = raftClusterMetadata;
     }
+
+    public RaftClusterMetadata createNewRaftClusterMetadata() {
+        RaftClusterMetadata metadata = new RaftClusterMetadata(this.currentTerm.get());
+        Node node = metadata.createNode(XID.getIpAddress(), XID.getPort(),
+            Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                .getProperty("server.port", String.valueOf(8088))),
+            group, Collections.emptyMap());
+        node.setRole(ClusterRole.LEADER);
+        metadata.setLeader(node);
+        Configuration configuration = RouteTable.getInstance().getConfiguration(this.group);
+        List<Node> learners = configuration.getLearners().stream().map(learner -> {
+            int nettyPort = learner.getPort() - SERVICE_OFFSET_SPRING_BOOT;
+            Node learnerNode = metadata.createNode(learner.getIp(), nettyPort, nettyPort - SERVICE_OFFSET_SPRING_BOOT,
+                this.group, Collections.emptyMap());
+            learnerNode.setRole(ClusterRole.LEARNER);
+            return learnerNode;
+        }).collect(Collectors.toList());
+        metadata.setLearner(learners);
+        List<Node> followers = configuration.getPeers().stream().map(follower -> {
+            int nettyPort = follower.getPort() - SERVICE_OFFSET_SPRING_BOOT;
+            Node followerNode = metadata.createNode(follower.getIp(), nettyPort, nettyPort - SERVICE_OFFSET_SPRING_BOOT,
+                this.group, Collections.emptyMap());
+            followerNode.setRole(ClusterRole.FOLLOWER);
+            return followerNode;
+        }).collect(Collectors.toList());
+        metadata.setFollowers(followers);
+        return metadata;
+    }
+
+    public void refreshClusterMetadata(RaftBaseMsg syncMsg){
+        raftClusterMetadata = (RaftClusterMetadata)syncMsg;
+        ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
+        LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
+    }
+
 }

@@ -53,7 +53,7 @@ public enum RaftSyncMsgType {
      */
     RELEASE_BRANCH_SESSION_LOCK,
     /**
-     * refresh leader metadata
+     * refresh cluster metadata
      */
-    REFRESH_LEADER_METADATA;
+    REFRESH_CLUSTER_METADATA;
 }

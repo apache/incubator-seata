@@ -287,9 +287,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+                                                      List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
-            return ALIVE_NODES.put(transactionServiceGroup, aliveAddress);
+            Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
+            InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
+            return ALIVE_NODES.put(transactionServiceGroup,
+                    aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
+                        // Since only follower will turn into leader, only the follower node needs to be listened to
+                        return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
+                                .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
+                    }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
@@ -397,7 +404,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 List<InetSocketAddress> list = new ArrayList<>();
                 String[] addresses = raftClusterAddress.split(",");
                 for (String address : addresses) {
-                    String[] endpoint = address.split(":");
+                    String[] endpoint = address.split(IP_PORT_SPLIT_CHAR);
                     String host = endpoint[0];
                     int port = Integer.parseInt(endpoint[1]);
                     list.add(new InetSocketAddress(host, port));

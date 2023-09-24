@@ -23,15 +23,14 @@ import java.util.Map;
  */
 public class Node {
 
-    Map<String,Object> metadata = new HashMap<>();
+    Map<String, Object> metadata = new HashMap<>();
     private Endpoint control;
     private Endpoint transaction;
-    
+
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;
 
-    public Node() {
-    }
+    public Node() {}
 
     public Endpoint createEndpoint(String host, int port, String protocol) {
         return new Endpoint(host, port);
@@ -83,12 +82,11 @@ public class Node {
         private String protocol;
         private int port;
 
-        public Endpoint() {
-        }
+        public Endpoint() {}
 
         public Endpoint(String host, int port) {
-            this.host=host;
-            this.port=port;
+            this.host = host;
+            this.port = port;
         }
 
         public String getHost() {

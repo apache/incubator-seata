@@ -15,61 +15,78 @@
  */
 package io.seata.server.cluster.raft.sync.msg;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import io.seata.common.XID;
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
-import org.springframework.core.env.Environment;
-
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 /**
  * @author jianbin.chen
  */
-public class RaftLeaderMetadata extends RaftBaseMsg {
+public class RaftClusterMetadata extends RaftBaseMsg {
 
 	private static final long serialVersionUID = 6208583637662412658L;
 
-	private Node node;
-	
+	private Node leader;
+
+	private List<Node> followers;
+
+	private List<Node> learner;
+
 	private long term;
 
-    public RaftLeaderMetadata(long term) {
-        this(term, null);
-    }
-
-	public RaftLeaderMetadata() {
+	public RaftClusterMetadata() {
+		this.msgType = RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
 	}
 
-	public RaftLeaderMetadata(long term, Map<String, Object> metadata) {
+	public RaftClusterMetadata(long term) {
 		this.term = term;
-        Node node = new Node();
-        node.setTransaction(node.createEndpoint(XID.getIpAddress(), XID.getPort(), "seata"));
-        node.setControl(node.createEndpoint(XID.getIpAddress(),
-            Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                .getProperty("server.port", String.valueOf(8088))),"http"));
-	    node.setRole(ClusterRole.LEADER);
-        Optional.ofNullable(metadata).ifPresent(node::setMetadata);
-		this.msgType = RaftSyncMsgType.REFRESH_LEADER_METADATA;
-        this.node = node;
+		this.msgType = RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
     }
 
-	public Node getNode() {
-		return node;
+    public Node createNode(String host, int txPort, int controlPort, String group,Map<String, Object> metadata) {
+        Node node = new Node();
+        node.setTransaction(node.createEndpoint(host, txPort, "seata"));
+        node.setControl(node.createEndpoint(host, controlPort, "http"));
+		node.setGroup(group);
+        Optional.ofNullable(metadata).ifPresent(node::setMetadata);
+        return node;
+    }
+
+	public Node getLeader() {
+		return leader;
 	}
 
-	public void setNode(Node node) {
-		this.node = node;
+	public void setLeader(Node leader) {
+		this.leader = leader;
 	}
 
 	public long getTerm() {
 		return term;
 	}
 
-    @Override
+	public List<Node> getFollowers() {
+		return followers;
+	}
+
+	public void setFollowers(List<Node> followers) {
+		this.followers = followers;
+	}
+
+	public List<Node> getLearner() {
+		return learner;
+	}
+
+	public void setLearner(List<Node> learner) {
+		this.learner = learner;
+	}
+
+	public void setTerm(long term) {
+		this.term = term;
+	}
+
+	@Override
     public String toString() {
         return StringUtils.toString(this);
     }

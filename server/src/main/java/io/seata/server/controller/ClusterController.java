@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
@@ -29,8 +28,6 @@ import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import io.seata.common.ConfigurationKeys;
-import io.seata.common.XID;
-import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
@@ -39,7 +36,7 @@ import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
-import io.seata.server.cluster.raft.sync.msg.RaftLeaderMetadata;
+import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,11 +106,13 @@ public class ClusterController {
                 PeerId leader = routeTable.selectLeader(group);
                 if (leader != null) {
                     Set<Node> nodes = new HashSet<>();
-                    RaftLeaderMetadata raftLeaderMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getNode();
+                    RaftClusterMetadata raftClusterMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                    Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getLeader();
                     leaderNode.setGroup(group);
                     nodes.add(leaderNode);
-                    metadataResponse.setTerm(raftLeaderMetadata.getTerm());
+                    nodes.addAll(raftClusterMetadata.getLearner());
+                    nodes.addAll(raftClusterMetadata.getFollowers());
+                    metadataResponse.setTerm(raftClusterMetadata.getTerm());
                     metadataResponse.setNodes(new ArrayList<>(nodes));
                 }
             } catch (Exception e) {

@@ -24,7 +24,7 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
-import io.seata.server.cluster.raft.sync.msg.RaftLeaderMetadata;
+import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSnapshotFile {
 	private static final long serialVersionUID = 78637164618855724L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RaftLeaderMetadata.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RaftClusterMetadata.class);
 
 	private final String group;
 
@@ -47,9 +47,9 @@ public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSn
     @Override
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();
-        RaftLeaderMetadata raftLeaderMetadata =
+        RaftClusterMetadata raftClusterMetadata =
             RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
-        raftSnapshot.setBody(raftLeaderMetadata);
+        raftSnapshot.setBody(raftClusterMetadata);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
         String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
         try {
@@ -74,9 +74,9 @@ public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSn
         }
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
-            RaftLeaderMetadata raftLeaderMetadata = (RaftLeaderMetadata)load(path);
+            RaftClusterMetadata raftClusterMetadata = (RaftClusterMetadata)load(path);
             RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine()
-                .setRaftLeaderMetadata(raftLeaderMetadata);
+                .setRaftLeaderMetadata(raftClusterMetadata);
             return true;
         } catch (final Exception e) {
             LOGGER.error("fail to load snapshot from {}", path, e);
