@@ -61,7 +61,7 @@
     "husky": "^1.1.4",
     "lint-staged": "^8.0.4",
     "mini-css-extract-plugin": "^0.5.0",
-    "node-sass": "^4.11.0",
+    "node-sass": "^9.0.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "1.15.2",
     "sass-loader": "^7.1.0",
