@@ -22,10 +22,11 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
 import io.seata.server.console.service.ConfigurationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +38,6 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/admin/configuration")
 public class ConfigController {
-    private Logger LOGGER = LoggerFactory.getLogger(ConfigController.class);
 
     private final Object SET_CONF_LOCK = new Object();
 

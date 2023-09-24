@@ -21,7 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class ConfigValidator {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigValidator.class);
 
     private static Map<String, ConfigSchema> configSchemaMap = new HashMap<>();
 
@@ -66,7 +70,7 @@ public class ConfigValidator {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("config-schema.yml");
         Map<String, Object> rawMap = yaml.loadAs(in, HashMap.class);
         if (rawMap.size() == 0) {
-            logger.error("Wrong config-schema.yml");
+            LOGGER.error("Wrong config-schema.yml");
         }
         flattenSchema("", rawMap);
     }
@@ -157,7 +161,7 @@ public class ConfigValidator {
 
     public static Set<String> availableConfiguration() {
         return configSchemaMap.keySet().stream().
-                filter(key -> (!key.startsWith(PREFIX_REGISTRY) && !key.startsWith(PREFIX_CONFIG)))
+                filter(key -> !key.startsWith(PREFIX_REGISTRY) && !key.startsWith(PREFIX_CONFIG))
                 .collect(Collectors.toSet());
     }
 
@@ -216,7 +220,7 @@ public class ConfigValidator {
         }
     }
     
-    static class IntegerConfigSchema extends ConfigSchema{
+    static class IntegerConfigSchema extends ConfigSchema {
         private int min;
         
         private int max;
@@ -246,8 +250,8 @@ public class ConfigValidator {
         @Override
         public boolean validate(String value) {
             try {
-               int v = Integer.parseInt(value);
-               return v >= min && v <= max;
+                int v = Integer.parseInt(value);
+                return v >= min && v <= max;
             } catch (NumberFormatException e) {
                 return false;
             }

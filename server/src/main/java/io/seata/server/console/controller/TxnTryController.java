@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin/txn")
 public class TxnTryController {
 
-    private Logger logger = LoggerFactory.getLogger(TxnTryController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TxnTryController.class);
 
     private final String DEMO_APP_NAME = "demo-app";
 
@@ -55,7 +55,7 @@ public class TxnTryController {
                 return SingleResult.success(xid);
             }
         } catch (TransactionException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             return SingleResult.failure(Code.ERROR);
         }
     }

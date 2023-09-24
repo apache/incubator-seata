@@ -19,7 +19,7 @@ import io.seata.config.ConfigChangeListener;
 import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.List;
 
 public class CustomRegistryServiceForTest implements RegistryService<ConfigChangeListener> {
     @Override
