@@ -82,7 +82,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
     private static final Map<String, List<InetSocketAddress>> INIT_ADDRESSES = new HashMap<>();
@@ -93,7 +92,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
         new PoolingHttpClientConnectionManager();
-    
+
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static volatile String CURRENT_TRANSACTION_SERVICE_GROUP;
@@ -101,6 +100,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static volatile String CURRENT_TRANSACTION_CLUSTER_NAME;
 
     private static volatile ThreadPoolExecutor REFRESH_METADATA_EXECUTOR;
+
+    private static final AtomicBoolean CLOSED = new AtomicBoolean(false);
 
     /**
      * Service node health check
@@ -159,7 +160,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     REFRESH_METADATA_EXECUTOR.execute(() -> {
                         long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
-                        while (true) {
+                        while (!CLOSED.get()) {
                             // Forced refresh of metadata information after set age
                             boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
                             String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
@@ -187,17 +188,20 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                             }
                         }
                     });
-                    Runtime.getRuntime().addShutdownHook(new Thread(REFRESH_METADATA_EXECUTOR::shutdown));
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                        CLOSED.compareAndSet(false, true);
+                        REFRESH_METADATA_EXECUTOR.shutdown();
+                        HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                            try {
+                                client.close();
+                            } catch (IOException e) {
+                                LOGGER.error(e.getMessage(), e);
+                            }
+                        });
+                    }));
                 }
             }
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> HTTP_CLIENT_MAP.values().stream().forEach(client -> {
-            try {
-                client.close();
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        })));
     }
 
     private static String queryHttpAddress(String clusterName, String group) {
@@ -207,8 +211,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (CollectionUtils.isNotEmpty(nodeList)) {
             List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
             if (CollectionUtils.isEmpty(inetSocketAddresses)) {
-                addressList = nodeList.stream().map(node -> node.getControl().createAddress())
-                    .collect(Collectors.toList());
+                addressList =
+                    nodeList.stream().map(node -> node.getControl().createAddress()).collect(Collectors.toList());
             } else {
                 stream = inetSocketAddresses.stream();
             }
@@ -227,7 +231,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
                 Node node = map.get(host);
-                return host + IP_PORT_SPLIT_CHAR + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
+                return host + IP_PORT_SPLIT_CHAR
+                    + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
@@ -245,6 +250,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public void close() {
+        CLOSED.compareAndSet(false, true);
     }
 
     @Override
@@ -275,7 +281,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             } catch (Exception e) {
                 LOGGER.error("watch cluster fail: {}", e.getMessage());
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
                 }
                 continue;
@@ -287,16 +293,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-                                                      List<InetSocketAddress> aliveAddress) {
+        List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
             return ALIVE_NODES.put(transactionServiceGroup,
-                    aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
-                        // Since only follower will turn into leader, only the follower node needs to be listened to
-                        return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
-                                .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
-                    }).collect(Collectors.toList()));
+                aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
+                    // Since only follower will turn into leader, only the follower node needs to be listened to
+                    return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
+                        .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
+                }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
@@ -334,7 +340,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
         int timeout) {
-        CloseableHttpClient client = null;
+        CloseableHttpClient client;
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {

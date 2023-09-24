@@ -89,7 +89,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);
 
     private final String mode;
-    
+
     private final String group;
 
     private final List<StoreSnapshotFile> snapshotFiles = new ArrayList<>();
@@ -97,7 +97,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     private static final Map<RaftSyncMsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
     private volatile RaftClusterMetadata raftClusterMetadata;
-    
+
     /**
      * Leader term
      */
@@ -144,8 +144,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 ByteBuffer byteBuffer = iterator.getData();
                 // if data is empty, it is only a heartbeat event and can be ignored
                 if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                    RaftBaseMsg msg =
-                        (RaftBaseMsg) RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
+                    RaftBaseMsg msg = (RaftBaseMsg)RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
                     // follower executes the corresponding task
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("sync msg: {}", msg);
@@ -283,12 +282,12 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     public RaftClusterMetadata createNewRaftClusterMetadata() {
         RaftClusterMetadata metadata = new RaftClusterMetadata(this.currentTerm.get());
-        Node node = metadata.createNode(XID.getIpAddress(), XID.getPort(),
+        Node leader = metadata.createNode(XID.getIpAddress(), XID.getPort(),
             Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                 .getProperty("server.port", String.valueOf(8088))),
             group, Collections.emptyMap());
-        node.setRole(ClusterRole.LEADER);
-        metadata.setLeader(node);
+        leader.setRole(ClusterRole.LEADER);
+        metadata.setLeader(leader);
         Configuration configuration = RouteTable.getInstance().getConfiguration(this.group);
         List<Node> learners = configuration.getLearners().stream().map(learner -> {
             int nettyPort = learner.getPort() - SERVICE_OFFSET_SPRING_BOOT;
@@ -309,10 +308,10 @@ public class RaftStateMachine extends StateMachineAdapter {
         return metadata;
     }
 
-    public void refreshClusterMetadata(RaftBaseMsg syncMsg){
+    public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
         raftClusterMetadata = (RaftClusterMetadata)syncMsg;
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
+            .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
         LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
     }
 
