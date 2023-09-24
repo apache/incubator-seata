@@ -9,7 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### optimize:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
 
 ### security:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
