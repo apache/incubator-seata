@@ -304,7 +304,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (this.branchType == BranchType.AT && CollectionUtils.isNotEmpty(this.lockHolder)) {
+        if (this.branchType == BranchType.AT) {
             return lockManager.releaseLock(this);
         }
         return true;
