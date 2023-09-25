@@ -82,60 +82,60 @@ public class SessionHolderTest {
 //    @Test
     @Order(2)
     public void test_retryRollbackingLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING));
+        Assertions.assertTrue(SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING));
     }
 
 //    @Test
     @Order(3)
     public void test_unRetryRollbackingLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING));
+        Assertions.assertTrue(SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING));
     }
 
 //    @Test
     @Order(4)
     public void test_retryCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(RETRY_COMMITTING));
+        Assertions.assertTrue(SessionHolder.acquireDistributedLock(RETRY_COMMITTING));
     }
 
 //    @Test
     @Order(5)
     public void test_unRetryCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(RETRY_COMMITTING));
+        Assertions.assertTrue(SessionHolder.releaseDistributedLock(RETRY_COMMITTING));
     }
 
 //    @Test
     @Order(6)
     public void test_asyncCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(ASYNC_COMMITTING));
+        Assertions.assertTrue(SessionHolder.acquireDistributedLock(ASYNC_COMMITTING));
     }
 
 //    @Test
     @Order(7)
     public void test_unAsyncCommittingLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(ASYNC_COMMITTING));
+        Assertions.assertTrue(SessionHolder.releaseDistributedLock(ASYNC_COMMITTING));
     }
 
 //    @Test
     @Order(8)
     public void test_txTimeoutCheckLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK));
+        Assertions.assertTrue(SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK));
     }
 
 //    @Test
     @Order(9)
     public void test_unTxTimeoutCheckLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK));
+        Assertions.assertTrue(SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK));
     }
 
 //    @Test
     @Order(10)
     public void test_undoLogDeleteLock() {
-        Assertions.assertEquals(true, SessionHolder.acquireDistributedLock(UNDOLOG_DELETE));
+        Assertions.assertTrue(SessionHolder.acquireDistributedLock(UNDOLOG_DELETE));
     }
 
 //    @Test
     @Order(11)
     public void test_unUndoLogDeleteLock() {
-        Assertions.assertEquals(true, SessionHolder.releaseDistributedLock(UNDOLOG_DELETE));
+        Assertions.assertTrue(SessionHolder.releaseDistributedLock(UNDOLOG_DELETE));
     }
 }
