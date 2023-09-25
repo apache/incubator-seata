@@ -360,8 +360,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             DefaultResourceManager.get().branchReport(BranchType.XA, xid, xaBranchXid.getBranchId(),
                     status, null);
         } catch (TransactionException te) {
-            LOGGER.warn("Failed to report XA branch " + status + " on " + xid + "-" + xaBranchXid.getBranchId()
-                    + " since " + te.getCode() + ":" + te.getMessage());
+            LOGGER.warn("Failed to report XA branch {} on {}-{} since {}:{}",
+                    status, xid, xaBranchXid.getBranchId(), te.getCode(), te.getMessage());
         }
     }
 
