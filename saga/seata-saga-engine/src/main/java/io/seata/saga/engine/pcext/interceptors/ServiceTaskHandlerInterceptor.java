@@ -27,6 +27,8 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionResolver;
+import io.seata.saga.engine.expression.exception.ExceptionMatchExpression;
+import io.seata.saga.engine.expression.spel.SpringELExpression;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -332,7 +334,17 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 for (Object evaluatorObj : statusEvaluators.keySet()) {
                     Expression evaluator = (Expression) evaluatorObj;
                     String statusVal = statusEvaluators.get(evaluator);
-                    Object elContext = resolver.getStatusEvaluationElContext(context, evaluator.getClass());
+                    Object elContext;
+
+                    Class<? extends Expression> expressionClass = evaluator.getClass();
+                    if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
+                        elContext = context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+                    } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
+                        elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
+                    } else {
+                        elContext = context.getVariables();
+                    }
+
                     if (Boolean.TRUE.equals(evaluator.getValue(elContext))) {
                         stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
                         break;
