@@ -16,8 +16,6 @@
 
 package io.seata.saga.engine.expression;
 
-import io.seata.saga.proctrl.ProcessContext;
-
 /**
  * Expression structure resolver
  *
@@ -25,10 +23,6 @@ import io.seata.saga.proctrl.ProcessContext;
  */
 public interface ExpressionResolver {
     Expression getExpression(String expressionStr);
-
-    <T extends Expression> Object getDefaultElContext(ProcessContext context, Class<T> expressionClass);
-
-    <T extends Expression> Object getStatusEvaluationElContext(ProcessContext context, Class<T> expressionClass);
 
     ExpressionFactoryManager getExpressionFactoryManager();
 

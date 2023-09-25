@@ -20,10 +20,6 @@ import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.ExpressionResolver;
-import io.seata.saga.engine.expression.exception.ExceptionMatchExpression;
-import io.seata.saga.engine.expression.spel.SpringELExpression;
-import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.DomainConstants;
 
 /**
  * Default {@link ExpressionResolver} implementation
@@ -46,8 +42,6 @@ public class DefaultExpressionResolver implements ExpressionResolver {
 
     private ExpressionFactoryManager expressionFactoryManager;
 
-    private String rootObjectName;
-
     @Override
     public Expression getExpression(String expressionStr) {
         ExpressionStruct struct = parseExpressionStruct(expressionStr);
@@ -57,26 +51,6 @@ public class DefaultExpressionResolver implements ExpressionResolver {
             throw new IllegalArgumentException("Cannot get ExpressionFactory by Type[" + struct + "]");
         }
         return expressionFactory.createExpression(struct.content);
-    }
-
-    @Override
-    public <T extends Expression> Object getDefaultElContext(ProcessContext context, Class<T> expressionClass) {
-        if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
-            return context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-        } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
-            return context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        }
-        return context.getVariables();
-    }
-
-    @Override
-    public <T extends Expression> Object getStatusEvaluationElContext(ProcessContext context, Class<T> expressionClass) {
-        if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
-            return context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-        } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
-            return context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
-        }
-        return context.getVariables();
     }
 
     protected ExpressionStruct parseExpressionStruct(String expressionStr) {
