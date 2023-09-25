@@ -9,10 +9,10 @@
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: 修复当 XA 事务失败回滚后，TC 还会继续重试回滚的问题
 
 ### optimize:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
 
 ### test:
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
