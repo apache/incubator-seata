@@ -23,6 +23,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.AsyncCallback;
+import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
@@ -1201,7 +1202,7 @@ public class StateMachineDBTests extends AbstractServerTest {
             Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
         });
 
-        // Test timeout
+        // Test timeout and forward recovery
         SagaCostPrint.executeAndPrint("3-40-3", () -> {
             HashMap<String, Object> paramMap = new HashMap<>();
             paramMap.put("forthSleepTime", 3000);
@@ -1212,6 +1213,20 @@ public class StateMachineDBTests extends AbstractServerTest {
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             EngineExecutionException e = (EngineExecutionException) inst.getException();
             Assertions.assertEquals(FrameworkErrorCode.StateMachineExecutionTimeout, e.getErrcode());
+        });
+
+        // Test direct event bus
+        SagaCostPrint.executeAndPrint("3-40-4", () -> {
+            DefaultStateMachineConfig config = (DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig();
+            boolean enableAsync = config.isEnableAsync();
+            config.setEnableAsync(false);
+            StateMachineInstance inst;
+            try {
+                inst = stateMachineEngine.start(stateMachineName, null, null);
+            } finally {
+                config.setEnableAsync(enableAsync);
+            }
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         });
     }
 }

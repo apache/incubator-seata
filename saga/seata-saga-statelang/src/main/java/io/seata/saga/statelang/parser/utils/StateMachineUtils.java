@@ -151,8 +151,8 @@ public class StateMachineUtils {
 
         Map<String, ForkStateImpl> stateNameToParentForkMap = new HashMap<>();
         List<Set<String>> forkStateChildren = forkStates.stream()
-                .map(state -> state.getAllBranchStates().values())
-                .flatMap(Collection::stream)
+                .map(state -> state.getAllBranchStates().values().stream()
+                        .flatMap(Collection::stream).collect(Collectors.toSet()))
                 .collect(Collectors.toList());
 
         for (int i = 0; i < forkStates.size(); i++) {

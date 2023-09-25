@@ -57,9 +57,11 @@ public class ForkStateHandler implements StateHandler {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Asynchronous start is disabled. Parallel execution will run serially.");
             }
+            // Use synchronized event publisher instead
+            publisher = stateMachineConfig.getProcessCtrlEventPublisher();
         }
 
-        publishBranches(stateMachineConfig.getAsyncProcessCtrlEventPublisher(), context, forkState);
+        publishBranches(publisher, context, forkState);
     }
 
     protected static void checkBranches(State forkState, List<String> branches) {
