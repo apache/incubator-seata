@@ -239,7 +239,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             }
             // Branch Report to TC
             reportStatusToTC(BranchStatus.PhaseOne_Failed);
-            LOGGER.info(xaBranchXid + " was rollbacked");
+            LOGGER.info("{} was rollbacked", xaBranchXid);
         } catch (XAException xe) {
             throw new SQLException("Failed to end(TMFAIL) xa branch on " + xid + "-" + xaBranchXid.getBranchId()
                 + " since " + xe.getMessage(), xe);
