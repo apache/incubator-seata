@@ -6,7 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### bugfix:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization

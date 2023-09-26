@@ -6,7 +6,7 @@
 - [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
 
 ### bugfix:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
