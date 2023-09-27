@@ -139,7 +139,7 @@ public class TransactionalTemplate {
             } finally {
                 //5. clear
                 resumeGlobalLockConfig(previousConfig);
-                triggerAfterCompletion();
+                triggerAfterCompletion(tx);
                 cleanUp();
             }
         } finally {
@@ -209,7 +209,7 @@ public class TransactionalTemplate {
         }
 
         try {
-            triggerBeforeCommit();
+            triggerBeforeCommit(tx);
             tx.commit();
             GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
@@ -236,7 +236,7 @@ public class TransactionalTemplate {
             if (null != statusException) {
                 throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
             }
-            triggerAfterCommit();
+            triggerAfterCommit(tx);
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -247,9 +247,9 @@ public class TransactionalTemplate {
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
 
         try {
-            triggerBeforeRollback();
+            triggerBeforeRollback(tx);
             tx.rollback();
-            triggerAfterRollback();
+            triggerAfterRollback(tx);
         } catch (TransactionException txe) {
             // Failed to rollback
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -286,9 +286,9 @@ public class TransactionalTemplate {
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
-            triggerBeforeBegin();
+            triggerBeforeBegin(tx);
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
-            triggerAfterBegin();
+            triggerAfterBegin(tx);
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.BeginFailure);
@@ -296,72 +296,86 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerBeforeBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeBegin();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+    private void triggerBeforeBegin(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerAfterBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterBegin();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook {}", e.getMessage(), e);
+    private void triggerAfterBegin(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterBegin in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerBeforeRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeRollback();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook {}", e.getMessage(), e);
+    private void triggerBeforeRollback(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeRollback in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerAfterRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterRollback();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+    private void triggerAfterRollback(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerBeforeCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeCommit();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+    private void triggerBeforeCommit(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCommit();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+    private void triggerAfterCommit(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCompletion();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+    private void triggerAfterCompletion(GlobalTransaction tx) {
+        if (tx == null || tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCompletion();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
