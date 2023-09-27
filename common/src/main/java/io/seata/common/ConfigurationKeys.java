@@ -639,6 +639,11 @@ public interface ConfigurationKeys {
     String ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableRmClientBatchSendRequest";
 
     /**
+     * The constant ENABLE_CLIENT_CHANNEL_CHECK_FAST_FAIL
+     */
+    String ENABLE_CLIENT_CHANNEL_CHECK_FAST_FAIL = TRANSPORT_PREFIX + "enableClientChannelCheckFastFail";
+
+    /**
      * The constant ENABLE_TC_SERVER_BATCH_SEND_RESPONSE
      */
     String ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = TRANSPORT_PREFIX + "enableTcServerBatchSendResponse";

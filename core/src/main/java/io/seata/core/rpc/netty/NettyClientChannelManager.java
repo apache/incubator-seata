@@ -31,6 +31,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
@@ -60,11 +61,14 @@ class NettyClientChannelManager {
 
     private Function<String, NettyPoolKey> poolKeyFunction;
 
+    private final boolean clientCheckChannelFastFail;
+
     NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
                                      final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
         this.poolKeyFunction = poolKeyFunction;
+        this.clientCheckChannelFastFail = clientConfig.isEnableClientChannelCheckFastFail();
     }
 
     private GenericKeyedObjectPool.Config getNettyPoolConfig(final NettyClientConfig clientConfig) {
@@ -181,6 +185,7 @@ class NettyClientChannelManager {
         }
         Set<String> channelAddress = new HashSet<>(availList.size());
         try {
+            String invalidAddress = "";
             for (String serverAddress : availList) {
                 try {
                     acquireChannel(serverAddress);
@@ -188,7 +193,11 @@ class NettyClientChannelManager {
                 } catch (Exception e) {
                     LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
                         serverAddress, e.getMessage(), e);
+                    invalidAddress += serverAddress + ",";
                 }
+            }
+            if (clientCheckChannelFastFail && StringUtils.isNotBlank(invalidAddress)) {
+                throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {

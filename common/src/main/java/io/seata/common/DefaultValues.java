@@ -52,6 +52,7 @@ public interface DefaultValues {
     boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
     boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
     boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
+    boolean DEFAULT_ENABLE_CLIENT_CHANNEL_CHECK_FAST_FAIL = false;
 
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
