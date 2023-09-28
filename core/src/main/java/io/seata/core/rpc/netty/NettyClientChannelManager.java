@@ -18,8 +18,10 @@ package io.seata.core.rpc.netty;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -185,19 +187,30 @@ class NettyClientChannelManager {
         }
         Set<String> channelAddress = new HashSet<>(availList.size());
         try {
-            String invalidAddress = "";
+            Map<String, Exception> failedMap = new HashMap<>();
             for (String serverAddress : availList) {
                 try {
                     acquireChannel(serverAddress);
                     channelAddress.add(serverAddress);
                 } catch (Exception e) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                        serverAddress, e.getMessage(), e);
-                    invalidAddress += serverAddress + ",";
+                    failedMap.put(serverAddress, e);
                 }
             }
-            if (clientChannelCheckFastFail && StringUtils.isNotBlank(invalidAddress)) {
-                throw new FrameworkException("can not connect to [" + invalidAddress + "]");
+            if (failedMap.size() > 0) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.error("{} can not connect to {} cause:{}",
+                            FrameworkErrorCode.NetConnect.getErrCode(), failedMap.keySet(),
+                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                } else if (LOGGER.isDebugEnabled()) {
+                    failedMap.forEach((key, value) -> {
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                    });
+                }
+                String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
+                if (clientChannelCheckFastFail && StringUtils.isNotBlank(invalidAddress)) {
+                    throw new FrameworkException("can not connect to [" + invalidAddress + "]");
+                }
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
