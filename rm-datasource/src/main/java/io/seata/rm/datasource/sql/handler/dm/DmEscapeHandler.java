@@ -16,7 +16,9 @@
 package io.seata.rm.datasource.sql.handler.dm;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
@@ -805,12 +807,28 @@ public class DmEscapeHandler implements EscapeHandler {
     }
 
     @Override
-    public boolean checkIfNeedEscape(String fieldOrTableName, TableMeta tableMeta) {
-        boolean check = checkIfKeyWords(fieldOrTableName);
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        columnName = columnName.trim();
+        if (containsEscape(columnName)) {
+            return false;
+        }
+        boolean isKeyWord = checkIfKeyWords(columnName);
+        if (isKeyWord) {
+            return true;
+        }
         // dm
         // we are recommend table name and column name must uppercase.
         // if exists full uppercase, the table name or column name does't bundle escape symbol.
-        return check || !isUppercase(fieldOrTableName);
+        if (null != tableMeta) {
+            ColumnMeta columnMeta = tableMeta.getColumnMeta(columnName);
+            if (null != columnMeta) {
+                return columnMeta.isCaseSensitive();
+            }
+        }
+        return !isUppercase(columnName);
     }
 
     private static boolean isUppercase(String fieldOrTableName) {
