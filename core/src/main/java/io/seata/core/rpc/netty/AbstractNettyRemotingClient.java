@@ -112,7 +112,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                clientChannelManager.reconnect(getTransactionServiceGroup());
+                try {
+                    clientChannelManager.reconnect(getTransactionServiceGroup());
+                } catch (Exception ex) {
+                    LOGGER.warn("reconnect TC error. reason: {}", ex.getMessage());
+                }
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
