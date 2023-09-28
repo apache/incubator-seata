@@ -19,14 +19,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.Constants;
-import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -34,6 +31,8 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Data source proxy.
@@ -89,6 +88,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
+            } else if (JdbcConstants.MYSQL.equals(dbType)) {
+                testMySQLAdaptiveType(connection);
             }
             version = selectDbVersion(connection);
         } catch (SQLException e) {
@@ -99,6 +100,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+    }
+
+    /**
+     * test mysql adaptive type for PolarDB-X
+     *
+     * @param connection db connection
+     */
+    private void testMySQLAdaptiveType(Connection connection) {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeQuery("show rule");
+            dbType = JdbcConstants.POLARDBX;
+        } catch (SQLException e) {
+            dbType = JdbcConstants.MYSQL;
+        }
     }
 
     /**
@@ -157,7 +172,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             initOracleResourceId();
-        } else if (JdbcConstants.MYSQL.equals(dbType)) {
+        } else if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
             initMysqlResourceId();
         } else if (JdbcConstants.DM.equals(dbType)) {
             initDMResourceId();
@@ -286,11 +301,17 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private String selectDbVersion(Connection connection) {
-        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+        if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
                  ResultSet versionResult = preparedStatement.executeQuery()) {
                 if (versionResult.next()) {
-                    return versionResult.getString("VERSION()");
+                    String version = versionResult.getString("VERSION()");
+                    if (version == null) {
+                        return null;
+                    }
+                    int dashIdx = version.indexOf('-');
+                    // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
+                    return dashIdx > 0 ? version.substring(0, dashIdx) : version;
                 }
             } catch (Exception e) {
                 LOGGER.error("get mysql version fail error: {}", e.getMessage());

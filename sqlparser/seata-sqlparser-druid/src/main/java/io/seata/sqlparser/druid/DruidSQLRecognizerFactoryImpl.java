@@ -24,6 +24,7 @@ import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ import java.util.List;
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, getAdaptiveDbType(dbType));
         if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
@@ -67,5 +68,18 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             }
         }
         return recognizers;
+    }
+
+    /**
+     * Get adaptive db type for druid parser.
+     *
+     * @param dbType origin db type
+     * @return adaptive db type
+     */
+    private static String getAdaptiveDbType(String dbType) {
+        if (JdbcConstants.POLARDBX.equals(dbType)) {
+            return JdbcConstants.MYSQL;
+        }
+        return dbType;
     }
 }
