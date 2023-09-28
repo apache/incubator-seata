@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
+- [[#5886](https://github.com/seata/seata/pull/5886)] optimize client startup connect server fail fast
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
@@ -21,6 +22,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
-
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

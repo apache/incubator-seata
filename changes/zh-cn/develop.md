@@ -10,6 +10,7 @@
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
+- [[#5886](https://github.com/seata/seata/pull/5886)] 优化客户端启动连接服务快速失败
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
@@ -21,5 +22,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
