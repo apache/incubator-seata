@@ -68,7 +68,7 @@ Seata 是一款开源的分布式事务解决方案，提供高性能和简单�
 - [wingchi-leung](https://github.com/wingchi-leung)
 - [liurong](https://github.com/robynron)
 - [opelok-z](https://github.com/opelok-z)
-- [a364176773](https://github.com/a364176773)
+- [funky-eyes](https://github.com/funky-eyes)
 - [Smery-lxm](https://github.com/Smery-lxm)
 - [lvekee](https://github.com/lvekee)
 - [doubleDimple](https://github.com/doubleDimple)
