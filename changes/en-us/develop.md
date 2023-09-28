@@ -10,12 +10,15 @@ Add changes here for all PR submitted to the develop branch.
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
+- [[#5889](https://github.com/seata/seata/pull/5889)] remove dependency without license
+- [[#5890](https://github.com/seata/seata/pull/5890)] remove 7z format compression support
+- [[#5891](https://github.com/seata/seata/pull/5891)] remove mariadb.jdbc dependency
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
 
 ### test:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5888](https://github.com/seata/seata/pull/5888)] remove sofa test cases
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
