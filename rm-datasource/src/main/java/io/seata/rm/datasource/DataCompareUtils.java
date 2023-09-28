@@ -31,11 +31,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.HashMap;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -139,11 +140,24 @@ public class DataCompareUtils {
      * @return the result
      */
     public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
+        return isRecordsEquals(new ArrayList<>(), beforeImage, afterImage);
+    }
+
+    /**
+     * Is records equals result.
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     * @return the result
+     */
+    public static Result<Boolean> isRecordsEquals(List<String> skipLowerList, TableRecords beforeImage,TableRecords afterImage) {
         if (beforeImage == null) {
-            return Result.build(afterImage == null, null);
+            return Result.build(afterImage == null || skip(skipLowerList, afterImage), null);
+        } else if (afterImage == null) {
+            return Result.build(skip(skipLowerList, beforeImage), null);
         } else {
-            if (afterImage == null) {
-                return Result.build(false, null);
+            if (skip(skipLowerList, beforeImage) || skip(skipLowerList, afterImage)) {
+                return Result.ok();
             }
             if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
                     && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
@@ -155,6 +169,14 @@ public class DataCompareUtils {
             } else {
                 return Result.build(false, null);
             }
+        }
+    }
+
+    private static boolean skip(List<String> skipList, TableRecords image) {
+        if (CollectionUtils.isEmpty(skipList)) {
+            return false;
+        } else {
+            return skipList.contains(image.getTableName().toLowerCase());
         }
     }
 

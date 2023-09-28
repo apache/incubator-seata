@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -76,6 +77,12 @@ public abstract class AbstractUndoExecutor {
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
             .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION);
+
+    /**
+     *  skip list of undo data validation
+     */
+    public static final String UNDO_DATA_VALIDATION_SKIP = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION_SKIP, "");
 
     /**
      * The Sql undo log.
@@ -233,10 +240,14 @@ public abstract class AbstractUndoExecutor {
 
         TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
         TableRecords afterRecords = sqlUndoLog.getAfterImage();
+        List<String> skipTables = new ArrayList<>();
+        if (StringUtils.isNotBlank(UNDO_DATA_VALIDATION_SKIP)) {
+            skipTables = Lists.newArrayList(UNDO_DATA_VALIDATION_SKIP.trim().toLowerCase().split(","));
+        }
 
         // Compare current data with before data
         // No need undo if the before data snapshot is equivalent to the after data snapshot.
-        Result<Boolean> beforeEqualsAfterResult = DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords);
+        Result<Boolean> beforeEqualsAfterResult = DataCompareUtils.isRecordsEquals(skipTables, beforeRecords, afterRecords);
         if (beforeEqualsAfterResult.getResult()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
@@ -249,12 +260,12 @@ public abstract class AbstractUndoExecutor {
         // Validate if data is dirty.
         TableRecords currentRecords = queryCurrentRecords(conn);
         // compare with current data and after image.
-        Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
+        Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(skipTables, afterRecords, currentRecords);
         if (!afterEqualsCurrentResult.getResult()) {
 
             // If current data is not equivalent to the after data, then compare the current data with the before
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
-            Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
+            Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(skipTables, beforeRecords, currentRecords);
             if (beforeEqualsCurrentResult.getResult()) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Stop rollback because there is no data change " +

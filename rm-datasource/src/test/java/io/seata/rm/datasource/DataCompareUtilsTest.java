@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import com.google.common.collect.Lists;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.sqlparser.struct.TableMeta;
@@ -61,13 +62,16 @@ public class DataCompareUtilsTest {
 
     @Test
     public void isRecordsEquals() {
+        List<String> skipList1 = Lists.newArrayList("Table_name".trim().toLowerCase().split(","));
+        List<String> skipList2 = Lists.newArrayList("Table_name1".trim().toLowerCase().split(","));
+        List<String> skipList3 = Lists.newArrayList("Table_name,table_name1".trim().toLowerCase().split(","));
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"pk"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
         beforeImage.setTableMeta(tableMeta);
+        beforeImage.setTableName("table_name");
 
         List<Row> rows = new ArrayList<>();
         Row row = new Row();
@@ -78,15 +82,19 @@ public class DataCompareUtilsTest {
 
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, null).getResult());
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(null, beforeImage).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList1, beforeImage, null).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList1, null, beforeImage).getResult());
 
         TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name1"); // wrong table name
         afterImage.setTableMeta(tableMeta);
+        afterImage.setTableName("table_name1"); // wrong table name
 
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList3, beforeImage, afterImage).getResult());
         afterImage.setTableName("table_name");
 
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList3, beforeImage, afterImage).getResult());
 
         List<Row> rows2 = new ArrayList<>();
         Row row2 = new Row();
@@ -95,19 +103,23 @@ public class DataCompareUtilsTest {
         rows2.add(row2);
         afterImage.setRows(rows2);
         Assertions.assertTrue(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList3, beforeImage, afterImage).getResult());
 
         field11.setValue("23456");
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
-        field11.setValue("12345");
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList3, beforeImage, afterImage).getResult());
 
+        field11.setValue("12345");
         field12.setName("sex");
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
-        field12.setName("age");
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(skipList1,beforeImage, afterImage).getResult());
 
+        field12.setName("age");
         field12.setValue("19");
         Assertions.assertFalse(DataCompareUtils.isRecordsEquals(beforeImage, afterImage).getResult());
-        field12.setName("18");
+        Assertions.assertFalse(DataCompareUtils.isRecordsEquals(skipList2, beforeImage, afterImage).getResult());
 
+        field12.setName("18");
         Field field3 = new Field("pk", 1, "12346");
         Row row3 = new Row();
         row3.add(field3);

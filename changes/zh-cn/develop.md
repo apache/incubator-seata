@@ -22,6 +22,7 @@
 - [[#5243](https://github.com/seata/seata/pull/5243)] 升级 kryo 5.4.0 优化对jdk17的兼容性
 - [[#5153](https://github.com/seata/seata/pull/5153)] 只允许AT去尝试跨RM获取channel
 - [[#5177](https://github.com/seata/seata/pull/5177)] 如果 `server.session.enable-branch-async-remove` 为真，异步删除分支，同步解锁。
+- [[#5273](https://github.com/seata/seata/pull/5273)] 优化`protobuf-maven-plugin`插件的编译配置，解决高版本的命令行过长问题
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] 修复一些安全漏洞的版本
@@ -42,5 +43,6 @@
 - [Bughue](https://github.com/Bughue)
 - [pengten](https://github.com/pengten)
 - [wangliang181230](https://github.com/wangliang181230)
+- [GoodBoyCoder](https://github.com/GoodBoyCoder)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

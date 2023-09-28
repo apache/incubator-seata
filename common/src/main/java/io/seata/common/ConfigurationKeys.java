@@ -410,6 +410,11 @@ public interface ConfigurationKeys {
     String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
 
     /**
+     * The constant TRANSACTION_UNDO_DATA_VALIDATION_SKIP.
+     */
+    String TRANSACTION_UNDO_DATA_VALIDATION_SKIP = TRANSACTION_UNDO_DATA_VALIDATION + ".skip";
+
+    /**
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     String TRANSACTION_UNDO_LOG_SERIALIZATION = CLIENT_UNDO_PREFIX + "logSerialization";
