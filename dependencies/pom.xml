@@ -708,6 +708,10 @@
                         <artifactId>*</artifactId>
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>xmlpull</artifactId>
+                        <groupId>xmlpull</groupId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
