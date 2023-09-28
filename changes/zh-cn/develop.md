@@ -10,12 +10,15 @@
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
+- [[#5889](https://github.com/seata/seata/pull/5889)] 移除无license组件
+- [[#5890](https://github.com/seata/seata/pull/5890)] 移除7z压缩支持
+- [[#5891](https://github.com/seata/seata/pull/5891)] 移除 mariadb.jdbc 依赖
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
 
 ### test:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#5888](https://github.com/seata/seata/pull/5888)] 移除 sofa 测试用例
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
