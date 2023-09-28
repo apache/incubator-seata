@@ -61,14 +61,14 @@ class NettyClientChannelManager {
 
     private Function<String, NettyPoolKey> poolKeyFunction;
 
-    private final boolean clientCheckChannelFastFail;
+    private final boolean clientChannelCheckFastFail;
 
     NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
                                      final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
         this.poolKeyFunction = poolKeyFunction;
-        this.clientCheckChannelFastFail = clientConfig.isEnableClientChannelCheckFastFail();
+        this.clientChannelCheckFastFail = clientConfig.isEnableClientChannelCheckFastFail();
     }
 
     private GenericKeyedObjectPool.Config getNettyPoolConfig(final NettyClientConfig clientConfig) {
@@ -196,7 +196,7 @@ class NettyClientChannelManager {
                     invalidAddress += serverAddress + ",";
                 }
             }
-            if (clientCheckChannelFastFail && StringUtils.isNotBlank(invalidAddress)) {
+            if (clientChannelCheckFastFail && StringUtils.isNotBlank(invalidAddress)) {
                 throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }
         } finally {
