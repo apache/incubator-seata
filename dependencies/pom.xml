@@ -218,6 +218,12 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-all</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.jcip</groupId>
+                        <artifactId>jcip-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${sofa.rpc.version}</version>
             </dependency>
             <dependency>
@@ -691,6 +697,10 @@
                     <exclusion>
                         <artifactId>*</artifactId>
                         <groupId>org.glassfish.jersey</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>xmlpull</artifactId>
+                        <groupId>xmlpull</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
