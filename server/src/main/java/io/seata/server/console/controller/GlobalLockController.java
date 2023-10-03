@@ -55,12 +55,11 @@ public class GlobalLockController {
     /**
      * Delete global locks
      *
-     * @param xid      the lock of xid
-     * @param branchId the lock of branchId
-     * @return ingleResult<Void>
+     * @param  param the param
+     * @return SingleResult<Void>
      */
     @DeleteMapping("delete")
-    public SingleResult<Void> query(String xid, String branchId) {
-        return globalLockService.deleteLock(xid, branchId);
+    public SingleResult<Void> delete(@ModelAttribute GlobalLockParam param) {
+        return globalLockService.deleteLock(param);
     }
 }

@@ -37,9 +37,8 @@ public interface GlobalLockService {
     /**
      * Delete lock by xid and branchId
      *
-     * @param xid      xid
-     * @param branchId branch id
+     * @param param param
      * @return SingleResult<Void>
      */
-    SingleResult<Void> deleteLock(String xid, String branchId);
+    SingleResult<Void> deleteLock(GlobalLockParam param);
 }

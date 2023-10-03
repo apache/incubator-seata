@@ -27,7 +27,6 @@ import javax.annotation.Resource;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
-import io.seata.console.result.SingleResult;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
@@ -350,8 +349,8 @@ public class LockManagerTest {
     }
 
     @ParameterizedTest
-    @MethodSource("globalSessionForLockTestProvider")
-    public void lockDeleteTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+    @MethodSource("globalSessionProvider")
+    public void lockDeleteTest(GlobalSession globalSessions) throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
         SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
@@ -363,20 +362,38 @@ public class LockManagerTest {
             }
         }
         try {
-            sessionManager.addGlobalSession(globalSessions1);
-            sessionManager.addGlobalSession(globalSessions2);
-            // wrong param for xid
-            Assertions.assertThrows(IllegalArgumentException.class, () ->
-                    globalLockService.deleteLock("testXid", "testBranchId"));
-            // wrong param for branch id
-            Assertions.assertThrows(IllegalArgumentException.class, () ->
-                    globalLockService.deleteLock(globalSessions1.getXid(), "testBranchId"));
-            SingleResult<Void> singleResult = globalLockService.deleteLock(globalSessions1.getXid(),
-                    String.valueOf(globalSessions1.getBranchSessions().get(0).getBranchId()));
-            Assertions.assertEquals(singleResult.getCode(), "200");
+            sessionManager.addGlobalSession(globalSessions);
+            LockManager lockManager = new FileLockManagerForTest();
+            for (BranchSession branchSession : globalSessions.getBranchSessions()) {
+                lockManager.acquireLock(branchSession);
+            }
+            GlobalLockParam globalLockParam = new GlobalLockParam();
+            globalLockParam.setPageSize(10);
+            globalLockParam.setPageNum(1);
+            globalLockParam.setXid(globalSessions.getXid());
+            GlobalLockParam param1 = new GlobalLockParam();
+            param1.setXid(globalSessions.getXid());
+            globalSessions.getBranchSessions().forEach(branchSession -> {
+                param1.setBranchId(String.valueOf(branchSession.getBranchId()));
+                String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
+                for (String tableGroupedLockKey : tableGroupedLockKeys) {
+                    int idx = tableGroupedLockKey.indexOf(":");
+                    String tableName = tableGroupedLockKey.substring(0, idx);
+                    String mergedPKs = tableGroupedLockKey.substring(idx + 1);
+                    String[] pks = mergedPKs.split(",");
+                    param1.setTableName(tableName);
+                    int beginCnt = globalLockService.query(globalLockParam).getData().size();
+                    for (int i = 0; i < pks.length; i++) {
+                        String pk = pks[i];
+                        param1.setPk(pk);
+                        globalLockService.deleteLock(param1);
+                        Assertions.assertEquals(beginCnt - i - 1, globalLockService.query(globalLockParam).getData().size());
+                    }
+                }
+            });
+            Assertions.assertEquals(0, globalLockService.query(globalLockParam).getData().size());
         } finally {
-            sessionManager.removeGlobalSession(globalSessions1);
-            sessionManager.removeGlobalSession(globalSessions2);
+            sessionManager.removeGlobalSession(globalSessions);
             sessionManager.destroy();
         }
     }
@@ -468,6 +485,26 @@ public class LockManagerTest {
         globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
 
         return Stream.of(Arguments.of(globalSession1, globalSession2));
+    }
+
+    static Stream<Arguments> globalSessionProvider() throws ParseException {
+        final BranchSession[] branchSessions2 = baseBranchSession("employee", "de:1,2;df:3,4;dg:5,6", "eg:7,8;ef:9,10");
+        final BranchSession branchSession3 = branchSessions2[0];
+        branchSession3.setTransactionId(123456L);
+
+        final BranchSession branchSession4 = branchSessions2[1];
+        branchSession4.setTransactionId(123456L);
+
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession.setXid("xid2:123456");
+        globalSession.add(branchSession3);
+        globalSession.add(branchSession4);
+        globalSession.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(globalSession));
     }
 
     /**

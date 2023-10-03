@@ -40,14 +40,14 @@ public abstract class AbstractBranchService extends AbstractService implements B
             throw new IllegalArgumentException("saga can not operate branch session");
         }
         BranchSession branchSession = checkResult.getBranchSession();
-        // For BranchStatus.PhaseOne_Done is finished, will remove soon, thus no support
         BranchStatus branchStatus = branchSession.getStatus();
+        if (branchStatus.getCode() == BranchStatus.STOP_RETRY.getCode()) {
+            return SingleResult.success();
+        }
+        // For BranchStatus.PhaseOne_Done is finished, will remove soon, thus no support
         if (branchStatus != BranchStatus.Unknown && branchStatus != BranchStatus.Registered &&
                 branchStatus != BranchStatus.PhaseOne_Done) {
             throw new IllegalArgumentException("current branch session is not support to stop");
-        }
-        if (branchStatus.getCode() == BranchStatus.STOP_RETRY.getCode()) {
-            throw new IllegalArgumentException("current branch session already stop");
         }
         GlobalStatus status = globalSession.getStatus();
         BranchStatus newStatus = RETRY_STATUS.contains(status) || GlobalStatus.Rollbacking.equals(status) ||
@@ -60,10 +60,10 @@ public abstract class AbstractBranchService extends AbstractService implements B
         try {
             globalSession.changeBranchStatus(branchSession, newStatus);
         } catch (TransactionException e) {
-            LOGGER.error("change branch session status fail, xid:{}, branchId:{}", xid, branchId, e);
+            LOGGER.error("stop branch session retry fail, xid:{}, branchId:{}", xid, branchId, e);
             throw new FrameworkException(e);
         } catch (Exception e) {
-            LOGGER.error("change branch session status fail, xid:{}, branchId:{}", xid, branchId, e);
+            LOGGER.error("stop branch session retry fail, xid:{}, branchId:{}", xid, branchId, e);
             throw e;
         }
         return SingleResult.success();
@@ -77,7 +77,23 @@ public abstract class AbstractBranchService extends AbstractService implements B
         if (globalSession.isSaga()) {
             throw new IllegalArgumentException("saga can not operate branch session");
         }
-        doStartBranchRetry(globalSession, checkResult.getBranchSession());
+        BranchSession branchSession = checkResult.getBranchSession();
+        BranchStatus branchStatus = branchSession.getStatus();
+        if (!BranchStatus.STOP_RETRY.equals(branchStatus)) {
+            throw new IllegalArgumentException("current branch transactions status is not support to start retry");
+        }
+        // BranchStatus.PhaseOne_Done and BranchStatus.Registered will become BranchStatus.Registered
+        BranchStatus newStatus = BranchStatus.Registered;
+        branchSession.setStatus(newStatus);
+        try {
+            globalSession.changeBranchStatus(branchSession, newStatus);
+        } catch (TransactionException e) {
+            LOGGER.error("start branch session retry fail, xid: {}, branchId:{}", xid, branchId, e);
+            throw new FrameworkException(e);
+        } catch (Exception e) {
+            LOGGER.error("change branch session retry fail, xid: {}, branchId:{}", xid, branchId, e);
+            throw e;
+        }
         return SingleResult.success();
     }
 
@@ -93,16 +109,16 @@ public abstract class AbstractBranchService extends AbstractService implements B
         BranchSession branchSession = checkResult.getBranchSession();
         if (FAIL_STATUS.contains(globalStatus) || RETRY_STATUS.contains(globalStatus)
                 || FINISH_STATUS.contains(globalStatus) || GlobalStatus.StopRollbackRetry == globalStatus
-                || GlobalStatus.StopCommitRetry == globalStatus) {
+                || GlobalStatus.StopCommitRetry == globalStatus || GlobalStatus.Deleting == globalStatus) {
             try {
                 boolean deleted = doDeleteBranch(globalSession, branchSession);
                 return deleted ? SingleResult.success() :
-                        SingleResult.failure("delete branch fail, please retry again");
+                        SingleResult.failure("delete branch fail, please retry again later");
             } catch (TransactionException | TimeoutException | RuntimeException e) {
-                LOGGER.error("Delete lock fail, xid:{}, branchId:{}, reason: {}", xid, branchId, e.getMessage(), e);
+                LOGGER.error("delete branch session fail, xid:{}, branchId:{}", xid, branchId, e);
                 throw new FrameworkException(e);
             } catch (Exception e) {
-                LOGGER.error("Delete lock fail, xid:{}, branchId:{}", xid, branchId, e);
+                LOGGER.error("delete branch session fail, xid:{}, branchId:{}", xid, branchId, e);
                 throw e;
             }
         }

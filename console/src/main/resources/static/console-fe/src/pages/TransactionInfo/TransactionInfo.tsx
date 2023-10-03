@@ -403,7 +403,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       changeGlobalSessionTitle,
     } = locale;
     return (
-      <Actions style={{width: '350px'}}>
+      <Actions style={{width: '450px'}}>
         {/* {when withBranch false, hide 'View branch session' button} */}
         {this.state.globalSessionParam.withBranch ? (
           <LinkButton

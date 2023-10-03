@@ -17,17 +17,19 @@ package io.seata.server.console.impl.file;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
-import io.seata.core.exception.TransactionException;
 import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
@@ -39,6 +41,7 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
+import io.seata.server.storage.file.lock.FileLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -81,24 +84,35 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
     }
 
     @Override
-    public SingleResult<Void> deleteLock(String xid, String branchId) {
-        CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
-        try {
-            BranchSession branchSession = checkResult.getBranchSession();
-            return lockManager.releaseLock(branchSession) ? SingleResult.success() : SingleResult.failure(Code.ERROR);
-        } catch (TransactionException e) {
-            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
-            throw new FrameworkException(e);
-        } catch (Exception e) {
-            LOGGER.error("Release lock fail, xid:{}, branchId:{}", xid, branchId, e);
-            throw e;
-        }
+    public SingleResult<Void> deleteLock(GlobalLockParam param) {
+        CheckResult checkResult = checkDeleteParam(param);
+        BranchSession branchSession = checkResult.getBranchSession();
+        ConcurrentMap<String, ConcurrentMap<String,
+                ConcurrentMap<Integer, FileLocker.BucketLockMap>>> lockMap = FileLocker.getLockMap();
+        Optional.ofNullable(lockMap.get(param.getResourceId()))
+                .map(dbLockMap -> dbLockMap.get(param.getTableName()))
+                .map(tableLockMap -> {
+                    int bucketId = param.getPk().hashCode() % FileLocker.getBucketPerTable();
+                    return tableLockMap.get(bucketId);
+                })
+                .ifPresent(bucketLockMap -> {
+                    Map<FileLocker.BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
+                    for (Map.Entry<FileLocker.BucketLockMap, Set<String>> entry : lockHolder.entrySet()) {
+                        FileLocker.BucketLockMap key = entry.getKey();
+                        // delete lock only if the same bucket in the branch
+                        if (key.equals(bucketLockMap)) {
+                            doDeleteGlobalLock(branchSession, param, entry);
+                            break;
+                        }
+                    }
+                });
+        return SingleResult.success();
     }
 
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param the query param
+     * @param param         the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */
@@ -191,6 +205,69 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
                     // timeEnd
                     (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
         };
+    }
+
+    private void doDeleteGlobalLock(BranchSession branchSession, GlobalLockParam param,
+                                    Map.Entry<FileLocker.BucketLockMap, Set<String>> entry) {
+        Map<FileLocker.BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
+        String delPk = param.getPk();
+        String delTableName = param.getTableName();
+        FileLocker.BucketLockMap bucket = entry.getKey();
+        Set<String> lockedPks = entry.getValue();
+        for (String lockedPk : lockedPks) {
+            // delete the lock when the pk is the same
+            if (StringUtils.isNotBlank(lockedPk) && lockedPk.equalsIgnoreCase(delPk)) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("start to delete global lock: xid{}, branchId:{}, tableName:{} pk:{}",
+                            param.getXid(), param.getBranchId(), delTableName, delPk);
+                }
+                // remove the lock
+                bucket.get().remove(lockedPk, branchSession);
+                String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
+                StringJoiner newLockKey = new StringJoiner(";");
+                for (String tableGroupedLockKey : tableGroupedLockKeys) {
+                    int idx = tableGroupedLockKey.indexOf(":");
+                    String tableName = tableGroupedLockKey.substring(0, idx);
+                    if (!tableName.equalsIgnoreCase(delTableName)) {
+                        newLockKey.add(tableGroupedLockKey);
+                        continue;
+                    }
+                    String mergedPKs = tableGroupedLockKey.substring(idx + 1);
+                    String[] pks = mergedPKs.split(",");
+                    StringJoiner newTablePkKey = new StringJoiner(",");
+                    for (String pk : pks) {
+                        // the pk that still contained, just append to the new lock key
+                        if (!pk.equalsIgnoreCase(delPk)) {
+                            newTablePkKey.add(pk);
+                        }
+                    }
+                    if (StringUtils.isNotBlank(newTablePkKey.toString())) {
+                        newLockKey.add(tableName + ":" + newTablePkKey);
+                    }
+                }
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("update lock key from:{} to:{}", branchSession.getLockKey(), newLockKey);
+                }
+                // update the lock key in branchSession
+                branchSession.setLockKey(newLockKey.toString());
+                break;
+            }
+        }
+        // remove the empty bucket
+        if (bucket.get().isEmpty()) {
+            lockHolder.remove(bucket);
+        }
+    }
+
+    private CheckResult checkDeleteParam(GlobalLockParam param) {
+        String xid = param.getXid();
+        String branchId = param.getBranchId();
+        CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
+        if (StringUtils.isBlank(param.getTableName()) || StringUtils.isBlank(param.getPk())
+                || StringUtils.isBlank(param.getResourceId())) {
+            throw new IllegalArgumentException("tableName or resourceId or pk can not be empty");
+        }
+        return checkResult;
     }
 
 

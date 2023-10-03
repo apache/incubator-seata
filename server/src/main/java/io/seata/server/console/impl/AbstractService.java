@@ -15,7 +15,6 @@
  */
 package io.seata.server.console.impl;
 
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -107,27 +106,6 @@ public abstract class AbstractService {
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("branch session is not exist, may be finished"));
         return new CheckResult(globalSession, branchSession);
-    }
-
-    protected void doStartBranchRetry(GlobalSession globalSession, BranchSession branchSession) {
-        BranchStatus branchStatus = branchSession.getStatus();
-        if (!BranchStatus.STOP_RETRY.equals(branchStatus)) {
-            throw new IllegalArgumentException("current branch transactions status is not support to start retry");
-        }
-        // BranchStatus.PhaseOne_Done and BranchStatus.Registered will become BranchStatus.Registered
-        BranchStatus newStatus = BranchStatus.Registered;
-        branchSession.setStatus(newStatus);
-        try {
-            globalSession.changeBranchStatus(branchSession, newStatus);
-        } catch (TransactionException e) {
-            LOGGER.error("Change branch session status fail, xid: {}, branchId:{}",
-                    globalSession.getXid(), branchSession.getBranchId(), e);
-            throw new FrameworkException(e);
-        } catch (Exception e) {
-            LOGGER.error("Change branch session status fail, xid: {}, branchId:{}",
-                    globalSession.getXid(), branchSession.getBranchId(), e);
-            throw e;
-        }
     }
 
     protected boolean doDeleteBranch(GlobalSession globalSession, BranchSession branchSession) throws TimeoutException, TransactionException {
