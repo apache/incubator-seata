@@ -16,6 +16,7 @@
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
+- [[#5898](https://github.com/seata/seata/pull/5898)] 修复npm package漏洞
 
 ### test:
 - [[#5888](https://github.com/seata/seata/pull/5888)] 移除 sofa 测试用例
