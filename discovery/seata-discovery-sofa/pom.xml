@@ -36,10 +36,5 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>registry-client-all</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>registry-test</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 </project>
