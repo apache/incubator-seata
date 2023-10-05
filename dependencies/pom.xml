@@ -63,7 +63,6 @@
         <sofa.registry.version>6.3.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.82</jcommander.version>
-        <xz.version>1.8</xz.version>
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
@@ -98,7 +97,7 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.6</druid.version>
+        <druid.version>1.2.7</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <!-- sql parser -->
@@ -218,6 +217,12 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-all</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.jcip</groupId>
+                        <artifactId>jcip-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${sofa.rpc.version}</version>
             </dependency>
             <dependency>
@@ -538,11 +543,6 @@
                 <version>${fst.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.tukaani</groupId>
-                <artifactId>xz</artifactId>
-                <version>${xz.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
@@ -692,6 +692,10 @@
                         <artifactId>*</artifactId>
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>xmlpull</artifactId>
+                        <groupId>xmlpull</groupId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -711,4 +715,26 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>dependencies-for-springboot3-1-or-above</id>
+            <properties>
+                <httpcore.version>4.4.16</httpcore.version>
+                <httpclient.version>4.5.14</httpclient.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                    <version>${httpcore.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                    <version>${httpclient.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

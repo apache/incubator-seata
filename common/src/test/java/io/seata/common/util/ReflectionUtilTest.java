@@ -28,7 +28,7 @@ import java.util.Map;
 import io.seata.common.BranchDO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
 public class ReflectionUtilTest {
@@ -124,7 +124,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
@@ -189,7 +189,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.getAnnotationValues` does not supported java17
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testGetAnnotationValues() throws NoSuchMethodException, NoSuchFieldException {
         Assertions.assertEquals(new LinkedHashMap<>(), ReflectionUtil
             .getAnnotationValues(this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));

@@ -734,7 +734,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         if(metas.isEmpty()){
             metas = Arrays.asList(columnsMetasReturnValue);
         }
-        return new MockResultSet((MockStatementBase) this.connection.createStatement())
+        return new MockResultSet(this.connection.createStatement())
             .mockResultSet(columnMetaColumnLabels, metas.toArray(new Object[0][]));
     }
 
@@ -791,7 +791,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
         throws SQLException {
-        return new MockResultSet((MockStatementBase)this.connection.createStatement())
+        return new MockResultSet(this.connection.createStatement())
                 .mockResultSet(indexMetaColumnLabels, indexMetasReturnValue);
     }
 
