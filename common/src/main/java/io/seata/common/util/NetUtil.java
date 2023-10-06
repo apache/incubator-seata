@@ -15,12 +15,22 @@
  */
 package io.seata.common.util;
 
-import java.net.*;
-import java.util.*;
-
 import io.seata.common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 /**
  * The type Net util.
@@ -103,8 +113,8 @@ public class NetUtil {
         return new InetSocketAddress(host, port);
     }
 
-    public static String[] splitIPPortStr(String address){
-        if(StringUtils.isBlank(address)){
+    public static String[] splitIPPortStr(String address) {
+        if (StringUtils.isBlank(address)) {
             throw new IllegalArgumentException("ip and port string cannot be empty!");
         }
         if (address.charAt(0) == '[') {
@@ -112,14 +122,14 @@ public class NetUtil {
         }
         String[] serverAddArr = null;
         int i = address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR);
-        if(i > -1){
+        if (i > -1) {
             serverAddArr = new String[2];
             String hostAddress = address.substring(0,i);
             if (hostAddress.contains("%")) {
                 hostAddress = hostAddress.substring(0, hostAddress.indexOf("%"));
             }
             serverAddArr[0] = hostAddress;
-            serverAddArr[1] = address.substring(i+1);
+            serverAddArr[1] = address.substring(i + 1);
         }
         return serverAddArr;
     }
@@ -149,7 +159,7 @@ public class NetUtil {
      */
     public static String getLocalIp(String... preferredNetworks) {
         InetAddress address = getLocalAddress(preferredNetworks);
-        if(null != address){
+        if (null != address) {
             String hostAddress = address.getHostAddress();
             if (address instanceof Inet6Address) {
                 if (hostAddress.contains("%")) {
@@ -161,7 +171,7 @@ public class NetUtil {
         return localIP();
     }
 
-    public static String localIP(){
+    public static String localIP() {
         if (PREFER_IPV6_ADDRESSES) {
             return LOCALHOST_IPV6;
         }
@@ -270,7 +280,7 @@ public class NetUtil {
         }
         String hostAddress = address.getHostAddress();
         if (address instanceof Inet6Address) {
-            if(!PREFER_IPV6_ADDRESSES){
+            if (!PREFER_IPV6_ADDRESSES) {
                 return false;
             }
             if (address.isAnyLocalAddress() // filter ::/128
@@ -322,11 +332,11 @@ public class NetUtil {
         }
     }
 
-    public static boolean isValidIPv4(String ip){
+    public static boolean isValidIPv4(String ip) {
         return NetAddressValidatorUtil.isIPv4Address(ip);
     }
 
-    public static boolean isValidIPv6(String ip){
+    public static boolean isValidIPv6(String ip) {
         return NetAddressValidatorUtil.isIPv6Address(ip);
     }
 
