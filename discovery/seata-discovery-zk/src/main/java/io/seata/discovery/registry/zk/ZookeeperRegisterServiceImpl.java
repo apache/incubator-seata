@@ -42,8 +42,6 @@ import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
-
 /**
  * zookeeper path as /registry/zk/
  *
