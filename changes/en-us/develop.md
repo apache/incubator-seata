@@ -22,6 +22,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5243](https://github.com/seata/seata/pull/5243)] optimize kryo 5.4.0 optimize compatibility with jdk17
 - [[#5153](https://github.com/seata/seata/pull/5153)] Only AT mode try to get channel with other app
 - [[#5177](https://github.com/seata/seata/pull/5177)] If `server.session.enable-branch-async-remove` is true, delete the branch asynchronously and unlock it synchronously.
+- [[#5272](https://github.com/seata/seata/pull/5272)] save tcc action context to fencelog
 
 ### security:
 - [[#5172](https://github.com/seata/seata/pull/5172)] fix some security vulnerabilities

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * The type Common Fence store data base dao
  *
  * @author kaka2code
+ * @author yangwenpeng
  */
 public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
 
@@ -207,5 +208,52 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
             LOGGER.error("get db type fail", e);
         }
         return false;
+    }
+
+    @Override
+    public boolean updateApplicationData(Connection conn, String xid, Long branchId, String applicationData) {
+        PreparedStatement ps = null;
+        try {
+            String sql = CommonFenceStoreSqls.getUpdateApplicationDataByBranchIdAndXid(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, applicationData);
+            ps.setString(2, xid);
+            ps.setLong(3, branchId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            String errMsg = null;
+            if (e.getMessage() != null && e.getMessage().contains("Unknown column 'application_data'")) {
+                errMsg = "EnableFence is required the column 'application_data' in table 'tcc_fence_log', please check!";
+            }
+            throw new StoreException(e, errMsg);
+        } finally {
+            IOUtil.close(ps);
+        }
+    }
+
+    @Override
+    public String queryApplicationData(Connection conn, String xid, long branchId) {
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String sql = CommonFenceStoreSqls.getQueryApplicationDataSql(logTableName);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("application_data");
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            String errMsg = null;
+            if (e.getMessage() != null && e.getMessage().contains("Unknown column 'application_data'")) {
+                errMsg = "EnableFence is required the column 'application_data' in table 'tcc_fence_log', please check!";
+            }
+            throw new DataAccessException(e, errMsg);
+        } finally {
+            IOUtil.close(rs, ps);
+        }
     }
 }

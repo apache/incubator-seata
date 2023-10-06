@@ -18,6 +18,8 @@ package io.seata.rm.fence;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import io.seata.integration.tx.api.fence.exception.CommonFenceException;
+import io.seata.rm.tcc.context.FenceLogContextReporter;
+import io.seata.rm.tcc.context.FenceLogContextSearcher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -47,8 +49,7 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
     @Override
     public void afterPropertiesSet() {
         if (dataSource != null) {
-            // set dataSource
-            SpringFenceHandler.setDataSource(dataSource);
+            init();
         } else {
             throw new CommonFenceException(FrameworkErrorCode.DateSourceNeedInjected);
         }
@@ -60,5 +61,12 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
         }
     }
 
-
+    @Override
+    public void init() {
+        // set dataSource
+        SpringFenceHandler.setDataSource(dataSource);
+        FenceLogContextReporter.setDataSource(dataSource);
+        FenceLogContextSearcher.setDataSource(dataSource);
+        super.init();
+    }
 }

@@ -16,14 +16,11 @@
 package io.seata.rm.tcc.api;
 
 import io.seata.common.Constants;
-import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
 import io.seata.integration.tx.api.interceptor.ActionContextUtil;
 import io.seata.integration.tx.api.util.JsonUtil;
-import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.tcc.api.context.DefaultContextReporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +32,7 @@ import java.util.Map;
  * the api of sharing business action context to tcc phase 2
  *
  * @author tanzj
+ * @author yangwenpeng report context
  */
 public final class BusinessActionContextUtil {
 
@@ -81,46 +79,17 @@ public final class BusinessActionContextUtil {
         }
         // set updated
         actionContext.setUpdated(true);
-
-        // if delay report, params will be finally reported after phase 1 execution
-        if (Boolean.TRUE.equals(actionContext.getDelayReport())) {
-            return false;
-        }
-
-        // do branch report
-        return reportContext(actionContext);
+        return true;
     }
 
     /**
      * to do branch report sharing actionContext
      *
-     * @param actionContext the context
      * @return branch report succeed
      */
-    public static boolean reportContext(BusinessActionContext actionContext) {
-        // check is updated
-        if (!Boolean.TRUE.equals(actionContext.getUpdated())) {
-            return false;
-        }
-
-        try {
-            // branch report
-            DefaultResourceManager.get().branchReport(
-                    actionContext.getBranchType(),
-                    actionContext.getXid(),
-                    actionContext.getBranchId(),
-                    BranchStatus.Registered,
-                    JsonUtil.toJSONString(Collections.singletonMap(Constants.TX_ACTION_CONTEXT, actionContext.getActionContext()))
-            );
-
-            // reset to un_updated
-            actionContext.setUpdated(null);
-            return true;
-        } catch (TransactionException e) {
-            String msg = String.format("TCC branch update error, xid: %s", actionContext.getXid());
-            LOGGER.error("{}, error: {}", msg, e.getMessage());
-            throw new FrameworkException(e, msg);
-        }
+    public static boolean reportContext() {
+        BusinessActionContext context = getContext();
+        return DefaultContextReporter.get().report(context);
     }
 
     public static BusinessActionContext getContext() {

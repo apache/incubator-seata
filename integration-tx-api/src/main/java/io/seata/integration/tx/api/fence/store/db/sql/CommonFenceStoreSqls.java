@@ -87,6 +87,18 @@ public class CommonFenceStoreSqls {
      */
     protected static final String DELETE_BY_BRANCH_XIDS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid in (" + PRAMETER_PLACEHOLD + ")";
 
+    /**
+     * The constant UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.
+     */
+    protected static final String UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID = "update " + LOCAL_TCC_LOG_PLACEHOLD + " set application_data = ?"
+            + " where xid = ? and  branch_id = ?";
+
+    /**
+     * The constant QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID
+     */
+    protected static final String QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID = "select application_data from " + LOCAL_TCC_LOG_PLACEHOLD
+            + " where xid = ? and  branch_id = ?";
+
 
     /**
      * The constant DELETE_BY_DATE_AND_STATUS.
@@ -124,6 +136,14 @@ public class CommonFenceStoreSqls {
     public static String getDeleteSQLByXids(String localTccTable, String paramsPlaceHolder) {
         return DELETE_BY_BRANCH_XIDS.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    public static String getUpdateApplicationDataByBranchIdAndXid(String localTccTable) {
+        return UPDATE_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
+    }
+
+    public static String getQueryApplicationDataSql(String localTccTable) {
+        return QUERY_APPLICATION_DATA_BY_BRANCH_ID_AND_XID.replace(LOCAL_TCC_LOG_PLACEHOLD, localTccTable);
     }
 
 }

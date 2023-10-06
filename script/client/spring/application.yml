@@ -22,6 +22,7 @@ seata:
       saga-compensate-persist-mode-update: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       sql-parser-type: druid
+      tccContextStore: tc
       lock:
         retry-interval: 10
         retry-times: 30

@@ -15,6 +15,18 @@
  */
 package io.seata.rm.fence;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -39,6 +51,7 @@ import io.seata.integration.tx.api.fence.store.CommonFenceDO;
 import io.seata.integration.tx.api.fence.store.CommonFenceStore;
 import io.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
 import io.seata.integration.tx.api.remoting.TwoPhaseResult;
+import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -124,9 +137,11 @@ public class SpringFenceHandler implements FenceHandler {
                     addToLogCleanQueue(xid, branchId);
                 }
                 status.setRollbackOnly();
+                BusinessActionContextUtil.addContext(Constants.TCC_PREPARE_STATUS, Constants.TCC_PREPARE_STATUS_ERROR);
                 throw new SkipCallbackWrapperException(e);
             } catch (Throwable t) {
                 status.setRollbackOnly();
+                BusinessActionContextUtil.addContext(Constants.TCC_PREPARE_STATUS, Constants.TCC_PREPARE_STATUS_ERROR);
                 throw new SkipCallbackWrapperException(t);
             }
         });
@@ -322,6 +337,16 @@ public class SpringFenceHandler implements FenceHandler {
         }
         return total;
 
+    }
+
+    private static boolean isOracle(Connection connection) {
+        try {
+            String url = connection.getMetaData().getURL();
+            return url.toLowerCase().contains(":oracle:");
+        } catch (SQLException e) {
+            LOGGER.error("get db type fail", e);
+        }
+        return false;
     }
 
     private static void initLogCleanExecutor() {

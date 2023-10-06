@@ -38,19 +38,17 @@ public class BusinessActionContext implements Serializable {
     private String actionName;
 
     /**
-     * delay branch report while sharing params to tcc phase 2 to enhance performance
-     *
-     * @see BusinessActionContextUtil
-     * @see io.seata.rm.tcc.api.TwoPhaseBusinessAction
-     */
-    private Boolean isDelayReport;
-
-    /**
      * mark that actionContext has been updated by business
      *
      * @see BusinessActionContextUtil
      */
     private Boolean isUpdated;
+
+    /**
+     * mark that actionContext has been reported
+     *
+     */
+    private Boolean isActionContextReported;
 
     /**
      * branch Type
@@ -149,6 +147,10 @@ public class BusinessActionContext implements Serializable {
      */
     public void setActionContext(Map<String, Object> actionContext) {
         this.actionContext = actionContext;
+        if (this.actionContext != actionContext) {
+            this.actionContext = actionContext;
+            this.setUpdated(true);
+        }
     }
 
     /**
@@ -210,14 +212,6 @@ public class BusinessActionContext implements Serializable {
         return isChanged;
     }
 
-    public Boolean getDelayReport() {
-        return isDelayReport;
-    }
-
-    public void setDelayReport(Boolean delayReport) {
-        isDelayReport = delayReport;
-    }
-
     public Boolean getUpdated() {
         return isUpdated;
     }
@@ -234,14 +228,22 @@ public class BusinessActionContext implements Serializable {
         this.branchType = branchType;
     }
 
+    public boolean getActionContextReported() {
+        return Boolean.TRUE.equals(isActionContextReported);
+    }
+
+    public void setActionContextReported(Boolean reported) {
+        isActionContextReported = reported;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[xid:").append(xid)
                 .append(",branch_Id:").append(branchId)
                 .append(",action_name:").append(actionName)
-                .append(",is_delay_report:").append(isDelayReport)
-                .append(",is_updated:").append(isDelayReport)
+                .append(",is_updated:").append(isUpdated)
+                .append(",is_reported").append(isActionContextReported)
                 .append(",branch_type:").append(branchType)
                 .append(",action_context:")
                 .append(actionContext).append("]");
