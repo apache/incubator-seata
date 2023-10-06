@@ -100,11 +100,11 @@ public class ChannelManager {
     private static String[] readClientId(String clientId) {
         int i = clientId.indexOf(Constants.CLIENT_ID_SPLIT_CHAR);
         String[] clientIdInfo = null;
-        if(i > -1){
-            String applicationId = clientId.substring(0,i);
+        if (i > -1) {
+            String applicationId = clientId.substring(0, i);
             String[] ipPortStr = NetUtil.splitIPPortStr(clientId.substring(i + 1));
-            if(null != ipPortStr && ipPortStr.length == 2){
-                clientIdInfo = new String[]{applicationId,ipPortStr[0],ipPortStr[1]};
+            if (null != ipPortStr && ipPortStr.length == 2) {
+                clientIdInfo = new String[]{applicationId, ipPortStr[0], ipPortStr[1]};
             }
         }
         return clientIdInfo;
