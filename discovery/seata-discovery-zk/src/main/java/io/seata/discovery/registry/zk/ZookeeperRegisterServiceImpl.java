@@ -303,7 +303,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
         for (String path : instances) {
             try {
-                String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
+                String[] ipAndPort = NetUtil.splitIPPortStr(path);
                 newAddressList.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
             } catch (Exception e) {
                 LOGGER.warn("The cluster instance info is error, instance info:{}", path);
