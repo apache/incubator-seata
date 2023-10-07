@@ -375,6 +375,7 @@ public class LockManagerTest {
             param1.setXid(globalSessions.getXid());
             globalSessions.getBranchSessions().forEach(branchSession -> {
                 param1.setBranchId(String.valueOf(branchSession.getBranchId()));
+                param1.setResourceId(branchSession.getResourceId());
                 String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
                 for (String tableGroupedLockKey : tableGroupedLockKeys) {
                     int idx = tableGroupedLockKey.indexOf(":");

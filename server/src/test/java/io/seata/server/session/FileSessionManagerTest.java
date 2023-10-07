@@ -645,7 +645,6 @@ public class FileSessionManagerTest {
             Assertions.assertEquals(BranchStatus.STOP_RETRY, newGlobalSession.getBranchSessions().get(1).getStatus());
         } finally {
             globalSession.end();
-            sessionManager.removeGlobalSession(globalSession);
         }
     }
 
@@ -675,7 +674,6 @@ public class FileSessionManagerTest {
             Assertions.assertEquals(BranchStatus.Registered, newGlobalSession.getBranchSessions().get(2).getStatus());
         } finally {
             globalSession.end();
-            sessionManager.removeGlobalSession(globalSession);
         }
     }
 
