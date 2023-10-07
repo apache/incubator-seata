@@ -24,7 +24,6 @@ import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
