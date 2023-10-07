@@ -99,8 +99,8 @@ public class ExecuteTemplate {
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
                         executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
-                                new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
