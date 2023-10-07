@@ -35,6 +35,7 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
+        <bytebuddy.version>1.12.17</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -80,6 +81,10 @@
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
 
+        <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
+        <httpcore.version>4.4.16</httpcore.version>
+        <httpclient.version>4.5.14</httpclient.version>
+
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.2.9</logback.version>
@@ -114,7 +119,6 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
         <janino-version>3.1.7</janino-version>
     </properties>
 
@@ -699,6 +703,16 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-security</artifactId>
                 <version>${jetty-version}</version>
@@ -715,26 +729,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <profiles>
-        <profile>
-            <id>dependencies-for-springboot3-1-or-above</id>
-            <properties>
-                <httpcore.version>4.4.16</httpcore.version>
-                <httpclient.version>4.5.14</httpclient.version>
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpcore</artifactId>
-                    <version>${httpcore.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                    <version>${httpclient.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
