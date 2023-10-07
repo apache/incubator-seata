@@ -14,7 +14,7 @@
 - [[#5889](https://github.com/seata/seata/pull/5889)] 移除无license组件
 - [[#5890](https://github.com/seata/seata/pull/5890)] 移除7z压缩支持
 - [[#5891](https://github.com/seata/seata/pull/5891)] 移除 mariadb.jdbc 依赖
-- [[#5828](https://github.com/seata/seata/pull/5828)] 统一版本号管理，只需维护 `build/pom.xml` 中的版本号即可。
+- [[#5828](https://github.com/seata/seata/pull/5828)] 修正 `codecov chart` 不展示的问题
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
