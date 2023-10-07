@@ -14,6 +14,7 @@
 - [[#5889](https://github.com/seata/seata/pull/5889)] 移除无license组件
 - [[#5890](https://github.com/seata/seata/pull/5890)] 移除7z压缩支持
 - [[#5891](https://github.com/seata/seata/pull/5891)] 移除 mariadb.jdbc 依赖
+- [[#5828](https://github.com/seata/seata/pull/5828)] 统一版本号管理，只需维护 `build/pom.xml` 中的版本号即可。
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
@@ -21,6 +22,8 @@
 
 ### test:
 - [[#5888](https://github.com/seata/seata/pull/5888)] 移除 sofa 测试用例
+- [[#5831](https://github.com/seata/seata/pull/5831)] 升级 `druid` 版本，并添加 `test-druid.yml` 用于测试seata与druid各版本的兼容性。
+- [[#5862](https://github.com/seata/seata/pull/5862)] 修复单元测试在Java21下无法正常运行的问题。
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 

@@ -14,6 +14,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5889](https://github.com/seata/seata/pull/5889)] remove dependency without license
 - [[#5890](https://github.com/seata/seata/pull/5890)] remove 7z format compression support
 - [[#5891](https://github.com/seata/seata/pull/5891)] remove mariadb.jdbc dependency
+- [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
@@ -21,6 +22,8 @@ Add changes here for all PR submitted to the develop branch.
 
 ### test:
 - [[#5888](https://github.com/seata/seata/pull/5888)] remove sofa test cases
+- [[#5831](https://github.com/seata/seata/pull/5831)] upgrade druid and add `test-druid.yml`
+- [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
