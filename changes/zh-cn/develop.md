@@ -4,6 +4,7 @@
 
 ### feature:
 - [[#3672](https://github.com/seata/seata/pull/3672)] AT模式支持dameng数据库
+- [[#5892](https://github.com/seata/seata/pull/5892)] AT模式支持PolarDB-X 2.0数据库
 
 ### bugfix:
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题

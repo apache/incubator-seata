@@ -38,7 +38,7 @@ import java.util.List;
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, getAdaptiveDbType(dbType));
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
         if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
@@ -68,18 +68,5 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             }
         }
         return recognizers;
-    }
-
-    /**
-     * Get adaptive db type for druid parser.
-     *
-     * @param dbType origin db type
-     * @return adaptive db type
-     */
-    private static String getAdaptiveDbType(String dbType) {
-        if (JdbcConstants.POLARDBX.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        return dbType;
     }
 }

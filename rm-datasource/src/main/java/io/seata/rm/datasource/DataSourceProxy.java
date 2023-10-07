@@ -89,7 +89,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
-                testMySQLAdaptiveType(connection);
+                getMySQLAdaptiveType(connection);
             }
             version = selectDbVersion(connection);
         } catch (SQLException e) {
@@ -103,11 +103,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * test mysql adaptive type for PolarDB-X
+     * get mysql adaptive type for PolarDB-X
      *
      * @param connection db connection
      */
-    private void testMySQLAdaptiveType(Connection connection) {
+    private void getMySQLAdaptiveType(Connection connection) {
         try (Statement statement = connection.createStatement()) {
             statement.executeQuery("show rule");
             dbType = JdbcConstants.POLARDBX;

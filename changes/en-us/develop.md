@@ -4,6 +4,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### feature:
 - [[#3672](https://github.com/seata/seata/pull/3672)] support Dameng database
+- [[#5892](https://github.com/seata/seata/pull/5892)] support PolarDB-X 2.0 database
 
 ### bugfix:
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
