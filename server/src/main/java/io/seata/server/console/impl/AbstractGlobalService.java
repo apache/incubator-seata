@@ -131,6 +131,8 @@ public abstract class AbstractGlobalService extends AbstractService implements G
                 if (res && globalSession.hasBranch() && globalSession.hasATBranch()) {
                     globalSession.clean();
                     globalSession.asyncCommit();
+                } else if (res && SessionHolder.findGlobalSession(xid) != null) {
+                    globalSession.end();
                 }
             } else if (RETRY_ROLLBACK_STATUS.contains(globalStatus) || GlobalStatus.Rollbacking.equals(globalStatus)
                     || GlobalStatus.StopRollbackRetry.equals(globalStatus)) {

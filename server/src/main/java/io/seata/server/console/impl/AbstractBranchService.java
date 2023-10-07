@@ -42,7 +42,7 @@ public abstract class AbstractBranchService extends AbstractService implements B
         BranchSession branchSession = checkResult.getBranchSession();
         BranchStatus branchStatus = branchSession.getStatus();
         if (branchStatus.getCode() == BranchStatus.STOP_RETRY.getCode()) {
-            return SingleResult.success();
+            throw new IllegalArgumentException("current branch session is already stop");
         }
         // For BranchStatus.PhaseOne_Done is finished, will remove soon, thus no support
         if (branchStatus != BranchStatus.Unknown && branchStatus != BranchStatus.Registered &&
