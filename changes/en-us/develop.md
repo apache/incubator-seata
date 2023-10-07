@@ -16,6 +16,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
+- [[#5898](https://github.com/seata/seata/pull/5898)] fix npm package vulnerabilities
 
 ### test:
 - [[#5888](https://github.com/seata/seata/pull/5888)] remove sofa test cases
