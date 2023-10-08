@@ -50,5 +50,7 @@ public class NetAddressValidatorUtilTest {
     @Test
     public void isIPv4Address() {
         assertThat(NetAddressValidatorUtil.isIPv4Address("192.168.1.2")).isTrue();
+        assertThat(NetAddressValidatorUtil.isIPv4Address("127.0.0.1")).isTrue();
+        assertThat(NetAddressValidatorUtil.isIPv4Address("999.999.999.999")).isFalse();
     }
 }
