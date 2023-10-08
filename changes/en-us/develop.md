@@ -7,6 +7,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5892](https://github.com/seata/seata/pull/5892)] support PolarDB-X 2.0 database
 
 ### bugfix:
+- [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
 
 ### optimize:
@@ -29,6 +30,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 
 <!-- Please make sure your Github ID is in the list below -->
 - [slievrly](https://github.com/slievrly)
+- [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
 
