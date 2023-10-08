@@ -8,6 +8,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### bugfix:
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
+- [[#5887](https://github.com/seata/seata/pull/5887)] fix global transaction hook repeat execute
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
@@ -31,6 +32,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [slievrly](https://github.com/slievrly)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

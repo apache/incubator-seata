@@ -8,6 +8,7 @@
 
 ### bugfix:
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
+- [[#5887](https://github.com/seata/seata/pull/5887)] 修复全局事务钩子重复执行
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
@@ -31,5 +32,6 @@
 - [slievrly](https://github.com/slievrly)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
