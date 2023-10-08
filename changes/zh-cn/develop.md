@@ -7,6 +7,7 @@
 - [[#5892](https://github.com/seata/seata/pull/5892)] AT模式支持PolarDB-X 2.0数据库
 
 ### bugfix:
+- [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: 修复当 XA 事务失败回滚后，TC 还会继续重试回滚的问题
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
 - [[#5887](https://github.com/seata/seata/pull/5887)] 修复全局事务钩子重复执行
 
@@ -30,6 +31,7 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
 - [jsbxyyx](https://github.com/jsbxyyx)
