@@ -90,7 +90,7 @@ public class RaftServerFactory {
         StoreMode storeMode = StoreMode.get(mode);
         if (storeMode.equals(StoreMode.RAFT)) {
             for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-                if (!(instance instanceof FileRegistryServiceImpl || instance instanceof RaftServerFactory)) {
+                if (!(instance instanceof FileRegistryServiceImpl)) {
                     throw new IllegalArgumentException("Raft store mode not support other Registration Center");
                 }
             }

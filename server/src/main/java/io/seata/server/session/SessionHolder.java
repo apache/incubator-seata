@@ -97,7 +97,7 @@ public class SessionHolder {
         }
         String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         RaftServerFactory.getInstance().init();
-        if (RaftServerFactory.getInstance().isRaftMode()) {
+        if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
             if (SessionMode.DB.equals(sessionMode) || SessionMode.REDIS.equals(sessionMode)) {
                 throw new StoreException("raft mode only support file store mode");
             }

@@ -32,17 +32,17 @@ import org.slf4j.LoggerFactory;
  * @author jianbin.chen
  */
 public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSnapshotFile {
-	private static final long serialVersionUID = 78637164618855724L;
+    private static final long serialVersionUID = 78637164618855724L;
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RaftClusterMetadata.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftClusterMetadata.class);
 
-	private final String group;
+    private final String group;
 
-	private final String fileName = "leader_metadata";
+    private final String fileName = "leader_metadata";
 
-	public LeaderMetadataSnapshotFile(String group) {
-		this.group = group;
-	}
+    public LeaderMetadataSnapshotFile(String group) {
+        this.group = group;
+    }
 
     @Override
     public Status save(SnapshotWriter writer) {
