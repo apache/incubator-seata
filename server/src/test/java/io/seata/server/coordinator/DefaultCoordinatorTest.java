@@ -53,7 +53,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -159,7 +159,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
@@ -185,7 +185,7 @@ public class DefaultCoordinatorTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
         NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
@@ -205,7 +205,7 @@ public class DefaultCoordinatorTest {
 
         int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
         try {
-            Assertions.assertTrue(lockSize == 0);
+            Assertions.assertEquals(0, lockSize);
         } finally {
             globalSession.closeAndClean();
             ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",

@@ -192,7 +192,7 @@ class NettyClientChannelManager {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
                 List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
                 for (String address : channelAddress) {
-                    String[] array = address.split(":");
+                    String[] array = NetUtil.splitIPPortStr(address);
                     aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
                 }
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);

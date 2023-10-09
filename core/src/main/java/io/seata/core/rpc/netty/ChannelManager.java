@@ -28,6 +28,7 @@ import io.netty.channel.Channel;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
@@ -98,7 +99,16 @@ public class ChannelManager {
     }
 
     private static String[] readClientId(String clientId) {
-        return clientId.split(Constants.CLIENT_ID_SPLIT_CHAR);
+        int i = clientId.indexOf(Constants.CLIENT_ID_SPLIT_CHAR);
+        String[] clientIdInfo = null;
+        if (i > -1) {
+            String applicationId = clientId.substring(0, i);
+            String[] ipPortStr = NetUtil.splitIPPortStr(clientId.substring(i + 1));
+            if (null != ipPortStr && ipPortStr.length == 2) {
+                clientIdInfo = new String[]{applicationId, ipPortStr[0], ipPortStr[1]};
+            }
+        }
+        return clientIdInfo;
     }
 
     private static RpcContext buildChannelHolder(NettyPoolKey.TransactionRole clientRole, String version, String applicationId,
