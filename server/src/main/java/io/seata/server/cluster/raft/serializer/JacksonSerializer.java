@@ -18,7 +18,6 @@ package io.seata.server.cluster.raft.serializer;
 import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 

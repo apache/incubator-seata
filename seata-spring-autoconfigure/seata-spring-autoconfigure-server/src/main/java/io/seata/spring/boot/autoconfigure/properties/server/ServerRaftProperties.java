@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PR
 @ConfigurationProperties(prefix = SERVER_RAFT_PREFIX)
 public class ServerRaftProperties {
 
-    private String cluster;
+    private String serverAddr;
 
     private String group;
 
@@ -56,12 +56,12 @@ public class ServerRaftProperties {
 
     private boolean sync = true;
 
-    public String getCluster() {
-        return cluster;
+    public String getServerAddr() {
+        return serverAddr;
     }
 
-    public ServerRaftProperties setCluster(String cluster) {
-        this.cluster = cluster;
+    public ServerRaftProperties setServerAddr(String serverAddr) {
+        this.serverAddr = serverAddr;
         return this;
     }
 

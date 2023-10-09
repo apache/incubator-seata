@@ -41,6 +41,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.MultiRegistryFactory;
 import io.seata.discovery.registry.RegistryService;
+import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,10 +86,9 @@ public class RaftServerFactory {
     }
 
     public void init() {
-        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_CLUSTER);
-        String mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        StoreMode storeMode = StoreMode.get(mode);
-        if (storeMode.equals(StoreMode.RAFT)) {
+        String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
+        StoreConfig.SessionMode storeMode = StoreConfig.getSessionMode();
+        if (storeMode.equals(StoreConfig.SessionMode.RAFT)) {
             for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
                 if (!(instance instanceof FileRegistryServiceImpl)) {
                     throw new IllegalArgumentException("Raft store mode not support other Registration Center");
@@ -99,7 +99,7 @@ public class RaftServerFactory {
         if (StringUtils.isBlank(initConfStr)) {
             if (raftMode) {
                 throw new IllegalArgumentException(
-                    "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_CLUSTER);
+                    "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
             }
             return;
         } else {

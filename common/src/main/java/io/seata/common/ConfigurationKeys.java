@@ -872,9 +872,9 @@ public interface ConfigurationKeys {
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
 
     /**
-     * The constant SERVER_RAFT_CLUSTER.
+     * The constant SERVER_RAFT_SERVER_ADDR.
      */
-    String SERVER_RAFT_CLUSTER = SERVER_RAFT + "cluster";
+    String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
 
     /**
      * The constant SERVER_RAFT_GROUP.
