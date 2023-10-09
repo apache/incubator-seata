@@ -117,6 +117,9 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
     @Override
     public ResultSet executeQuery(MockStatementBase stmt, String sql) throws SQLException {
+        if ("show rule".equals(sql)) {
+            throw new SQLException("throw exception for polardb-x test sql");
+        }
         return this.mockExecuteHandler.executeQuery(stmt, sql);
     }
 

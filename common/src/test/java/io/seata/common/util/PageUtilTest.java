@@ -39,6 +39,7 @@ public class PageUtilTest {
                 " where rn between 1 and 5";
 
         assertEquals(PageUtil.pageSql(sourceSql, "mysql", 1, 5), mysqlTargetSql);
+        assertEquals(PageUtil.pageSql(sourceSql, "polardb-x", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "h2", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "postgresql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);
