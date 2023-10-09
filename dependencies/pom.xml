@@ -121,6 +121,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
+        <native-lib-loader.version>2.4.0</native-lib-loader.version>
     </properties>
 
     <dependencyManagement>
@@ -461,6 +462,17 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scijava</groupId>
+                        <artifactId>native-lib-loader</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.scijava</groupId>
+                <artifactId>native-lib-loader</artifactId>
+                <version>${native-lib-loader.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>

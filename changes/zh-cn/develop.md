@@ -26,6 +26,7 @@
 - [[#5888](https://github.com/seata/seata/pull/5888)] 移除 sofa 测试用例
 - [[#5831](https://github.com/seata/seata/pull/5831)] 升级 `druid` 版本，并添加 `test-druid.yml` 用于测试seata与druid各版本的兼容性。
 - [[#5862](https://github.com/seata/seata/pull/5862)] 修复单元测试在Java21下无法正常运行的问题。
+- [[#5914](https://github.com/seata/seata/pull/5914)] 升级 native-lib-loader 版本
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
