@@ -165,6 +165,11 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mariadb.jdbc</groupId>-->
+<!--            <artifactId>mariadb-java-client</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -231,11 +236,6 @@
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -297,6 +297,19 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>${git-commit-id-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib-maven-plugin.version}</version>
@@ -331,6 +344,11 @@
                         </ports>
                         <labels>
                             <name>seata-server</name>
+                            <git.commit.message.full>${git.commit.message.full}</git.commit.message.full>
+                            <git.remote.origin.url>${git.remote.origin.url}</git.remote.origin.url>
+                            <git.commit.id>${git.commit.id}</git.commit.id>
+                            <git.commit.time>${git.commit.time}</git.commit.time>
+                            <mvn.build.version>${project.version}</mvn.build.version>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                         <entrypoint>
