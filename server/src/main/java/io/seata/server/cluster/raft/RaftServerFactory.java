@@ -35,7 +35,6 @@ import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
-import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
