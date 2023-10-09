@@ -181,4 +181,20 @@ public class NetUtilTest {
 
     }
 
+    @Test
+    public void testSplitIPPortStr() {
+        String[] ipPort = new String[]{"127.0.0.1","8080"};
+        assertThat(NetUtil.splitIPPortStr("127.0.0.1:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::","8080"};
+        assertThat(NetUtil.splitIPPortStr("[::]:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"2000:0000:0000:0000:0001:2345:6789:abcd","8080"};
+        assertThat(NetUtil.splitIPPortStr("2000:0000:0000:0000:0001:2345:6789:abcd%10:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"2000:0000:0000:0000:0001:2345:6789:abcd","8080"};
+        assertThat(NetUtil.splitIPPortStr("[2000:0000:0000:0000:0001:2345:6789:abcd]:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::FFFF:192.168.1.2","8080"};
+        assertThat(NetUtil.splitIPPortStr("::FFFF:192.168.1.2:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::FFFF:192.168.1.2","8080"};
+        assertThat(NetUtil.splitIPPortStr("[::FFFF:192.168.1.2]:8080")).isEqualTo(ipPort);
+    }
+
 }
