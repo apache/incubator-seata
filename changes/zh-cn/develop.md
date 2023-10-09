@@ -16,6 +16,7 @@
 - [[#5890](https://github.com/seata/seata/pull/5890)] 移除7z压缩支持
 - [[#5891](https://github.com/seata/seata/pull/5891)] 移除 mariadb.jdbc 依赖
 - [[#5828](https://github.com/seata/seata/pull/5828)] 修正 `codecov chart` 不展示的问题
+- [[#5918](https://github.com/seata/seata/pull/5918)] 修正codecov.yml不标准属性
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
