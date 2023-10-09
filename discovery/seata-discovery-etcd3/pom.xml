@@ -51,5 +51,10 @@
             <artifactId>testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scijava</groupId>
+            <artifactId>native-lib-loader</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
