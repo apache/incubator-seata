@@ -194,7 +194,7 @@
       "stateType": "Fork",
       "stateProps": {
         "Parallel": 0,
-        "AwaitTimeout": 3600
+        "Timeout": 3600
       },
       "x": 513.7249999999997,
       "y": 341.5,

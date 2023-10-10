@@ -59,7 +59,7 @@ const subStateMachinePropsTemplate = {
 }
 const forkPropsTemplate = {
   Parallel: 0,
-  AwaitTimeout: 0,
+  Timeout: 0,
 };
 
 const FlowItemPanel = () => {
