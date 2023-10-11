@@ -21,6 +21,7 @@ import java.util.Map;
 
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import io.seata.saga.statelang.validator.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -73,5 +74,38 @@ public class StateParserTests {
 
         String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);
         System.out.println(fastjsonOutputJson);
+    }
+
+    @Test
+    public void singleInfiniteLoopTest() throws IOException {
+        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_single_infinite_loop.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
+            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+        });
+        System.out.println(e.getMessage());
+        Assertions.assertTrue(e.getMessage().endsWith("without outgoing flow to end"));
+    }
+
+    @Test
+    public void testMultipleInfiniteLoop() throws IOException {
+        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_multiple_infinite_loop.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
+            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+        });
+        System.out.println(e.getMessage());
+        Assertions.assertTrue(e.getMessage().endsWith("without outgoing flow to end"));
+    }
+
+    @Test
+    public void testNonExistedName() throws IOException {
+        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_non_existed_name.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
+            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+        });
+        System.out.println(e.getMessage());
+        Assertions.assertTrue(e.getMessage().endsWith("does not exist"));
     }
 }
