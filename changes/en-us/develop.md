@@ -9,6 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
+- [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
