@@ -16,6 +16,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5890](https://github.com/seata/seata/pull/5890)] remove 7z format compression support
 - [[#5891](https://github.com/seata/seata/pull/5891)] remove mariadb.jdbc dependency
 - [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
+- [[#5927](https://github.com/seata/seata/pull/5927)] optimize some scripts related to Apollo
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
