@@ -16,30 +16,23 @@
 
 package io.seata.saga.statelang.validator.impl;
 
-import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.StateMachineUtils;
-import io.seata.saga.statelang.validator.Rule;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 /**
  * Rule to check if the state machine can terminate in finite time, i.e. if there is an infinite loop
  *
  * @author ptyin
  */
-public class FiniteTerminationRule implements Rule {
-
-    String hint;
+public class FiniteTerminationRule extends AbstractRule {
 
     @Override
     public boolean validate(StateMachine stateMachine) {
@@ -159,15 +152,5 @@ public class FiniteTerminationRule implements Rule {
                 }
             }
         }
-    }
-
-    @Override
-    public String getName() {
-        return "FiniteTerminationRule";
-    }
-
-    @Override
-    public String getHint() {
-        return hint;
     }
 }

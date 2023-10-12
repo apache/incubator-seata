@@ -19,7 +19,6 @@ package io.seata.saga.statelang.validator.impl;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.StateMachineUtils;
-import io.seata.saga.statelang.validator.Rule;
 
 import java.util.Set;
 
@@ -28,9 +27,7 @@ import java.util.Set;
  *
  * @author ptyin
  */
-public class StateNameExistsRule implements Rule {
-
-    private String hint;
+public class StateNameExistsRule extends AbstractRule {
 
     @Override
     public boolean validate(StateMachine stateMachine) {
@@ -44,15 +41,5 @@ public class StateNameExistsRule implements Rule {
             }
         }
         return true;
-    }
-
-    @Override
-    public String getName() {
-        return "StateNameExistsRule";
-    }
-
-    @Override
-    public String getHint() {
-        return hint;
     }
 }

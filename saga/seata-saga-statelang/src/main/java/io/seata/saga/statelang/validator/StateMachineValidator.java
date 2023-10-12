@@ -26,7 +26,14 @@ import java.util.List;
  * @author ptyin
  */
 public class StateMachineValidator {
-    public void validate(StateMachine stateMachine) {
+
+    /**
+     * Validate on state machine
+     *
+     * @param stateMachine state machine
+     * @throws ValidationException throws if there is a validation rule failed
+     */
+    public void validate(StateMachine stateMachine) throws ValidationException {
         List<Rule> rules = RuleFactory.getRules();
         for (Rule rule: rules) {
             boolean pass;
