@@ -108,4 +108,14 @@ public class StateParserTests {
         System.out.println(e.getMessage());
         Assertions.assertTrue(e.getMessage().endsWith("does not exist"));
     }
+
+    @Test
+    public void testRecursiveSubStateMachine() throws IOException {
+        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_recursive_sub_machine.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
+            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+        });
+        Assertions.assertTrue(e.getMessage().endsWith("call itself"));
+    }
 }
