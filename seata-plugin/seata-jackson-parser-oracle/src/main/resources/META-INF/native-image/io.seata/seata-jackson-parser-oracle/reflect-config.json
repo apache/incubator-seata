@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.parser.spi.JacksonSerializer"
+    },
+    "name": "io.seata.plugin.jackson.parser.oracle.OracleTimestampJacksonSerializer",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

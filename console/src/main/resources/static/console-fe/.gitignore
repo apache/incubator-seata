@@ -14,3 +14,4 @@ npm-debug.log*
 test/uirecorder.log
 test/reports
 test/screenshots/*
+/public/saga-statemachine-designer/

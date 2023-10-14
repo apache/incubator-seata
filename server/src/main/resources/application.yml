@@ -22,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs/seata
+    path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -34,7 +34,6 @@ console:
   user:
     username: seata
     password: seata
-
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3
@@ -51,4 +50,4 @@ seata:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
     ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.ico,/console-fe/public/**,/api/v1/auth/login
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login

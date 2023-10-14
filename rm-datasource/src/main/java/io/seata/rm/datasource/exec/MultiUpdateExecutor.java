@@ -35,7 +35,7 @@ import io.seata.common.DefaultValues;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -113,18 +113,9 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         suffix.append(" FOR UPDATE");
         final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
-        if (ONLY_CARE_UPDATE_COLUMNS) {
-            if (!containsPK(new ArrayList<>(updateColumnsSet))) {
-                selectSQLAppender.add(getColumnNamesInSQL(tmeta.getEscapePkNameList(getDbType())));
-            }
-            for (String updateCol : updateColumnsSet) {
-                selectSQLAppender.add(updateCol);
-            }
-        } else {
-            for (String columnName : tmeta.getAllColumns().keySet()) {
-                selectSQLAppender.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
-        }
+        List<String> needColumns =
+            getNeedColumns(tmeta.getTableName(), sqlRecognizer.getTableAlias(), new ArrayList<>(updateColumnsSet));
+        needColumns.forEach(selectSQLAppender::add);
         return buildTableRecords(tmeta, selectSQLAppender.toString(), paramAppenderList);
     }
 
@@ -140,7 +131,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         ResultSet rs = null;
-        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL);) {
+        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);

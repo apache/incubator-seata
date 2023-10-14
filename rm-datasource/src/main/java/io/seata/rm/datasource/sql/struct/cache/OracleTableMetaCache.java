@@ -24,10 +24,10 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
@@ -142,7 +142,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("TYPE"));
                     index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setCardinality(rsIndex.getLong("CARDINALITY"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.UNIQUE);

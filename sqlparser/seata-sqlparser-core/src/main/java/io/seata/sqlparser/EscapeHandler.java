@@ -16,6 +16,7 @@
 package io.seata.sqlparser;
 
 import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.struct.TableMeta;
 
 /**
  * The interface Keyword checker.
@@ -36,10 +37,11 @@ public interface EscapeHandler {
 
     /**
      * check whether given field or table name use keywords. the method has database special logic.
-     * @param fieldOrTableName the field or table name
+     * @param columnName the column or table name
+     * @param tableMeta the tableMeta
      * @return true: need to escape. false: no need to escape.
      */
-    boolean checkIfNeedEscape(String fieldOrTableName);
+    boolean checkIfNeedEscape(String columnName, TableMeta tableMeta);
 
     default char getEscapeSymbol() {
         return '"';
@@ -61,11 +63,26 @@ public interface EscapeHandler {
 
     /**
      * add escape if colName is keywords
-     * @param colName
-     * @return
+     * @param colName colName
+     * @return colName
      */
     default String addColNameEscape(String colName) {
-        boolean needEscape = checkIfNeedEscape(colName);
+        return addColNameEscape(colName, null);
+    }
+
+    /**
+     * add escape if colName is keywords
+     * @param colName colName
+     * @param tableMeta tableMeta
+     * @return colName
+     */
+    default String addColNameEscape(String colName, TableMeta tableMeta) {
+        String colNameToCheck = colName;
+        if (colName.contains(DOT)) {
+            colNameToCheck = colName.substring(colName.lastIndexOf(DOT) + 1);
+        }
+
+        boolean needEscape = checkIfNeedEscape(colNameToCheck, tableMeta);
         if (!needEscape) {
             return colName;
         }
@@ -75,21 +92,21 @@ public interface EscapeHandler {
             String str = escapeChar + DOT;
             int dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(colName.substring(0, dotIndex + str.length())).append(escapeChar)
+                return new StringBuilder().append(colName, 0, dotIndex + str.length()).append(escapeChar)
                     .append(colName.substring(dotIndex + str.length())).append(escapeChar).toString();
             }
             // like scheme."id" scheme.`id`
             str = DOT + escapeChar;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar).append(colName.substring(0, dotIndex)).append(escapeChar)
+                return new StringBuilder().append(escapeChar).append(colName, 0, dotIndex).append(escapeChar)
                     .append(colName.substring(dotIndex)).toString();
             }
 
             str = DOT;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar).append(colName.substring(0, dotIndex)).append(escapeChar)
+                return new StringBuilder().append(escapeChar).append(colName, 0, dotIndex).append(escapeChar)
                     .append(DOT).append(escapeChar).append(colName.substring(dotIndex + str.length())).append(
                         escapeChar).toString();
             }

@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import io.seata.common.loader.LoadLevel;
 import io.seata.saga.statelang.parser.JsonParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,15 +36,13 @@ import java.util.List;
 @LoadLevel(name = JacksonJsonParser.NAME)
 public class JacksonJsonParser implements JsonParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonJsonParser.class);
-
-    private ObjectMapper objectMapperWithAutoType = new ObjectMapper()
+    private final ObjectMapper objectMapperWithAutoType = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")
             .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
             .setSerializationInclusion(Include.NON_NULL);
 
-    private ObjectMapper objectMapper = new ObjectMapper()
+    private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disableDefaultTyping()
             .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
@@ -62,6 +58,11 @@ public class JacksonJsonParser implements JsonParser {
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
         return toJsonString(o, false, prettyPrint);
+    }
+
+    @Override
+    public boolean useAutoType(String json) {
+        return json != null && json.contains("\"@type\"");
     }
 
     @Override
@@ -95,7 +96,7 @@ public class JacksonJsonParser implements JsonParser {
     @Override
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
         try {
-            if (json != null && "[]".equals(json)) {
+            if ("[]".equals(json)) {
                 return (T) (new ArrayList(0));
             }
             if (ignoreAutoType) {
