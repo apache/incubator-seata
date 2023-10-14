@@ -43,3 +43,22 @@ copyList.forEach(_fileName => {
     const writeStream = fs.createWriteStream(destFileName);
     readStream.pipe(writeStream);
 });
+
+// copy seata-saga-statemachine-designer from console-fe/public to console resource folder
+const designerDir = path.join(__dirname, '../public/saga-statemachine-designer');
+const designerDestDir = path.join(destDir, 'saga-statemachine-designer');
+const designerHtmlFileName = path.join(designerDestDir, 'designer.html');
+const designerBundleFileName = path.join(designerDestDir, 'dist/bundle.js');
+
+mkdir(path.dirname(designerHtmlFileName));
+mkdir(path.dirname(designerBundleFileName));
+
+fs.createReadStream(path.join(designerDir, 'designer.html'))
+.pipe(
+  fs.createWriteStream(designerHtmlFileName)
+  );
+
+fs.createReadStream(path.join(designerDir, 'dist/bundle.js'))
+.pipe(
+  fs.createWriteStream(designerBundleFileName)
+  );

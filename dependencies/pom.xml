@@ -35,6 +35,7 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
+        <bytebuddy.version>1.12.17</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -60,13 +61,15 @@
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
         <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
         <archaius-core.version>0.7.6</archaius-core.version>
-        <sofa.registry.version>5.2.0</sofa.registry.version>
+        <sofa.registry.version>6.3.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
-        <jcommander.version>1.72</jcommander.version>
-        <xz.version>1.8</xz.version>
-        <commons-compress.version>1.19</commons-compress.version>
+        <jcommander.version>1.82</jcommander.version>
+        <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
+        <netty.version>4.1.86.Final</netty.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <sofa.hessian.version>4.0.3</sofa.hessian.version>
 
         <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
@@ -76,7 +79,11 @@
         <fst.version>2.57</fst.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
-        <xstream.version>1.4.19</xstream.version>
+        <xstream.version>1.4.20</xstream.version>
+
+        <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
+        <httpcore.version>4.4.16</httpcore.version>
+        <httpclient.version>4.5.14</httpclient.version>
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
@@ -95,8 +102,8 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.6</druid.version>
-        <commons-dbcp2.version>2.7.0</commons-dbcp2.version>
+        <druid.version>1.2.7</druid.version>
+        <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
@@ -112,8 +119,8 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
         <janino-version>3.1.7</janino-version>
+        <native-lib-loader.version>2.4.0</native-lib-loader.version>
     </properties>
 
     <dependencyManagement>
@@ -152,6 +159,21 @@
             </dependency>
 
             <!-- the 3rd part -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${sofa.hessian.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
@@ -200,6 +222,12 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-all</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.jcip</groupId>
+                        <artifactId>jcip-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${sofa.rpc.version}</version>
             </dependency>
             <dependency>
@@ -311,6 +339,10 @@
                     <exclusion>
                         <groupId>com.alipay.sofa.lookout</groupId>
                         <artifactId>lookout-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.alipay.sofa</groupId>
+                        <artifactId>hessian</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -424,6 +456,17 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scijava</groupId>
+                        <artifactId>native-lib-loader</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.scijava</groupId>
+                <artifactId>native-lib-loader</artifactId>
+                <version>${native-lib-loader.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
@@ -514,11 +557,6 @@
                 <groupId>de.ruedigermoeller</groupId>
                 <artifactId>fst</artifactId>
                 <version>${fst.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.tukaani</groupId>
-                <artifactId>xz</artifactId>
-                <version>${xz.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -670,7 +708,21 @@
                         <artifactId>*</artifactId>
                         <groupId>org.glassfish.jersey</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>xmlpull</artifactId>
+                        <groupId>xmlpull</groupId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>

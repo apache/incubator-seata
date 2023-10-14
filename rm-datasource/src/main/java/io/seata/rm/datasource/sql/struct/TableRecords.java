@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
@@ -36,6 +37,9 @@ import javax.sql.rowset.serial.SerialRef;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.serial.SerialArray;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
+
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
 import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
 import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;
@@ -190,7 +194,7 @@ public class TableRecords implements java.io.Serializable {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        Map<String, ColumnMeta> primaryKeyMap = tmeta.getPrimaryKeyMap();
+        Set<String> ignoreCasePKs = tmeta.getCaseInsensitivePKs();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
@@ -201,7 +205,7 @@ public class TableRecords implements java.io.Serializable {
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (primaryKeyMap.containsKey(colName)) {
+                if (ignoreCasePKs.contains(colName)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);

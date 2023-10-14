@@ -38,6 +38,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String REGISTRY_TYPE = "nacos";
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String PRO_APPLICATION_KEY = "application";
+    private static final String PRO_CLIENT_APPLICATION = "clientApplication";
     private static final String PRO_GROUP_KEY = "group";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
@@ -145,7 +147,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public List<InetSocketAddress> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         if (useSLBWay) {
             if (LOGGER.isDebugEnabled()) {
@@ -322,6 +325,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     public static String getNacosSecretKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, SECRET_KEY);
+    }
+
+    public static String getClientApplication() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_CLIENT_APPLICATION);
     }
 
     private static String getNacosUrlPatternOfSLB() {
