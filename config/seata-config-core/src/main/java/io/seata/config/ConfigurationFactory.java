@@ -294,7 +294,7 @@ public final class ConfigurationFactory {
                     newProperties.put(key, conf.get(key));
                     oldProperties.put(key, CURRENT_FILE_INSTANCE.getConfig(key));
                 }
-            } else if (!value.equals(conf.get(key))){
+            } else if (!value.equals(conf.get(key))) {
                 throw new Exception(String.format("%s is set in env before, value = %s", key, value));
             }
         }
