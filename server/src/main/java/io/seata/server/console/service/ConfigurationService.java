@@ -76,7 +76,7 @@ public class ConfigurationService {
                 if (ConfigValidator.availableConfiguration().contains(key)) {
                     configurations.put(key, instance.getConfig(key));
                 } else if (ConfigValidator.availableRegistryConf().contains(key) ||
-                ConfigValidator.availableConfigCenterConf().contains(key)) {
+                    ConfigValidator.availableConfigCenterConf().contains(key)) {
                     currentFileInstance.getConfig(key);
                 }
             }
