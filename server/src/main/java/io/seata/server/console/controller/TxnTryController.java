@@ -25,8 +25,10 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static io.seata.server.console.Constant.DEMO_APP_NAME;
 import static io.seata.server.console.Constant.DEMO_GROUP_NAME;
@@ -41,11 +43,12 @@ public class TxnTryController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TxnTryController.class);
 
-    @RequestMapping
-    public SingleResult<String> tryASimpleTxn() {
+    @RequestMapping(method = RequestMethod.POST, value = "begin")
+    public SingleResult<String> tryBegin(@RequestParam("timeout") int timeout) {
         DefaultCore core = new DefaultCore(Server.getNettyRemotingServer());
+        if (timeout < 3000) timeout = 3000;
         try {
-            String xid = core.begin(DEMO_APP_NAME, DEMO_GROUP_NAME, DEMO_TXN_NAME, 3000);
+            String xid = core.begin(DEMO_APP_NAME, DEMO_GROUP_NAME, DEMO_TXN_NAME, timeout);
             GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
             if (globalSession == null) {
                 return SingleResult.failure(Code.ERROR);
@@ -54,7 +57,31 @@ public class TxnTryController {
             }
         } catch (TransactionException e) {
             LOGGER.error(e.getMessage());
-            return SingleResult.failure(Code.ERROR);
+            return SingleResult.failure(Code.ERROR.code, e.getMessage());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "commit")
+    public SingleResult<String> tryCommit(@RequestParam("xid") String xid) {
+        DefaultCore core = new DefaultCore(Server.getNettyRemotingServer());
+        try {
+            core.commit(xid);
+            return SingleResult.success(xid);
+        } catch (TransactionException e) {
+            LOGGER.error(e.getMessage());
+            return SingleResult.failure(Code.ERROR.code, e.getMessage());
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "rollback")
+    public SingleResult<String> tryRollback(@RequestParam("xid") String xid) {
+        DefaultCore core = new DefaultCore(Server.getNettyRemotingServer());
+        try {
+            core.rollback(xid);
+            return SingleResult.success(xid);
+        } catch (TransactionException e) {
+            LOGGER.error(e.getMessage());
+            return SingleResult.failure(Code.ERROR.code, e.getMessage());
         }
     }
 }

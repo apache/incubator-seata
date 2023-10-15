@@ -16,7 +16,7 @@ seata:
   config:
     type:
       value-type: enum
-      value-range: [ nacos, consul, apollo, zk, etcd3 ]
+      value-range: [ file, nacos, consul, apollo, zk, etcd3 ]
       dynamic-config: true
     nacos:
       server-addr:
@@ -106,7 +106,7 @@ seata:
   registry:
     type:
       value-type: enum
-      value-range: [ nacos, eureka, redis, zk, consul, etcd3, sofa ]
+      value-range: [ file, nacos, eureka, redis, zk, consul, etcd3, sofa ]
       dynamic-config: true
     preferred-networks:
       value-type: string

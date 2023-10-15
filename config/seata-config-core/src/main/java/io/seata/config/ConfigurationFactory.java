@@ -15,9 +15,12 @@
  */
 package io.seata.config;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map;
 
+import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
@@ -186,5 +189,132 @@ public final class ConfigurationFactory {
         maybeNeedOriginFileInstance();
         instance = null;
         getInstance();
+    }
+
+    /**
+     * Set configuration during the runtime
+     * @param conf registry new conf
+     * @return old conf
+     */
+    public static Map<String, String> setConf(Map<String, String> conf) throws Exception {
+        Map<String, String> oldConf = new HashMap<>(conf.size());
+        for (String key: conf.keySet()) {
+            ConfigValidator.ValidateResult validateResult = ConfigValidator.validateConfiguration(key, conf.get(key));
+            if (!validateResult.getValid())
+                throw new Exception(validateResult.getErrorMessage());
+            if (!ConfigValidator.canBeConfiguredDynamically(key))
+                throw new Exception("Cannot be configured dynamically");
+            oldConf.put(key, instance.getConfig(key));
+        }
+        for (String key: conf.keySet()) {
+            boolean success = ConfigurationFactory.getInstance().putConfig(key, conf.get(key));
+            if (!success) {
+                throw new Exception("Set config failed");
+            }
+        }
+        return oldConf;
+    }
+
+    /**
+     * Set registry configs during the runtime
+     * @param conf registry new conf
+     * @return old conf
+     */
+    public static Map<String, String> setRegistryConf(Map<String, String> conf) throws Exception {
+        // NOTE: notice that the order `env var` > `JVM system property` > `config file(local/conf-center)`,
+        //       registry could be set dynamically by injecting new properties into `JVM system property`.
+        // TODO: write new conf-center configurations into `file(disk)` instead of `JVM property(memory)`
+
+        String registryTypesPrefix = ConfigurationKeys.FILE_ROOT_REGISTRY
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
+        for (String key: conf.keySet()) {
+            if (key.equals(registryTypesPrefix)) {
+                String[] types = conf.get(registryTypesPrefix).split(Constants.REGISTRY_TYPE_SPLIT_CHAR);
+                for (String type: types) {
+                    ConfigValidator.ValidateResult result = ConfigValidator.validateRegistryConf(key, type);
+                    if (!result.getValid())
+                        throw new Exception(result.getErrorMessage());
+                }
+            } else {
+                ConfigValidator.ValidateResult result = ConfigValidator.validateRegistryConf(key, conf.get(key));
+                if (!result.getValid())
+                    throw new Exception(result.getErrorMessage());
+            }
+        }
+
+        Map<String, String> newProperties = new HashMap<>();
+        Map<String, String> oldProperties = new HashMap<>();
+        // Check if properties are already set in `env var`
+        for (String key: conf.keySet()) {
+            String value = System.getenv(key);
+            if (StringUtils.isBlank(value)) {
+                if (!CURRENT_FILE_INSTANCE.getConfig(key).equals(conf.get(key))) {
+                    newProperties.put(key, conf.get(key));
+                    oldProperties.put(key, CURRENT_FILE_INSTANCE.getConfig(key));
+                }
+            } else if (!value.equals(conf.get(key))) {
+                throw new Exception(String.format("%s is set in env before, value = %s", key, value));
+            }
+        }
+
+        // Inject properties into `JVM system property`
+        for (String key: newProperties.keySet()) {
+            System.setProperty(key, newProperties.get(key));
+        }
+
+        reload();
+
+        return oldProperties;
+    }
+
+
+    /**
+     * Set configuration center configs during the runtime
+     * @param conf conf-center new conf
+     * @return old conf
+     */
+    public static Map<String, String> setConfCenterConf(Map<String, String> conf) throws Exception {
+        // NOTE: notice that the order `env var` > `JVM system property` > `config file(local/conf-center)`,
+        //       conf-center could be set dynamically by injecting new properties into `JVM system property`.
+        // TODO: write new conf-center configurations into `file(disk)` instead of `JVM property(memory)`
+
+        for (String key: conf.keySet()) {
+            ConfigValidator.ValidateResult validateResult = ConfigValidator.validateCenterConf(key, conf.get(key));
+            if (!validateResult.getValid())
+                throw new Exception(validateResult.getErrorMessage());
+        }
+
+        Map<String, String> newProperties = new HashMap<>();
+        Map<String, String> oldProperties = new HashMap<>();
+        // Check if properties are already set in `env var`
+        for (String key: conf.keySet()) {
+            String value = System.getenv(key);
+            if (StringUtils.isBlank(value)) {
+                if (!CURRENT_FILE_INSTANCE.getConfig(key).equals(conf.get(key))) {
+                    newProperties.put(key, conf.get(key));
+                    oldProperties.put(key, CURRENT_FILE_INSTANCE.getConfig(key));
+                }
+            } else if (!value.equals(conf.get(key))){
+                throw new Exception(String.format("%s is set in env before, value = %s", key, value));
+            }
+        }
+
+        // Inject properties into `JVM system property`
+        for (String key: newProperties.keySet()) {
+            System.setProperty(key, newProperties.get(key));
+        }
+
+        try {
+            reload();
+        } catch (Exception e) {
+            // rollback to the old configurations
+            for (String key: oldProperties.keySet()) {
+                System.setProperty(key, oldProperties.get(key));
+            }
+            reload();
+            throw e;
+        }
+
+        return oldProperties;
     }
 }
