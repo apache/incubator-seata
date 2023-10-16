@@ -84,7 +84,7 @@ seata:
       app-id: seata-server
       namespace: application
       apollo-accesskey-secret:
-      cluster: seata
+      cluster:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
