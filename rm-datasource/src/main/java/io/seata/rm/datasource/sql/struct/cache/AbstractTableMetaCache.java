@@ -63,9 +63,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        TableMeta tmeta;
         final String key = getCacheKey(connection, tableName, resourceId);
-        tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
+        TableMeta tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(connection, tableName);
             } catch (SQLException e) {
@@ -75,7 +74,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         });
 
         if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get table meta failed," +
+            throw new ShouldNeverHappenException(String.format("[xid:%s] Get table meta failed," +
                 " please check whether the table `%s` exists.", RootContext.getXID(), tableName));
         }
         return tmeta;

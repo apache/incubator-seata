@@ -13,21 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db.sql.distributed.lock;
+package io.seata.core.store.db.sql.lock;
+
+import io.seata.common.loader.LoadLevel;
 
 /**
- * @author chd
+ * the database lock store DaMeng sql
+ *
+ * @author wang.liang
+ * @since 1.8.0
  */
-public class DistributedLockSqlFactory {
-    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
-
-    /**
-     * get the lock store sql
-     *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm, it's useless now, but maybe useful later
-     * @return lock store sql
-     */
-    public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
-        return DISTRIBUTED_LOCK_SQL;
-    }
+@LoadLevel(name = "dm")
+public class DmLockStoreSql extends MysqlLockStoreSql {
 }

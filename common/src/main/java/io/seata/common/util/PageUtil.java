@@ -102,10 +102,10 @@ public class PageUtil {
     public static String pageSql(String sourceSql, String dbType, int pageNum, int pageSize) {
         switch (dbType) {
             case "mysql":
-            case "polardb-x":
             case "h2":
             case "postgresql":
             case "oceanbase":
+            case "dm":
                 return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
@@ -131,6 +131,7 @@ public class PageUtil {
             case "h2":
             case "oceanbase":
             case "oracle":
+            case "dm":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");

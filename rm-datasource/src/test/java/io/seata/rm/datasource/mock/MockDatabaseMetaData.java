@@ -863,7 +863,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return null;
+        return connection;
     }
 
     @Override
