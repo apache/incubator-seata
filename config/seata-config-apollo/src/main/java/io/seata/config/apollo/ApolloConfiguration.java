@@ -186,13 +186,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
                 System.setProperty(PROP_APOLLO_SECRET, apolloAccesskeySecret);
             }
         }
-        if (!properties.containsKey(APOLLO_CLUSTER)) {
+        if (!properties.containsKey(PROP_APOLLO_CLUSTER)) {
             String apolloCluster = FILE_CONFIG.getConfig(getApolloCluster());
             if (StringUtils.isNotBlank(apolloCluster)) {
                 System.setProperty(PROP_APOLLO_CLUSTER, apolloCluster);
             }
         }
-        if (!properties.containsKey(APOLLO_CONFIG_SERVICE)) {
+        if (!properties.containsKey(PROP_APOLLO_CONFIG_SERVICE)) {
             String apolloConfigService = FILE_CONFIG.getConfig(getApolloConfigService());
             if (StringUtils.isNotBlank(apolloConfigService)) {
                 System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
