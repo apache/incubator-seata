@@ -27,7 +27,12 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.*;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolAbstract;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
+import redis.clients.jedis.Protocol;
+import redis.clients.jedis.Jedis;
 
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
