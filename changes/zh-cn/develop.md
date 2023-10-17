@@ -18,6 +18,7 @@
 - [[#5828](https://github.com/seata/seata/pull/5828)] 修正 `codecov chart` 不展示的问题
 - [[#5927](https://github.com/seata/seata/pull/5927)] 优化一些与 Apollo 相关的脚本
 - [[#5918](https://github.com/seata/seata/pull/5918)] 修正codecov.yml不标准属性
+- [[#5938](https://github.com/seata/seata/pull/5938)] 支持 jmx 监控配置
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
