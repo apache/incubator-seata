@@ -75,16 +75,12 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v1
       # step 3
-      - name: "install"
+      - name: "Install ARM64v8/ubuntu and test with Maven"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
-                       apt-get install maven -y'
-      # step 4
-      - name: "Print maven version"
-        run: ./mvnw -version
-      # step 5
-      - name: "test-arm64"
-        run: |
-          ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn          
+                       apt-get install maven -y && \
+                       java -version && \
+                       mvn -version && \
+                       mvn -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'

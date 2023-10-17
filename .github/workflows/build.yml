@@ -2,7 +2,7 @@ name: "build"
 
 on:
   push:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, test* ]
   pull_request:
     branches: [ 2.x, develop, master ]
 
@@ -44,7 +44,6 @@ jobs:
   # job 2: Test on 'arm64v8/ubuntu' OS.
   build_arm64-binary:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
     strategy:
       fail-fast: false
     steps:
@@ -56,11 +55,12 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v1
       # step 3
-      - name: "Build arm-binary"
+      - name: "Install ARM64v8/ubuntu:20.04 and build with Maven"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
+                       java -version && \
                        mvn -version && \
-                       mvn -Prelease-seata -DskipTests clean install -U'
+                       mvn clean install -Prelease-seata -DskipTests -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
