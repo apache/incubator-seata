@@ -182,6 +182,7 @@ seata:
       sentinel:
         master-name:
         sentinel-hosts:
+        sentinel-password:
   metrics:
     enabled: false
     registry-type: compact
