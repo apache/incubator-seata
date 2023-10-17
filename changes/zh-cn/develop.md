@@ -37,5 +37,6 @@
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [leizhiyuan](https://github.com/leizhiyuan)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
