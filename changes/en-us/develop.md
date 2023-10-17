@@ -37,6 +37,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [leizhiyuan](https://github.com/leizhiyuan) 
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
