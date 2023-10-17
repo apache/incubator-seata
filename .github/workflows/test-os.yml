@@ -37,7 +37,13 @@ jobs:
         run: |
           ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       ## step 4.2、for Windows
-      - name: "Test with Maven in Windows OS"
+      - name: "Test with Maven in Windows OS-1"
         if: matrix.os == 'windows-latest'
         run: |
           ./mvnw -T 4C clean test -e -B;
+      ## step 4.3、for Windows
+      - name: "Test with Maven in Windows OS-2"
+        if: matrix.os == 'windows-latest'
+        run: |
+          mvn -version;
+          mvn -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
