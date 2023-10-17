@@ -82,6 +82,5 @@ jobs:
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
-                       java -version && \
                        mvn -version && \
                        mvn clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
