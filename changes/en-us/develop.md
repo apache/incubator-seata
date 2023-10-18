@@ -10,6 +10,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
 - [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
+- [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
@@ -17,6 +18,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5890](https://github.com/seata/seata/pull/5890)] remove 7z format compression support
 - [[#5891](https://github.com/seata/seata/pull/5891)] remove mariadb.jdbc dependency
 - [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
+- [[#5927](https://github.com/seata/seata/pull/5927)] optimize some scripts related to Apollo
+- [[#5918](https://github.com/seata/seata/pull/5918)] standardized the properties of codecov.yml
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
