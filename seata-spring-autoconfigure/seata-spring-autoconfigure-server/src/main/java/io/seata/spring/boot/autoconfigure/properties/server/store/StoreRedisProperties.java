@@ -149,6 +149,8 @@ public class StoreRedisProperties {
          */
         private String sentinelHosts;
 
+        private String sentinelPassword;
+
         public String getMasterName() {
             return masterName;
         }
@@ -164,6 +166,15 @@ public class StoreRedisProperties {
 
         public Sentinel setSentinelHosts(String sentinelHosts) {
             this.sentinelHosts = sentinelHosts;
+            return this;
+        }
+
+        public String getSentinelPassword() {
+            return sentinelPassword;
+        }
+
+        public Sentinel setSentinelPassword(String sentinelPassword) {
+            this.sentinelPassword = sentinelPassword;
             return this;
         }
     }

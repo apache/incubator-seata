@@ -92,7 +92,7 @@
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
         <!-- redis -->
-        <jedis.version>3.2.0</jedis.version>
+        <jedis.version>3.8.0</jedis.version>
 
         <!-- # for database -->
         <!-- db -->
