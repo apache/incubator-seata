@@ -20,6 +20,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
 - [[#5927](https://github.com/seata/seata/pull/5927)] optimize some scripts related to Apollo
 - [[#5918](https://github.com/seata/seata/pull/5918)] standardized the properties of codecov.yml
+- [[#5939](https://github.com/seata/seata/pull/5939)] support jmx port in seata
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
@@ -38,6 +39,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [leizhiyuan](https://github.com/leizhiyuan) 
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.

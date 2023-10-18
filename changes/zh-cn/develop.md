@@ -20,6 +20,7 @@
 - [[#5828](https://github.com/seata/seata/pull/5828)] 修正 `codecov chart` 不展示的问题
 - [[#5927](https://github.com/seata/seata/pull/5927)] 优化一些与 Apollo 相关的脚本
 - [[#5918](https://github.com/seata/seata/pull/5918)] 修正codecov.yml不标准属性
+- [[#5939](https://github.com/seata/seata/pull/5939)] 支持 jmx 监控配置
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
@@ -38,5 +39,6 @@
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [leizhiyuan](https://github.com/leizhiyuan)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
