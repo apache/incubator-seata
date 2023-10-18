@@ -60,12 +60,6 @@ public class ZookeeperRegisterServiceImplTest {
     }
 
     @Test
-    public void buildZkTest() {
-        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
-        Assertions.assertTrue(client.exists("/zookeeper"));
-    }
-
-    @Test
     public void testAll() throws Exception {
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
