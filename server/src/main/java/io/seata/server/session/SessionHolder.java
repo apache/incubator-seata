@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -185,6 +186,9 @@ public class SessionHolder {
                     case AsyncCommitting:
                     case Committing:
                     case CommitRetrying:
+                        if (Objects.equals(SessionMode.RAFT, storeMode)) {
+                            globalSession.unlock();
+                        }
                         break;
                     default: {
                         if (acquireLock) {
