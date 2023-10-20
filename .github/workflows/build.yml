@@ -53,7 +53,7 @@ jobs:
       # step 2
       - name: "Set up QEMU"
         id: qemu
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
       # step 3
       - name: "Install ARM64v8/ubuntu:20.04 and build with Maven"
         run: |
