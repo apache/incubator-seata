@@ -68,7 +68,7 @@
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
-        <jraft.version>1.3.12</jraft.version>
+        <jraft.version>1.3.13</jraft.version>
         <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>

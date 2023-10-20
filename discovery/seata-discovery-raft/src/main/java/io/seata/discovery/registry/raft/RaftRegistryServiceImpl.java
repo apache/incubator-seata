@@ -225,12 +225,13 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             Map<String, Node> map = new HashMap<>();
             if (CollectionUtils.isNotEmpty(nodeList)) {
                 for (Node node : nodeList) {
-                    map.put(node.getTransaction().getHost(), node);
+                    map.put(node.getTransaction().getHost() + IP_PORT_SPLIT_CHAR + node.getTransaction().getPort(),
+                        node);
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
-                Node node = map.get(host);
+                Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
                 return host + IP_PORT_SPLIT_CHAR
                     + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());

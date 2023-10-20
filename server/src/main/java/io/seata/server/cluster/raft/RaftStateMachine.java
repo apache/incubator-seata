@@ -246,6 +246,17 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
+        if (isLeader()) {
+            SeataClusterContext.bindGroup(group);
+            try {
+                RaftClusterMetadata clusterMetadata = createNewRaftClusterMetadata();
+                RaftTaskUtil.createTask(status -> refreshClusterMetadata(clusterMetadata), clusterMetadata, null);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            } finally {
+                SeataClusterContext.unbindGroup();
+            }
+        }
         RouteTable.getInstance().updateConfiguration(group, conf);
     }
 
