@@ -9,6 +9,8 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
+- [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
+- [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
@@ -18,6 +20,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
 - [[#5927](https://github.com/seata/seata/pull/5927)] optimize some scripts related to Apollo
 - [[#5918](https://github.com/seata/seata/pull/5918)] standardized the properties of codecov.yml
+- [[#5939](https://github.com/seata/seata/pull/5939)] support jmx port in seata
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
@@ -37,6 +40,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
+- [leizhiyuan](https://github.com/leizhiyuan) 
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
