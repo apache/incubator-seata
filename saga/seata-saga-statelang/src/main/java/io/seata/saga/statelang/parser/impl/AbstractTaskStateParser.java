@@ -101,14 +101,14 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
                 retry.setExceptions((List<String>) retryMap.get("Exceptions"));
 
                 Object intervalSeconds = retryMap.get("IntervalSeconds");
-                if (intervalSeconds != null && intervalSeconds instanceof Number) {
+                if (intervalSeconds instanceof Number) {
                     retry.setIntervalSeconds(((Number) intervalSeconds).doubleValue());
                 }
 
                 retry.setMaxAttempts((Integer) retryMap.get("MaxAttempts"));
 
                 Object backoffRate = retryMap.get("BackoffRate");
-                if (backoffRate != null && backoffRate instanceof Number) {
+                if (backoffRate instanceof Number) {
                     retry.setBackoffRate(((Number) backoffRate).doubleValue());
                 }
 

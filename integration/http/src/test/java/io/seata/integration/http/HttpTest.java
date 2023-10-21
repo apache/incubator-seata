@@ -212,7 +212,7 @@ class HttpTest {
 
         src.close();
         dest.close();
-        return new String(bos.toByteArray(), "UTF-8");
+        return bos.toString("UTF-8");
     }
 
     @Test
