@@ -212,7 +212,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         }
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
-                LOGGER.info("reload session， groupId: {}, session map size: {} ", group,
+                LOGGER.info("reload session, groupId: {}, session map size: {} ", group,
                     SessionHolder.getRootSessionManager().allSessions().size());
                 SeataClusterContext.bindGroup(group);
                 try {
