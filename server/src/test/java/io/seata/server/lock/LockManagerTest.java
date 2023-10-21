@@ -348,57 +348,6 @@ public class LockManagerTest {
         }
     }
 
-    @ParameterizedTest
-    @MethodSource("globalSessionProvider")
-    public void lockDeleteTest(GlobalSession globalSessions) throws TransactionException, ParseException {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
-        final SessionManager sessionManager = SessionHolder.getRootSessionManager();
-        Collection<GlobalSession> sessions = sessionManager.allSessions();
-        if (CollectionUtils.isNotEmpty(sessions)) {
-            // make sure sessionManager is empty
-            for (GlobalSession session : sessions) {
-                sessionManager.removeGlobalSession(session);
-            }
-        }
-        try {
-            sessionManager.addGlobalSession(globalSessions);
-            LockManager lockManager = new FileLockManagerForTest();
-            for (BranchSession branchSession : globalSessions.getBranchSessions()) {
-                lockManager.acquireLock(branchSession);
-            }
-            GlobalLockParam globalLockParam = new GlobalLockParam();
-            globalLockParam.setPageSize(10);
-            globalLockParam.setPageNum(1);
-            globalLockParam.setXid(globalSessions.getXid());
-            GlobalLockParam param1 = new GlobalLockParam();
-            param1.setXid(globalSessions.getXid());
-            globalSessions.getBranchSessions().forEach(branchSession -> {
-                param1.setBranchId(String.valueOf(branchSession.getBranchId()));
-                param1.setResourceId(branchSession.getResourceId());
-                String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
-                for (String tableGroupedLockKey : tableGroupedLockKeys) {
-                    int idx = tableGroupedLockKey.indexOf(":");
-                    String tableName = tableGroupedLockKey.substring(0, idx);
-                    String mergedPKs = tableGroupedLockKey.substring(idx + 1);
-                    String[] pks = mergedPKs.split(",");
-                    param1.setTableName(tableName);
-                    int beginCnt = globalLockService.query(globalLockParam).getData().size();
-                    for (int i = 0; i < pks.length; i++) {
-                        String pk = pks[i];
-                        param1.setPk(pk);
-                        globalLockService.deleteLock(param1);
-                        Assertions.assertEquals(beginCnt - i - 1, globalLockService.query(globalLockParam).getData().size());
-                    }
-                }
-            });
-            Assertions.assertEquals(0, globalLockService.query(globalLockParam).getData().size());
-        } finally {
-            sessionManager.removeGlobalSession(globalSessions);
-            sessionManager.destroy();
-        }
-    }
-
     /**
      * Branch session provider object [ ] [ ].
      *

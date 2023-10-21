@@ -41,4 +41,13 @@ public interface GlobalLockService {
      * @return SingleResult<Void>
      */
     SingleResult<Void> deleteLock(GlobalLockParam param);
+
+    /**
+     * Check if the lock exist the branch session
+     *
+     * @param xid      xid
+     * @param branchId branchId
+     * @return True-exist   False-not exist the branch session
+     */
+    SingleResult<Boolean> check(String xid, String branchId);
 }

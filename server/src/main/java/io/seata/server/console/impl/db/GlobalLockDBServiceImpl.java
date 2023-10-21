@@ -36,6 +36,7 @@ import io.seata.console.result.PageResult;
 import io.seata.console.result.SingleResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import io.seata.server.console.exception.ConsoleException;
 import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
@@ -134,9 +135,9 @@ public class GlobalLockDBServiceImpl extends AbstractLockService implements Glob
             ps.setString(1, rowKey);
             ps.setString(2, param.getXid());
             ps.executeUpdate();
-        } catch (SQLException e) {
-            LOGGER.error("delete global lock,xid:{} branchId:{} row key:{} failed", param.getXid(), param.getBranchId(), rowKey, e);
-            throw new StoreException(e);
+        } catch (Exception e) {
+            throw new ConsoleException(e, String.format("delete global lock," +
+                    "xid:%s ,branchId:%s ,row key:%s failed", param.getXid(), param.getBranchId(), rowKey));
         }
         return SingleResult.success();
     }

@@ -15,29 +15,22 @@
  */
 package io.seata.server.console.impl;
 
-import io.seata.common.exception.FrameworkException;
 import io.seata.console.result.SingleResult;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.console.exception.ConsoleException;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeoutException;
 
 public abstract class AbstractBranchService extends AbstractService implements BranchSessionService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBranchService.class);
-
     @Override
     public SingleResult<Void> stopBranchRetry(String xid, String branchId) {
         CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
         GlobalSession globalSession = checkResult.getGlobalSession();
         // saga is not support to operate
         if (globalSession.isSaga()) {
-            throw new IllegalArgumentException("saga can not operate branch session");
+            throw new IllegalArgumentException("saga can not operate branch transactions because it have no determinative role");
         }
         BranchSession branchSession = checkResult.getBranchSession();
         BranchStatus branchStatus = branchSession.getStatus();
@@ -59,12 +52,8 @@ public abstract class AbstractBranchService extends AbstractService implements B
         branchSession.setStatus(newStatus);
         try {
             globalSession.changeBranchStatus(branchSession, newStatus);
-        } catch (TransactionException e) {
-            LOGGER.error("stop branch session retry fail, xid:{}, branchId:{}", xid, branchId, e);
-            throw new FrameworkException(e);
         } catch (Exception e) {
-            LOGGER.error("stop branch session retry fail, xid:{}, branchId:{}", xid, branchId, e);
-            throw e;
+            throw new ConsoleException(e, String.format("stop branch session retry fail, xid:%s, branchId:%s", xid, branchId));
         }
         return SingleResult.success();
     }
@@ -75,7 +64,7 @@ public abstract class AbstractBranchService extends AbstractService implements B
         GlobalSession globalSession = checkResult.getGlobalSession();
         // saga is not support to operate
         if (globalSession.isSaga()) {
-            throw new IllegalArgumentException("saga can not operate branch session");
+            throw new IllegalArgumentException("saga can not operate branch transactions because it have no determinative role");
         }
         BranchSession branchSession = checkResult.getBranchSession();
         BranchStatus branchStatus = branchSession.getStatus();
@@ -87,12 +76,8 @@ public abstract class AbstractBranchService extends AbstractService implements B
         branchSession.setStatus(newStatus);
         try {
             globalSession.changeBranchStatus(branchSession, newStatus);
-        } catch (TransactionException e) {
-            LOGGER.error("start branch session retry fail, xid: {}, branchId:{}", xid, branchId, e);
-            throw new FrameworkException(e);
         } catch (Exception e) {
-            LOGGER.error("change branch session retry fail, xid: {}, branchId:{}", xid, branchId, e);
-            throw e;
+            throw new ConsoleException(e, String.format("start branch session retry fail, xid:%s, branchId:%s", xid, branchId));
         }
         return SingleResult.success();
     }
@@ -103,7 +88,7 @@ public abstract class AbstractBranchService extends AbstractService implements B
         GlobalSession globalSession = checkResult.getGlobalSession();
         // saga is not support to operate
         if (globalSession.isSaga()) {
-            throw new IllegalArgumentException("saga can not operate branch session");
+            throw new IllegalArgumentException("saga can not operate branch transactions because it have no determinative role");
         }
         GlobalStatus globalStatus = globalSession.getStatus();
         BranchSession branchSession = checkResult.getBranchSession();
@@ -114,12 +99,8 @@ public abstract class AbstractBranchService extends AbstractService implements B
                 boolean deleted = doDeleteBranch(globalSession, branchSession);
                 return deleted ? SingleResult.success() :
                         SingleResult.failure("delete branch fail, please retry again later");
-            } catch (TransactionException | TimeoutException | RuntimeException e) {
-                LOGGER.error("delete branch session fail, xid:{}, branchId:{}", xid, branchId, e);
-                throw new FrameworkException(e);
             } catch (Exception e) {
-                LOGGER.error("delete branch session fail, xid:{}, branchId:{}", xid, branchId, e);
-                throw e;
+                throw new ConsoleException(e, String.format("delete branch session fail, xid:%s, branchId:%s", xid, branchId));
             }
         }
         throw new IllegalArgumentException("current global transaction is not support delete branch transaction");

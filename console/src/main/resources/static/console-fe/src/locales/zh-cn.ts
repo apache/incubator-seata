@@ -63,7 +63,7 @@ const zhCn: ILocale = {
     deleteGlobalSessionTitle: '删除全局事务',
     stopGlobalSessionTitle: '停止全局事务重试',
     startGlobalSessionTitle: '开启全局事务重试',
-    sendGlobalSessionTitle: '发送单次提交或回滚',
+    sendGlobalSessionTitle: '提交或回滚',
     changeGlobalSessionTitle: '更新全局事务状态',
     deleteBranchSessionTitle: '删除分支事务',
     stopBranchSessionTitle: '停止分支事务重启',

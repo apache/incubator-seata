@@ -18,6 +18,9 @@ package io.seata.server.console.aop;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.console.result.SingleResult;
+import io.seata.server.console.exception.ConsoleException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,33 +29,47 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @ControllerAdvice
 @Component
 public class GlobalExceptionHandlerAdvice {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandlerAdvice.class);
+
+    @ExceptionHandler(ConsoleException.class)
+    @ResponseBody
+    public SingleResult<Void> handlerConsoleException(ConsoleException ex) {
+        LOGGER.error("console error, reason: {}", ex.getLogMessage(), ex);
+        return SingleResult.failure(ex.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseBody
     public SingleResult<Void> handlerIllegalArgumentException(IllegalArgumentException ex) {
+        LOGGER.error("IllegalArgumentException: ", ex);
         return SingleResult.failure(ex.getMessage());
     }
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseBody
     public SingleResult<Void> handlerIllegalStateException(IllegalStateException ex) {
+        LOGGER.error("IllegalStateException: ", ex);
         return SingleResult.failure(ex.getMessage());
     }
 
     @ExceptionHandler(ShouldNeverHappenException.class)
     @ResponseBody
     public SingleResult<Void> handlerShouldNeverHappenException(ShouldNeverHappenException ex) {
+        LOGGER.error("ShouldNeverHappenException: ", ex);
         return SingleResult.failure(ex.getMessage());
     }
 
     @ExceptionHandler(FrameworkException.class)
     @ResponseBody
     public SingleResult<Void> handlerFrameworkException(FrameworkException ex) {
+        LOGGER.error("FrameworkException: ", ex);
         return SingleResult.failure(ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public SingleResult<Void> handleException(Exception ex) {
-        return SingleResult.failure("There was an error with the system, please try again later!");
+        LOGGER.error("FrameworkException: ", ex);
+        return SingleResult.failure(ex.getMessage());
     }
 }

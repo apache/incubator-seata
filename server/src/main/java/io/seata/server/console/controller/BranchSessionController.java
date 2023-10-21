@@ -19,6 +19,8 @@ import javax.annotation.Resource;
 
 import io.seata.console.result.SingleResult;
 import io.seata.server.console.service.BranchSessionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSessionController.class);
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
@@ -45,6 +48,9 @@ public class BranchSessionController {
      */
     @DeleteMapping("deleteBranchSession")
     public SingleResult<Void> deleteBranchSession(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to delete the branch session, xid: {} branchId: {}", xid, branchId);
+        }
         return branchSessionService.deleteBranchSession(xid, branchId);
     }
 
@@ -57,6 +63,9 @@ public class BranchSessionController {
      */
     @PutMapping("stopBranchSession")
     public SingleResult<Void> stopBranchSession(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to stop the branch session, xid: {} branchId: {}", xid, branchId);
+        }
         return branchSessionService.stopBranchRetry(xid, branchId);
     }
 
@@ -69,6 +78,9 @@ public class BranchSessionController {
      */
     @PutMapping("startBranchSession")
     public SingleResult<Void> startBranchRetry(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to start the branch session, xid: {} branchId: {}", xid, branchId);
+        }
         return branchSessionService.startBranchRetry(xid, branchId);
     }
 }

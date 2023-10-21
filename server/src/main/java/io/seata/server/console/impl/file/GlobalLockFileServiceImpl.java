@@ -17,11 +17,6 @@ package io.seata.server.console.impl.file;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,9 +36,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
-import io.seata.server.storage.file.lock.FileLocker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +53,6 @@ import static java.util.Objects.isNull;
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
 public class GlobalLockFileServiceImpl extends AbstractLockService implements GlobalLockService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockFileServiceImpl.class);
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -85,28 +76,7 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
 
     @Override
     public SingleResult<Void> deleteLock(GlobalLockParam param) {
-        CheckResult checkResult = checkDeleteParam(param);
-        BranchSession branchSession = checkResult.getBranchSession();
-        ConcurrentMap<String, ConcurrentMap<String,
-                ConcurrentMap<Integer, FileLocker.BucketLockMap>>> lockMap = FileLocker.getLockMap();
-        Optional.ofNullable(lockMap.get(param.getResourceId()))
-                .map(dbLockMap -> dbLockMap.get(param.getTableName()))
-                .map(tableLockMap -> {
-                    int bucketId = param.getPk().hashCode() % FileLocker.getBucketPerTable();
-                    return tableLockMap.get(bucketId);
-                })
-                .ifPresent(bucketLockMap -> {
-                    Map<FileLocker.BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
-                    for (Map.Entry<FileLocker.BucketLockMap, Set<String>> entry : lockHolder.entrySet()) {
-                        FileLocker.BucketLockMap key = entry.getKey();
-                        // delete lock only if the same bucket in the branch
-                        if (key.equals(bucketLockMap)) {
-                            doDeleteGlobalLock(branchSession, param, entry);
-                            break;
-                        }
-                    }
-                });
-        return SingleResult.success();
+        throw new IllegalStateException("Not Support to delete lock in file mode");
     }
 
     /**
@@ -206,69 +176,4 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
                     (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
         };
     }
-
-    private void doDeleteGlobalLock(BranchSession branchSession, GlobalLockParam param,
-                                    Map.Entry<FileLocker.BucketLockMap, Set<String>> entry) {
-        Map<FileLocker.BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
-        String delPk = param.getPk();
-        String delTableName = param.getTableName();
-        FileLocker.BucketLockMap bucket = entry.getKey();
-        Set<String> lockedPks = entry.getValue();
-        for (String lockedPk : lockedPks) {
-            // delete the lock when the pk is the same
-            if (StringUtils.isNotBlank(lockedPk) && lockedPk.equalsIgnoreCase(delPk)) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("start to delete global lock: xid{}, branchId:{}, tableName:{} pk:{}",
-                            param.getXid(), param.getBranchId(), delTableName, delPk);
-                }
-                // remove the lock
-                bucket.get().remove(lockedPk, branchSession);
-                String[] tableGroupedLockKeys = branchSession.getLockKey().split(";");
-                StringJoiner newLockKey = new StringJoiner(";");
-                for (String tableGroupedLockKey : tableGroupedLockKeys) {
-                    int idx = tableGroupedLockKey.indexOf(":");
-                    String tableName = tableGroupedLockKey.substring(0, idx);
-                    if (!tableName.equalsIgnoreCase(delTableName)) {
-                        newLockKey.add(tableGroupedLockKey);
-                        continue;
-                    }
-                    String mergedPKs = tableGroupedLockKey.substring(idx + 1);
-                    String[] pks = mergedPKs.split(",");
-                    StringJoiner newTablePkKey = new StringJoiner(",");
-                    for (String pk : pks) {
-                        // the pk that still contained, just append to the new lock key
-                        if (!pk.equalsIgnoreCase(delPk)) {
-                            newTablePkKey.add(pk);
-                        }
-                    }
-                    if (StringUtils.isNotBlank(newTablePkKey.toString())) {
-                        newLockKey.add(tableName + ":" + newTablePkKey);
-                    }
-                }
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("update lock key from:{} to:{}", branchSession.getLockKey(), newLockKey);
-                }
-                // update the lock key in branchSession
-                branchSession.setLockKey(newLockKey.toString());
-                break;
-            }
-        }
-        // remove the empty bucket
-        if (bucket.get().isEmpty()) {
-            lockHolder.remove(bucket);
-        }
-    }
-
-    private CheckResult checkDeleteParam(GlobalLockParam param) {
-        String xid = param.getXid();
-        String branchId = param.getBranchId();
-        CheckResult checkResult = commonCheckAndGetGlobalStatus(xid, branchId);
-        if (StringUtils.isBlank(param.getTableName()) || StringUtils.isBlank(param.getPk())
-                || StringUtils.isBlank(param.getResourceId())) {
-            throw new IllegalArgumentException("tableName or resourceId or pk can not be empty");
-        }
-        return checkResult;
-    }
-
-
 }
