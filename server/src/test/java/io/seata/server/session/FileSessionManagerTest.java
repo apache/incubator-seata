@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
@@ -40,6 +41,7 @@ import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.store.StoreConfig;
 import io.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
@@ -290,6 +292,16 @@ public class FileSessionManagerTest {
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
 
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+            // make sure sessionMaanager is empty
+            Collection<GlobalSession> sessions = sessionManager.allSessions();
+            if (CollectionUtils.isNotEmpty(sessions)) {
+                // FileSessionManager use ConcurrentHashMap is thread safe
+                for (GlobalSession session : sessions) {
+                    sessionManager.removeGlobalSession(session);
+                }
+            }
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
             }
@@ -417,6 +429,7 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void stopGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
             }
@@ -446,6 +459,7 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
             }
@@ -475,6 +489,7 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void startGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
             }
@@ -588,6 +603,7 @@ public class FileSessionManagerTest {
     @MethodSource("branchSessionsProvider")
     public void stopBranchRetryTest(GlobalSession globalSession) throws Exception {
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
             globalSession.begin();
             // wrong param for xid and branchId
             Assertions.assertThrows(IllegalArgumentException.class,
@@ -622,6 +638,7 @@ public class FileSessionManagerTest {
     @MethodSource("branchSessionsProvider")
     public void restartBranchFailRetryTest(GlobalSession globalSession) throws Exception {
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
             globalSession.begin();
             List<BranchSession> branchSessions = globalSession.getBranchSessions();
             // wrong status for branch transaction
