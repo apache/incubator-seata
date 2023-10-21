@@ -592,6 +592,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.caucho</groupId>
             <artifactId>hessian</artifactId>
             <scope>provided</scope>

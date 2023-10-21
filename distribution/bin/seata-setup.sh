@@ -150,6 +150,21 @@ fi
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
 
+if [ "$JMX_ENABLE" = "true" ]; then
+  JMX_PORT=$JMX_PORT
+  JMX_OPTS=$JMX_OPTS
+  if [ -z "$JMX_OPTS" ]; then
+    JMX_OPTS=" -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false "
+  fi
+  if [ -z "$JMX_PORT" ]; then
+    JMX_OPTS=" $JMX_OPTS -Dcom.sun.management.jmxremote.port=${JMX_PORT:="10055"} -Dcom.sun.management.jmxremote.rmi.port=${JMX_PORT:="10055"} "
+  fi
+  echo "JMX enabled"
+else
+  echo "JMX disabled"
+fi
+
+JAVA_OPT="${JAVA_OPT} ${JMX_OPTS}"
 
 if [ ! -x "$BASEDIR"/logs ]; then
   mkdir "$BASEDIR"/logs
