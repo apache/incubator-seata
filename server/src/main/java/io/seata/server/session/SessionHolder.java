@@ -206,17 +206,11 @@ public class SessionHolder {
                             case TimeoutRollbackRetrying:
                                 break;
                             case Begin:
-                                if (storeMode == SessionMode.RAFT) {
+                                if (Objects.equals(storeMode, SessionMode.RAFT)) {
                                     try {
-                                        if (globalSession.isActive()) {
-                                            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
-                                        } else {
-                                            // This means that the transaction is unlocked, but a reelection has
-                                            // occurred before the transaction state has been updated
-                                            // so the transaction needs to be resubmitted (deleted)
-                                            globalSession.changeGlobalStatus(GlobalStatus.CommitRetrying);
-                                        }
-                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(), globalSession.getXid());
+                                        globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
+                                            globalSession.getXid());
                                     } catch (TransactionException e) {
                                         LOGGER.error("change global status fail: {}", e.getMessage(), e);
                                     }

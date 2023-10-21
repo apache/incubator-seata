@@ -654,7 +654,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.putInt(active ? 1 : 0);
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -672,7 +671,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + 4 // applicationDataBytes.length
             + 8 // beginTime
             + 1 // statusCode
-            + 1 // active
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
@@ -719,9 +717,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
-        if (byteBuffer.hasRemaining()) {
-            this.active = byteBuffer.getInt() == 1;
-        }
     }
 
     /**
