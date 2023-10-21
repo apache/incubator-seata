@@ -37,10 +37,7 @@ public class TableMetaTest {
     @Test
     public void testTableMeta() {
         TableMeta tableMeta = new TableMeta();
-        Assertions.assertEquals(tableMeta, tableMeta);
         Assertions.assertEquals(tableMeta, new TableMeta());
-        Assertions.assertEquals(tableMeta.hashCode(), tableMeta.hashCode());
-        Assertions.assertNotEquals(tableMeta, "");
 
         TableMeta other = new TableMeta();
         other.setTableName("");
