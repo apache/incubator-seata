@@ -37,6 +37,7 @@ public class PageUtilTest {
         String oracleTargetSql = "select * from " +
                 "( select ROWNUM rn, temp.* from (select * from test where a = 1) temp )" +
                 " where rn between 1 and 5";
+        String sqlserverTargetSql = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
 
         assertEquals(PageUtil.pageSql(sourceSql, "mysql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "h2", 1, 5), mysqlTargetSql);
@@ -44,6 +45,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "dm", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oracle", 1, 5), oracleTargetSql);
+        assertEquals(PageUtil.pageSql(sourceSql, "sqlserver", 1, 5), sqlserverTargetSql);
 
         assertThrows(NotSupportYetException.class, () -> PageUtil.pageSql(sourceSql, "xxx", 1, 5));
     }
@@ -60,6 +62,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.countSql(sourceSql, "oceanbase"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "dm"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oracle"), targetSql);
+        assertEquals(PageUtil.countSql(sourceSql, "sqlserver"), targetSql);
 
         assertThrows(NotSupportYetException.class, () -> PageUtil.countSql(sourceSql, "xxx"));
     }
