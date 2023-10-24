@@ -112,7 +112,7 @@
     },
     "SecondMatchState": {
       "Type": "SubStateMachine",
-      "StateMachineName": "simpleTestStateMachine",
+      "StateMachineName": "simpleTestSubStateMachine",
       "Input": [
         {
           "input": "$.data"
