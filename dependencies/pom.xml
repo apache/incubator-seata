@@ -92,12 +92,13 @@
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
         <!-- redis -->
-        <jedis.version>3.2.0</jedis.version>
+        <jedis.version>3.8.0</jedis.version>
 
         <!-- # for database -->
         <!-- db -->
         <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
+        <dm.version>8.1.2.192</dm.version>
         <postgresql.version>42.3.3</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
@@ -120,6 +121,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
+        <native-lib-loader.version>2.4.0</native-lib-loader.version>
     </properties>
 
     <dependencyManagement>
@@ -212,6 +214,11 @@
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
                 <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.dameng</groupId>
+                <artifactId>DmJdbcDriver18</artifactId>
+                <version>${dm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mariadb.jdbc</groupId>
@@ -455,6 +462,17 @@
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.scijava</groupId>
+                        <artifactId>native-lib-loader</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.scijava</groupId>
+                <artifactId>native-lib-loader</artifactId>
+                <version>${native-lib-loader.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
