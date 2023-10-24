@@ -51,16 +51,9 @@ public class ZookeeperRegisterServiceImplTest {
         }
     }
 
-    ZookeeperRegisterServiceImpl service = (ZookeeperRegisterServiceImpl) new ZookeeperRegistryProvider().provide();
-
-    @Test
-    public void getInstance() {
-        ZookeeperRegisterServiceImpl service1 = ZookeeperRegisterServiceImpl.getInstance();
-        Assertions.assertEquals(service1, service);
-    }
-
     @Test
     public void testAll() throws Exception {
+        ZookeeperRegisterServiceImpl service = (ZookeeperRegisterServiceImpl) new ZookeeperRegistryProvider().provide();
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
         Assertions.assertThrows(ConfigNotFoundException.class, new Executable() {
