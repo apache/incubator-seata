@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.seata.server.console.controller;
+package io.seata.server.console.controller.v1;
 
 import io.seata.console.constant.Code;
 import io.seata.console.result.SingleResult;
@@ -38,10 +38,10 @@ import static io.seata.server.console.Constant.DEMO_TXN_NAME;
  * @author Junduo Dong
  */
 @RestController
-@RequestMapping("/api/v1/admin/txn")
-public class TxnTryController {
+@RequestMapping("/api/v1/console/trx")
+public class TrxMockController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TxnTryController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrxMockController.class);
 
     @RequestMapping(method = RequestMethod.POST, value = "begin")
     public SingleResult<String> tryBegin(@RequestParam("timeout") int timeout) {

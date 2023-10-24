@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.seata.server.console.controller;
+package io.seata.server.console.controller.v1;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

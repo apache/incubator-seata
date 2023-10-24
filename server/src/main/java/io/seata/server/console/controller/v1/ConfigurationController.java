@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.seata.server.console.controller;
+package io.seata.server.console.controller.v1;
 
 import io.seata.config.ConfigValidator;
 import io.seata.console.constant.Code;
@@ -34,7 +34,7 @@ import java.util.Map;
  * @author Junduo Dong
  */
 @RestController
-@RequestMapping("/api/v1/admin/configuration")
+@RequestMapping("/api/v1/console/configuration")
 public class ConfigurationController {
 
     private final Object setConfLock = new Object();
@@ -49,6 +49,7 @@ public class ConfigurationController {
 
     @RequestMapping(method = RequestMethod.POST)
     SingleResult<Map<String, List<String>>> setConf(@RequestBody Map<String, String> conf) {
+        // TODO: replace that process-level lock with global lock
         synchronized (setConfLock) {
             try {
                 return SingleResult.success(configurationService.setConf(conf));
@@ -60,6 +61,7 @@ public class ConfigurationController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/registry")
     SingleResult<Map<String, List<String>>> setRegistryConf(@RequestBody Map<String, String> conf) {
+        // TODO: replace that process-level lock with global lock
         synchronized (setConfLock) {
             try {
                 return SingleResult.success(configurationService.setRegistryConf(conf));
@@ -71,6 +73,7 @@ public class ConfigurationController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/config-center")
     SingleResult<Map<String, List<String>>> setConfigCenterConf(@RequestBody Map<String, String> conf) {
+        // TODO: replace that process-level lock with global lock
         synchronized (setConfLock) {
             try {
                 return SingleResult.success(configurationService.setConfCenterConf(conf));
@@ -92,6 +95,7 @@ public class ConfigurationController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/reload")
     SingleResult<Boolean> reloadConf() {
+        // TODO: replace that process-level lock with global lock
         synchronized (setConfLock) {
             try {
                 configurationService.reloadConfigurationInstance();

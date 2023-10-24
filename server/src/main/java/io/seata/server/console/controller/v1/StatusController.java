@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.seata.server.console.controller;
+package io.seata.server.console.controller.v1;
 
 import io.seata.console.bean.NodeStatus;
 import io.seata.console.result.SingleResult;
@@ -47,7 +47,7 @@ import static io.seata.server.console.Constant.HTTP_PROTOCOL;
  * @author Junduo Dong
  */
 @RestController
-@RequestMapping("/api/v1/admin/status")
+@RequestMapping("/api/v1/console/status")
 public class StatusController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiRegistryFactory.class);
 

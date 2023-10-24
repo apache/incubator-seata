@@ -96,8 +96,8 @@ public interface RegistryService<T> {
     List<InetSocketAddress> lookup(String key) throws Exception;
 
     /**
-     * Get all nodes' ip in that server's cluster
-     * @return ips
+     * Get all server addresses in the current cluster. Only used at server side.
+     * @return the addresses
      * @throws Exception the exception
      */
     List<InetSocketAddress> getClusterNodes() throws Exception;
