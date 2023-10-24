@@ -160,7 +160,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
     @Test
     public void testParsePK() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList("id"));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -210,6 +210,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
         Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )",sql);
+        sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mariadb");
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )",sql);
     }
 
     @Test
@@ -225,6 +227,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkRowValues.put("id1",pkId1Values);
 
         String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
+        Assertions.assertEquals("(id1) in ( (?) )",sql);
+        sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mariadb");
         Assertions.assertEquals("(id1) in ( (?) )",sql);
     }
 }

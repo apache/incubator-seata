@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.EscapeHandler;
-import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.EscapeSymbol;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -34,7 +34,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLEscapeHandler implements EscapeHandler {
 
-    private Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
+    protected Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
     private static final EscapeSymbol ESCAPE_SYMBOL = new EscapeSymbol('`');
 
     /**

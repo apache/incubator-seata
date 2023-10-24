@@ -98,7 +98,7 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.6</druid.version>
+        <druid.version>1.2.7</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <!-- sql parser -->
@@ -711,4 +711,26 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>dependencies-for-springboot3-1-or-above</id>
+            <properties>
+                <httpcore.version>4.4.16</httpcore.version>
+                <httpclient.version>4.5.14</httpclient.version>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                    <version>${httpcore.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                    <version>${httpclient.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
