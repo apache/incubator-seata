@@ -76,7 +76,7 @@
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fst.version>2.57</fst.version>
-        <groovy.version>2.5.21</groovy.version>
+        <groovy.version>2.4.21</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
 
