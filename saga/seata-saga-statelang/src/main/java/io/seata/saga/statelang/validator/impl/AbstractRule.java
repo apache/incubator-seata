@@ -13,26 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.parser.utils;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.core.io.Resource;
+package io.seata.saga.statelang.validator.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.seata.saga.statelang.validator.Rule;
 
 /**
- * ResourceUtil tests
+ * Abstract class for {@link Rule}
  *
- * @author wang.liang
+ * @author ptyin
  */
-public class ResourceUtilTests {
+public abstract class AbstractRule implements Rule {
 
-    @Test
-    public void getResources_test() {
-        Resource[] resources = ResourceUtil.getResources("classpath*:statelang/*.json");
-        assertThat(resources.length).isEqualTo(6);
+    protected String hint;
 
-        Resource[] resources2 = ResourceUtil.getResources(new String[]{"classpath*:statelang/*.json"});
-        assertThat(resources2.length).isEqualTo(6);
+    @Override
+    public String getName() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
+    public String getHint() {
+        return hint;
     }
 }

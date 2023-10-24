@@ -30,6 +30,7 @@ import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import io.seata.saga.statelang.validator.StateMachineValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,8 @@ public class StateMachineParserImpl implements StateMachineParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
 
     private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
+
+    private final StateMachineValidator validator = new StateMachineValidator();
 
     public StateMachineParserImpl(String jsonParserName) {
         if (StringUtils.isNotBlank(jsonParserName)) {
@@ -124,6 +127,8 @@ public class StateMachineParserImpl implements StateMachineParser {
                 }
             }
         }
+
+        validator.validate(stateMachine);
         return stateMachine;
     }
 

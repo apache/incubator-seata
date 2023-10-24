@@ -13,26 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.parser.utils;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.core.io.Resource;
+package io.seata.saga.statelang.validator;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.seata.common.loader.EnhancedServiceLoader;
+
+import java.util.List;
 
 /**
- * ResourceUtil tests
+ * Factorial class to get all rules.
  *
- * @author wang.liang
+ * @author ptyin
  */
-public class ResourceUtilTests {
+public class RuleFactory {
+    private static final List<Rule> RULES = EnhancedServiceLoader.loadAll(Rule.class);
 
-    @Test
-    public void getResources_test() {
-        Resource[] resources = ResourceUtil.getResources("classpath*:statelang/*.json");
-        assertThat(resources.length).isEqualTo(6);
-
-        Resource[] resources2 = ResourceUtil.getResources(new String[]{"classpath*:statelang/*.json"});
-        assertThat(resources2.length).isEqualTo(6);
+    public static List<Rule> getRules() {
+        return RULES;
     }
 }
