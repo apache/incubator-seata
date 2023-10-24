@@ -232,10 +232,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
+        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
-        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
     }
 
     @Override
