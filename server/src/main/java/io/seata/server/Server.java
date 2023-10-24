@@ -82,9 +82,9 @@ public class Server {
             ((GenericWebApplicationContext)ObjectHolder.INSTANCE
                 .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
-        beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
-        beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
         if (coordinator instanceof ApplicationListener) {
+            beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
+            beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
             ((GenericWebApplicationContext)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                 .addApplicationListener((ApplicationListener<?>)coordinator);
         }

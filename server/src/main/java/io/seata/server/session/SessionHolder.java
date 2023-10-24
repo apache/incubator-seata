@@ -266,13 +266,9 @@ public class SessionHolder {
 
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
-        FileLockManager fileLockManager =
-                (FileLockManager)EnhancedServiceLoader.load(LockManager.class, SessionMode.FILE.getName());
         branchSessions.forEach(branchSession -> {
             try {
-                if (StringUtils.isNotBlank(branchSession.getLockKey())) {
-                    fileLockManager.acquireLock(branchSession);
-                }
+                branchSession.lock();
             } catch (TransactionException e) {
                 throw new ShouldNeverHappenException(e);
             }

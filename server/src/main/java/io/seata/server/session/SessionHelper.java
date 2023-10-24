@@ -28,7 +28,6 @@ import java.util.stream.StreamSupport;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
@@ -40,6 +39,7 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsPublisher;
+import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,13 +72,8 @@ public class SessionHelper {
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
-    private static final String STORE_MODE =
-        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_SESSION_MODE,
-            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, SessionMode.FILE.getName()));
-
-    private static final boolean DELAY_HANDLE_SESSION =
-        !(StringUtils.equalsIgnoreCase(STORE_MODE, SessionMode.FILE.getName())
-            || StringUtils.equalsIgnoreCase(STORE_MODE, SessionMode.RAFT.getName()));
+    private static final boolean DELAY_HANDLE_SESSION = !(Objects.equals(StoreConfig.getSessionMode(), SessionMode.FILE)
+        || Objects.equals(StoreConfig.getSessionMode(), SessionMode.RAFT));
 
 
     private SessionHelper() {
