@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console.constant;
+package io.seata.common.result;
 
 /**
  * The Code for the response of message

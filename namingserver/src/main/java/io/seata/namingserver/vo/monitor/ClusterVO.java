@@ -25,11 +25,13 @@ import java.util.List;
 public class ClusterVO {
     private String clusterName;
     private String clusterType;
-    HashMap<String /* vGroup */, String/* unitName */> vGroupMapping = new HashMap<>();
+
+    private List<String /*vgroup*/> vGroupMapping;
     private final List<Unit> unitData;
 
 
     public ClusterVO() {
+        this.vGroupMapping = new ArrayList<>();
         this.unitData = new ArrayList<>();
     }
 
@@ -37,6 +39,7 @@ public class ClusterVO {
         this.clusterName = clusterName;
         this.clusterType = clusterType;
         this.unitData = unitData;
+        this.vGroupMapping = new ArrayList<>();
     }
 
     public String getClusterName() {
@@ -59,11 +62,11 @@ public class ClusterVO {
         return unitData;
     }
 
-    public HashMap<String, String> getvGroupMapping() {
+    public List<String> getvGroupMapping() {
         return vGroupMapping;
     }
 
-    public void setvGroupMapping(HashMap<String, String> vGroupMapping) {
+    public void setvGroupMapping(List<String> vGroupMapping) {
         this.vGroupMapping = vGroupMapping;
     }
 
@@ -75,7 +78,9 @@ public class ClusterVO {
         return new ClusterVO(cluster.getClusterName(), cluster.getClusterType(), unitList);
     }
 
-    public void addMapping(String vGroup, String unitName) {
-        vGroupMapping.put(vGroup, unitName);
+    public void addMapping(String vGroup) {
+        if (!vGroupMapping.contains(vGroup)) {
+            vGroupMapping.add(vGroup);
+        }
     }
 }

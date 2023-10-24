@@ -110,6 +110,13 @@ public class ClusterData extends AbstractClusterData {
 
 
     public boolean registerInstance(Node instance, String unitName) {
+        // refresh node weight
+        Object weightValue = instance.getMetadata().get("weight");
+        if (weightValue != null) {
+            instance.setWeight(Double.parseDouble(String.valueOf(weightValue)));
+            instance.getMetadata().remove("weight");
+        }
+
         Unit unit = unitData.get(unitName);
         if (unit == null) {
             unit = new Unit();

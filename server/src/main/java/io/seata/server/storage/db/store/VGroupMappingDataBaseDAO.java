@@ -15,6 +15,7 @@
  */
 package io.seata.server.storage.db.store;
 
+import io.seata.common.metadata.Instance;
 import io.seata.common.util.IOUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -35,9 +36,9 @@ public class VGroupMappingDataBaseDAO {
 
     protected DataSource vGroupMappingDataSource = null;
 
-    protected String vMapping;
+    protected final String vMapping;
 
-    private static final String DEFAULT_VGROUP_MAPPING = "mapping_tbl";
+    private static final String DEFAULT_VGROUP_MAPPING = "vgroup_table";
 
     private static final String REGISTRY_NAMINGSERVER_CLUSTER = "registry.namingserver.cluster";
 
@@ -45,11 +46,11 @@ public class VGroupMappingDataBaseDAO {
 
     public VGroupMappingDataBaseDAO(DataSource vGroupMappingDataSource) {
         this.vGroupMappingDataSource = vGroupMappingDataSource;
-        vMapping = CONFIG.getConfig("store.db.mapping-table", DEFAULT_VGROUP_MAPPING);
+        this.vMapping = CONFIG.getConfig("store.db.mapping-table", DEFAULT_VGROUP_MAPPING);
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {
-        deleteMappingDOByVGroup(mappingDO.getVGroup());
+        clearMappingDOByVGroup(mappingDO.getVGroup());
         String sql = "INSERT INTO " + vMapping + " (vgroup,namespace, cluster) VALUES (?, ?, ?)";
         Connection conn = null;
         PreparedStatement ps = null;
@@ -71,7 +72,7 @@ public class VGroupMappingDataBaseDAO {
         return false;
     }
 
-    public boolean deleteMappingDOByVGroup(String vGroup) {
+    public boolean clearMappingDOByVGroup(String vGroup) {
         String sql = "DELETE FROM " + vMapping + " WHERE vGroup = ?";
         Connection conn = null;
         PreparedStatement ps = null;
@@ -80,6 +81,26 @@ public class VGroupMappingDataBaseDAO {
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, vGroup);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return false;
+    }
+
+    public boolean deleteMappingDOByVGroup(String vGroup) {
+        String sql = "DELETE FROM " + vMapping + " WHERE vGroup = ? and cluster = ?";
+        Instance instance = Instance.getInstance();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = vGroupMappingDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, vGroup);
+            ps.setString(2, instance.getClusterName());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

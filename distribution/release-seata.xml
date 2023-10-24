@@ -32,7 +32,9 @@
 
         <fileSet>
             <includes>
-                <include>bin/*</include>
+                <include>bin/seata-server.bat</include>
+                <include>bin/seata-server.sh</include>
+                <include>bin/seata-setup.sh</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>

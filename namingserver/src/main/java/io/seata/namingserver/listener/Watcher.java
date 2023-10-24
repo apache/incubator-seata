@@ -35,13 +35,16 @@ public class Watcher<T> {
 
     private long term;
 
+    private String clientEndpoint;
+
     private String protocol = HTTP;
 
-    public Watcher(String group, T asyncContext, int timeout, long term) {
+    public Watcher(String group, T asyncContext, int timeout, long term, String clientEndpoint) {
         this.group = group;
         this.asyncContext = asyncContext;
         this.timeout = System.currentTimeMillis() + timeout;
         this.term = term;
+        this.clientEndpoint = clientEndpoint;
     }
 
     public String getGroup() {
@@ -74,6 +77,14 @@ public class Watcher<T> {
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
+    }
+
+    public String getClientEndpoint() {
+        return clientEndpoint;
+    }
+
+    public void setClientEndpoint(String clientEndpoint) {
+        this.clientEndpoint = clientEndpoint;
     }
 
     public String getProtocol() {

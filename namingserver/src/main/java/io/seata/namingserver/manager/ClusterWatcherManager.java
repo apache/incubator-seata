@@ -28,9 +28,13 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -107,6 +111,19 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         } else {
             notify(watcher);
         }
+    }
+
+    public List<String> getWatcherIpList(String vGroup) {
+        Set<String> watcherIpSet = new HashSet<>();
+        Queue<Watcher<?>> watcherQueue = WATCHERS.get(vGroup);
+        for (Watcher<?> watcher : watcherQueue) {
+            watcherIpSet.add(watcher.getClientEndpoint());
+        }
+        return new ArrayList<>(watcherIpSet);
+    }
+
+    public List<String> getWatchVGroupList() {
+        return new ArrayList<>(WATCHERS.keySet());
     }
 
     public long getTermByvGroup(String vGroup) {

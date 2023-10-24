@@ -17,6 +17,7 @@ package io.seata.server.storage.redis.store;
 
 import io.seata.common.exception.RedisException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.metadata.Instance;
 import io.seata.common.util.BeanUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.store.MappingDO;
@@ -32,15 +33,18 @@ import java.util.List;
 @LoadLevel(name = "redis")
 public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager {
 
-    private final String mappingListKey = "mapping";
+    private final String REDIS_SPLIT_KEY = ":";
 
 
     @Override
     public boolean addVGroup(MappingDO mappingDO) {
         String vGroup = mappingDO.getVGroup();
+        String namespace = mappingDO.getNamespace();
+        String clusterName = mappingDO.getCluster();
+        String mappingKey = namespace + REDIS_SPLIT_KEY + clusterName;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance(); Pipeline pipelined = jedis.pipelined()) {
-            pipelined.hmset(vGroup, BeanUtils.objectToMap(mappingDO));
-            pipelined.rpush(mappingListKey, vGroup);
+            pipelined.lrem(mappingKey, 0, vGroup);
+            pipelined.rpush(mappingKey, vGroup);
             pipelined.sync();
             return true;
         } catch (Exception ex) {
@@ -50,14 +54,13 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
 
     @Override
     public boolean removeVGroup(String vGroup) {
+        Instance instance = Instance.getInstance();
+        String namespace = instance.getNamespace();
+        String clusterName = instance.getClusterName();
+        String mappingKey = namespace + REDIS_SPLIT_KEY + clusterName;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            String clusterName = jedis.hget(vGroup, "cluster");
-            if (StringUtils.isEmpty(clusterName)) {
-                return true;
-            }
             try (Pipeline pipelined = jedis.pipelined()) {
-                pipelined.lrem(mappingListKey, 0, vGroup);
-                pipelined.del(vGroup);
+                pipelined.lrem(mappingKey, 0, vGroup);
                 pipelined.sync();
             }
             return true;
@@ -67,9 +70,13 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     }
 
     @Override
-    public HashMap<String, Object> load() {
+    public HashMap<String, Object> loadVGroups() {
+        Instance instance = Instance.getInstance();
+        String namespace = instance.getNamespace();
+        String clusterName = instance.getClusterName();
+        String mappingKey = namespace + REDIS_SPLIT_KEY + clusterName;
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            List<String> mappingKeyList = jedis.lrange(mappingListKey, 0, -1);
+            List<String> mappingKeyList = jedis.lrange(mappingKey, 0, -1);
             HashMap<String, Object> result = new HashMap<>();
             for (String vGroup : mappingKeyList) {
                 result.put(vGroup, null);

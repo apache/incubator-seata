@@ -20,7 +20,6 @@ import io.seata.common.metadata.Cluster;
 import io.seata.common.metadata.Node;
 import io.seata.common.metadata.Unit;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.namingserver.ClusterNotFoundException;
 import io.seata.namingserver.listener.ClusterChangeEvent;
 import io.seata.namingserver.pojo.AbstractClusterData;
 import io.seata.namingserver.pojo.ClusterData;
@@ -43,7 +42,6 @@ import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Component
 public class NamingManager {
@@ -51,8 +49,8 @@ public class NamingManager {
     private final HashMap<InetSocketAddress, Long> instanceLiveTable;
     private final HashMap<String/* VGroup */, HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
     private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> NamespaceClusterDataMap;
-    @Value("${threshold.heartbeat}")
-    private final long HEARTBEAT_TIME_THRESHOLD = 30 * 1000;
+    private int HEARTBEAT_TIME_THRESHOLD = 90 * 1000;
+    private int HEARTBEAT_CHECK_TIME_PERIOD = 60 * 1000;
     protected final ScheduledExecutorService heartBeatCheckService = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
 
@@ -61,7 +59,10 @@ public class NamingManager {
     private ApplicationContext applicationContext;
 
 
-    public NamingManager() {
+    public NamingManager(@Value("${heartbeat.threshold}") int heartbeatThreshold,
+                         @Value("${heartbeat.period}") int heartbeatPeriod) {
+        HEARTBEAT_CHECK_TIME_PERIOD = heartbeatPeriod;
+        HEARTBEAT_TIME_THRESHOLD = heartbeatThreshold;
         this.instanceLiveTable = new HashMap<>();
         this.VGroupMap = new HashMap<>();
         this.NamespaceClusterDataMap = new HashMap<>();
@@ -72,7 +73,7 @@ public class NamingManager {
             } catch (Exception e) {
                 LOGGER.error("Heart Beat Check Exception", e);
             }
-        }, 0, HEARTBEAT_TIME_THRESHOLD, TimeUnit.MILLISECONDS);
+        }, 0, HEARTBEAT_CHECK_TIME_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -94,10 +95,9 @@ public class NamingManager {
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
             String clusterName = pair.getKey();
-            String unitName = pair.getValue();
             ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
             if (clusterVO != null) {
-                clusterVO.addMapping(vGroup, unitName);
+                clusterVO.addMapping(vGroup);
             }
         }
 
@@ -141,12 +141,14 @@ public class NamingManager {
 
     }
 
-    public void registerInstance(Node node, String namespace, String clusterName, String unitName) {
+    public boolean registerInstance(Node node, String namespace, String clusterName, String unitName) {
         try {
             HashMap<String, ClusterData> clusterDataHashMap = NamespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
 
             // add instance in cluster
-            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName, k -> new ClusterData(clusterName, (String) node.getMetadata().get("cluster-type")));
+            // create cluster when there is no cluster in clusterDataHashMap
+            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName, key -> new ClusterData(clusterName, (String) node.getMetadata().get("cluster-type")));
+            node.getMetadata().remove("cluster-type");
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Object mappingObj = node.getMetadata().get("vGroup");
@@ -164,14 +166,16 @@ public class NamingManager {
             if (hasChanged) {
                 notifyClusterChange(namespace, clusterName, unitName);
             }
-            instanceLiveTable.put(new InetSocketAddress(node.getIp(), node.getPort()), System.currentTimeMillis());
+            instanceLiveTable.put(new InetSocketAddress(node.getTransactionEndpoint().getHost(), node.getTransactionEndpoint().getPort()), System.currentTimeMillis());
         } catch (Exception e) {
             LOGGER.error("Instance registered failed!", e);
+            return false;
         }
+        return true;
     }
 
 
-    public void unregisterInstance(String unitName, Node node) {
+    public boolean unregisterInstance(String unitName, Node node) {
         try {
             for (String namespace : NamespaceClusterDataMap.keySet()) {
                 HashMap<String, ClusterData> clusterMap = NamespaceClusterDataMap.get(namespace);
@@ -182,13 +186,15 @@ public class NamingManager {
                     if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
                         clusterData.removeInstance(node, unitName);
                         notifyClusterChange(namespace, clusterName, unitName);
-                        instanceLiveTable.remove(new InetSocketAddress(node.getIp(), node.getPort()));
+                        instanceLiveTable.remove(new InetSocketAddress(node.getTransactionEndpoint().getHost(), node.getTransactionEndpoint().getPort()));
                     }
                 }
             }
         } catch (Exception e) {
             LOGGER.error("Instance unregistered failed!");
+            return false;
         }
+        return true;
     }
 
 
@@ -207,16 +213,14 @@ public class NamingManager {
         return clusterList;
     }
 
-    public List<InetSocketAddress> getInstances(String namespace, String clusterName) {
+    public List<Node> getInstances(String namespace, String clusterName) {
         HashMap<String, ClusterData> clusterDataHashMap = NamespaceClusterDataMap.get(namespace);
         AbstractClusterData abstractClusterData = clusterDataHashMap.get(clusterName);
         if (abstractClusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
             return Collections.EMPTY_LIST;
         }
-        return abstractClusterData.getInstanceList().stream()
-                .map(namingInstance -> new InetSocketAddress(namingInstance.getIp(), namingInstance.getPort()))
-                .collect(Collectors.toList());
+        return abstractClusterData.getInstanceList();
     }
 
     public void instanceHeartBeatCheck() {
@@ -227,8 +231,8 @@ public class NamingManager {
 
                     while (instanceIterator.hasNext()) {
                         Node instance = instanceIterator.next();
-                        InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getIp(), instance.getPort());
-                        long lastHeatBeatTimeStamp = instanceLiveTable.get(inetSocketAddress);
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransactionEndpoint().getHost(), instance.getTransactionEndpoint().getPort());
+                        long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long) 0);
 
                         if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > HEARTBEAT_TIME_THRESHOLD) {
                             instanceLiveTable.remove(inetSocketAddress);
@@ -237,7 +241,7 @@ public class NamingManager {
                             clusterData.removeInstance(instance, unit.getUnitName());
 
                             notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
-                            LOGGER.warn("{} instance has gone offline", instance.getIp() + ":" + instance.getPort());
+                            LOGGER.warn("{} instance has gone offline", instance.getTransactionEndpoint().getHost() + ":" + instance.getTransactionEndpoint().getPort());
                         }
                     }
                 }

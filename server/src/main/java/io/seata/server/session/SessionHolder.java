@@ -37,6 +37,7 @@ import io.seata.core.store.DistributedLocker;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
+import io.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,10 @@ public class SessionHolder {
      */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
     /**
+     * The constant ROOT_MAPPING_MANAGER_NAME.
+     */
+    public static final String ROOT_MAPPING_MANAGER_NAME = "mapping.json";
+    /**
      * The constant ASYNC_COMMITTING_SESSION_MANAGER_NAME.
      */
     public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
@@ -78,6 +83,11 @@ public class SessionHolder {
     public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
 
     /**
+     * The default vgroup mapping store dir
+     */
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = "mappingStore";
+
+    /**
      * The redis distributed lock expire time
      */
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
@@ -86,9 +96,12 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
+    private static VGroupMappingStoreManager ROOT_VGROUP_MAPPING_MANAGER;
+
     public static void init() {
         init(null);
     }
+
     /**
      * Init.
      *
@@ -103,19 +116,31 @@ public class SessionHolder {
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
 
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.DB.getName());
+
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.DB.getName());
         } else if (SessionMode.FILE.equals(sessionMode)) {
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
                     DEFAULT_SESSION_STORE_FILE_DIR);
-            if (StringUtils.isBlank(sessionStorePath)) {
+            String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR);
+            if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.FILE.getName(),
+                    new Object[]{ROOT_MAPPING_MANAGER_NAME, vGroupMappingStorePath});
+
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.FILE.getName());
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
+
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.REDIS.getName());
 
             DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
         } else {
@@ -166,7 +191,7 @@ public class SessionHolder {
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
                                     globalSession.getBranchSessions().parallelStream()
-                                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                                            .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                                     break;
                                 case Begin:
                                     globalSession.setActive(true);
@@ -230,7 +255,6 @@ public class SessionHolder {
     }
 
 
-
     //endregion
 
     //region get session manager
@@ -245,6 +269,24 @@ public class SessionHolder {
             throw new ShouldNeverHappenException("SessionManager is NOT init!");
         }
         return ROOT_SESSION_MANAGER;
+    }
+
+
+    //region get group mapping manager
+
+    /**
+     * Gets root session manager.
+     *
+     * @return the root session manager
+     */
+    public static VGroupMappingStoreManager getRootVGroupMappingManager() {
+        if (ROOT_VGROUP_MAPPING_MANAGER == null) {
+            init();
+            if(ROOT_VGROUP_MAPPING_MANAGER == null){
+                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
+            }
+        }
+        return ROOT_VGROUP_MAPPING_MANAGER;
     }
 
     //endregion

@@ -36,27 +36,23 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileVGroupMappingStoreManager.class);
 
-    private static final String STORE_KEY = "store";
-
-    private static final String RAFT_KEY = "raft";
-
-    private static final String FILE_VGROUP_MAPPING_KEY = "file_vgroup_mapping";
-
     private final ReentrantLock writeLock = new ReentrantLock();
 
-    private final String path;
+    private String storePath;
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
 
     public FileVGroupMappingStoreManager() {
-        String mappingPath = System.getProperty("user.dir") + "mapping.json";
-        path = CONFIG.getConfig(STORE_KEY + RAFT_KEY + FILE_VGROUP_MAPPING_KEY, mappingPath);
+    }
+
+    public FileVGroupMappingStoreManager(String name, String mappingStoreFilePath) {
+        storePath = mappingStoreFilePath + File.separator + name;
     }
 
     @Override
     public boolean addVGroup(MappingDO mappingDO) {
-        HashMap<String, Object> vGroupMapping = load();
+        HashMap<String, Object> vGroupMapping = loadVGroups();
         vGroupMapping.put(mappingDO.getVGroup(), mappingDO.getUnit());
         boolean isSaved = save(vGroupMapping);
         if (!isSaved) {
@@ -67,7 +63,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     @Override
     public boolean removeVGroup(String vGroup) {
-        HashMap<String, Object> vGroupMapping = load();
+        HashMap<String, Object> vGroupMapping = loadVGroups();
         vGroupMapping.remove(vGroup);
         boolean isSaved = save(vGroupMapping);
         if (!isSaved) {
@@ -77,12 +73,22 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
     }
 
     @Override
-    public HashMap<String, Object> load() {
+    public HashMap<String, Object> loadVGroups() {
         HashMap<String, Object> vGroupMapping = new HashMap<>();
         try {
-            File fileToLoad = new File(path);
+            File fileToLoad = new File(storePath);
             if (!fileToLoad.exists()) {
-                throw new IOException("File does not exist at path: " + path);
+                try {
+                    // create new file to record vgroup mapping relationship
+                    boolean fileCreated = fileToLoad.createNewFile();
+                    if (fileCreated) {
+                        LOGGER.info("New vgroup file created at path: " + storePath);
+                    } else {
+                        LOGGER.warn("Failed to create a new vgroup file at path: " + storePath);
+                    }
+                } catch (IOException e) {
+                    LOGGER.error("Error while creating a new file: " + e.getMessage());
+                }
             }
 
             String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
@@ -102,7 +108,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonMapping = objectMapper.writeValueAsString(vGroupMapping);
-            FileUtils.writeStringToFile(new File(path), jsonMapping, "UTF-8");
+            FileUtils.writeStringToFile(new File(storePath), jsonMapping, "UTF-8");
             return true;
         } catch (IOException e) {
             LOGGER.error("mapping relationship saved failed! ", e);

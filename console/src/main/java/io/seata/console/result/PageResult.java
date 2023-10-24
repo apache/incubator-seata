@@ -18,7 +18,9 @@ package io.seata.console.result;
 import java.io.Serializable;
 import java.util.List;
 
+import io.seata.common.result.Result;
 import io.seata.console.param.BaseParam;
+
 /**
  * The page result
  *
@@ -110,6 +112,7 @@ public class PageResult<T> extends Result<T> implements Serializable {
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
     }
+
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pageNum, pageSize);
     }

@@ -26,8 +26,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMIN
 @Component
 @ConfigurationProperties(prefix = REGISTRY_NAMINGSERVER_PREFIX)
 public class RegistryNamingserverProperties {
-    private String namespace = "public";
-    private String serverAddr = "127.0.0.1:8500";
+
+    private String namespace;
+    private String serverAddr;
 
     public String getNamespace() {
         return namespace;

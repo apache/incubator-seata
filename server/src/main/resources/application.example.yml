@@ -70,6 +70,13 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa 、 namingserver
     type: namingserver
     preferred-networks: 30.240.*
+    metadata:
+      weight: 1
+    namingserver:
+      server-addr: 127.0.0.1:8080,127.0.0.1:8081
+      cluster: cluster1
+      namespace: public
+      heartbeat-period: 1000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -114,14 +121,6 @@ seata:
       cluster: default
       group: SEATA_GROUP
       address-wait-time: 3000
-    namingserver:
-      server-addr:
-        - 127.0.0.1:8889
-      cluster: default
-      namespace: dev
-    metadata:
-      cluster-type: default
-      weight: 1
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1

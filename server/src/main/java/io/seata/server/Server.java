@@ -15,11 +15,16 @@
  */
 package io.seata.server;
 
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.XID;
+import io.seata.common.holder.ObjectHolder;
+import io.seata.common.metadata.Instance;
+import io.seata.common.metadata.Node;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
@@ -30,7 +35,15 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.VGroupMappingStoreManager;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.PropertySource;
 
+import static io.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -40,6 +53,60 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFE
  * @author slievrly
  */
 public class Server {
+
+    private static final String SEATA_ROOT_KEY = "seata";
+    private static final String REGISTRY_TYPE = "namingserver";
+    private static final String NAMESPACE_KEY = "namespace";
+    private static final String DEFAULT_NAMESPACE = "public";
+    private static final String CLUSTER_NAME_KEY = "cluster";
+    private static final String DEFAULT_CLUSTER_NAME = "default";
+
+    public static void metadataInit(){
+
+        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+
+        // load node properties
+        Instance instance = Instance.getInstance();
+
+        // load namespace
+        String namespaceKey = String.join(FILE_CONFIG_SPLIT_CHAR, SEATA_ROOT_KEY, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMESPACE_KEY);
+        String namespace = environment.getProperty(namespaceKey, DEFAULT_NAMESPACE);
+        instance.setNamespace(namespace);
+
+        // load cluster name
+        String clusterNameKey = String.join(FILE_CONFIG_SPLIT_CHAR, SEATA_ROOT_KEY, FILE_ROOT_REGISTRY, REGISTRY_TYPE, CLUSTER_NAME_KEY);
+        String clusterName = environment.getProperty(clusterNameKey, DEFAULT_CLUSTER_NAME);
+        instance.setClusterName(clusterName);
+
+        // load cluster type
+        String clusterType = String.valueOf(StoreConfig.getSessionMode());;
+        instance.addMetadata("cluster-type", "raft".equals(clusterType) ? clusterType : "default");
+
+        // load unit name
+        instance.setUnit(String.valueOf(UUID.randomUUID()));
+
+        // load node Endpoint
+
+        instance.setControlEndpoint(new Node.Endpoint(NetUtil.getLocalIp(),Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))),"http"));
+
+        // load metadata
+        String prefix = "seata.registry.metadata.";
+        for (PropertySource<?> propertySource : environment.getPropertySources()) {
+            if (propertySource instanceof EnumerablePropertySource) {
+                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
+                for (String propertyName : enumerablePropertySource.getPropertyNames()) {
+                    if (propertyName.startsWith(prefix)) {
+                        instance.addMetadata(propertyName.substring(prefix.length()), enumerablePropertySource.getProperty(propertyName));
+                    }
+                }
+            }
+        }
+
+        // load vgroup mapping relationship
+        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+        instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
+    }
+
     /**
      * The entry point of application.
      *
@@ -83,6 +150,8 @@ public class Server {
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
+
+        metadataInit();
 
         nettyRemotingServer.init();
     }

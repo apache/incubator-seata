@@ -15,12 +15,12 @@
  */
 package io.seata.server.controller;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.metadata.Instance;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.Result;
+import io.seata.common.result.Result;
 import io.seata.core.store.MappingDO;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.store.VGroupMappingStoreManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,8 +39,7 @@ public class ClusterController {
 
     @PostConstruct
     private void init() {
-        String storeType = CONFIG.getConfig("store.mode", "db");
-        vGroupMappingStoreManager = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, storeType);
+        vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
 
     }
 

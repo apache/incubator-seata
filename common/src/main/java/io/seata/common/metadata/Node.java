@@ -23,14 +23,12 @@ import java.util.Objects;
 
 public class Node {
 
-    private String ip;
-    private int port;
-    private int nettyPort;
-    private int grpcPort;
+    private Endpoint controlEndpoint = new Endpoint();
+    private Endpoint transactionEndpoint = new Endpoint();
     private double weight = 1.0;
     private boolean healthy = true;
     private long timeStamp;
-    private String role;
+    private String role = "member";
 
 
     private Map<String, Object> metadata = new HashMap<>();
@@ -39,6 +37,21 @@ public class Node {
     public Node() {
     }
 
+    public Endpoint getControlEndpoint() {
+        return controlEndpoint;
+    }
+
+    public void setControlEndpoint(Endpoint controlEndpoint) {
+        this.controlEndpoint = controlEndpoint;
+    }
+
+    public Endpoint getTransactionEndpoint() {
+        return transactionEndpoint;
+    }
+
+    public void setTransactionEndpoint(Endpoint transactionEndpoint) {
+        this.transactionEndpoint = transactionEndpoint;
+    }
 
     public String getRole() {
         return role;
@@ -48,22 +61,6 @@ public class Node {
         this.role = role;
     }
 
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
 
     public double getWeight() {
         return weight;
@@ -85,21 +82,6 @@ public class Node {
         return timeStamp;
     }
 
-    public int getNettyPort() {
-        return nettyPort;
-    }
-
-    public void setNettyPort(int nettyPort) {
-        this.nettyPort = nettyPort;
-    }
-
-    public int getGrpcPort() {
-        return grpcPort;
-    }
-
-    public void setGrpcPort(int grpcPort) {
-        this.grpcPort = grpcPort;
-    }
 
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
@@ -107,7 +89,7 @@ public class Node {
 
     public void addMetadata(String key, String value) {
         if (this.metadata == null) {
-            this.metadata = new HashMap(4);
+            this.metadata = new HashMap<>(4);
         }
 
         this.metadata.put(key, value);
@@ -123,7 +105,7 @@ public class Node {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ip, nettyPort, grpcPort, port);
+        return Objects.hash(controlEndpoint, transactionEndpoint);
     }
 
     @Override
@@ -135,8 +117,7 @@ public class Node {
             return false;
         }
         Node node = (Node) o;
-        return Objects.equals(ip, node.ip) && Objects.equals(nettyPort, node.nettyPort)
-                && Objects.equals(grpcPort, node.grpcPort) && Objects.equals(port, node.port);
+        return Objects.equals(controlEndpoint, node.controlEndpoint) && Objects.equals(transactionEndpoint, node.transactionEndpoint);
     }
 
     public boolean isTotalEqual(Object obj) {
@@ -151,10 +132,8 @@ public class Node {
         Node otherNode = (Node) obj;
 
         // check each member variable
-        return Objects.equals(ip, otherNode.ip) &&
-                port == otherNode.port &&
-                nettyPort == otherNode.nettyPort &&
-                grpcPort == otherNode.grpcPort &&
+        return Objects.equals(controlEndpoint, otherNode.controlEndpoint) &&
+                Objects.equals(transactionEndpoint, otherNode.transactionEndpoint) &&
                 Double.compare(otherNode.weight, weight) == 0 &&
                 healthy == otherNode.healthy &&
                 Objects.equals(role, otherNode.role) &&
@@ -165,8 +144,8 @@ public class Node {
     public String toJsonString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"ip\": \"").append(ip).append("\", ");
-        sb.append("\"port\": ").append(port).append(", ");
+        sb.append("\"controlEndpoint\": ").append(controlEndpoint.toString()).append(", ");
+        sb.append("\"transactionEndpoint\": ").append(transactionEndpoint.toString()).append(", ");
         sb.append("\"weight\": ").append(weight).append(", ");
         sb.append("\"healthy\": ").append(healthy).append(", ");
         sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
@@ -187,9 +166,63 @@ public class Node {
     }
 
 
-    // convert String to Object
-    public static Node fromJsonString(String jsonString) {
-        return null;
+    public static class Endpoint {
+
+        private String host;
+
+        private int port;
+
+        private String protocol;
+
+        public Endpoint() {
+        }
+
+        public Endpoint(String host, int port, String protocol) {
+            this.host = host;
+            this.port = port;
+            this.protocol = protocol;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getProtocol() {
+            return protocol;
+        }
+
+        public void setProtocol(String protocol) {
+            this.protocol = protocol;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Endpoint endpoint = (Endpoint) o;
+            return Objects.equals(host, endpoint.getHost()) && Objects.equals(port, endpoint.getPort()) && Objects.equals(protocol, endpoint.protocol);
+        }
+
+        @Override
+        public String toString() {
+            return "{" + "\"host\" :\"" + host + "\",\"port\" : " + port + ",\"protocol\" :\"" + protocol + "\"}";
+        }
     }
 
 }

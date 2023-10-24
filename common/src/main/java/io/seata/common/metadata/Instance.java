@@ -20,19 +20,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.seata.common.util.CollectionUtils.mapToJsonString;
+
 
 public class Instance {
     private String namespace;
     private String clusterName;
     private String unit;
-    private String ip;
-    private int port;
-    private int nettyPort;
-    private int grpcPort;
+    private Node.Endpoint controlEndpoint = new Node.Endpoint();
+    private Node.Endpoint transactionEndpoint = new Node.Endpoint();
     private double weight = 1.0;
     private boolean healthy = true;
     private long timeStamp;
-    private String role;
+    private String role = "member";
 
 
     private Map<String, Object> metadata = new HashMap<>();
@@ -44,10 +44,7 @@ public class Instance {
     }
 
     public static Instance getInstance() {
-        if (instance == null) {
-            instance = new Instance();
-        }
-        return instance;
+        return SingletonHolder.instance;
     }
 
 
@@ -83,21 +80,20 @@ public class Instance {
         this.role = role;
     }
 
-
-    public String getIp() {
-        return ip;
+    public Node.Endpoint getControlEndpoint() {
+        return controlEndpoint;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setControlEndpoint(Node.Endpoint controlEndpoint) {
+        this.controlEndpoint = controlEndpoint;
     }
 
-    public int getPort() {
-        return port;
+    public Node.Endpoint getTransactionEndpoint() {
+        return transactionEndpoint;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setTransactionEndpoint(Node.Endpoint transactionEndpoint) {
+        this.transactionEndpoint = transactionEndpoint;
     }
 
     public double getWeight() {
@@ -120,31 +116,12 @@ public class Instance {
         return timeStamp;
     }
 
-    public int getNettyPort() {
-        return nettyPort;
-    }
-
-    public void setNettyPort(int nettyPort) {
-        this.nettyPort = nettyPort;
-    }
-
-    public int getGrpcPort() {
-        return grpcPort;
-    }
-
-    public void setGrpcPort(int grpcPort) {
-        this.grpcPort = grpcPort;
-    }
 
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
     }
 
     public void addMetadata(String key, Object value) {
-        if (this.metadata == null) {
-            this.metadata = new HashMap<>(16);
-        }
-
         this.metadata.put(key, value);
     }
 
@@ -152,19 +129,9 @@ public class Instance {
         this.metadata = metadata;
     }
 
-    public Map<String, Object> getMetadata(String vGroup) {
-        return metadata;
-    }
-
-    public void removeMetadata(String key) {
-        if (metadata.containsKey(key)) {
-            metadata.remove(key);
-        }
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(ip, nettyPort, grpcPort, port);
+        return Objects.hash(controlEndpoint, transactionEndpoint);
     }
 
     @Override
@@ -176,35 +143,9 @@ public class Instance {
             return false;
         }
         Instance instance = (Instance) o;
-        return Objects.equals(ip, instance.ip) && Objects.equals(nettyPort, instance.nettyPort)
-                && Objects.equals(grpcPort, instance.grpcPort) && Objects.equals(port, instance.port)
-                && Objects.equals(unit, instance.unit);
+        return Objects.equals(controlEndpoint, instance.controlEndpoint) && Objects.equals(transactionEndpoint, instance.transactionEndpoint);
     }
 
-    public String mapToJsonString(Map<String, Object> map) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        int i = 0;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append("\"").append(entry.getKey()).append("\": ");
-            if (entry.getValue() instanceof HashMap) {
-                HashMap<String, Object> objectHashMap = (HashMap<String, Object>) entry.getValue();
-                sb.append(mapToJsonString(objectHashMap));
-            } else if (entry.getValue() instanceof String) {
-                sb.append("\"");
-                sb.append(entry.getValue());
-                sb.append("\"");
-            } else {
-                sb.append(entry.getValue());
-            }
-            i++;
-        }
-        sb.append("}");
-        return sb.toString();
-    }
 
     // Recursively convert metadata to JSON
     public String toJsonString() {
@@ -213,8 +154,8 @@ public class Instance {
         sb.append("\"namespace\": \"").append(namespace).append("\", ");
         sb.append("\"clusterName\": \"").append(clusterName).append("\", ");
         sb.append("\"unit\": \"").append(unit).append("\", ");
-        sb.append("\"ip\": \"").append(ip).append("\", ");
-        sb.append("\"port\": ").append(port).append(", ");
+        sb.append("\"controlEndpoint\": ").append(controlEndpoint.toString()).append(", ");
+        sb.append("\"transactionEndpoint\": ").append(transactionEndpoint.toString()).append(", ");
         sb.append("\"weight\": ").append(weight).append(", ");
         sb.append("\"healthy\": ").append(healthy).append(", ");
         sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
@@ -225,6 +166,10 @@ public class Instance {
 
         sb.append("}");
         return sb.toString();
+    }
+
+    private static class SingletonHolder {
+        private static final Instance instance = new Instance();
     }
 
 

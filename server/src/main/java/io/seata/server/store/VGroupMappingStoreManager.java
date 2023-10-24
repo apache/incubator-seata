@@ -44,7 +44,7 @@ public interface VGroupMappingStoreManager {
      *
      * @return
      */
-    HashMap<String, Object> load();
+    HashMap<String, Object> loadVGroups();
 
     /**
      * notify mapping relationship to all namingserver nodes
@@ -52,7 +52,7 @@ public interface VGroupMappingStoreManager {
     default void notifyMapping() {
 
         Instance instance = Instance.getInstance();
-        instance.addMetadata("vGroup", this.load());
+        instance.addMetadata("vGroup", this.loadVGroups());
         try {
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
             for (RegistryService registryService : MultiRegistryFactory.getInstances()) {

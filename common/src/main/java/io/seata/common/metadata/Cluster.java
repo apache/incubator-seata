@@ -21,10 +21,9 @@ import java.util.List;
 public class Cluster {
     private String clusterName;
     private String clusterType;
-    private List<Unit> unitData;
+    private List<Unit> unitData = new ArrayList<>();
 
     public Cluster() {
-        unitData = new ArrayList<>();
     }
 
     public String getClusterName() {

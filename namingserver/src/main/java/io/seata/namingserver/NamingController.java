@@ -15,15 +15,17 @@
  */
 package io.seata.namingserver;
 
+import io.seata.common.util.HttpClientUtil;
 import io.seata.common.metadata.Cluster;
 import io.seata.common.metadata.MetaResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.metadata.Unit;
-import io.seata.core.model.Result;
+import io.seata.common.result.Result;
 import io.seata.namingserver.listener.Watcher;
 import io.seata.namingserver.manager.ClusterWatcherManager;
 import io.seata.namingserver.manager.NamingManager;
 import io.seata.namingserver.vo.monitor.ClusterVO;
+import io.seata.namingserver.vo.monitor.WatcherVO;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,10 @@ import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
-
-import static io.seata.core.http.HttpServlet.doGet;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -51,7 +52,6 @@ import static io.seata.core.http.HttpServlet.doGet;
 public class NamingController {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingController.class);
 
-    private static final String OK = "200";
 
     @Resource
     private NamingManager namingManager;
@@ -60,27 +60,43 @@ public class NamingController {
     private ClusterWatcherManager clusterWatcherManager;
 
     @PostMapping("/register")
-    public void registerInstance(@RequestParam String namespace,
-                                 @RequestParam String clusterName,
-                                 @RequestParam String unit,
-                                 @RequestBody Node registerBody) {
-        namingManager.registerInstance(registerBody, namespace, clusterName, unit);
+    public Result<?> registerInstance(@RequestParam String namespace,
+                                      @RequestParam String clusterName,
+                                      @RequestParam String unit,
+                                      @RequestBody Node registerBody) {
+        Result result = new Result();
+        boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
+        if (isSuccess) {
+            result.setMessage("node has registered successfully!");
+        } else {
+            result.setCode("500");
+            result.setMessage("node registered unsuccessfully!");
+        }
+        return result;
     }
 
     @PostMapping("/unregister")
-    public void unregisterInstance(@RequestParam String unit,
-                                   @RequestBody Node registerBody) {
-        namingManager.unregisterInstance(unit, registerBody);
+    public Result<?> unregisterInstance(@RequestParam String unit,
+                                        @RequestBody Node registerBody) {
+        Result result = new Result();
+        boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
+        if (isSuccess) {
+            result.setMessage("node has unregistered successfully!");
+        } else {
+            result.setCode("500");
+            result.setMessage("node unregistered unsuccessfully!");
+        }
+        return result;
     }
 
-    @GetMapping("/monitor")
-    public List<ClusterVO> monitorCluster(String namespace){
+    @GetMapping("/clusters")
+    public List<ClusterVO> monitorCluster(String namespace) {
         return namingManager.monitorCluster(namespace);
     }
 
     @GetMapping("/health")
-    public String healthCheck() {
-        return OK;
+    public Result<?> healthCheck() {
+        return new Result<>();
     }
 
     @GetMapping("/discovery")
@@ -96,9 +112,33 @@ public class NamingController {
                                  @RequestParam String vGroup) {
 
         List<Cluster> clusterList = namingManager.getClusterListByVgroup(vGroup, namespace);
-        namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-        if (clusterList == null || clusterList.size() == 0) {
-            return Result.build(200, "no instance in cluster for storing mapping relationship");
+
+        // add vGroup in new cluster
+        List<Node> nodeList = namingManager.getInstances(namespace, clusterName);
+        if (nodeList == null || nodeList.size() == 0) {
+            LOGGER.error("no instance in cluster {}", clusterName);
+            return new Result<>("301", "no instance in cluster" + clusterName);
+        } else {
+            Node node = nodeList.get(0);
+            String controlHost = node.getControlEndpoint().getHost();
+            int controlPort = node.getControlEndpoint().getPort();
+            String httpUrl = "http://"
+                    + controlHost
+                    + ":"
+                    + controlPort
+                    + "/naming/v1/addVGroup?";
+            HashMap<String, String> params = new HashMap<>();
+            params.put("vGroup", vGroup);
+            params.put("unit", unitName);
+
+            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params)) {
+                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    return new Result<>("200", "add vGroup in new cluster failed");
+                }
+            } catch (IOException | URISyntaxException e) {
+                LOGGER.warn("add vGroup in new cluster failed");
+            }
+
         }
 
         // remove vGroup in old cluster
@@ -110,56 +150,28 @@ public class NamingController {
                         && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
                     String httpUrl = "http://"
-                            + node.getIp()
+                            + node.getControlEndpoint().getHost()
                             + ":"
-                            + (node.getPort() - 1000)
+                            + node.getControlEndpoint().getPort()
                             + "/naming/v1/removeVGroup?";
                     HashMap<String, String> params = new HashMap<>();
                     params.put("vGroup", vGroup);
                     params.put("unit", unitName);
 
-                    try (CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params)) {
+                    try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params)) {
                         if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                             LOGGER.warn("remove vGroup in old cluster failed");
                         }
-                    } catch (IOException e) {
-                        LOGGER.error("remove vGroup in new cluster failed");
+                    } catch (IOException | URISyntaxException e) {
+                        LOGGER.warn("remove vGroup in new cluster failed");
                     }
                 }
             }
         }
 
-        // add vGroup in new cluster
-        List<InetSocketAddress> inetSocketAddressList = namingManager.getInstances(namespace, clusterName);
-        if (inetSocketAddressList == null || inetSocketAddressList.size() == 0) {
-            LOGGER.error("no instance in cluster {}", clusterName);
-            return Result.build(301, "no instance in cluster" + clusterName);
-        } else {
-            InetSocketAddress inetSocketAddress = inetSocketAddressList.get(0);
-            String httpUrl = "http://"
-                    + inetSocketAddress.getAddress().getHostAddress()
-                    + ":"
-                    //TODO:
-                    + (inetSocketAddress.getPort() - 1000)
-                    + "/naming/v1/addVGroup?";
-            HashMap<String, String> params = new HashMap<>();
-            params.put("vGroup", vGroup);
-            params.put("unit", unitName);
+        namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
 
-            try (CloseableHttpResponse closeableHttpResponse = doGet(httpUrl, params)) {
-                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                    return Result.build(500, "add vGroup in new cluster failed");
-                }
-            } catch (IOException e) {
-                LOGGER.error("add vGroup in new cluster failed");
-            }
-
-        }
-
-
-
-
-        return Result.ok();
+        return new Result<>();
     }
 
     /**
@@ -169,15 +181,24 @@ public class NamingController {
      * @param request    客户端HTTP请求
      */
 
-    @GetMapping("/watch")
+    @PostMapping("/watch")
     public void watch(@RequestParam String clientTerm,
                       @RequestParam String vGroup,
                       @RequestParam String timeout,
+                      @RequestParam String clientAddr,
                       HttpServletRequest request) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm));
+        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), clientAddr);
         clusterWatcherManager.registryWatcher(watcher);
+    }
+
+    @GetMapping("/watchList")
+    public List<WatcherVO> getWatchList() {
+        List<String> watchVGroupList = clusterWatcherManager.getWatchVGroupList();
+        return watchVGroupList.stream()
+                .map(vgroup -> new WatcherVO(vgroup, clusterWatcherManager.getWatcherIpList(vgroup)))
+                .collect(Collectors.toList());
     }
 
 

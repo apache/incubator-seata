@@ -13,11 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.console.result;
+package io.seata.common.result;
 
 import java.io.Serializable;
 
-import io.seata.console.constant.Code;
+
 
 /**
  * The single result

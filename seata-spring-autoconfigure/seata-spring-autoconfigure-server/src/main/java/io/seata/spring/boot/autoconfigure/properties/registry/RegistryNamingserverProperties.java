@@ -26,9 +26,10 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMIN
 @Component
 @ConfigurationProperties(prefix = REGISTRY_NAMINGSERVER_PREFIX)
 public class RegistryNamingserverProperties {
-    private String namespace = "public";
-    private String serverAddr = "127.0.0.1:8500";
-    private String clusterName = "cluster2";
+    private String namespace;
+    private String serverAddr;
+    private String clusterName;
+    private int heartBeatPeriod = 30 * 1000;
 
     public String getNamespace() {
         return namespace;
@@ -53,5 +54,13 @@ public class RegistryNamingserverProperties {
 
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
+    }
+
+    public int getHeartBeatPeriod() {
+        return heartBeatPeriod;
+    }
+
+    public void setHeartBeatPeriod(int heartBeatPeriod) {
+        this.heartBeatPeriod = heartBeatPeriod;
     }
 }

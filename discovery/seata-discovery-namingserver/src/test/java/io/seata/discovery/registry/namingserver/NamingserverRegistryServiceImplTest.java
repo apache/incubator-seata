@@ -18,7 +18,7 @@ package io.seata.discovery.registry.namingserver;
 import io.seata.common.holder.ObjectHolder;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.http.HttpServlet;
+import io.seata.common.util.HttpClientUtil;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.junit.jupiter.api.BeforeAll;
@@ -317,7 +317,7 @@ class NamingserverRegistryServiceImplTest {
         paraMap.put("clusterName", clusterName);
         String url = "http://127.0.0.1:8080/naming/v1/createGroup";
         try {
-            CloseableHttpResponse response = HttpServlet.doGet(url, paraMap);
+            CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap);
         } catch (Exception e) {
             throw new RemoteException();
         }

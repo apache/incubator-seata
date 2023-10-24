@@ -17,6 +17,7 @@ package io.seata.server.storage.db.store;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.metadata.Instance;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -52,11 +53,14 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
     }
 
     @Override
-    public HashMap<String, Object> load() {
+    public HashMap<String, Object> loadVGroups() {
         List<MappingDO> mappingDOS = vGroupMappingDataBaseDAO.queryMappingDO();
+        Instance instance = Instance.getInstance();
         HashMap<String, Object> mappings = new HashMap<>();
         for (MappingDO mappingDO : mappingDOS) {
-            mappings.put(mappingDO.getVGroup(), null);
+            if (mappingDO.getCluster() != null && mappingDO.getCluster().equals(instance.getClusterName())) {
+                mappings.put(mappingDO.getVGroup(), null);
+            }
         }
         return mappings;
     }
