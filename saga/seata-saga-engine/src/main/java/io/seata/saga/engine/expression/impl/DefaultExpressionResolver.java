@@ -63,7 +63,8 @@ public class DefaultExpressionResolver implements ExpressionResolver {
         boolean isOldEvaluatorStyle = false;
         if (struct.typeStart == 0) {
             if (leftBracket < 0 && dot < 0) {
-                throw new IllegalArgumentException(String.format("Expression [%s] type is not closed", expressionStr));
+                throw new IllegalArgumentException(String.format(
+                        "Failed to resolve the expression [%s]: missing expression type end indicator", expressionStr));
             }
             // Backward compatible for structure: $expressionType{expressionContent}
             if (leftBracket > 0 && (leftBracket < dot || dot < 0)) {
