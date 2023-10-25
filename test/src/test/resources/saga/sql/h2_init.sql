@@ -12,7 +12,7 @@ create table if not exists seata_state_machine_def
     content          clob comment 'content',
     recover_strategy varchar(16) comment 'transaction recover strategy(compensate|retry)',
     primary key (id)
-);
+    );
 
 create table if not exists seata_state_machine_inst
 (
@@ -30,9 +30,10 @@ create table if not exists seata_state_machine_inst
     compensation_status varchar(2) comment 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
     is_running          tinyint(1) comment 'is running(0 no|1 yes)',
     gmt_updated         timestamp(3)   not null,
-    primary key (id),
-    unique key unikey_buz_tenant (business_key, tenant_id)
-);
+    primary key (id)
+    );
+
+CREATE UNIQUE INDEX unikey_buz_tenant ON seata_state_machine_inst (business_key, tenant_id);
 
 create table if not exists seata_state_inst
 (
@@ -55,4 +56,4 @@ create table if not exists seata_state_inst
     gmt_updated              timestamp(3) comment 'update time',
     gmt_end                  timestamp(3) comment 'end time',
     primary key (id, machine_inst_id)
-);
+    );
