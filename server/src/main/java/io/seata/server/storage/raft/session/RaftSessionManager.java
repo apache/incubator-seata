@@ -25,13 +25,14 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.file.session.FileSessionManager;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.cluster.raft.util.RaftTaskUtil;
 
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
@@ -86,8 +87,9 @@ public class RaftSessionManager extends FileSessionManager {
                 }
             }
         };
-        GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDO);
+        GlobalTransactionDTO globalTransactionDTO = new GlobalTransactionDTO();
+        SessionConverter.convertGlobalTransactionDO(globalTransactionDTO, globalSession);
+        RaftGlobalSessionSyncMsg raftSyncMsg = new RaftGlobalSessionSyncMsg(ADD_GLOBAL_SESSION, globalTransactionDTO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -110,10 +112,10 @@ public class RaftSessionManager extends FileSessionManager {
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
+        GlobalTransactionDTO globalTransactionDO = new GlobalTransactionDTO(globalSession.getXid());
         globalTransactionDO.setStatus(globalStatus.getCode());
-        RaftSessionSyncMsg raftSyncMsg =
-            new RaftSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
+        RaftGlobalSessionSyncMsg raftSyncMsg =
+            new RaftGlobalSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -131,10 +133,10 @@ public class RaftSessionManager extends FileSessionManager {
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
+        BranchTransactionDTO branchTransactionDO = new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
         branchTransactionDO.setStatus(branchStatus.getCode());
-        RaftSessionSyncMsg raftSyncMsg =
-                new RaftSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO);
+        RaftBranchSessionSyncMsg raftSyncMsg =
+                new RaftBranchSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -159,8 +161,9 @@ public class RaftSessionManager extends FileSessionManager {
                 }
             }
         };
-        BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDO);
+        BranchTransactionDTO branchTransactionDTO = new BranchTransactionDTO();
+        SessionConverter.convertBranchTransaction(branchTransactionDTO, branchSession);
+        RaftBranchSessionSyncMsg raftSyncMsg = new RaftBranchSessionSyncMsg(ADD_BRANCH_SESSION, branchTransactionDTO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -176,9 +179,9 @@ public class RaftSessionManager extends FileSessionManager {
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
-        BranchTransactionDO branchTransactionDO =
-            new BranchTransactionDO(globalSession.getXid(), branchSession.getBranchId());
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
+        BranchTransactionDTO branchTransactionDO =
+            new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
+        RaftBranchSessionSyncMsg raftSyncMsg = new RaftBranchSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
@@ -199,8 +202,8 @@ public class RaftSessionManager extends FileSessionManager {
                         "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO(globalSession.getXid());
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
+        GlobalTransactionDTO globalTransactionDO = new GlobalTransactionDTO(globalSession.getXid());
+        RaftGlobalSessionSyncMsg raftSyncMsg = new RaftGlobalSessionSyncMsg(REMOVE_GLOBAL_SESSION, globalTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 

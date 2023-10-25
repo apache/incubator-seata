@@ -36,7 +36,7 @@ import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
-import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
+import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -20,12 +20,13 @@ import com.alipay.sofa.jraft.Closure;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.file.lock.FileLockManager;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.cluster.raft.util.RaftTaskUtil;
 
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
@@ -38,9 +39,9 @@ public class RaftLockManager extends FileLockManager {
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalTransactionDO.setXid(globalSession.getXid());
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDO);
+        GlobalTransactionDTO globalTransactionDTO = new GlobalTransactionDTO();
+        globalTransactionDTO.setXid(globalSession.getXid());
+        RaftGlobalSessionSyncMsg raftSyncMsg = new RaftGlobalSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDTO);
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
             if (status.isOk()) {
@@ -60,10 +61,10 @@ public class RaftLockManager extends FileLockManager {
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setBranchId(branchSession.getBranchId());
-        branchTransactionDO.setXid(branchSession.getXid());
-        RaftSessionSyncMsg raftSyncMsg = new RaftSessionSyncMsg(RELEASE_BRANCH_SESSION_LOCK, branchTransactionDO);
+        BranchTransactionDTO branchTransactionDTO = new BranchTransactionDTO();
+        branchTransactionDTO.setBranchId(branchSession.getBranchId());
+        branchTransactionDTO.setXid(branchSession.getXid());
+        RaftBranchSessionSyncMsg raftSyncMsg = new RaftBranchSessionSyncMsg(RELEASE_BRANCH_SESSION_LOCK, branchTransactionDTO);
         Closure closure = status -> {
             if (status.isOk()) {
                 try {

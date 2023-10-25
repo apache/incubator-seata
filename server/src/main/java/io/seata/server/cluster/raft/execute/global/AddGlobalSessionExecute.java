@@ -17,10 +17,10 @@ package io.seata.server.cluster.raft.execute.global;
 
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
@@ -30,7 +30,7 @@ public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
-        RaftSessionSyncMsg  sessionSyncMsg = (RaftSessionSyncMsg)syncMsg;
+        RaftGlobalSessionSyncMsg sessionSyncMsg = (RaftGlobalSessionSyncMsg)syncMsg;
         RaftSessionManager raftSessionManager =
             (RaftSessionManager)SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         GlobalSession globalSession = SessionConverter.convertGlobalSession(sessionSyncMsg.getGlobalSession());

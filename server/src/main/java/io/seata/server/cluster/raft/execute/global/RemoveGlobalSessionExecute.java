@@ -23,8 +23,8 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
@@ -38,7 +38,7 @@ public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
-        RaftSessionSyncMsg  sessionSyncMsg = (RaftSessionSyncMsg)syncMsg;
+        RaftGlobalSessionSyncMsg sessionSyncMsg = (RaftGlobalSessionSyncMsg)syncMsg;
         // when the global transaction needs to be deleted, it does not affect any consistency issues, and can be
         // deleted in an asynchronous thread to improve the throughput of the state machine
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());

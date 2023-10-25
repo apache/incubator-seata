@@ -17,23 +17,33 @@ package io.seata.server.cluster.raft.sync.msg;
 
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
+import io.seata.common.util.StringUtils;
+import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+
 /**
- * @author jianbin.chen
+ * @author funkye
  */
-public class RaftBaseMsg implements java.io.Serializable {
+public class RaftBranchSessionSyncMsg extends RaftBaseMsg {
 
-    private static final long serialVersionUID = -1439073440621259777L;
+    private static final long serialVersionUID = -8577994371969898054L;
 
-    protected RaftSyncMsgType msgType;
+    private BranchTransactionDTO branchSession;
 
-    protected String group = DEFAULT_SEATA_GROUP;
+    private String group = DEFAULT_SEATA_GROUP;
 
-    public RaftSyncMsgType getMsgType() {
-        return msgType;
+    public RaftBranchSessionSyncMsg(RaftSyncMsgType msgType, BranchTransactionDTO branchSession) {
+        this.msgType = msgType;
+        this.branchSession = branchSession;
     }
 
-    public void setMsgType(RaftSyncMsgType msgType) {
-        this.msgType = msgType;
+    public RaftBranchSessionSyncMsg() {}
+
+    public BranchTransactionDTO getBranchSession() {
+        return branchSession;
+    }
+
+    public void setBranchSession(BranchTransactionDTO branchSession) {
+        this.branchSession = branchSession;
     }
 
     public String getGroup() {
@@ -42,6 +52,11 @@ public class RaftBaseMsg implements java.io.Serializable {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 
 }

@@ -15,7 +15,9 @@
  */
 package io.seata.server.store;
 
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,7 +28,6 @@ import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 
 /**
  * @author funkye
@@ -40,15 +41,17 @@ public class RaftSyncMessageSerializerTest {
 
     @Test
     public void testSerializerTest() throws Exception {
-        RaftSessionSyncMsg raftSessionSyncMsg = new RaftSessionSyncMsg();
+        RaftGlobalSessionSyncMsg raftSessionSyncMsg = new RaftGlobalSessionSyncMsg();
         raftSessionSyncMsg.setMsgType(RaftSyncMsgType.ADD_GLOBAL_SESSION);
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
-        raftSessionSyncMsg.setGlobalSession(SessionConverter.convertGlobalTransactionDO(session));
+        GlobalTransactionDTO globalTransactionDTO = new GlobalTransactionDTO();
+        SessionConverter.convertGlobalTransactionDO(globalTransactionDTO,session);
+        raftSessionSyncMsg.setGlobalSession(globalTransactionDTO);
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
         raftSyncMessage.setBody(raftSessionSyncMsg);
         byte[] bytes = RaftSyncMessageSerializer.encode(raftSyncMessage);
         RaftSyncMessage raftSyncMessage2 = RaftSyncMessageSerializer.decode(bytes);
-        RaftSessionSyncMsg raftSessionSyncMsg2 = (RaftSessionSyncMsg) raftSyncMessage2.getBody();
+        RaftGlobalSessionSyncMsg raftSessionSyncMsg2 = (RaftGlobalSessionSyncMsg) raftSyncMessage2.getBody();
         Assertions.assertTrue(raftSessionSyncMsg2.getGlobalSession().getXid().equals(session.getXid()));
         Assertions.assertTrue(raftSessionSyncMsg.getMsgType().equals(raftSessionSyncMsg2.getMsgType()));
     }

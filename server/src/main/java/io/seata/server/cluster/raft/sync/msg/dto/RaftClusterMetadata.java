@@ -13,18 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.cluster.raft.sync.msg;
+package io.seata.server.cluster.raft.sync.msg.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
 
 /**
  * @author jianbin.chen
  */
-public class RaftClusterMetadata extends RaftBaseMsg {
+public class RaftClusterMetadata implements Serializable {
 
     private static final long serialVersionUID = 6208583637662412658L;
 
@@ -36,13 +38,8 @@ public class RaftClusterMetadata extends RaftBaseMsg {
 
     private long term;
 
-    public RaftClusterMetadata() {
-        this.msgType = RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
-    }
-
     public RaftClusterMetadata(long term) {
         this.term = term;
-        this.msgType = RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
     }
 
     public Node createNode(String host, int txPort, int controlPort, String group, Map<String, Object> metadata) {

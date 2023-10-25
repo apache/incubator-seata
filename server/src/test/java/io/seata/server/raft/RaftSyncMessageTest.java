@@ -20,17 +20,18 @@ import java.util.HashMap;
 import java.util.Map;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import io.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
+import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -57,15 +58,20 @@ public class RaftSyncMessageTest {
     @Test
     public void testMsgSerialize() throws IOException {
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
-        RaftSessionSyncMsg raftSessionSyncMsg = new RaftSessionSyncMsg();
-        raftSessionSyncMsg.setBranchSession(new BranchTransactionDO("123:123", 1234));
-        raftSessionSyncMsg.setGlobalSession(new GlobalTransactionDO("123:123"));
+        RaftGlobalSessionSyncMsg raftSessionSyncMsg = new RaftGlobalSessionSyncMsg();
+        RaftBranchSessionSyncMsg raftBranchSessionMsg = new RaftBranchSessionSyncMsg();
+        raftBranchSessionMsg.setBranchSession(new BranchTransactionDTO("123:123", 1234));
+        raftSessionSyncMsg.setGlobalSession(new GlobalTransactionDTO("123:123"));
         raftSyncMessage.setBody(raftSessionSyncMsg);
         byte[] msg = RaftSyncMessageSerializer.encode(raftSyncMessage);
         RaftSyncMessage raftSyncMessage1 = RaftSyncMessageSerializer.decode(msg);
-        Assertions.assertEquals("123:123", ((RaftSessionSyncMsg) raftSyncMessage1.getBody()).getBranchSession().getXid());
-        Assertions.assertEquals("123:123", ((RaftSessionSyncMsg) raftSyncMessage1.getBody()).getGlobalSession().getXid());
-        Assertions.assertEquals(1234, ((RaftSessionSyncMsg) raftSyncMessage1.getBody()).getBranchSession().getBranchId());
+        RaftSyncMessage raftSyncMessage2 = new RaftSyncMessage();
+        raftSyncMessage2.setBody(raftBranchSessionMsg);
+        byte[] msg2 = RaftSyncMessageSerializer.encode(raftSyncMessage2);
+        RaftSyncMessage raftSyncMessageByBranch = RaftSyncMessageSerializer.decode(msg2);
+        Assertions.assertEquals("123:123", ((RaftBranchSessionSyncMsg) raftSyncMessageByBranch.getBody()).getBranchSession().getXid());
+        Assertions.assertEquals("123:123", ((RaftGlobalSessionSyncMsg) raftSyncMessage1.getBody()).getGlobalSession().getXid());
+        Assertions.assertEquals(1234, ((RaftBranchSessionSyncMsg) raftSyncMessageByBranch.getBody()).getBranchSession().getBranchId());
     }
 
     @Test

@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.Collections;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
@@ -76,18 +78,25 @@ public class SessionConverter {
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
         branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
-        branchSession.setLockKey(branchTransactionDO.getLockKey());
+        if(branchTransactionDO instanceof BranchTransactionDTO) {
+            branchSession.setLockKey(((BranchTransactionDTO)branchTransactionDO).getLockKey());
+        }
         return branchSession;
     }
 
     public static GlobalTransactionDO convertGlobalTransactionDO(SessionStorable session) {
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
+        convertGlobalTransactionDO(globalTransactionDO, session);
+        return globalTransactionDO;
+    }
+
+    public static void convertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO,
+        SessionStorable session) {
         if (!(session instanceof GlobalSession)) {
             throw new IllegalArgumentException(
-                    "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
+                "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
         GlobalSession globalSession = (GlobalSession)session;
-
-        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
         globalTransactionDO.setXid(globalSession.getXid());
         globalTransactionDO.setStatus(globalSession.getStatus().getCode());
         globalTransactionDO.setApplicationId(globalSession.getApplicationId());
@@ -97,7 +106,6 @@ public class SessionConverter {
         globalTransactionDO.setTransactionName(globalSession.getTransactionName());
         globalTransactionDO.setTransactionServiceGroup(globalSession.getTransactionServiceGroup());
         globalTransactionDO.setApplicationData(globalSession.getApplicationData());
-        return globalTransactionDO;
     }
 
     public static BranchTransactionDO convertBranchTransactionDO(SessionStorable session) {
@@ -105,8 +113,23 @@ public class SessionConverter {
             throw new IllegalArgumentException(
                     "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
         }
-        BranchSession branchSession = (BranchSession)session;
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
+        convertBranchTransaction(branchTransactionDO, session);
+        return branchTransactionDO;
+    }
+
+    public static BranchTransactionDTO convertBranchTransactionDTO(SessionStorable session) {
+        if (!(session instanceof BranchSession)) {
+            throw new IllegalArgumentException(
+                "The parameter of SessionStorable is not available, SessionStorable:" + StringUtils.toString(session));
+        }
+        BranchTransactionDTO branchTransactionDTO = new BranchTransactionDTO();
+        convertBranchTransaction(branchTransactionDTO, session);
+        return branchTransactionDTO;
+    }
+
+    public static void convertBranchTransaction(BranchTransactionDO branchTransactionDO, SessionStorable session) {
+        BranchSession branchSession = (BranchSession)session;
         branchTransactionDO.setXid(branchSession.getXid());
         branchTransactionDO.setBranchId(branchSession.getBranchId());
         branchTransactionDO.setBranchType(branchSession.getBranchType().name());
@@ -116,8 +139,9 @@ public class SessionConverter {
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());
         branchTransactionDO.setStatus(branchSession.getStatus().getCode());
-        branchTransactionDO.setLockKey(branchSession.getLockKey());
-        return branchTransactionDO;
+        if (branchTransactionDO instanceof BranchTransactionDTO) {
+            ((BranchTransactionDTO)branchTransactionDO).setLockKey(branchSession.getLockKey());
+        }
     }
 
     public static void convertToGlobalSessionVo(List<GlobalSessionVO> result, List<GlobalSession> globalSessions) {

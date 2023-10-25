@@ -13,35 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.cluster.raft.sync.msg;
+package io.seata.server.cluster.raft.sync.msg.dto;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import io.seata.core.store.GlobalTransactionDO;
 
 /**
  * @author jianbin.chen
  */
-public class RaftBaseMsg implements java.io.Serializable {
+public class GlobalTransactionDTO extends GlobalTransactionDO {
+	private static final long serialVersionUID = 8402806824435215696L;
 
-    private static final long serialVersionUID = -1439073440621259777L;
+	public GlobalTransactionDTO(String xid) {
+		super(xid);
+	}
 
-    protected RaftSyncMsgType msgType;
-
-    protected String group = DEFAULT_SEATA_GROUP;
-
-    public RaftSyncMsgType getMsgType() {
-        return msgType;
-    }
-
-    public void setMsgType(RaftSyncMsgType msgType) {
-        this.msgType = msgType;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
-    }
+	public GlobalTransactionDTO() {
+		super();
+	}
 
 }

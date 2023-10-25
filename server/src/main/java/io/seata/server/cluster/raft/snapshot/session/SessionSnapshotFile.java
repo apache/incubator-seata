@@ -17,6 +17,7 @@ package io.seata.server.cluster.raft.snapshot.session;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
@@ -34,9 +35,11 @@ import org.slf4j.LoggerFactory;
 /**
  * @author funkye
  */
-public class SessionSnapshotFile implements StoreSnapshotFile {
+public class SessionSnapshotFile implements Serializable,StoreSnapshotFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionSnapshotFile.class);
+
+    private static final long serialVersionUID = 7942307427240595916L;
 
     String group;
 

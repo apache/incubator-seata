@@ -57,8 +57,9 @@ import io.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import io.seata.server.cluster.listener.ClusterChangeEvent;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
-import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
+import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
+import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import io.seata.server.cluster.raft.util.RaftTaskUtil;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
@@ -66,7 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
-
 
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
@@ -202,14 +202,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
         this.currentTerm.set(term);
         SeataClusterContext.bindGroup(group);
-        try {
-            RaftClusterMetadata clusterMetadata = createNewRaftClusterMetadata();
-            RaftTaskUtil.createTask(status -> refreshClusterMetadata(clusterMetadata), clusterMetadata, null);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        } finally {
-            SeataClusterContext.unbindGroup();
-        }
+        syncMetadata();
         if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("reload session, groupId: {}, session map size: {} ", group,
@@ -246,18 +239,24 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
+        syncMetadata();
+        RouteTable.getInstance().updateConfiguration(group, conf);
+    }
+    
+    private void syncMetadata() {
         if (isLeader()) {
             SeataClusterContext.bindGroup(group);
             try {
-                RaftClusterMetadata clusterMetadata = createNewRaftClusterMetadata();
-                RaftTaskUtil.createTask(status -> refreshClusterMetadata(clusterMetadata), clusterMetadata, null);
+                RaftClusterMetadataMsg raftClusterMetadataMsg =
+                    new RaftClusterMetadataMsg(createNewRaftClusterMetadata());
+                RaftTaskUtil.createTask(status -> refreshClusterMetadata(raftClusterMetadataMsg),
+                    raftClusterMetadataMsg, null);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
                 SeataClusterContext.unbindGroup();
             }
         }
-        RouteTable.getInstance().updateConfiguration(group, conf);
     }
 
     private void onExecuteRaft(RaftBaseMsg msg) {
@@ -320,7 +319,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
-        raftClusterMetadata = (RaftClusterMetadata)syncMsg;
+        raftClusterMetadata = ((RaftClusterMetadataMsg)syncMsg).getRaftClusterMetadata();
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
         LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);

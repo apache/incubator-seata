@@ -17,6 +17,7 @@ package io.seata.server.cluster.raft.snapshot.metadata;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -24,17 +25,17 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
-import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadata;
+import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author jianbin.chen
  */
-public class LeaderMetadataSnapshotFile implements java.io.Serializable, StoreSnapshotFile {
+public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final long serialVersionUID = 78637164618855724L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RaftClusterMetadata.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LeaderMetadataSnapshotFile.class);
 
     private final String group;
 

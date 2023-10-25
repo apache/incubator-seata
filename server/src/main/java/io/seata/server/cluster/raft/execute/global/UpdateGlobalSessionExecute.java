@@ -17,12 +17,12 @@ package io.seata.server.cluster.raft.execute.global;
 
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
-import io.seata.core.store.GlobalTransactionDO;
 import io.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.cluster.raft.sync.msg.RaftSessionSyncMsg;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
@@ -32,12 +32,12 @@ public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
-        RaftSessionSyncMsg  sessionSyncMsg = (RaftSessionSyncMsg)syncMsg;
+        RaftGlobalSessionSyncMsg sessionSyncMsg = (RaftGlobalSessionSyncMsg)syncMsg;
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-        GlobalTransactionDO globalTransactionDO = sessionSyncMsg.getGlobalSession();
-        GlobalSession globalSession = raftSessionManager.findGlobalSession(globalTransactionDO.getXid());
+        GlobalTransactionDTO globalTransactionDTO = sessionSyncMsg.getGlobalSession();
+        GlobalSession globalSession = raftSessionManager.findGlobalSession(globalTransactionDTO.getXid());
         if (globalSession != null) {
-            globalSession.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
+            globalSession.setStatus(GlobalStatus.get(globalTransactionDTO.getStatus()));
             if (GlobalStatus.RollbackRetrying.equals(globalSession.getStatus())
                 || GlobalStatus.Rollbacking.equals(globalSession.getStatus())
                 || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
