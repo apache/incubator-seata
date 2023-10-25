@@ -33,7 +33,8 @@ create table if not exists seata_state_machine_inst
     primary key (id)
     );
 
-CREATE UNIQUE INDEX unikey_buz_tenant ON seata_state_machine_inst (business_key, tenant_id);
+ALTER TABLE seata_state_machine_inst ADD CONSTRAINT unikey_buz_tenant UNIQUE (business_key, tenant_id);
+
 
 create table if not exists seata_state_inst
 (
