@@ -138,7 +138,9 @@
                                     <failOnMissing>false</failOnMissing>
                                     <licenseMerges>
                                         <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
-                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
+                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License
+                                            v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software
+                                            License, Version 2.0
                                         </licenseMerge>
                                         <licenseMerge>The MIT License|MIT License</licenseMerge>
                                         <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
@@ -245,7 +247,8 @@
                                 <phase>validate</phase>
                                 <configuration>
                                     <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
+                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml
+                                    </suppressionsLocation>
                                     <encoding>UTF-8</encoding>
                                     <consoleOutput>true</consoleOutput>
                                     <failsOnError>true</failsOnError>
@@ -360,6 +363,8 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>${maven.surefire.argLine}</argLine>
+                    <parallel>methods</parallel>
+                    <threadCount>1</threadCount>
                 </configuration>
             </plugin>
         </plugins>

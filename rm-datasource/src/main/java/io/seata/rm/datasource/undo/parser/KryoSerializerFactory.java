@@ -113,7 +113,7 @@ public class KryoSerializerFactory {
         }
 
         @Override
-        public Blob read(Kryo kryo, Input input, Class<? extends Blob> type) {
+        public Blob read(Kryo kryo, Input input, Class<Blob> type) {
             int length = input.readInt(true);
             byte[] bytes = input.readBytes(length);
             try {
@@ -139,7 +139,7 @@ public class KryoSerializerFactory {
         }
 
         @Override
-        public Clob read(Kryo kryo, Input input, Class<? extends Clob> type) {
+        public Clob read(Kryo kryo, Input input, Class<Clob> type) {
             try {
                 String s = input.readString();
                 return new SerialClob(s.toCharArray());
@@ -159,7 +159,7 @@ public class KryoSerializerFactory {
         }
 
         @Override
-        public Timestamp read(Kryo kryo, Input input, Class<? extends Timestamp> type) {
+        public Timestamp read(Kryo kryo, Input input, Class<Timestamp> type) {
             Timestamp timestamp = new Timestamp(input.readLong(true));
             timestamp.setNanos(input.readInt(true));
             return timestamp;
