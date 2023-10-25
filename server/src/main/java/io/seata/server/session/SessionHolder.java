@@ -17,11 +17,11 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.StoreException;
@@ -94,32 +94,30 @@ public class SessionHolder {
         if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
-        String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
-        RaftServerFactory.getInstance().init();
-        if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
-            if (SessionMode.DB.equals(sessionMode) || SessionMode.REDIS.equals(sessionMode)) {
-                throw new StoreException("raft mode only support file store mode");
-            }
-            sessionMode = SessionMode.RAFT;
-        }
         LOGGER.info("use session store mode: {}", sessionMode.getName());
         DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             reload(sessionMode);
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                + separator + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
-            if (StringUtils.isBlank(sessionStorePath)) {
-                throw new StoreException("the {store.file.dir} is empty.");
+            RaftServerFactory.getInstance().init();
+            if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
+                sessionMode = SessionMode.RAFT;
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
+                String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
-                SESSION_MANAGER_MAP = new ConcurrentHashMap<>();
+                SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
                 RaftServerFactory.getInstance().start();
             } else {
+                String sessionStorePath =
+                    CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
+                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
+                if (StringUtils.isBlank(sessionStorePath)) {
+                    throw new StoreException("the {store.file.dir} is empty.");
+                }
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 reload(sessionMode);
