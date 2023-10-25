@@ -44,23 +44,7 @@ seata:
     type: file
   store:
     # support: file 、 db 、 redis
-    mode: db
-    db:
-      datasource: druid
-      db-type: mysql
-      driver-class-name: com.mysql.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
-      user: root
-      password: root
-      min-conn: 10
-      max-conn: 100
-      mapping-table: vgroup_table
-      global-table: global_table
-      branch-table: branch_table
-      lock-table: lock_table
-      distributed-lock-table: distributed_lock
-      query-limit: 1000
-      max-wait: 5000
+    mode: file
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:

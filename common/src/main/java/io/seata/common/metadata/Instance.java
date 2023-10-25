@@ -33,11 +33,7 @@ public class Instance {
     private boolean healthy = true;
     private long timeStamp;
     private String role = "member";
-
-
     private Map<String, Object> metadata = new HashMap<>();
-
-    private static Instance instance;
 
 
     private Instance() {
