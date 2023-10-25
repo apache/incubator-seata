@@ -31,7 +31,6 @@ import io.seata.core.lock.RowLock;
 import io.seata.core.model.LockStatus;
 import io.seata.server.session.BranchSession;
 
-
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**

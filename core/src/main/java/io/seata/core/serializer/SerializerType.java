@@ -56,6 +56,12 @@ public enum SerializerType {
      * Math.pow(2, 4)
      */
     HESSIAN((byte)0x16),
+    /**
+     * The hessian.
+     * <p>
+     * Math.pow(2, 5)
+     */
+    JACKSON((byte)0x32),
     ;
 
     private final byte code;
