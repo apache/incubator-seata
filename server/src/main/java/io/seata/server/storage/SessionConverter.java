@@ -23,7 +23,6 @@ import java.util.Collections;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
-import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.core.model.BranchStatus;
@@ -78,7 +77,7 @@ public class SessionConverter {
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
         branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
-        if(branchTransactionDO instanceof BranchTransactionDTO) {
+        if (branchTransactionDO instanceof BranchTransactionDTO) {
             branchSession.setLockKey(((BranchTransactionDTO)branchTransactionDO).getLockKey());
         }
         return branchSession;
