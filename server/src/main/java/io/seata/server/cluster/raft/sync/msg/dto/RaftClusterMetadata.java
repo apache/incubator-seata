@@ -38,6 +38,9 @@ public class RaftClusterMetadata implements Serializable {
 
     private long term;
 
+    public RaftClusterMetadata() {
+    }
+
     public RaftClusterMetadata(long term) {
         this.term = term;
     }
