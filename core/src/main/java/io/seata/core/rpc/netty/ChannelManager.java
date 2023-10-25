@@ -15,6 +15,15 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.Channel;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
@@ -28,14 +37,6 @@ import io.seata.core.protocol.Version;
 import io.seata.core.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type channel manager.
@@ -465,7 +466,7 @@ public class ChannelManager {
      */
     public static Map<String,Channel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {
-            return null;
+            return Collections.emptyMap();
         }
         Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
         RM_CHANNELS.forEach((resourceId, value) -> {
