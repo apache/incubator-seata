@@ -92,9 +92,9 @@ public class LogStoreDataBaseDAO implements LogStore {
     public LogStoreDataBaseDAO(DataSource logStoreDataSource) {
         this.logStoreDataSource = logStoreDataSource;
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-                DEFAULT_STORE_DB_GLOBAL_TABLE);
+            DEFAULT_STORE_DB_GLOBAL_TABLE);
         branchTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-                DEFAULT_STORE_DB_BRANCH_TABLE);
+            DEFAULT_STORE_DB_BRANCH_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
@@ -208,8 +208,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             ps.setString(index++, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
             transactionName = transactionName.length() > transactionNameColumnSize ?
-                    transactionName.substring(0, transactionNameColumnSize) :
-                    transactionName;
+                transactionName.substring(0, transactionNameColumnSize) :
+                transactionName;
             ps.setString(index++, transactionName);
             ps.setInt(index++, globalTransactionDO.getTimeout());
             ps.setLong(index++, globalTransactionDO.getBeginTime());
@@ -245,7 +245,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     @Override
     public boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO, Integer expectedStatus) {
         String sql =
-                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateGlobalTransactionStatusByStatusSQL(globalTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -367,8 +367,8 @@ public class LogStoreDataBaseDAO implements LogStore {
     public boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
         boolean shouldUpdateAppData = StringUtils.isNotBlank(branchTransactionDO.getApplicationData());
         String sql = shouldUpdateAppData ?
-                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusAppDataSQL(branchTable) :
-                LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(branchTable);
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusAppDataSQL(branchTable) :
+            LogStoreSqlsFactory.getLogStoreSqls(dbType).getUpdateBranchTransactionStatusSQL(branchTable);
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -454,7 +454,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
         globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
         globalTransactionDO.setTransactionServiceGroup(
-                rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+            rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
         globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
