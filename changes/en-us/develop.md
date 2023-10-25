@@ -9,7 +9,6 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
-- [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 - [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
 
 ### optimize:
@@ -31,6 +30,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5831](https://github.com/seata/seata/pull/5831)] upgrade druid and add `test-druid.yml`
 - [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
 - [[#5914](https://github.com/seata/seata/pull/5914)] upgrade native-lib-loader version
+- [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
@@ -39,7 +39,11 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
-- [leizhiyuan](https://github.com/leizhiyuan) 
+- [leizhiyuan](https://github.com/leizhiyuan)
+- [l81893521](https://github.com/l81893521)
+- [PeppaO](https://github.com/PeppaO)
+- [wangliang181230](https://github.com/wangliang181230)
+- [hsien999](https://github.com/hsien999)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
