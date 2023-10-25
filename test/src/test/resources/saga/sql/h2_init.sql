@@ -26,7 +26,7 @@ create table if not exists seata_state_machine_inst
     gmt_end             timestamp(3) comment 'end time',
     excep               blob comment 'exception',
     end_params          clob comment 'end parameters',
-    status              varchar(2) comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    "status"            varchar(2) comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
     compensation_status varchar(2) comment 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
     is_running          tinyint(1) comment 'is running(0 no|1 yes)',
     gmt_updated         timestamp(3)   not null,
