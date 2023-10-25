@@ -37,7 +37,6 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String POSTFIX_GROUPLIST = ".grouplist";
     private static final String ENDPOINT_SPLIT_CHAR = ";";
-    private static final String IP_PORT_SPLIT_CHAR = ":";
 
     private FileRegistryServiceImpl() {
     }

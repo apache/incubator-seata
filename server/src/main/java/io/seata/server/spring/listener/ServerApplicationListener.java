@@ -105,7 +105,6 @@ public class ServerApplicationListener implements GenericApplicationListener {
     private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         System.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
-
         if (needAddPropertySource) {
             // add property source to the first position
             Properties pro = new Properties();

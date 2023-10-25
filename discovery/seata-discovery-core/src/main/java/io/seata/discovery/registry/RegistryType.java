@@ -26,6 +26,10 @@ public enum RegistryType {
      */
     File,
     /**
+     * Raft registry type.
+     */
+    Raft,
+    /**
      * ZK registry type.
      */
     ZK,

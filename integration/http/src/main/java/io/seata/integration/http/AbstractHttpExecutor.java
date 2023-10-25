@@ -131,7 +131,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
     private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
-            Map<String, String> headers) throws IOException {
+                                  Map<String, String> headers) throws IOException {
         CloseableHttpResponse response;
         String xid = RootContext.getXID();
         if (xid != null) {

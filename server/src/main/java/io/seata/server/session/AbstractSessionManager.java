@@ -156,7 +156,7 @@ public abstract class AbstractSessionManager implements SessionManager {
 
     @Override
     public void onFailEnd(GlobalSession globalSession) throws TransactionException {
-        LOGGER.info("xid:{} fail end, transaction:{}",globalSession.getXid(),globalSession.toString());
+        LOGGER.info("xid:{} fail end, transaction:{}", globalSession.getXid(), globalSession);
     }
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {

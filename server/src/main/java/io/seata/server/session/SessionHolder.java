@@ -17,13 +17,17 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.exception.StoreException;
+import io.seata.core.model.LockStatus;
 import io.seata.common.XID;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -31,16 +35,22 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
 import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
+import io.seata.server.cluster.raft.RaftServer;
+import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
  * The type Session holder.
@@ -55,27 +65,11 @@ public class SessionHolder {
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * The constant ROOT_SESSION_MANAGER_NAME.
      */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
-    /**
-     * The constant ASYNC_COMMITTING_SESSION_MANAGER_NAME.
-     */
-    public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
-    /**
-     * The constant RETRY_COMMITTING_SESSION_MANAGER_NAME.
-     */
-    public static final String RETRY_COMMITTING_SESSION_MANAGER_NAME = "retry.commit.data";
-    /**
-     * The constant RETRY_ROLLBACKING_SESSION_MANAGER_NAME.
-     */
-    public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
-
-    /**
-     * The default session store dir
-     */
-    public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
 
     /**
      * The redis distributed lock expire time
@@ -83,6 +77,7 @@ public class SessionHolder {
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
     private static SessionManager ROOT_SESSION_MANAGER;
+    private static volatile Map<String, SessionManager> SESSION_MANAGER_MAP;
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
@@ -100,32 +95,41 @@ public class SessionHolder {
             sessionMode = StoreConfig.getSessionMode();
         }
         LOGGER.info("use session store mode: {}", sessionMode.getName());
+        DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.DB.getName());
-        } else if (SessionMode.FILE.equals(sessionMode)) {
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                    DEFAULT_SESSION_STORE_FILE_DIR);
-            if (StringUtils.isBlank(sessionStorePath)) {
-                throw new StoreException("the {store.file.dir} is empty.");
+            reload(sessionMode);
+        } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
+            RaftServerFactory.getInstance().init();
+            if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
+                sessionMode = SessionMode.RAFT;
             }
-            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.FILE.getName());
+            if (SessionMode.RAFT.equals(sessionMode)) {
+                String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
+                    new Object[] {ROOT_SESSION_MANAGER_NAME});
+                SESSION_MANAGER_MAP = new HashMap<>();
+                SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
+                RaftServerFactory.getInstance().start();
+            } else {
+                String sessionStorePath =
+                    CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
+                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
+                if (StringUtils.isBlank(sessionStorePath)) {
+                    throw new StoreException("the {store.file.dir} is empty.");
+                }
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
+                    new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                reload(sessionMode);
+            }
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
-
-            DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(SessionMode.REDIS.getName());
+            reload(sessionMode);
         } else {
             // unknown store
             throw new IllegalArgumentException("unknown store mode:" + sessionMode.getName());
         }
-        reload(sessionMode);
     }
-
-    //region reload
 
     /**
      * Reload.
@@ -133,50 +137,88 @@ public class SessionHolder {
      * @param sessionMode the mode of store
      */
     protected static void reload(SessionMode sessionMode) {
-
-        if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable) ROOT_SESSION_MANAGER).reload();
+        if (sessionMode == SessionMode.FILE) {
+            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
+        } else {
+            reload(null, sessionMode);
         }
+    }
 
-        if (SessionMode.FILE.equals(sessionMode)) {
-            Collection<GlobalSession> allSessions = ROOT_SESSION_MANAGER.allSessions();
-            if (CollectionUtils.isNotEmpty(allSessions)) {
-                for (GlobalSession globalSession : allSessions) {
-                    GlobalStatus globalStatus = globalSession.getStatus();
-                    switch (globalStatus) {
-                        case UnKnown:
-                        case Committed:
-                        case CommitFailed:
-                        case Rollbacked:
-                        case RollbackFailed:
-                        case TimeoutRollbacked:
-                        case TimeoutRollbackFailed:
-                        case Finished:
-                            removeInErrorState(globalSession);
-                            break;
-                        case AsyncCommitting:
-                        case Committing:
-                        case CommitRetrying:
-                            break;
-                        default: {
-                            lockBranchSessions(globalSession.getSortedBranches());
-                            switch (globalStatus) {
-                                case Rollbacking:
-                                case RollbackRetrying:
-                                case TimeoutRollbacking:
-                                case TimeoutRollbackRetrying:
-                                    globalSession.getBranchSessions().parallelStream()
-                                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
-                                    break;
-                                case Begin:
-                                    globalSession.setActive(true);
-                                    break;
-                                default:
-                                    LOGGER.error("Could not handle the global session, xid: {}", globalSession.getXid());
-                                    throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
-                            }
-                            break;
+    public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode) {
+        reload(allSessions, storeMode, true);
+    }
+
+    public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
+        if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
+            && CollectionUtils.isNotEmpty(allSessions)) {
+            for (GlobalSession globalSession : allSessions) {
+                GlobalStatus globalStatus = globalSession.getStatus();
+                switch (globalStatus) {
+                    case TimeoutRollbacked:
+                    case Rollbacked:
+                        try {
+                            SessionHelper.endRollbacked(globalSession, true);
+                        } catch (TransactionException e) {
+                            LOGGER.error("Could not handle the global session, xid: {},error: {}",
+                                globalSession.getXid(), e.getMessage());
                         }
+                        break;
+                    case Committed:
+                        try {
+                            SessionHelper.endCommitted(globalSession, true);
+                        } catch (TransactionException e) {
+                            LOGGER.error("Could not handle the global session, xid: {},error: {}",
+                                globalSession.getXid(), e.getMessage());
+                        }
+                        break;
+                    case Finished:
+                    case UnKnown:
+                    case CommitFailed:
+                    case RollbackFailed:
+                    case TimeoutRollbackFailed:
+                        removeInErrorState(globalSession);
+                        break;
+                    case AsyncCommitting:
+                    case Committing:
+                    case CommitRetrying:
+                        if (Objects.equals(SessionMode.RAFT, storeMode)) {
+                            globalSession.unlock();
+                        }
+                        break;
+                    default: {
+                        if (acquireLock) {
+                            lockBranchSessions(globalSession.getSortedBranches());
+                            if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                                globalSession.getBranchSessions().parallelStream()
+                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                            }
+                        }
+                        switch (globalStatus) {
+                            case Rollbacking:
+                            case RollbackRetrying:
+                            case TimeoutRollbacking:
+                            case TimeoutRollbackRetrying:
+                                break;
+                            case Begin:
+                                if (Objects.equals(storeMode, SessionMode.RAFT)) {
+                                    try {
+                                        globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
+                                            globalSession.getXid());
+                                    } catch (TransactionException e) {
+                                        LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                    }
+                                } else {
+                                    globalSession.setActive(true);
+                                }
+                                break;
+                            default:
+                                LOGGER.error("Could not handle the global session, xid: {}", globalSession.getXid());
+                                throw new ShouldNeverHappenException("NOT properly handled " + globalStatus);
+                        }
+                        break;
                     }
                 }
             }
@@ -209,7 +251,7 @@ public class SessionHolder {
     private static void removeInErrorState(GlobalSession globalSession) {
         try {
             LOGGER.warn("The global session should NOT be {}, remove it. xid = {}", globalSession.getStatus(), globalSession.getXid());
-            ROOT_SESSION_MANAGER.removeGlobalSession(globalSession);
+            getRootSessionManager().removeGlobalSession(globalSession);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Remove global session succeed, xid = {}, status = {}", globalSession.getXid(), globalSession.getStatus());
             }
@@ -241,10 +283,13 @@ public class SessionHolder {
      * @return the root session manager
      */
     public static SessionManager getRootSessionManager() {
-        if (ROOT_SESSION_MANAGER == null) {
-            throw new ShouldNeverHappenException("SessionManager is NOT init!");
-        }
-        return ROOT_SESSION_MANAGER;
+        String group = SeataClusterContext.getGroup();
+        return getRootSessionManager(group);
+    }
+
+    public static SessionManager getRootSessionManager(String group) {
+        return StringUtils.isNotBlank(group) && SESSION_MANAGER_MAP != null
+            ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER) : ROOT_SESSION_MANAGER;
     }
 
     //endregion
@@ -329,6 +374,14 @@ public class SessionHolder {
     }
 
     public static void destroy() {
+        Collection<RaftServer> raftServers = RaftServerFactory.getInstance().getRaftServers();
+        if (raftServers != null) {
+            try {
+                raftServers.forEach(RaftServer::close);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage());
+            }
+        }
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }

@@ -49,6 +49,7 @@ public interface StarterConstants {
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     String REGISTRY_PREFERED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
+    String REGISTRY_RAFT_PREFIX = REGISTRY_PREFIX + ".raft";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";
     String REGISTRY_REDIS_PREFIX = REGISTRY_PREFIX + ".redis";
     String REGISTRY_ZK_PREFIX = REGISTRY_PREFIX + ".zk";
@@ -69,6 +70,7 @@ public interface StarterConstants {
 
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
+    String SERVER_RAFT_PREFIX = SERVER_PREFIX + ".raft";
     String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
 
     String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
