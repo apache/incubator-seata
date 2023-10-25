@@ -208,6 +208,11 @@ public class Node {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(host, port, protocol);
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;

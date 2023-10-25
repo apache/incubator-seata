@@ -40,7 +40,7 @@ public class Instance {
     }
 
     public static Instance getInstance() {
-        return SingletonHolder.instance;
+        return SingletonHolder.serverInstance;
     }
 
 
@@ -165,7 +165,7 @@ public class Instance {
     }
 
     private static class SingletonHolder {
-        private static final Instance instance = new Instance();
+        private static final Instance serverInstance = new Instance();
     }
 
 
