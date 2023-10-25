@@ -227,6 +227,15 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         return lookupByCluster(clusterName);
     }
 
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(clusterName);
+    }
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
+    }
+
     // default visible for test
     List<InetSocketAddress> lookupByCluster(String clusterName) {
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {

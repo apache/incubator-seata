@@ -171,6 +171,16 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
     }
 
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
+    }
+
     private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
         if (!listenerMap.containsKey(cluster)) {
             //1.refresh cluster

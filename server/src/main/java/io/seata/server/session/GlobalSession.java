@@ -74,7 +74,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
      *  then the tx will be remand as need to retry rollback
      */
-    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+    private static int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
             .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private String xid;
@@ -802,5 +802,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + beginTime + ", applicationData='" + applicationData + '\'' + ", lazyLoadBranch=" + lazyLoadBranch
             + ", active=" + active + ", branchSessions=" + branchSessions + ", globalSessionLock=" + globalSessionLock
             + ", lifecycleListeners=" + lifecycleListeners + '}';
+    }
+
+    /**
+     * Only be called after configuration is reloaded.
+     */
+    public static void reloadConfiguration() {
+        RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
     }
 }

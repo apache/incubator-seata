@@ -72,7 +72,11 @@ public class MultiRegistryFactory {
         return registryServices;
     }
 
+    public static void reloadRegistryServices() {
+        MultiRegistryFactoryHolder.INSTANCES = buildRegistryServices();
+    }
+
     private static class MultiRegistryFactoryHolder {
-        private static final List<RegistryService> INSTANCES = buildRegistryServices();
+        private static List<RegistryService> INSTANCES = buildRegistryServices();
     }
 }

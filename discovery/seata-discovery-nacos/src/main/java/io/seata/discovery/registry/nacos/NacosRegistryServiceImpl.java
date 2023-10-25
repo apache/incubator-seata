@@ -150,6 +150,10 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
+        return lookupByCluster(clusterName);
+    }
+
+    private List<InetSocketAddress> lookupByCluster(String clusterName) throws Exception {
         if (useSLBWay) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("look up service address of SLB by nacos");
@@ -198,6 +202,16 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             }
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
+    }
+
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
     }
 
     @Override

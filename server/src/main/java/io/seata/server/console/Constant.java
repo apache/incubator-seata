@@ -13,26 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.parser.utils;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.core.io.Resource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package io.seata.server.console;
 
 /**
- * ResourceUtil tests
- *
- * @author wang.liang
+ * @author Junduo Dong
  */
-public class ResourceUtilTests {
+public interface Constant {
+    String UNKNOWN_SERVER_STATUS = "UNKNOWN";
 
-    @Test
-    public void getResources_test() {
-        Resource[] resources = ResourceUtil.getResources("classpath*:statelang/*.json");
-        assertThat(resources.length).isEqualTo(6);
+    String HTTP_PROTOCOL = "http://";
 
-        Resource[] resources2 = ResourceUtil.getResources(new String[]{"classpath*:statelang/*.json"});
-        assertThat(resources2.length).isEqualTo(6);
-    }
+    String URI_HEALTH = "/health";
+
+    String DEMO_APP_NAME = "demo-app";
+
+    String DEMO_GROUP_NAME = "demo-group";
+
+    String DEMO_TXN_NAME = "txn-name";
 }

@@ -54,7 +54,7 @@ public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
 
-    private static final int RETRY_XAER_NOTA_TIMEOUT = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
+    private static int RETRY_XAER_NOTA_TIMEOUT = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
             DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
 
     private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
@@ -400,5 +400,13 @@ public class DefaultCore implements Core {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Only be called after configuration is reloaded.
+     */
+    public static void reloadConfiguration() {
+        RETRY_XAER_NOTA_TIMEOUT = ConfigurationFactory.getInstance().getInt(XAER_NOTA_RETRY_TIMEOUT,
+                DefaultValues.DEFAULT_XAER_NOTA_RETRY_TIMEOUT);
     }
 }

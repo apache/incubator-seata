@@ -76,6 +76,11 @@ public class PageUtil {
             + SOURCE_SQL_PLACE_HOLD + ") temp ) where rn between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
 
     /**
+     * The constant SQLSERVER_PAGE_TEMPLATE
+     */
+    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from ("
+            + SOURCE_SQL_PLACE_HOLD + ") temp ) t where t.rowId between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
+    /**
      * check page parm
      *
      * @param pageNum the page num
@@ -113,6 +118,10 @@ public class PageUtil {
                 return ORACLE_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
+            case "sqlserver":
+                return SQLSERVER_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
+                        .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
+                        .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
             default:
                 throw new NotSupportYetException("PageUtil not support this dbType:" + dbType);
         }
@@ -134,6 +143,7 @@ public class PageUtil {
             case "dm":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
+            case "sqlserver":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {
                     return sourceSql.substring(0, lastIndexOfOrderBy).replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");

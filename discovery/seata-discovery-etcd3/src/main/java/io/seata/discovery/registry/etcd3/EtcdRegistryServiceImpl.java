@@ -190,6 +190,16 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         return lookupByCluster(cluster);
     }
 
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return lookupByCluster(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
+    }
+
     private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
         if (!listenerMap.containsKey(cluster)) {
             //1.refresh

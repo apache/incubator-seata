@@ -185,6 +185,16 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         return doLookup(clusterName);
     }
 
+    @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        return doLookup(getClusterName());
+    }
+
+    @Override
+    public String getType() {
+        return REGISTRY_TYPE;
+    }
+
     // visible for test.
     List<InetSocketAddress> doLookup(String clusterName) throws Exception {
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {

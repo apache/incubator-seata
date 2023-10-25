@@ -48,6 +48,16 @@ public class CustomRegistryServiceForTest implements RegistryService<ConfigChang
     }
 
     @Override
+    public List<InetSocketAddress> getClusterNodes() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getType() {
+        return "";
+    }
+
+    @Override
     public void close() throws Exception {
         throw new UnsupportedOperationException();
     }
