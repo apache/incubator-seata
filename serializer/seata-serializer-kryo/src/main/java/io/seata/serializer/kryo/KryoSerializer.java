@@ -16,8 +16,8 @@
 package io.seata.serializer.kryo;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.core.serializer.Serializer;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.serializer.Serializer;
 
 /**
  * @author jsbxyyx
@@ -36,6 +36,7 @@ public class KryoSerializer implements Serializer {
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
+
     }
 
     @Override
