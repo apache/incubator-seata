@@ -258,7 +258,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(cluster), getOption).get();
         //2.add to list
         List<InetSocketAddress> instanceList = getResponse.getKvs().stream().map(keyValue -> {
-            String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
+            String[] instanceInfo = NetUtil.splitIPPortStr(keyValue.getValue().toString(UTF_8));
             return new InetSocketAddress(instanceInfo[0], Integer.parseInt(instanceInfo[1]));
         }).collect(Collectors.toList());
         clusterAddressMap.put(cluster, new Pair<>(getResponse.getHeader().getRevision(), instanceList));

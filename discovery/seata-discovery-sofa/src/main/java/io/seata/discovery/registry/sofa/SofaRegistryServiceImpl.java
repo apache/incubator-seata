@@ -205,8 +205,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
         for (Map.Entry<String, List<String>> entry : instances.entrySet()) {
             for (String str : entry.getValue()) {
-                String ip = StringUtils.substringBefore(str, HOST_SEPERATOR);
-                String port = StringUtils.substringAfter(str, HOST_SEPERATOR);
+                String ip = StringUtils.substringBeforeLast(str, HOST_SEPERATOR);
+                String port = StringUtils.substringAfterLast(str, HOST_SEPERATOR);
                 InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, Integer.parseInt(port));
                 result.add(inetSocketAddress);
             }
