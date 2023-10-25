@@ -46,7 +46,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.9.1</apache-zookeeper.version>
-        <curator-test.version>2.9.1</curator-test.version>
+        <curator-test.version>5.1.0</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <mock-jedis.version>0.3.0</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
