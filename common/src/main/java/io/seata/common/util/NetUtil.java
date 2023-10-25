@@ -15,17 +15,22 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.regex.Pattern;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Net util.
@@ -34,13 +39,25 @@ import org.slf4j.LoggerFactory;
  */
 public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);
-    private static final String LOCALHOST = "127.0.0.1";
 
+    public static final boolean PREFER_IPV6_ADDRESSES = Boolean.parseBoolean(
+            System.getProperty("java.net.preferIPv6Addresses"));
+
+    private static final String LOCALHOST = "127.0.0.1";
     private static final String ANY_HOST = "0.0.0.0";
+
+    public static final String LOCALHOST_IPV6 = "0:0:0:0:0:0:0:1";
+    public static final String LOCALHOST_SHORT_IPV6 = "::1";
+    public static final String ANY_HOST_IPV6  = "0:0:0:0:0:0:0:0";
+    public static final String ANY_HOST_SHORT_IPV6  = "::";
 
     private static volatile InetAddress LOCAL_ADDRESS = null;
 
-    private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
+    private static final Set<String> FORBIDDEN_HOSTS = Collections.unmodifiableSet(
+            new LinkedHashSet<>(Arrays.asList(
+                            LOCALHOST, ANY_HOST,
+                            LOCALHOST_IPV6, LOCALHOST_SHORT_IPV6,
+                            ANY_HOST_IPV6,ANY_HOST_SHORT_IPV6)));
 
     /**
      * To string address string.
@@ -83,17 +100,38 @@ public class NetUtil {
      * @return the inet socket address
      */
     public static InetSocketAddress toInetSocketAddress(String address) {
-        int i = address.indexOf(':');
+        String[] ipPortStr = splitIPPortStr(address);
         String host;
         int port;
-        if (i > -1) {
-            host = address.substring(0, i);
-            port = Integer.parseInt(address.substring(i + 1));
+        if (null != ipPortStr) {
+            host = ipPortStr[0];
+            port = Integer.parseInt(ipPortStr[1]);
         } else {
             host = address;
             port = 0;
         }
         return new InetSocketAddress(host, port);
+    }
+
+    public static String[] splitIPPortStr(String address) {
+        if (StringUtils.isBlank(address)) {
+            throw new IllegalArgumentException("ip and port string cannot be empty!");
+        }
+        if (address.charAt(0) == '[') {
+            address = removeBrackets(address);
+        }
+        String[] serverAddArr = null;
+        int i = address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR);
+        if (i > -1) {
+            serverAddArr = new String[2];
+            String hostAddress = address.substring(0,i);
+            if (hostAddress.contains("%")) {
+                hostAddress = hostAddress.substring(0, hostAddress.indexOf("%"));
+            }
+            serverAddArr[0] = hostAddress;
+            serverAddArr[1] = address.substring(i + 1);
+        }
+        return serverAddArr;
     }
 
     /**
@@ -121,7 +159,23 @@ public class NetUtil {
      */
     public static String getLocalIp(String... preferredNetworks) {
         InetAddress address = getLocalAddress(preferredNetworks);
-        return address == null ? LOCALHOST : address.getHostAddress();
+        if (null != address) {
+            String hostAddress = address.getHostAddress();
+            if (address instanceof Inet6Address) {
+                if (hostAddress.contains("%")) {
+                    hostAddress = hostAddress.substring(0, hostAddress.indexOf("%"));
+                }
+            }
+            return hostAddress;
+        }
+        return localIP();
+    }
+
+    public static String localIP() {
+        if (PREFER_IPV6_ADDRESSES) {
+            return LOCALHOST_IPV6;
+        }
+        return LOCALHOST;
     }
 
     /**
@@ -224,7 +278,21 @@ public class NetUtil {
         if (address == null || address.isLoopbackAddress()) {
             return false;
         }
-        return isValidIp(address.getHostAddress(), false);
+        String hostAddress = address.getHostAddress();
+        if (address instanceof Inet6Address) {
+            if (!PREFER_IPV6_ADDRESSES) {
+                return false;
+            }
+            if (address.isAnyLocalAddress() // filter ::/128
+                    || address.isLinkLocalAddress() //filter fe80::/10
+                    || address.isSiteLocalAddress()// filter fec0::/10
+                    || isUniqueLocalAddress(address)) //filter fd00::/8
+            {
+                return false;
+            }
+            return isValidIPv6(hostAddress);
+        }
+        return !FORBIDDEN_HOSTS.contains(hostAddress) && isValidIPv4(hostAddress);
     }
 
     /**
@@ -240,11 +308,10 @@ public class NetUtil {
         }
         ip = convertIpIfNecessary(ip);
         if (validLocalAndAny) {
-            return IP_PATTERN.matcher(ip).matches();
+            return isValidIPv4(ip) || isValidIPv6(ip);
         } else {
-            return !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
+            return !FORBIDDEN_HOSTS.contains(ip) && (isValidIPv4(ip) || isValidIPv6(ip));
         }
-
     }
 
     /**
@@ -254,7 +321,7 @@ public class NetUtil {
      * @return java.lang.String
      */
     private static String convertIpIfNecessary(String ip) {
-        if (IP_PATTERN.matcher(ip).matches()) {
+        if (isValidIPv4(ip) || isValidIPv6(ip)) {
             return ip;
         } else {
             try {
@@ -263,5 +330,25 @@ public class NetUtil {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static boolean isValidIPv4(String ip) {
+        return NetAddressValidatorUtil.isIPv4Address(ip);
+    }
+
+    public static boolean isValidIPv6(String ip) {
+        return NetAddressValidatorUtil.isIPv6Address(ip);
+    }
+
+    private static boolean isUniqueLocalAddress(InetAddress address) {
+        byte[] ip = address.getAddress();
+        return (ip[0] & 0xff) == 0xfd;
+    }
+
+    private static String removeBrackets(String str) {
+        if (StringUtils.isBlank(str)) {
+            return "";
+        }
+        return str.replaceAll("[\\[\\]]", "");
     }
 }
