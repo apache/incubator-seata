@@ -92,12 +92,16 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
             }
 
             String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
-            ObjectMapper objectMapper = new ObjectMapper();
-            vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
-            });
+
+            if (!fileContent.isEmpty()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
+                });
+            }
+
 
         } catch (Exception e) {
-            LOGGER.error("mapping relationship load failed! ", e);
+            LOGGER.error("mapping relationship load failed! " + e);
         }
         return vGroupMapping;
     }

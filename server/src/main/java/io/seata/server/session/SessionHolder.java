@@ -85,7 +85,7 @@ public class SessionHolder {
     /**
      * The default vgroup mapping store dir
      */
-    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = "mappingStore";
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = System.getProperty("user.dir");;
 
     /**
      * The redis distributed lock expire time
