@@ -32,6 +32,8 @@ public interface DomainConstants {
     String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
     String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
     String STATE_TYPE_LOOP_START = "LoopStart";
+    String STATE_TYPE_FORK = "Fork";
+    String STATE_TYPE_JOIN = "Join";
     //endregion
 
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
@@ -71,15 +73,12 @@ public interface DomainConstants {
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
+    String VAR_NAME_CURRENT_PARALLEL_CONTEXT_HOLDER = "_current_parallel_context_holder_";
     //endregion
 
     // region of loop
     String LOOP_COUNTER = "loopCounter";
     String LOOP_SEMAPHORE = "loopSemaphore";
-    String LOOP_RESULT = "loopResult";
-    String NUMBER_OF_INSTANCES = "nrOfInstances";
-    String NUMBER_OF_ACTIVE_INSTANCES = "nrOfActiveInstances";
-    String NUMBER_OF_COMPLETED_INSTANCES = "nrOfCompletedInstances";
     // endregion
 
     String OPERATION_NAME_START = "start";
@@ -96,4 +95,6 @@ public interface DomainConstants {
     String SEPERATOR_PARENT_ID      = ":";
 
     String DEFAULT_JSON_PARSER      = "fastjson";
+
+    int DEFAULT_FORK_AWAIT_TIME  = 12 * 60 * 60 * 1000;  // 12 hours
 }

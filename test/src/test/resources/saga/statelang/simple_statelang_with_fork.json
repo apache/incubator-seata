@@ -1,0 +1,136 @@
+{
+  "Name": "simpleForkTestStateMachine",
+  "Comment": "测试状态机定义",
+  "StartState": "FirstState",
+  "Version": "0.0.2",
+  "States": {
+    "FirstState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "foo",
+      "CompensateState": "CompensateFirstState",
+      "Next": "OuterForkState"
+    },
+    "OuterForkState": {
+      "Type": "Fork",
+      "Branches": [
+        "SecondState",
+        "ThirdState"
+      ],
+      "Parallel": 2,
+      "Timeout": 2000
+    },
+    "SecondState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "CompensateState": "CompensateSecondState",
+      "Next": "InnerForkState"
+    },
+    "InnerForkState": {
+      "Type": "Fork",
+      "Branches": [
+        "ForthState",
+        "FifthState"
+      ],
+      "Parallel": 1
+    },
+    "ForthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "Input": [
+        {
+          "sleepTime": "$.[forthSleepTime]",
+          "throwException": "$.[forthThrowException]"
+        }
+      ],
+      "Status": {
+        "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+        "#root != null": "SU",
+        "#root == null": "FA"
+      },
+      "Catch": [
+        {
+          "Exceptions": [
+            "io.seata.saga.engine.mock.DemoException"
+          ],
+          "Next": "CompensationTrigger"
+        }
+      ],
+      "CompensateState": "CompensateForthState",
+      "Next": "InnerJoinState"
+    },
+    "FifthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "CompensateState": "CompensateFifthState",
+      "Next": "InnerJoinState"
+    },
+    "InnerJoinState": {
+      "Type": "Join",
+      "Next": "SixthState"
+    },
+    "SixthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "CompensateState": "CompensateSixthState",
+      "Next": "OuterJoinState"
+    },
+    "ThirdState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "bar",
+      "CompensateState": "CompensateThirdState",
+      "Next": "OuterJoinState"
+    },
+    "OuterJoinState": {
+      "Type": "Join",
+      "Next": "SucceedState"
+    },
+    "SucceedState": {
+      "Type": "Succeed"
+    },
+    "CompensationTrigger": {
+      "Type": "CompensationTrigger",
+      "Next": "FailState"
+    },
+    "CompensateFirstState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateFoo"
+    },
+    "CompensateSecondState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "CompensateThirdState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "CompensateForthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "CompensateFifthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "CompensateSixthState": {
+      "Type": "ServiceTask",
+      "ServiceName": "demoService",
+      "ServiceMethod": "compensateBar"
+    },
+    "FailState": {
+      "Type": "Fail",
+      "ErrorCode": "NOT_FOUND",
+      "Message": "not found"
+    }
+  }
+}

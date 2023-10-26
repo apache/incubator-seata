@@ -15,8 +15,6 @@
  */
 package io.seata.saga.engine.pcext.routers;
 
-import java.util.Stack;
-
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -33,12 +31,15 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
+import java.util.Stack;
 
 /**
  * TaskState Router
@@ -51,6 +52,16 @@ public class TaskStateRouter implements StateRouter {
 
     @Override
     public Instruction route(ProcessContext context, State state) throws EngineExecutionException {
+
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        if (!stateMachineInstance.isRunning()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("StateMachine instance [{}] ended. Current state [{}]", stateMachineInstance.getId(),
+                        state.getName());
+            }
+            return null;
+        }
 
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
         if (stateInstruction.isEnd()) {

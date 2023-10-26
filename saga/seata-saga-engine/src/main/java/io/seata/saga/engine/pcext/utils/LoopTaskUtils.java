@@ -39,6 +39,7 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.TaskState;
 import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.slf4j.Logger;
@@ -228,10 +229,11 @@ public class LoopTaskUtils {
                     Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
                         DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
                     // multi-instance variables should be double/float while evaluate
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_INSTANCES, (double)nrOfInstances);
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_ACTIVE_INSTANCES, (double)nrOfActiveInstances);
-                    stateMachineContext.put(DomainConstants.NUMBER_OF_COMPLETED_INSTANCES,
-                        (double)nrOfCompletedInstances);
+                    stateMachineContext.put(currentState.getLoop().getNumberOfInstancesName(), (double) nrOfInstances);
+                    stateMachineContext.put(currentState.getLoop().getNumberOfActiveInstancesName(),
+                            (double) nrOfActiveInstances);
+                    stateMachineContext.put(currentState.getLoop().getNumberOfCompletedInstancesName(),
+                            (double) nrOfCompletedInstances);
                     StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
                     ExpressionResolver resolver = stateMachineConfig.getExpressionResolver();
@@ -311,7 +313,7 @@ public class LoopTaskUtils {
                 subContextVariables.add(outputVariablesToContext);
             }
 
-            contextVariables.put(DomainConstants.LOOP_RESULT, subContextVariables);
+            contextVariables.put(((TaskState) state).getLoop().getResultName(), subContextVariables);
         }
 
     }

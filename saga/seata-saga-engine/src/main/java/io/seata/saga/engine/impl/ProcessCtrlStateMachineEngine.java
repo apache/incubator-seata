@@ -42,11 +42,12 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.TaskState.Loop;
-import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
+import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
+import io.seata.saga.statelang.parser.utils.StateMachineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -245,12 +246,17 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 "StateMachineInstance[id:" + stateMachineInstId + "] Cannot find last forward execution stateInstance",
                 FrameworkErrorCode.OperationDenied);
         }
+        String lastForwardStateName = EngineUtils.getOriginStateName(lastForwardState);
+        State lastSerialState = findOutLastSerialState(lastForwardState);
 
         ProcessContextBuilder contextBuilder = ProcessContextBuilder.create().withProcessType(ProcessType.STATE_LANG)
             .withOperationName(DomainConstants.OPERATION_NAME_FORWARD).withAsyncCallback(callback)
-            .withStateMachineInstance(stateMachineInstance).withStateInstance(lastForwardState).withStateMachineConfig(
-                getStateMachineConfig()).withStateMachineEngine(this);
+            .withStateMachineInstance(stateMachineInstance).withStateMachineConfig(getStateMachineConfig())
+            .withStateMachineEngine(this);
 
+        if (lastSerialState.getName().equals(lastForwardStateName)) {
+            contextBuilder.withStateInstance(lastForwardState);
+        }
         contextBuilder.withIsAsyncExecution(async);
 
         ProcessContext context = contextBuilder.build();
@@ -268,36 +274,35 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, concurrentContextVariables);
         stateMachineInstance.setContext(concurrentContextVariables);
 
-        String originStateName = EngineUtils.getOriginStateName(lastForwardState);
-        State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
-        Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
-        if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
-            lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
-        }
+        if (lastSerialState.getName().equals(lastForwardStateName)) {
+            Loop loop = LoopTaskUtils.getLoopConfig(context, lastSerialState);
+            if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+                lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
+            }
 
-        context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
-            lastForwardState.getId());
-        if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(lastForwardState.getType()) && !ExecutionStatus.SU
-            .equals(lastForwardState.getCompensationStatus())) {
+            context.setVariable(
+                    lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
+                    lastForwardState.getId()
+            );
+            if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(lastForwardState.getType())
+                    && !ExecutionStatus.SU.equals(lastForwardState.getCompensationStatus())) {
 
-            context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
-        }
+                context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
+            }
 
-        if (!ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
-            lastForwardState.setIgnoreStatus(true);
+            if (!ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+                lastForwardState.setIgnoreStatus(true);
+            }
         }
 
         try {
             StateInstruction inst = new StateInstruction();
             inst.setTenantId(stateMachineInstance.getTenantId());
             inst.setStateMachineName(stateMachineInstance.getStateMachine().getName());
-            if (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+            if (lastSerialState.getName().equals(lastForwardStateName)
+                    && (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus()))) {
 
-                String next = null;
-                State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
-                if (state instanceof AbstractTaskState) {
-                    next = state.getNext();
-                }
+                String next = lastSerialState.getNext();
                 if (StringUtils.isEmpty(next)) {
                     LOGGER.warn(
                         "Last Forward execution StateInstance was succeed, and it has not Next State , skip forward "
@@ -307,13 +312,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 inst.setStateName(next);
             } else {
 
-                if (ExecutionStatus.RU.equals(lastForwardState.getStatus())
-                        && !EngineUtils.isTimeout(lastForwardState.getGmtStarted(), stateMachineConfig.getServiceInvokeTimeout())) {
+                if (lastSerialState.getName().equals(lastForwardStateName)
+                        && ExecutionStatus.RU.equals(lastForwardState.getStatus())
+                        && !EngineUtils.isTimeout(lastForwardState.getGmtStarted(),
+                        stateMachineConfig.getServiceInvokeTimeout())) {
                     throw new EngineExecutionException(
-                            "State [" + lastForwardState.getName() + "] is running, operation[forward] denied", FrameworkErrorCode.OperationDenied);
+                            "State [" + lastForwardState.getName() + "] is running, operation[forward] denied",
+                            FrameworkErrorCode.OperationDenied);
                 }
 
-                inst.setStateName(EngineUtils.getOriginStateName(lastForwardState));
+                inst.setStateName(lastSerialState.getName());
             }
             context.setInstruction(inst);
 
@@ -328,7 +336,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
             }
 
-            loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
+            Loop loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
             if (null != loop) {
                 inst.setTemporaryState(new LoopStartStateImpl());
             }
@@ -452,6 +460,29 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
         }
         return lastForwardStateInstance;
+    }
+
+    /**
+     * Find the last state in serial link.
+     *
+     * @param lastForwardStateInstance Last forward state instance
+     * @return last state in serial link
+     */
+    public State findOutLastSerialState(StateInstance lastForwardStateInstance) {
+        StateMachine stateMachine = lastForwardStateInstance.getStateMachineInstance().getStateMachine();
+        Map<String, ForkStateImpl> stateNameToParentForkMap = StateMachineUtils.getStateToParentForkMap(stateMachine);
+
+        String stateName = EngineUtils.getOriginStateName(lastForwardStateInstance);
+        ForkStateImpl outerParentForkState = null;
+        while (stateNameToParentForkMap.containsKey(stateName)) {
+            outerParentForkState = stateNameToParentForkMap.get(stateName);
+            stateName = outerParentForkState.getName();
+        }
+        if (outerParentForkState != null) {
+            return outerParentForkState;
+        } else {
+            return stateMachine.getState(stateName);
+        }
     }
 
     @Override

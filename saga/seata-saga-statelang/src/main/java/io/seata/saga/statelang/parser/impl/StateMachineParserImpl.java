@@ -23,6 +23,7 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.BaseState;
+import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.parser.JsonParser;
 import io.seata.saga.statelang.parser.JsonParserFactory;
@@ -30,6 +31,7 @@ import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import io.seata.saga.statelang.parser.utils.StateMachineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,6 +124,8 @@ public class StateMachineParserImpl implements StateMachineParser {
                         ((AbstractTaskState) compState).setForCompensation(true);
                     }
                 }
+            } else if (state instanceof ForkStateImpl) {
+                StateMachineUtils.generateBranchStatesAndPairedJoin((ForkStateImpl) state);
             }
         }
         return stateMachine;
