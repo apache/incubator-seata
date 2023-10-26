@@ -183,7 +183,13 @@ public class SessionHolder {
                     case Committing:
                     case CommitRetrying:
                         if (Objects.equals(SessionMode.RAFT, storeMode)) {
-                            globalSession.unlock();
+                            // When a state change occurs, re-electing the leader may result in the lock not being unlocked yet
+                            // so a COMMIT unlock operation needs to be performed at the time of re-election
+                            try {
+                                globalSession.clean();
+                            } catch (TransactionException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                         break;
                     default: {
