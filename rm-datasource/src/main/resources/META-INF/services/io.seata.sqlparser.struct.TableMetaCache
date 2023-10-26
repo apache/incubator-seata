@@ -4,3 +4,4 @@ io.seata.rm.datasource.sql.struct.cache.PostgresqlTableMetaCache
 io.seata.rm.datasource.sql.struct.cache.SqlServerTableMetaCache
 io.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache
 io.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache
+io.seata.rm.datasource.sql.struct.cache.DmTableMetaCache
