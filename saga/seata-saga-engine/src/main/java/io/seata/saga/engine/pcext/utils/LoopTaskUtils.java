@@ -15,14 +15,21 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EmptyStackException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NumberUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
-import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
-import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
 import io.seata.saga.engine.exception.ForwardInvalidException;
+import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -38,15 +45,6 @@ import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EmptyStackException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-
 /**
  * Loop Task Util
  *
@@ -56,10 +54,7 @@ public class LoopTaskUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
-    private static final String DEFAULT_COMPLETION_CONDITION = "[nrOfInstances] == [nrOfCompletedInstances]";
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
-
-    private static final Map<String, ExpressionEvaluator> EXPRESSION_EVALUATOR_MAP = new ConcurrentHashMap<>();
 
     /**
      * get Loop Config from State
@@ -82,7 +77,7 @@ public class LoopTaskUtils {
                 String collectionName = loop.getCollection();
                 if (StringUtils.isNotBlank(collectionName)) {
                     Object expression = ParameterUtils.createValueExpression(
-                        stateMachineConfig.getExpressionFactoryManager(), collectionName);
+                        stateMachineConfig.getExpressionResolver(), collectionName);
                     Object collection = ParameterUtils.getValue(expression, stateMachineInstance.getContext(), null);
                     if (collection instanceof Collection && ((Collection)collection).size() > 0) {
                         LoopContextHolder.getCurrent(context, true).setCollection((Collection)collection);
@@ -239,9 +234,12 @@ public class LoopTaskUtils {
                             (double) nrOfActiveInstances);
                     stateMachineContext.put(currentState.getLoop().getNumberOfCompletedInstancesName(),
                             (double) nrOfCompletedInstances);
+                    StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                    ExpressionResolver resolver = stateMachineConfig.getExpressionResolver();
 
-                    if (nrOfCompletedInstances >= nrOfInstances || getEvaluator(context,
-                        currentState.getLoop().getCompletionCondition()).evaluate(stateMachineContext)) {
+                    if (nrOfCompletedInstances >= nrOfInstances || Boolean.TRUE.equals(resolver.getExpression(
+                            currentState.getLoop().getCompletionCondition()).getValue(stateMachineContext))) {
                         currentLoopContext.setCompletionConditionSatisfied(true);
                     }
                 }
@@ -311,7 +309,7 @@ public class LoopTaskUtils {
                 StateInstance stateInstance = (StateInstance)subProcessContext.getVariable(DomainConstants.VAR_NAME_STATE_INST);
 
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
-                    stateMachineConfig.getExpressionFactoryManager(), (AbstractTaskState)state, stateInstance.getOutputParams());
+                    stateMachineConfig.getExpressionResolver(), (AbstractTaskState)state, stateInstance.getOutputParams());
                 subContextVariables.add(outputVariablesToContext);
             }
 
@@ -394,29 +392,6 @@ public class LoopTaskUtils {
             }
         }
         return route;
-    }
-
-    /**
-     * get loop completion condition evaluator
-     *
-     * @param context the process context
-     * @param completionCondition the completion condition
-     * @return the expression evaluator
-     */
-    private static ExpressionEvaluator getEvaluator(ProcessContext context, String completionCondition) {
-        if (StringUtils.isBlank(completionCondition)) {
-            completionCondition = DEFAULT_COMPLETION_CONDITION;
-        }
-        if (!EXPRESSION_EVALUATOR_MAP.containsKey(completionCondition)) {
-            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            ExpressionEvaluator expressionEvaluator = (ExpressionEvaluator)stateMachineConfig
-                .getEvaluatorFactoryManager().getEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT)
-                .createEvaluator(completionCondition);
-            expressionEvaluator.setRootObjectName(null);
-            EXPRESSION_EVALUATOR_MAP.put(completionCondition, expressionEvaluator);
-        }
-        return EXPRESSION_EVALUATOR_MAP.get(completionCondition);
     }
 
     private static StateInstruction copyInstruction(StateInstruction instruction) {

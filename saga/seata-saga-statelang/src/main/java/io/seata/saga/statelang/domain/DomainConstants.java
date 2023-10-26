@@ -90,7 +90,7 @@ public interface DomainConstants {
     String SEQ_ENTITY_STATE_INST = "STATE_INST";
 
     String EXPRESSION_TYPE_SEQUENCE = "Sequence";
-    String EVALUATOR_TYPE_EXCEPTION = "Exception";
+    String EXPRESSION_TYPE_EXCEPTION = "Exception";
 
     String SEPERATOR_PARENT_ID      = ":";
 

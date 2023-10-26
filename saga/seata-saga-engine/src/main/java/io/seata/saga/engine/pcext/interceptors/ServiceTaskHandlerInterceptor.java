@@ -24,11 +24,11 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
-import io.seata.saga.engine.evaluation.Evaluator;
-import io.seata.saga.engine.evaluation.EvaluatorFactory;
-import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
-import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.expression.Expression;
+import io.seata.saga.engine.expression.ExpressionResolver;
+import io.seata.saga.engine.expression.exception.ExceptionMatchExpression;
+import io.seata.saga.engine.expression.spel.SpringELExpression;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -109,7 +109,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         List<Object> serviceInputParams = null;
         if (contextVariables != null) {
             try {
-                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionFactoryManager(), stateInstance,
+                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionResolver(), stateInstance,
                     state, contextVariables);
             } catch (Exception e) {
 
@@ -259,7 +259,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (serviceOutputParams != null) {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
-                    stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
+                    stateMachineConfig.getExpressionResolver(), state, serviceOutputParams);
                 if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
@@ -317,6 +317,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             } else {
                 StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                ExpressionResolver resolver = stateMachineConfig.getExpressionResolver();
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
                 if (statusEvaluators == null) {
@@ -325,11 +326,11 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
                             String expressionStr, statusVal;
-                            Evaluator evaluator;
+                            Expression evaluator;
                             for (Map.Entry<String, String> entry : statusMatchList.entrySet()) {
                                 expressionStr = entry.getKey();
                                 statusVal = entry.getValue();
-                                evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
+                                evaluator = resolver.getExpression(expressionStr);
                                 if (evaluator != null) {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }
@@ -340,9 +341,20 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
 
                 for (Object evaluatorObj : statusEvaluators.keySet()) {
-                    Evaluator evaluator = (Evaluator)evaluatorObj;
+                    Expression evaluator = (Expression) evaluatorObj;
                     String statusVal = statusEvaluators.get(evaluator);
-                    if (evaluator.evaluate(context.getVariables())) {
+                    Object elContext;
+
+                    Class<? extends Expression> expressionClass = evaluator.getClass();
+                    if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
+                        elContext = context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+                    } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
+                        elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
+                    } else {
+                        elContext = context.getVariables();
+                    }
+
+                    if (Boolean.TRUE.equals(evaluator.getValue(elContext))) {
                         stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
                         break;
                     }
@@ -406,38 +418,5 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("State[{}] finish with status[{}]", state.getName(), stateInstance.getStatus());
         }
-    }
-
-    private Evaluator createEvaluator(EvaluatorFactoryManager evaluatorFactoryManager, String expressionStr) {
-        String expressionType = null;
-        String expressionContent = null;
-        Evaluator evaluator = null;
-        if (StringUtils.hasLength(expressionStr)) {
-            if (expressionStr.startsWith("$")) {
-                int expTypeStart = expressionStr.indexOf("$");
-                int expTypeEnd = expressionStr.indexOf("{", expTypeStart);
-
-                if (expTypeStart >= 0 && expTypeEnd > expTypeStart) {
-                    expressionType = expressionStr.substring(expTypeStart + 1, expTypeEnd);
-                }
-
-                int expEnd = expressionStr.lastIndexOf("}");
-                if (expTypeEnd > 0 && expEnd > expTypeEnd) {
-                    expressionContent = expressionStr.substring(expTypeEnd + 1, expEnd);
-                }
-            } else {
-                expressionContent = expressionStr;
-            }
-
-            EvaluatorFactory evaluatorFactory = evaluatorFactoryManager.getEvaluatorFactory(expressionType);
-            if (evaluatorFactory == null) {
-                throw new IllegalArgumentException("Cannot get EvaluatorFactory by Type[" + expressionType + "]");
-            }
-            evaluator = evaluatorFactory.createEvaluator(expressionContent);
-            if (evaluator instanceof ExpressionEvaluator) {
-                ((ExpressionEvaluator)evaluator).setRootObjectName(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
-            }
-        }
-        return evaluator;
     }
 }
