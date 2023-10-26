@@ -84,7 +84,7 @@ jobs:
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn -T 4C clean install \
+                       mvn clean install \
                            -Dspring-boot.version=${{ matrix.springboot }} \
                            -DskipTests \
                            -Prelease-seata \
