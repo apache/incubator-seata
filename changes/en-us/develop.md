@@ -9,6 +9,8 @@ Add changes here for all PR submitted to the develop branch.
 ### bugfix:
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: fix TC retry rollback wrongly, after the XA transaction fail and rollback
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
+- [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
+- [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
@@ -17,6 +19,9 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5891](https://github.com/seata/seata/pull/5891)] remove mariadb.jdbc dependency
 - [[#5828](https://github.com/seata/seata/pull/5828)] fix codecov chart not display
 - [[#5886](https://github.com/seata/seata/pull/5886)] optimize client startup connect server fail fast
+- [[#5927](https://github.com/seata/seata/pull/5927)] optimize some scripts related to Apollo
+- [[#5918](https://github.com/seata/seata/pull/5918)] standardized the properties of codecov.yml
+- [[#5939](https://github.com/seata/seata/pull/5939)] support jmx port in seata
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] fix npm package vulnerabilities
@@ -26,6 +31,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5888](https://github.com/seata/seata/pull/5888)] remove sofa test cases
 - [[#5831](https://github.com/seata/seata/pull/5831)] upgrade druid and add `test-druid.yml`
 - [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
+- [[#5914](https://github.com/seata/seata/pull/5914)] upgrade native-lib-loader version
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
@@ -35,5 +41,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
 - [jsbxyyx](https://github.com/jsbxyyx)
+- [leizhiyuan](https://github.com/leizhiyuan) 
+
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
