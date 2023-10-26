@@ -27,6 +27,7 @@ import io.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
 import io.seata.spring.boot.autoconfigure.properties.client.UndoProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingserverProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -45,6 +46,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMINGSERVER_PREFIX;
 
 
 /**
@@ -68,6 +70,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, SpringFenceConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
+        PROPERTY_BEAN_MAP.put(REGISTRY_NAMINGSERVER_PREFIX, RegistryNamingserverProperties.class);
     }
 
     @Override

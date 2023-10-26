@@ -67,9 +67,16 @@ seata:
       server-addr: http://localhost:2379
       key: seata.properties
   registry:
-    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
+    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa 、 namingserver
     type: file
     preferred-networks: 30.240.*
+    metadata:
+      weight: 1
+    namingserver:
+      server-addr: 127.0.0.1:8080
+      cluster: default
+      namespace: public
+      heartbeat-period: 1000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848

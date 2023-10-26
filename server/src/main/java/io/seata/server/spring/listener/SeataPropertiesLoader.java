@@ -28,25 +28,28 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
 
+
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
 import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
-import static io.seata.common.ConfigurationKeys.METRICS_PREFIX;
-import static io.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
 import static io.seata.common.ConfigurationKeys.SERVER_PREFIX;
 import static io.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static io.seata.common.ConfigurationKeys.METRICS_PREFIX;
 import static io.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static io.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-    
+
+
     List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX,
-        STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
+            STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
 
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -57,11 +60,11 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         if (CollectionUtils.isNotEmpty(configs)) {
             Optional<FileConfiguration> originFileInstance = ConfigurationFactory.getOriginFileInstance();
             originFileInstance
-                .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
+                    .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
             Properties properties = new Properties();
             configs.forEach((k, v) -> {
                 if (v instanceof String) {
-                    if (StringUtils.isEmpty((String)v)) {
+                    if (StringUtils.isEmpty((String) v)) {
                         return;
                     }
                 }
@@ -75,6 +78,7 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
         // Load by priority
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());
+
     }
 
 }

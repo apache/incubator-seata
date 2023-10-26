@@ -36,10 +36,11 @@ console:
     password: seata
 seata:
   config:
-    # support: nacos, consul, apollo, zk, etcd3
+    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
     type: file
+
   registry:
-    # support: nacos, eureka, redis, zk, consul, etcd3, sofa
+    # support: nacos, eureka, redis, zk, consul, etcd3, sofa, namingserver
     type: file
   store:
     # support: file 、 db 、 redis
@@ -50,4 +51,9 @@ seata:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
     ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/naming/v1/addVGroup,/naming/v1/removeVGroup
+
+
+
+
+

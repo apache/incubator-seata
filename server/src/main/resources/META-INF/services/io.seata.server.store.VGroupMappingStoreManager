@@ -1,0 +1,3 @@
+io.seata.server.storage.db.store.DataBaseVGroupMappingStoreManager
+io.seata.server.storage.file.store.FileVGroupMappingStoreManager
+io.seata.server.storage.redis.store.RedisVGroupMappingStoreManager

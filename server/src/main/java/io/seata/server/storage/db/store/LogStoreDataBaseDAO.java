@@ -534,7 +534,7 @@ public class LogStoreDataBaseDAO implements LogStore {
         } else if ("postgresql".equalsIgnoreCase(dbType)) {
             String sql = "select current_schema";
             try (PreparedStatement ps = conn.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+                 ResultSet rs = ps.executeQuery()) {
                 String schema = null;
                 if (rs.next()) {
                     schema = rs.getString(1);

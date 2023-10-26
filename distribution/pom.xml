@@ -53,6 +53,7 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>release-seata.xml</descriptor>
+                                <descriptor>release-seata-namingserver.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -68,6 +69,7 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 
     <build>

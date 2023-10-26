@@ -70,3 +70,10 @@ INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('AsyncCommit
 INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
 INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
 INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
+
+CREATE TABLE vgroup_table
+(
+    vGroup    VARCHAR2(255) PRIMARY KEY,
+    namespace VARCHAR2(255),
+    cluster   VARCHAR2(255)
+);
