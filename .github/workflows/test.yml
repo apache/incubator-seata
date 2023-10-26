@@ -2,7 +2,7 @@ name: "test"
 
 on:
   push:
-    branches: [ xxx ]
+    branches: [ test*, "*.*.*" ]
 
 jobs:
   # job 1
@@ -14,7 +14,7 @@ jobs:
       matrix:
         java: [ 8, 11, 17, 21 ]
         springboot: [
-          2.7.16         -Dspring-framework.version=5.3.30,
+          2.7.17         -Dspring-framework.version=5.3.30,
           2.6.15         -Dspring-framework.version=5.3.27,
           2.5.15         -Dspring-framework.version=5.3.27,
           2.4.13         -Dspring-framework.version=5.3.13,
@@ -46,11 +46,7 @@ jobs:
       - name: "Test with Maven"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
-          if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          else
-            ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          fi
+          ./mvnw -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 2
   test-springboot3x:

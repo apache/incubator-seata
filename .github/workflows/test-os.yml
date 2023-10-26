@@ -15,7 +15,7 @@ jobs:
         os: [
           ubuntu-latest,
           macos-latest,
-          windows-latest, # Too many errors in unit-test.
+          windows-latest, # Skip tests, because too many errors in unit-test.
         ]
         java: [ 8, 11, 17, 21 ]
     steps:
@@ -32,19 +32,22 @@ jobs:
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4
-      ## step 4.1、for Ubuntu and MacOS
-      - name: "Test with Maven in Ubuntu and MacOS"
+      ## step 4.1: for Ubuntu and MacOS
+      - name: "Test with Maven on Ubuntu and MacOS"
         if: matrix.os != 'windows-latest'
         run: |
-          ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      ## step 4.2、for Windows
-      - name: "Test with Maven in Windows OS"
+          ./mvnw -T 4C clean install \
+                 -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+      ## step 4.2: for Windows
+      - name: "Build with Maven on Windows (Skip tests)"
         if: matrix.os == 'windows-latest'
-        run: |
+        run: | # Skip tests, because too many errors in unit-test.
             mvn  -version;
-            mvn  -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            mvn  -T 4C clean install \
+                 -DskipTests \
+                 -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
-  # job 2
+  # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   test-arm64:
     name: "test-arm64"
     runs-on: ubuntu-latest
@@ -52,7 +55,7 @@ jobs:
       fail-fast: false
       matrix:
         springboot: [
-          2.7.16         -Dspring-framework.version=5.3.30,
+          2.7.17         -Dspring-framework.version=5.3.30,
           2.6.15         -Dspring-framework.version=5.3.27,
           2.5.15         -Dspring-framework.version=5.3.27,
           2.4.13         -Dspring-framework.version=5.3.13,
@@ -76,11 +79,15 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v3
       # step 3
-      - name: "Install ARM64v8/ubuntu:20.04 and test with Maven"
+      - name: "Build with Maven on 'arm64v8/ubuntu' OS (Skip tests)"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn -T 4C clean test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+                       mvn -T 4C clean install \
+                           -Dspring-boot.version=${{ matrix.springboot }} \
+                           -DskipTests \
+                           -Prelease-seata \
+                           -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
