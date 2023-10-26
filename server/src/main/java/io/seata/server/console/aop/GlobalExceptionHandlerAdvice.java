@@ -69,7 +69,7 @@ public class GlobalExceptionHandlerAdvice {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public SingleResult<Void> handleException(Exception ex) {
-        LOGGER.error("FrameworkException: ", ex);
+        LOGGER.error("Exception: ", ex);
         return SingleResult.failure(ex.getMessage());
     }
 }
