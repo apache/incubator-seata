@@ -2,7 +2,7 @@ name: "build"
 
 on:
   push:
-    branches: [ 2.x, develop, master, test* ]
+    branches: [ 2.x, develop, master ]
   pull_request:
     branches: [ 2.x, develop, master ]
 
@@ -44,6 +44,7 @@ jobs:
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
     strategy:
       fail-fast: false
     steps:
@@ -62,7 +63,7 @@ jobs:
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn -T 4C clean install \
+                       mvn clean install \
                            -DskipTests \
                            -Prelease-seata \
                            -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
