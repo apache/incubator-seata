@@ -43,8 +43,8 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
             mvn  -version;
-            mvn  -T 4C clean install \
-                 -DskipTests \
+            mvn  -T 4C clean install ^
+                 -DskipTests ^
                  -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
