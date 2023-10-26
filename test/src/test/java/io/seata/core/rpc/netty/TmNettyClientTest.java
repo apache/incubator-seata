@@ -110,7 +110,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         tmNettyRemotingClient.init();
 
-        TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup, false);
+        TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }

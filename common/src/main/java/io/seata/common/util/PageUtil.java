@@ -102,6 +102,7 @@ public class PageUtil {
     public static String pageSql(String sourceSql, String dbType, int pageNum, int pageSize) {
         switch (dbType) {
             case "mysql":
+            case "polardb-x":
             case "h2":
             case "postgresql":
             case "oceanbase":

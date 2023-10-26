@@ -164,9 +164,8 @@ class NettyClientChannelManager {
      * Reconnect to remote server of current transaction service group.
      *
      * @param transactionServiceGroup transaction service group
-     * @param failFast true: check connect failed throws exception. false: not check connect failed.
      */
-    void reconnect(String transactionServiceGroup, boolean failFast) {
+    void reconnect(String transactionServiceGroup) {
         List<String> availList = null;
         try {
             availList = getAvailServerList(transactionServiceGroup);
@@ -205,7 +204,9 @@ class NettyClientChannelManager {
                                 FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
-                if (failFast) {
+                boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
+                boolean main = StringUtils.equals("main", Thread.currentThread().getName());
+                if (failFast && main) {
                     String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
                     throw new FrameworkException("can not connect to [" + invalidAddress + "]");
                 }

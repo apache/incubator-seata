@@ -113,7 +113,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             @Override
             public void run() {
                 try {
-                    clientChannelManager.reconnect(getTransactionServiceGroup(), false);
+                    clientChannelManager.reconnect(getTransactionServiceGroup());
                 } catch (Exception ex) {
                     LOGGER.warn("reconnect TC error. reason: {}", ex.getMessage());
                 }

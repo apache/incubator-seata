@@ -112,7 +112,7 @@ class NettyClientChannelManagerTest {
     @Test
     void assertReconnect() {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
-        channelManager.reconnect(DEFAULT_TX_GROUP, false);
+        channelManager.reconnect(DEFAULT_TX_GROUP);
     }
     
     @Test

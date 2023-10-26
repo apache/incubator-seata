@@ -4,8 +4,10 @@
 
 ### feature:
 - [[#3672](https://github.com/seata/seata/pull/3672)] AT模式支持dameng数据库
+- [[#5892](https://github.com/seata/seata/pull/5892)] AT模式支持PolarDB-X 2.0数据库
 
 ### bugfix:
+- [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: 修复当 XA 事务失败回滚后，TC 还会继续重试回滚的问题
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
 
 ### optimize:
@@ -13,18 +15,23 @@
 - [[#5889](https://github.com/seata/seata/pull/5889)] 移除无license组件
 - [[#5890](https://github.com/seata/seata/pull/5890)] 移除7z压缩支持
 - [[#5891](https://github.com/seata/seata/pull/5891)] 移除 mariadb.jdbc 依赖
+- [[#5828](https://github.com/seata/seata/pull/5828)] 修正 `codecov chart` 不展示的问题
 - [[#5886](https://github.com/seata/seata/pull/5886)] 优化客户端启动连接服务快速失败
 
 ### security:
 - [[#5867](https://github.com/seata/seata/pull/5867)] 修复npm package漏洞
+- [[#5898](https://github.com/seata/seata/pull/5898)] 修复npm package漏洞
 
 ### test:
 - [[#5888](https://github.com/seata/seata/pull/5888)] 移除 sofa 测试用例
+- [[#5831](https://github.com/seata/seata/pull/5831)] 升级 `druid` 版本，并添加 `test-druid.yml` 用于测试seata与druid各版本的兼容性。
+- [[#5862](https://github.com/seata/seata/pull/5862)] 修复单元测试在Java21下无法正常运行的问题。
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
+- [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
 - [jsbxyyx](https://github.com/jsbxyyx)

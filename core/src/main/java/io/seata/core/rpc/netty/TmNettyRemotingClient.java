@@ -195,8 +195,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (initialized.compareAndSet(false, true)) {
             super.init();
             if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
-                boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
-                getClientChannelManager().reconnect(transactionServiceGroup, failFast);
+                getClientChannelManager().reconnect(transactionServiceGroup);
             }
         }
     }
