@@ -73,7 +73,7 @@ seata:
     metadata:
       weight: 1
     namingserver:
-      server-addr: 127.0.0.1:8080 # namingserver address
+      server-addr: 127.0.0.1:8080
       cluster: default
       namespace: public
       heartbeat-period: 1000

@@ -111,6 +111,9 @@ seata:
     type: file
     file:
       name: file.conf
+    namingserver:
+      server-addr: 127.0.0.1:8080
+      namespace: public
     consul:
       server-addr: 127.0.0.1:8500
       acl-token:
