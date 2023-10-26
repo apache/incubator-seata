@@ -15,15 +15,12 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
-import java.util.Map;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.BaseState;
-import io.seata.saga.statelang.domain.impl.ForkStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.parser.JsonParser;
 import io.seata.saga.statelang.parser.JsonParserFactory;
@@ -34,6 +31,8 @@ import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import io.seata.saga.statelang.parser.utils.StateMachineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * State machine language parser
@@ -112,22 +111,7 @@ public class StateMachineParserImpl implements StateMachineParser {
             stateMachine.putState(stateName, state);
         });
 
-        Map<String, State> stateMap = stateMachine.getStates();
-        for (State state : stateMap.values()) {
-            if (state instanceof AbstractTaskState) {
-                AbstractTaskState taskState = (AbstractTaskState) state;
-                if (StringUtils.isNotBlank(taskState.getCompensateState())) {
-                    taskState.setForUpdate(true);
-
-                    State compState = stateMap.get(taskState.getCompensateState());
-                    if (compState instanceof AbstractTaskState) {
-                        ((AbstractTaskState) compState).setForCompensation(true);
-                    }
-                }
-            } else if (state instanceof ForkStateImpl) {
-                StateMachineUtils.generateBranchStatesAndPairedJoin((ForkStateImpl) state);
-            }
-        }
+        StateMachineUtils.parseAfterAll(stateMachine);
         return stateMachine;
     }
 
