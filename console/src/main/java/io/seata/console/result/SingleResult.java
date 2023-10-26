@@ -57,7 +57,7 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
     }
 
     public static <T> SingleResult<T> success() {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,null);
+        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG, null);
     }
 
     public T getData() {

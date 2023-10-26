@@ -79,7 +79,6 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         // https://github.com/seata/seata/issues/2226
     }
 
-
     /**
      * Do branch commit.
      *
