@@ -31,6 +31,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5831](https://github.com/seata/seata/pull/5831)] upgrade druid and add `test-druid.yml`
 - [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
 - [[#5914](https://github.com/seata/seata/pull/5914)] upgrade native-lib-loader version
+- [[#5960](https://github.com/seata/seata/pull/5960)] fix zookeeper UT failed
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
