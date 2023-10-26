@@ -15,7 +15,7 @@ jobs:
         os: [
           ubuntu-latest,
           macos-latest,
-          #windows-latest, # Too many errors in unit-test.
+          windows-latest, # Too many errors in unit-test.
         ]
         java: [ 8, 11, 17, 21 ]
     steps:
