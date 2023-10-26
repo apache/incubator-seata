@@ -78,3 +78,14 @@ CREATE NONCLUSTERED INDEX [idx_branch_id]
                      [branch_id]
         )
 GO
+
+
+CREATE TABLE [vgroup_table]
+(
+    [vGroup]    nvarchar(255) NOT NULL,
+    [namespace] nvarchar(255) NOT NULL,
+    [cluster]   nvarchar(255) NOT NULL,
+    PRIMARY KEY CLUSTERED ([vGroup])
+        WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+)
+

@@ -73,9 +73,11 @@ INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryRoll
 INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
 
 
-CREATE TABLE vgroup_table
+CREATE TABLE IF NOT EXISTS `vgroup_table`
 (
-    vGroup    VARCHAR(255) PRIMARY KEY,
-    namespace VARCHAR(255),
-    cluster   VARCHAR(255)
-);
+    `vGroup`    VARCHAR(255),
+    `namespace` VARCHAR(255),
+    `cluster`   VARCHAR(255),
+    primary key (`vGroup`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;

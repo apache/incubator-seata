@@ -41,8 +41,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 
-import static io.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static io.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
+
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
@@ -54,28 +53,19 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFE
  */
 public class Server {
 
-    private static final String SEATA_ROOT_KEY = "seata";
-    private static final String REGISTRY_TYPE = "namingserver";
-    private static final String NAMESPACE_KEY = "namespace";
-    private static final String DEFAULT_NAMESPACE = "public";
-    private static final String CLUSTER_NAME_KEY = "cluster";
-    private static final String DEFAULT_CLUSTER_NAME = "default";
-
     public static void metadataInit(){
 
         ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
         // load node properties
         Instance instance = Instance.getInstance();
-
         // load namespace
-        String namespaceKey = String.join(FILE_CONFIG_SPLIT_CHAR, SEATA_ROOT_KEY, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMESPACE_KEY);
-        String namespace = environment.getProperty(namespaceKey, DEFAULT_NAMESPACE);
+        String namespaceKey = "seata.registry.namingserver.namespace";
+        String namespace = environment.getProperty(namespaceKey, "public");
         instance.setNamespace(namespace);
-
         // load cluster name
-        String clusterNameKey = String.join(FILE_CONFIG_SPLIT_CHAR, SEATA_ROOT_KEY, FILE_ROOT_REGISTRY, REGISTRY_TYPE, CLUSTER_NAME_KEY);
-        String clusterName = environment.getProperty(clusterNameKey, DEFAULT_CLUSTER_NAME);
+        String clusterNameKey = "seata.registry.namingserver.cluster";
+        String clusterName = environment.getProperty(clusterNameKey, "default");
         instance.setClusterName(clusterName);
 
         // load cluster type
@@ -86,7 +76,6 @@ public class Server {
         instance.setUnit(String.valueOf(UUID.randomUUID()));
 
         // load node Endpoint
-
         instance.setControlEndpoint(new Node.Endpoint(NetUtil.getLocalIp(),Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))),"http"));
 
         // load metadata
