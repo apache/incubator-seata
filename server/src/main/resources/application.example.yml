@@ -22,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs/seata
+    path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -116,6 +116,20 @@ seata:
       address-wait-time: 3000
 
   server:
+    raft:
+      group: default
+      cluster:
+      snapshot-interval: 600
+      apply-batch: 32
+      max-append-bufferSize: 262144
+      max-replicator-inflight-msgs: 256
+      disruptor-buffer-size: 16384
+      election-timeout-ms: 1000
+      reporter-enabled: false
+      reporter-initial-delay: 60
+      serialization: jackson
+      compressor: none
+      sync: true # sync log&snapshot to disk
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
@@ -138,7 +152,7 @@ seata:
       branch-async-queue-size: 5000 #branch async remove queue size
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
   store:
-    # support: file 、 db 、 redis
+    # support: file 、 db 、 redis 、 raft
     mode: file
     session:
       mode: file
@@ -182,6 +196,7 @@ seata:
       sentinel:
         master-name:
         sentinel-hosts:
+        sentinel-password:
   metrics:
     enabled: false
     registry-type: compact

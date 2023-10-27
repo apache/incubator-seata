@@ -32,7 +32,6 @@
         <module>seata-compressor-all</module>
         <module>seata-compressor-gzip</module>
         <module>seata-compressor-zip</module>
-        <module>seata-compressor-7z</module>
         <module>seata-compressor-bzip2</module>
         <module>seata-compressor-lz4</module>
         <module>seata-compressor-deflater</module>

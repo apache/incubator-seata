@@ -15,16 +15,17 @@
  */
 package io.seata.core.store;
 
-import io.seata.common.util.StringUtils;
-
 import java.util.Date;
+import io.seata.common.util.StringUtils;
 
 /**
  * Global Transaction data object
  *
  * @author zhangsen
  */
-public class GlobalTransactionDO {
+public class GlobalTransactionDO implements java.io.Serializable {
+
+    private static final long serialVersionUID = -6770955173129666389L;
 
     private String xid;
 
@@ -47,6 +48,12 @@ public class GlobalTransactionDO {
     private Date gmtCreate;
 
     private Date gmtModified;
+
+    public GlobalTransactionDO(String xid) {
+        this.xid = xid;
+    }
+
+    public GlobalTransactionDO() {}
 
     /**
      * Gets xid.
@@ -71,7 +78,7 @@ public class GlobalTransactionDO {
      *
      * @return the status
      */
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
@@ -143,7 +150,7 @@ public class GlobalTransactionDO {
      *
      * @return the timeout
      */
-    public int getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
@@ -161,7 +168,7 @@ public class GlobalTransactionDO {
      *
      * @return the begin time
      */
-    public long getBeginTime() {
+    public Long getBeginTime() {
         return beginTime;
     }
 
@@ -179,7 +186,7 @@ public class GlobalTransactionDO {
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 

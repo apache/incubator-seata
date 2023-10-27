@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchType;
@@ -48,6 +49,11 @@ public class RootContext {
     public static final String KEY_XID = "TX_XID";
 
     /**
+     * The constant HIDDEN_KEY_XID for sofa-rpc integration.
+     */
+    public static final String HIDDEN_KEY_XID = Constants.HIDE_KEY_PREFIX_CHAR + KEY_XID;
+
+    /**
      * The constant KEY_TIMEOUT.
      */
     public static final String KEY_TIMEOUT = "TX_TIMEOUT";
@@ -68,6 +74,11 @@ public class RootContext {
      * The constant KEY_BRANCH_TYPE
      */
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
+
+    /**
+     * The constant HIDDEN_KEY_BRANCH_TYPE for sofa-rpc integration.
+     */
+    public static final String HIDDEN_KEY_BRANCH_TYPE = Constants.HIDE_KEY_PREFIX_CHAR + KEY_BRANCH_TYPE;
 
     /**
      * The constant KEY_GLOBAL_LOCK_FLAG, VALUE_GLOBAL_LOCK_FLAG

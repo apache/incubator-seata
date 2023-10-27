@@ -1,0 +1,29 @@
+{
+  "Name": "simpleTestStateMachineWithNonExistedName",
+  "Comment": "测试状态机定义",
+  "StartState": "FirstState",
+  "Version": "0.0.2",
+  "States": {
+    "FirstState": {
+      "Type": "ServiceTask",
+      "Next": "ChoiceState"
+    },
+    "ChoiceState": {
+      "Type": "Choice",
+      "Choices":[
+        {
+          "Expression":"[a] == 1",
+          "Next":"SecondState"
+        },
+        {
+          "Expression":"[a] == 2",
+          "Next":"ThirdState"
+        }
+      ]
+    },
+    "SecondState": {
+      "Type": "ServiceTask",
+      "Next": "FirstState"
+    }
+  }
+}

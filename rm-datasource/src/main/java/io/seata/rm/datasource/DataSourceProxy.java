@@ -19,14 +19,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.seata.common.Constants;
-import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -34,6 +31,8 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Data source proxy.
@@ -89,8 +88,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl);
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
-            } else if (JdbcConstants.MARIADB.equals(dbType)) {
-                dbType = JdbcConstants.MYSQL;
+            } else if (JdbcConstants.MYSQL.equals(dbType)) {
+                getMySQLAdaptiveType(connection);
             }
             version = selectDbVersion(connection);
         } catch (SQLException e) {
@@ -105,6 +104,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+    }
+
+    /**
+     * get mysql adaptive type for PolarDB-X
+     *
+     * @param connection db connection
+     */
+    private void getMySQLAdaptiveType(Connection connection) {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeQuery("show rule");
+            dbType = JdbcConstants.POLARDBX;
+        } catch (SQLException e) {
+            dbType = JdbcConstants.MYSQL;
+        }
     }
 
     /**
@@ -163,10 +176,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             initOracleResourceId();
-        } else if (JdbcConstants.MYSQL.equals(dbType)) {
+        } else if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
             initMysqlResourceId();
         } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
             initSqlServerResourceId();
+        } else if (JdbcConstants.DM.equals(dbType)) {
+            initDMResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -212,6 +227,36 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = url.replace(",", "|");
         } else {
             initDefaultResourceId();
+        }
+    }
+
+    private void initDMResourceId() {
+        LOGGER.warn("support for the dameng database is currently an experimental feature ");
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
+
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("schema")) {
+                    // remove the '"'
+                    if (urlParam.contains("\"")) {
+                        urlParam = urlParam.replaceAll("\"", "");
+                    }
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            resourceId = jdbcUrlBuilder.toString();
+        } else {
+            resourceId = jdbcUrl;
         }
     }
 
@@ -295,11 +340,17 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private String selectDbVersion(Connection connection) {
-        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+        if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
             try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
                  ResultSet versionResult = preparedStatement.executeQuery()) {
                 if (versionResult.next()) {
-                    return versionResult.getString("VERSION()");
+                    String version = versionResult.getString("VERSION()");
+                    if (version == null) {
+                        return null;
+                    }
+                    int dashIdx = version.indexOf('-');
+                    // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
+                    return dashIdx > 0 ? version.substring(0, dashIdx) : version;
                 }
             } catch (Exception e) {
                 LOGGER.error("get mysql version fail error: {}", e.getMessage());
