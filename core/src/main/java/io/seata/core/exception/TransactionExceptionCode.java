@@ -118,6 +118,11 @@ public enum TransactionExceptionCode {
     FailedStore,
 
     /**
+     * not raft leader exception code
+     */
+    NotRaftLeader,
+  
+    /**
      * Lock key conflict fail fast transaction exception code.
      */
     LockKeyConflictFailFast,

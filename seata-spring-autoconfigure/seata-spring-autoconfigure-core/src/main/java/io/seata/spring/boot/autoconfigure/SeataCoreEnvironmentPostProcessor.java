@@ -34,6 +34,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Prope
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRaftProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
@@ -58,6 +59,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_RAFT_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
@@ -105,6 +107,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_CUSTOM_PREFIX, RegistryCustomProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_RAFT_PREFIX, RegistryRaftProperties.class);
 
             PROPERTY_BEAN_MAP.put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);

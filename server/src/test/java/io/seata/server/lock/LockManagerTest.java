@@ -236,8 +236,8 @@ public class LockManagerTest {
 
             // wrong pageSize or pageNum
             Assertions.assertThrows(
-                    IllegalArgumentException.class,
-                    () -> globalLockService.query(param)
+                IllegalArgumentException.class,
+                () -> globalLockService.query(param)
             );
 
             LockManager lockManager = new FileLockManagerForTest();

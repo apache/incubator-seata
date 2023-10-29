@@ -365,6 +365,11 @@ public interface ConfigurationKeys {
     String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
 
     /**
+     * The constant SERVER_RAFT_PORT.
+     */
+    String SERVER_RAFT_PORT_CAMEL = SERVER_PREFIX + "raftPort";
+
+    /**
      * The constant SERVER_SERVICE_PORT_CONFIG.
      */
     String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
@@ -877,6 +882,81 @@ public interface ConfigurationKeys {
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 
     /**
+     * The constant SERVER_RAFT.
+     */
+    String SERVER_RAFT = SERVER_PREFIX + "raft.";
+
+    /**
+     * The constant SERVER_RAFT_SERVER_ADDR.
+     */
+    String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
+
+    /**
+     * The constant SERVER_RAFT_GROUP.
+     */
+    String SERVER_RAFT_GROUP = SERVER_RAFT + "group";
+
+    /**
+     * The constant SERVER_RAFT_SNAPSHOT_INTERVAL.
+     */
+    String SERVER_RAFT_SNAPSHOT_INTERVAL = SERVER_RAFT + "snapshotInterval";
+
+    /**
+     * The constant SERVER_RAFT_DISRUPTOR_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_DISRUPTOR_BUFFER_SIZE = SERVER_RAFT + "disruptorBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS.
+     */
+    String SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS = SERVER_RAFT + "maxReplicatorInflightMsgs";
+
+    /**
+     * The constant SERVER_RAFT_SYNC.
+     */
+    String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
+     * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_MAX_APPEND_BUFFER_SIZE = SERVER_RAFT + "maxAppendBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_APPLY_BATCH = SERVER_RAFT + "applyBatch";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_ELECTION_TIMEOUT_MS = SERVER_RAFT + "electionTimeoutMs";
+
+    /**
+     * The constant SERVER_RAFT_REPORTER_ENABLED.
+     */
+    String SERVER_RAFT_REPORTER_ENABLED = SERVER_RAFT + "reporterEnabled";
+
+    /**
+     * The constant SERVER_RAFT_REPORTER_INITIAL_DELAY.
+     */
+    String SERVER_RAFT_REPORTER_INITIAL_DELAY = SERVER_RAFT + "reporterInitialDelay";
+
+    /**
+     * The constant SERVER_RAFT_SERIALIZATION.
+     */
+    String SERVER_RAFT_SERIALIZATION = SERVER_RAFT + "serialization";
+
+    /**
+     * The constant SERVER_RAFT_COMPRESSOR.
+     */
+    String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
+
+    /**
+     * The constant CLIENT_METADATA_MAX_AGE_MS.
+     */
+    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
@@ -900,6 +980,7 @@ public interface ConfigurationKeys {
      * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
      */
     String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
+
 
     /**
      * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY

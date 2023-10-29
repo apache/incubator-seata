@@ -52,4 +52,5 @@ public interface RMInboundHandler {
      * @return the branch delete response
      */
     BranchDeleteResponse handle(BranchDeleteRequest request);
+
 }

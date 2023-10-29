@@ -38,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
@@ -65,10 +67,10 @@ public class SessionStoreTest {
      */
     @BeforeEach
     public void clean() throws Exception {
-        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
-        File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
-        File rootDataFileHis = new File(
-            sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
+        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+            + separator + XID.getPort();
+        File rootDataFile = new File(sessionStorePath + separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
+        File rootDataFileHis = new File(sessionStorePath + separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 
         if (rootDataFile.exists()) {
             rootDataFile.delete();
@@ -195,7 +197,6 @@ public class SessionStoreTest {
             // Re-init SessionHolder: restore sessions from file
             SessionHolder.init(SessionMode.FILE);
 
-            long tid = globalSession.getTransactionId();
             GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
             Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
