@@ -37,6 +37,7 @@ import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import io.seata.core.rpc.processor.client.RmBranchCommitProcessor;
+import io.seata.core.rpc.processor.client.RmBranchDeleteProcessor;
 import io.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
 import io.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
@@ -328,5 +329,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+        // 6.registry rm handler branch delete processor
+        RmBranchDeleteProcessor rmBranchDeleteProcessor = new RmBranchDeleteProcessor(getTransactionMessageHandler(), this);
+        super.registerProcessor(MessageType.TYPE_BRANCH_DELETE, rmBranchDeleteProcessor, messageExecutor);
     }
 }

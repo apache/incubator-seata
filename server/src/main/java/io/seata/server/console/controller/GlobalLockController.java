@@ -17,10 +17,14 @@ package io.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
 import io.seata.server.console.service.GlobalLockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,17 +33,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Global Lock Controller
+ *
  * @author zhongxiang.wang
  */
 @RestController
 @RequestMapping("/api/v1/console/globalLock")
 public class GlobalLockController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockController.class);
+
     @Resource(type = GlobalLockService.class)
     private GlobalLockService globalLockService;
 
     /**
      * Query locks by param
+     *
      * @param param the param
      * @return the list of GlobalLockVO
      */
@@ -48,4 +56,29 @@ public class GlobalLockController {
         return globalLockService.query(param);
     }
 
+    /**
+     * Delete global locks
+     *
+     * @param  param the param
+     * @return SingleResult<Void>
+     */
+    @DeleteMapping("delete")
+    public SingleResult<Void> delete(@ModelAttribute GlobalLockParam param) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to delete the global lock, param: {}", param);
+        }
+        return globalLockService.deleteLock(param);
+    }
+
+    /**
+     * Check if the lock exist the branch session
+     *
+     * @param xid      xid
+     * @param branchId branch id
+     * @return the list of GlobalLockVO
+     */
+    @GetMapping("check")
+    public SingleResult<Boolean> check(String xid, String branchId) {
+        return globalLockService.check(xid, branchId);
+    }
 }

@@ -56,6 +56,7 @@ public class SessionConverter {
         session.setStatus(GlobalStatus.get(globalTransactionDO.getStatus()));
         session.setApplicationData(globalTransactionDO.getApplicationData());
         session.setBeginTime(globalTransactionDO.getBeginTime());
+        session.setGmtModified(globalTransactionDO.getGmtModified().getTime());
         return session;
     }
 
@@ -77,6 +78,7 @@ public class SessionConverter {
         branchSession.setClientId(branchTransactionDO.getClientId());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
         branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
+        branchSession.setGmtModified(branchTransactionDO.getGmtModified().getTime());
         if (branchTransactionDO instanceof BranchTransactionDTO) {
             branchSession.setLockKey(((BranchTransactionDTO)branchTransactionDO).getLockKey());
         }

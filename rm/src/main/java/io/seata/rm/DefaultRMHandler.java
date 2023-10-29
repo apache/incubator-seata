@@ -23,6 +23,8 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
@@ -71,6 +73,11 @@ public class DefaultRMHandler extends AbstractRMHandler {
     @Override
     public void handle(UndoLogDeleteRequest request) {
         getRMHandler(request.getBranchType()).handle(request);
+    }
+
+    @Override
+    public BranchDeleteResponse handle(BranchDeleteRequest request) {
+        return getRMHandler(request.getBranchType()).handle(request);
     }
 
     protected AbstractRMHandler getRMHandler(BranchType branchType) {

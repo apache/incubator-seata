@@ -74,6 +74,16 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private LockStatus lockStatus = Locked;
 
+    private Long gmtModified;
+
+    public Long getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setGmtModified(Long gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
     private final Map<FileLocker.BucketLockMap, Set<String>> lockHolder;
 
     private final LockManager lockManager = LockerManagerFactory.getLockManager();
@@ -407,6 +417,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put((byte)status.getCode());
         byteBuffer.put((byte)lockStatus.getCode());
+        gmtModified = System.currentTimeMillis();
+        byteBuffer.putLong(gmtModified);
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -423,6 +435,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + 4 // applicationDataBytes.length
             + 4 // xidBytes.size
             + 1 // statusCode
+            + 8 // gmtModified
             + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
             + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
@@ -481,6 +494,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             this.branchType = BranchType.values()[branchTypeId];
         }
         this.status = BranchStatus.get(byteBuffer.get());
+        this.gmtModified = byteBuffer.getLong();
     }
 
 }

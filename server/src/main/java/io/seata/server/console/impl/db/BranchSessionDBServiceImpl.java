@@ -34,6 +34,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
+import io.seata.server.console.impl.AbstractBranchService;
 import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.vo.BranchSessionVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -50,7 +51,7 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'db'.equals('${sessionMode}')}")
-public class BranchSessionDBServiceImpl implements BranchSessionService {
+public class BranchSessionDBServiceImpl extends AbstractBranchService implements BranchSessionService {
 
     private String branchTable;
 

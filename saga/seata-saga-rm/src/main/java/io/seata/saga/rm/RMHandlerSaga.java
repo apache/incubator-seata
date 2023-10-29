@@ -17,6 +17,8 @@ package io.seata.saga.rm;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.rm.AbstractRMHandler;
 import io.seata.rm.DefaultResourceManager;
@@ -31,6 +33,11 @@ public class RMHandlerSaga extends AbstractRMHandler {
     @Override
     public void handle(UndoLogDeleteRequest request) {
         //DO nothing
+    }
+
+    @Override
+    public BranchDeleteResponse handle(BranchDeleteRequest request) {
+        return null;
     }
 
     /**

@@ -33,15 +33,21 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
+import io.seata.console.result.SingleResult;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import io.seata.server.console.exception.ConsoleException;
+import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.server.console.service.GlobalLockService;
 import io.seata.server.console.vo.GlobalLockVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 
 
 /**
@@ -53,7 +59,8 @@ import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'db'.equals('${lockMode}')}")
-public class GlobalLockDBServiceImpl implements GlobalLockService {
+public class GlobalLockDBServiceImpl extends AbstractLockService implements GlobalLockService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockDBServiceImpl.class);
 
     private String lockTable;
 
@@ -106,11 +113,37 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
                 count = countRs.getInt(1);
             }
         } catch (SQLException e) {
+            LOGGER.error("query global lock exception, param:{}", param, e);
             throw new StoreException(e);
         } finally {
             IOUtil.close(rs, countRs);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
+    }
+
+    @Override
+    public SingleResult<Void> deleteLock(GlobalLockParam param) {
+        checkDeleteLock(param);
+        String rowKey = buildRowKey(param.getTableName(), param.getPk(), param.getResourceId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("start to delete global lock,xid:{} branchId:{} row key:{} ",
+                    param.getXid(), param.getBranchId(), rowKey);
+        }
+        String deleteLockSql = LockStoreSqlFactory.getLogStoreSql(dbType).getDeleteLockSql(lockTable);
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(deleteLockSql)) {
+            ps.setString(1, rowKey);
+            ps.setString(2, param.getXid());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new ConsoleException(e, String.format("delete global lock," +
+                    "xid:%s ,branchId:%s ,row key:%s failed", param.getXid(), param.getBranchId(), rowKey));
+        }
+        return SingleResult.success();
+    }
+
+    private String buildRowKey(String tableName, String pk, String resourceId) {
+        return resourceId + SPLIT + tableName + SPLIT + pk;
     }
 
     private String getWhereConditionByParam(GlobalLockParam param, List<Object> sqlParamList) {

@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input } from '@alicloud/console-components';
+import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input, Dialog, Message } from '@alicloud/console-components';
 import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
-import getData, { GlobalLockParam } from '@/service/globalLockInfo';
+import getData, {checkData, deleteData, GlobalLockParam} from '@/service/globalLockInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
-
+import {get} from "lodash";
+import {enUsKey, getCurrentLanguage} from "@/reducers/locale";
 const { RangePicker } = DatePicker;
 const FormItem = Form.Item;
 
@@ -147,12 +148,52 @@ type GlobalLockInfoState = {
     this.search();
   }
 
+  deleteCell = (val: string, index: number, record: any) => {
+    const {locale = {}} = this.props;
+    const {
+      deleteGlobalLockTitle
+    } = locale;
+    let width = getCurrentLanguage() === enUsKey ? '120px' : '80px'
+    return (
+      <Actions style={{width: width}}>
+        <Button onClick={() => {
+          let addWarnning = ''
+          Dialog.confirm({
+            title: 'Confirm',
+            content: 'Are you sure you want to delete the global lock',
+            onOk: () => {
+              checkData(record).then((rsp) => {
+                 addWarnning = rsp.data ? 'The branch transactions may be affected' : ''
+                Dialog.confirm({
+                  title: 'Warnning',
+                  content: <div dangerouslySetInnerHTML={{ __html: 'Dirty write problem exists' + '<br>' + addWarnning }}/>,
+                  onOk: () => {
+                    deleteData(record).then(() => {
+                      Message.success("Delete success")
+                      this.search()
+                    }).catch((rsp) => {
+                      Message.error(get(rsp, 'data.message'))
+                    })
+                  }
+                })
+              }).catch((rsp) => {
+                Message.error(get(rsp, 'data.message'))
+              })
+            }
+          });
+        }}>
+          {deleteGlobalLockTitle}
+        </Button>
+      </Actions>)
+  }
+
   render() {
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
       inputFilterPlaceholder,
       searchButtonLabel,
       resetButtonLabel,
+      operateTitle
     } = locale;
     return (
       <Page
@@ -230,6 +271,10 @@ type GlobalLockInfoState = {
           <Table.Column title="rowKey" dataIndex="rowKey" />
           <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
           <Table.Column title="gmtModified" dataIndex="gmtModified" />
+          <Table.Column
+            title={operateTitle}
+            cell={this.deleteCell}
+          />
         </Table>
         <Pagination
           total={this.state.total}

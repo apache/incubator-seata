@@ -128,7 +128,25 @@ public enum GlobalStatus {
      * The rollback retry Timeout .
      */
     // Finally: failed to rollback since retry timeout
-    RollbackRetryTimeout(17, "global transaction still failed after commit failure and retries for some time");
+    RollbackRetryTimeout(17, "global transaction still failed after commit failure and retries for some time"),
+
+    /**
+     * Deleting .
+     */
+    // Finally: deleting
+    Deleting(18, "global transaction is deleting, willing delete soon"),
+
+    /**
+     * The rollback retry Timeout .
+     */
+    // stop commit  retry
+    StopCommitRetry(19,"global transaction is retry commit but stop retry now"),
+
+    /**
+     * The rollback retry Timeout .
+     */
+    // stop rollback retry
+    StopRollbackRetry(20,"global transaction is retry rollback but stop retry now");
 
     private final int code;
     private final String desc;
@@ -194,7 +212,7 @@ public enum GlobalStatus {
      */
     public static boolean isTwoPhaseSuccess(GlobalStatus status) {
         if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
+            || status == GlobalStatus.TimeoutRollbacked || status == GlobalStatus.Deleting) {
             return true;
         }
         return false;

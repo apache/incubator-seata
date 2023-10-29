@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.service;
 
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.param.GlobalSessionParam;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.console.result.PageResult;
@@ -32,4 +33,43 @@ public interface GlobalSessionService {
      */
     PageResult<GlobalSessionVO> query(GlobalSessionParam param);
 
+    /**
+     * Delete the global session
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> deleteGlobalSession(String xid);
+
+    /**
+     * Stop the global session retry
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> stopGlobalRetry(String xid);
+
+    /**
+     * Start the global session retry
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> startGlobalRetry(String xid);
+
+    /**
+     * Send global session to commit or rollback to rm
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> sendCommitOrRollback(String xid);
+
+    /**
+     * Change the global session status
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> changeGlobalStatus(String xid);
 }

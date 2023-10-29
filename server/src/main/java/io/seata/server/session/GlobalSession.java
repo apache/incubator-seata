@@ -97,6 +97,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
+    private Long gmtModified;
+
     private final boolean lazyLoadBranch;
 
     private volatile boolean active = true;
@@ -203,7 +205,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return if true retry commit or roll back
      */
     public boolean isDeadSession() {
-        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
+        return (System.currentTimeMillis() - gmtModified) > RETRY_DEAD_THRESHOLD;
     }
 
     @Override
@@ -597,6 +599,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.active = active;
     }
 
+    public Long getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setGmtModified(Long gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
     @Override
     public byte[] encode() {
         byte[] byApplicationIdBytes = applicationId != null ? applicationId.getBytes() : null;
@@ -654,6 +664,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
+        gmtModified = System.currentTimeMillis();
+        byteBuffer.putLong(gmtModified);
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -671,6 +683,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + 4 // applicationDataBytes.length
             + 8 // beginTime
             + 1 // statusCode
+            + 8 // gmtModified
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
@@ -717,6 +730,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
+        this.gmtModified = byteBuffer.getLong();
     }
 
     /**
@@ -780,11 +794,17 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void queueToRetryCommit() throws TransactionException {
+        if (this.status == GlobalStatus.StopCommitRetry || this.status == GlobalStatus.StopRollbackRetry) {
+            return;
+        }
         changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         GlobalStatus currentStatus = this.getStatus();
+        if (currentStatus == GlobalStatus.StopCommitRetry || currentStatus == GlobalStatus.StopRollbackRetry) {
+            return;
+        }
         GlobalStatus newStatus;
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
             newStatus = GlobalStatus.TimeoutRollbackRetrying;

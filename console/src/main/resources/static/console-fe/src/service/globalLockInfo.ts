@@ -36,3 +36,25 @@ export type GlobalLockParam = {
 
   return result;
 }
+
+export async function deleteData(params: GlobalLockParam): Promise<any> {
+  let result = await request('/console/globalLock/delete', {
+    method: 'delete',
+    params,
+  });
+  return result;
+}
+
+export async function checkData(params: GlobalLockParam): Promise<any> {
+  const xid = params.xid
+  const branchId = params.branchId
+
+  let result = await request('/console/globalLock/check', {
+    method: 'get',
+    params: {
+      xid,
+      branchId
+    },
+  });
+  return result;
+}

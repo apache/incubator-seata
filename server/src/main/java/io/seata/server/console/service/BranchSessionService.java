@@ -15,6 +15,7 @@
  */
 package io.seata.server.console.service;
 
+import io.seata.console.result.SingleResult;
 import io.seata.server.console.vo.BranchSessionVO;
 import io.seata.console.result.PageResult;
 
@@ -31,4 +32,31 @@ public interface BranchSessionService {
      */
     PageResult<BranchSessionVO> queryByXid(String xid);
 
+    /**
+     * Stop branch transaction retry
+     *
+     * @param xid      the global transaction
+     * @param branchId the branch transaction
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> stopBranchRetry(String xid, String branchId);
+
+
+    /**
+     * Start branch transaction retry
+     *
+     * @param xid      the global transaction
+     * @param branchId the branch transaction
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> startBranchRetry(String xid, String branchId);
+
+    /**
+     * Delete branch transaction
+     *
+     * @param xid      the global transaction
+     * @param branchId the branch transaction
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> deleteBranchSession(String xid, String branchId);
 }

@@ -19,7 +19,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
+
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.console.result.SingleResult;
+import io.seata.server.console.impl.AbstractLockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import io.seata.common.util.BeanUtils;
@@ -45,7 +52,8 @@ import static io.seata.core.constants.RedisKeyConstants.SPLIT;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
-public class GlobalLockRedisServiceImpl implements GlobalLockService {
+public class GlobalLockRedisServiceImpl extends AbstractLockService implements GlobalLockService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -68,6 +76,47 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         } else {
             return PageResult.failure(ParameterRequired.getErrCode(),"only three parameters of tableName,pk,resourceId or Xid are supported");
         }
+    }
+
+    @Override
+    public SingleResult<Void> deleteLock(GlobalLockParam param) {
+        checkDeleteLock(param);
+        String rowKey = buildRowKey(param.getTableName(), param.getPk(), param.getResourceId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("start to delete global lock,xid:{} branchId:{} row key:{} ",
+                    param.getXid(), param.getBranchId(), rowKey);
+        }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            // del the row key
+            jedis.del(rowKey);
+            String xidLockKey = buildXidLockKey(param.getXid());
+            String rowKeys = jedis.hget(xidLockKey, param.getBranchId());
+            if (StringUtils.isNotBlank(rowKeys)) {
+                // Check whether other locks exist. If so, update it. If not, delete it
+                if (rowKeys.contains(ROW_LOCK_KEY_SPLIT_CHAR)) {
+                    String[] rowKeyArray = rowKeys.split(ROW_LOCK_KEY_SPLIT_CHAR);
+                    StringJoiner lockKeysString = new StringJoiner(ROW_LOCK_KEY_SPLIT_CHAR);
+                    for (String rk : rowKeyArray) {
+                        if (rk.equalsIgnoreCase(rowKey)) {
+                            continue;
+                        }
+                        lockKeysString.add(rk);
+                    }
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("update global lock key from {} to :{} ",rowKeys, lockKeysString);
+                    }
+                    // update the new lock key
+                    jedis.hset(xidLockKey, param.getBranchId(), lockKeysString.toString());
+                } else {
+                    // no other branch session
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("start to delete global lock key:{} ", xidLockKey);
+                    }
+                    jedis.del(xidLockKey);
+                }
+            }
+        }
+        return SingleResult.success();
     }
 
     private List<GlobalLockVO> queryGlobalLockByRowKey(String buildRowKey) {
@@ -116,4 +165,7 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         return vos;
     }
 
+    private String buildXidLockKey(String xid) {
+        return DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid;
+    }
 }

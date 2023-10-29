@@ -16,9 +16,13 @@
 package io.seata.serializer.protobuf.manager;
 
 import io.seata.core.protocol.BatchResultMessage;
+import io.seata.core.protocol.transaction.BranchDeleteRequest;
+import io.seata.core.protocol.transaction.BranchDeleteResponse;
 import io.seata.serializer.protobuf.convertor.BatchResultMessageConvertor;
 import io.seata.serializer.protobuf.convertor.BranchCommitRequestConvertor;
 import io.seata.serializer.protobuf.convertor.BranchCommitResponseConvertor;
+import io.seata.serializer.protobuf.convertor.BranchDeleteRequestConvertor;
+import io.seata.serializer.protobuf.convertor.BranchDeleteResponseConvertor;
 import io.seata.serializer.protobuf.convertor.BranchRegisterRequestConvertor;
 import io.seata.serializer.protobuf.convertor.BranchRegisterResponseConvertor;
 import io.seata.serializer.protobuf.convertor.BranchReportRequestConvertor;
@@ -46,6 +50,8 @@ import io.seata.serializer.protobuf.convertor.RegisterRMResponseConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMRequestConvertor;
 import io.seata.serializer.protobuf.convertor.RegisterTMResponseConvertor;
 import io.seata.serializer.protobuf.generated.BatchResultMessageProto;
+import io.seata.serializer.protobuf.generated.BranchDeleteRequestProto;
+import io.seata.serializer.protobuf.generated.BranchDeleteResponseProto;
 import io.seata.serializer.protobuf.generated.GlobalReportRequestProto;
 import io.seata.serializer.protobuf.generated.GlobalReportResponseProto;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -165,6 +171,10 @@ public class ProtobufConvertManager {
                 new GlobalReportResponseConvertor());
             protobufConvertManager.convertorMap.put(UndoLogDeleteRequest.class.getName(),
                 new UndoLogDeleteRequestConvertor());
+            protobufConvertManager.convertorMap.put(BranchDeleteRequest.class.getName(),
+                    new BranchDeleteRequestConvertor());
+            protobufConvertManager.convertorMap.put(BranchDeleteResponse.class.getName(),
+                    new BranchDeleteResponseConvertor());
 
             protobufConvertManager.convertorMap.put(MergedWarpMessage.class.getName(),
                 new MergedWarpMessageConvertor());
@@ -224,6 +234,10 @@ public class ProtobufConvertManager {
                 GlobalReportResponseProto.class);
             protobufConvertManager.protoClazzMap.put(UndoLogDeleteRequestProto.getDescriptor().getFullName(),
                 UndoLogDeleteRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(BranchDeleteResponseProto.getDescriptor().getFullName(),
+                    BranchDeleteResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(BranchDeleteRequestProto.getDescriptor().getFullName(),
+                    BranchDeleteRequestProto.class);
 
             protobufConvertManager.protoClazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(),
                 MergedWarpMessageProto.class);
@@ -284,6 +298,10 @@ public class ProtobufConvertManager {
                 new GlobalReportResponseConvertor());
             protobufConvertManager.reverseConvertorMap.put(UndoLogDeleteRequestProto.class.getName(),
                 new UndoLogDeleteRequestConvertor());
+            protobufConvertManager.reverseConvertorMap.put(BranchDeleteRequestProto.class.getName(),
+                    new BranchDeleteRequestConvertor());
+            protobufConvertManager.reverseConvertorMap.put(BranchDeleteResponseProto.class.getName(),
+                    new BranchDeleteResponseConvertor());
 
             protobufConvertManager.reverseConvertorMap.put(MergedWarpMessageProto.class.getName(),
                 new MergedWarpMessageConvertor());

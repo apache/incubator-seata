@@ -28,17 +28,20 @@ import javax.annotation.Resource;
 
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.console.result.PageResult;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.console.param.GlobalSessionParam;
+import io.seata.server.console.service.BranchSessionService;
 import io.seata.server.console.service.GlobalSessionService;
 import io.seata.server.console.vo.GlobalSessionVO;
 import io.seata.server.storage.file.session.FileSessionManager;
-import io.seata.server.store.StoreConfig.SessionMode;
+import io.seata.server.store.StoreConfig;
 import io.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
@@ -67,6 +70,12 @@ public class FileSessionManagerTest {
 
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
+
+    @Resource(type = BranchSessionService.class)
+    private BranchSessionService branchSessionService;
+
+    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+            DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
@@ -282,10 +291,18 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionsWithPageResultProvider")
     public void findGlobalSessionsWithPageResultTest(List<GlobalSession> globalSessions) throws Exception {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
 
         try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            final SessionManager sessionManager = SessionHolder.getRootSessionManager();
+            // make sure sessionMaanager is empty
+            Collection<GlobalSession> sessions = sessionManager.allSessions();
+            if (CollectionUtils.isNotEmpty(sessions)) {
+                // FileSessionManager use ConcurrentHashMap is thread safe
+                for (GlobalSession session : sessions) {
+                    sessionManager.removeGlobalSession(session);
+                }
+            }
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
             }
@@ -374,7 +391,6 @@ public class FileSessionManagerTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
 
     }
@@ -407,6 +423,96 @@ public class FileSessionManagerTest {
             sessionManager.onBegin(globalSession);
             sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
             sessionManager.onSuccessEnd(globalSession);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void stopGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.begin();
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.stopGlobalRetry(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.changeGlobalStatus(GlobalStatus.CommitRetrying);
+            String xid = globalSession.getXid();
+            globalSessionService.stopGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.StopCommitRetry);
+
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+            globalSessionService.stopGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.StopRollbackRetry);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.setStatus(GlobalStatus.Committed);
+                globalSession.end();
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.begin();
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.changeGlobalStatus(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
+            String xid = globalSession.getXid();
+            globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.CommitRetrying);
+
+            globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
+            globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.RollbackRetrying);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.setStatus(GlobalStatus.Committed);
+                globalSession.end();
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("globalSessionForLockTestProvider")
+    public void startGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.begin();
+            }
+            Assertions.assertThrows(IllegalArgumentException.class, () ->
+                    globalSessionService.startGlobalRetry(globalSessions.get(0).getXid()));
+
+            GlobalSession globalSession = globalSessions.get(1);
+            globalSession.setStatus(GlobalStatus.StopCommitRetry);
+            String xid = globalSession.getXid();
+            globalSessionService.startGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.CommitRetrying);
+
+            globalSession.setStatus(GlobalStatus.StopRollbackRetry);
+            globalSessionService.startGlobalRetry(xid);
+            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
+                    GlobalStatus.RollbackRetrying);
+        } finally {
+            for (GlobalSession globalSession : globalSessions) {
+                globalSession.setStatus(GlobalStatus.Committed);
+                globalSession.end();
+            }
         }
     }
 
@@ -494,6 +600,63 @@ public class FileSessionManagerTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("branchSessionsProvider")
+    public void stopBranchRetryTest(GlobalSession globalSession) throws Exception {
+        try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            globalSession.begin();
+            // wrong param for xid and branchId
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> branchSessionService.stopBranchRetry("xid", null));
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> branchSessionService.stopBranchRetry(globalSession.getXid(), "test"));
+
+            // wrong status for branch transaction
+            List<BranchSession> branchSessions = globalSession.getBranchSessions();
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> branchSessionService.stopBranchRetry(globalSession.getXid(),
+                            String.valueOf(branchSessions.get(0).getBranchId())));
+
+            // wrong status for global transaction
+            globalSession.setStatus(GlobalStatus.Begin);
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> branchSessionService.stopBranchRetry(globalSession.getXid(),
+                            String.valueOf(branchSessions.get(1).getBranchId())));
+
+            // success stop
+            globalSession.setStatus(GlobalStatus.CommitRetrying);
+            branchSessionService.stopBranchRetry(globalSession.getXid(), String.valueOf(branchSessions.get(1).getBranchId()));
+            GlobalSession newGlobalSession = SessionHolder.findGlobalSession(globalSession.getXid());
+            Assertions.assertEquals(BranchStatus.STOP_RETRY, newGlobalSession.getBranchSessions().get(1).getStatus());
+        } finally {
+            globalSession.setStatus(GlobalStatus.Committed);
+            globalSession.end();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("branchSessionsProvider")
+    public void restartBranchFailRetryTest(GlobalSession globalSession) throws Exception {
+        try {
+            SessionHolder.init(StoreConfig.SessionMode.FILE);
+            globalSession.begin();
+            List<BranchSession> branchSessions = globalSession.getBranchSessions();
+            // wrong status for branch transaction
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> branchSessionService.startBranchRetry(globalSession.getXid(),
+                            String.valueOf(branchSessions.get(0).getBranchId())));
+            // success
+            branchSessionService.startBranchRetry(globalSession.getXid(),
+                    String.valueOf(branchSessions.get(2).getBranchId()));
+            GlobalSession newGlobalSession = SessionHolder.findGlobalSession(globalSession.getXid());
+            Assertions.assertEquals(BranchStatus.Registered, newGlobalSession.getBranchSessions().get(2).getStatus());
+        } finally {
+            globalSession.setStatus(GlobalStatus.Committed);
+            globalSession.end();
+        }
+    }
+
     /**
      * Global session provider object [ ] [ ].
      *
@@ -562,6 +725,46 @@ public class FileSessionManagerTest {
         );
     }
 
+    static Stream<Arguments> globalSessionForLockTestProvider() throws ParseException {
+        BranchSession branchSession1 = new BranchSession();
+        branchSession1.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession1.setBranchId(1L);
+        branchSession1.setClientId("c1");
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession1.setResourceId("department");
+        branchSession1.setLockKey("a:1,2");
+        branchSession1.setBranchType(BranchType.AT);
+        branchSession1.setApplicationData("{\"data\":\"test\"}");
+        branchSession1.setBranchType(BranchType.AT);
+
+        BranchSession branchSession2 = new BranchSession();
+        branchSession2.setTransactionId(UUIDGenerator.generateUUID());
+        branchSession2.setBranchId(2L);
+        branchSession2.setClientId("c1");
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession2.setResourceId("department");
+        branchSession2.setLockKey("e:3,4");
+        branchSession2.setBranchType(BranchType.AT);
+        branchSession2.setApplicationData("{\"data\":\"test\"}");
+        branchSession2.setBranchType(BranchType.AT);
+
+        branchSession1.setTransactionId(397215L);
+        branchSession2.setTransactionId(92482L);
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        GlobalSession globalSession1 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test1", 6000);
+        globalSession1.setXid("xid1");
+        globalSession1.add(branchSession1);
+        globalSession1.setBeginTime(dateFormat.parse("2022-1-1 03:00:00").getTime());
+
+        GlobalSession globalSession2 = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession2.setXid("ddd1");
+        globalSession2.add(branchSession2);
+        globalSession2.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(Arrays.asList(globalSession1, globalSession2)));
+    }
+
     /**
      * Branch session provider object [ ] [ ].
      *
@@ -581,6 +784,39 @@ public class FileSessionManagerTest {
         return Stream.of(
                 Arguments.of(globalSession, branchSession)
         );
+    }
+
+    /**
+     * Branch sessions provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
+    static Stream<Arguments> branchSessionsProvider() {
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test", 6000);
+        globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
+        globalSession.setStatus(GlobalStatus.CommitRetrying);
+        BranchSession branchSession = new BranchSession();
+        branchSession.setBranchId(1L);
+        branchSession.setXid(globalSession.getXid());
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession.setStatus(BranchStatus.PhaseOne_Failed);
+        branchSession.setBranchType(BranchType.AT);
+        BranchSession branchSession1 = new BranchSession();
+        branchSession1.setBranchId(2L);
+        branchSession1.setXid(globalSession.getXid());
+        branchSession1.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession1.setStatus(BranchStatus.Registered);
+        branchSession1.setBranchType(BranchType.AT);
+        BranchSession branchSession2 = new BranchSession();
+        branchSession2.setBranchId(3L);
+        branchSession2.setXid(globalSession.getXid());
+        branchSession2.setResourceGroupId(DEFAULT_TX_GROUP);
+        branchSession2.setStatus(BranchStatus.STOP_RETRY);
+        branchSession2.setBranchType(BranchType.AT);
+        globalSession.add(branchSession);
+        globalSession.add(branchSession1);
+        globalSession.add(branchSession2);
+        return Stream.of(Arguments.of(globalSession));
     }
 
 }

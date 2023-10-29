@@ -111,6 +111,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
             new ServerOnResponseProcessor(getHandler(), getFutures());
         super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, branchResultMessageExecutor);
         super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, branchResultMessageExecutor);
+        super.registerProcessor(MessageType.TYPE_BRANCH_DELETE_RESULT, onResponseProcessor, branchResultMessageExecutor);
         // 3. registry rm message processor
         RegRmProcessor regRmProcessor = new RegRmProcessor(this);
         super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);

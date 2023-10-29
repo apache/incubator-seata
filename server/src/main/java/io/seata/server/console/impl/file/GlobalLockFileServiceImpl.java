@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.console.result.SingleResult;
+import io.seata.server.console.impl.AbstractLockService;
 import io.seata.server.console.param.GlobalLockParam;
 import io.seata.console.result.PageResult;
 import io.seata.server.console.vo.GlobalLockVO;
@@ -50,7 +52,7 @@ import static java.util.Objects.isNull;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'file'.equals('${lockMode}')}")
-public class GlobalLockFileServiceImpl implements GlobalLockService {
+public class GlobalLockFileServiceImpl extends AbstractLockService implements GlobalLockService {
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -72,10 +74,15 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
     }
 
+    @Override
+    public SingleResult<Void> deleteLock(GlobalLockParam param) {
+        throw new IllegalStateException("Not Support to delete lock in file mode");
+    }
+
     /**
      * filter with tableName and generate RowLock
      *
-     * @param param the query param
+     * @param param         the query param
      * @param branchSession the branch session
      * @return the RowLock list
      */
@@ -169,6 +176,4 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
                     (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
         };
     }
-
-
 }
