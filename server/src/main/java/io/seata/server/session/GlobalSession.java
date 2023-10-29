@@ -97,7 +97,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
-	private Long gmtModified;
+    private Long gmtModified;
 
     private final boolean lazyLoadBranch;
 
@@ -797,7 +797,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         if (this.status == GlobalStatus.StopCommitRetry || this.status == GlobalStatus.StopRollbackRetry) {
             return;
         }
-		changeGlobalStatus(GlobalStatus.CommitRetrying);
+        changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {

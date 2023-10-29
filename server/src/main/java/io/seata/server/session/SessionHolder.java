@@ -191,11 +191,12 @@ public class SessionHolder {
                                 throw new RuntimeException(e);
                             }
                         }
-                        case StopCommitRetry:
-                        case StopRollbackRetry:
-                        case Deleting:
-                            break;
-                        default: {if (acquireLock) {
+                    case StopCommitRetry:
+                    case StopRollbackRetry:
+                    case Deleting:
+                        break;
+                    default: {
+                        if (acquireLock) {
                             lockBranchSessions(globalSession.getSortedBranches());
                             if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
                                 || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
