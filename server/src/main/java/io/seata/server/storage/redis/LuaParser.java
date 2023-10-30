@@ -31,8 +31,11 @@ import io.seata.common.io.FileLoader;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.jedis.exceptions.JedisNoScriptException;
 
 /**
  * lua related utils
@@ -40,10 +43,13 @@ import redis.clients.jedis.exceptions.JedisDataException;
  * @author conghuhu
  */
 public class LuaParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LuaParser.class);
 
     private static final String WHITE_SPACE = " ";
 
     private static final String ANNOTATION_LUA = "--";
+
+    private static  String ACQUIRE_LUA_FILE;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -147,6 +153,16 @@ public class LuaParser {
             });
         } catch (JsonProcessingException e) {
             throw new StoreException(e.getMessage());
+        }
+    }
+
+    public static String jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args){
+        try {
+            return (String)jedis.evalsha(luaSHA, keys, args);
+        }catch (JedisNoScriptException e) {
+            LOGGER.warn("jedis ex:" + e.getMessage());
+            jedis.scriptLoad(luaFileName);
+            return (String)jedis.evalsha(luaSHA, keys, args);
         }
     }
 }
