@@ -49,7 +49,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
  * The type Session holder.
