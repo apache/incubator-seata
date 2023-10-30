@@ -68,7 +68,35 @@ class RaftServerFactoryTest {
 
     @AfterAll
     public static void destroy() {
-        SessionHolder.destroy();
+        System.clearProperty("config.type");
+        System.clearProperty("config.file.name");
+        System.clearProperty("registry.type");
+        System.clearProperty("registry.file.name");
+        System.clearProperty("server.raftPort");
+        System.clearProperty("server.raft.serverAddr");
+        System.clearProperty("store.session.mode");
+        System.clearProperty("store.file.dir");
+        System.clearProperty("server.raft.group");
+        System.clearProperty("server.raft.snapshotInterval");
+        System.clearProperty("server.raft.applyBatch");
+        System.clearProperty("server.raft.maxAppendBufferSize");
+        System.clearProperty("server.raft.disruptorBufferSize");
+        System.clearProperty("server.raft.maxReplicatorInflightMsgs");
+        System.clearProperty("server.raft.sync");
+        System.clearProperty("server.raft.electionTimeoutMs");
+        System.clearProperty("store.mode");
+        System.clearProperty("store.lock.mode");
+        System.clearProperty("server.distributedLockExpireTime");
+        System.clearProperty("server.raft.reporterEnabled");
+        try {
+            SessionHolder.destroy();
+            RaftServerFactory.getInstance().getRaftServers().forEach((v) -> {
+                v.close();
+            });
+        } catch (Throwable e) {
+            // ignore
+        }
+
     }
 
     @Test
