@@ -15,25 +15,15 @@
  */
 package io.seata.server.cluster.raft;
 
+import com.alipay.sofa.jraft.RaftGroupService;
 import io.seata.common.XID;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.server.coordinator.AbstractCore;
-import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.coordinator.DefaultCoordinatorTest;
-import io.seata.server.coordinator.DefaultCore;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.server.session.SessionHolder;
-import io.seata.server.store.StoreConfig;
-import javax.transaction.xa.Xid;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import java.util.Collection;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RaftServerFactoryTest {
 
@@ -61,43 +51,47 @@ class RaftServerFactoryTest {
         // no exception
     }
 
-    @BeforeAll
-    public static void beforeClass() throws Exception {
+    @BeforeEach
+    public void before() throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
     }
 
-    @AfterAll
-    public static void destroy() {
-
-        XID.setIpAddress(null);
-
-        System.clearProperty("config.type");
-        System.clearProperty("config.file.name");
-        System.clearProperty("registry.type");
-        System.clearProperty("registry.file.name");
-        System.clearProperty("server.raftPort");
-        System.clearProperty("server.raft.serverAddr");
-        System.clearProperty("store.session.mode");
-        System.clearProperty("store.file.dir");
-        System.clearProperty("server.raft.group");
-        System.clearProperty("server.raft.snapshotInterval");
-        System.clearProperty("server.raft.applyBatch");
-        System.clearProperty("server.raft.maxAppendBufferSize");
-        System.clearProperty("server.raft.disruptorBufferSize");
-        System.clearProperty("server.raft.maxReplicatorInflightMsgs");
-        System.clearProperty("server.raft.sync");
-        System.clearProperty("server.raft.electionTimeoutMs");
-        System.clearProperty("store.mode");
-        System.clearProperty("store.lock.mode");
-        System.clearProperty("server.distributedLockExpireTime");
-        System.clearProperty("server.raft.reporterEnabled");
+    @AfterEach
+    public void destroy() {
         try {
+            Collection<RaftServer> servers = RaftServerFactory.getInstance().getRaftServers();
+            if (servers != null) {
+                servers.forEach((v) -> {
+                    closeSharedRaftServer(v);
+                });
+            }
             SessionHolder.destroy();
-            RaftServerFactory.getInstance().getRaftServers().forEach((v) -> {
-                v.close();
-            });
         } catch (Throwable e) {
             // ignore
+        } finally {
+
+            XID.setIpAddress(null);
+
+            System.clearProperty("config.type");
+            System.clearProperty("config.file.name");
+            System.clearProperty("registry.type");
+            System.clearProperty("registry.file.name");
+            System.clearProperty("server.raftPort");
+            System.clearProperty("server.raft.serverAddr");
+            System.clearProperty("store.session.mode");
+            System.clearProperty("store.file.dir");
+            System.clearProperty("server.raft.group");
+            System.clearProperty("server.raft.snapshotInterval");
+            System.clearProperty("server.raft.applyBatch");
+            System.clearProperty("server.raft.maxAppendBufferSize");
+            System.clearProperty("server.raft.disruptorBufferSize");
+            System.clearProperty("server.raft.maxReplicatorInflightMsgs");
+            System.clearProperty("server.raft.sync");
+            System.clearProperty("server.raft.electionTimeoutMs");
+            System.clearProperty("store.mode");
+            System.clearProperty("store.lock.mode");
+            System.clearProperty("server.distributedLockExpireTime");
+            System.clearProperty("server.raft.reporterEnabled");
         }
 
     }
@@ -115,8 +109,21 @@ class RaftServerFactoryTest {
         raftServerFactory.init();
         raftServerFactory.start();
         raftServerFactory.getRaftServers().forEach((v) -> {
-            v.close();
+            closeSharedRaftServer(v);
         });
         // no exception
+    }
+
+    private static void closeSharedRaftServer(RaftServer v) {
+        RaftGroupService raftGroupService = null;
+        try {
+            raftGroupService = ReflectionUtil.getFieldValue(v, "raftGroupService");
+        } catch (NoSuchFieldException e) {
+
+        }
+        if (raftGroupService.getRpcServer() != null) {
+            raftGroupService.getRpcServer().shutdown();
+        }
+        v.close();
     }
 }
