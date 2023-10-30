@@ -11,6 +11,7 @@
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
 - [[#5924](https://github.com/seata/seata/pull/5924)] 修复zk单元测试错误
 - [[#5931](https://github.com/seata/seata/pull/5931)] 修复存储redis哨兵模式下哨兵密码缺失的问题
+- [[#5970](https://github.com/seata/seata/pull/5970)] 修复某些未弃用的配置显示"已弃用"
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
