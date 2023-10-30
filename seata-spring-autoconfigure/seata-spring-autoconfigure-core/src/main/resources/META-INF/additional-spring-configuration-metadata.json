@@ -104,29 +104,17 @@
     {
       "name": "seata.transport.rpc-rm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
-      "deprecation": {
-        "level": "error",
-        "reason": "Please configure to 'seata.transport.rpcRmRequestTimeout'."
-      }
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
     },
     {
       "name": "seata.transport.rpc-tm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
-      "deprecation": {
-        "level": "error",
-        "reason": "Please configure to 'seata.transport.rpcTmRequestTimeout'."
-      }
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
     },
     {
       "name": "seata.transport.rpc-tc-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
-      "deprecation": {
-        "level": "error",
-        "reason": "Please configure to 'seata.transport.rpcTcRequestTimeout'."
-      }
+      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
     }
   ],
   "hints": [
