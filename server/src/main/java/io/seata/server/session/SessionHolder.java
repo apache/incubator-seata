@@ -39,7 +39,6 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
-import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
