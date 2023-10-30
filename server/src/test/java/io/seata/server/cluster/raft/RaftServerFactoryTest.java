@@ -68,6 +68,9 @@ class RaftServerFactoryTest {
 
     @AfterAll
     public static void destroy() {
+
+        XID.setIpAddress(null);
+
         System.clearProperty("config.type");
         System.clearProperty("config.file.name");
         System.clearProperty("registry.type");
