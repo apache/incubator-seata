@@ -50,7 +50,7 @@ jobs:
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.java }}
+          java-version: 8
       # step 3
       - name: "Print maven version"
         run: ./mvnw -version
