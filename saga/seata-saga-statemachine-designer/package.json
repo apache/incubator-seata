@@ -47,12 +47,13 @@
     "@antv/g6": "^2.2.6",
     "codemirror": "^5.65.8",
     "core-js": "^3.6.5",
+    "decode-uri-component": "^0.2.2",
     "lodash": "^4.17.21",
     "react-codemirror": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.10.4",
+    "@babel/core": "^7.22.20",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
     "@babel/plugin-transform-runtime": "^7.10.4",

@@ -681,7 +681,7 @@ public final class ReflectionUtil {
      */
     public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
         InvocationHandler h = Proxy.getInvocationHandler(annotation);
-        return (Map<String, Object>)getFieldValue(h, "memberValues");
+        return getFieldValue(h, "memberValues");
     }
 
     //endregion
