@@ -43,7 +43,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [capthua](https://github.com/capthua)
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
-- [leizhiyuan](https://github.com/leizhiyuan) 
-
+- [leizhiyuan](https://github.com/leizhiyuan)
+- [wangliang181230](https://github.com/wangliang181230)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
