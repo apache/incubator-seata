@@ -13,21 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.evaluation;
+
+package io.seata.saga.engine.expression.exception;
+
+import io.seata.saga.engine.expression.Expression;
+import io.seata.saga.engine.expression.ExpressionFactory;
 
 /**
- * Evaluator Factory
+ * Exception match expression factory
  *
- * @author lorne.cl
- * @see Evaluator
+ * @author ptyin
  */
-public interface EvaluatorFactory {
-
-    /**
-     * create evaluator
-     *
-     * @param expressionString the expression
-     * @return the evaluator
-     */
-    Evaluator createEvaluator(String expressionString);
+public class ExceptionMatchExpressionFactory implements ExpressionFactory {
+    @Override
+    public Expression createExpression(String expressionString) {
+        ExceptionMatchExpression expression = new ExceptionMatchExpression();
+        expression.setExpressionString(expressionString);
+        return expression;
+    }
 }

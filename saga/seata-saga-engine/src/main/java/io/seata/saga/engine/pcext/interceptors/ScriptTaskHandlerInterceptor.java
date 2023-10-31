@@ -66,7 +66,7 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
         List<Object> serviceInputParams = null;
         if (contextVariables != null) {
             try {
-                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionFactoryManager(), null,
+                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionResolver(), null,
                     state, contextVariables);
             } catch (Exception e) {
 
@@ -108,7 +108,7 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (serviceOutputParams != null) {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
-                    stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
+                    stateMachineConfig.getExpressionResolver(), state, serviceOutputParams);
                 if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }

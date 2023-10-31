@@ -21,10 +21,9 @@ import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.StateMachineConfig;
-import io.seata.saga.engine.evaluation.Evaluator;
-import io.seata.saga.engine.evaluation.EvaluatorFactory;
-import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.expression.Expression;
+import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateInstruction;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
@@ -60,8 +59,10 @@ public class ChoiceStateHandler implements StateHandler {
                         choiceEvaluators = new LinkedHashMap<>(0);
                     } else {
                         choiceEvaluators = new LinkedHashMap<>(choices.size());
+                        ExpressionResolver resolver = ((StateMachineConfig) context.getVariable(
+                                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG)).getExpressionResolver();
                         for (ChoiceState.Choice choice : choices) {
-                            Evaluator evaluator = getEvaluatorFactory(context).createEvaluator(choice.getExpression());
+                            Expression evaluator = resolver.getExpression(choice.getExpression());
                             choiceEvaluators.put(evaluator, choice.getNext());
                         }
                     }
@@ -70,10 +71,11 @@ public class ChoiceStateHandler implements StateHandler {
             }
         }
 
-        Evaluator evaluator;
+        Expression expression;
         for (Map.Entry<Object, String> entry : choiceEvaluators.entrySet()) {
-            evaluator = (Evaluator)entry.getKey();
-            if (evaluator.evaluate(context.getVariables())) {
+            expression = (Expression) entry.getKey();
+            if (Boolean.TRUE.equals(expression.getValue(context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)))) {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, entry.getValue());
                 return;
             }
@@ -92,12 +94,5 @@ public class ChoiceStateHandler implements StateHandler {
         }
 
         context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, choiceState.getDefault());
-    }
-
-    public EvaluatorFactory getEvaluatorFactory(ProcessContext context) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        return stateMachineConfig.getEvaluatorFactoryManager().getEvaluatorFactory(
-            EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT);
     }
 }
