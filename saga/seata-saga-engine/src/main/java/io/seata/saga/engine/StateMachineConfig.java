@@ -17,8 +17,8 @@ package io.seata.saga.engine;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
+import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
@@ -67,11 +67,11 @@ public interface StateMachineConfig {
     ExpressionFactoryManager getExpressionFactoryManager();
 
     /**
-     * Gets get evaluator factory manager.
+     * Gets get expression resolver
      *
-     * @return the get evaluator factory manager
+     * @return the get expression resolver
      */
-    EvaluatorFactoryManager getEvaluatorFactoryManager();
+    ExpressionResolver getExpressionResolver();
 
     /**
      * Gets get charset.
