@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
 - [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 - [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
+- [[#5970](https://github.com/seata/seata/pull/5970)] fix some configurations that are not deprecated show "Deprecated"
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
@@ -31,6 +32,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5831](https://github.com/seata/seata/pull/5831)] upgrade druid and add `test-druid.yml`
 - [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
 - [[#5914](https://github.com/seata/seata/pull/5914)] upgrade native-lib-loader version
+- [[#5960](https://github.com/seata/seata/pull/5960)] fix zookeeper UT failed
+- [[#5981](https://github.com/seata/seata/pull/5981)] fixed jedis version for `seata-server`
 - [[#5935](https://github.com/seata/seata/pull/5935)] add `test-os.yml` for testing the OS
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
