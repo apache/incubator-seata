@@ -32,6 +32,9 @@
         <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
         <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
         <native-build-tools-plugin.version>0.9.20</native-build-tools-plugin.version>
+
+        <!-- jedis version for seata-server -->
+        <jedis.version>3.8.0</jedis.version>
     </properties>
 
     <dependencyManagement>
@@ -202,6 +205,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
         </dependency>
 
         <dependency>

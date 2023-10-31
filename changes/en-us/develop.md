@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5884](https://github.com/seata/seata/pull/5884)] fix dm escaped characters for upper and lower case column names
 - [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 - [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
+- [[#5970](https://github.com/seata/seata/pull/5970)] fix some configurations that are not deprecated show "Deprecated"
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] some minor syntax optimization
