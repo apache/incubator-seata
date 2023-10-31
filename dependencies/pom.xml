@@ -91,6 +91,9 @@
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
+        <!-- redis -->
+        <jedis.version>3.8.0</jedis.version>
+
         <!-- # for database -->
         <!-- db -->
         <mysql.version>5.1.42</mysql.version>
@@ -386,6 +389,11 @@
                 <groupId>com.ctrip.framework.apollo</groupId>
                 <artifactId>apollo-client</artifactId>
                 <version>${apollo-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.microwww</groupId>
