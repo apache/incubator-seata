@@ -33,6 +33,7 @@
 - [[#5862](https://github.com/seata/seata/pull/5862)] 修复单元测试在Java21下无法正常运行的问题。
 - [[#5914](https://github.com/seata/seata/pull/5914)] 升级 native-lib-loader 版本
 - [[#5960](https://github.com/seata/seata/pull/5960)] 修复 zookeeper 单测失败问题
+- [[#5981](https://github.com/seata/seata/pull/5981)] 固定 `seata-server` 所使用有 jedis 版本
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
@@ -42,5 +43,6 @@
 - [funky-eyes](https://github.com/funky-eyes)
 - [iquanzhan](https://github.com/iquanzhan)
 - [leizhiyuan](https://github.com/leizhiyuan)
+
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
