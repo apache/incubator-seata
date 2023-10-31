@@ -33,6 +33,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5862](https://github.com/seata/seata/pull/5862)] fix unit test in java 21
 - [[#5914](https://github.com/seata/seata/pull/5914)] upgrade native-lib-loader version
 - [[#5960](https://github.com/seata/seata/pull/5960)] fix zookeeper UT failed
+- [[#5981](https://github.com/seata/seata/pull/5981)] fixed jedis version for `seata-server`
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
