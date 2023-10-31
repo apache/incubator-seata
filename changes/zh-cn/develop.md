@@ -10,6 +10,7 @@
 - [[#5833](https://github.com/seata/seata/pull/5833)] bugfix: 修复当 XA 事务失败回滚后，TC 还会继续重试回滚的问题
 - [[#5884](https://github.com/seata/seata/pull/5884)] 修复达梦前后镜像查询列名都加了引号导致sql异常的问题
 - [[#5931](https://github.com/seata/seata/pull/5931)] 修复存储redis哨兵模式下哨兵密码缺失的问题
+- [[#5970](https://github.com/seata/seata/pull/5970)] 修复某些未弃用的配置显示"已弃用"
 
 ### optimize:
 - [[#5866](https://github.com/seata/seata/pull/5866)] 一些小的语法优化
@@ -30,7 +31,8 @@
 - [[#5831](https://github.com/seata/seata/pull/5831)] 升级 `druid` 版本，并添加 `test-druid.yml` 用于测试seata与druid各版本的兼容性。
 - [[#5862](https://github.com/seata/seata/pull/5862)] 修复单元测试在Java21下无法正常运行的问题。
 - [[#5914](https://github.com/seata/seata/pull/5914)] 升级 native-lib-loader 版本
-- [[#5924](https://github.com/seata/seata/pull/5924)] 修复zk单元测试错误
+- [[#5960](https://github.com/seata/seata/pull/5960)] 修复 zookeeper 单测失败问题
+- [[#5981](https://github.com/seata/seata/pull/5981)] 固定 `seata-server` 所使用有 jedis 版本
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
@@ -44,5 +46,6 @@
 - [PeppaO](https://github.com/PeppaO)
 - [wangliang181230](https://github.com/wangliang181230)
 - [hsien999](https://github.com/hsien999)
+
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
