@@ -33,7 +33,7 @@ jobs:
         run: ./mvnw -version
       # step 4
       ## step 4.1: for Ubuntu and MacOS
-      - name: "Test with Maven on Ubuntu and MacOS"
+      - name: "Test with Maven on ${{ matrix.os }}"
         if: matrix.os != 'windows-latest'
         run: |
           ./mvnw -T 4C clean install -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
