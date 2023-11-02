@@ -32,6 +32,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.IdConstants;
@@ -104,6 +105,7 @@ public class SessionHelper {
         branchSession.setLockKey(lockKeys);
         branchSession.setClientId(clientId);
         branchSession.setApplicationData(applicationData);
+        branchSession.setStatus(BranchStatus.Registered);
 
         return branchSession;
     }
