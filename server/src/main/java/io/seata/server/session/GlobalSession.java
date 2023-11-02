@@ -314,7 +314,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             lifecycleListener.onAddBranch(this, branchSession);
         }
         if (!RaftServerFactory.getInstance().isRaftMode()) {
-            branchSession.setStatus(BranchStatus.Registered);
             add(branchSession);
         }
     }

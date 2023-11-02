@@ -80,6 +80,7 @@
     "@alicloud/console-components-console-menu": "^1.0.4",
     "@babel/traverse": "^7.23.2",
     "axios": "^0.27.2",
+    "browserify-sign": "^4.2.2",
     "decode-uri-component": "^0.2.2",
     "history": "^4.10.1",
     "jquery": "^3.3.1",
