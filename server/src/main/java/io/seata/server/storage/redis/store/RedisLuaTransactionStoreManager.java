@@ -212,7 +212,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(applicationData);
                 }
             };
-            String result = LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
+            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             if (!luaResult.getSuccess()) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
@@ -323,7 +323,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(xid);
                 }
             };
-            String result = LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
+            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             // fail
             if (!luaResult.getSuccess()) {

@@ -131,7 +131,7 @@ public class RedisLuaLocker extends RedisLocker {
             // reset args index 2
             args.set(1, String.valueOf(args.size()));
 
-            String result = LuaParser.jedisEvalSha(jedis, luaSHA, ACQUIRE_LOCK_LUA_FILE_NAME, keys, args);
+            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, ACQUIRE_LOCK_LUA_FILE_NAME, keys, args);
 
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
 
@@ -208,7 +208,7 @@ public class RedisLuaLocker extends RedisLocker {
             keys.addAll(lockKeys);
             List<String> args = new ArrayList<>();
             args.add(xid);
-            String res = LuaParser.jedisEvalSha(jedis, luaSHA, LOCKABLE_LUA_FILE_NAME, keys, args);
+            String res = (String)LuaParser.jedisEvalSha(jedis, luaSHA, LOCKABLE_LUA_FILE_NAME, keys, args);
             return "true".equals(res);
         }
     }

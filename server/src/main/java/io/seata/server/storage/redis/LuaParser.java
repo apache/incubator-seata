@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +50,7 @@ public class LuaParser {
 
     private static final String ANNOTATION_LUA = "--";
 
-    private static  String ACQUIRE_LUA_FILE;
+    private static  Map<String, String> LUA_FILE_MAP = new HashMap<>();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -129,6 +130,7 @@ public class LuaParser {
         } catch (IOException e) {
             throw new IOException(e);
         }
+        LUA_FILE_MAP.put(fileName, luaByFile.toString());
         Map<String, String> resultMap = new ConcurrentHashMap<>(1);
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             resultMap.put(fileName, jedis.scriptLoad(luaByFile.toString()));
@@ -156,13 +158,13 @@ public class LuaParser {
         }
     }
 
-    public static String jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args){
+    public static Object jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args){
         try {
-            return (String)jedis.evalsha(luaSHA, keys, args);
+            return jedis.evalsha(luaSHA, keys, args);
         }catch (JedisNoScriptException e) {
-            LOGGER.warn("jedis ex:" + e.getMessage());
-            jedis.scriptLoad(luaFileName);
-            return (String)jedis.evalsha(luaSHA, keys, args);
+            LOGGER.warn("jedis ex: " + e.getMessage());
+            jedis.scriptLoad(LUA_FILE_MAP.get(luaFileName));
+            return jedis.evalsha(luaSHA, keys, args);
         }
     }
 }

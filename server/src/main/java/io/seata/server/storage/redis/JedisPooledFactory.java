@@ -98,8 +98,12 @@ public class JedisPooledFactory {
                             Set<String> sentinels = new HashSet<>(SENTINEL_HOST_NUMBER);
                             String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
                             Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
+                            String sentinelPassword = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_PASSWORD);
+                            if (StringUtils.isBlank(password)) {
+                                sentinelPassword = null;
+                            }
                             tempJedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE),
-                                    null, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_PASSWORD), null);
+                                    null, Protocol.DEFAULT_TIMEOUT, Protocol.DEFAULT_TIMEOUT, sentinelPassword, null);
                         } else if (mode.equals(ConfigurationKeys.REDIS_SINGLE_MODE)) {
                             String host = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SINGLE_HOST);
                             host = StringUtils.isBlank(host) ? CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_HOST, HOST) : host;
