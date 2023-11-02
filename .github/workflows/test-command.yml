@@ -1,0 +1,25 @@
+name: "test-command"
+
+on:
+  push:
+    branches: [ test-os ]
+
+jobs:
+  test-arm64-version:
+    name: "test-arm64"
+    runs-on: ubuntu-latest
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up QEMU"
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+      # step 3
+      - name: "Show OS info"
+        run: |
+          uname -v;
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            arm64v8/ubuntu:20.04 \
+            bash -exc 'uname -v';
