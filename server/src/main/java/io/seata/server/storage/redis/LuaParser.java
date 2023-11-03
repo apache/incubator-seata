@@ -50,7 +50,7 @@ public class LuaParser {
 
     private static final String ANNOTATION_LUA = "--";
 
-    private static  Map<String, String> LUA_FILE_MAP = new HashMap<>();
+    private static final Map<String, String> LUA_FILE_MAP = new HashMap<>();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
