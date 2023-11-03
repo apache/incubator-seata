@@ -1,0 +1,10 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.ConfigurationCache"
+    },
+    "interfaces": [
+      "io.seata.config.Configuration"
+    ]
+  }
+]

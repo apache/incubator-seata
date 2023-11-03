@@ -15,7 +15,14 @@
  */
 package io.seata.discovery.registry.zk;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import io.seata.common.util.NetUtil;
+import io.seata.config.exception.ConfigNotFoundException;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.curator.test.TestingServer;
@@ -23,12 +30,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.function.Executable;
 
 /**
  * @author Geng Zhang
@@ -58,16 +60,15 @@ public class ZookeeperRegisterServiceImplTest {
     }
 
     @Test
-    public void buildZkTest() {
-        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
-        Assertions.assertTrue(client.exists("/zookeeper"));
-    }
-
-    @Test
     public void testAll() throws Exception {
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
-        Assertions.assertNull(service.lookup("xxx"));
+        Assertions.assertThrows(ConfigNotFoundException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                service.lookup("xxx");
+            }
+        });
         List<InetSocketAddress> lookup2 = service.doLookup("default");
         Assertions.assertEquals(1, lookup2.size());
 

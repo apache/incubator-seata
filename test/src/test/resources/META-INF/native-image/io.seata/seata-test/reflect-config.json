@@ -1,0 +1,50 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.common.loader.LoaderTestSPI"
+    },
+    "name": "io.seata.common.loader.LoaderTestImpl1",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.common.loader.LoaderTestSPI"
+    },
+    "name": "io.seata.common.loader.LoaderTestImpl2",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.saga.engine.pcext.StateHandlerInterceptor"
+    },
+    "name": "io.seata.saga.engine.mock.MockStateHandlerInterceptor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.saga.engine.pcext.StateRouterInterceptor"
+    },
+    "name": "io.seata.saga.engine.mock.MockStateRouterInterceptor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

@@ -19,8 +19,9 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -160,7 +161,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
     @Test
     public void testParsePK() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -169,12 +170,12 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         List<Row> beforeRows = new ArrayList<>();
         Row row0 = new Row();
-        Field field01 = addField(row0, "id", 1, "12345");
-        Field field02 = addField(row0, "age", 1, "2");
+        addField(row0, "id", 1, "12345");
+        addField(row0, "age", 1, "2");
         beforeRows.add(row0);
         Row row1 = new Row();
-        Field field11 = addField(row1, "id", 1, "12346");
-        Field field12 = addField(row1, "age", 1, "2");
+        addField(row1, "id", 1, "12346");
+        addField(row1, "age", 1, "2");
         beforeRows.add(row1);
         beforeImage.setRows(beforeRows);
 
@@ -196,41 +197,47 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkNameList.add("id1");
         pkNameList.add("id2");
 
-        Map<String,List<Field>> pkRowValues = new HashMap<>();
-        List<Field> pkId1Values= new ArrayList<>();
+        Map<String, List<Field>> pkRowValues = new HashMap<>();
+        List<Field> pkId1Values = new ArrayList<>();
         pkId1Values.add(new Field());
         pkId1Values.add(new Field());
         pkId1Values.add(new Field());
-        List<Field> pkId2Values= new ArrayList<>();
+        List<Field> pkId2Values = new ArrayList<>();
         pkId2Values.add(new Field());
         pkId2Values.add(new Field());
         pkId2Values.add(new Field());
-        pkRowValues.put("id1",pkId1Values);
-        pkRowValues.put("id2",pkId2Values);
+        pkRowValues.put("id1", pkId1Values);
+        pkRowValues.put("id2", pkId2Values);
 
-        String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
-        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )",sql);
+        String sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
+        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
+        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
     }
 
     @Test
     public void testBuildWhereConditionByPK() throws SQLException {
-        List<String> pkNameList =new ArrayList<>();
+        List<String> pkNameList = new ArrayList<>();
         pkNameList.add("id1");
 
-        Map<String,List<Field>> pkRowValues = new HashMap<>();
-        List<Field> pkId1Values= new ArrayList<>();
+        Map<String, List<Field>> pkRowValues = new HashMap<>();
+        List<Field> pkId1Values = new ArrayList<>();
         pkId1Values.add(new Field());
-        List<Field> pkId2Values= new ArrayList<>();
-        pkId2Values.add(new Field());
-        pkRowValues.put("id1",pkId1Values);
+        pkRowValues.put("id1", pkId1Values);
 
-        String sql=SqlGenerateUtils.buildWhereConditionByPKs(pkNameList,pkRowValues.get("id1").size(),"mysql");
-        Assertions.assertEquals("(id1) in ( (?) )",sql);
+        String sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
+        Assertions.assertEquals("(id1) in ( (?) )", sql);
+        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
+        Assertions.assertEquals("(id1) in ( (?) )", sql);
+        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
+        Assertions.assertEquals("(id1) in ( (?) )", sql);
     }
 }
 
 class TestUndoExecutor extends AbstractUndoExecutor {
-    private boolean isDelete;
+    private final boolean isDelete;
     public TestUndoExecutor(SQLUndoLog sqlUndoLog, boolean isDelete) {
         super(sqlUndoLog);
         this.isDelete = isDelete;

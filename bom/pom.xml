@@ -292,11 +292,6 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-7z</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
                 <artifactId>seata-compressor-bzip2</artifactId>
                 <version>${project.version}</version>
             </dependency>

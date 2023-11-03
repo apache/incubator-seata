@@ -15,10 +15,8 @@
  */
 package io.seata.serializer.hessian;
 
-import com.caucho.hessian.io.Deserializer;
-import com.caucho.hessian.io.HessianProtocolException;
-import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.SerializerFactory;
+import io.seata.core.serializer.SerializerSecurityRegistry;
 
 /*
  * @Xin Wang
@@ -28,19 +26,27 @@ public class HessianSerializerFactory extends SerializerFactory {
 
     private HessianSerializerFactory() {
         super();
+        //Serialization whitelist
+        super.getClassFactory().setWhitelist(true);
+        //register allow types
+        registerAllowTypes();
+        //register deny types
+        registerDenyTypes();
     }
 
     public static SerializerFactory getInstance() {
         return INSTANCE;
     }
 
-    @Override
-    protected Serializer loadSerializer(Class<?> cl) throws HessianProtocolException {
-        return super.loadSerializer(cl);
+    private void registerAllowTypes() {
+        for (String pattern : SerializerSecurityRegistry.getAllowClassPattern()) {
+            super.getClassFactory().allow(pattern);
+        }
     }
 
-    @Override
-    protected Deserializer loadDeserializer(Class cl) throws HessianProtocolException {
-        return super.loadDeserializer(cl);
+    private void registerDenyTypes() {
+        for (String pattern : SerializerSecurityRegistry.getDenyClassPattern()) {
+            super.getClassFactory().deny(pattern);
+        }
     }
 }

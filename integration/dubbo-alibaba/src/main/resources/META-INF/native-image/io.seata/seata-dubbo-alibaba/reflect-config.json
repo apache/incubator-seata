@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.dubbo.rpc.Filter"
+    },
+    "name": "io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionPropagationFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

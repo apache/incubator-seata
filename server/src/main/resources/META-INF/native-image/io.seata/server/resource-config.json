@@ -1,0 +1,21 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\Qlogback\/\\E.*"
+      },
+      {
+        "pattern": "\\Qlua\/redislocker\/redislock.lua\\E"
+      },
+      {
+        "pattern": "\\Qapplication.yml\\E"
+      },
+      {
+        "pattern": "\\Qbanner.txt\\E"
+      },
+      {
+        "pattern": "\\Qlogback-spring.xml\\E"
+      }
+    ]
+  }
+}
