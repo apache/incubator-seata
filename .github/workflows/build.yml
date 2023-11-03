@@ -29,7 +29,7 @@ jobs:
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4.1
-      - name: "Test with Maven and Java${{ matrix.java }}, Check style and license"
+      - name: "Test and Check style and license with Maven and Java${{ matrix.java }}"
         if: matrix.java == '8'
         run: |
           ./mvnw -T 4C clean test \
@@ -48,6 +48,7 @@ jobs:
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
+    name: "Build on 'arm64v8/ubuntu' OS"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

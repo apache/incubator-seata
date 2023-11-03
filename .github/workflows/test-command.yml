@@ -5,8 +5,8 @@ on:
     branches: [ test-os ]
 
 jobs:
-  test-arm64-version:
-    name: "test-arm64"
+  test-command:
+    name: "test-command"
     runs-on: ubuntu-latest
     steps:
       # step 1
@@ -16,10 +16,13 @@ jobs:
       - name: "Set up QEMU"
         id: qemu
         uses: docker/setup-qemu-action@v3
-      # step 3
-      - name: "Show OS info"
+      # step 3.1
+      - name: "Show arm64v8/ubuntu OS info"
         run: |
-          uname -v;
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'uname -v';
+      # step 3.2
+      - name: "Show OS info"
+        run: |
+          uname -v;
