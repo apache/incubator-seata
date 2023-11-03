@@ -15,6 +15,7 @@
  */
 package io.seata.server.cluster.raft;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.rpc.Disposable;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.MultiRegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -60,7 +62,7 @@ import static java.io.File.separator;
 /**
  * @author funkye
  */
-public class RaftServerFactory {
+public class RaftServerFactory implements Disposable, Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerFactory.class);
 
@@ -153,6 +155,20 @@ public class RaftServerFactory {
         if (!this.rpcServer.init(null)) {
             throw new RuntimeException("start raft node fail!");
         }
+    }
+
+    @Override
+    public void destroy() {
+        this.close();
+    }
+
+    @Override
+    public void close() {
+        RAFT_SERVER_MAP.forEach((group, raftServer) -> {
+            raftServer.close();
+            LOGGER.info("closed seata server raft cluster, group: {} ", group);
+        });
+        Optional.ofNullable(rpcServer).ifPresent(RpcServer::shutdown);
     }
 
     public RaftServer getRaftServer(String group) {
