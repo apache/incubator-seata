@@ -39,7 +39,6 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
-import io.seata.server.cluster.raft.RaftServer;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
@@ -50,7 +49,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
  * The type Session holder.
@@ -380,14 +379,7 @@ public class SessionHolder {
     }
 
     public static void destroy() {
-        Collection<RaftServer> raftServers = RaftServerFactory.getInstance().getRaftServers();
-        if (raftServers != null) {
-            try {
-                raftServers.forEach(RaftServer::close);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
+        RaftServerFactory.getInstance().destroy();
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }
