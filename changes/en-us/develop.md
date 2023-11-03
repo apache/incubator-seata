@@ -6,7 +6,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
 
 ### bugfix:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
+- [[#5991](https://github.com/seata/seata/pull/5991)] fix the issue that the Lua script is not synchronized when the redis sentinel master node is down
 
 ### optimize:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR

@@ -85,7 +85,8 @@ public class RedisLocker extends AbstractLocker {
 
     private static String ACQUIRE_LOCK_SHA;
 
-    private static  String ACQUIRE_LOCK_LUA_BY_FILE;
+    private static String ACQUIRE_LOCK_LUA_BY_FILE;
+
     private static final String WHITE_SPACE = " ";
 
     private static final String ANNOTATION_LUA = "--";
