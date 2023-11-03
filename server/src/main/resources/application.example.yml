@@ -22,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs/seata
+    path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -179,6 +179,7 @@ seata:
       sentinel:
         master-name:
         sentinel-hosts:
+        sentinel-password:
   metrics:
     enabled: false
     registry-type: compact

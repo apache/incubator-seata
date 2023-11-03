@@ -34,6 +34,7 @@ import io.seata.common.Constants;
 import io.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -124,7 +125,12 @@ public class StringUtilsTest {
         //case: Charset
         Assertions.assertEquals("UTF-8", StringUtils.toString(StandardCharsets.UTF_8));
         //case: Thread
-        Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
+        try {
+            Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
+        } catch (AssertionFailedError e) {
+            // for java21 and above
+            Assertions.assertEquals("Thread[#" + Thread.currentThread().getId() + ",main,5,main]", StringUtils.toString(Thread.currentThread()));
+        }
 
         //case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);

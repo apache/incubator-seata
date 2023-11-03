@@ -113,6 +113,22 @@ public class TransactionContextFilterTest {
         }
     }
 
+    @Test
+    public void testSetAttachment() {
+        Exception exception = null;
+        try {
+            RpcInternalContext.getContext().setAttachment(RootContext.KEY_XID, "xidddd");
+        } catch (Exception e) {
+            exception = e;
+        }
+        Assertions.assertNotNull(exception);
+        Assertions.assertTrue(exception instanceof IllegalArgumentException);
+        RpcInternalContext.getContext().setAttachment(RootContext.HIDDEN_KEY_XID, "xidddd");
+        Object xid = RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID);
+        Assertions.assertEquals("xidddd", xid);
+        Assertions.assertNotNull(RpcInternalContext.getContext().removeAttachment(RootContext.HIDDEN_KEY_XID));
+    }
+
     @BeforeAll
     public static void adBeforeClass() {
         RpcRunningState.setUnitTestMode(true);

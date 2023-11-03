@@ -739,6 +739,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_SENTINEL_HOST = STORE_REDIS_SENTINEL_PREFIX + "sentinelHosts";
 
     /**
+     * STORE_REDIS_SENTINEL_PASSWORD.
+     */
+    String STORE_REDIS_SENTINEL_PASSWORD = STORE_REDIS_SENTINEL_PREFIX + "sentinelPassword";
+
+    /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
     String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";

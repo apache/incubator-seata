@@ -34,7 +34,7 @@ public class SeataSerializer implements Serializer {
 
     @Override
     public <T> byte[] serialize(T t) {
-        if (t == null || !(t instanceof AbstractMessage)) {
+        if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
         AbstractMessage abstractMessage = (AbstractMessage)t;

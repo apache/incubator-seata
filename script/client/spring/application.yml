@@ -84,6 +84,7 @@ seata:
       app-id: seata-server
       namespace: application
       apollo-accesskey-secret:
+      cluster:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
@@ -126,6 +127,7 @@ seata:
       username:
       password:
       context-path:
+      client-application: ${spring.application.name}
       ##if use MSE Nacos with auth, mutex with username/password attribute
       #access-key:
       #secret-key:

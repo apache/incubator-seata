@@ -32,6 +32,9 @@
         <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
         <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
         <native-build-tools-plugin.version>0.9.20</native-build-tools-plugin.version>
+
+        <!-- jedis version for seata-server -->
+        <jedis.version>3.8.0</jedis.version>
     </properties>
 
     <dependencyManagement>
@@ -166,9 +169,18 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mariadb.jdbc</groupId>-->
+<!--            <artifactId>mariadb-java-client</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -193,6 +205,7 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
         </dependency>
 
         <dependency>
@@ -317,37 +330,21 @@
                     <container>
                         <appRoot>/seata-server</appRoot>
                         <workingDirectory>/seata-server</workingDirectory>
-                        <mainClass>io.seata.server.ServerApplication</mainClass>
                         <ports>
                             <port>8091</port>
                             <port>7091</port>
                         </ports>
-                        <jvmFlags>
-                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
-                            <jvmFlag>-server</jvmFlag>
-                            <jvmFlag>-Xss512k</jvmFlag>
-                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
-                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
-                            <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
-                            <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
-                            <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
-                            <jvmFlag>-XX:MaxDirectMemorySize=256m</jvmFlag>
-                            <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
-                            <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
-                            <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
-                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
-                            <!--gc-->
-                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
-                            <jvmFlag>-XX:+UseG1GC</jvmFlag>
-                            <!--netty-->
-                            <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
-                            <!--log-->
-                            <jvmFlag>-Dlogback.color.disable-for-bat=true</jvmFlag>
-                        </jvmFlags>
                         <labels>
                             <name>seata-server</name>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <entrypoint>
+                            <arg>/bin/bash</arg>
+                            <arg>/seata-server-entrypoint.sh</arg>
+                        </entrypoint>
+                        <environment>
+                            <TZ>Asia/Shanghai</TZ>
+                        </environment>
                     </container>
                     <extraDirectories>
                         <paths>
@@ -355,9 +352,18 @@
                                 <from>target/lib/jdbc</from>
                                 <into>/seata-server/libs/jdbc</into>
                             </path>
+                            <path>
+                                <from>src/main/resources/docker</from>
+                                <includes>seata-server-entrypoint.sh</includes>
+                            </path>
+                            <path>
+                                <from>../distribution/bin</from>
+                                <includes>seata-setup.sh</includes>
+                            </path>
                         </paths>
                     </extraDirectories>
                     <skip>${image.publish.skip}</skip>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
                 </configuration>
                 <executions>
                     <execution>
