@@ -158,10 +158,10 @@ public class LuaParser {
         }
     }
 
-    public static Object jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args){
+    public static Object jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args) {
         try {
             return jedis.evalsha(luaSHA, keys, args);
-        }catch (JedisNoScriptException e) {
+        } catch (JedisNoScriptException e) {
             LOGGER.warn("jedis ex: " + e.getMessage());
             jedis.scriptLoad(LUA_FILE_MAP.get(luaFileName));
             return jedis.evalsha(luaSHA, keys, args);
