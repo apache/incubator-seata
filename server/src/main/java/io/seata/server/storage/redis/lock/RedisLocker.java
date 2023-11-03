@@ -273,9 +273,9 @@ public class RedisLocker extends AbstractLocker {
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
         String xIdOwnLock;
-        try{
+        try {
             xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
-        }catch (JedisNoScriptException e) {
+        } catch (JedisNoScriptException e) {
             LOGGER.warn("jedis ex: "+e.getMessage());
             jedis.scriptLoad(ACQUIRE_LOCK_LUA_BY_FILE);
             xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
