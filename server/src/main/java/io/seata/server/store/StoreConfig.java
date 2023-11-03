@@ -155,16 +155,16 @@ public class StoreConfig {
         /**
          * The Redis store mode.
          */
-        REDIS("redis");
+        REDIS("redis"),
+        /**
+         * The Raft store mode.
+         */
+        RAFT("raft");
 
         private String name;
 
         StoreMode(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return name;
         }
 
         public static StoreMode get(String name) {
@@ -174,6 +174,10 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown store mode:" + name);
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
@@ -189,16 +193,16 @@ public class StoreConfig {
         /**
          * The Redis store mode.
          */
-        REDIS("redis");
+        REDIS("redis"),
+        /**
+         * raft store
+         */
+        RAFT("raft");
 
         private String name;
 
         SessionMode(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return name;
         }
 
         public static SessionMode get(String name) {
@@ -208,6 +212,10 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown session mode:" + name);
+        }
+
+        public String getName() {
+            return name;
         }
     }
 
@@ -223,16 +231,16 @@ public class StoreConfig {
         /**
          * The Redis store mode.
          */
-        REDIS("redis");
+        REDIS("redis"),
+        /**
+         * raft store
+         */
+        RAFT("raft");
 
         private String name;
 
         LockMode(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return name;
         }
 
         public static LockMode get(String name) {
@@ -242,6 +250,10 @@ public class StoreConfig {
                 }
             }
             throw new IllegalArgumentException("unknown lock mode:" + name);
+        }
+
+        public String getName() {
+            return name;
         }
     }
 

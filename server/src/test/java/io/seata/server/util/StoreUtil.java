@@ -19,15 +19,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import io.seata.common.XID;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static java.io.File.separator;
 
+/**
+ * @author funkye
+ */
 public class StoreUtil {
 
     private static String sessionStorePath =
-        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
+        ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+            + separator + XID.getPort();
 
     public static void deleteDataFile() {
         try {

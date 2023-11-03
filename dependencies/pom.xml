@@ -26,6 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-dependencies</artifactId>
+
     <packaging>pom</packaging>
 
     <name>Seata dependencies ${project.version}</name>
@@ -46,7 +47,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
-        <curator-test.version>2.9.1</curator-test.version>
+        <curator-test.version>5.1.0</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <mock-jedis.version>0.3.0</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
@@ -67,6 +68,7 @@
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
+        <jraft.version>1.3.13</jraft.version>
         <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
@@ -633,6 +635,11 @@
                         <artifactId>junit-platform-launcher</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>jraft-core</artifactId>
+                <version>${jraft.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.luben</groupId>
