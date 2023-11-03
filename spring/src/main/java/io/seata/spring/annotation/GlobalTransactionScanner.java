@@ -529,8 +529,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
             }
-            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                    (ConfigurationChangeListener)this);
+            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             return;
         }
         if (initialized.compareAndSet(false, true)) {

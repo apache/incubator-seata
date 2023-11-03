@@ -19,6 +19,7 @@ package io.seata.sqlparser.util;
  * @author ggndnn
  */
 public interface JdbcConstants {
+
     String ORACLE = "oracle";
 
     String MYSQL = "mysql";
@@ -30,4 +31,58 @@ public interface JdbcConstants {
     String MARIADB = "mariadb";
 
     String POSTGRESQL = "postgresql";
+
+    String SQLSERVER = "sqlserver";
+
+    String JTDS = "jtds";
+
+    String HSQL = "hsql";
+
+    String SYBASE = "sybase";
+
+    String DERBY = "derby";
+
+    String HBASE = "hbase";
+
+    String HIVE = "hive";
+
+    String DM = "dm";
+
+    String KINGBASE = "kingbase";
+
+    String GBASE = "gbase";
+
+    String XUGU = "xugu";
+
+    String OCEANBASE = "oceanbase";
+
+    String OCEANBASE_ORACLE = "oceanbase_oracle";
+
+    String INFORMIX = "informix";
+
+    String ODPS = "odps";
+
+    String TERADATA = "teradata";
+
+    String LOG4JDBC = "log4jdbc";
+
+    String PHOENIX = "phoenix";
+
+    String EDB = "edb";
+
+    String KYLIN = "kylin";
+
+    String SQLITE = "sqlite";
+
+    String PRESTO = "presto";
+
+    String ELASTIC_SEARCH = "elastic_search";
+
+    String CLICKHOUSE = "clickhouse";
+
+    String KDB = "kdb";
+
+    String POLARDB = "polardb";
+
+    String POLARDBX = "polardb-x";
 }

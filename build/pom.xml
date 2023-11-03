@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>1.7.1-SNAPSHOT</revision>
+        <revision>1.8.0</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -379,11 +379,11 @@
             </properties>
         </profile>
 
-        <!-- profile: args-for-test-by-jdk17 -->
+        <!-- profile: args-for-test-by-jdk17-and-above-versions -->
         <profile>
-            <id>args-for-test-by-jdk17</id>
+            <id>args-for-test-by-jdk17-and-above-versions</id>
             <activation>
-                <jdk>17</jdk>
+                <jdk>[17,)</jdk>
             </activation>
             <properties>
                 <maven.surefire.argLine>

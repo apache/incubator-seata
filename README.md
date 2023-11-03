@@ -5,7 +5,8 @@
 [![Build Status](https://github.com/seata/seata/workflows/build/badge.svg?branch=develop)](https://github.com/seata/seata/actions)
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=1.7.0)](https://search.maven.org/search?q=io.seata)
+[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=1.8.0)](https://search.maven.
+org/search?q=io.seata)
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/seata/seata.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seata/seata/context:java)
 
 
@@ -84,7 +85,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` and `io.seata:seata-spring-boot-starter`.
 ```xml
 <properties>
-  <seata.version>1.7.0</seata.version>
+  <seata.version>1.8.0</seata.version>
 </properties>
 
 <dependencies>

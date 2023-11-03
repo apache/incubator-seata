@@ -3,30 +3,25 @@
 <!-- 请根据PR的类型添加 `变更记录` 到以下对应位置(feature/bugfix/optimize/test) 下 -->
 
 ### feature:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### bugfix:
-- [[#5749](https://github.com/seata/seata/pull/5749)] 修复在某些情况下，业务sql中主键字段名大小写与表元数据中的不一致，导致回滚失败
-- [[#5762](https://github.com/seata/seata/pull/5762)] 修复TableMetaCache的一些字段类型，避免溢出
-- [[#5769](https://github.com/seata/seata/pull/5769)] 修复不满足 sofa-rpc 中 setAttachment 方法的参数前缀要求问题
+- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### optimize:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### security:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### test:
-- [[#XXX](https://github.com/seata/seata/pull/XXX)] XXX
+- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
-- [capthua](https://github.com/capthua)
-- [robynron](https://github.com/robynron)
-- [dmego](https://github.com/dmego)
-- [XXX](https://github.com/XXX)
+- [GitHub_ID](https://github.com/GitHub_ID)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
