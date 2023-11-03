@@ -99,7 +99,7 @@ public class JedisPooledFactory {
                             String[] sentinelHosts = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_HOST).split(",");
                             Arrays.asList(sentinelHosts).forEach(sentinelHost -> sentinels.add(sentinelHost));
                             String sentinelPassword = CONFIGURATION.getConfig(ConfigurationKeys.STORE_REDIS_SENTINEL_PASSWORD);
-                            if (StringUtils.isBlank(password)) {
+                            if (StringUtils.isBlank(sentinelPassword)) {
                                 sentinelPassword = null;
                             }
                             tempJedisPool = new JedisSentinelPool(masterName, sentinels, poolConfig, 60000, 60000, password, CONFIGURATION.getInt(ConfigurationKeys.STORE_REDIS_DATABASE, DATABASE),
