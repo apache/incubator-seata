@@ -16,11 +16,17 @@
 package io.seata.server.raft;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.seata.common.metadata.ClusterRole;
+import io.seata.common.metadata.Node;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
+import io.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
 import io.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
@@ -29,6 +35,7 @@ import io.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import io.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
 import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 import io.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
+import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
@@ -92,6 +99,56 @@ public class RaftSyncMessageTest {
         Assertions.assertEquals(1, map.size());
         Assertions.assertNotNull(map.get(globalSession.getXid()));
         Assertions.assertEquals(1, map.get(globalSession.getXid()).getBranchSessions().size());
+    }
+
+    @Test
+    public void testRaftClusterMetadataSerialize() throws IOException {
+        RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
+        RaftClusterMetadata raftClusterMetadata = new RaftClusterMetadata();
+        //set leader
+        Node leader = new Node();
+        leader.setRole(ClusterRole.LEADER);
+        leader.setGroup("abc");
+        leader.setControl(leader.createEndpoint("1.1.1.1",8088,"http"));
+        leader.setTransaction(leader.createEndpoint("1.1.1.1",8089,"netty"));
+        Map<String,Object> metaData=new HashMap<>();
+        metaData.put("abc","abc");
+        leader.setMetadata(metaData);
+        raftClusterMetadata.setLeader(leader);
+        //set learner
+        Node learner = new Node();
+        learner.setRole(ClusterRole.LEARNER);
+        learner.setGroup("abc");
+        learner.setControl(leader.createEndpoint("1.1.1.2",8088,"http"));
+        learner.setTransaction(leader.createEndpoint("1.1.1.2",8089,"netty"));
+        List<Node> learners=new ArrayList<>();
+        learners.add(learner);
+        raftClusterMetadata.setLearner(learners);
+        //set follower
+        Node follower = new Node();
+        follower.setRole(ClusterRole.FOLLOWER);
+        follower.setGroup("abc");
+        follower.setControl(leader.createEndpoint("1.1.1.3",8088,"http"));
+        follower.setTransaction(leader.createEndpoint("1.1.1.3",8089,"netty"));
+        List<Node> followers=new ArrayList<>();
+        followers.add(follower);
+        raftClusterMetadata.setFollowers(followers);
+
+        RaftClusterMetadataMsg raftClusterMetadataMsg=new RaftClusterMetadataMsg(raftClusterMetadata);
+
+        raftSyncMessage.setBody(raftClusterMetadataMsg);
+        byte[] msg = RaftSyncMessageSerializer.encode(raftSyncMessage);
+        RaftSyncMessage raftSyncMessage1 = RaftSyncMessageSerializer.decode(msg);
+        RaftClusterMetadataMsg raftClusterMetadataMsg1=(RaftClusterMetadataMsg)  raftSyncMessage1.getBody();
+        Node leader1=raftClusterMetadataMsg1.getRaftClusterMetadata().getLeader();
+        Assertions.assertEquals("1.1.1.1", leader1.getControl().getHost());
+        Assertions.assertEquals("abc",leader1.getMetadata().get("abc"));
+        Assertions.assertEquals(1,raftClusterMetadataMsg1.getRaftClusterMetadata().getFollowers().size());
+        Node follower1=raftClusterMetadataMsg1.getRaftClusterMetadata().getFollowers().get(0);
+        Assertions.assertEquals("abc", follower1.getGroup());
+        Assertions.assertEquals(1,raftClusterMetadataMsg1.getRaftClusterMetadata().getLearner().size());
+        Node learner1=raftClusterMetadataMsg1.getRaftClusterMetadata().getLearner().get(0);
+        Assertions.assertEquals(ClusterRole.LEARNER,learner1.getRole());
     }
 
 }
