@@ -152,7 +152,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                 keys.add(entry.getKey());
                 args.add(entry.getValue());
             }
-            jedis.evalsha(luaSHA, keys, args);
+            LuaParser.jedisEvalSha(jedis, luaSHA, INSERT_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -180,7 +180,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add("branch");
                 }
             };
-            jedis.evalsha(luaSHA, keys, args);
+            LuaParser.jedisEvalSha(jedis, luaSHA, DELETE_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -212,7 +212,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(applicationData);
                 }
             };
-            String result = (String) jedis.evalsha(luaSHA, keys, args);
+            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             if (!luaResult.getSuccess()) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
@@ -258,7 +258,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
             keys.add(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
             args.add(xid);
             args.add(String.valueOf(globalTransactionDO.getBeginTime() + globalTransactionDO.getTimeout()));
-            jedis.evalsha(luaSHA, keys, args);
+            LuaParser.jedisEvalSha(jedis, luaSHA, INSERT_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -290,7 +290,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(String.valueOf(globalTransactionDO.getStatus()));
                 }
             };
-            jedis.evalsha(luaSHA, keys, args);
+            LuaParser.jedisEvalSha(jedis, luaSHA, DELETE_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
@@ -323,7 +323,7 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(xid);
                 }
             };
-            String result = (String) jedis.evalsha(luaSHA, keys, args);
+            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             // fail
             if (!luaResult.getSuccess()) {
