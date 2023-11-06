@@ -15,10 +15,10 @@
  */
 package io.seata.saga.engine.expression.seq;
 
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.sequence.SeqGenerator;
-import org.springframework.util.StringUtils;
 
 /**
  * Sequence expression factory

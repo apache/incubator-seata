@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.impl;
 
+import io.seata.common.util.StringUtils;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,6 @@ import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * ProcessCtrl-based state machine engine

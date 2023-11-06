@@ -18,11 +18,11 @@ package io.seata.saga.statelang.parser.utils;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.parser.JsonParser;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

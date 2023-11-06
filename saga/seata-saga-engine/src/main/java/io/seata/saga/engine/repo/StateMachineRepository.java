@@ -18,7 +18,7 @@ package io.seata.saga.engine.repo;
 import java.io.IOException;
 
 import io.seata.saga.statelang.domain.StateMachine;
-import org.springframework.core.io.Resource;
+import java.io.InputStream;
 
 /**
  * StateMachineRepository
@@ -62,10 +62,11 @@ public interface StateMachineRepository {
     StateMachine registryStateMachine(StateMachine stateMachine);
 
     /**
-     * registry by resources
+     * Registry by resources.
      *
-     * @param resources
-     * @param tenantId
+     * @param resourceAsStreamArray the resource as stream array
+     * @param tenantId the tenant id
+     * @throws IOException the io exception
      */
-    void registryByResources(Resource[] resources, String tenantId) throws IOException;
+    void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException;
 }

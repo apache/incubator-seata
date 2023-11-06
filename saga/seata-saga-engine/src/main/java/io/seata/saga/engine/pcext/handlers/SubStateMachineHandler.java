@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import io.seata.common.util.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,6 @@ import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * SubStateMachine Handler

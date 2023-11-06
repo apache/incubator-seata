@@ -15,6 +15,8 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -26,9 +28,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type String utils.
@@ -367,6 +366,24 @@ public class StringUtils {
         }
         for (int i = 0; i < str.length(); i++) {
             if (Character.isUpperCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasText(String str) {
+        return (str != null && !str.isEmpty() && containsText(str));
+    }
+
+    public static boolean hasLength(CharSequence str) {
+        return (str != null && str.length() > 0);
+    }
+
+    private static boolean containsText(CharSequence str) {
+        int strLen = str.length();
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
                 return true;
             }
         }

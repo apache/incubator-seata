@@ -27,7 +27,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.sequence.SeqGenerator;
-import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
+import io.seata.saga.engine.sequence.UUIDSeqGenerator;
 import io.seata.saga.engine.store.StateLangStore;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateMachine;
@@ -35,7 +35,6 @@ import io.seata.saga.statelang.parser.StateMachineParserFactory;
 import io.seata.saga.statelang.parser.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
 
 /**
  * StateMachineRepository Implementation
@@ -48,7 +47,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     private Map<String/** Name_Tenant **/, Item> stateMachineMapByNameAndTenant = new ConcurrentHashMap<>();
     private Map<String/** Id **/, Item> stateMachineMapById = new ConcurrentHashMap<>();
     private StateLangStore stateLangStore;
-    private SeqGenerator seqGenerator = new SpringJvmUUIDSeqGenerator();
+    private SeqGenerator seqGenerator = new UUIDSeqGenerator();
     private String charset = "UTF-8";
     private String defaultTenantId;
     private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
@@ -163,24 +162,23 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         return stateMachine;
     }
 
+
     @Override
-    public void registryByResources(Resource[] resources, String tenantId) throws IOException {
-        if (resources != null) {
-            for (Resource resource : resources) {
-                String json;
-                try (InputStream is = resource.getInputStream()) {
-                    json = IOUtils.toString(is, charset);
+    public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
+        for (InputStream resource : resourceAsStreamArray) {
+            String json;
+            try (InputStream is = resource) {
+                json = IOUtils.toString(is, charset);
+            }
+            StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(json);
+            if (stateMachine != null) {
+                stateMachine.setContent(json);
+                if (StringUtils.isBlank(stateMachine.getTenantId())) {
+                    stateMachine.setTenantId(tenantId);
                 }
-                StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName).parse(json);
-                if (stateMachine != null) {
-                    stateMachine.setContent(json);
-                    if (StringUtils.isBlank(stateMachine.getTenantId())) {
-                        stateMachine.setTenantId(tenantId);
-                    }
-                    registryStateMachine(stateMachine);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("===== StateMachine Loaded: \n{}", json);
-                    }
+                registryStateMachine(stateMachine);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("===== StateMachine Loaded: \n{}", json);
                 }
             }
         }

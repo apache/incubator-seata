@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.routers;
 
+import io.seata.common.util.StringUtils;
 import java.util.Stack;
 
 import io.seata.common.exception.FrameworkErrorCode;
@@ -38,7 +39,6 @@ import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * TaskState Router

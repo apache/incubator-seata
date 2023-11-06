@@ -318,7 +318,7 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-saga-tm</artifactId>
+            <artifactId>seata-saga-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

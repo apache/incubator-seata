@@ -26,7 +26,6 @@ import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
@@ -51,8 +50,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
         return clazz != null &&
-            (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
-                || SubStateMachineHandler.class.isAssignableFrom(clazz)
+            (SubStateMachineHandler.class.isAssignableFrom(clazz)
                 || ScriptTaskHandlerInterceptor.class.isAssignableFrom(clazz));
     }
 

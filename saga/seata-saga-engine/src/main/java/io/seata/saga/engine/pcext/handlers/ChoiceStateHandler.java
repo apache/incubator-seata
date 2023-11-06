@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import io.seata.common.util.StringUtils;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,6 @@ import io.seata.saga.statelang.domain.ChoiceState;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.ChoiceStateImpl;
-import org.springframework.util.StringUtils;
 
 /**
  * ChoiceState Handler

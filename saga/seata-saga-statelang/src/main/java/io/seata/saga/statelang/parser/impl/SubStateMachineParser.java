@@ -15,13 +15,12 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
-import java.util.Map;
-
+import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import io.seata.saga.statelang.parser.StateParser;
-import org.springframework.util.StringUtils;
+import java.util.Map;
 
 /**
  * SubStateMachineParser

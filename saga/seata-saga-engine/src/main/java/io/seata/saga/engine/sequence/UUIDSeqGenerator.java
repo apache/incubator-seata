@@ -17,17 +17,14 @@ package io.seata.saga.engine.sequence;
 
 import java.util.List;
 
-import org.springframework.util.AlternativeJdkIdGenerator;
-import org.springframework.util.IdGenerator;
-
 /**
  * Based On Spring AlternativeJdkIdGenerator
  *
  * @author lorne.cl
  */
-public class SpringJvmUUIDSeqGenerator implements SeqGenerator {
+public class UUIDSeqGenerator implements SeqGenerator {
 
-    private IdGenerator idGenerator = new AlternativeJdkIdGenerator();
+    private final AlternativeJdkIdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
     @Override
     public String generate(String entity, String ruleName, List<Object> shardingParameters) {

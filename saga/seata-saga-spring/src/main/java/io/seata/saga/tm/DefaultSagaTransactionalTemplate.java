@@ -15,14 +15,12 @@
  */
 package io.seata.saga.tm;
 
-import java.util.List;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.ShutdownHook;
+import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
@@ -36,6 +34,7 @@ import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -62,20 +61,20 @@ public class DefaultSagaTransactionalTemplate
     private ApplicationContext applicationContext;
 
     @Override
-    public void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+    public void commitTransaction(GlobalTransaction tx) throws ExecutionException {
         try {
             triggerBeforeCommit(tx);
             tx.commit();
             triggerAfterCommit(tx);
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
-            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
+            throw new ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
         }
     }
 
     @Override
     public void rollbackTransaction(GlobalTransaction tx, Throwable ex)
-        throws TransactionException, TransactionalExecutor.ExecutionException {
+        throws TransactionException, ExecutionException {
         triggerBeforeRollback(tx);
         tx.rollback();
         triggerAfterRollback(tx);
@@ -83,14 +82,14 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
+    public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws ExecutionException {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         try {
             triggerBeforeBegin(tx);
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin(tx);
         } catch (TransactionException txe) {
-            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
+            throw new ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
         }
         return tx;
@@ -103,13 +102,13 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus)
-        throws TransactionalExecutor.ExecutionException {
+        throws ExecutionException {
         try {
             tx.globalReport(globalStatus);
             triggerAfterCompletion(tx);
         } catch (TransactionException txe) {
 
-            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
+            throw new ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
         }
     }
 

@@ -15,12 +15,9 @@
  */
 package io.seata.saga.engine.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ThreadPoolExecutor;
-import javax.script.ScriptEngineManager;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.saga.engine.StateMachineConfig;
@@ -40,12 +37,13 @@ import io.seata.saga.engine.pcext.StateMachineProcessHandler;
 import io.seata.saga.engine.pcext.StateMachineProcessRouter;
 import io.seata.saga.engine.pcext.StateRouter;
 import io.seata.saga.engine.pcext.StateRouterInterceptor;
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.repo.impl.StateLogRepositoryImpl;
 import io.seata.saga.engine.repo.impl.StateMachineRepositoryImpl;
 import io.seata.saga.engine.sequence.SeqGenerator;
-import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
+import io.seata.saga.engine.sequence.UUIDSeqGenerator;
 import io.seata.saga.engine.store.StateLangStore;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.engine.strategy.StatusDecisionStrategy;
@@ -62,7 +60,14 @@ import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.parser.utils.ResourceUtil;
+import io.seata.saga.util.ResourceUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
+import javax.script.ScriptEngineManager;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,10 +75,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
-
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * Default state machine configuration
@@ -97,7 +98,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ExpressionResolver expressionResolver;
     private StateMachineRepository stateMachineRepository;
     private StatusDecisionStrategy statusDecisionStrategy;
-    private SeqGenerator seqGenerator;
+    private volatile SeqGenerator seqGenerator;
 
     private ProcessCtrlEventPublisher syncProcessCtrlEventPublisher;
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
@@ -154,7 +155,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         if (autoRegisterResources && ArrayUtils.isNotEmpty(resources)) {
             try {
                 Resource[] resources = ResourceUtil.getResources(this.resources);
-                stateMachineRepository.registryByResources(resources, defaultTenantId);
+                InputStream[] resourceAsStreamArray = new InputStream[resources.length];
+                for (int i = 0; i < resources.length; i++) {
+                    resourceAsStreamArray[i] = resources[i].getInputStream();
+                }
+                stateMachineRepository.registryByResources(resourceAsStreamArray, defaultTenantId);
             } catch (IOException e) {
                 LOGGER.error("Load State Language Resources failed.", e);
             }
@@ -227,6 +232,10 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
         StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
         stateMachineProcessHandler.initDefaultHandlers();
+
+        stateMachineProcessHandler.getStateHandlers().put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateHandler());
+        stateMachineProcessHandler.getStateHandlers().put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, new ServiceTaskStateHandler());
+
         loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
 
         DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
@@ -357,13 +366,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.statusDecisionStrategy = statusDecisionStrategy;
     }
 
-    @SuppressWarnings("lgtm[java/unsafe-double-checked-locking]")
     @Override
     public SeqGenerator getSeqGenerator() {
         if (seqGenerator == null) {
             synchronized (this) {
                 if (seqGenerator == null) {
-                    seqGenerator = new SpringJvmUUIDSeqGenerator();
+                    seqGenerator = new UUIDSeqGenerator();
                 }
             }
         }
@@ -388,7 +396,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.asyncProcessCtrlEventPublisher = asyncProcessCtrlEventPublisher;
     }
 
-    @Override
     public ApplicationContext getApplicationContext() {
         return applicationContext;
     }
@@ -437,7 +444,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.resources = resources;
     }
 
-    @Override
     public ServiceInvokerManager getServiceInvokerManager() {
         return serviceInvokerManager;
     }

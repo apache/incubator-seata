@@ -17,11 +17,11 @@
 package io.seata.saga.engine.expression.exception;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.expression.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * Exception match evaluator expression
