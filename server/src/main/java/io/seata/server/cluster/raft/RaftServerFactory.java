@@ -160,6 +160,8 @@ public class RaftServerFactory implements Disposable, Closeable {
     @Override
     public void destroy() {
         this.close();
+        rpcServer = null;
+        RAFT_SERVER_MAP.clear();
     }
 
     @Override
