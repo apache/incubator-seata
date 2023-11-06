@@ -18,10 +18,8 @@ package io.seata.server.raft.execute;
 
 import io.seata.common.util.NetUtil;
 import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.cluster.raft.execute.global.AddGlobalSessionExecute;
 import io.seata.server.cluster.raft.execute.global.RemoveGlobalSessionExecute;
 import io.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
