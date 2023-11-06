@@ -383,6 +383,7 @@ public class SessionHolder {
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }
+        SESSION_MANAGER_MAP = null;
     }
 
     @FunctionalInterface
