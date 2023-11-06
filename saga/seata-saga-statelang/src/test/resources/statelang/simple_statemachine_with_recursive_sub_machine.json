@@ -1,0 +1,18 @@
+{
+  "Name": "simpleStateMachineWithRecursiveSubMachine",
+  "Comment": "递归调用子状态机",
+  "StartState": "CallSubStateMachine",
+  "Version": "0.0.1",
+  "IsRetryPersistModeUpdate": false,
+  "IsCompensatePersistModeUpdate": false,
+  "States": {
+    "CallSubStateMachine": {
+      "Type": "SubStateMachine",
+      "StateMachineName": "simpleStateMachineWithRecursiveSubMachine",
+      "Next": "Succeed"
+    },
+    "Succeed": {
+      "Type":"Succeed"
+    }
+  }
+}

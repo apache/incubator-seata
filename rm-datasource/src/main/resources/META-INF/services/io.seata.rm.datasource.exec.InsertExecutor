@@ -3,3 +3,5 @@ io.seata.rm.datasource.exec.oracle.OracleInsertExecutor
 io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor
 io.seata.rm.datasource.exec.sqlserver.SqlServerInsertExecutor
 io.seata.rm.datasource.exec.mariadb.MariadbInsertExecutor
+io.seata.rm.datasource.exec.polardbx.PolarDBXInsertExecutor
+io.seata.rm.datasource.exec.dm.DmInsertExecutor

@@ -45,8 +45,11 @@
   },
   "dependencies": {
     "@antv/g6": "^2.2.6",
+    "@babel/traverse": "^7.23.2",
+    "browserify-sign": "^4.2.2",
     "codemirror": "^5.65.8",
     "core-js": "^3.6.5",
+    "decode-uri-component": "^0.2.2",
     "lodash": "^4.17.21",
     "react-codemirror": "^1.0.0"
   },

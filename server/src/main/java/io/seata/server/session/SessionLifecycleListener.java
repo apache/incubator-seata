@@ -95,4 +95,5 @@ public interface SessionLifecycleListener {
      * @throws TransactionException the transaction exception
      */
     void onFailEnd(GlobalSession globalSession) throws TransactionException;
+
 }

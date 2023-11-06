@@ -84,6 +84,7 @@ seata:
       app-id: seata-server
       namespace: application
       apollo-accesskey-secret:
+      cluster:
     etcd3:
       server-addr: http://localhost:2379
     nacos:
@@ -108,6 +109,9 @@ seata:
       name:
   registry:
     type: file
+    raft:
+      server-addr:
+      metadata-max-age-ms: 30000
     file:
       name: file.conf
     consul:
