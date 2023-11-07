@@ -26,7 +26,7 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 public class LockAndCallback {
     private final Object lock;
     private final AsyncCallback callback;
-
+    private final static long DEFAULT_TIMEOUT = 5 * 60000;
     private String result;
 
     public LockAndCallback() {
@@ -49,13 +49,16 @@ public class LockAndCallback {
             }
         };
     }
-
     public void waittingForFinish(StateMachineInstance inst) {
+        waittingForFinish(inst, DEFAULT_TIMEOUT);
+    }
+
+    public void waittingForFinish(StateMachineInstance inst, long timeout) {
         synchronized (lock) {
             if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 long start = System.nanoTime();
                 try {
-                    lock.wait(30000);
+                    lock.wait(timeout);
                     System.out.printf("finish wait ====== XID: %s, status: %s, compensationStatus: %s, cost: %d ms, result: %s\r\n",
                             inst.getId(), inst.getStatus(), inst.getCompensationStatus(), (System.nanoTime() - start) / 1000_000, result);
                 } catch (Exception e) {
