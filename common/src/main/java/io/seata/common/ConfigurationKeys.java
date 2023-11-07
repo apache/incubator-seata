@@ -29,6 +29,7 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_REGISTRY.
      */
     String FILE_ROOT_REGISTRY = "registry";
+
     /**
      * The constant FILE_ROOT_CONFIG.
      */
@@ -37,6 +38,22 @@ public interface ConfigurationKeys {
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
     String FILE_CONFIG_SPLIT_CHAR = ".";
+
+    /**
+     * The constant FILE_ROOT_PREFIX_REGISTRY.
+     */
+    String FILE_ROOT_PREFIX_REGISTRY = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant FILE_ROOT_PREFIX_CONFIG.
+     */
+    String FILE_ROOT_PREFIX_CONFIG = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant SEATA_FILE_PREFIX_ROOT_CONFIG
+     */
+    String SEATA_FILE_PREFIX_ROOT_CONFIG = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
     /**
      * The constant FILE_ROOT_TYPE.
      */
@@ -45,7 +62,6 @@ public interface ConfigurationKeys {
      * The constant DATA_TYPE.
      */
     String DATA_TYPE = "dataType";
-
 
     /**
      * The constant SEATA_PREFIX.
@@ -364,9 +380,24 @@ public interface ConfigurationKeys {
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
 
     /**
-     * The constant HANDLE_ALL_SESSION_PERIOD.
+     * The constant COMMITING_RETRY_PERIOD.
      */
-    String HANDLE_ALL_SESSION_PERIOD = RECOVERY_PREFIX + "handleAllSessionPeriod";
+    String COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "committingRetryPeriod";
+
+    /**
+     * The constant ASYN_COMMITING_RETRY_PERIOD.
+     */
+    String ASYNC_COMMITING_RETRY_PERIOD = RECOVERY_PREFIX + "asyncCommittingRetryPeriod";
+
+    /**
+     * The constant ROLLBACKING_RETRY_PERIOD.
+     */
+    String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
+
+    /**
+     * The constant TIMEOUT_RETRY_PERIOD.
+     */
+    String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
      * The constant CLIENT_UNDO_PREFIX.
@@ -377,6 +408,7 @@ public interface ConfigurationKeys {
      * The constant TRANSACTION_UNDO_DATA_VALIDATION.
      */
     String TRANSACTION_UNDO_DATA_VALIDATION = CLIENT_UNDO_PREFIX + "dataValidation";
+
     /**
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
@@ -627,6 +659,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_MODE = STORE_REDIS_PREFIX + "mode";
 
     /**
+     * The constant STORE_REDIS_TYPE. lua pipeline
+     */
+    String STORE_REDIS_TYPE = STORE_REDIS_PREFIX + "type";
+
+    /**
      * The constant STORE_REDIS_HOST.
      */
     String STORE_REDIS_HOST = STORE_REDIS_PREFIX + "host";
@@ -726,14 +763,24 @@ public interface ConfigurationKeys {
     String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
+     * The constant ACCESS_KEY.
+     */
+    String ACCESS_KEY = "accesskey";
+
+    /**
+     * The constant SECRET_KEY.
+     */
+    String SECRET_KEY = "secretkey";
+
+    /**
      * The constant SEATA_ACCESS_KEY.
      */
-    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + ACCESS_KEY;
 
     /**
      * The constant SEATA_SECRET_KEY.
      */
-    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+    String SEATA_SECRET_KEY = SEATA_PREFIX + SECRET_KEY;
 
     /**
      * The constant EXTRA_DATA_SPLIT_CHAR.
@@ -825,6 +872,31 @@ public interface ConfigurationKeys {
     String IS_USE_ENDPOINT_PARSING_RULE = "isUseEndpointParsingRule";
 
     /**
+     * The constant XAER_NOTA_RETRY_TIMEOUT
+     */
+    String XAER_NOTA_RETRY_TIMEOUT = SERVER_PREFIX + "xaerNotaRetryTimeout";
+
+    /**
+     * The constant XA_BRANCH_EXECUTION_TIMEOUT
+     */
+    String XA_BRANCH_EXECUTION_TIMEOUT = CLIENT_RM_PREFIX + "branchExecutionTimeoutXA";
+
+    /**
+     * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
+     */
+    String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
+
+    /**
+     * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
+     */
+    String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
+
+    /**
+     * The constant ENABLE_PARALLEL_HANDLE_BRANCH_KEY
+     */
+    String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
+
+    /**
      * The constant RM_APPLICATION_DATA_PERCENT_WARN
      */
     String RM_APPLICATION_DATA_PERCENT_WARN = CLIENT_RM_PREFIX + "applicationDataWarnPercent";
@@ -853,30 +925,4 @@ public interface ConfigurationKeys {
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
     String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataCheck";
-
-    /**
-     * The constant XAER_NOTA_RETRY_TIMEOUT
-     */
-    String XAER_NOTA_RETRY_TIMEOUT = SERVER_PREFIX + "xaerNotaRetryTimeout";
-
-    /**
-     * The constant XA_BRANCH_EXECUTION_TIMEOUT
-     */
-    String XA_BRANCH_EXECUTION_TIMEOUT = CLIENT_RM_PREFIX + "branchExecutionTimeoutXA";
-
-    /**
-     * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
-     */
-    String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
-
-    /**
-     * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
-     */
-    String ENABLE_PARALLEL_REQUEST_HANDLE_KEY = SERVER_PREFIX + "enableParallelRequestHandle";
-
-    /**
-     * The constant ENABLE_PARALLEL_HANDLE_BRANCH_KEY
-     */
-    String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
-
 }
