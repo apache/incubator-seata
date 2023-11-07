@@ -21,8 +21,16 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
-            bash -exc 'uname -v';
+            bash -exc 'uname -v && \
+                       cat /etc/os-release && \
+                       cat /etc/issue && \
+                       cat /proc/meminfo && \
+                       cat /proc/cpuinfo';
       # step 3.2
       - name: "Show OS info"
         run: |
           uname -v;
+          cat /etc/os-release;
+          cat /etc/issue;
+          cat /proc/meminfo;
+          cat /proc/cpuinfo;
