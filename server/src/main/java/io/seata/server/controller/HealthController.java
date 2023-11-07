@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  */
+@Deprecated
 @Controller
 @RequestMapping
 public class HealthController {
@@ -35,6 +36,7 @@ public class HealthController {
     private ServerRunner serverRunner;
 
 
+    @Deprecated
     @RequestMapping("/health")
     @ResponseBody
     String healthCheck() {
