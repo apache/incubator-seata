@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5887](https://github.com/seata/seata/pull/5887)] fix global transaction hook repeat execute
 - [[#5924](https://github.com/seata/seata/pull/5924)] fix zk unit test error
 - [[#5931](https://github.com/seata/seata/pull/5931)] fix the issue of missing sentinel password in store redis mode
+- [[#5991](https://github.com/seata/seata/pull/5991)] fix the issue that the Lua script is not synchronized when the redis sentinel master node is down
 
 ### optimize:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR

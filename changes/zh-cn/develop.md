@@ -11,6 +11,7 @@
 - [[#5887](https://github.com/seata/seata/pull/5887)] 修复全局事务钩子重复执行
 - [[#5924](https://github.com/seata/seata/pull/5924)] 修复zk单元测试错误
 - [[#5931](https://github.com/seata/seata/pull/5931)] 修复存储redis哨兵模式下哨兵密码缺失的问题
+- [[#5991](https://github.com/seata/seata/pull/5991)] 修复redis sentinel master node 宕机时，lua脚本未同步的问题
 
 ### optimize:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
