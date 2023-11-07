@@ -56,6 +56,7 @@ public enum SerializerType {
      * Math.pow(2, 4)
      */
     HESSIAN((byte)0x16),
+
     /**
      * The jackson.
      * <p>
