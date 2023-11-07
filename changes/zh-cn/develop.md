@@ -6,7 +6,7 @@
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### bugfix:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
+- [[#5991](https://github.com/seata/seata/pull/5991)] 修复redis sentinel master node 宕机时，lua脚本未同步的问题
 
 ### optimize:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
