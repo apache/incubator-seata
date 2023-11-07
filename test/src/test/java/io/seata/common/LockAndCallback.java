@@ -49,11 +49,11 @@ public class LockAndCallback {
             }
         };
     }
-    public void waittingForFinish(StateMachineInstance inst) {
-        waittingForFinish(inst, DEFAULT_TIMEOUT);
+    public void waitingForFinish(StateMachineInstance inst) {
+        waitingForFinish(inst, DEFAULT_TIMEOUT);
     }
 
-    public void waittingForFinish(StateMachineInstance inst, long timeout) {
+    public void waitingForFinish(StateMachineInstance inst, long timeout) {
         synchronized (lock) {
             if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 long start = System.nanoTime();
