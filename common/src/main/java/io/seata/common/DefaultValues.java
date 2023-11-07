@@ -60,6 +60,8 @@ public interface DefaultValues {
     boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
     boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
 
+    boolean DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST = false;
+
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";

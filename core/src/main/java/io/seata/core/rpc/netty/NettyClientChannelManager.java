@@ -181,11 +181,20 @@ class NettyClientChannelManager {
             }
             if (failedMap.size() > 0) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(), failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedMap.keySet(),
+                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
+                }
+                boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
+                boolean main = Thread.currentThread().getId() == 1L;
+                if (failFast && main) {
+                    String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
+                    throw new FrameworkException("can not connect to [" + invalidAddress + "]");
                 }
             }
         } finally {
