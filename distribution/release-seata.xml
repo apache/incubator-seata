@@ -96,6 +96,10 @@
             <source>../server/src/main/resources/application.example.yml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
+        <file>
+            <source>../server/src/main/resources/application.raft.example.yml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
 
         <file>
             <source>../server/src/main/resources/logback-spring.xml</source>

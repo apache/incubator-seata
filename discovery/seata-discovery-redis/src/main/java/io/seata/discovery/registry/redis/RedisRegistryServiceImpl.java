@@ -84,7 +84,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = seataConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
-        String[] serverArr = serverAddr.split(":");
+        String[] serverArr = NetUtil.splitIPPortStr(serverAddr);
         String host = serverArr[0];
         int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());
@@ -195,7 +195,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             try {
                 try (Jedis jedis = jedisPool.getResource()) {
                     // try update Map every 2s
-                    updateClusterAddressMap(jedis, redisRegistryKey);
+                    updateClusterAddressMap(jedis, redisRegistryKey, cluster);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -232,7 +232,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             String redisRegistryKey = REDIS_FILEKEY_PREFIX + clusterName;
             try (Jedis jedis = jedisPool.getResource()) {
-                updateClusterAddressMap(jedis, redisRegistryKey);
+                updateClusterAddressMap(jedis, redisRegistryKey, clusterName);
             }
             subscribe(clusterName, msg -> {
                 String[] msgr = msg.split("-");
@@ -286,7 +286,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
     }
 
-    private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey) {
+    private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey, String clusterName) {
         ScanParams scanParams = new ScanParams();
         scanParams.count(10);
         scanParams.match(redisRegistryKey + "_*");
