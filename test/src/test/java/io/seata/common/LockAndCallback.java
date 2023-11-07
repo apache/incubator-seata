@@ -32,7 +32,7 @@ public class LockAndCallback {
     private final Lock lock;
     private final Condition notFinished;
     private final AsyncCallback callback;
-    private final static long DEFAULT_TIMEOUT = 5 * 60000;
+    private final static long DEFAULT_TIMEOUT = 60000;
     private String result;
 
     public LockAndCallback() {
