@@ -1,8 +1,8 @@
 name: "test-druid"
 
-#on:
-#  push:
-#    branches: [ test*, "*.*.*" ]
+on:
+  push:
+    branches: [ "*.*.*" ]
 
 jobs:
   test-druid:

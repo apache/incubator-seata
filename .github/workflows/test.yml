@@ -1,8 +1,8 @@
 name: "test"
 
-#on:
-#  push:
-#    branches: [ test*, "*.*.*" ]
+on:
+  push:
+    branches: [ "*.*.*" ]
 
 jobs:
   # job 1
