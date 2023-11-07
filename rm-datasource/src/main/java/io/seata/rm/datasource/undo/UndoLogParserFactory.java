@@ -59,12 +59,11 @@ public class UndoLogParserFactory {
      * @return the UndoLogParser
      */
     public static UndoLogParser getInstance(String name) {
-        UndoLogParser undoLogParser = CollectionUtils.computeIfAbsent(INSTANCES, name,
-            key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
-        if (undoLogParser == null && StringUtils.equalsIgnoreCase("fst", name)) {
+        if (StringUtils.equalsIgnoreCase("fst", name)) {
             throw new IllegalArgumentException(
                 "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
         }
-        return undoLogParser;
+        return CollectionUtils.computeIfAbsent(INSTANCES, name,
+            key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
     }
 }

@@ -57,7 +57,7 @@ public enum SerializerType {
      */
     HESSIAN((byte)0x16),
     /**
-     * The hessian.
+     * The jackson.
      * <p>
      * Math.pow(2, 5)
      */
