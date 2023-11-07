@@ -44,6 +44,13 @@ public enum SerializerType {
     KRYO((byte)0x4),
 
     /**
+     * The FST but it's been removed..
+     * <p>
+     * Math.pow(2, 3)
+     */
+    FST((byte)0x8),
+
+    /**
      * The hessian.
      * <p>
      * Math.pow(2, 4)
@@ -74,6 +81,10 @@ public enum SerializerType {
             if (code == b.code) {
                 return b;
             }
+        }
+        if (code == SerializerType.FST.getCode()) {
+            throw new IllegalArgumentException(
+                "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
         }
         throw new IllegalArgumentException("unknown codec:" + code);
     }

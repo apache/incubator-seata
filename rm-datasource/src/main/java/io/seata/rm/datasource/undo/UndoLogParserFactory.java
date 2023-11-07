@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -58,7 +59,12 @@ public class UndoLogParserFactory {
      * @return the UndoLogParser
      */
     public static UndoLogParser getInstance(String name) {
-        return CollectionUtils.computeIfAbsent(INSTANCES, name,
+        UndoLogParser undoLogParser = CollectionUtils.computeIfAbsent(INSTANCES, name,
             key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
+        if (undoLogParser == null && StringUtils.equalsIgnoreCase("fst", name)) {
+            throw new IllegalArgumentException(
+                "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
+        }
+        return undoLogParser;
     }
 }
