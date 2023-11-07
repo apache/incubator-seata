@@ -44,7 +44,7 @@ public enum SerializerType {
     KRYO((byte)0x4),
 
     /**
-     * The FST but it's been removed..
+     * The FST but it's been removed.
      * <p>
      * Math.pow(2, 3)
      */
