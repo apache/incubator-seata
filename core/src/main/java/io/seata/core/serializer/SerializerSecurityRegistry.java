@@ -36,16 +36,12 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Serializer Security Registry
  * @author funkye
  */
 public class SerializerSecurityRegistry {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerializerSecurityRegistry.class);
-
     private static final Set<Class<?>> ALLOW_CLAZZ_SET = new HashSet<>();
 
     private static final Set<String> ALLOW_CLAZZ_PATTERN = new HashSet<>();
@@ -111,24 +107,20 @@ public class SerializerSecurityRegistry {
 
         try {
             String packageName = "io.seata.core.protocol";
-
             Enumeration<URL> packageDir = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
             while (packageDir.hasMoreElements()) {
                 String filePath = packageDir.nextElement().getFile();
                 findProtocolClassByPackage(filePath, packageName, classNameSet);
             }
-
-            LOGGER.error("classNameSet from scan:({}) {}", classNameSet.size(), classNameSet);
         } catch (IOException ignore) {
         }
 
-        if (classNameSet.isEmpty()) {
+        if (classNameSet.size() < 31) {
             // package io.seata.core.protocol
             classNameSet.add(io.seata.core.protocol.BatchResultMessage.class);
             classNameSet.add(io.seata.core.protocol.HeartbeatMessage.class);
             classNameSet.add(io.seata.core.protocol.MergedWarpMessage.class);
             classNameSet.add(io.seata.core.protocol.MergeResultMessage.class);
-            classNameSet.add(io.seata.core.protocol.MergeMessage.class);
             classNameSet.add(io.seata.core.protocol.RegisterRMRequest.class);
             classNameSet.add(io.seata.core.protocol.RegisterRMResponse.class);
             classNameSet.add(io.seata.core.protocol.RegisterTMRequest.class);
@@ -136,28 +128,27 @@ public class SerializerSecurityRegistry {
             classNameSet.add(io.seata.core.protocol.RpcMessage.class);
 
             // package io.seata.core.protocol.transaction
+            classNameSet.add(io.seata.core.protocol.transaction.BranchCommitRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchCommitResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchRegisterRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchRegisterResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchReportRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchReportResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.BranchRollbackRequest.class);
             classNameSet.add(io.seata.core.protocol.transaction.BranchRollbackResponse.class);
             classNameSet.add(io.seata.core.protocol.transaction.GlobalBeginRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchCommitResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalBeginResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalCommitRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalCommitResponse.class);
             classNameSet.add(io.seata.core.protocol.transaction.GlobalLockQueryResponse.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalLockQueryRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalReportRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalReportResponse.class);
             classNameSet.add(io.seata.core.protocol.transaction.GlobalRollbackRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchRegisterRequest.class);
+            classNameSet.add(io.seata.core.protocol.transaction.GlobalRollbackResponse.class);
             classNameSet.add(io.seata.core.protocol.transaction.GlobalStatusRequest.class);
             classNameSet.add(io.seata.core.protocol.transaction.GlobalStatusResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalReportResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchCommitRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalReportRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchReportRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalRollbackResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalBeginResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchReportResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalCommitResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalLockQueryRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.GlobalCommitRequest.class);
             classNameSet.add(io.seata.core.protocol.transaction.UndoLogDeleteRequest.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchRegisterResponse.class);
-            classNameSet.add(io.seata.core.protocol.transaction.BranchRollbackRequest.class);
-            LOGGER.error("classNameSet from add:({}) {}", classNameSet.size(), classNameSet);
         }
 
         return classNameSet;

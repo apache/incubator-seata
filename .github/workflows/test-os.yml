@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-          ubuntu-latest,
+          #ubuntu-latest, # Already tested in `test.yml`
           macos-latest,
           windows-latest, # Skip tests, because too many errors in unit-test.
         ]
@@ -44,7 +44,7 @@ jobs:
             mvn  -version;
             mvn  clean install -DskipTests -e -B;
 
-  # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
+  # job 2:
   test-arm64:
     name: "test-arm64"
     runs-on: ubuntu-latest

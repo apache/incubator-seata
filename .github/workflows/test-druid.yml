@@ -2,7 +2,7 @@ name: "test-druid"
 
 on:
   push:
-    branches: [ "*.*.*" ]
+    branches: [ test*, "*.*.*" ]
 
 jobs:
   test-druid:
@@ -57,4 +57,6 @@ jobs:
       # step 4
       - name: "Test with Maven"
         run: |
-          ./mvnw -T 4C clean test -Ddruid.version=${{ matrix.druid }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean test \
+                 -Ddruid.version=${{ matrix.druid }} \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
