@@ -383,7 +383,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -401,7 +401,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -419,7 +419,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -441,7 +441,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
@@ -522,7 +522,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -544,7 +544,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
 
@@ -564,7 +564,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         });
@@ -957,7 +957,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         SagaCostPrint.executeAndPrint("3-37-" + i, () -> {
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
@@ -1119,7 +1119,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         SagaCostPrint.executeAndPrint("3-39-" + i, () -> {
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
