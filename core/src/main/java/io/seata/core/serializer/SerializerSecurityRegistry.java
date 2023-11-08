@@ -36,12 +36,16 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Serializer Security Registry
  * @author funkye
  */
 public class SerializerSecurityRegistry {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializerSecurityRegistry.class);
+
     private static final Set<Class<?>> ALLOW_CLAZZ_SET = new HashSet<>();
 
     private static final Set<String> ALLOW_CLAZZ_PATTERN = new HashSet<>();
@@ -114,6 +118,7 @@ public class SerializerSecurityRegistry {
             String filePath = packageDir.nextElement().getFile();
             findProtocolClassByPackage(filePath, packageName, classNameSet);
         }
+        LOGGER.error("classNameSet: " + classNameSet);
         return classNameSet;
     }
 
