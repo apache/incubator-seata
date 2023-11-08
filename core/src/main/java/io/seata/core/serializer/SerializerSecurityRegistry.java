@@ -108,6 +108,7 @@ public class SerializerSecurityRegistry {
 
     private static Set<Class<?>> getProtocolType() {
         Set<Class<?>> classNameSet = new HashSet<>();
+
         try {
             String packageName = "io.seata.core.protocol";
 
@@ -119,17 +120,20 @@ public class SerializerSecurityRegistry {
 
             LOGGER.error("classNameSet from scan:({}) {}", classNameSet.size(), classNameSet);
         } catch (IOException ignore) {
+        }
+
+        if (classNameSet.isEmpty()) {
             // package io.seata.core.protocol
-            classNameSet.add(io.seata.core.protocol.RpcMessage.class);
-            classNameSet.add(io.seata.core.protocol.MergedWarpMessage.class);
-            classNameSet.add(io.seata.core.protocol.RegisterTMResponse.class);
-            classNameSet.add(io.seata.core.protocol.RegisterRMResponse.class);
-            classNameSet.add(io.seata.core.protocol.MergeResultMessage.class);
-            classNameSet.add(io.seata.core.protocol.RegisterTMRequest.class);
-            classNameSet.add(io.seata.core.protocol.HeartbeatMessage.class);
-            classNameSet.add(io.seata.core.protocol.MergeMessage.class);
             classNameSet.add(io.seata.core.protocol.BatchResultMessage.class);
+            classNameSet.add(io.seata.core.protocol.HeartbeatMessage.class);
+            classNameSet.add(io.seata.core.protocol.MergedWarpMessage.class);
+            classNameSet.add(io.seata.core.protocol.MergeResultMessage.class);
+            classNameSet.add(io.seata.core.protocol.MergeMessage.class);
             classNameSet.add(io.seata.core.protocol.RegisterRMRequest.class);
+            classNameSet.add(io.seata.core.protocol.RegisterRMResponse.class);
+            classNameSet.add(io.seata.core.protocol.RegisterTMRequest.class);
+            classNameSet.add(io.seata.core.protocol.RegisterTMResponse.class);
+            classNameSet.add(io.seata.core.protocol.RpcMessage.class);
 
             // package io.seata.core.protocol.transaction
             classNameSet.add(io.seata.core.protocol.transaction.BranchRollbackResponse.class);
