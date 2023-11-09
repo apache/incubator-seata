@@ -65,7 +65,6 @@ public abstract class AbstractCore implements Core {
     protected LockManager lockManager = LockerManagerFactory.getLockManager();
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
-    private int appDataWarnPercent;
     private int appDataErrSize ;
     private boolean throwDataSizeExp ;
 
@@ -76,8 +75,6 @@ public abstract class AbstractCore implements Core {
             throw new IllegalArgumentException("remotingServer must be not null");
         }
         this.remotingServer = remotingServer;
-        this.appDataWarnPercent = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_PERCENT_WARN,
-            DefaultValues.DEFAULT_APPLICATION_DATA_PERENT_WARN);
         this.appDataErrSize = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_ERROR,
             DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_ERR);
         this.throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_CHECK, false);
@@ -90,7 +87,7 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        StringUtils.checkDataSize(applicationData, "applicationData", appDataWarnPercent, appDataErrSize, throwDataSizeExp);
+        StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
 
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);

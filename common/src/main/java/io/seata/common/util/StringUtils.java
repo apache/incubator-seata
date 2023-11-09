@@ -358,11 +358,10 @@ public class StringUtils {
      *
      * @param data the str
      * @param dataName the data name
-     * @param warningPercent log warning if size > errorSize * warningPercent / 100
      * @param errorSize throw exception if size > errorSize
      * @return boolean
      */
-    public static boolean checkDataSize(String data, String dataName, int warningPercent, int errorSize, boolean throwIfErr) {
+    public static boolean checkDataSize(String data, String dataName, int errorSize, boolean throwIfErr) {
         try {
             if (isBlank(data)) {
                 return true;
@@ -374,10 +373,6 @@ public class StringUtils {
                     return false;
                 }
                 throw new IllegalArgumentException(dataName + " data is too large, size=" + length);
-            }
-            if (length > errorSize * warningPercent / 100) {
-                LOGGER.warn("{} data is large(warningSize), size={}", dataName, length);
-                return false;
             }
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("decode name error: {}", e.getMessage(), e);

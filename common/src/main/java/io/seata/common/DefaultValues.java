@@ -198,11 +198,6 @@ public interface DefaultValues {
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
-     * the constant DEFAULT_APPLICATION_DATA_PERENT_WARN
-     */
-    int DEFAULT_APPLICATION_DATA_PERENT_WARN = 50;
-
-    /**
      * the constant DEFAULT_APPLICATION_DATA_SIZE_ERR
      */
     int DEFAULT_APPLICATION_DATA_SIZE_ERR = 64000;

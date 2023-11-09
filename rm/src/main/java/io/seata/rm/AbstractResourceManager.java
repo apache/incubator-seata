@@ -49,8 +49,6 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static int appDataWarnPercent = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_PERCENT_WARN,
-            DefaultValues.DEFAULT_APPLICATION_DATA_PERENT_WARN);
     private static int appDataErrSize = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_ERROR,
             DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_ERR);
 
@@ -69,7 +67,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
-            StringUtils.checkDataSize(applicationData, "applicationData", appDataWarnPercent, appDataErrSize, throwDataSizeExp);
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
 
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
@@ -108,7 +106,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
-            StringUtils.checkDataSize(applicationData, "applicationData", appDataWarnPercent, appDataErrSize, throwDataSizeExp);
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
             request.setBranchId(branchId);

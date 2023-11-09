@@ -983,11 +983,6 @@ public interface ConfigurationKeys {
     String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
 
     /**
-     * The constant RM_APPLICATION_DATA_PERCENT_WARN
-     */
-    String RM_APPLICATION_DATA_PERCENT_WARN = CLIENT_RM_PREFIX + "applicationDataWarnPercent";
-
-    /**
      * The constant RM_APPLICATION_DATA_SIZE_ERROR
      */
     String RM_APPLICATION_DATA_SIZE_ERROR = CLIENT_RM_PREFIX + "applicationDataErrSize";
@@ -996,11 +991,6 @@ public interface ConfigurationKeys {
      * The constant RM_APPLICATION_DATA_SIZE_CHECK
      */
     String RM_APPLICATION_DATA_SIZE_CHECK = CLIENT_RM_PREFIX + "applicationDataEnable";
-
-    /**
-     * The constant SERVER_APPLICATION_DATA_PERCENT_WARN
-     */
-    String SERVER_APPLICATION_DATA_PERCENT_WARN = SERVER_PREFIX + "applicationDataWarnPercent";
 
     /**
      * The constant SERVER_APPLICATION_DATA_SIZE_ERROR
