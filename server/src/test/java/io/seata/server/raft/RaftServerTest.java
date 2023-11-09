@@ -20,6 +20,7 @@ import io.seata.common.XID;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,8 +34,8 @@ public class RaftServerTest {
     public static void setUp(ApplicationContext context) {
     }
 
-    @AfterAll
-    public static void destroy() {
+    @AfterEach
+    public void destroy() {
         System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
         StoreConfig.setStartupParameter("file", "file", "file");
@@ -60,7 +61,6 @@ public class RaftServerTest {
 
     @Test
     public void initRaftServerFailByRaftPortNull() {
-        System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
             XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
