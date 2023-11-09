@@ -17,6 +17,9 @@ package io.seata.server.raft;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationFactory;
 import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
@@ -39,6 +42,7 @@ public class RaftServerTest {
         System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
         StoreConfig.setStartupParameter("file", "file", "file");
+        ConfigurationCache.clear();
     }
 
     @Test
