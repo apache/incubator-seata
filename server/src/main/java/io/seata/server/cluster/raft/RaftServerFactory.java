@@ -161,6 +161,7 @@ public class RaftServerFactory implements Disposable, Closeable {
     public void destroy() {
         this.close();
         rpcServer = null;
+        raftMode = false;
         RAFT_SERVER_MAP.clear();
     }
 
