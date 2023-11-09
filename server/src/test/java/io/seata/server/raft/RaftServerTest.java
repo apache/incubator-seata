@@ -53,6 +53,10 @@ public class RaftServerTest {
         StoreConfig.setStartupParameter("raft", "raft", "raft");
         Assertions.assertDoesNotThrow(() -> RaftServerFactory.getInstance().init());
         Assertions.assertNotNull(RaftServerFactory.getInstance().getRaftServer("default"));
+        Assertions.assertNotNull(RaftServerFactory.groups());
+        Assertions.assertNotNull(RaftServerFactory.getCliServiceInstance());
+        Assertions.assertNotNull(RaftServerFactory.getCliClientServiceInstance());
+        Assertions.assertEquals(RaftServerFactory.getInstance().isLeader("default"), false);
         RaftServerFactory.getInstance().start();
         RaftServerFactory.getInstance().destroy();
     }
