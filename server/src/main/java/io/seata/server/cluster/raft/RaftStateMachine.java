@@ -114,7 +114,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     public RaftStateMachine(String group) {
         this.group = group;
-        mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        mode = StoreConfig.getSessionMode().getName();
         EXECUTES.put(REFRESH_CLUSTER_METADATA, syncMsg -> {
             refreshClusterMetadata(syncMsg);
             return null;
