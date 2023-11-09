@@ -191,8 +191,8 @@ class NettyClientChannelManager {
                     });
                 }
                 boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
-                boolean main = Thread.currentThread().getId() == 1L;
-                if (failFast && main) {
+                boolean notSchedule = !Thread.currentThread().getName().startsWith(AbstractNettyRemoting.TIME_EXECUTOR_NAME_PREFIX);
+                if (failFast && notSchedule) {
                     String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
                     throw new FrameworkException("can not connect to [" + invalidAddress + "]");
                 }

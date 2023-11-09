@@ -59,11 +59,13 @@ import org.slf4j.MDC;
 public abstract class AbstractNettyRemoting implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemoting.class);
+
+    public static final String TIME_EXECUTOR_NAME_PREFIX = "timeoutChecker";
     /**
      * The Timer executor.
      */
     protected final ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("timeoutChecker", 1, true));
+        new NamedThreadFactory(TIME_EXECUTOR_NAME_PREFIX, 1, true));
     /**
      * The Message executor.
      */
