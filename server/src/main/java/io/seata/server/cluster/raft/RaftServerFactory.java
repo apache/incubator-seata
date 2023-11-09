@@ -89,14 +89,7 @@ public class RaftServerFactory implements Disposable, Closeable {
     public void init() {
         String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
         StoreConfig.SessionMode storeMode = StoreConfig.getSessionMode();
-        if (storeMode.equals(StoreConfig.SessionMode.RAFT)) {
-            for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-                if (!(instance instanceof FileRegistryServiceImpl)) {
-                    throw new IllegalArgumentException("Raft store mode not support other Registration Center");
-                }
-            }
-            raftMode = true;
-        }
+        raftMode = storeMode.equals(StoreConfig.SessionMode.RAFT);
         if (StringUtils.isBlank(initConfStr)) {
             if (raftMode) {
                 throw new IllegalArgumentException(
@@ -104,6 +97,13 @@ public class RaftServerFactory implements Disposable, Closeable {
             }
             return;
         } else {
+            if (raftMode) {
+                for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
+                    if (!(instance instanceof FileRegistryServiceImpl)) {
+                        throw new IllegalArgumentException("Raft store mode not support other Registration Center");
+                    }
+                }
+            }
             LOGGER.warn("raft mode and raft cluster is an experimental feature");
         }
         final Configuration initConf = new Configuration();
