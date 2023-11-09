@@ -40,8 +40,8 @@ public class RaftServerTest {
     public void destroy() {
         System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
-        StoreConfig.setStartupParameter("file", "file", "file");
         ConfigurationCache.clear();
+        StoreConfig.setStartupParameter("file", "file", "file");
     }
 
     @Test
