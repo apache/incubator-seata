@@ -34,8 +34,7 @@ import org.springframework.context.ApplicationContext;
 public class RaftServerTest {
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {
-    }
+    public static void setUp(ApplicationContext context) {}
 
     @AfterEach
     public void destroy() {
