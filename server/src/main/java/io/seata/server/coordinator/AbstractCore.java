@@ -76,7 +76,7 @@ public abstract class AbstractCore implements Core {
         }
         this.remotingServer = remotingServer;
         this.appDataErrSize = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_LIMIT,
-            DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_ERR);
+            DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT);
         this.throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_CHECK, false);
 
     }

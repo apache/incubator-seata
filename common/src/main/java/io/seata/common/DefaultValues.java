@@ -198,9 +198,9 @@ public interface DefaultValues {
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
-     * the constant DEFAULT_APPLICATION_DATA_SIZE_ERR
+     * the constant DEFAULT_APPLICATION_DATA_SIZE_LIMIT
      */
-    int DEFAULT_APPLICATION_DATA_SIZE_ERR = 64000;
+    int DEFAULT_APPLICATION_DATA_SIZE_LIMIT = 64000;
 
     /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
