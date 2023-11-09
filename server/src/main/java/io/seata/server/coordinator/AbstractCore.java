@@ -75,7 +75,7 @@ public abstract class AbstractCore implements Core {
             throw new IllegalArgumentException("remotingServer must be not null");
         }
         this.remotingServer = remotingServer;
-        this.appDataErrSize = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_ERROR,
+        this.appDataErrSize = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_LIMIT,
             DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_ERR);
         this.throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_CHECK, false);
 

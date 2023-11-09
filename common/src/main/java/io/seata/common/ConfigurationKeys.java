@@ -985,20 +985,20 @@ public interface ConfigurationKeys {
     /**
      * The constant RM_APPLICATION_DATA_SIZE_ERROR
      */
-    String RM_APPLICATION_DATA_SIZE_ERROR = CLIENT_RM_PREFIX + "applicationDataErrSize";
+    String RM_APPLICATION_DATA_SIZE_LIMIT = CLIENT_RM_PREFIX + "applicationDataLimit";
 
     /**
      * The constant RM_APPLICATION_DATA_SIZE_CHECK
      */
-    String RM_APPLICATION_DATA_SIZE_CHECK = CLIENT_RM_PREFIX + "applicationDataEnable";
+    String RM_APPLICATION_DATA_SIZE_CHECK = CLIENT_RM_PREFIX + "applicationDataLimitCheck";
 
     /**
      * The constant SERVER_APPLICATION_DATA_SIZE_ERROR
      */
-    String SERVER_APPLICATION_DATA_SIZE_ERROR = SERVER_PREFIX + "applicationDataErrSize";
+    String SERVER_APPLICATION_DATA_SIZE_LIMIT = SERVER_PREFIX + "applicationDataLimit";
 
     /**
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
-    String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataCheck";
+    String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
 }

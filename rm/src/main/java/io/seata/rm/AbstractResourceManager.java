@@ -49,7 +49,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static int appDataErrSize = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_ERROR,
+    private static int appDataErrSize = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_LIMIT,
             DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_ERR);
 
     private static boolean throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_CHECK, false);
