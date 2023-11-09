@@ -39,8 +39,6 @@ import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.Node;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
