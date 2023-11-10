@@ -43,6 +43,7 @@ import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
+import io.seata.spring.remoting.parser.RemotingFactoryBeanParser;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
@@ -472,6 +473,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        RemotingFactoryBeanParser.setApplicationContext(applicationContext);
         this.setBeanFactory(applicationContext);
     }
 

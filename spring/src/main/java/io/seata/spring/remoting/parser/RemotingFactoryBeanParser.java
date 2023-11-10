@@ -81,4 +81,8 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
     public short getProtocol() {
         return 0;
     }
+
+    public static void setApplicationContext(ApplicationContext applicationContext) {
+        RemotingFactoryBeanParser.applicationContext = applicationContext;
+    }
 }
