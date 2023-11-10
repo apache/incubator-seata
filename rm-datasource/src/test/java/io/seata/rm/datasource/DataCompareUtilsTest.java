@@ -17,7 +17,7 @@ package io.seata.rm.datasource;
 
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -181,7 +181,7 @@ public class DataCompareUtilsTest {
         rows.add(row3);
 
         Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
-        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(result.keySet().iterator().next(),"1");
 
     }
@@ -216,7 +216,7 @@ public class DataCompareUtilsTest {
         rows.add(row3);
 
         Map<String, Map<String, Field>> result =DataCompareUtils.rowListToMap(rows,primaryKeyList);
-        Assertions.assertTrue(result.size()==3);
+        Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(result.keySet().iterator().next(),"1_2");
 
     }

@@ -295,8 +295,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                 String next = null;
                 State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
-                if (state != null && state instanceof AbstractTaskState) {
-                    next = ((AbstractTaskState)state).getNext();
+                if (state instanceof AbstractTaskState) {
+                    next = state.getNext();
                 }
                 if (StringUtils.isEmpty(next)) {
                     LOGGER.warn(
@@ -355,7 +355,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
     protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
         Map<String, Object> contextVariables = new HashMap<>();
-        if (stateMachineInstance.getStartParams() == null) {
+        if (stateMachineInstance.getStartParams() != null) {
             contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 

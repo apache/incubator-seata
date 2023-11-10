@@ -15,13 +15,13 @@
  */
 package io.seata.tm.api;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.GlobalLockConfigHolder;
+import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalLockConfig;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.Propagation;
@@ -29,7 +29,6 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,16 +66,16 @@ public class TransactionalTemplate {
                 case NOT_SUPPORTED:
                     // If transaction is existing, suspend it.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend();
+                        suspendedResourcesHolder = tx.suspend(false);
                     }
                     // Execute without transaction and return.
                     return business.execute();
                 case REQUIRES_NEW:
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
-                        suspendedResourcesHolder = tx.suspend();
-                        tx = GlobalTransactionContext.createNew();
+                        suspendedResourcesHolder = tx.suspend(false);
                     }
+                    tx = GlobalTransactionContext.createNew();
                     // Continue and execute with new transaction
                     break;
                 case SUPPORTS:
@@ -87,8 +86,8 @@ public class TransactionalTemplate {
                     // Continue and execute with new transaction
                     break;
                 case REQUIRED:
-                    // If current transaction is existing, execute with current transaction,
-                    // else continue and execute with new transaction.
+                    // If current transaction is existing, execute with current transaction,else create
+                    tx = GlobalTransactionContext.getCurrentOrCreate();
                     break;
                 case NEVER:
                     // If transaction is existing, throw exception.
@@ -111,13 +110,12 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
-            if (tx == null) {
-                tx = GlobalTransactionContext.createNew();
-            }
-
             // set current tx config to holder
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
+
+            if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
+                LOGGER.info("join into a existing global transaction,xid={}", tx.getXid());
+            }
 
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
@@ -156,7 +154,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo          the transaction info
+     * @param txInfo    the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -204,21 +202,40 @@ public class TransactionalTemplate {
             throws TransactionalExecutor.ExecutionException, TransactionException {
         if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
-            LOGGER.info("TM detected timeout, xid = {}", tx.getXid());
-            tx.rollback();
+            Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
+                String.format("client detected transaction timeout before commit, so change to rollback, xid = %s", tx.getXid()));
+            rollbackTransaction(tx, exx);
             return;
         }
 
         try {
             triggerBeforeCommit();
             tx.commit();
-
-            if (Arrays.asList(GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbacked).contains(tx.getLocalStatus())) {
-                throw new TransactionalExecutor.ExecutionException(tx,
-                        new TimeoutException(String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid())),
-                        TransactionalExecutor.Code.TimeoutRollback);
+            GlobalStatus afterCommitStatus = tx.getLocalStatus();
+            TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
+            switch (afterCommitStatus) {
+                case TimeoutRollbacking:
+                    code = TransactionalExecutor.Code.Rollbacking;
+                    break;
+                case TimeoutRollbacked:
+                    code = TransactionalExecutor.Code.RollbackDone;
+                    break;
+                case Finished:
+                    code = TransactionalExecutor.Code.CommitFailure;
+                    break;
+                default:
             }
-
+            Exception statusException = null;
+            if (GlobalStatus.isTwoPhaseHeuristic(afterCommitStatus)) {
+                statusException = new TmTransactionException(TransactionExceptionCode.CommitHeuristic,
+                    String.format("Global transaction[%s] not found, may be rollbacked.", tx.getXid()));
+            } else if (GlobalStatus.isOnePhaseTimeout(afterCommitStatus)) {
+                statusException = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
+                    String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
+            }
+            if (null != statusException) {
+                throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
+            }
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
@@ -239,9 +256,32 @@ public class TransactionalTemplate {
                     TransactionalExecutor.Code.RollbackFailure, originalException);
         }
 
-        // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, GlobalStatus.RollbackRetrying.equals(tx.getLocalStatus())
-                ? TransactionalExecutor.Code.RollbackRetrying : TransactionalExecutor.Code.RollbackDone, originalException);
+        //# fix #5231
+        TransactionalExecutor.Code code;
+        switch (tx.getLocalStatus()) {
+            case RollbackFailed:
+            case TimeoutRollbackFailed:
+            case RollbackRetryTimeout:
+                code = TransactionalExecutor.Code.RollbackFailure;
+                break;
+            case Rollbacking:
+            case RollbackRetrying:
+            case TimeoutRollbacking:
+            case TimeoutRollbackRetrying:
+                code = TransactionalExecutor.Code.Rollbacking;
+                break;
+            case TimeoutRollbacked:
+            case Rollbacked:
+                //rollback transactions but do not exist are usually considered completed
+            case Finished:
+                code = TransactionalExecutor.Code.RollbackDone;
+                break;
+            default:
+                code = TransactionalExecutor.Code.Unknown;
+                LOGGER.warn("{} rollback in the state {}", tx.getXid(), tx.getLocalStatus());
+        }
+        throw new TransactionalExecutor.ExecutionException(tx, code, originalException);
+
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {

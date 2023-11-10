@@ -275,8 +275,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateColumns();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -306,8 +306,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new MySqlCharExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateColumns();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -336,8 +336,8 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setValue(new MySqlOrderingExpr());
             }
-            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateValues();
+            MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            mySQLUpdateRecognizer.getUpdateValues();
         });
     }
 
@@ -372,17 +372,6 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         List<String> updateColumns = recognizer.getUpdateColumns();
         for (String updateColumn : updateColumns) {
             Assertions.assertTrue(updateColumn.contains("`"));
-        }
-    }
-
-    @Test
-    public void testGetUpdateColumnsIsSimplified() {
-        String sql = "update t set `a` = 1, `b` = 2, `c` = 3";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
-        List<String> updateColumns = recognizer.getUpdateColumnsIsSimplified();
-        for (String updateColumn : updateColumns) {
-            Assertions.assertFalse(updateColumn.contains("`"));
         }
     }
 }

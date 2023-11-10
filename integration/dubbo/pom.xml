@@ -29,13 +29,16 @@
     <name>seata-dubbo ${project.version}</name>
     <description>apache dubbo integration for Seata built with Maven</description>
 
-    <properties>
-        <dubbo-seata.version>1.0.0</dubbo-seata.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.apache.dubbo.extensions</groupId>
             <artifactId>dubbo-filter-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

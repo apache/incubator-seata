@@ -49,14 +49,15 @@ public class UpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
-        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
+        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all");
         Object[][] returnValue = new Object[][] {
-            new Object[] {1, "Tom"},
-            new Object[] {2, "Jack"},
+            new Object[] {1, "Tom", "keyword"},
+            new Object[] {2, "Jack", "keyword"},
         };
         Object[][] columnMetas = new Object[][] {
             new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
             new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "ALL", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
         Object[][] indexMetas = new Object[][] {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
@@ -95,6 +96,17 @@ public class UpdateExecutorTest {
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(updateExecutor.beforeImage());
+    }
+
+    @Test
+    public void testKeyword() throws SQLException {
+        String sql = "update table_update_executor_test set `all` = '1234' where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(updateExecutor.afterImage(beforeImage));
     }
 
     @Test

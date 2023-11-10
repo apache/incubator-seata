@@ -35,6 +35,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -194,7 +195,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             try {
                 try (Jedis jedis = jedisPool.getResource()) {
                     // try update Map every 2s
-                    updateClusterAddressMap(jedis, redisRegistryKey);
+                    updateClusterAddressMap(jedis, redisRegistryKey, cluster);
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
@@ -220,7 +221,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     public List<InetSocketAddress> lookup(String key) {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         return lookupByCluster(clusterName);
     }
@@ -230,7 +232,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             String redisRegistryKey = REDIS_FILEKEY_PREFIX + clusterName;
             try (Jedis jedis = jedisPool.getResource()) {
-                updateClusterAddressMap(jedis, redisRegistryKey);
+                updateClusterAddressMap(jedis, redisRegistryKey, clusterName);
             }
             subscribe(clusterName, msg -> {
                 String[] msgr = msg.split("-");
@@ -284,7 +286,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
     }
 
-    private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey) {
+    private void updateClusterAddressMap(Jedis jedis, String redisRegistryKey, String clusterName) {
         ScanParams scanParams = new ScanParams();
         scanParams.count(10);
         scanParams.match(redisRegistryKey + "_*");

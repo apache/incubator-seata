@@ -55,7 +55,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     public void begin(int timeout) throws TransactionException {
         this.createTime = System.currentTimeMillis();
         status = GlobalStatus.Begin;
-        xid = uuidSeqGenerator.generate(null).toString();
+        xid = uuidSeqGenerator.generate(null);
         RootContext.bind(xid);
     }
 
@@ -75,7 +75,12 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend()
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        return null;
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean clean)
             throws TransactionException {
         return null;
     }

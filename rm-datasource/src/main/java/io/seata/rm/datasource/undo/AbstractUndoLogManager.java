@@ -39,7 +39,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -255,6 +255,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
+        ConnectionProxy connectionProxy = null;
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
@@ -262,7 +263,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
         for (; ; ) {
             try {
-                conn = dataSourceProxy.getPlainConnection();
+                connectionProxy = dataSourceProxy.getConnection();
+                conn = connectionProxy.getTargetConnection();
 
                 // The entire undo process should run in a local transaction.
                 if (originalAutoCommit = conn.getAutoCommit()) {
@@ -312,7 +314,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                 dataSourceProxy.getDbType(), sqlUndoLog);
-                            undoExecutor.executeOn(conn);
+                            undoExecutor.executeOn(connectionProxy);
                         }
                     } finally {
                         // remove serializer name
@@ -381,7 +383,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         if (originalAutoCommit) {
                             conn.setAutoCommit(true);
                         }
-                        conn.close();
+                        connectionProxy.close();
                     }
                 } catch (SQLException closeEx) {
                     LOGGER.warn("Failed to close JDBC resource while undo ... ", closeEx);

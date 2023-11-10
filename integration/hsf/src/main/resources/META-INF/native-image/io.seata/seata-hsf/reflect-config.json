@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.taobao.hsf.invocation.filter.RPCFilter"
+    },
+    "name": "io.seata.integration.hsf.HsfTransactionFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]
