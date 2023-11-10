@@ -21,6 +21,8 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +36,10 @@ import org.springframework.context.ApplicationContext;
 public class RaftServerTest {
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {}
+    public static void setUp(ApplicationContext context) {
+        LockerManagerFactory.destroy();
+        SessionHolder.destroy();
+    }
 
     @AfterEach
     public void destroy() {
@@ -42,6 +47,8 @@ public class RaftServerTest {
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
         ConfigurationCache.clear();
         StoreConfig.setStartupParameter("file", "file", "file");
+        LockerManagerFactory.destroy();
+        SessionHolder.destroy();
     }
 
     @Test
@@ -57,7 +64,6 @@ public class RaftServerTest {
         Assertions.assertNotNull(RaftServerFactory.getCliClientServiceInstance());
         Assertions.assertEquals(RaftServerFactory.getInstance().isLeader("default"), false);
         RaftServerFactory.getInstance().start();
-        RaftServerFactory.getInstance().destroy();
     }
 
     @Test

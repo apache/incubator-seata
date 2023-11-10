@@ -162,7 +162,6 @@ public class RaftServerFactory implements Disposable, Closeable {
         this.close();
         rpcServer = null;
         raftMode = false;
-        RAFT_SERVER_MAP.clear();
     }
 
     @Override
@@ -172,6 +171,7 @@ public class RaftServerFactory implements Disposable, Closeable {
             LOGGER.info("closed seata server raft cluster, group: {} ", group);
         });
         Optional.ofNullable(rpcServer).ifPresent(RpcServer::shutdown);
+        RAFT_SERVER_MAP.clear();
     }
 
     public RaftServer getRaftServer(String group) {
