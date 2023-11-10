@@ -285,7 +285,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     private void initConnection() {
-        getClientChannelManager().reconnect(transactionServiceGroup);
+        boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
+        getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
     }
 
 }

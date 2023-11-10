@@ -164,59 +164,27 @@ class NettyClientChannelManager {
     /**
      * Reconnect to remote server of current transaction service group.
      *
-     * @param availList avail list
-     * @param transactionServiceGroup transaction service group
-     */
-    void reconnect(List<String> availList, String transactionServiceGroup) {
-        Set<String> channelAddress = new HashSet<>(availList.size());
-        Map<String, Exception> failedMap = new HashMap<>();
-        try {
-            for (String serverAddress : availList) {
-                try {
-                    acquireChannel(serverAddress);
-                    channelAddress.add(serverAddress);
-                } catch (Exception e) {
-                    failedMap.put(serverAddress, e);
-                }
-            }
-            if (failedMap.size() > 0) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                            failedMap.keySet(),
-                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
-                } else if (LOGGER.isDebugEnabled()) {
-                    failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
-                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
-                    });
-                }
-                boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
-                boolean notSchedule = !Thread.currentThread().getName().startsWith(AbstractNettyRemoting.TIME_EXECUTOR_NAME_PREFIX);
-                if (failFast && notSchedule) {
-                    String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
-                    throw new FrameworkException("can not connect to [" + invalidAddress + "]");
-                }
-            }
-        } finally {
-            if (CollectionUtils.isNotEmpty(channelAddress)) {
-                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
-                for (String address : channelAddress) {
-                    String[] array = NetUtil.splitIPPortStr(address);
-                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
-                }
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
-            } else {
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
-            }
-        }
-    }
-
-    /**
-     * Reconnect to remote server of current transaction service group.
-     *
      * @param transactionServiceGroup transaction service group
      */
     void reconnect(String transactionServiceGroup) {
+        doReconnect(transactionServiceGroup, false);
+    }
+
+    /**
+     * Init reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void initReconnect(String transactionServiceGroup, boolean failFast) {
+        doReconnect(transactionServiceGroup, failFast);
+    }
+
+    /**
+     * reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void doReconnect(String transactionServiceGroup, boolean failFast) {
         List<String> availList;
         try {
             availList = getAvailServerList(transactionServiceGroup);
@@ -240,7 +208,57 @@ class NettyClientChannelManager {
             }
             return;
         }
-        reconnect(availList, transactionServiceGroup);
+        try {
+            doReconnect(availList, transactionServiceGroup);
+        } catch (Exception e) {
+            if (failFast) throw e;
+        }
+    }
+
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
+     * @param availList avail list
+     * @param transactionServiceGroup transaction service group
+     */
+    void doReconnect(List<String> availList, String transactionServiceGroup) {
+        Set<String> channelAddress = new HashSet<>(availList.size());
+        Map<String, Exception> failedMap = new HashMap<>();
+        try {
+            for (String serverAddress : availList) {
+                try {
+                    acquireChannel(serverAddress);
+                    channelAddress.add(serverAddress);
+                } catch (Exception e) {
+                    failedMap.put(serverAddress, e);
+                }
+            }
+            if (failedMap.size() > 0) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedMap.keySet(),
+                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                } else if (LOGGER.isDebugEnabled()) {
+                    failedMap.forEach((key, value) -> {
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                    });
+                }
+                String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
+                throw new FrameworkException("can not connect to [" + invalidAddress + "]");
+            }
+        } finally {
+            if (CollectionUtils.isNotEmpty(channelAddress)) {
+                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
+                for (String address : channelAddress) {
+                    String[] array = NetUtil.splitIPPortStr(address);
+                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
+                }
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
+            } else {
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
+            }
+        }
     }
 
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
@@ -317,5 +335,6 @@ class NettyClientChannelManager {
         }
         return null;
     }
+
 }
 
