@@ -56,7 +56,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -107,7 +107,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
@@ -125,7 +125,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -144,7 +144,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
             // FIXME: some times, the compensationStatus is RU
@@ -163,7 +163,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         });
@@ -180,7 +180,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
         });
@@ -200,7 +200,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
             Assertions.assertNotNull(peopleResult);
@@ -219,7 +219,7 @@ public class StateMachineAsyncTests {
 
             LockAndCallback lockAndCallback = new LockAndCallback();
             StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
-            lockAndCallback.waittingForFinish(inst);
+            lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         });
