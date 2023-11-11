@@ -146,7 +146,7 @@ public class SessionHelper {
                 globalSession.changeGlobalStatus(GlobalStatus.Committed);
             }
             globalSession.end();
-            if (!retryGlobal) {
+            if (!DELAY_HANDLE_SESSION) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
@@ -218,7 +218,7 @@ public class SessionHelper {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
             }
             globalSession.end();
-            if (!retryGlobal && !timeoutDone) {
+            if (!DELAY_HANDLE_SESSION && !timeoutDone) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
@@ -331,7 +331,7 @@ public class SessionHelper {
     public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
         return forEach(sessions, handler, false);
     }
-
+    
     /**
      * Foreach branch sessions.
      *
