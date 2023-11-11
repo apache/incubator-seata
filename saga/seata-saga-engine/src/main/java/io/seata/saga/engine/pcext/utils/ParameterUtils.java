@@ -16,13 +16,13 @@
 package io.seata.saga.engine.pcext.utils;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.expression.seq.SequenceExpression;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -15,16 +15,16 @@
  */
 package io.seata.saga.statelang.parser;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Map;
-
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import io.seata.saga.statelang.validator.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * StateParser tests
@@ -35,9 +35,8 @@ public class StateParserTests {
 
     @Test
     public void testParser() throws IOException {
-
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(null).parse(json);
         stateMachine.setGmtCreate(new Date());
         Assertions.assertNotNull(stateMachine);
@@ -52,14 +51,13 @@ public class StateParserTests {
         System.out.println(fastjsonOutputJson);
 
         Assertions.assertEquals("simpleTestStateMachine", stateMachine.getName());
-        Assertions.assertTrue(stateMachine.getStates().size() > 0);
+        Assertions.assertFalse(stateMachine.getStates().isEmpty());
     }
 
     @Test
     public void testDesignerJsonTransformer() throws IOException {
-
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_layout.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_layout.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
@@ -78,8 +76,8 @@ public class StateParserTests {
 
     @Test
     public void singleInfiniteLoopTest() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_single_infinite_loop.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_single_infinite_loop.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -89,8 +87,8 @@ public class StateParserTests {
 
     @Test
     public void testMultipleInfiniteLoop() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_multiple_infinite_loop.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_multiple_infinite_loop.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -100,8 +98,8 @@ public class StateParserTests {
 
     @Test
     public void testNonExistedName() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_non_existed_name.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_non_existed_name.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -111,8 +109,8 @@ public class StateParserTests {
 
     @Test
     public void testRecursiveSubStateMachine() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_recursive_sub_machine.json");
-        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_recursive_sub_machine.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
