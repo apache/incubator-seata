@@ -25,6 +25,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.Resource;
 import io.seata.rm.AbstractResourceManager;
+import io.seata.saga.engine.StateMachineEngineHolder;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.statelang.domain.ExecutionStatus;

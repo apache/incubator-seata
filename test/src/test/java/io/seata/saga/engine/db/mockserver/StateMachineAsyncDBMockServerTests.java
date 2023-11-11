@@ -18,6 +18,7 @@ package io.seata.saga.engine.db.mockserver;
 import io.seata.common.LockAndCallback;
 import io.seata.common.SagaCostPrint;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.engine.StateMachineEngineHolder;
 import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -44,6 +45,7 @@ public class StateMachineAsyncDBMockServerTests {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
                 "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+        StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
 
     @Test

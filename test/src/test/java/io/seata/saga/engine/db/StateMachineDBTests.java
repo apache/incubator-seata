@@ -24,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.engine.StateMachineEngineHolder;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.mock.DemoService.Engineer;
@@ -69,6 +70,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+        StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
 
     @AfterAll

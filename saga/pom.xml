@@ -34,7 +34,6 @@
         <module>seata-saga-statelang</module>
         <module>seata-saga-engine</module>
         <module>seata-saga-rm</module>
-        <module>seata-saga-engine-store</module>
         <module>seata-saga-spring</module>
     </modules>
 

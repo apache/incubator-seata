@@ -23,9 +23,9 @@ import javax.sql.DataSource;
 
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.engine.StateMachineEngineHolder;
 import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine;
-import io.seata.saga.rm.StateMachineEngineHolder;
 import io.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -88,7 +88,7 @@ public class SeataSagaAutoConfiguration {
     public StateMachineEngine stateMachineEngine(StateMachineConfig config) {
         ProcessCtrlStateMachineEngine engine = new ProcessCtrlStateMachineEngine();
         engine.setStateMachineConfig(config);
-        new StateMachineEngineHolder().setStateMachineEngine(engine);
+        StateMachineEngineHolder.setStateMachineEngine(engine);
         return engine;
     }
 

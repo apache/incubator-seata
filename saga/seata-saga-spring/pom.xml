@@ -16,19 +16,13 @@
 
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>seata-tm</artifactId>
+      <artifactId>seata-saga-engine</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>seata-saga-rm</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>seata-saga-engine-store</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -342,11 +342,6 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-saga-engine-store</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
                 <artifactId>seata-sqlparser-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
