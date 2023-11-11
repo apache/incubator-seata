@@ -29,8 +29,9 @@
     <description>server for Seata built with Maven</description>
 
     <properties>
-        <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
-        <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
+        <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
+        <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
+        <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -63,9 +64,18 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml-for-server.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
