@@ -16,11 +16,15 @@
 package io.seata.spring.remoting.parser;
 
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.holder.ObjectHolder;
 import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
 import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.spring.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author leezongjie
@@ -28,6 +32,8 @@ import org.springframework.context.ApplicationContext;
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
     public static final ApplicationContext APPLICATION_CONTEXT = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
+
+    private static final Set<String> processedBeanNames = new HashSet<>();
 
     /**
      * if it is proxy bean, check if the FactoryBean is Remoting bean
@@ -43,19 +49,30 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         //the FactoryBean of proxy bean
         String factoryBeanName = "&" + beanName;
         Object factoryBean = null;
+        checkApplicationContext();
         if (applicationContext != null && applicationContext.containsBean(factoryBeanName)) {
             factoryBean = applicationContext.getBean(factoryBeanName);
         }
         return factoryBean;
     }
 
+    private static void checkApplicationContext() {
+        if (applicationContext == null) {
+            applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
+        }
+    }
     @Override
     public boolean isReference(Object bean, String beanName) {
         Object factoryBean = getRemotingFactoryBean(bean, beanName);
         if (factoryBean == null) {
             return false;
         }
-        return DefaultRemotingParser.get().isReference(bean, beanName);
+        if (onProcessing(beanName)) {
+            return false;
+        }
+        boolean result = DefaultRemotingParser.get().isReference(factoryBean, beanName);
+        finishProcess(beanName);
+        return result;
     }
 
     @Override
@@ -64,7 +81,12 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return false;
         }
-        return DefaultRemotingParser.get().isReference(bean, beanName);
+        if (onProcessing(beanName)) {
+            return false;
+        }
+        boolean result = DefaultRemotingParser.get().isService(factoryBean, beanName);
+        finishProcess(beanName);
+        return result;
     }
 
     @Override
@@ -73,9 +95,29 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return null;
         }
-        return DefaultRemotingParser.get().getServiceDesc(bean, beanName);
+        if (onProcessing(beanName)) {
+            return null;
+        }
+        RemotingDesc remotingDesc = DefaultRemotingParser.get().getServiceDesc(factoryBean, beanName);
+        finishProcess(beanName);
+        return remotingDesc;
     }
 
+    private boolean onProcessing(String beanName) {
+        if (processedBeanNames.contains(beanName)) {
+            return true;
+        } else {
+            processedBeanNames.add(beanName);
+            return false;
+        }
+    }
+
+    private boolean finishProcess(String beanName) {
+        if (processedBeanNames.contains(beanName)) {
+            return processedBeanNames.remove(beanName);
+        }
+        return true;
+    }
 
     @Override
     public short getProtocol() {
