@@ -371,7 +371,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         <LinkButton
           onClick={() => {
             history.push({
-              pathname: '/GlobalLockInfo',
+              pathname: '/globallock/list',
               // @ts-ignore
               query: { xid: record.xid },
             });
@@ -392,7 +392,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         <LinkButton
           onClick={() => {
             history.push({
-              pathname: '/GlobalLockInfo',
+              pathname: '/globallock/list',
               // @ts-ignore
               query: { xid: record.xid },
             });
