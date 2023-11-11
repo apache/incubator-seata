@@ -178,6 +178,10 @@
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.opengauss</groupId>
+            <artifactId>opengauss-jdbc</artifactId>
+        </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
         <dependency>

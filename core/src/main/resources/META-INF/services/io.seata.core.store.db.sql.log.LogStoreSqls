@@ -7,3 +7,4 @@ io.seata.core.store.db.sql.log.SqlServerLogStoreSqls
 io.seata.core.store.db.sql.log.MariadbLogStoreSqls
 io.seata.core.store.db.sql.log.PolarDBXLogStoreSqls
 io.seata.core.store.db.sql.log.DmLogStoreSqls
+io.seata.core.store.db.sql.log.GaussDBLogStoreSqls

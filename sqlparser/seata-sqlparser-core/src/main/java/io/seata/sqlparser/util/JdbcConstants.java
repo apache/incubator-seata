@@ -85,4 +85,6 @@ public interface JdbcConstants {
     String POLARDB = "polardb";
 
     String POLARDBX = "polardb-x";
+
+    String GAUSSDB = "gaussdb";
 }

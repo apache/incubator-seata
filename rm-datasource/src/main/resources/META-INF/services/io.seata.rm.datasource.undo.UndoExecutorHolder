@@ -5,3 +5,4 @@ io.seata.rm.datasource.undo.sqlserver.SqlServerUndoExecutorHolder
 io.seata.rm.datasource.undo.mariadb.MariadbUndoExecutorHolder
 io.seata.rm.datasource.undo.polardbx.PolarDBXUndoExecutorHolder
 io.seata.rm.datasource.undo.dm.DmUndoExecutorHolder
+io.seata.rm.datasource.undo.gaussdb.GaussDBUndoExecutorHolder
