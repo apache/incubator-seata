@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
-    public static final ApplicationContext APPLICATION_CONTEXT = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
+    public static ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
 
     private static final Set<String> processedBeanNames = new HashSet<>();
 
@@ -106,17 +106,13 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
     private boolean onProcessing(String beanName) {
         if (processedBeanNames.contains(beanName)) {
             return true;
-        } else {
-            processedBeanNames.add(beanName);
-            return false;
         }
+        processedBeanNames.add(beanName);
+        return false;
     }
 
-    private boolean finishProcess(String beanName) {
-        if (processedBeanNames.contains(beanName)) {
-            return processedBeanNames.remove(beanName);
-        }
-        return true;
+    private void finishProcess(String beanName) {
+        processedBeanNames.remove(beanName);
     }
 
     @Override
