@@ -33,7 +33,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
     public static ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
 
-    private static final Set<String> processedBeanNames = new HashSet<>();
+    private static final Set<String> PROCESSED_BEAN_NAMES = new HashSet<>();
 
     /**
      * if it is proxy bean, check if the FactoryBean is Remoting bean
@@ -104,15 +104,15 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
     }
 
     private boolean onProcessing(String beanName) {
-        if (processedBeanNames.contains(beanName)) {
+        if (PROCESSED_BEAN_NAMES.contains(beanName)) {
             return true;
         }
-        processedBeanNames.add(beanName);
+        PROCESSED_BEAN_NAMES.add(beanName);
         return false;
     }
 
     private void finishProcess(String beanName) {
-        processedBeanNames.remove(beanName);
+        PROCESSED_BEAN_NAMES.remove(beanName);
     }
 
     @Override
