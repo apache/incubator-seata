@@ -22,7 +22,7 @@ import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
  */
 public interface InterfaceParser {
 
-    ProxyInvocationHandler parserInterfaceToProxy(Object target) throws Exception;
+    ProxyInvocationHandler parserInterfaceToProxy(Object target, String targetName) throws Exception;
 
 
 }

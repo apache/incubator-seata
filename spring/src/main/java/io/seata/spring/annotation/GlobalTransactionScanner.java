@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
+import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -69,6 +70,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
+import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
@@ -280,7 +282,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
                 interceptor = null;
-                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean);
+                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean, beanName);
                 if (proxyInvocationHandler == null) {
                     return bean;
                 }

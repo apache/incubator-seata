@@ -39,7 +39,7 @@ public class ProxyUtil {
                 if (PROXYED_SET.containsKey(target)) {
                     return (T) PROXYED_SET.get(target);
                 }
-                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(target);
+                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(target, target.getClass().getName());
                 if (proxyInvocationHandler == null) {
                     return target;
                 }
