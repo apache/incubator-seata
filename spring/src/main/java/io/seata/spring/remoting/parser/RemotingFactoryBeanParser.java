@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationContext;
  */
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
-    public static ApplicationContext applicationContext;
+    public static final ApplicationContext APPLICATION_CONTEXT = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
 
     /**
      * if it is proxy bean, check if the FactoryBean is Remoting bean
@@ -82,7 +82,4 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         return 0;
     }
 
-    public static void setApplicationContext(ApplicationContext applicationContext) {
-        RemotingFactoryBeanParser.applicationContext = applicationContext;
-    }
 }
