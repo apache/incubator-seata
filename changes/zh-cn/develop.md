@@ -6,6 +6,7 @@
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### bugfix:
+- [[#5887](https://github.com/seata/seata/pull/5887)] 修复全局事务钩子重复执行
 - [[#5991](https://github.com/seata/seata/pull/5991)] 修复redis sentinel master node 宕机时，lua脚本未同步的问题
 
 ### optimize:
@@ -21,7 +22,6 @@
 
 <!-- 请确保您的 GitHub ID 在以下列表中 -->
 - [slievrly](https://github.com/slievrly)
-- [GitHub_ID](https://github.com/GitHub_ID)
-
+- [jsbxyyx](https://github.com/jsbxyyx)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
