@@ -37,8 +37,8 @@ import java.util.Set;
 public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
-    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String targetName) {
-        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, targetName);
+    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String beanName) {
+        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, beanName);
         if (isTxRemotingBean) {
             RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
             if (remotingDesc != null) {
