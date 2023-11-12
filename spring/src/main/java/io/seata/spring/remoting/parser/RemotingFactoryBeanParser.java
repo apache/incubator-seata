@@ -23,8 +23,9 @@ import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.spring.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author leezongjie
@@ -33,7 +34,9 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
     public static ApplicationContext applicationContext = ObjectHolder.INSTANCE.getObject(ApplicationContext.class);
 
-    private static final Set<String> PROCESSED_BEAN_NAMES = new HashSet<>();
+    /** Names of beans that are currently in process. */
+    private final Set<String> beansCurrentlyInProcess =
+            Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
     /**
      * if it is proxy bean, check if the FactoryBean is Remoting bean
@@ -67,11 +70,11 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return false;
         }
-        if (onProcessing(beanName)) {
+        if (beforeRemainParserProcess(beanName)) {
             return false;
         }
         boolean result = DefaultRemotingParser.get().isReference(factoryBean, beanName);
-        finishProcess(beanName);
+        afterRemainParserProcess(beanName);
         return result;
     }
 
@@ -81,11 +84,11 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return false;
         }
-        if (onProcessing(beanName)) {
+        if (beforeRemainParserProcess(beanName)) {
             return false;
         }
         boolean result = DefaultRemotingParser.get().isService(factoryBean, beanName);
-        finishProcess(beanName);
+        afterRemainParserProcess(beanName);
         return result;
     }
 
@@ -95,24 +98,20 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return null;
         }
-        if (onProcessing(beanName)) {
+        if (beforeRemainParserProcess(beanName)) {
             return null;
         }
         RemotingDesc remotingDesc = DefaultRemotingParser.get().getServiceDesc(factoryBean, beanName);
-        finishProcess(beanName);
+        afterRemainParserProcess(beanName);
         return remotingDesc;
     }
 
-    private boolean onProcessing(String beanName) {
-        if (PROCESSED_BEAN_NAMES.contains(beanName)) {
-            return true;
-        }
-        PROCESSED_BEAN_NAMES.add(beanName);
-        return false;
+    private boolean beforeRemainParserProcess(String beanName) {
+        return !beansCurrentlyInProcess.add(beanName);
     }
 
-    private void finishProcess(String beanName) {
-        PROCESSED_BEAN_NAMES.remove(beanName);
+    private void afterRemainParserProcess(String beanName) {
+        beansCurrentlyInProcess.remove(beanName);
     }
 
     @Override
