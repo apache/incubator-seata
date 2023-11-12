@@ -26,6 +26,7 @@ class UndoLogParserFactoryTest {
 
     @Test
     void getInstance() {
+        Assertions.assertThrowsExactly(IllegalArgumentException.class, () -> UndoLogParserFactory.getInstance("fst"));
         Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JacksonUndoLogParser);
     }
 }
