@@ -22,13 +22,15 @@ import java.util.UUID;
 
 /**
  * copy as Spring AlternativeJdkIdGenerator
- *
- * @author Author: Rossen Stoyanchev, Rob Winch
+ * Author: Rossen Stoyanchev, Rob Winch
  */
-public class AlternativeJdkIdGenerator  {
+public class AlternativeJdkIdGenerator {
 
 	private final Random random;
 
+	/**
+	 * AlternativeJdkIdGenerator
+	 */
 	public AlternativeJdkIdGenerator() {
 		SecureRandom secureRandom = new SecureRandom();
 		byte[] seed = new byte[8];
@@ -36,7 +38,11 @@ public class AlternativeJdkIdGenerator  {
 		this.random = new Random(new BigInteger(seed).longValue());
 	}
 
-
+	/**
+	 * Generate UUId
+	 *
+	 * @return UUID
+	 */
 	public UUID generateId() {
 		byte[] randomBytes = new byte[16];
 		this.random.nextBytes(randomBytes);
