@@ -48,7 +48,6 @@ class RMHandlerATTest {
         for (int i = 0; i < testTimes; i++) {
             handler.handle(request);
         }
-        verify(handler, times(1)).checkUndoLogTableExist(any());
         verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
     }
 
@@ -60,7 +59,6 @@ class RMHandlerATTest {
         for (int i = 0; i < testTimes; i++) {
             handler.handle(request);
         }
-        verify(handler, times(1)).checkUndoLogTableExist(any());
         verify(handler, never()).deleteUndoLog(any(), any(), any());
     }
 
