@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
-import io.seata.common.holder.ObjectHolder;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -42,8 +41,10 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
+import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
+import io.seata.spring.remoting.parser.RemotingFactoryBeanParser;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
@@ -69,7 +70,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
@@ -474,7 +474,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
+        RemotingFactoryBeanParser remotingFactoryBeanParser = new RemotingFactoryBeanParser(applicationContext);
+        DefaultRemotingParser.get().registerRemotingParser(remotingFactoryBeanParser);
         this.setBeanFactory(applicationContext);
     }
 

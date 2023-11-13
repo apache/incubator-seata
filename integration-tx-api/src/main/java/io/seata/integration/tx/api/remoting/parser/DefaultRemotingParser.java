@@ -75,6 +75,9 @@ public class DefaultRemotingParser {
         }
     }
 
+    public void registerRemotingParser(RemotingParser remotingParser) {
+        allRemotingParsers.add(remotingParser);
+    }
     /**
      * is remoting bean ?
      *
