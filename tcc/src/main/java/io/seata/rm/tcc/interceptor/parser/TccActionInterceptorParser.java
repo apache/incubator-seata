@@ -43,7 +43,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
             RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
             if (remotingDesc != null) {
                 if (remotingDesc.isService()) {
-                    DefaultResourceRegisterParser.get().registerResource(target);
+                    DefaultResourceRegisterParser.get().registerResource(target, beanName);
                 }
                 if (remotingDesc.isReference()) {
                     //if it is a tcc remote reference
