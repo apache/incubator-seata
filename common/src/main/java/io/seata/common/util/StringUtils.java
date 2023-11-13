@@ -373,11 +373,11 @@ public class StringUtils {
     }
 
     public static boolean hasText(String str) {
-        return (str != null && !str.isEmpty() && containsText(str));
+        return str != null && !str.isEmpty() && containsText(str);
     }
 
     public static boolean hasLength(CharSequence str) {
-        return (str != null && str.length() > 0);
+        return str != null && str.length() > 0;
     }
 
     private static boolean containsText(CharSequence str) {

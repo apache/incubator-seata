@@ -18,13 +18,12 @@ package io.seata.saga.statelang.parser;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import io.seata.saga.statelang.validator.ValidationException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * StateParser tests
@@ -35,7 +34,7 @@ public class StateParserTests {
 
     @Test
     public void testParser() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(null).parse(json);
         stateMachine.setGmtCreate(new Date());
@@ -56,7 +55,7 @@ public class StateParserTests {
 
     @Test
     public void testDesignerJsonTransformer() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_layout.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_layout.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
@@ -76,7 +75,7 @@ public class StateParserTests {
 
     @Test
     public void singleInfiniteLoopTest() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_single_infinite_loop.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_single_infinite_loop.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
@@ -87,7 +86,7 @@ public class StateParserTests {
 
     @Test
     public void testMultipleInfiniteLoop() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_multiple_infinite_loop.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_multiple_infinite_loop.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
@@ -98,7 +97,7 @@ public class StateParserTests {
 
     @Test
     public void testNonExistedName() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_non_existed_name.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_non_existed_name.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
@@ -109,11 +108,20 @@ public class StateParserTests {
 
     @Test
     public void testRecursiveSubStateMachine() throws IOException {
-        FileInputStream inputStream = new FileInputStream("statelang/simple_statemachine_with_recursive_sub_machine.json");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_recursive_sub_machine.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
         Assertions.assertTrue(e.getMessage().endsWith("call itself"));
+    }
+
+    private InputStream getInputStreamByPath(String path) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = Thread.currentThread().getClass().getClassLoader();
+        }
+
+        return classLoader.getResourceAsStream(path);
     }
 }
