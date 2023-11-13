@@ -256,11 +256,6 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-serializer-fst</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
             <artifactId>seata-serializer-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -579,11 +574,6 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
