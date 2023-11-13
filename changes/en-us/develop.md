@@ -9,6 +9,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#5887](https://github.com/seata/seata/pull/5887)] fix global transaction hook repeat execute
 - [[#5991](https://github.com/seata/seata/pull/5991)] fix the issue that the Lua script is not synchronized when the redis sentinel master node is down
 - [[#6025](https://github.com/seata/seata/pull/6025)] fix the white screen after click the "View Global Lock" button on the transaction info page in the console
+- [[#6026](https://github.com/seata/seata/pull/6026)] fix incorrect metric report
 
 ### optimize:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
@@ -25,6 +26,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [slievrly](https://github.com/slievrly)
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [liuqiufeng](https://github.com/liuqiufeng)
+- [ptyin](https://github.com/ptyin)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
