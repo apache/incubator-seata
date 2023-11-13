@@ -75,6 +75,10 @@ public class DefaultRemotingParser {
         }
     }
 
+    /**
+     * register custom remoting parser
+     * @param remotingParser
+     */
     public void registerRemotingParser(RemotingParser remotingParser) {
         allRemotingParsers.add(remotingParser);
     }
