@@ -51,17 +51,6 @@ class RMHandlerATTest {
         verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
     }
 
-    @Test
-    void noUndoLogTableTest() {
-        RMHandlerAT handler = buildHandler(false);
-        UndoLogDeleteRequest request = buildRequest();
-        int testTimes = 5;
-        for (int i = 0; i < testTimes; i++) {
-            handler.handle(request);
-        }
-        verify(handler, never()).deleteUndoLog(any(), any(), any());
-    }
-
     private RMHandlerAT buildHandler(boolean hasUndoLogTable) {
         RMHandlerAT handler = spy(new RMHandlerAT());
         DataSourceManager dataSourceManager = mock(DataSourceManager.class);

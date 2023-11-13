@@ -12,7 +12,7 @@
 - [[#6026](https://github.com/seata/seata/pull/6026)] 修复异常的打点
 
 ### optimize:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
+- [[#6028](https://github.com/seata/seata/pull/6028)] 添加undo_log表的存在性校验
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
