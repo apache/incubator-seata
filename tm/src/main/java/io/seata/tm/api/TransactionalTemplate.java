@@ -139,7 +139,7 @@ public class TransactionalTemplate {
             } finally {
                 //5. clear
                 resumeGlobalLockConfig(previousConfig);
-                triggerAfterCompletion();
+                triggerAfterCompletion(tx);
                 cleanUp();
             }
         } finally {
@@ -200,6 +200,12 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException, TransactionException {
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore commit: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
             Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
@@ -236,7 +242,7 @@ public class TransactionalTemplate {
             if (null != statusException) {
                 throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
             }
-            triggerAfterCommit();
+            triggerAfterCommit(tx);
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -245,7 +251,12 @@ public class TransactionalTemplate {
     }
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
-
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore rollback: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         try {
             triggerBeforeRollback();
             tx.rollback();
@@ -285,6 +296,12 @@ public class TransactionalTemplate {
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore begin: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         try {
             triggerBeforeBegin();
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
@@ -346,7 +363,7 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCommit() {
+    private void triggerAfterCommit(GlobalTransaction tx) {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
                 hook.afterCommit();
@@ -356,14 +373,17 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCompletion();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+    private void triggerAfterCompletion(GlobalTransaction tx) {
+        if (tx == null || tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCompletion();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+                }
             }
         }
+
     }
 
     private void cleanUp() {
