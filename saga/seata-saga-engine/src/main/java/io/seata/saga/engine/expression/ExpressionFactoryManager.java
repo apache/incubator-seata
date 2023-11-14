@@ -29,7 +29,7 @@ public class ExpressionFactoryManager {
 
     public static final String DEFAULT_EXPRESSION_TYPE = "Default";
 
-    private Map<String, ExpressionFactory> expressionFactoryMap = new ConcurrentHashMap<>();
+    private final Map<String, ExpressionFactory> expressionFactoryMap = new ConcurrentHashMap<>();
 
     public ExpressionFactory getExpressionFactory(String expressionType) {
         if (StringUtils.isBlank(expressionType)) {

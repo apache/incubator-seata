@@ -17,6 +17,7 @@ package io.seata.saga.engine;
 
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.ExpressionResolver;
+import io.seata.saga.engine.invoker.ServiceInvokerManager;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.sequence.SeqGenerator;
@@ -133,13 +134,22 @@ public interface StateMachineConfig {
     boolean isEnableAsync();
 
     /**
+     * get ServiceInvokerManager
+     *
+     * @return the service invoker manager info
+     */
+    ServiceInvokerManager getServiceInvokerManager();
+
+    /**
      * get trans operation timeout
+     *
      * @return the transaction operate time out
      */
     int getTransOperationTimeout();
 
     /**
      * get service invoke timeout
+     *
      * @return the service invoke time out
      */
     int getServiceInvokeTimeout();

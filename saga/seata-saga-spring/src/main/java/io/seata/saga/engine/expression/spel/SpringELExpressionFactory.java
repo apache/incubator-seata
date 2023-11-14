@@ -33,22 +33,21 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  *
  * @author lorne.cl
  */
-public class SpringELExpressionFactory implements ExpressionFactory, ApplicationContextAware {
+public class SpringELExpressionFactory implements ExpressionFactory {
 
     ExpressionParser parser = new SpelExpressionParser();
     ApplicationContext applicationContext;
 
-    @Override
-    public Expression createExpression(String expression) {
-        org.springframework.expression.Expression defaultExpression = parser.parseExpression(expression);
-        EvaluationContext evaluationContext = ((SpelExpression)defaultExpression).getEvaluationContext();
-        ((StandardEvaluationContext)evaluationContext).setBeanResolver(new AppContextBeanResolver());
-        return new SpringELExpression(defaultExpression);
+    public SpringELExpressionFactory(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    public Expression createExpression(String expression) {
+        org.springframework.expression.Expression defaultExpression = parser.parseExpression(expression);
+        EvaluationContext evaluationContext = ((SpelExpression) defaultExpression).getEvaluationContext();
+        ((StandardEvaluationContext) evaluationContext).setBeanResolver(new AppContextBeanResolver());
+        return new SpringELExpression(defaultExpression);
     }
 
     private class AppContextBeanResolver implements BeanResolver {

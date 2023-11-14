@@ -18,12 +18,12 @@ package io.seata.saga.engine.pcext.interceptors;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.engine.expression.ExpressionResolver;
 import io.seata.saga.engine.expression.exception.ExceptionMatchExpression;
-import io.seata.saga.engine.expression.spel.SpringELExpression;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
@@ -120,7 +119,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
-        Object isForCompensation = state.isForCompensation();
+        boolean isForCompensation = state.isForCompensation();
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
             stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
             StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(stateMachineInstance,
@@ -149,7 +148,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceMethod(state.getServiceMethod());
         stateInstance.setServiceType(state.getServiceType());
 
-        if (isForCompensation != null && (Boolean)isForCompensation) {
+        if (isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());
             if (stateToBeCompensated != null) {
@@ -338,10 +337,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                     Class<? extends Expression> expressionClass = evaluator.getClass();
                     if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
                         elContext = context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-                    } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
-                        elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
                     } else {
-                        elContext = context.getVariables();
+                        elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
                     }
 
                     if (Boolean.TRUE.equals(evaluator.getValue(elContext))) {

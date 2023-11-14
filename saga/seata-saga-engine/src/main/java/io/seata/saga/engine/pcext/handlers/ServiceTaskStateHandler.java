@@ -17,10 +17,10 @@ package io.seata.saga.engine.pcext.handlers;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
-import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.invoker.ServiceInvoker;
 import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
@@ -42,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.StringUtils;
 
 /**
  * ServiceTaskState Handler
@@ -69,7 +67,6 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptableState
 
         Object result;
         try {
-
             List<Object> input = (List<Object>) context.getVariable(
                 DomainConstants.VAR_NAME_INPUT_PARAMS);
 
@@ -83,29 +80,19 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptableState
             }
 
             if (state instanceof CompensateSubStateMachineState) {
-                //If it is the compensation of the substate machine,
-                // directly call the state machine's compensate method
+                //If it is the compensation of the substate machine, directly call the state machine's compensate method
                 result = compensateSubStateMachine(context, state, input, stateInstance,
                     (StateMachineEngine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_ENGINE));
             } else {
                 StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-                ServiceInvoker serviceInvoker = null;
-                if(stateMachineConfig instanceof DefaultStateMachineConfig){
-                    serviceInvoker = ((DefaultStateMachineConfig) stateMachineConfig).getServiceInvokerManager().getServiceInvoker(state.getServiceType());
-                }
+                ServiceInvoker serviceInvoker = stateMachineConfig.getServiceInvokerManager().getServiceInvoker(state.getServiceType());
 
                 if (serviceInvoker == null) {
                     throw new EngineExecutionException(
                         "No such ServiceInvoker[" + state.getServiceType() + "]",
                         FrameworkErrorCode.ObjectNotExists);
-                }
-
-                if (serviceInvoker instanceof ApplicationContextAware) {
-                  DefaultStateMachineConfig defaultStateMachineConfig = (DefaultStateMachineConfig) stateMachineConfig;
-                  ((ApplicationContextAware) serviceInvoker).setApplicationContext(
-                      defaultStateMachineConfig.getApplicationContext());
                 }
 
                 result = serviceInvoker.invoke(state, input.toArray());

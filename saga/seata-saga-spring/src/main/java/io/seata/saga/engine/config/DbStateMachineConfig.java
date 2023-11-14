@@ -15,16 +15,11 @@
  */
 package io.seata.saga.engine.config;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
-
 import io.seata.common.ConfigurationKeys;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.sequence.UUIDSeqGenerator;
 import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
@@ -38,6 +33,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
+
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
+import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * DbStateMachineConfig
@@ -56,21 +57,18 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String tablePrefix = "seata_";
     private String dbType;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
-    private boolean rmReportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-    private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-
 
     public DbStateMachineConfig() {
         try {
             Configuration configuration = ConfigurationFactory.getInstance();
             if (configuration != null) {
-                this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
-                this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
+                setRmReportSuccessEnable(configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE));
+                setSagaBranchRegisterEnable(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE));
                 setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
-                this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY,null);
-                this.secretKey = configuration.getConfig(ConfigurationKeys.SECRET_KEY,null);
+                this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY, null);
+                this.secretKey = configuration.getConfig(ConfigurationKeys.SECRET_KEY, null);
                 setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
                     DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
                 setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
@@ -90,9 +88,11 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        if (dataSource == null) {
+            throw new IllegalArgumentException("datasource required not null!");
+        }
 
         dbType = getDbTypeFromDataSource(dataSource);
-
         if (getStateLogStore() == null) {
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
             dbStateLogStore.setDataSource(dataSource);
@@ -108,8 +108,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             }
 
             if (sagaTransactionalTemplate == null) {
-                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate
-                    = new DefaultSagaTransactionalTemplate();
+                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
                 defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
@@ -133,7 +132,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             setStateLangStore(dbStateLangStore);
         }
 
-        super.afterPropertiesSet();//must execute after StateLangStore initialized
+        //must execute after StateLangStore initialized
+        super.afterPropertiesSet();
     }
 
     @Override
@@ -201,21 +201,5 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setDbType(String dbType) {
         this.dbType = dbType;
-    }
-
-    public boolean isRmReportSuccessEnable() {
-        return rmReportSuccessEnable;
-    }
-
-    public boolean isSagaBranchRegisterEnable() {
-        return sagaBranchRegisterEnable;
-    }
-
-    public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
-        this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
-    }
-
-    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
-        this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 }
