@@ -26,22 +26,18 @@ import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.util.ResourceUtil;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 
 /**
- * Default state machine configuration
+ * State machine configuration base spring. In spring context,some uses will be combined with the spring framework.
+ * such as expression evaluation add spring el impl, serviceInvoker add spring bean Invoker impl, etc ...
  *
- * @author lorne.cl
+ * @author lorne.cl, wt-better
  */
 public class DefaultStateMachineConfig extends AbstractStateMachineConfig implements ApplicationContextAware, InitializingBean {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
     private ApplicationContext applicationContext;
 
@@ -49,26 +45,26 @@ public class DefaultStateMachineConfig extends AbstractStateMachineConfig implem
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        // load resource as spring classPathResource
-        try {
-            Resource[] registerResources = ResourceUtil.getResources(this.resources);
-            InputStream[] resourceAsStreamArray = new InputStream[registerResources.length];
-            for (int i = 0; i < registerResources.length; i++) {
-                resourceAsStreamArray[i] = registerResources[i].getInputStream();
-            }
-            setStateMachineDefInputStreamArray(resourceAsStreamArray);
-        } catch (IOException e) {
-            LOGGER.error("Load State Language Resources failed.", e);
-        }
-
         // super init
         super.init();
+
+        // register StateMachine def  after init
+        registerStateMachineDef();
 
         // register spring el ExpressionFactoryManager
         registerSpringElExpressionFactoryManager();
 
         // register serviceInvoker as spring bean invoker after init
         registerSpringBeanServiceInvoker();
+    }
+
+    private void registerStateMachineDef() throws IOException {
+        Resource[] registerResources = ResourceUtil.getResources(this.resources);
+        InputStream[] resourceAsStreamArray = new InputStream[registerResources.length];
+        for (int i = 0; i < registerResources.length; i++) {
+            resourceAsStreamArray[i] = registerResources[i].getInputStream();
+        }
+        getStateMachineRepository().registryByResources(resourceAsStreamArray, getDefaultTenantId());
     }
 
     private void registerSpringElExpressionFactoryManager() {

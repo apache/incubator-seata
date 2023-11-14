@@ -32,14 +32,13 @@ import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
 import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.*;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,27 +47,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Default stateLogStore by database
- * <p>
- * Author: wt-better
+ * Default StateLogStore by database
+ *
+ * @author wt-better
  */
 public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbStateLogStore.class);
-    private static final StateMachineInstanceToStatementForInsert STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT
-        = new StateMachineInstanceToStatementForInsert();
-    private static final StateMachineInstanceToStatementForUpdate STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE
-        = new StateMachineInstanceToStatementForUpdate();
-    private static final ResultSetToStateMachineInstance RESULT_SET_TO_STATE_MACHINE_INSTANCE
-        = new ResultSetToStateMachineInstance();
-    private static final StateInstanceToStatementForInsert STATE_INSTANCE_TO_STATEMENT_FOR_INSERT
-        = new StateInstanceToStatementForInsert();
-    private static final StateInstanceToStatementForUpdate STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE
-        = new StateInstanceToStatementForUpdate();
+    private static final StateMachineInstanceToStatementForInsert STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT = new StateMachineInstanceToStatementForInsert();
+    private static final StateMachineInstanceToStatementForUpdate STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE = new StateMachineInstanceToStatementForUpdate();
+    private static final ResultSetToStateMachineInstance RESULT_SET_TO_STATE_MACHINE_INSTANCE = new ResultSetToStateMachineInstance();
+    private static final StateInstanceToStatementForInsert STATE_INSTANCE_TO_STATEMENT_FOR_INSERT = new StateInstanceToStatementForInsert();
+    private static final StateInstanceToStatementForUpdate STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE = new StateInstanceToStatementForUpdate();
     private static final ResultSetToStateInstance RESULT_SET_TO_STATE_INSTANCE = new ResultSetToStateInstance();
 
     private Serializer<Object, String> paramsSerializer = new ParamsSerializer();
@@ -97,15 +89,12 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
                 // save to db
                 machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
-                int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType),
-                    STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
+                int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType), STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
                 if (effect < 1) {
-                    throw new StoreException("StateMachineInstance record start error, Xid: " + machineInstance.getId(),
-                        FrameworkErrorCode.OperationDenied);
+                    throw new StoreException("StateMachineInstance record start error, Xid: " + machineInstance.getId(), FrameworkErrorCode.OperationDenied);
                 }
             } catch (StoreException e) {
-                LOGGER.error("Record statemachine start error: {}, StateMachine: {}, XID: {}, Reason: {}",
-                    e.getErrcode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
+                LOGGER.error("Record statemachine start error: {}, StateMachine: {}, XID: {}, Reason: {}", e.getErrcode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
                 this.clearUp();
                 throw e;
             }
@@ -129,13 +118,11 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
                 machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
                 machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
-                int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType),
-                    STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
+                int effect = executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType), STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
                 if (effect < 1) {
                     LOGGER.warn("StateMachineInstance[{}] is recovery by server, skip recordStateMachineFinished.", machineInstance.getId());
                 } else {
-                    StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
-                        DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                    StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
                     if (EngineUtils.isTimeout(machineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
                         LOGGER.warn("StateMachineInstance[{}] is execution timeout, skip report transaction finished to server.", machineInstance.getId());
                     } else if (StringUtils.isEmpty(machineInstance.getParentId())) {
@@ -155,11 +142,9 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
         if (machineInstance != null) {
             //save to db
             Date gmtUpdated = new Date();
-            int effect = executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), new Timestamp(gmtUpdated.getTime()),
-                machineInstance.getId(), new Timestamp(machineInstance.getGmtUpdated().getTime()));
+            int effect = executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), new Timestamp(gmtUpdated.getTime()), machineInstance.getId(), new Timestamp(machineInstance.getGmtUpdated().getTime()));
             if (effect < 1) {
-                throw new EngineExecutionException(
-                    "StateMachineInstance [id:" + machineInstance.getId() + "] is recovered by an other execution, restart denied", FrameworkErrorCode.OperationDenied);
+                throw new EngineExecutionException("StateMachineInstance [id:" + machineInstance.getId() + "] is recovered by an other execution, restart denied", FrameworkErrorCode.OperationDenied);
             }
             machineInstance.setGmtUpdated(gmtUpdated);
         }
@@ -193,13 +178,10 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
             stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
             if (!isUpdateMode) {
-                executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType),
-                    STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
+                executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
             } else {
                 // if this retry/compensate state do not need persist, just update last inst
-                executeUpdate(stateLogStoreSqls.getUpdateStateExecutionStatusSql(dbType),
-                    stateInstance.getStatus().name(), new Timestamp(System.currentTimeMillis()),
-                    stateInstance.getMachineInstanceId(), stateInstance.getId());
+                executeUpdate(stateLogStoreSqls.getUpdateStateExecutionStatusSql(dbType), stateInstance.getStatus().name(), new Timestamp(System.currentTimeMillis()), stateInstance.getMachineInstanceId(), stateInstance.getId());
             }
         }
     }
@@ -243,8 +225,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
         for (int i = 0; i < stateInstance.getStateMachineInstance().getStateList().size(); i++) {
             StateInstance aStateInstance = stateInstance.getStateMachineInstance().getStateList().get(i);
-            if (aStateInstance != stateInstance
-                && originalCompensateStateInstId.equals(aStateInstance.getStateIdCompensatedFor())) {
+            if (aStateInstance != stateInstance && originalCompensateStateInstId.equals(aStateInstance.getStateIdCompensatedFor())) {
                 int idIndex = getIdIndex(aStateInstance.getId(), "-");
                 maxIndex = Math.max(idIndex, maxIndex);
                 maxIndex++;
@@ -269,8 +250,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
     }
 
     private boolean isUpdateMode(StateInstance stateInstance, ProcessContext context) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         if (stateMachineConfig instanceof AbstractStateMachineConfig) {
             AbstractStateMachineConfig config = ((AbstractStateMachineConfig) stateMachineConfig);
             StateInstruction instruction = context.getInstruction(StateInstruction.class);
@@ -313,15 +293,11 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
             stateInstance.setSerializedOutputParams(paramsSerializer.serialize(stateInstance.getOutputParams()));
             stateInstance.setSerializedException(exceptionSerializer.serialize(stateInstance.getException()));
-            executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE,
-                stateInstance);
+            executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE, stateInstance);
 
             //A switch to skip branch report on branch success, in order to optimize performance
-            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            if (!(stateMachineConfig instanceof AbstractStateMachineConfig
-                && !((AbstractStateMachineConfig) stateMachineConfig).isRmReportSuccessEnable()
-                && ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            if (!(stateMachineConfig instanceof AbstractStateMachineConfig && !((AbstractStateMachineConfig) stateMachineConfig).isRmReportSuccessEnable() && ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
                 branchReport(stateInstance, context);
             }
         }
@@ -329,8 +305,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     @Override
     public StateMachineInstance getStateMachineInstance(String stateMachineInstanceId) {
-        StateMachineInstance stateMachineInstance = selectOne(stateLogStoreSqls.getGetStateMachineInstanceByIdSql(dbType),
-            RESULT_SET_TO_STATE_MACHINE_INSTANCE, stateMachineInstanceId);
+        StateMachineInstance stateMachineInstance = selectOne(stateLogStoreSqls.getGetStateMachineInstanceByIdSql(dbType), RESULT_SET_TO_STATE_MACHINE_INSTANCE, stateMachineInstanceId);
         if (stateMachineInstance == null) {
             return null;
         }
@@ -348,9 +323,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
         if (StringUtils.isEmpty(tenantId)) {
             tenantId = defaultTenantId;
         }
-        StateMachineInstance stateMachineInstance = selectOne(
-            stateLogStoreSqls.getGetStateMachineInstanceByBusinessKeySql(dbType), RESULT_SET_TO_STATE_MACHINE_INSTANCE,
-            businessKey, tenantId);
+        StateMachineInstance stateMachineInstance = selectOne(stateLogStoreSqls.getGetStateMachineInstanceByBusinessKeySql(dbType), RESULT_SET_TO_STATE_MACHINE_INSTANCE, businessKey, tenantId);
         if (stateMachineInstance == null) {
             return null;
         }
@@ -371,8 +344,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
         String serializedStartParams = (String) stateMachineInstance.getSerializedStartParams();
         if (StringUtils.hasLength(serializedStartParams)) {
-            stateMachineInstance.setStartParams(
-                (Map<String, Object>) paramsSerializer.deserialize(serializedStartParams));
+            stateMachineInstance.setStartParams((Map<String, Object>) paramsSerializer.deserialize(serializedStartParams));
         }
 
         String serializedEndParams = (String) stateMachineInstance.getSerializedEndParams();
@@ -383,15 +355,12 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     @Override
     public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
-        return selectList(stateLogStoreSqls.getQueryStateMachineInstancesByParentIdSql(dbType),
-            RESULT_SET_TO_STATE_MACHINE_INSTANCE, parentId);
+        return selectList(stateLogStoreSqls.getQueryStateMachineInstancesByParentIdSql(dbType), RESULT_SET_TO_STATE_MACHINE_INSTANCE, parentId);
     }
 
     @Override
     public StateInstance getStateInstance(String stateInstanceId, String machineInstId) {
-        StateInstance stateInstance = selectOne(
-            stateLogStoreSqls.getGetStateInstanceByIdAndMachineInstanceIdSql(dbType), RESULT_SET_TO_STATE_INSTANCE,
-            machineInstId, stateInstanceId);
+        StateInstance stateInstance = selectOne(stateLogStoreSqls.getGetStateInstanceByIdAndMachineInstanceIdSql(dbType), RESULT_SET_TO_STATE_INSTANCE, machineInstId, stateInstanceId);
         deserializeParamsAndException(stateInstance);
         return stateInstance;
     }
@@ -415,9 +384,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     @Override
     public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
-        List<StateInstance> stateInstanceList = selectList(
-            stateLogStoreSqls.getQueryStateInstancesByMachineInstanceIdSql(dbType), RESULT_SET_TO_STATE_INSTANCE,
-            stateMachineInstanceId);
+        List<StateInstance> stateInstanceList = selectList(stateLogStoreSqls.getQueryStateInstancesByMachineInstanceIdSql(dbType), RESULT_SET_TO_STATE_INSTANCE, stateMachineInstanceId);
 
         if (CollectionUtils.isEmpty(stateInstanceList)) {
             return stateInstanceList;
@@ -525,8 +492,8 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     private static class StateMachineInstanceToStatementForInsert implements ObjectToStatement<StateMachineInstance> {
         @Override
-        public void toStatement(StateMachineInstance stateMachineInstance, PreparedStatement statement)
-            throws SQLException {
+        public void toStatement(StateMachineInstance stateMachineInstance,
+                                PreparedStatement statement) throws SQLException {
             statement.setString(1, stateMachineInstance.getId());
             statement.setString(2, stateMachineInstance.getMachineId());
             statement.setString(3, stateMachineInstance.getTenantId());
@@ -542,16 +509,13 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
 
     private static class StateMachineInstanceToStatementForUpdate implements ObjectToStatement<StateMachineInstance> {
         @Override
-        public void toStatement(StateMachineInstance stateMachineInstance, PreparedStatement statement)
-            throws SQLException {
+        public void toStatement(StateMachineInstance stateMachineInstance,
+                                PreparedStatement statement) throws SQLException {
             statement.setTimestamp(1, new Timestamp(stateMachineInstance.getGmtEnd().getTime()));
-            statement.setBytes(2, stateMachineInstance.getSerializedException() != null ? (byte[]) stateMachineInstance
-                .getSerializedException() : null);
+            statement.setBytes(2, stateMachineInstance.getSerializedException() != null ? (byte[]) stateMachineInstance.getSerializedException() : null);
             statement.setObject(3, stateMachineInstance.getSerializedEndParams());
             statement.setString(4, stateMachineInstance.getStatus().name());
-            statement.setString(5,
-                stateMachineInstance.getCompensationStatus() != null ? stateMachineInstance.getCompensationStatus()
-                    .name() : null);
+            statement.setString(5, stateMachineInstance.getCompensationStatus() != null ? stateMachineInstance.getCompensationStatus().name() : null);
             statement.setBoolean(6, stateMachineInstance.isRunning());
             statement.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             statement.setString(8, stateMachineInstance.getId());
@@ -584,8 +548,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
         @Override
         public void toStatement(StateInstance stateInstance, PreparedStatement statement) throws SQLException {
             statement.setTimestamp(1, new Timestamp(stateInstance.getGmtEnd().getTime()));
-            statement.setBytes(2,
-                stateInstance.getException() != null ? (byte[]) stateInstance.getSerializedException() : null);
+            statement.setBytes(2, stateInstance.getException() != null ? (byte[]) stateInstance.getSerializedException() : null);
             statement.setString(3, stateInstance.getStatus().name());
             statement.setObject(4, stateInstance.getSerializedOutputParams());
             statement.setTimestamp(5, new Timestamp(stateInstance.getGmtEnd().getTime()));

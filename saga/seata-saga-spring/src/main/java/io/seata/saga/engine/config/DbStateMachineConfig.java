@@ -19,6 +19,7 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.sequence.UUIDSeqGenerator;
 import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
@@ -92,7 +93,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         }
 
         dbType = getDbTypeFromDataSource(dataSource);
-
         if (getStateLogStore() == null) {
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
             dbStateLogStore.setDataSource(dataSource);

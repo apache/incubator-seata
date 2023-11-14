@@ -23,14 +23,7 @@ import io.seata.saga.engine.expression.exception.ExceptionMatchExpressionFactory
 import io.seata.saga.engine.expression.impl.DefaultExpressionResolver;
 import io.seata.saga.engine.expression.seq.SequenceExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
-import io.seata.saga.engine.pcext.InterceptableStateHandler;
-import io.seata.saga.engine.pcext.InterceptableStateRouter;
-import io.seata.saga.engine.pcext.StateHandler;
-import io.seata.saga.engine.pcext.StateHandlerInterceptor;
-import io.seata.saga.engine.pcext.StateMachineProcessHandler;
-import io.seata.saga.engine.pcext.StateMachineProcessRouter;
-import io.seata.saga.engine.pcext.StateRouter;
-import io.seata.saga.engine.pcext.StateRouterInterceptor;
+import io.seata.saga.engine.pcext.*;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.repo.impl.StateLogRepositoryImpl;
@@ -53,23 +46,21 @@ import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import io.seata.saga.statelang.domain.DomainConstants;
+
+import javax.script.ScriptEngineManager;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
-import javax.annotation.Nullable;
-import javax.script.ScriptEngineManager;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
+import static io.seata.common.DefaultValues.*;
 
 /**
  * Abstract StateMachineConfig
- * Author: wt-better
+ * TODO: support default memory/file NAS/db and reportable store on engine package
+ *
+ * @author wt-better
  */
 public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
@@ -80,13 +71,19 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
     private ExpressionResolver expressionResolver;
 
     private StateLogRepository stateLogRepository;
+    /**
+     * NullAble
+     */
     private StateLogStore stateLogStore;
     private StateMachineRepository stateMachineRepository;
+    /**
+     * NullAble
+     */
     private StateLangStore stateLangStore;
 
     private StatusDecisionStrategy statusDecisionStrategy;
 
-    private SeqGenerator seqGenerator;
+    private SeqGenerator seqGenerator = new UUIDSeqGenerator();
 
     private ProcessCtrlEventPublisher syncProcessCtrlEventPublisher;
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
@@ -160,7 +157,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
             StateMachineRepositoryImpl defaultStateMachineRepository = new StateMachineRepositoryImpl();
             defaultStateMachineRepository.setCharset(charset);
             defaultStateMachineRepository.setSeqGenerator(seqGenerator);
-            defaultStateMachineRepository.setStateLangStore(stateLangStore);
             defaultStateMachineRepository.setDefaultTenantId(defaultTenantId);
             defaultStateMachineRepository.setJsonParserName(sagaJsonParser);
             defaultStateMachineRepository.setStateLangStore(stateLangStore);
@@ -283,7 +279,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
      *
      * @return StateLogStore
      */
-    @Nullable
     public abstract StateLangStore initStateLogStoreStore() throws Exception;
 
     /**
@@ -291,7 +286,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
      *
      * @return StateLogStore
      */
-    @Nullable
     public abstract StateLogStore initStateLogStore() throws Exception;
 
     @Override
@@ -417,12 +411,12 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
     }
 
     public void setSyncProcessCtrlEventPublisher(
-        ProcessCtrlEventPublisher syncProcessCtrlEventPublisher) {
+            ProcessCtrlEventPublisher syncProcessCtrlEventPublisher) {
         this.syncProcessCtrlEventPublisher = syncProcessCtrlEventPublisher;
     }
 
     public void setAsyncProcessCtrlEventPublisher(
-        ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher) {
+            ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher) {
         this.asyncProcessCtrlEventPublisher = asyncProcessCtrlEventPublisher;
     }
 
