@@ -21,6 +21,7 @@ import io.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
 import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.spring.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.Assert;
 
 /**
  * @author leezongjie
@@ -30,6 +31,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
     public ApplicationContext applicationContext;
 
     public RemotingFactoryBeanParser(ApplicationContext applicationContext) {
+        Assert.notNull(applicationContext, "applicationContext must not be null");
         this.applicationContext = applicationContext;
     }
 
@@ -45,9 +47,9 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
             return null;
         }
         //the FactoryBean of proxy bean
-        String factoryBeanName = "&" + beanName;
+        String factoryBeanName = getFactoryBeanName(beanName);
         Object factoryBean = null;
-        if (applicationContext != null && applicationContext.containsBean(factoryBeanName)) {
+        if (applicationContext.containsBean(factoryBeanName)) {
             factoryBean = applicationContext.getBean(factoryBeanName);
         }
         return factoryBean;
@@ -59,8 +61,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return false;
         }
-        String factoryBeanName = "&" + beanName;
-        return DefaultRemotingParser.get().isReference(factoryBean, factoryBeanName);
+        return DefaultRemotingParser.get().isReference(factoryBean, getFactoryBeanName(beanName));
     }
 
     @Override
@@ -69,8 +70,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return false;
         }
-        String factoryBeanName = "&" + beanName;
-        return DefaultRemotingParser.get().isService(factoryBean, factoryBeanName);
+        return DefaultRemotingParser.get().isService(factoryBean, getFactoryBeanName(beanName));
     }
 
     @Override
@@ -79,8 +79,11 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         if (factoryBean == null) {
             return null;
         }
-        String factoryBeanName = "&" + beanName;
-        return DefaultRemotingParser.get().getServiceDesc(factoryBean, factoryBeanName);
+        return DefaultRemotingParser.get().getServiceDesc(factoryBean, getFactoryBeanName(beanName));
+    }
+
+    private String getFactoryBeanName(String beanName) {
+        return "&" + beanName;
     }
 
     @Override
