@@ -32,7 +32,11 @@ import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
 import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
-import io.seata.saga.statelang.domain.*;
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
@@ -180,7 +184,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
             if (!isUpdateMode) {
                 executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
             } else {
-                // if this retry/compensate state do not need persist, just update last inst
+                // if this retry/compensate state do not need to persist, just update last inst
                 executeUpdate(stateLogStoreSqls.getUpdateStateExecutionStatusSql(dbType), stateInstance.getStatus().name(), new Timestamp(System.currentTimeMillis()), stateInstance.getMachineInstanceId(), stateInstance.getId());
             }
         }
