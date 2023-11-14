@@ -19,20 +19,20 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
-import io.seata.saga.engine.sequence.UUIDSeqGenerator;
 import io.seata.saga.engine.serializer.impl.ParamsSerializer;
 import io.seata.saga.engine.store.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static io.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;

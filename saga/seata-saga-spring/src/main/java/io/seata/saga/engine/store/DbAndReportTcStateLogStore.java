@@ -42,7 +42,7 @@ import java.util.Map;
 
 /**
  * State machine logs and definitions persist to database and report status to TC (Transaction Coordinator)
- * TODO：move to engine as a base StateLogStore impl
+ * TODO: move to engine as a base StateLogStore impl
  *
  * @author lorne.cl, wt-better
  */
