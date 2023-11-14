@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
+  namespace: {{ .Release.Namespace | quote }}
   name: "{{ include "seata-server.fullname" . }}-test-connection"
   labels:
 {{ include "seata-server.labels" . | indent 4 }}
