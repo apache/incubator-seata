@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
@@ -161,7 +162,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     private void checkUndoLogTableExist(Connection conn) {
         if (DBType.optionalof(dbType).isPresent()) {
-            UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+            UndoLogManager undoLogManager;
+            try {
+                 undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+            } catch (EnhancedServiceNotFoundException e) {
+                LOGGER.error("can't find undoLogManager service provider for dbtype: {}", dbType);
+                return;
+            }
             boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
             if (!undoLogTableExist) {
                 String undoLogTableName = ConfigurationFactory.getInstance()
