@@ -497,7 +497,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
     private static class StateMachineInstanceToStatementForInsert implements ObjectToStatement<StateMachineInstance> {
         @Override
         public void toStatement(StateMachineInstance stateMachineInstance,
-                                PreparedStatement statement) throws SQLException {
+            PreparedStatement statement) throws SQLException {
             statement.setString(1, stateMachineInstance.getId());
             statement.setString(2, stateMachineInstance.getMachineId());
             statement.setString(3, stateMachineInstance.getTenantId());
@@ -514,7 +514,7 @@ public class DbStateLogStore extends AbstractStore implements StateLogStore {
     private static class StateMachineInstanceToStatementForUpdate implements ObjectToStatement<StateMachineInstance> {
         @Override
         public void toStatement(StateMachineInstance stateMachineInstance,
-                                PreparedStatement statement) throws SQLException {
+            PreparedStatement statement) throws SQLException {
             statement.setTimestamp(1, new Timestamp(stateMachineInstance.getGmtEnd().getTime()));
             statement.setBytes(2, stateMachineInstance.getSerializedException() != null ? (byte[]) stateMachineInstance.getSerializedException() : null);
             statement.setObject(3, stateMachineInstance.getSerializedEndParams());

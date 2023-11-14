@@ -33,7 +33,7 @@ class TccActionInterceptorParserTest {
         NormalTccActionImpl tccAction = new NormalTccActionImpl();
 
         //when
-        ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(tccAction);
+        ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(tccAction, tccAction.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);

@@ -90,7 +90,6 @@ public class DbAndReportTcStateLogStore extends DbStateLogStore {
             try {
                 globalTransaction = getGlobalTransaction(machineInstance, context);
                 if (globalTransaction == null) {
-
                     throw new EngineExecutionException("Global transaction is not exists", FrameworkErrorCode.ObjectNotExists);
                 }
 
@@ -243,7 +242,6 @@ public class DbAndReportTcStateLogStore extends DbStateLogStore {
                 if (globalTransaction == null) {
                     throw new EngineExecutionException("Global transaction is not exists", FrameworkErrorCode.ObjectNotExists);
                 }
-
                 sagaTransactionalTemplate.branchReport(globalTransaction.getXid(), Long.parseLong(originalStateInst.getId()), branchStatus, null);
             } catch (TransactionException e) {
                 LOGGER.error("Report branch status to server error: {}, StateMachine:{}, StateName:{}, XID: {}, branchId: {}, branchStatus:{}," + " Reason:{} ", e.getCode(), originalStateInst.getStateMachineInstance().getStateMachine().getName(), originalStateInst.getName(), originalStateInst.getStateMachineInstance().getId(), originalStateInst.getId(), branchStatus, e.getMessage(), e);

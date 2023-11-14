@@ -28,9 +28,9 @@ public class DefaultResourceRegisterParser {
 
     protected static List<RegisterResourceParser> allRegisterResourceParsers = new ArrayList<>();
 
-    public void registerResource(Object target) {
+    public void registerResource(Object target, String beanName) {
         for (RegisterResourceParser registerResourceParser : allRegisterResourceParsers) {
-            registerResourceParser.registerResource(target);
+            registerResourceParser.registerResource(target, beanName);
         }
     }
 
