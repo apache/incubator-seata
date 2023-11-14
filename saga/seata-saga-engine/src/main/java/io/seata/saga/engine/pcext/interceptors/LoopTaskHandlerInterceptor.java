@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.interceptors;
 
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -50,7 +51,8 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
         return clazz != null &&
-            (SubStateMachineHandler.class.isAssignableFrom(clazz)
+            (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
+                || SubStateMachineHandler.class.isAssignableFrom(clazz)
                 || ScriptTaskHandlerInterceptor.class.isAssignableFrom(clazz));
     }
 
