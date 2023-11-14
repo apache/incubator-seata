@@ -20,6 +20,6 @@ package io.seata.integration.tx.api.interceptor.parser;
  */
 public interface RegisterResourceParser {
 
-    void registerResource(Object target);
+    void registerResource(Object target, String beanName);
 
 }

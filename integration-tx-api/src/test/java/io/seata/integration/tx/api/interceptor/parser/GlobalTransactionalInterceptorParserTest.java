@@ -33,7 +33,7 @@ class GlobalTransactionalInterceptorParserTest {
         GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
 
         //when
-        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business);
+        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);

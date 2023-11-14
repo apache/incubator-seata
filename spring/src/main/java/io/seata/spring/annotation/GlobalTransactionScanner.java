@@ -41,8 +41,10 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
+import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
+import io.seata.spring.remoting.parser.RemotingFactoryBeanParser;
 import io.seata.spring.util.OrderUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
@@ -279,7 +281,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
                 interceptor = null;
-                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean);
+                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean, beanName);
                 if (proxyInvocationHandler == null) {
                     return bean;
                 }
@@ -472,6 +474,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        RemotingFactoryBeanParser remotingFactoryBeanParser = new RemotingFactoryBeanParser(applicationContext);
+        DefaultRemotingParser.get().registerRemotingParser(remotingFactoryBeanParser);
         this.setBeanFactory(applicationContext);
     }
 
