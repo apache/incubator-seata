@@ -33,6 +33,8 @@ import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+
 /**
  * @author slievrly
  */

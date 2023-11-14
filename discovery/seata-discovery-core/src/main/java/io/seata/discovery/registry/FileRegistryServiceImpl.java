@@ -19,6 +19,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
@@ -36,7 +37,6 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String POSTFIX_GROUPLIST = ".grouplist";
     private static final String ENDPOINT_SPLIT_CHAR = ";";
-    private static final String IP_PORT_SPLIT_CHAR = ":";
 
     private FileRegistryServiceImpl() {
     }
@@ -88,7 +88,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
         List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
         for (String endpoint : endpoints) {
-            String[] ipAndPort = endpoint.split(IP_PORT_SPLIT_CHAR);
+            String[] ipAndPort = NetUtil.splitIPPortStr(endpoint);
             if (ipAndPort.length != 2) {
                 throw new IllegalArgumentException("endpoint format should like ip:port");
             }

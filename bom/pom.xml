@@ -145,6 +145,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-discovery-raft</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-brpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -267,11 +272,6 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
-                <artifactId>seata-serializer-fst</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
                 <artifactId>seata-spring-boot-starter</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -288,11 +288,6 @@
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-compressor-zip</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-compressor-7z</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

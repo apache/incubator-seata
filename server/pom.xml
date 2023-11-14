@@ -29,8 +29,9 @@
     <description>server for Seata built with Maven</description>
 
     <properties>
-        <spring-boot-for-server.version>${spring-boot.version}</spring-boot-for-server.version>
-        <spring-framework-for-server.version>${spring-framework.version}</spring-framework-for-server.version>
+        <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
+        <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
+        <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -63,9 +64,18 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml-for-server.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -165,9 +175,18 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mariadb.jdbc</groupId>-->
+<!--            <artifactId>mariadb-java-client</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver18</artifactId>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -224,13 +243,12 @@
             <artifactId>logback-kafka-appender</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>jraft-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <scope>provided</scope>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
         </dependency>
     </dependencies>
 
@@ -293,6 +311,19 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>${git-commit-id-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>${jib-maven-plugin.version}</version>
@@ -327,6 +358,11 @@
                         </ports>
                         <labels>
                             <name>seata-server</name>
+                            <git.commit.message.full>${git.commit.message.full}</git.commit.message.full>
+                            <git.remote.origin.url>${git.remote.origin.url}</git.remote.origin.url>
+                            <git.commit.id>${git.commit.id}</git.commit.id>
+                            <git.commit.time>${git.commit.time}</git.commit.time>
+                            <mvn.build.version>${project.version}</mvn.build.version>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                         <entrypoint>

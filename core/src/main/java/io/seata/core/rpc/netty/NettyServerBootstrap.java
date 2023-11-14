@@ -138,6 +138,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
+        int port = getListenPort();
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(NettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
@@ -149,7 +150,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
                 new WriteBufferWaterMark(nettyServerConfig.getWriteBufferLowWaterMark(),
                     nettyServerConfig.getWriteBufferHighWaterMark()))
-            .localAddress(new InetSocketAddress(getListenPort()))
+            .localAddress(new InetSocketAddress(port))
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
@@ -164,10 +165,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             });
 
         try {
-            this.serverBootstrap.bind(getListenPort()).sync();
+            this.serverBootstrap.bind(port).sync();
             LOGGER.info("Server started, service listen port: {}", getListenPort());
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
-            for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+            for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }
             initialized.set(true);
