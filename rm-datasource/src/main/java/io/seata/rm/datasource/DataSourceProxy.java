@@ -142,7 +142,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         if (DBType.optionalof(dbType).isPresent()) {
             UndoLogManager undoLogManager;
             try {
-                 undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+                undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
             } catch (EnhancedServiceNotFoundException e) {
                 LOGGER.error("can't find undoLogManager service provider for dbtype: {}", dbType);
                 return;
