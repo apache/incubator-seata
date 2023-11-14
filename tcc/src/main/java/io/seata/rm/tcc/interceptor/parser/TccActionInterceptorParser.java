@@ -37,13 +37,13 @@ import java.util.Set;
 public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
-    public ProxyInvocationHandler parserInterfaceToProxy(Object target) {
-        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, target.toString());
+    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
+        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, objectName);
         if (isTxRemotingBean) {
             RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
             if (remotingDesc != null) {
                 if (remotingDesc.isService()) {
-                    DefaultResourceRegisterParser.get().registerResource(target);
+                    DefaultResourceRegisterParser.get().registerResource(target, objectName);
                 }
                 if (remotingDesc.isReference()) {
                     //if it is a tcc remote reference

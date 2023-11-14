@@ -53,9 +53,9 @@ public class DefaultInterfaceParser implements InterfaceParser {
     }
 
     @Override
-    public ProxyInvocationHandler parserInterfaceToProxy(Object target) throws Exception {
+    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
         for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
-            ProxyInvocationHandler proxyInvocationHandler = interfaceParser.parserInterfaceToProxy(target);
+            ProxyInvocationHandler proxyInvocationHandler = interfaceParser.parserInterfaceToProxy(target, objectName);
             if (proxyInvocationHandler != null) {
                 return proxyInvocationHandler;
             }

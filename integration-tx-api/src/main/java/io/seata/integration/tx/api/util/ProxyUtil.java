@@ -34,12 +34,16 @@ public class ProxyUtil {
     private static final Map<Object, Object> PROXYED_SET = new HashMap<>();
 
     public static <T> T createProxy(T target) {
+        return createProxy(target, target.getClass().getName());
+    }
+
+    public static <T> T createProxy(T target, String beanName) {
         try {
             synchronized (PROXYED_SET) {
                 if (PROXYED_SET.containsKey(target)) {
                     return (T) PROXYED_SET.get(target);
                 }
-                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(target);
+                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(target, beanName);
                 if (proxyInvocationHandler == null) {
                     return target;
                 }

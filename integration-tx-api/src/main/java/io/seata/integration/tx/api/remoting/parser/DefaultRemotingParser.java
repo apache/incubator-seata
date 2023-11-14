@@ -76,6 +76,16 @@ public class DefaultRemotingParser {
     }
 
     /**
+     * register custom remoting parser
+     * @param remotingParser
+     */
+    public boolean registerRemotingParser(RemotingParser remotingParser) {
+        synchronized (this) {
+            return allRemotingParsers.add(remotingParser);
+        }
+    }
+
+    /**
      * is remoting bean ?
      *
      * @param bean     the bean
