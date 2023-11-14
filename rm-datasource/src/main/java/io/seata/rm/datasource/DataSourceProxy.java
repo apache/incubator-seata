@@ -22,17 +22,24 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 
 /**
  * The type Data source proxy.
@@ -101,6 +108,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 validMySQLVersion(connection);
                 checkDerivativeProduct();
             }
+            checkUndoLogTableExist(connection);
+
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -141,6 +150,26 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             }
         }
         return false;
+    }
+
+    /**
+     * check existence of undolog table
+     *
+     * if the table not exist fast fail, or else keep silence
+     *
+     * @param conn db connection
+     */
+    private void checkUndoLogTableExist(Connection conn) {
+        if (DBType.optionalof(dbType).isPresent()) {
+            UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+            boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
+            if (!undoLogTableExist) {
+                String undoLogTableName = ConfigurationFactory.getInstance()
+                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+                String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
+                throw new IllegalStateException(errMsg);
+            }
+        }
     }
 
     /**

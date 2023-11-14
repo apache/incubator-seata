@@ -48,20 +48,7 @@ class RMHandlerATTest {
         for (int i = 0; i < testTimes; i++) {
             handler.handle(request);
         }
-        verify(handler, times(1)).checkUndoLogTableExist(any());
         verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
-    }
-
-    @Test
-    void noUndoLogTableTest() {
-        RMHandlerAT handler = buildHandler(false);
-        UndoLogDeleteRequest request = buildRequest();
-        int testTimes = 5;
-        for (int i = 0; i < testTimes; i++) {
-            handler.handle(request);
-        }
-        verify(handler, times(1)).checkUndoLogTableExist(any());
-        verify(handler, never()).deleteUndoLog(any(), any(), any());
     }
 
     private RMHandlerAT buildHandler(boolean hasUndoLogTable) {
