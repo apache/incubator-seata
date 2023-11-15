@@ -16,9 +16,9 @@
 package io.seata.serializer.seata.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.serializer.seata.protocol.v1.SeataV1Serializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class RegisterTMRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataV1Serializer seataSerializer = new SeataV1Serializer();
+    SeataSerializer seataSerializer = new SeataSerializer();
 
     private static       RegisterTMRequest       registerTMRequest;
     private static       AbstractIdentifyRequest air;

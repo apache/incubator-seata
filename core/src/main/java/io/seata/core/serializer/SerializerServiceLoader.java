@@ -50,7 +50,7 @@ public final class SerializerServiceLoader {
         }
         if (type == SerializerType.SEATA) {
             return EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
-        }else {
+        } else {
             return EnhancedServiceLoader.load(Serializer.class, type.name());
         }
     }

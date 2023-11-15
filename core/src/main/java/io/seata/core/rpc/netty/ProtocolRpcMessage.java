@@ -29,18 +29,18 @@ public interface ProtocolRpcMessage {
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
 
     static String getVersion(Object body) {
-        if(body instanceof AbstractIdentifyRequest){
-            return  ((AbstractIdentifyRequest) body).getVersion();
-        }else {
+        if (body instanceof AbstractIdentifyRequest) {
+            return ((AbstractIdentifyRequest) body).getVersion();
+        } else {
             //todo?
             return null;
         }
     }
 
-    static void setVersion(Object body, String version){
-        if(body instanceof AbstractIdentifyRequest){
+    static void setVersion(Object body, String version) {
+        if (body instanceof AbstractIdentifyRequest) {
             ((AbstractIdentifyRequest) body).setVersion(version);
-        }else {
+        } else {
             //todo?
         }
     }

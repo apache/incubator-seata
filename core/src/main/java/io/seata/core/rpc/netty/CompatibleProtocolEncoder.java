@@ -48,7 +48,7 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
 
     private static Map<Byte, ProtocolEncoder> protocolEncoderMap;
 
-    public CompatibleProtocolEncoder(){
+    public CompatibleProtocolEncoder() {
         super();
         protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
                 .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
@@ -67,7 +67,7 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
                     throw new IllegalArgumentException("Unknown version: " + version);
                 }
 
-                encoder.encode(rpcMessage,out);
+                encoder.encode(rpcMessage, out);
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }

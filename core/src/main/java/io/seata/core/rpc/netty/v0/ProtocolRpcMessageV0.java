@@ -157,24 +157,24 @@ public class ProtocolRpcMessageV0 implements ProtocolRpcMessage {
     }
 
     @Override
-    public RpcMessage protocolMsg2RpcMsg(){
+    public RpcMessage protocolMsg2RpcMsg() {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(this.messageType);
         rpcMessage.setCompressor(CompressorType.NONE.getCode());
 
-        byte codecType = this.isSeataCodec? SerializerType.SEATA.getCode():SerializerType.HESSIAN.getCode();
+        byte codecType = this.isSeataCodec ? SerializerType.SEATA.getCode() : SerializerType.HESSIAN.getCode();
         rpcMessage.setCodec(codecType);
 
-        if(this.isHeartbeat){
-            if(this.isRequest){
+        if (this.isHeartbeat) {
+            if (this.isRequest) {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
-            }else {
+            } else {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE);
             }
-        }else {
-            if(this.isRequest){
+        } else {
+            if (this.isRequest) {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-            }else {
+            } else {
                 rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
             }
         }
@@ -191,16 +191,17 @@ public class ProtocolRpcMessageV0 implements ProtocolRpcMessage {
         this.id = rpcMessage.getId();
         this.isRequest = isRequest(rpcMessage.getMessageType());
         this.isHeartbeat = isHeartbeat(rpcMessage.getMessageType());
-        this.isSeataCodec = rpcMessage.getCodec() ==SerializerType.SEATA.getCode();
+        this.isSeataCodec = rpcMessage.getCodec() == SerializerType.SEATA.getCode();
         this.messageType = rpcMessage.getMessageType();
     }
 
-    private boolean isHeartbeat(byte msgType){
-        return msgType==ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                || msgType ==ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE;
+    private boolean isHeartbeat(byte msgType) {
+        return msgType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                || msgType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE;
     }
-    private boolean isRequest(byte msgType){
-        return msgType==ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY
-                || msgType ==ProtocolConstants.MSGTYPE_RESQUEST_SYNC;
+
+    private boolean isRequest(byte msgType) {
+        return msgType == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY
+                || msgType == ProtocolConstants.MSGTYPE_RESQUEST_SYNC;
     }
 }

@@ -103,7 +103,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     }
                     return decoder.decodeFrame(frame);
                 } finally {
-                    if(!isV0(version)){
+                    if (!isV0(version)) {
                         frame.release();
                     }
                 }
