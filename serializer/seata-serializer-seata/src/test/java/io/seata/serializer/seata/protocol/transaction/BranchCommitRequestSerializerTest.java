@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol.transaction;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
@@ -32,7 +33,7 @@ public class BranchCommitRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION_1);
 
     /**
      * Test codec.

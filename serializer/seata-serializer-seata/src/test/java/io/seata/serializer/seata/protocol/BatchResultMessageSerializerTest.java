@@ -24,6 +24,7 @@ import io.seata.core.protocol.BatchResultMessage;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +40,7 @@ public class BatchResultMessageSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION_1);
 
 
     @Test

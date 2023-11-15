@@ -15,6 +15,7 @@
  */
 package io.seata.serializer.seata.protocol;
 
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -35,7 +36,7 @@ public class MergeResultMessageSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION_1);
 
     /**
      * Test codec.

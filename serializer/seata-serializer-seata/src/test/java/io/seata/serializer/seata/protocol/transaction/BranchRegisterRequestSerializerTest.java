@@ -19,6 +19,7 @@ import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.junit.jupiter.api.Test;
+import io.seata.core.protocol.ProtocolConstants;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +33,7 @@ public class BranchRegisterRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION_1);
 
     /**
      * Test codec.

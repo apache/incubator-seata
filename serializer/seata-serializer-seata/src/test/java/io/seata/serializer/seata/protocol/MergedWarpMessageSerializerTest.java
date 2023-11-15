@@ -22,6 +22,7 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.serializer.seata.SeataSerializer;
+import io.seata.core.protocol.ProtocolConstants;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ public class MergedWarpMessageSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION_1);
 
     /**
      * Test codec.
