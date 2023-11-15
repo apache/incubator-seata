@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty.v1;
 
 import io.seata.common.util.StringUtils;
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
 
@@ -182,17 +183,19 @@ public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
         rpcMessage.setCompressor(this.compressor);
         rpcMessage.setHeadMap(this.headMap);
         rpcMessage.setBody(this.body);
+        rpcMessage.setVersion(ProtocolRpcMessage.getVersion(this.body));
         return rpcMessage;
     }
+
 
     @Override
     public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
         this.body = rpcMessage.getBody();
+        ProtocolRpcMessage.setVersion(this.body, rpcMessage.getVersion());
         this.headMap = rpcMessage.getHeadMap();
         this.id = rpcMessage.getId();
         this.messageType = rpcMessage.getMessageType();
         this.codec = rpcMessage.getCodec();
         this.compressor = rpcMessage.getCompressor();
-        rpcMessage.getVersion();
     }
 }

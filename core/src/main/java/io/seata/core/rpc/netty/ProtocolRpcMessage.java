@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.netty;
 
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RpcMessage;
 
 /**
@@ -26,4 +27,21 @@ public interface ProtocolRpcMessage {
     RpcMessage protocolMsg2RpcMsg();
 
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
+
+    static String getVersion(Object body) {
+        if(body instanceof AbstractIdentifyRequest){
+            return  ((AbstractIdentifyRequest) body).getVersion();
+        }else {
+            //todo?
+            return null;
+        }
+    }
+
+    static void setVersion(Object body, String version){
+        if(body instanceof AbstractIdentifyRequest){
+            ((AbstractIdentifyRequest) body).setVersion(version);
+        }else {
+            //todo?
+        }
+    }
 }

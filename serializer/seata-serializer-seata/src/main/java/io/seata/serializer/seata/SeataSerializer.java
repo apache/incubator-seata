@@ -42,7 +42,7 @@ public class SeataSerializer implements Serializer {
             .put(ProtocolConstants.VERSION_1, new MessageCodecFactoryV1())
             .build();
 
-    public SeataSerializer(byte version){
+    public SeataSerializer(Byte version){
         factory =  FACTORY_MAP.get(version);
         protocolVersion = version;
     }
