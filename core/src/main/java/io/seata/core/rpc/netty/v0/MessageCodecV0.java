@@ -16,15 +16,13 @@
 package io.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MessageTypeAware;
 
 /**
  * The interface Message codec.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
+ * @author Bughue
+ * @date 2023/11/01
  */
 public interface MessageCodecV0<T> extends MessageTypeAware {
 

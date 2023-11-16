@@ -173,7 +173,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             if (msg instanceof ProtocolRpcMessage) {
                 rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
                 processMessage(ctx, rpcMessage);
-            }else {
+            } else {
                 LOGGER.error("rpcMessage type error");
             }
         }

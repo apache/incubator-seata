@@ -155,7 +155,7 @@ public class Version {
         long v0 = convertVersion(VERSION_0_7_1);
         if (version <= v0) {
             return ProtocolConstants.VERSION_0;
-        }else {
+        } else {
             return ProtocolConstants.VERSION_1;
         }
     }

@@ -84,12 +84,12 @@ public class ProtocolEncoderV0 implements ProtocolEncoder {
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codec), ProtocolConstants.VERSION_0);
             bodyBytes = serializer.serialize(msg.getBody());
 
-            if(msg.isSeataCodec()){
-                if(msg.getBody() instanceof MessageTypeAware){
+            if (msg.isSeataCodec()) {
+                if (msg.getBody() instanceof MessageTypeAware) {
                     short typeCode = ((MessageTypeAware) msg.getBody()).getTypeCode();
                     out.writeShort(typeCode);
                 }
-            }else {
+            } else {
                 out.writeShort(bodyBytes.length);
             }
             out.writeLong(msg.getId());
