@@ -16,7 +16,6 @@
 package io.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.protocol.HeartbeatMessage;
 
 import io.seata.core.protocol.ProtocolConstants;
