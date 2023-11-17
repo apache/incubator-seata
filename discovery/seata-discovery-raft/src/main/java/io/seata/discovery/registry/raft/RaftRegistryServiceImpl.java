@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * @author funkye
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
-   
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftRegistryServiceImpl.class);
 
     private static final String REGISTRY_TYPE = "raft";
@@ -126,7 +126,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
     }
 
-    private RaftRegistryServiceImpl() {}
+    private RaftRegistryServiceImpl() {
+    }
 
     /**
      * Gets instance.
@@ -298,19 +299,19 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
             String token = getToken(tcAddress);
-            if(!Objects.isNull(token)){
-                header.put(AUTHORIZATION_HEADER,token);
+            if (!Objects.isNull(token)) {
+                header.put(AUTHORIZATION_HEADER, token);
             }
             try (CloseableHttpResponse response =
-                doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000,"application/x-www-form-urlencoded")) {
+                     doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000, "application/x-www-form-urlencoded")) {
                 if (response != null) {
                     //refresh jwt token
-                    Header tokenHeader=response.getFirstHeader(newTokenKey);
-                    if(tokenHeader!=null){
+                    Header tokenHeader = response.getFirstHeader(newTokenKey);
+                    if (tokenHeader != null) {
                         jwtToken = tokenHeader.getValue();
                     }
                     StatusLine statusLine = response.getStatusLine();
-                    if(statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED){
+                    if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         LOGGER.error("Authentication failed! you should configure the correct username and password.");
                     }
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -330,7 +331,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+                                                      List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
@@ -351,26 +352,26 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     public static void acquireClusterMetaData(String clusterName, String group) {
         String tcAddress = queryHttpAddress(clusterName, group);
-        Map<String,String> header = new HashMap<>();
+        Map<String, String> header = new HashMap<>();
         String token = getToken(tcAddress);
-        if(!Objects.isNull(token)){
-            header.put(AUTHORIZATION_HEADER,token);
+        if (!Objects.isNull(token)) {
+            header.put(AUTHORIZATION_HEADER, token);
         }
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                     doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
                     //refresh jwt token
                     Header newTokenHeader = httpResponse.getFirstHeader(newTokenKey);
-                    if(!Objects.isNull(newTokenHeader)){
+                    if (!Objects.isNull(newTokenHeader)) {
                         jwtToken = newTokenHeader.getValue();
                     }
-                    if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                    }else if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED){
+                    } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         LOGGER.error("Authentication failed! you should configure the correct username and password.");
                     }
                 }
@@ -389,15 +390,15 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    public static String getToken(String tcAddress){
+    public static String getToken(String tcAddress) {
         // if the token is present ,return it
-        if(!Objects.isNull(jwtToken)){
+        if (!Objects.isNull(jwtToken)) {
             return jwtToken;
         }
         // if username and password is not in config , return null
         String username = CONFIG.getConfig(getRaftUserNameKey());
         String password = CONFIG.getConfig(getRaftPassWordKey());
-        if(Objects.isNull(username) || Objects.isNull(password)){
+        if (Objects.isNull(username) || Objects.isNull(password)) {
             return null;
         }
         // get token and set it in cache
@@ -407,7 +408,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put(PRO_PASSWORD_KEY, password);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                     doPost("http://" + tcAddress + "/api/v1/auth/login", param, null, 1000,"application/json")) {
+                     doPost("http://" + tcAddress + "/api/v1/auth/login", param, null, 1000, "application/json")) {
                 if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     ObjectMapper objectMapper = new ObjectMapper();
@@ -424,7 +425,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-        int timeout) {
+                                              int timeout) {
         CloseableHttpClient client;
         try {
             URIBuilder builder = new URIBuilder(url);
