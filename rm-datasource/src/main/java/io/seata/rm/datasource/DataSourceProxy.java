@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -31,6 +30,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String userName;
 
-    private String version;
+    private String kernelVersion;
+
+    private String productVersion;
+
+    /**
+     * POLARDB-X 1.X -> TDDL
+     * POLARDB-X 2.X & MySQL 5.6 -> PXC
+     * POLARDB-X 2.X & MySQL 5.7 -> AliSQL-X
+     */
+    private static final String[] POLARDB_X_PRODUCT_KEYWORD = {"TDDL","AliSQL-X","PXC"};
 
     /**
      * Instantiates a new Data source proxy.
@@ -89,9 +98,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
-                getMySQLAdaptiveType(connection);
+                validMySQLVersion(connection);
+                buildDerivativeVersion();
             }
-            version = selectDbVersion(connection);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -103,17 +112,31 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * get mysql adaptive type for PolarDB-X
+     * Define derivative product version for MySQL Kernel
      *
-     * @param connection db connection
      */
-    private void getMySQLAdaptiveType(Connection connection) {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeQuery("show rule");
-            dbType = JdbcConstants.POLARDBX;
-        } catch (SQLException e) {
-            dbType = JdbcConstants.MYSQL;
+    private void buildDerivativeVersion() {
+        if (!JdbcConstants.MYSQL.equals(dbType)) {
+            return;
         }
+        // check for polardb-x
+        if (isPolardbXProduct()) {
+            dbType = JdbcConstants.POLARDBX;
+            return;
+        }
+        // check for other products base on mysql kenerel
+    }
+
+    private boolean isPolardbXProduct() {
+        if (StringUtils.isBlank(productVersion)) {
+            return false;
+        }
+        for (String keyword : POLARDB_X_PRODUCT_KEYWORD) {
+            if (productVersion.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -296,27 +319,33 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         return BranchType.AT;
     }
 
-    public String getVersion() {
-        return version;
+    public String getKernelVersion() {
+        return kernelVersion;
     }
 
-    private String selectDbVersion(Connection connection) {
-        if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
-                 ResultSet versionResult = preparedStatement.executeQuery()) {
-                if (versionResult.next()) {
-                    String version = versionResult.getString("VERSION()");
-                    if (version == null) {
-                        return null;
-                    }
-                    int dashIdx = version.indexOf('-');
-                    // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
-                    return dashIdx > 0 ? version.substring(0, dashIdx) : version;
-                }
-            } catch (Exception e) {
-                LOGGER.error("get mysql version fail error: {}", e.getMessage());
-            }
+    private void validMySQLVersion(Connection connection) {
+        if (!JdbcConstants.MYSQL.equals(dbType)) {
+            return;
         }
-        return "";
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+             ResultSet versionResult = preparedStatement.executeQuery()) {
+            if (versionResult.next()) {
+                String version = versionResult.getString("VERSION()");
+                if (StringUtils.isBlank(version)) {
+                    return;
+                }
+                int dashIdx = version.indexOf('-');
+                // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
+                if (dashIdx > 0) {
+                    kernelVersion = version.substring(0, dashIdx);
+                    productVersion = version.substring(dashIdx + 1);
+                } else {
+                    kernelVersion = version;
+                    productVersion = version;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("check mysql version fail error: {}", e.getMessage());
+        }
     }
 }
