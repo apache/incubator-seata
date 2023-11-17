@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.metadata.Metadata;
@@ -46,6 +48,7 @@ import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
+import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -77,6 +80,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String REGISTRY_TYPE = "raft";
 
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+
+    private static final String PRO_USERNAME_KEY = "username";
+
+    private static final String PRO_PASSWORD_KEY = "password";
+
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
+    private static String jwtToken;
+
+    private static final String newTokenKey = "new_token";
 
     private static volatile RaftRegistryServiceImpl instance;
 
@@ -244,6 +257,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
+    private static String getRaftUserNameKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, PRO_USERNAME_KEY);
+    }
+
+    private static String getRaftPassWordKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, PRO_PASSWORD_KEY);
+    }
+
     private InetSocketAddress convertInetSocketAddress(Node node) {
         Node.Endpoint endpoint = node.getTransaction();
         return new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
@@ -267,16 +290,29 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private static boolean watch() {
+        Map<String, String> header = new HashMap<>();
         Map<String, String> param = new HashMap<>();
         String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
         Map<String, Long> groupTerms = METADATA.getClusterTerm(clusterName);
         groupTerms.forEach((k, v) -> param.put(k, String.valueOf(v)));
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
+            String token = getToken(tcAddress);
+            if(!Objects.isNull(token)){
+                header.put(AUTHORIZATION_HEADER,token);
+            }
             try (CloseableHttpResponse response =
-                doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+                doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000,"application/x-www-form-urlencoded")) {
                 if (response != null) {
+                    //refresh jwt token
+                    Header tokenHeader=response.getFirstHeader(newTokenKey);
+                    if(tokenHeader!=null){
+                        jwtToken = tokenHeader.getValue();
+                    }
                     StatusLine statusLine = response.getStatusLine();
+                    if(statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED){
+                        LOGGER.error("Authentication failed! you should configure the correct username and password.");
+                    }
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
             } catch (Exception e) {
@@ -313,16 +349,30 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         acquireClusterMetaData(clusterName, "");
     }
 
-    private static void acquireClusterMetaData(String clusterName, String group) {
+    public static void acquireClusterMetaData(String clusterName, String group) {
         String tcAddress = queryHttpAddress(clusterName, group);
+        Map<String,String> header = new HashMap<>();
+        String token = getToken(tcAddress);
+        if(!Objects.isNull(token)){
+            header.put(AUTHORIZATION_HEADER,token);
+        }
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
-                if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                if (httpResponse != null) {
+                    //refresh jwt token
+                    Header newTokenHeader = httpResponse.getFirstHeader(newTokenKey);
+                    if(!Objects.isNull(newTokenHeader)){
+                        jwtToken = newTokenHeader.getValue();
+                    }
+                    if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+                        response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                    }else if(httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED){
+                        LOGGER.error("Authentication failed! you should configure the correct username and password.");
+                    }
                 }
                 MetadataResponse metadataResponse;
                 if (StringUtils.isNotBlank(response)) {
@@ -337,6 +387,40 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 LOGGER.error(e.getMessage(), e);
             }
         }
+    }
+
+    public static String getToken(String tcAddress){
+        // if the token is present ,return it
+        if(!Objects.isNull(jwtToken)){
+            return jwtToken;
+        }
+        // if username and password is not in config , return null
+        String username = CONFIG.getConfig(getRaftUserNameKey());
+        String password = CONFIG.getConfig(getRaftPassWordKey());
+        if(Objects.isNull(username) || Objects.isNull(password)){
+            return null;
+        }
+        // get token and set it in cache
+        if (StringUtils.isNotBlank(tcAddress)) {
+            Map<String, String> param = new HashMap<>();
+            param.put(PRO_USERNAME_KEY, username);
+            param.put(PRO_PASSWORD_KEY, password);
+            String response = null;
+            try (CloseableHttpResponse httpResponse =
+                     doPost("http://" + tcAddress + "/api/v1/auth/login", param, null, 1000,"application/json")) {
+                if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode jsonNode = objectMapper.readTree(response);
+                    jwtToken = jsonNode.get("data").asText();
+                }
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        }
+
+        return jwtToken;
+
     }
 
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
@@ -367,8 +451,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-        int timeout) {
-        CloseableHttpClient client = null;
+                                               int timeout, String contentType) {
+        CloseableHttpClient client;
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -376,15 +460,26 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (header != null) {
                 header.forEach(httpPost::addHeader);
             }
-            List<NameValuePair> nameValuePairs = new ArrayList<>();
-            params.forEach((k, v) -> {
-                nameValuePairs.add(new BasicNameValuePair(k, v));
-            });
-            String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
+            if (contentType != null) {
+                httpPost.setHeader("Content-Type", contentType);
+            }
 
-            StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
-            httpPost.setEntity(stringEntity);
-            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            if ("application/x-www-form-urlencoded".equals(contentType)) {
+                List<NameValuePair> nameValuePairs = new ArrayList<>();
+                params.forEach((k, v) -> {
+                    nameValuePairs.add(new BasicNameValuePair(k, v));
+                });
+                String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
+
+                StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
+                httpPost.setEntity(stringEntity);
+            } else if ("application/json".equals(contentType)) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String requestBody = objectMapper.writeValueAsString(params);
+                StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
+                httpPost.setEntity(stringEntity);
+            }
+
             client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
                 k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
                     .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
