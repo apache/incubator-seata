@@ -350,7 +350,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         acquireClusterMetaData(clusterName, "");
     }
 
-    public static void acquireClusterMetaData(String clusterName, String group) {
+    private static void acquireClusterMetaData(String clusterName, String group) {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
         String token = getToken(tcAddress);
