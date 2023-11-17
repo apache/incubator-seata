@@ -367,34 +367,28 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-        int timeout) {
-        CloseableHttpClient client = null;
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            URI uri = builder.build();
-            HttpPost httpPost = new HttpPost(uri);
-            if (header != null) {
-                header.forEach(httpPost::addHeader);
-            }
-            List<NameValuePair> nameValuePairs = new ArrayList<>();
-            params.forEach((k, v) -> {
-                nameValuePairs.add(new BasicNameValuePair(k, v));
-            });
-            String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
-
-            StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
-            httpPost.setEntity(stringEntity);
-            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build());
-            return client.execute(httpPost);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+        int timeout) throws Exception {
+        CloseableHttpClient client;
+        URIBuilder builder = new URIBuilder(url);
+        URI uri = builder.build();
+        HttpPost httpPost = new HttpPost(uri);
+        if (header != null) {
+            header.forEach(httpPost::addHeader);
         }
-        return null;
+        List<NameValuePair> nameValuePairs = new ArrayList<>();
+        params.forEach((k, v) -> {
+            nameValuePairs.add(new BasicNameValuePair(k, v));
+        });
+        String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
+
+        StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
+        httpPost.setEntity(stringEntity);
+        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
+            .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER).setDefaultRequestConfig(RequestConfig.custom()
+                .setConnectionRequestTimeout(timeout).setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+            .build());
+        return client.execute(httpPost);
     }
 
     @Override
