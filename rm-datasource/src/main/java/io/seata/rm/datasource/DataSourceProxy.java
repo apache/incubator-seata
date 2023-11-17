@@ -99,7 +99,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
                 validMySQLVersion(connection);
-                buildDerivativeVersion();
+                checkDerivativeProduct();
             }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
@@ -115,7 +115,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Define derivative product version for MySQL Kernel
      *
      */
-    private void buildDerivativeVersion() {
+    private void checkDerivativeProduct() {
         if (!JdbcConstants.MYSQL.equals(dbType)) {
             return;
         }
