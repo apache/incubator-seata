@@ -55,7 +55,7 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
     @Override
     public boolean isReference(Object bean, String beanName) {
         String beanClassName = bean.getClass().getName();
-        return isHsf && ("com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName) || "org.springframework.beans.factory.FactoryBean".equals(beanClassName));
+        return isHsf && "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName);
     }
 
     @Override
