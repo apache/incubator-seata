@@ -124,7 +124,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcConstants.POLARDBX;
             return;
         }
-        // check for other products base on mysql kenerel
+        // check for other products base on mysql kernel
     }
 
     private boolean isPolardbXProduct() {
