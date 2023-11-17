@@ -89,7 +89,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static String jwtToken;
 
-    private static final String newTokenKey = "new_token";
+    private static final String NEW_TOKEN_KEY = "new_token";
 
     private static volatile RaftRegistryServiceImpl instance;
 
@@ -306,7 +306,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                      doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000, "application/x-www-form-urlencoded")) {
                 if (response != null) {
                     //refresh jwt token
-                    Header tokenHeader = response.getFirstHeader(newTokenKey);
+                    Header tokenHeader = response.getFirstHeader(NEW_TOKEN_KEY);
                     if (tokenHeader != null) {
                         jwtToken = tokenHeader.getValue();
                     }
@@ -365,7 +365,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                      doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
                     //refresh jwt token
-                    Header newTokenHeader = httpResponse.getFirstHeader(newTokenKey);
+                    Header newTokenHeader = httpResponse.getFirstHeader(NEW_TOKEN_KEY);
                     if (!Objects.isNull(newTokenHeader)) {
                         jwtToken = newTokenHeader.getValue();
                     }
