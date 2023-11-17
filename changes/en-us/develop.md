@@ -12,7 +12,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6026](https://github.com/seata/seata/pull/6026)] fix incorrect metric report
 
 ### optimize:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
+- [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR

@@ -12,7 +12,7 @@
 - [[#6026](https://github.com/seata/seata/pull/6026)] 修复异常的打点
 
 ### optimize:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
+- [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
