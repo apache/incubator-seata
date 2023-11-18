@@ -17,7 +17,6 @@ package io.seata.discovery.registry.raft;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,26 +40,15 @@ import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.HttpClientUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,11 +78,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-        new PoolingHttpClientConnectionManager();
-
-    private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
-
     private static volatile String CURRENT_TRANSACTION_SERVICE_GROUP;
 
     private static volatile String CURRENT_TRANSACTION_CLUSTER_NAME;
@@ -107,11 +90,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
      * Service node health check
      */
     private static final Map<String, List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
-
-    static {
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
-    }
 
     private RaftRegistryServiceImpl() {}
 
@@ -191,13 +169,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         CLOSED.compareAndSet(false, true);
                         REFRESH_METADATA_EXECUTOR.shutdown();
-                        HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
-                            try {
-                                client.close();
-                            } catch (IOException e) {
-                                LOGGER.error(e.getMessage(), e);
-                            }
-                        });
                     }));
                 }
             }
@@ -274,13 +245,13 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
             try (CloseableHttpResponse response =
-                doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+                HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
-            } catch (Exception e) {
-                LOGGER.error("watch cluster fail: {}", e.getMessage());
+            } catch (IOException e) {
+                LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
@@ -320,7 +291,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
+                HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
                 if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                 }
@@ -337,64 +308,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 LOGGER.error(e.getMessage(), e);
             }
         }
-    }
-
-    public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-        int timeout) {
-        CloseableHttpClient client;
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            if (param != null) {
-                for (String key : param.keySet()) {
-                    builder.addParameter(key, param.get(key));
-                }
-            }
-            URI uri = builder.build();
-            HttpGet httpGet = new HttpGet(uri);
-            if (header != null) {
-                header.forEach(httpGet::addHeader);
-            }
-            client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build());
-            return client.execute(httpGet);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-        int timeout) {
-        CloseableHttpClient client = null;
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            URI uri = builder.build();
-            HttpPost httpPost = new HttpPost(uri);
-            if (header != null) {
-                header.forEach(httpPost::addHeader);
-            }
-            List<NameValuePair> nameValuePairs = new ArrayList<>();
-            params.forEach((k, v) -> {
-                nameValuePairs.add(new BasicNameValuePair(k, v));
-            });
-            String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
-
-            StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
-            httpPost.setEntity(stringEntity);
-            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build());
-            return client.execute(httpPost);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
     }
 
     @Override
