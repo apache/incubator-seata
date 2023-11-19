@@ -125,6 +125,7 @@
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
+        <maven.surefire.excludes></maven.surefire.excludes>
         <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
         <gpg.arg2/>
@@ -403,6 +404,14 @@
                     --add-opens java.sql/java.sql=ALL-UNNAMED
                     --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
                 </maven.surefire.argLine>
+            </properties>
+        </profile>
+
+        <!-- profile: args-for-client-test -->
+        <profile>
+            <id>args-for-client-test</id>
+            <properties>
+                <maven.surefire.excludes>io/seata/server/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>
