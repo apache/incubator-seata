@@ -411,7 +411,7 @@
         <profile>
             <id>args-for-client-test</id>
             <properties>
-                <maven.surefire.excludes>io/seata/server/**/*.java</maven.surefire.excludes>
+                <maven.surefire.excludes>io/seata/server/**/*.java,io/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>
