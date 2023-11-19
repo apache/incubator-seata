@@ -947,11 +947,6 @@ public interface ConfigurationKeys {
     String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
 
     /**
-     * The constant CLIENT_METADATA_MAX_AGE_MS.
-     */
-    String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
-
-    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
