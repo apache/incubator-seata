@@ -44,6 +44,7 @@ import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.HttpClientUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
@@ -74,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * @author funkye
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
-
+   
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftRegistryServiceImpl.class);
 
     private static final String REGISTRY_TYPE = "raft";
@@ -105,11 +106,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-        new PoolingHttpClientConnectionManager();
-
-    private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
-
     private static volatile String CURRENT_TRANSACTION_SERVICE_GROUP;
 
     private static volatile String CURRENT_TRANSACTION_CLUSTER_NAME;
@@ -123,10 +119,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
      */
     private static final Map<String, List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
 
-    static {
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
-    }
 
     private RaftRegistryServiceImpl() {
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
@@ -209,13 +201,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         CLOSED.compareAndSet(false, true);
                         REFRESH_METADATA_EXECUTOR.shutdown();
-                        HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
-                            try {
-                                client.close();
-                            } catch (IOException e) {
-                                LOGGER.error(e.getMessage(), e);
-                            }
-                        });
                     }));
                 }
             }
@@ -322,7 +307,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
             try (CloseableHttpResponse response =
-                     doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000, "application/x-www-form-urlencoded")) {
+                doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
                     if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -330,9 +315,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     }
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
-            } catch (AuthenticationFailedException e) {
-                throw e;
-            } catch (Exception e) {
+            } catch (IOException e) {
                 LOGGER.error("watch cluster fail: {}", e.getMessage());
                 try {
                     Thread.sleep(1000);
@@ -347,7 +330,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-                                                      List<InetSocketAddress> aliveAddress) {
+        List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
