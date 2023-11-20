@@ -83,7 +83,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_NAME = "rpcMergeMessageSend";
-    protected static final Object mergeLock = new Object();
+    protected static final Object MERGE_LOCK = new Object();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -95,7 +95,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * Send via asynchronous thread {@link io.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
-    protected static final ConcurrentHashMap<String/*serverAddress*/, Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>>> basketMap = new ConcurrentHashMap<>();
+    protected static final ConcurrentHashMap<String/*serverAddress*/, Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>>> BASKET_MAP = new ConcurrentHashMap<>();
     private final NettyClientBootstrap clientBootstrap;
     private final NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
@@ -114,7 +114,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     private void startMergeSendThread() {
-        if(mergeSendExecutorService == null) {
+        if (mergeSendExecutorService == null) {
             synchronized (AbstractNettyRemoting.class) {
                 if(mergeSendExecutorService == null) {
                     mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
@@ -155,8 +155,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> roleMessage = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
-                    key -> new Pair<>(transactionRole, new LinkedBlockingQueue<>()));
+            Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> roleMessage = CollectionUtils.computeIfAbsent(BASKET_MAP, serverAddress,
+                key -> new Pair<>(transactionRole, new LinkedBlockingQueue<>()));
             BlockingQueue<RpcMessage> basket = roleMessage.getSecond();
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
@@ -167,8 +167,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());
             }
             if (!isSending) {
-                synchronized (mergeLock) {
-                    mergeLock.notifyAll();
+                synchronized (MERGE_LOCK) {
+                    MERGE_LOCK.notifyAll();
                 }
             }
 
@@ -337,14 +337,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void run() {
             while (true) {
-                synchronized (mergeLock) {
+                synchronized (MERGE_LOCK) {
                     try {
-                        mergeLock.wait(MAX_MERGE_SEND_MILLS);
+                        MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
                     } catch (InterruptedException e) {
                     }
                 }
                 isSending = true;
-                basketMap.forEach((address, roleMessage) -> {
+                BASKET_MAP.forEach((address, roleMessage) -> {
                     NettyPoolKey.TransactionRole messageRole = roleMessage.getFirst();
 
                     BlockingQueue<RpcMessage> basket = roleMessage.getSecond();
@@ -353,9 +353,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
 
                     AbstractNettyRemotingClient client = null;
-                    if(messageRole.equals(NettyPoolKey.TransactionRole.RMROLE)){
+                    if (messageRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
                         client = RmNettyRemotingClient.getInstance();
-                    }else{
+                    } else {
                         client = TmNettyRemotingClient.getInstance();
                     }
 
