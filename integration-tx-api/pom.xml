@@ -24,9 +24,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-integration-tx-api</artifactId>
-    <name>seata-integration-tx-api ${project.version}</name>
     <packaging>jar</packaging>
-
+    <name>seata-integration-tx-api ${project.version}</name>
+    <description>integration transaction API for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
