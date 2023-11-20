@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -95,7 +96,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * Send via asynchronous thread {@link io.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
-    protected static final ConcurrentHashMap<String/*serverAddress*/, Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>>> BASKET_MAP = new ConcurrentHashMap<>();
+    protected static final ConcurrentHashMap<String/*serverAddress*/, Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>>> BASKET_MAP = new ConcurrentHashMap<>();
     private final NettyClientBootstrap clientBootstrap;
     private final NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
@@ -155,9 +156,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            Pair<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> roleMessage = CollectionUtils.computeIfAbsent(BASKET_MAP, serverAddress,
-                key -> new Pair<>(transactionRole, new LinkedBlockingQueue<>()));
-            BlockingQueue<RpcMessage> basket = roleMessage.getSecond();
+            Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> roleMessage = CollectionUtils.computeIfAbsent(BASKET_MAP, serverAddress,
+                key -> {
+                    Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> map = new HashMap<>(2);
+                    map.put(NettyPoolKey.TransactionRole.TMROLE, new LinkedBlockingQueue<>());
+                    map.put(NettyPoolKey.TransactionRole.RMROLE, new LinkedBlockingQueue<>());
+                    return map;
+                });
+            BlockingQueue<RpcMessage> basket = roleMessage.get(transactionRole);
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
                     serverAddress, rpcMessage);
@@ -344,16 +350,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     }
                 }
                 isSending = true;
-                BASKET_MAP.forEach((address, roleMessage) -> {
-                    NettyPoolKey.TransactionRole messageRole = roleMessage.getFirst();
-
-                    BlockingQueue<RpcMessage> basket = roleMessage.getSecond();
+                BASKET_MAP.forEach((address, roleMessage) -> roleMessage.forEach((role, basket) -> {
                     if (basket.isEmpty()) {
                         return;
                     }
 
                     AbstractNettyRemotingClient client = null;
-                    if (messageRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
+                    if (role.equals(NettyPoolKey.TransactionRole.RMROLE)) {
                         client = RmNettyRemotingClient.getInstance();
                     } else {
                         client = TmNettyRemotingClient.getInstance();
@@ -386,12 +389,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                             MessageFuture messageFuture = clientFutures.remove(msgId);
                             if (messageFuture != null) {
                                 messageFuture.setResultMessage(
-                                    new RuntimeException(String.format("%s is unreachable", address), e));
+                                        new RuntimeException(String.format("%s is unreachable", address), e));
                             }
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
-                });
+                }));
                 isSending = false;
             }
         }
