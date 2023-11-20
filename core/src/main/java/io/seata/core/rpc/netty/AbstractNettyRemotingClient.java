@@ -116,7 +116,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private void startMergeSendThread() {
         if (mergeSendExecutorService == null) {
             synchronized (AbstractNettyRemoting.class) {
-                if(mergeSendExecutorService == null) {
+                if (mergeSendExecutorService == null) {
                     mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                             MAX_MERGE_SEND_THREAD,
                             KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
