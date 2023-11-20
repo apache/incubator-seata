@@ -87,7 +87,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` or `io.seata:seata-spring-boot-starter`.
 ```xml
 <properties>
-  <seata.version>1.8.0</seata.version>
+  <seata.version>2.0.0</seata.version>
 </properties>
 
 <dependencies>
