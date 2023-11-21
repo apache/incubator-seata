@@ -201,4 +201,10 @@ public class EnhancedServiceLoaderTest {
         assertThat(classToDefinitionMap.get(EnglishHello.class)).isNull();
     }
 
+    @Test
+    public void testDependsOn() {
+        List<Hello3> hello3List = EnhancedServiceLoader.loadAll(Hello3.class);
+        assertThat(hello3List.size()).isEqualTo(1);
+        assertThat(hello3List.get(0).getClass()).isEqualTo(AfricaHello.class);
+    }
 }
