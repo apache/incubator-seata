@@ -121,6 +121,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          * 1. show full columns from xxx from xxx(normal)
          * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
+
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
              ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {

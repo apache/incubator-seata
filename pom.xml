@@ -53,8 +53,6 @@
         <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
-        <module>rm-datasource-mysql5</module>
-        <module>rm-datasource-mysql8</module>
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
