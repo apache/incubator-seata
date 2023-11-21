@@ -37,7 +37,7 @@ public class PolarDBXTableMetaCache extends MysqlTableMetaCache {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.POLARDBX) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+            return resultSetMetaToSchema(connection, stmt, rs, rs.getMetaData(), connection.getMetaData());
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {

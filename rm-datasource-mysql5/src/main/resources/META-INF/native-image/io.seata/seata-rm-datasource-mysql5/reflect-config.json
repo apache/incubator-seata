@@ -1,0 +1,16 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.cache.Mysql5ColumnMetaProcessor"
+    },
+    "name": "com.mysql.jdbc.ResultSetMetaData",
+    "methods": [
+      {
+        "name": "getField",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  }
+]

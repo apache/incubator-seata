@@ -19,9 +19,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-build</artifactId>
+        <artifactId>seata-dependencies</artifactId>
         <version>${revision}</version>
-        <relativePath>./build/pom.xml</relativePath>
+        <relativePath>./dependencies/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,6 +52,8 @@
         <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
+        <module>rm-datasource-mysql5</module>
+        <module>rm-datasource-mysql8</module>
         <module>spring</module>
         <module>spring-aot</module>
         <module>spring-framework-fake-for-java8</module>
@@ -104,18 +106,6 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-dependencies</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <profiles>
         <!-- profile: licenseCheck -->
         <profile>
@@ -158,15 +148,13 @@
             <properties>
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java8 -->
         <profile>
             <id>release-image-based-on-java8</id>
             <properties>
-                <image.tags>${project.version},latest</image.tags>
+                <image.tags>${project.version}</image.tags>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java8-slim -->

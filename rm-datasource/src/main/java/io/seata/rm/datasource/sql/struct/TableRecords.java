@@ -202,56 +202,15 @@ public class TableRecords implements java.io.Serializable {
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
                 ColumnMeta col = getColumnMeta(tmeta,colName);
-                int dataType = col.getDataType();
+                int dataType = col.getRealDataType() != null ? col.getRealDataType() : col.getDataType();
+
                 Field field = new Field();
                 field.setName(col.getColumnName());
                 if (ignoreCasePKs.contains(colName)) {
                     field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(dataType);
-                // mysql will not run in this code
-                // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
-                if (dataType == Types.BLOB) {
-                    Blob blob = resultSet.getBlob(i);
-                    if (blob != null) {
-                        field.setValue(new SerialBlob(blob));
-                    }
-                } else if (dataType == Types.CLOB) {
-                    Clob clob = resultSet.getClob(i);
-                    if (clob != null) {
-                        field.setValue(new SerialClob(clob));
-                    }
-                } else if (dataType == Types.NCLOB) {
-                    NClob object = resultSet.getNClob(i);
-                    if (object != null) {
-                        field.setValue(new SerialClob(object));
-                    }
-                } else if (dataType == Types.ARRAY) {
-                    Array array = resultSet.getArray(i);
-                    if (array != null) {
-                        field.setValue(new SerialArray(array));
-                    }
-                } else if (dataType == Types.REF) {
-                    Ref ref = resultSet.getRef(i);
-                    if (ref != null) {
-                        field.setValue(new SerialRef(ref));
-                    }
-                } else if (dataType == Types.DATALINK) {
-                    java.net.URL url = resultSet.getURL(i);
-                    if (url != null) {
-                        field.setValue(new SerialDatalink(url));
-                    }
-                } else if (dataType == Types.JAVA_OBJECT) {
-                    Object object = resultSet.getObject(i);
-                    if (object != null) {
-                        field.setValue(new SerialJavaObject(object));
-                    }
-                } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
-                    field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
-                } else {
-                    // JDBCType.DISTINCT, JDBCType.STRUCT etc...
-                    field.setValue(holdSerialDataType(resultSet.getObject(i)));
-                }
+                loadFieldValue(field, resultSet, i);
 
                 fields.add(field);
             }
@@ -262,6 +221,59 @@ public class TableRecords implements java.io.Serializable {
             records.add(row);
         }
         return records;
+    }
+
+    private static void loadFieldValue(Field field, ResultSet resultSet, int i) throws SQLException {
+        int dataType = field.getType();
+
+        // mysql will not run in this code
+        // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
+        if (dataType == Types.BLOB) {
+            Blob blob = resultSet.getBlob(i);
+            if (blob != null) {
+                field.setValue(new SerialBlob(blob));
+            }
+        } else if (dataType == Types.CLOB) {
+            Clob clob = resultSet.getClob(i);
+            if (clob != null) {
+                field.setValue(new SerialClob(clob));
+            }
+        } else if (dataType == Types.NCLOB) {
+            NClob object = resultSet.getNClob(i);
+            if (object != null) {
+                field.setValue(new SerialClob(object));
+            }
+        } else if (dataType == Types.ARRAY) {
+            Array array = resultSet.getArray(i);
+            if (array != null) {
+                field.setValue(new SerialArray(array));
+            }
+        } else if (dataType == Types.REF) {
+            Ref ref = resultSet.getRef(i);
+            if (ref != null) {
+                field.setValue(new SerialRef(ref));
+            }
+        } else if (dataType == Types.DATALINK) {
+            java.net.URL url = resultSet.getURL(i);
+            if (url != null) {
+                field.setValue(new SerialDatalink(url));
+            }
+        } else if (dataType == Types.TINYINT) {
+            Object object = resultSet.getObject(i);
+            if (object != null) {
+                field.setValue(resultSet.getInt(i));
+            }
+        } else if (dataType == Types.JAVA_OBJECT) {
+            Object object = resultSet.getObject(i);
+            if (object != null) {
+                field.setValue(new SerialJavaObject(object));
+            }
+        } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
+            field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
+        } else {
+            // JDBCType.DISTINCT, JDBCType.STRUCT etc...
+            field.setValue(holdSerialDataType(resultSet.getObject(i)));
+        }
     }
 
     /**

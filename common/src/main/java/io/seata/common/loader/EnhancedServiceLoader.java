@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.common.util.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -339,7 +340,7 @@ public class EnhancedServiceLoader {
          * @param activateName the activate name
          * @param argsType     the args type
          * @param args         the args
-         * @param loader  the class loader
+         * @param loader       the class loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
@@ -350,8 +351,8 @@ public class EnhancedServiceLoader {
 
         /**
          * get all implements
-         * @param loader  the class loader
          *
+         * @param loader the class loader
          * @return list list
          */
         private List<S> loadAll(ClassLoader loader) {
@@ -541,7 +542,7 @@ public class EnhancedServiceLoader {
                                         continue;
                                     }
                                     extensions.add(extensionDefinition);
-                                } catch (LinkageError | ClassNotFoundException e) {
+                                } catch (LinkageError | ClassNotFoundException | DependsOnException e) {
                                     LOGGER.warn("Load [{}] class fail: {}", line, e.getMessage());
                                 } catch (ClassCastException e) {
                                     LOGGER.error("Load [{}] class fail, please make sure the extension" +
@@ -572,7 +573,7 @@ public class EnhancedServiceLoader {
 
         @SuppressWarnings("unchecked")
         private ExtensionDefinition<S> getUnloadedExtensionDefinition(String className, ClassLoader loader)
-                throws ClassNotFoundException, ClassCastException {
+                throws ClassNotFoundException, ClassCastException, DependsOnException {
             //Check whether the definition has been loaded
             if (!isDefinitionContainsClazz(className, loader)) {
                 Class<?> clazz = Class.forName(className, true, loader);
@@ -584,11 +585,17 @@ public class EnhancedServiceLoader {
                 String serviceName = null;
                 int priority = 0;
                 Scope scope = Scope.SINGLETON;
-                LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
-                if (loadLevel != null) {
-                    serviceName = loadLevel.name();
-                    priority = loadLevel.order();
-                    scope = loadLevel.scope();
+                try {
+                    LoadLevel loadLevel = clazz.getAnnotation(LoadLevel.class);
+                    if (loadLevel != null) {
+                        serviceName = loadLevel.name();
+                        priority = loadLevel.order();
+                        scope = loadLevel.scope();
+
+                        this.verifyDependsOn(loadLevel);
+                    }
+                } catch (ArrayStoreException | TypeNotPresentException e) {
+                    throw new DependsOnException("Verify depends on classes failed.", e);
                 }
                 ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass);
                 classToDefinitionMap.put(clazz, result);
@@ -599,6 +606,20 @@ public class EnhancedServiceLoader {
                 return result;
             }
             return null;
+        }
+
+        private void verifyDependsOn(LoadLevel loadLevel) throws DependsOnException {
+            // In java11 and above, a TypeNotPresentException will throw only after obtaining it once,
+            // if any dependent class does not exist.
+            @SuppressWarnings("unused")
+            Class<?>[] dependsOnClasses = loadLevel.dependsOnClasses();
+
+            // verify depends on class names
+            for (String className : loadLevel.dependsOnClassNames()) {
+                if (!ReflectionUtil.existsClass(className)) {
+                    throw new DependsOnException("The dependent class '" + className + "' does not exist");
+                }
+            }
         }
 
         private boolean isDefinitionContainsClazz(String className, ClassLoader loader) {
@@ -654,6 +675,7 @@ public class EnhancedServiceLoader {
 
         /**
          * Helper Class for hold a value.
+         *
          * @param <T>
          */
         private static class Holder<T> {
