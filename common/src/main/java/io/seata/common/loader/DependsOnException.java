@@ -20,7 +20,7 @@ package io.seata.common.loader;
  *
  * @author wang.liang
  */
-class DependsOnException extends Exception {
+public class DependsOnException extends Exception {
 
     public DependsOnException(String message) {
         super(message);
