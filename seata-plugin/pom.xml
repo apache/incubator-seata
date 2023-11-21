@@ -32,6 +32,8 @@
 
     <modules>
         <module>seata-jackson-parser-oracle</module>
+        <module>seata-rm-datasource-mysql5</module>
+        <module>seata-rm-datasource-mysql8</module>
     </modules>
 
     <repositories>

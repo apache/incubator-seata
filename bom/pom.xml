@@ -193,16 +193,6 @@
                 <artifactId>seata-rm-datasource</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-rm-datasource-mysql5</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-rm-datasource-mysql8</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <!-- the 'seata-server' is an application, not a dependency
             <dependency>
                 <groupId>io.seata</groupId>
