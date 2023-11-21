@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
@@ -42,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class RMHandlerATTest {
 
     @Test
-    void hasNormalUndoLogTableTest() {
+    void testNormalDeleteUndoLogTable() throws SQLException {
         RMHandlerAT handler = buildHandler(false);
         UndoLogDeleteRequest request = buildRequest();
         int testTimes = 5;
@@ -53,16 +55,15 @@ class RMHandlerATTest {
     }
 
     @Test
-    void hasErrorUndoLogTableTest() {
+    void testErrorDeleteUndoLogTable() throws SQLException {
         RMHandlerAT handler = buildHandler(true);
         UndoLogDeleteRequest request = buildRequest();
         request.setSaveDays((short) -1);
-        int testTimes = 1;
         handler.handle(request);
-        verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
+        verify(handler, times(1)).deleteUndoLog(any(), any(), any());
     }
 
-    private RMHandlerAT buildHandler(boolean hasUndoLogTable) {
+    private RMHandlerAT buildHandler(boolean errorDeleteUndologTable) throws SQLException {
         RMHandlerAT handler = spy(new RMHandlerAT());
         DataSourceManager dataSourceManager = mock(DataSourceManager.class);
         doReturn(dataSourceManager).when(handler).getResourceManager();
@@ -76,8 +77,13 @@ class RMHandlerATTest {
         });
 
         UndoLogManager manager = mock(UndoLogManager.class);
-        when(manager.hasUndoLogTable(any())).thenReturn(hasUndoLogTable);
+        when(manager.hasUndoLogTable(any())).thenReturn(true);
         doReturn(manager).when(handler).getUndoLogManager(any());
+
+        if (errorDeleteUndologTable) {
+            when(manager.deleteUndoLogByLogCreated(any(Date.class), anyInt(), any(Connection.class)))
+                    .thenThrow(new SQLException());
+        }
 
         return handler;
     }
