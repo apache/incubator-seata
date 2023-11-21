@@ -61,7 +61,9 @@ public class Mysql8ColumnMetaProcessor implements IColumnMetaProcessor {
             return;
         }
 
+        // get field
         Field field = rsmd.getFields()[columnIndex];
+
         if (field.getMysqlTypeId() == MysqlType.FIELD_TYPE_TINY) {
             columnMeta.setRealDataType(Types.TINYINT);
         }
