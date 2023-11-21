@@ -22,6 +22,7 @@ import io.seata.rm.datasource.undo.UndoLogManager;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -41,13 +42,23 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class RMHandlerATTest {
 
     @Test
-    void hasUndoLogTableTest() {
-        RMHandlerAT handler = buildHandler(true);
+    void hasNormalUndoLogTableTest() {
+        RMHandlerAT handler = buildHandler(false);
         UndoLogDeleteRequest request = buildRequest();
         int testTimes = 5;
         for (int i = 0; i < testTimes; i++) {
             handler.handle(request);
         }
+        verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
+    }
+
+    @Test
+    void hasErrorUndoLogTableTest() {
+        RMHandlerAT handler = buildHandler(true);
+        UndoLogDeleteRequest request = buildRequest();
+        request.setSaveDays((short) -1);
+        int testTimes = 1;
+        handler.handle(request);
         verify(handler, times(testTimes)).deleteUndoLog(any(), any(), any());
     }
 
