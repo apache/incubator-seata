@@ -114,7 +114,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private RaftRegistryServiceImpl() {
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
-        refreshToken();
+        try {
+            refreshToken();
+        } catch (IOException e) {
+            throw new RuntimeException("Init token failed!");
+        }
     }
 
     /**
@@ -293,20 +297,22 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         groupTerms.forEach((k, v) -> param.put(k, String.valueOf(v)));
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
-            if (isTokenExpired()) {
-                refreshToken();
-            }
-            if (!Objects.isNull(jwtToken)) {
-                header.put(AUTHORIZATION_HEADER, jwtToken);
-            }
-            try (CloseableHttpResponse response =
-                     HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
-                if (response != null) {
-                    StatusLine statusLine = response.getStatusLine();
-                    if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+            try {
+                if (isTokenExpired()) {
+                    refreshToken();
+                }
+                if (!Objects.isNull(jwtToken)) {
+                    header.put(AUTHORIZATION_HEADER, jwtToken);
+                }
+                try (CloseableHttpResponse response =
+                         HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+                    if (response != null) {
+                        StatusLine statusLine = response.getStatusLine();
+                        if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        }
+                        return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                     }
-                    return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
             } catch (IOException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
@@ -347,7 +353,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         Map<String, String> header = new HashMap<>();
         header.put(CONTENT_TYPE_KEY, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         if (isTokenExpired()) {
-            refreshToken();
+            try {
+                refreshToken();
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
         if (!Objects.isNull(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
@@ -380,7 +390,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    public static void refreshToken() {
+    public static void refreshToken() throws IOException {
         // if username and password is not in config , return
         String username = CONFIG.getConfig(getRaftUserNameKey());
         String password = CONFIG.getConfig(getRaftPassWordKey());
@@ -416,8 +426,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                 }
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
             }
         }
 
