@@ -23,6 +23,8 @@ public interface JdbcConstants {
     String ORACLE = "oracle";
 
     String MYSQL = "mysql";
+    String MYSQL5 = "mysql5";
+    String MYSQL8 = "mysql8";
 
     String DB2 = "db2";
 

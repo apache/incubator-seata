@@ -48,4 +48,18 @@ public @interface LoadLevel {
      * Scope enum.
      */
     Scope scope() default Scope.SINGLETON;
+
+    /**
+     * Depends on classes.
+     *
+     * @return the classes
+     */
+    Class<?>[] dependsOnClasses() default {};
+
+    /**
+     * Depends on class names.
+     *
+     * @return the class names
+     */
+    String[] dependsOnClassNames() default {};
 }

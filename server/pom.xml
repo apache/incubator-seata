@@ -294,12 +294,12 @@
                                 <artifactItem>
                                     <groupId>mysql</groupId>
                                     <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql.jdbc.version}</version>
+                                    <version>${mysql5.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>mysql</groupId>
                                     <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql8.jdbc.version}</version>
+                                    <version>${mysql8.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
@@ -408,8 +408,6 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
             <build>
