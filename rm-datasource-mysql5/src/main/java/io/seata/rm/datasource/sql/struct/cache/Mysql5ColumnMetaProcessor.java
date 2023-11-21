@@ -24,6 +24,7 @@ import io.seata.sqlparser.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -74,18 +75,27 @@ public class Mysql5ColumnMetaProcessor implements IColumnMetaProcessor {
             return;
         }
 
-        Field field;
+        // get field
+        Field field = this.getField(rsmd, columnMeta.getColumnName(), columnIndex);
+        if (field == null) {
+            return;
+        }
+
+        if (field.getMysqlType() == FIELD_TYPE_TINY) {
+            columnMeta.setRealDataType(Types.TINYINT);
+        }
+    }
+
+    @Nullable
+    private Field getField(ResultSetMetaData rsmd, String columnName, int columnIndex) {
         try {
             // the columnIndex of the method 'ResultSetMetaData#getField(int columnIndex)' starts from 1, not 0
             columnIndex++;
 
-            field = (Field) ReflectionUtil.invokeMethod(rsmd, "getField", new Class<?>[]{int.class}, new Object[]{columnIndex});
+            return (Field) ReflectionUtil.invokeMethod(rsmd, "getField", new Class<?>[]{int.class}, new Object[]{columnIndex});
         } catch (NoSuchMethodException | InvocationTargetException e) {
-            LOGGER.warn("Get field of the column '{}' failed, ignore the exception", columnMeta.getColumnName(), e);
-            return;
-        }
-        if (field.getMysqlType() == FIELD_TYPE_TINY) {
-            columnMeta.setRealDataType(Types.TINYINT);
+            LOGGER.warn("Get field of the column '{}' failed, ignore the exception", columnName, e);
+            return null;
         }
     }
 }
