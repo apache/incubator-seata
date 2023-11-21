@@ -130,6 +130,21 @@ public final class ReflectionUtil {
         return clazz;
     }
 
+    /**
+     * Whether the class exists
+     *
+     * @param className the class name
+     * @return the boolean
+     */
+    public static boolean existsClass(String className) {
+        try {
+            getClassByName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     //endregion
 
 
