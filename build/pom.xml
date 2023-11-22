@@ -107,6 +107,7 @@
         <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
         <jib-maven-plugin.version>3.2.0</jib-maven-plugin.version>
+        <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
         <!-- Deploy && GPG -->
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
@@ -196,6 +197,25 @@
                     <configuration>
                         <simplifiedPomFileName>.flattened-pom.xml</simplifiedPomFileName>
                         <useTabIndent>true</useTabIndent>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${git-commit-id-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>get-the-git-infos</id>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <verbose>true</verbose>
+                        <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                        <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
                     </configuration>
                 </plugin>
             </plugins>
@@ -294,6 +314,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Git Commit -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -379,9 +404,9 @@
             </properties>
         </profile>
 
-        <!-- profile: args-for-test-by-jdk17-and-above-versions -->
+        <!-- profile: args-for-test-by-jdk17-and-above -->
         <profile>
-            <id>args-for-test-by-jdk17-and-above-versions</id>
+            <id>args-for-test-by-jdk17-and-above</id>
             <activation>
                 <jdk>[17,)</jdk>
             </activation>
