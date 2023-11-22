@@ -28,5 +28,6 @@
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [ptyin](https://github.com/ptyin)
+- [wangliang181230](https://github.com/wangliang181230)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

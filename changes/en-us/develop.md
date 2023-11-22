@@ -28,6 +28,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [jsbxyyx](https://github.com/jsbxyyx)
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [ptyin](https://github.com/ptyin)
-
+- [wangliang181230](https://github.com/wangliang181230)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
