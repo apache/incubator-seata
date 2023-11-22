@@ -316,7 +316,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Git Commit -->
+            <!-- Git commit id -->
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
