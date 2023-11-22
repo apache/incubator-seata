@@ -13,31 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-<<<<<<<< HEAD:rm-datasource/src/test/java/io/seata/rm/datasource/undo/polardbx/keyword/PolarDBXEscapeHandlerTest.java
-package io.seata.rm.datasource.undo.polardbx.keyword;
-========
 
 package io.seata.common.loader;
->>>>>>>> upstream/2.x:common/src/test/java/io/seata/common/loader/ExtensionDefinitionTest.java
 
-import io.seata.sqlparser.EscapeHandler;
-import io.seata.sqlparser.EscapeHandlerFactory;
-import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
-<<<<<<<< HEAD:rm-datasource/src/test/java/io/seata/rm/datasource/undo/polardbx/keyword/PolarDBXEscapeHandlerTest.java
- * The type PolarDB-X keyword checker test.
- *
- * @author hsien999
- */
-public class PolarDBXEscapeHandlerTest {
-    @Test
-    public void testOracleKeywordChecker() {
-        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.POLARDBX);
-        Assertions.assertNotNull(escapeHandler);
-========
  * @author liuqiufeng
  */
 public class ExtensionDefinitionTest {
@@ -49,6 +31,5 @@ public class ExtensionDefinitionTest {
         ExtensionDefinition<ChineseHello> definition2
                 = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
         Assertions.assertEquals(definition2, definition);
->>>>>>>> upstream/2.x:common/src/test/java/io/seata/common/loader/ExtensionDefinitionTest.java
     }
 }

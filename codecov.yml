@@ -2,25 +2,24 @@ codecov:
   require_ci_to_pass: yes
 coverage:
   status:
-    patch: off
-    changes: off
+    patch: no
     project:
       default:
         threshold: 1%
         if_not_found: success
-  round: down
+    changes: no
   precision: 2
-  range: "50..75"
+  range: "50...100"
 ignore:
- - "**/test"
- - "**/.github"
- - "**/.mvn"
- - "**/.style"
- - "**/*.md"
+ - "test/.*"
+ - ".github/.*"
+ - ".mvn/.*"
+ - ".style/.*"
+ - "*.md"
  - "rm-datasource/src/test/java/io/seata/rm/datasource/mock"
- - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/antlr"
- - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/parser"
+ - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/antlr/.*"
+ - "sqlparser/seata-sqlparser-antlr/src/main/java/io/seata/sqlparser/antlr/mysql/parser/.*"
 comment:
-  layout: "reach, diff, flags, tree"
+  layout: "reach,diff,flags,tree"
   behavior: default
   require_changes: no

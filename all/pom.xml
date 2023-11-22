@@ -219,16 +219,6 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-spring-aot-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
-            <artifactId>seata-spring-aot-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.seata</groupId>
             <artifactId>seata-tcc</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -582,11 +572,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.dameng</groupId>
-            <artifactId>DmJdbcDriver18</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
@@ -643,13 +628,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>${spring-boot.version}</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -675,9 +653,6 @@
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                                <transformer implementation="org.springframework.boot.maven.PropertiesMergingResourceTransformer">
-                                    <resource>META-INF/spring/aot.factories</resource>
                                 </transformer>
                             </transformers>
                             <filters>

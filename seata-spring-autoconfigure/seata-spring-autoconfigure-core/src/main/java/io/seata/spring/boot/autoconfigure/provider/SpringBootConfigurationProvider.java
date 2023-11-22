@@ -16,13 +16,12 @@
 package io.seata.spring.boot.autoconfigure.provider;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.holder.ObjectHolder;
@@ -33,6 +32,8 @@ import io.seata.config.ExtConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.lang.Nullable;
 
@@ -59,8 +60,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
-            , (proxy, method, args) -> {
+        return (Configuration)Enhancer.create(originalConfiguration.getClass(),
+            (MethodInterceptor)(proxy, method, args, methodProxy) -> {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result;
                     String rawDataId = (String)args[0];
@@ -114,7 +115,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             });
     }
 
-    private Object getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException, InvocationTargetException {
+    private Object getDefaultValueFromPropertyObject(String dataId) throws IllegalAccessException {
         String propertyPrefix = getPropertyPrefix(dataId);
         String propertySuffix = getPropertySuffix(dataId);
 
@@ -148,30 +149,16 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @author xingfudeshi@gmail.com
      */
     @Nullable
-    private Object getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException, InvocationTargetException {
-        try {
-            Field field = propertyObj.getClass().getDeclaredField(fieldName);
+    private Object getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException {
+        Optional<Field> fieldOptional = Stream.of(propertyObj.getClass().getDeclaredFields())
+            .filter(f -> f.getName().equalsIgnoreCase(fieldName)).findAny();
 
+        // Get defaultValue from the field
+        if (fieldOptional.isPresent()) {
+            Field field = fieldOptional.get();
             if (!Map.class.isAssignableFrom(field.getType())) {
                 field.setAccessible(true);
                 return field.get(propertyObj);
-            }
-        } catch (NoSuchFieldException e) {
-            Method method = null;
-            try {
-                method = propertyObj.getClass().getMethod("get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1));
-            } catch (NoSuchMethodException ex) {
-                try {
-                    method = propertyObj.getClass().getMethod("is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1));
-                } catch (NoSuchMethodException exc) {
-                    LOGGER.warn("The get method not found for the field '{}#{}'.", propertyObj.getClass().getSimpleName(), fieldName);
-                }
-            }
-            if (method != null) {
-                if (!Map.class.isAssignableFrom(method.getReturnType())) {
-                    method.setAccessible(true);
-                    return method.invoke(propertyObj);
-                }
             }
         }
 

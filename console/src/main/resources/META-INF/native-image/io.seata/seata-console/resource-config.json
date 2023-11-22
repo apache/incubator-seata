@@ -1,9 +1,0 @@
-{
-  "resources": {
-    "includes": [
-      {
-        "pattern": "\\Qstatic\/\\E.*"
-      }
-    ]
-  }
-}

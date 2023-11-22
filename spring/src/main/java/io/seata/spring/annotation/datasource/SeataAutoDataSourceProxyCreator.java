@@ -15,12 +15,11 @@
  */
 package io.seata.spring.annotation.datasource;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import javax.sql.DataSource;
 
-import io.seata.common.aot.NativeUtils;
 import io.seata.core.model.BranchType;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.SeataDataSourceProxy;
@@ -60,15 +59,6 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) {
-        if (NativeUtils.isSpringAotProcessing()) {
-            if (!DataSource.class.isAssignableFrom(beanClass)) {
-                return DO_NOT_PROXY;
-            }
-
-            if (this.shouldSkip(beanClass, beanName)) {
-                return DO_NOT_PROXY;
-            }
-        }
         return advisors;
     }
 

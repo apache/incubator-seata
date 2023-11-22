@@ -230,7 +230,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     // visible for test.
-    private ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
+    ZkClient buildZkClient(String address, int sessionTimeout, int connectTimeout,String... authInfo) {
         ZkClient zkClient = new ZkClient(address, sessionTimeout, connectTimeout);
         if (authInfo != null && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {

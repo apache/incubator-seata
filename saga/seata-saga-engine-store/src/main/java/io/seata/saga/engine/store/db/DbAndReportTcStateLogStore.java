@@ -201,6 +201,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             try {
                 globalTransaction = getGlobalTransaction(machineInstance, context);
                 if (globalTransaction == null) {
+
                     throw new EngineExecutionException("Global transaction is not exists",
                             FrameworkErrorCode.ObjectNotExists);
                 }

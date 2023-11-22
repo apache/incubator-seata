@@ -13,26 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-<<<<<<<< HEAD:sqlparser/seata-sqlparser-druid/src/main/java/io/seata/sqlparser/druid/polardbx/PolarDBXDeleteRecognizer.java
-package io.seata.sqlparser.druid.polardbx;
-========
 
 package io.seata.config;
->>>>>>>> upstream/2.x:config/seata-config-core/src/test/java/io/seata/config/ConfigTypeTest.java
 
-import com.alibaba.druid.sql.ast.SQLStatement;
-import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
-<<<<<<<< HEAD:sqlparser/seata-sqlparser-druid/src/main/java/io/seata/sqlparser/druid/polardbx/PolarDBXDeleteRecognizer.java
- * Delete statement recognizer for PolarDB-X
- *
- * @author hsien999
- */
-public class PolarDBXDeleteRecognizer extends MySQLDeleteRecognizer {
-    public PolarDBXDeleteRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL, ast);
-========
  * @author liuqiufeng
  */
 class ConfigTypeTest {
@@ -42,6 +29,5 @@ class ConfigTypeTest {
         // mainly test exception scene
         Assertions.assertEquals(ConfigType.File, ConfigType.getType("File"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> ConfigType.getType("test"));
->>>>>>>> upstream/2.x:config/seata-config-core/src/test/java/io/seata/config/ConfigTypeTest.java
     }
 }

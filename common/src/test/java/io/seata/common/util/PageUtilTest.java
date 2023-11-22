@@ -40,7 +40,6 @@ public class PageUtilTest {
         String sqlserverTargetSql = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
 
         assertEquals(PageUtil.pageSql(sourceSql, "mysql", 1, 5), mysqlTargetSql);
-        assertEquals(PageUtil.pageSql(sourceSql, "polardb-x", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "h2", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "postgresql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);

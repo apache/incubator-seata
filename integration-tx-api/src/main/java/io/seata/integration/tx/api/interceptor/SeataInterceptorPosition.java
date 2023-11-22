@@ -13,29 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-<<<<<<<< HEAD:sqlparser/seata-sqlparser-druid/src/main/java/io/seata/sqlparser/druid/mariadb/MariadbSelectForUpdateRecognizer.java
-package io.seata.sqlparser.druid.mariadb;
-
-import com.alibaba.druid.sql.ast.SQLStatement;
-import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
-
-/**
- * The type Mariadb select for update recognizer.
- *
- * @author funkye
- */
-public class MariadbSelectForUpdateRecognizer extends MySQLSelectForUpdateRecognizer {
-
-    /**
-     * Instantiates a new Mariadb select for update recognizer.
-     *
-     * @param originalSQL the original sql
-     * @param ast         the ast
-     */
-    public MariadbSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL, ast);
-    }
-========
 package io.seata.integration.tx.api.interceptor;
 
 /**
@@ -61,5 +38,4 @@ public enum SeataInterceptorPosition {
      * The SeataInterceptor's order must be bigger than TransactionInterceptor's order.
      */
     AfterTransaction
->>>>>>>> upstream/2.x:integration-tx-api/src/main/java/io/seata/integration/tx/api/interceptor/SeataInterceptorPosition.java
 }

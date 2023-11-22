@@ -20,27 +20,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-<<<<<<<< HEAD:spring-aot/seata-spring-aot-core/pom.xml
-        <artifactId>seata-spring-aot</artifactId>
-========
         <artifactId>seata-parent</artifactId>
->>>>>>>> upstream/2.x:integration/rpc-core/pom.xml
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-<<<<<<<< HEAD:spring-aot/seata-spring-aot-core/pom.xml
-
-    <artifactId>seata-spring-aot-core</artifactId>
-
-    <name>${project.artifactId} ${project.version}</name>
-    <description>spring-aot-core for Seata built with Maven</description>
-========
     <artifactId>seata-rpc-core</artifactId>
     <packaging>jar</packaging>
     <name>seata-rpc-core ${project.version}</name>
     <description>RPC Core integration for Seata built with Maven</description>
->>>>>>>> upstream/2.x:integration/rpc-core/pom.xml
 
     <dependencies>
         <dependency>
@@ -49,8 +37,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-<<<<<<<< HEAD:spring-aot/seata-spring-aot-core/pom.xml
 </project>
-========
-</project>
->>>>>>>> upstream/2.x:integration/rpc-core/pom.xml

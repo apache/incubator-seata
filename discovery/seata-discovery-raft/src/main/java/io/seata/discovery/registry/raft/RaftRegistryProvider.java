@@ -13,20 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-<<<<<<<< HEAD:core/src/main/java/io/seata/core/store/db/sql/lock/DmLockStoreSql.java
-package io.seata.core.store.db.sql.lock;
-
-import io.seata.common.loader.LoadLevel;
-
-/**
- * the database lock store DaMeng sql
- *
- * @author wang.liang
- * @since 1.8.0
- */
-@LoadLevel(name = "dm")
-public class DmLockStoreSql extends MysqlLockStoreSql {
-========
 package io.seata.discovery.registry.raft;
 
 import io.seata.common.loader.LoadLevel;
@@ -43,5 +29,4 @@ public class RaftRegistryProvider implements RegistryProvider {
     public RegistryService<?> provide() {
         return RaftRegistryServiceImpl.getInstance();
     }
->>>>>>>> upstream/2.x:discovery/seata-discovery-raft/src/main/java/io/seata/discovery/registry/raft/RaftRegistryProvider.java
 }
