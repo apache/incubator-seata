@@ -120,6 +120,7 @@
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
+        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
@@ -318,6 +319,9 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
+                <configuration>
+                    <skip>${maven.git-commit-id.skip}</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
