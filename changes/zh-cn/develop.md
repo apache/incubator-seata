@@ -13,6 +13,7 @@
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
+- [[#6071](https://github.com/seata/seata/pull/6071)] 添加git信息到jar包中。
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
