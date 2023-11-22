@@ -44,4 +44,5 @@ public interface RMInboundHandler {
      * @param request the request
      */
     void handle(UndoLogDeleteRequest request);
+
 }

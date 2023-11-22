@@ -24,10 +24,10 @@ import javax.script.ScriptEngineManager;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.saga.engine.StateMachineConfig;
-import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
-import io.seata.saga.engine.evaluation.exception.ExceptionMatchEvaluatorFactory;
-import io.seata.saga.engine.evaluation.expression.ExpressionEvaluatorFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
+import io.seata.saga.engine.expression.ExpressionResolver;
+import io.seata.saga.engine.expression.exception.ExceptionMatchExpressionFactory;
+import io.seata.saga.engine.expression.impl.DefaultExpressionResolver;
 import io.seata.saga.engine.expression.seq.SequenceExpressionFactory;
 import io.seata.saga.engine.expression.spel.SpringELExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
@@ -94,7 +94,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private StateLogStore stateLogStore;
     private StateLangStore stateLangStore;
     private ExpressionFactoryManager expressionFactoryManager;
-    private EvaluatorFactoryManager evaluatorFactoryManager;
+    private ExpressionResolver expressionResolver;
     private StateMachineRepository stateMachineRepository;
     private StatusDecisionStrategy statusDecisionStrategy;
     private SeqGenerator seqGenerator;
@@ -129,19 +129,16 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             sequenceExpressionFactory.setSeqGenerator(getSeqGenerator());
             expressionFactoryManager.putExpressionFactory(DomainConstants.EXPRESSION_TYPE_SEQUENCE,
                 sequenceExpressionFactory);
+
+            ExceptionMatchExpressionFactory exceptionMatchExpressionFactory = new ExceptionMatchExpressionFactory();
+            expressionFactoryManager.putExpressionFactory(DomainConstants.EXPRESSION_TYPE_EXCEPTION,
+                exceptionMatchExpressionFactory);
         }
 
-        if (evaluatorFactoryManager == null) {
-            evaluatorFactoryManager = new EvaluatorFactoryManager();
-
-            ExpressionEvaluatorFactory expressionEvaluatorFactory = new ExpressionEvaluatorFactory();
-            expressionEvaluatorFactory.setExpressionFactory(
-                expressionFactoryManager.getExpressionFactory(ExpressionFactoryManager.DEFAULT_EXPRESSION_TYPE));
-            evaluatorFactoryManager.putEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT,
-                expressionEvaluatorFactory);
-
-            evaluatorFactoryManager.putEvaluatorFactory(DomainConstants.EVALUATOR_TYPE_EXCEPTION,
-                new ExceptionMatchEvaluatorFactory());
+        if (expressionResolver == null) {
+            DefaultExpressionResolver defaultExpressionResolver = new DefaultExpressionResolver();
+            defaultExpressionResolver.setExpressionFactoryManager(expressionFactoryManager);
+            expressionResolver = defaultExpressionResolver;
         }
 
         if (stateMachineRepository == null) {
@@ -321,15 +318,16 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     public void setExpressionFactoryManager(ExpressionFactoryManager expressionFactoryManager) {
         this.expressionFactoryManager = expressionFactoryManager;
+        this.expressionResolver.setExpressionFactoryManager(expressionFactoryManager);
     }
 
     @Override
-    public EvaluatorFactoryManager getEvaluatorFactoryManager() {
-        return this.evaluatorFactoryManager;
+    public ExpressionResolver getExpressionResolver() {
+        return expressionResolver;
     }
 
-    public void setEvaluatorFactoryManager(EvaluatorFactoryManager evaluatorFactoryManager) {
-        this.evaluatorFactoryManager = evaluatorFactoryManager;
+    public void setExpressionResolver(ExpressionResolver expressionResolver) {
+        this.expressionResolver = expressionResolver;
     }
 
     @Override

@@ -23,13 +23,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
+ *
  * @author funkye
  */
 @SpringBootTest
 public class LoaderConfTest {
 
     static Environment environment;
-
+    
     /**
      * Init session manager.
      *
@@ -39,15 +40,16 @@ public class LoaderConfTest {
     public static void initSessionManager(ApplicationContext context) throws Exception {
         environment = context.getEnvironment();
     }
-
+    
     @Test
     public void checkConf() {
         String nacosServerAddr = environment.resolveRequiredPlaceholders("${seata.config.nacos.serverAddr:localhost}");
-        Assertions.assertEquals("127.0.0.1:8848", nacosServerAddr);
+        Assertions.assertEquals(nacosServerAddr, "127.0.0.1:8848");
         String nacosNamespace = environment.resolveRequiredPlaceholders("${seata.config.nacos.namespace:seata-group}");
-        Assertions.assertEquals("seata-test", nacosNamespace);
+        Assertions.assertEquals(nacosNamespace, "seata-test");
         String undologSaveDays = environment.resolveRequiredPlaceholders("${seata.server.undo.log-save-days:7}");
-        Assertions.assertEquals("2", undologSaveDays);
+        Assertions.assertEquals(undologSaveDays, "2");
     }
+    
 
 }

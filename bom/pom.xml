@@ -145,6 +145,11 @@
             </dependency>
             <dependency>
                 <groupId>io.seata</groupId>
+                <artifactId>seata-discovery-raft</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-brpc</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -263,11 +268,6 @@
             <dependency>
                 <groupId>io.seata</groupId>
                 <artifactId>seata-serializer-hessian</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.seata</groupId>
-                <artifactId>seata-serializer-fst</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

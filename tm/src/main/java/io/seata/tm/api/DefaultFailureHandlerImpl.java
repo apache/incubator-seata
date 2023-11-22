@@ -48,7 +48,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     private static final int TICKS_PER_WHEEL = 8;
 
-    private HashedWheelTimer timer = new HashedWheelTimer(
+    private static final HashedWheelTimer TIMER = new HashedWheelTimer(
         new NamedThreadFactory("failedTransactionRetry", 1),
         TICK_DURATION, TimeUnit.SECONDS, TICKS_PER_WHEEL);
 
@@ -60,19 +60,19 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     @Override
     public void onCommitFailure(GlobalTransaction tx, Throwable cause) {
         LOGGER.warn("Failed to commit transaction[" + tx.getXid() + "]", cause);
-        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        TIMER.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
     public void onRollbackFailure(GlobalTransaction tx, Throwable originalException) {
         LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", originalException);
-        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        TIMER.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
     public void onRollbacking(GlobalTransaction tx, Throwable originalException) {
         StackTraceLogger.warn(LOGGER, originalException, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
-        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
+        TIMER.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
             TimeUnit.SECONDS);
     }
 
@@ -99,7 +99,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
                     return;
                 }
                 isStopped = shouldStop(tx, required);
-                timer.newTimeout(this, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+                TIMER.newTimeout(this, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
             }
         }
     }

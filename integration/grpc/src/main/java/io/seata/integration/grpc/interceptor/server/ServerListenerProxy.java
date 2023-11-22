@@ -15,26 +15,33 @@
  */
 package io.seata.integration.grpc.interceptor.server;
 
+import java.util.Map;
+import java.util.Objects;
+
 import io.grpc.ServerCall;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-
-import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author eddyxu1213@126.com
  */
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);
 
     private ServerCall.Listener<ReqT> target;
-    private String xid;
+    private final String xid;
 
-    public ServerListenerProxy(String xid, ServerCall.Listener<ReqT> target) {
+    private final Map<String, String> context;
+
+    public ServerListenerProxy(String xid, Map<String, String> context, ServerCall.Listener<ReqT> target) {
         super();
         Objects.requireNonNull(target);
         this.target = target;
         this.xid = xid;
+        this.context = context;
     }
 
     @Override
@@ -44,9 +51,13 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     @Override
     public void onHalfClose() {
-        RootContext.unbind();
+        cleanContext();
         if (StringUtils.isNotBlank(xid)) {
             RootContext.bind(xid);
+            String branchType = context.get(RootContext.KEY_BRANCH_TYPE);
+            if (StringUtils.equals(BranchType.TCC.name(), branchType)) {
+                RootContext.bindBranchType(BranchType.TCC);
+            }
         }
         target.onHalfClose();
     }
@@ -66,5 +77,11 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
         target.onReady();
     }
 
-
+    private void cleanContext() {
+        RootContext.unbind();
+        BranchType previousBranchType = RootContext.getBranchType();
+        if (BranchType.TCC == previousBranchType) {
+            RootContext.unbindBranchType();
+        }
+    }
 }

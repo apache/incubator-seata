@@ -22,8 +22,7 @@ import javax.transaction.xa.XAResource;
  * @since 2023/3/16
  */
 public interface SeataXAResource extends XAResource {
-
     // OracleXAResource Loosely Coupled Branches
-    int ORATRANSLOOSE = 65536;
+    public static final int ORATRANSLOOSE = 65536;
 
 }

@@ -76,7 +76,6 @@ public abstract class AbstractCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                     applicationData, lockKeys, clientId);
             MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
@@ -138,7 +137,6 @@ public abstract class AbstractCore implements Core {
                     String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
         }
         branchSession.setApplicationData(applicationData);
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
 
         if (LOGGER.isInfoEnabled()) {

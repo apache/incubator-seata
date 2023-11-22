@@ -33,7 +33,6 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Jedis;
-
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;

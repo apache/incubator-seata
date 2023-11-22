@@ -170,6 +170,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("transaction {} will be rollback", xid);
         }
+
         int retry = ROLLBACK_RETRY_COUNT <= 0 ? DEFAULT_TM_ROLLBACK_RETRY_COUNT : ROLLBACK_RETRY_COUNT;
         try {
             while (retry > 0) {

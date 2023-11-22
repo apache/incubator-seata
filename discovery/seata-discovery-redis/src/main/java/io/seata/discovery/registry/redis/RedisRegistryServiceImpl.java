@@ -84,7 +84,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = seataConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
-        String[] serverArr = serverAddr.split(":");
+        String[] serverArr = NetUtil.splitIPPortStr(serverAddr);
         String host = serverArr[0];
         int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());

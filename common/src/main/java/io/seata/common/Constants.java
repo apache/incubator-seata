@@ -74,7 +74,7 @@ public interface Constants {
     /**
      * Use TCC fence
      */
-    String USE_TCC_FENCE = "useTCCFence";
+    String USE_COMMON_FENCE = "useTCCFence";
 
     /**
      * phase one method name
@@ -99,7 +99,7 @@ public interface Constants {
     /**
      * branch context
      */
-    String TCC_ACTION_CONTEXT = "actionContext";
+    String TX_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name
@@ -122,6 +122,10 @@ public interface Constants {
      * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
      */
     String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
+    /**
+     * The constant BEAN_NAME_SPRING_FENCE_CONFIG
+     */
+    String BEAN_NAME_SPRING_FENCE_CONFIG = "SpringFenceConfig";
     /**
      * The constant BEAN_NAME_FAILURE_HANDLER
      */
@@ -170,5 +174,34 @@ public interface Constants {
      * The constant REGISTRY_TYPE_SPLIT_CHAR.
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
+    
+    /**
+     * phase two compensation method name
+     */
+    String COMPENSATION_METHOD = "sys::compensation";
 
+    /**
+     * phase STORE_REDIS_TYPE_PIPELINE
+     */
+    String STORE_REDIS_TYPE_PIPELINE = "pipeline";
+
+    /**
+     * The constant FASTJSON_JSON_PARSER_NAME
+     */
+    String FASTJSON_JSON_PARSER_NAME = "fastjson";
+
+    /**
+     * The constant JACKSON_JSON_PARSER_NAME
+     */
+    String JACKSON_JSON_PARSER_NAME = "jackson";
+
+    /**
+     * The constant GSON_JSON_PARSER_NAME
+     */
+    String GSON_JSON_PARSER_NAME = "gson";
+
+    /**
+     * The constant JACKSON_JSON_TEXT_PREFIX
+     */
+    String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
 }

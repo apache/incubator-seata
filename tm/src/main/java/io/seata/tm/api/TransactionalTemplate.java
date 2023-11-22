@@ -112,7 +112,7 @@ public class TransactionalTemplate {
 
             // set current tx config to holder
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
-
+            
             if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
                 LOGGER.info("join into a existing global transaction,xid={}", tx.getXid());
             }
@@ -154,7 +154,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo    the transaction info
+     * @param txInfo          the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -242,7 +242,7 @@ public class TransactionalTemplate {
             if (null != statusException) {
                 throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
             }
-            triggerAfterCommit(tx);
+            triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -363,7 +363,7 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCommit(GlobalTransaction tx) {
+    private void triggerAfterCommit() {
         for (TransactionHook hook : getCurrentHooks()) {
             try {
                 hook.afterCommit();
@@ -383,7 +383,6 @@ public class TransactionalTemplate {
                 }
             }
         }
-
     }
 
     private void cleanUp() {

@@ -25,7 +25,9 @@ import io.seata.core.model.BranchStatus;
  *
  * @author zhangsen
  */
-public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
+public class BranchTransactionDO implements Comparable<BranchTransactionDO>, java.io.Serializable {
+
+    private static final long serialVersionUID = -2108665795230590896L;
 
     private String xid;
 
@@ -48,6 +50,13 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
     private Date gmtCreate;
 
     private Date gmtModified;
+
+    public BranchTransactionDO(String xid, long branchId) {
+        this.xid = xid;
+        this.branchId = branchId;
+    }
+
+    public BranchTransactionDO() {}
 
     /**
      * Gets xid.
@@ -72,7 +81,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
      *
      * @return the transaction id
      */
-    public long getTransactionId() {
+    public Long getTransactionId() {
         return transactionId;
     }
 
@@ -90,7 +99,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
      *
      * @return the branch id
      */
-    public long getBranchId() {
+    public Long getBranchId() {
         return branchId;
     }
 
@@ -162,7 +171,7 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO> {
      *
      * @return the status
      */
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 

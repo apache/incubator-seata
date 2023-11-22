@@ -31,7 +31,7 @@
     <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
 
-    <if condition='property("LOG_BASH_DIR").equals("")'>
+    <if condition='property("LOG_BASH_DIR").equals("")' >
         <then>
             <!-- console-appender -->
             <include resource="logback/console-appender.xml"/>
@@ -41,39 +41,69 @@
 
             <!-- logstash-appender: off by default -->
             <!--<include resource="logback/logstash-appender.xml"/>-->
-
+            <!-- metric-appender: off by default -->
+            <!--<include resource="logback/metric-appender.xml"/>-->
             <!-- kafka-appender: off by default -->
             <!--<include resource="logback/kafka-appender.xml"/>-->
         </then>
         <else>
-            <!-- console-appender -->
             <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
-
-            <!-- file-appender -->
             <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
-
             <!-- logstash-appender: off by default -->
-            <!--<include resource="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>-->
-
+            <!--<include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>-->
+            <!-- metric-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>-->
             <!-- kafka-appender: off by default -->
-            <!--<include resource="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>-->
+            <!--<include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>-->
         </else>
     </if>
 
-    <root level="INFO">
+
+
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
         <!-- console-appender -->
         <appender-ref ref="CONSOLE"/>
-
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_ALL" class="ch.qos.logback.classic.AsyncAppender">
         <!-- file-appender -->
         <appender-ref ref="FILE_ALL"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_WARN" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="FILE_WARN"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_ERROR" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="FILE_ERROR"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
 
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE_ALL"/>
+        <appender-ref ref="ASYNC_FILE_WARN"/>
+        <appender-ref ref="ASYNC_FILE_ERROR"/>
         <!-- logstash-appender: off by default -->
         <!--<appender-ref ref="LOGSTASH"/>-->
 
         <!-- kafka-appender: off by default -->
         <!--<appender-ref ref="KAFKA"/>-->
+
+        <!-- metric-appender: off by default -->
+        <!--<appender-ref ref="METRIC"/>-->
     </root>
     <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
     <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>

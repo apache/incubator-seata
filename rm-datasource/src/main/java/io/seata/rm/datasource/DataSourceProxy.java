@@ -104,6 +104,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
+        if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            LOGGER.info("SQLServer support in AT mode is currently an experimental function, " +
+                    "if you have any problems in use, please feedback to us");
+        }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         TableMetaCacheFactory.registerTableMeta(this);
@@ -197,6 +201,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initOracleResourceId();
         } else if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
             initMysqlResourceId();
+        } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            initSqlServerResourceId();
         } else if (JdbcConstants.DM.equals(dbType)) {
             initDMResourceId();
         } else {
@@ -247,6 +253,36 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
     }
 
+    private void initDMResourceId() {
+        LOGGER.warn("support for the dameng database is currently an experimental feature ");
+        if (jdbcUrl.contains("?")) {
+            StringBuilder jdbcUrlBuilder = new StringBuilder();
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
+
+            StringBuilder paramsBuilder = new StringBuilder();
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
+            String[] urlParams = paramUrl.split("&");
+            for (String urlParam : urlParams) {
+                if (urlParam.contains("schema")) {
+                    // remove the '"'
+                    if (urlParam.contains("\"")) {
+                        urlParam = urlParam.replaceAll("\"", "");
+                    }
+                    paramsBuilder.append(urlParam);
+                    break;
+                }
+            }
+
+            if (paramsBuilder.length() > 0) {
+                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(paramsBuilder);
+            }
+            resourceId = jdbcUrlBuilder.toString();
+        } else {
+            resourceId = jdbcUrl;
+        }
+    }
+
     /**
      * prevent pg sql url like
      * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
@@ -284,28 +320,31 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
     }
 
-    private void initDMResourceId() {
-        LOGGER.warn("support for the dameng database is currently an experimental feature ");
-        if (jdbcUrl.contains("?")) {
+    /**
+     * The general form of the connection URL for SqlServer is
+     * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
+     * required connection properties: [INSTANCENAME], [databaseName,database]
+     *
+     */
+    private void initSqlServerResourceId() {
+        if (jdbcUrl.contains(";")) {
             StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
-
+            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf(';'));
             StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
-            String[] urlParams = paramUrl.split("&");
+            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf(';') + 1);
+            String[] urlParams = paramUrl.split(";");
             for (String urlParam : urlParams) {
-                if (urlParam.contains("schema")) {
-                    // remove the '"'
-                    if (urlParam.contains("\"")) {
-                        urlParam = urlParam.replaceAll("\"", "");
-                    }
+                String[] paramSplit = urlParam.split("=");
+                String propertyName = paramSplit[0];
+                if ("INSTANCENAME".equalsIgnoreCase(propertyName)
+                        || "databaseName".equalsIgnoreCase(propertyName)
+                        || "database".equalsIgnoreCase(propertyName)) {
                     paramsBuilder.append(urlParam);
-                    break;
                 }
             }
 
             if (paramsBuilder.length() > 0) {
-                jdbcUrlBuilder.append("?");
+                jdbcUrlBuilder.append(";");
                 jdbcUrlBuilder.append(paramsBuilder);
             }
             resourceId = jdbcUrlBuilder.toString();

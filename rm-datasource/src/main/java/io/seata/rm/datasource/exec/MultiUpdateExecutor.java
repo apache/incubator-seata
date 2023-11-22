@@ -104,15 +104,12 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
         }
         StringBuilder prefix = new StringBuilder("SELECT ");
-        final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         if (noWhereCondition) {
             //select all rows
             paramAppenderList.clear();
-        } else {
-            suffix.append(" WHERE ").append(whereCondition);
+            whereCondition = new StringBuilder();
         }
-        suffix.append(" FOR UPDATE");
-        final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, suffix.toString());
+        final StringJoiner selectSQLAppender = new StringJoiner(", ", prefix, buildSuffixSql(whereCondition.toString()));
         List<String> needColumns =
             getNeedColumns(tmeta.getTableName(), sqlRecognizer.getTableAlias(), new ArrayList<>(updateColumnsSet));
         needColumns.forEach(selectSQLAppender::add);
@@ -164,5 +161,13 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             }
         }
         return selectSQLJoiner.toString();
+    }
+
+    protected String buildSuffixSql(String whereCondition) {
+        final StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
+        if (StringUtils.isNotBlank(whereCondition)) {
+            suffix.append(" WHERE ").append(whereCondition);
+        }
+        return suffix.append(" FOR UPDATE").toString();
     }
 }

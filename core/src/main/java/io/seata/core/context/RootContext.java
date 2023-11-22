@@ -76,6 +76,11 @@ public class RootContext {
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     /**
+     * The constant HIDDEN_KEY_BRANCH_TYPE for sofa-rpc integration.
+     */
+    public static final String HIDDEN_KEY_BRANCH_TYPE = Constants.HIDE_KEY_PREFIX_CHAR + KEY_BRANCH_TYPE;
+
+    /**
      * The constant KEY_GLOBAL_LOCK_FLAG, VALUE_GLOBAL_LOCK_FLAG
      */
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";

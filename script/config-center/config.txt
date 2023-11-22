@@ -29,6 +29,7 @@ service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
 service.disableGlobalTransaction=false
 
+client.metadataMaxAgeMs=30000
 #Transaction rule configuration, only for the client
 client.rm.asyncCommitBufferLimit=10000
 client.rm.lock.retryInterval=10
@@ -42,6 +43,7 @@ client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
 client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
+client.rm.sqlParserType=druid
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 client.tm.defaultGlobalTransactionTimeout=60000
@@ -61,6 +63,8 @@ client.undo.compress.threshold=64k
 #For TCC transaction mode
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
+# You can choose from the following options: fastjson, jackson, gson
+tcc.contextJsonParserType=fastjson
 
 #Log rule configuration, for client and server
 log.exceptionRate=100
@@ -98,6 +102,7 @@ store.db.maxWait=5000
 
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single
+store.redis.type=pipeline
 store.redis.single.host=127.0.0.1
 store.redis.single.port=6379
 store.redis.sentinel.masterName=
@@ -119,10 +124,25 @@ server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
 server.rollbackRetryTimeoutUnlockEnable=false
 server.distributedLockExpireTime=10000
-server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
-server.enableParallelRequestHandle=false
+server.enableParallelRequestHandle=true
+server.enableParallelHandleBranch=false
+
+server.raft.cluster=127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093
+server.raft.snapshotInterval=600
+server.raft.applyBatch=32
+server.raft.maxAppendBufferSize=262144
+server.raft.maxReplicatorInflightMsgs=256
+server.raft.disruptorBufferSize=16384
+server.raft.electionTimeoutMs=2000
+server.raft.reporterEnabled=false
+server.raft.reporterInitialDelay=60
+server.raft.serialization=jackson
+server.raft.compressor=none
+server.raft.sync=true
+
+
 
 #Metrics configuration, only for the server
 metrics.enabled=false

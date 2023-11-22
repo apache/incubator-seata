@@ -15,6 +15,8 @@
  */
 package io.seata.rm.tcc.api;
 
+import io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -26,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * @author zhangsen
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
- * @see io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser // the RemotingParser impl for LocalTCC
+ * @see LocalTCCRemotingParser // the RemotingParser impl for LocalTCC
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

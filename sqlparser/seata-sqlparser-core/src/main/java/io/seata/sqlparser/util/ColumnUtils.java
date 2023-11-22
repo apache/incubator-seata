@@ -92,6 +92,7 @@ public final class ColumnUtils {
         return newCols;
     }
 
+
     /**
      * if necessary, add escape
      *
@@ -118,5 +119,4 @@ public final class ColumnUtils {
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(dbType);
         return escapeHandler.addColNameEscape(colName, tableMeta);
     }
-
 }

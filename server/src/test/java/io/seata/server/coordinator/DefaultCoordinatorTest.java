@@ -97,7 +97,7 @@ public class DefaultCoordinatorTest {
         EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         RemotingServer remotingServer = new MockServerMessageSender();
-        defaultCoordinator =DefaultCoordinator.getInstance(remotingServer);
+        defaultCoordinator = DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
     }
@@ -217,7 +217,7 @@ public class DefaultCoordinatorTest {
     public static void afterClass() throws Exception {
 
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getRootSessionManager().allSessions();
         for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
             asyncGlobalSession.closeAndClean();
         }

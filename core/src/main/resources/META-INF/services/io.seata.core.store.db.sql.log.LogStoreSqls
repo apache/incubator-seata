@@ -1,8 +1,9 @@
 io.seata.core.store.db.sql.log.MysqlLogStoreSqls
-io.seata.core.store.db.sql.log.MariadbLogStoreSqls
 io.seata.core.store.db.sql.log.OracleLogStoreSqls
 io.seata.core.store.db.sql.log.PostgresqlLogStoreSqls
 io.seata.core.store.db.sql.log.OceanbaseLogStoreSqls
 io.seata.core.store.db.sql.log.H2LogStoreSqls
-io.seata.core.store.db.sql.log.DmLogStoreSqls
+io.seata.core.store.db.sql.log.SqlServerLogStoreSqls
+io.seata.core.store.db.sql.log.MariadbLogStoreSqls
 io.seata.core.store.db.sql.log.PolarDBXLogStoreSqls
+io.seata.core.store.db.sql.log.DmLogStoreSqls

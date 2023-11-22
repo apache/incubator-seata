@@ -200,7 +200,7 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public void triggerAfterCompletion(GlobalTransaction tx) {
-        if (tx == null || tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
             for (TransactionHook hook : getCurrentHooks()) {
                 try {
                     hook.afterCompletion();

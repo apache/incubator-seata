@@ -44,14 +44,16 @@ public class LockerManagerFactory {
      * @return the lock manager
      */
     public static LockManager getLockManager() {
-        if (LOCK_MANAGER == null) {
-            init();
-        }
+        init();
         return LOCK_MANAGER;
     }
 
     public static void init() {
         init(null);
+    }
+
+    public static void destroy() {
+        LOCK_MANAGER = null;
     }
 
     public static void init(LockMode lockMode) {

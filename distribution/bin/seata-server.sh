@@ -60,8 +60,6 @@ show_usage() {
     echo "  --help"
 }
 
-echo "Affected JVM parameters:$JAVA_OPT"
-
 # start
 
 function validate_host() {
@@ -294,4 +292,3 @@ else
         ;;
   esac
 fi
-

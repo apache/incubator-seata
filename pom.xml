@@ -41,6 +41,7 @@
         <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
+        <module>integration/rpc-core</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
@@ -67,6 +68,7 @@
         <module>sqlparser</module>
         <module>server</module>
         <module>ext/apm-seata-skywalking-plugin</module>
+        <module>integration-tx-api</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 
@@ -360,6 +362,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>${maven.surefire.argLine}</argLine>
+                    <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
         </plugins>
