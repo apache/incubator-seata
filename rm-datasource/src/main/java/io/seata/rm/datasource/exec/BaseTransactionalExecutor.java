@@ -535,6 +535,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            if (StringUtils.isNotBlank(tableAlias)) {
+                onUpdateColumns = onUpdateColumns.stream()
+                        .map(onUpdateColumn -> getColumnNameWithTablePrefix(table, tableAlias, onUpdateColumn))
+                        .collect(Collectors.toList());
+            }
             onUpdateColumns.removeAll(unescapeColumns);
             needUpdateColumns.addAll(onUpdateColumns.stream()
                 .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))

@@ -18,6 +18,7 @@ package io.seata.rm.datasource.exec;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.mock.MockStatement;
@@ -49,21 +50,25 @@ public class UpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
-        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all");
+        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all", "updated");
         Object[][] returnValue = new Object[][] {
-            new Object[] {1, "Tom", "keyword"},
-            new Object[] {2, "Jack", "keyword"},
+            new Object[] {1, "Tom", "keyword", 0},
+            new Object[] {2, "Jack", "keyword", 0},
         };
         Object[][] columnMetas = new Object[][] {
             new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
             new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
             new Object[] {"", "", "table_update_executor_test", "ALL", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "updated", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
         Object[][] indexMetas = new Object[][] {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
         };
+        Object[][] onUpdateColumnsReturnValue = new Object[][] {
+            new Object[]{0, "updated", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
+        };
 
-        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -96,6 +101,18 @@ public class UpdateExecutorTest {
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(updateExecutor.beforeImage());
+    }
+
+    @Test
+    public void testBeforeImageWithTableAlias() throws SQLException {
+        Assertions.assertNotNull(updateExecutor.beforeImage());
+
+        String sql = "update table_update_executor_test t set t.name = 'WILL' where t.id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        String builtSql = updateExecutor.buildBeforeImageSQL(updateExecutor.getTableMeta(), new ArrayList<>());
+        Assertions.assertTrue(builtSql.contains("t.updated"));
     }
 
     @Test
