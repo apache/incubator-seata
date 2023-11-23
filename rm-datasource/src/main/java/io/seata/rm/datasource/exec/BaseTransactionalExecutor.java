@@ -522,17 +522,22 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(unescapeColumns)) {
             if (!containsPK(table, unescapeColumns)) {
                 List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
+
                 if (CollectionUtils.isNotEmpty(pkNameList)) {
-                    if (StringUtils.isNotBlank(tableAlias)) {
-                        needUpdateColumns.add(getColumnNamesWithTablePrefix(table, tableAlias, pkNameList));
-                    } else {
-                        needUpdateColumns.add(getColumnNamesInSQL(pkNameList));
+                    for (String pkName : pkNameList) {
+                        if (StringUtils.isNotBlank(tableAlias)) {
+                            needUpdateColumns.add(getColumnNameWithTablePrefix(table, tableAlias, pkName));
+                        } else {
+                            needUpdateColumns.add(getColumnNameInSQL(pkName));
+                        }
                     }
                 }
             }
-            needUpdateColumns.addAll(unescapeColumns.stream()
-                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType(), tableMeta)).collect(
-                    Collectors.toList()));
+            for (String unescapeColumn : unescapeColumns) {
+                if (!needUpdateColumns.contains(unescapeColumn)) {
+                    needUpdateColumns.add(ColumnUtils.addEscape(unescapeColumn, getDbType(), tableMeta));
+                }
+            }
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
