@@ -194,18 +194,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * Gets column name in sql.
-     *
-     * @param columnName the column name
-     * @return the column name in sql
-     */
-    protected String getColumnNameInSQL(String columnName) {
-        String tableAlias = sqlRecognizer.getTableAlias();
-        return tableAlias == null ? columnName : tableAlias + "." + columnName;
-    }
-
-
-    /**
      * Gets column name with table prefix
      *
      * @param table      the table name
@@ -236,26 +224,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * Gets several column name in sql.
      *
-     * @param columnNameList the column name
-     * @return the column name in sql
-     */
-    protected String getColumnNamesInSQL(List<String> columnNameList) {
-        if (CollectionUtils.isEmpty(columnNameList)) {
-            return null;
-        }
-        StringBuilder columnNamesStr = new StringBuilder();
-        for (int i = 0; i < columnNameList.size(); i++) {
-            if (i > 0) {
-                columnNamesStr.append(" , ");
-            }
-            columnNamesStr.append(getColumnNameInSQL(columnNameList.get(i)));
-        }
-        return columnNamesStr.toString();
-    }
-
-    /**
-     * Gets several column name in sql.
-     *
      * @param table          the table
      * @param tableAlias     the table alias
      * @param columnNameList the column name
@@ -270,7 +238,52 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             if (i > 0) {
                 columnNamesStr.append(" , ");
             }
-            columnNamesStr.append(getColumnNameWithTablePrefix(table,tableAlias, columnNameList.get(i)));
+            columnNamesStr.append(getColumnNameWithTablePrefix(table, tableAlias, columnNameList.get(i)));
+        }
+        return columnNamesStr.toString();
+    }
+
+    /**
+     * Gets column name in sql.
+     *
+     * @param columnName the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNameInSQL(String columnName) {
+        String tableAlias = sqlRecognizer.getTableAlias();
+        return tableAlias == null ? columnName : tableAlias + "." + columnName;
+    }
+
+    /**
+     * Gets column names in sql.
+     *
+     * @param columnNames the column names
+     * @return
+     */
+    protected List<String> getColumnNamesInSQLList(List<String> columnNames) {
+        List<String> columnNameWithTableAlias = new ArrayList<>();
+        for (String columnName : columnNames) {
+            columnNameWithTableAlias.add(this.getColumnNameInSQL(columnName));
+        }
+        return columnNameWithTableAlias;
+    }
+
+    /**
+     * Gets several column name in sql.
+     *
+     * @param columnNameList the column name
+     * @return the column name in sql
+     */
+    protected String getColumnNamesInSQL(List<String> columnNameList) {
+        if (CollectionUtils.isEmpty(columnNameList)) {
+            return null;
+        }
+        StringBuilder columnNamesStr = new StringBuilder();
+        for (int i = 0; i < columnNameList.size(); i++) {
+            if (i > 0) {
+                columnNamesStr.append(" , ");
+            }
+            columnNamesStr.append(getColumnNameInSQL(columnNameList.get(i)));
         }
         return columnNamesStr.toString();
     }
@@ -522,17 +535,15 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(unescapeColumns)) {
             if (!containsPK(table, unescapeColumns)) {
                 List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
-
                 if (CollectionUtils.isNotEmpty(pkNameList)) {
-                    for (String pkName : pkNameList) {
-                        if (StringUtils.isNotBlank(tableAlias)) {
-                            needUpdateColumns.add(getColumnNameWithTablePrefix(table, tableAlias, pkName));
-                        } else {
-                            needUpdateColumns.add(getColumnNameInSQL(pkName));
-                        }
+                    if (StringUtils.isNotBlank(tableAlias)) {
+                        needUpdateColumns.addAll(getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList));
+                    } else {
+                        needUpdateColumns.addAll(getColumnNamesInSQLList(pkNameList));
                     }
                 }
             }
+
             for (String unescapeColumn : unescapeColumns) {
                 if (!needUpdateColumns.contains(unescapeColumn)) {
                     needUpdateColumns.add(ColumnUtils.addEscape(unescapeColumn, getDbType(), tableMeta));
