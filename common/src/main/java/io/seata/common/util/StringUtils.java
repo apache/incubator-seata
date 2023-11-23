@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -362,20 +363,16 @@ public class StringUtils {
      * @return boolean
      */
     public static boolean checkDataSize(String data, String dataName, int errorSize, boolean throwIfErr) {
-        try {
-            if (isBlank(data)) {
-                return true;
+        if (isBlank(data)) {
+            return true;
+        }
+        int length = data.getBytes(StandardCharsets.UTF_8).length;
+        if (length > errorSize) {
+            LOGGER.warn("{} data is large(errorSize), size={}", dataName, length);
+            if (!throwIfErr) {
+                return false;
             }
-            int length = data.getBytes(Constants.DEFAULT_CHARSET_NAME).length;
-            if (length > errorSize) {
-                LOGGER.warn("{} data is large(errorSize), size={}", dataName, length);
-                if (!throwIfErr) {
-                    return false;
-                }
-                throw new IllegalArgumentException(dataName + " data is too large, size=" + length);
-            }
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("decode name error: {}", e.getMessage(), e);
+            throw new IllegalArgumentException(dataName + " data is too large, size=" + length);
         }
         return true;
     }
