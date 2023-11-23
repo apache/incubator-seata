@@ -360,6 +360,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>${maven.surefire.argLine}</argLine>
+                    <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
         </plugins>

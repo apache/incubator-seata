@@ -41,8 +41,8 @@ import java.util.Set;
 public class TccRegisterResourceParser implements RegisterResourceParser {
 
     @Override
-    public void registerResource(Object target) {
-        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, target.toString());
+    public void registerResource(Object target, String beanName) {
+        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, beanName);
         if (isTxRemotingBean) {
             RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
             if (remotingDesc != null) {
