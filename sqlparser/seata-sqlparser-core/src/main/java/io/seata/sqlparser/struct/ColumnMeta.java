@@ -52,6 +52,11 @@ public class ColumnMeta {
     public ColumnMeta() {
     }
 
+    public ColumnMeta(String columnName) {
+        this.columnName = columnName;
+    }
+
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ColumnMeta{");

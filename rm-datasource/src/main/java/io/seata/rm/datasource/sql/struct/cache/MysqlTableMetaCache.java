@@ -161,19 +161,19 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     processor.process(col, columnIndex, context);
                 }
 
-                tm.getAllColumns().put(col.getColumnName(), col);
+                tm.addColumnMeta(col);
 
                 columnIndex++;
             }
 
             while (onUpdateColumns.next()) {
-                tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
+                tm.getColumnMeta(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
             }
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
                 String colName = rsIndex.getString("COLUMN_NAME");
-                ColumnMeta col = tm.getAllColumns().get(colName);
+                ColumnMeta col = tm.getColumnMeta(colName);
 
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
