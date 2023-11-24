@@ -46,6 +46,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final List<IColumnMetaProcessor> COLUMN_META_PROCESSORS = EnhancedServiceLoader.loadAll(IColumnMetaProcessor.class);
+
+
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
         StringBuilder cacheKey = new StringBuilder(resourceId);
@@ -112,9 +115,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         // May be not consistent with lower_case_table_names
         tm.setCaseSensitive(true);
 
-        // Load IColumnMetaProcessor
-        List<IColumnMetaProcessor> processors = EnhancedServiceLoader.loadAll(IColumnMetaProcessor.class);
-
         /*
          * here has two different type to get the data
          * make sure the table name was right
@@ -157,7 +157,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
 
-                for (IColumnMetaProcessor processor : processors) {
+                for (IColumnMetaProcessor processor : COLUMN_META_PROCESSORS) {
                     processor.process(col, columnIndex, context);
                 }
 
