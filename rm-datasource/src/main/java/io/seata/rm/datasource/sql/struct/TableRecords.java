@@ -259,7 +259,8 @@ public class TableRecords implements java.io.Serializable {
                 field.setValue(new SerialDatalink(url));
             }
         } else if (dataType == Types.TINYINT) {
-            if (!resultSet.wasNull()) {
+            Object object = resultSet.getObject(i);
+            if (object != null) {
                 field.setValue(resultSet.getInt(i));
             }
         } else if (dataType == Types.JAVA_OBJECT) {
