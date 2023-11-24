@@ -34,6 +34,7 @@ import io.seata.common.Constants;
 import io.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -56,6 +57,54 @@ public class StringUtilsTest {
         assertThat(StringUtils.isNullOrEmpty("abc")).isFalse();
         assertThat(StringUtils.isNullOrEmpty("")).isTrue();
         assertThat(StringUtils.isNullOrEmpty(" ")).isFalse();
+    }
+
+    @Test
+    public void testIsBlank() {
+        assertThat(StringUtils.isBlank(null)).isTrue();
+        assertThat(StringUtils.isBlank("abc")).isFalse();
+        assertThat(StringUtils.isBlank("")).isTrue();
+        assertThat(StringUtils.isBlank(" ")).isTrue();
+    }
+
+    @Test
+    public void testIsNotBlank() {
+        assertThat(StringUtils.isNotBlank(null)).isFalse();
+        assertThat(StringUtils.isNotBlank("abc")).isTrue();
+        assertThat(StringUtils.isNotBlank("")).isFalse();
+        assertThat(StringUtils.isNotBlank(" ")).isFalse();
+    }
+
+    @Test
+    public void testTrimToNull() {
+        assertThat(StringUtils.trimToNull(null)).isNull();
+        assertThat(StringUtils.trimToNull("abc")).isEqualTo("abc");
+        assertThat(StringUtils.trimToNull("")).isNull();
+        assertThat(StringUtils.trimToNull(" ")).isNull();
+    }
+
+    @Test
+    public void testTrim() {
+        assertThat(StringUtils.trim(null)).isNull();
+        assertThat(StringUtils.trim("abc")).isEqualTo("abc");
+        assertThat(StringUtils.trim("")).isEqualTo("");
+        assertThat(StringUtils.trim(" ")).isEqualTo("");
+    }
+
+    @Test
+    public void testIsEmpty() {
+        assertThat(StringUtils.isEmpty(null)).isTrue();
+        assertThat(StringUtils.isEmpty("abc")).isFalse();
+        assertThat(StringUtils.isEmpty("")).isTrue();
+        assertThat(StringUtils.isEmpty(" ")).isFalse();
+    }
+
+    @Test
+    public void testIsNotEmpty() {
+        assertThat(StringUtils.isNotEmpty(null)).isFalse();
+        assertThat(StringUtils.isNotEmpty("abc")).isTrue();
+        assertThat(StringUtils.isNotEmpty("")).isFalse();
+        assertThat(StringUtils.isNotEmpty(" ")).isTrue();
     }
 
     @Test
@@ -124,7 +173,12 @@ public class StringUtilsTest {
         //case: Charset
         Assertions.assertEquals("UTF-8", StringUtils.toString(StandardCharsets.UTF_8));
         //case: Thread
-        Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
+        try {
+            Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
+        } catch (AssertionFailedError e) {
+            // for java21 and above
+            Assertions.assertEquals("Thread[#" + Thread.currentThread().getId() + ",main,5,main]", StringUtils.toString(Thread.currentThread()));
+        }
 
         //case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);

@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import io.seata.integration.tx.api.util.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
@@ -122,7 +122,7 @@ public class SpringProxyUtils {
      */
     public static Class<?> getTargetInterface(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
 
         //jdk proxy
@@ -143,7 +143,7 @@ public class SpringProxyUtils {
      */
     protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
-            throw new java.lang.IllegalArgumentException("proxy can not be null");
+            throw new IllegalArgumentException("proxy can not be null");
         }
         //not proxy
         if (!AopUtils.isAopProxy(proxy)) {

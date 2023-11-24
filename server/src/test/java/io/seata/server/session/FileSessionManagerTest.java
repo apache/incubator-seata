@@ -49,9 +49,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+
+import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static io.seata.server.session.SessionHolder.CONFIG;
-import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 /**
  * The type File based session manager test.
  *
@@ -66,9 +67,6 @@ public class FileSessionManagerTest {
 
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
-
-    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-            DEFAULT_SESSION_STORE_FILE_DIR);
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
@@ -289,7 +287,6 @@ public class FileSessionManagerTest {
 
         try {
             for (GlobalSession globalSession : globalSessions) {
-                globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.begin();
             }
             final GlobalSessionParam globalSessionParam = new GlobalSessionParam();

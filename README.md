@@ -1,11 +1,13 @@
-<img src="https://img.alicdn.com/imgextra/i1/O1CN011z0JfQ2723QgDiWuH_!!6000000007738-2-tps-1497-401.png"  height="100" width="426">
+<div style="align: center">
+<img src="https://img.alicdn.com/imgextra/i1/O1CN011z0JfQ2723QgDiWuH_!!6000000007738-2-tps-1497-401.png"  height="100" width="426"/>
+</div>
 
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
 [![Build Status](https://github.com/seata/seata/workflows/build/badge.svg?branch=develop)](https://github.com/seata/seata/actions)
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
+[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=1.8.0)](https://search.maven.org/search?q=io.seata)
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/seata/seata.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seata/seata/context:java)
 
 
@@ -81,23 +83,31 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 
 ## Maven dependency
+
+Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` or `io.seata:seata-spring-boot-starter`.
 ```xml
-<seata.version>1.6.1</seata.version>
-<dependency>
+<properties>
+  <seata.version>2.0.0</seata.version>
+</properties>
+
+<dependencies>
+<!--dependencies for non-SpringBoot application framework-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
-</dependency>
+  </dependency>
 
 <!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
-<!--Notice: `seata-spring-boot-starter` has included `seata-all` dependency-->
-<dependency>
+<!--Notice: `seata-spring-boot-starter` has already included `seata-all` dependency-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
-</dependency>
-
+  </dependency>
+</dependencies>
 ```
+
 ## Quick Start
 
 [Quick Start](https://seata.io/zh-cn/docs/ops/deploy-guide-beginner.html)
@@ -109,8 +119,11 @@ You can view the full documentation from Seata Official Website: [Seata Website 
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/seata/seata/blob/develop/.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
+Please follow the [template](./.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
 
+## Security
+
+Please do not use our public issue tracker but refer to our [security policy](./SECURITY.md)
 
 ## Contributing
 
@@ -121,9 +134,9 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
-  
+* Online chat: 
 
-<img src="https://img.alicdn.com/imgextra/i3/O1CN01FKBxyk25Ffx83dIJc_!!6000000007497-0-tps-1078-354.jpg"  height="200" width="630">
+<img src="https://img.alicdn.com/imgextra/i2/O1CN01nQG77T1VNcpPDOMVi_!!6000000002641-0-tps-1566-424.jpg"  height="200" width="630">
 
 
 ## Seata ecosystem

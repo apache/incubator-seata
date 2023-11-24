@@ -295,8 +295,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                 String next = null;
                 State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
-                if (state != null && state instanceof AbstractTaskState) {
-                    next = ((AbstractTaskState)state).getNext();
+                if (state instanceof AbstractTaskState) {
+                    next = state.getNext();
                 }
                 if (StringUtils.isEmpty(next)) {
                     LOGGER.warn(
@@ -378,7 +378,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 if (CollectionUtils.isNotEmpty(state.getOutput())) {
                     try {
                         Map<String, Object> outputVariablesToContext = ParameterUtils
-                                .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
+                                .createOutputParams(stateMachineConfig.getExpressionResolver(), state,
                                         serviceOutputParams);
                         if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                             contextVariables.putAll(outputVariablesToContext);

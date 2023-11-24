@@ -28,7 +28,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -80,7 +79,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String SINGLE_LOG_POSTFIX = ";";
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
-
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
@@ -99,9 +97,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
-
     private final NettyClientBootstrap clientBootstrap;
-    private NettyClientChannelManager clientChannelManager;
+    private final NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
@@ -109,12 +106,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                clientChannelManager.reconnect(getTransactionServiceGroup());
-            }
-        }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+        timerExecutor.scheduleAtFixedRate(() -> clientChannelManager.reconnect(getTransactionServiceGroup()), SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
@@ -158,7 +150,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 key -> new LinkedBlockingQueue<>());
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
-                        serverAddress, rpcMessage);
+                    serverAddress, rpcMessage);
                 return null;
             }
             if (LOGGER.isDebugEnabled()) {
@@ -171,17 +163,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
 
             try {
-                return messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+                Object response = messageFuture.get(timeoutMillis, TimeUnit.MILLISECONDS);
+                return response;
             } catch (Exception exx) {
-                LOGGER.error("wait response error:{},ip:{},request:{}",
-                    exx.getMessage(), serverAddress, rpcMessage.getBody());
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), serverAddress, rpcMessage.getBody());
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException) exx;
+                    throw (TimeoutException)exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
             }
-
         } else {
             Channel channel = clientChannelManager.acquireChannel(serverAddress);
             return super.sendSync(channel, rpcMessage, timeoutMillis);
@@ -257,7 +248,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
+            List<InetSocketAddress> inetSocketAddressList =
+                RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());

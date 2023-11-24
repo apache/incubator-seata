@@ -58,6 +58,14 @@ class ConfigProcessorTest {
         dataType = ConfigProcessor.resolverConfigDataType("", "a", "properties");
         Assertions.assertEquals(dataType, "properties");
 
+        dataType = ConfigProcessor.resolverConfigDataType("a.yaml");
+        Assertions.assertEquals(dataType, "yaml");
+        dataType = ConfigProcessor.resolverConfigDataType("a.properties");
+        Assertions.assertEquals(dataType, "properties");
+        dataType = ConfigProcessor.resolverConfigDataType("a.txt");
+        Assertions.assertEquals(dataType, "properties");
+        dataType = ConfigProcessor.resolverConfigDataType("a");
+        Assertions.assertEquals(dataType, "properties");
     }
 
 

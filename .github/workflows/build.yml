@@ -2,58 +2,65 @@ name: "build"
 
 on:
   push:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
   pull_request:
-    branches: [ develop, master ]
+    branches: [ 2.x, develop, master ]
 
 jobs:
-  build_arm64-binary: 
-     runs-on: ubuntu-latest
-     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}   
-     strategy:
-      fail-fast: false
-     steps:
-      - uses: actions/checkout@v2
-      - name: Set up QEMU
-        id: qemu
-        uses: docker/setup-qemu-action@v1
-      - name: Build arm-binary
-        run: |
-               docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-               arm64v8/ubuntu:20.04 \
-               bash -exc 'apt-get update -y && \
-                apt-get install maven -y && \
-                mvn -Prelease-seata -Dmaven.test.skip=true clean install -U'
-
+  # job 1: Test based on java 8 and 17. Do not checkstyle.
   build:
     name: "build"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 11 ]
+        java: [ 8, 17 ]
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v2.4.0
-
+        uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-
       # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
       - name: "Build with Maven"
         run: |
           if [ "${{ matrix.java }}" == "8" ]; then
             ./mvnw -T 4C clean test -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          elif [ "${{ matrix.java }}" == "11" ]; then
+          elif [ "${{ matrix.java }}" == "17" ]; then
             ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
-
-      # step 4
+      # step 5
       - name: "Codecov"
         if: matrix.java == '8'
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.1.4
+
+  # job 2: Test on 'arm64v8/ubuntu' OS.
+  build_arm64-binary:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
+    strategy:
+      fail-fast: false
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Set up QEMU"
+        id: qemu
+        uses: docker/setup-qemu-action@v3
+      # step 3
+      - name: "Build arm-binary"
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            arm64v8/ubuntu:20.04 \
+            bash -exc 'apt-get update -y && \
+                       apt-get install maven -y && \
+                       mvn -version && \
+                       mvn -Prelease-seata -DskipTests clean install -U'

@@ -52,4 +52,18 @@ public interface HttpExecutor {
      */
     <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException;
 
+    /**
+     * Execute put k.
+     *
+     * @param <T>         the type parameter
+     * @param <K>         the type parameter
+     * @param host        the host
+     * @param path        the path
+     * @param paramObject the param object
+     * @param returnType  the return type
+     * @return the k
+     * @throws IOException the io exception
+     */
+    <T, K> K executePut(String host, String path, T paramObject, Class<K> returnType) throws IOException;
+
 }

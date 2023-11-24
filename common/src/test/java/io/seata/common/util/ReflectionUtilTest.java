@@ -19,13 +19,16 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.BranchDO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
 public class ReflectionUtilTest {
@@ -39,6 +42,27 @@ public class ReflectionUtilTest {
     public void testGetClassByName() throws ClassNotFoundException {
         Assertions.assertEquals(String.class,
                 ReflectionUtil.getClassByName("java.lang.String"));
+    }
+
+    @Test
+    public void testGetWrappedClass() {
+        Assertions.assertEquals(Byte.class, ReflectionUtil.getWrappedClass(byte.class));
+        Assertions.assertEquals(Boolean.class, ReflectionUtil.getWrappedClass(boolean.class));
+        Assertions.assertEquals(Character.class, ReflectionUtil.getWrappedClass(char.class));
+        Assertions.assertEquals(Short.class, ReflectionUtil.getWrappedClass(short.class));
+        Assertions.assertEquals(Integer.class, ReflectionUtil.getWrappedClass(int.class));
+        Assertions.assertEquals(Long.class, ReflectionUtil.getWrappedClass(long.class));
+        Assertions.assertEquals(Float.class, ReflectionUtil.getWrappedClass(float.class));
+        Assertions.assertEquals(Double.class, ReflectionUtil.getWrappedClass(double.class));
+        Assertions.assertEquals(Void.class, ReflectionUtil.getWrappedClass(void.class));
+        Assertions.assertEquals(Object.class, ReflectionUtil.getWrappedClass(Object.class));
+    }
+
+    @Test
+    public void testSetFieldValue() throws NoSuchFieldException {
+        BranchDO branchDO = new BranchDO("xid123123", 123L, 1, 2.2, new Date());
+        ReflectionUtil.setFieldValue(branchDO, "xid", "xid456");
+        Assertions.assertEquals("xid456", branchDO.getXid());
     }
 
     @Test
@@ -100,7 +124,7 @@ public class ReflectionUtilTest {
     }
 
     @Test
-    @DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
@@ -150,6 +174,25 @@ public class ReflectionUtilTest {
         for (Field field : fields) {
             Assertions.assertTrue(fieldNameList.contains(field.getName()));
         }
+    }
+
+    @Test
+    public void testMethodToString() throws NoSuchMethodException {
+        Assertions.assertEquals("Method<ReflectionUtilTest.testMethodToString()>",
+            ReflectionUtil.methodToString(this.getClass().getMethod("testMethodToString")));
+    }
+
+    @Test
+    public void testAnnotationToString() throws NoSuchMethodException {
+        Assertions.assertEquals("@Test()", ReflectionUtil
+            .annotationToString(this.getClass().getMethod("testAnnotationToString").getAnnotation(Test.class)));
+    }
+
+    @Test
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+    public void testGetAnnotationValues() throws NoSuchMethodException, NoSuchFieldException {
+        Assertions.assertEquals(new LinkedHashMap<>(), ReflectionUtil
+            .getAnnotationValues(this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));
     }
 
     //region the test class and interface

@@ -197,8 +197,9 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     protected void reportTransactionFinished(StateMachineInstance machineInstance, ProcessContext context) {
         if (sagaTransactionalTemplate != null) {
+            GlobalTransaction globalTransaction = null;
             try {
-                GlobalTransaction globalTransaction = getGlobalTransaction(machineInstance, context);
+                globalTransaction = getGlobalTransaction(machineInstance, context);
                 if (globalTransaction == null) {
 
                     throw new EngineExecutionException("Global transaction is not exists",
@@ -234,7 +235,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 // clear
                 RootContext.unbind();
                 RootContext.unbindBranchType();
-                sagaTransactionalTemplate.triggerAfterCompletion();
+                sagaTransactionalTemplate.triggerAfterCompletion(globalTransaction);
                 sagaTransactionalTemplate.cleanUp();
             }
         }
@@ -407,7 +408,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
         if (StringUtils.hasLength(stateInstanceId)) {
             int start = stateInstanceId.lastIndexOf(separator);
             if (start > 0) {
-                String indexStr = stateInstanceId.substring(start + 1, stateInstanceId.length());
+                String indexStr = stateInstanceId.substring(start + 1);
                 try {
                     return Integer.parseInt(indexStr);
                 } catch (NumberFormatException e) {
@@ -635,7 +636,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     private void deserializeParamsAndException(StateMachineInstance stateMachineInstance) {
         byte[] serializedException = (byte[]) stateMachineInstance.getSerializedException();
         if (serializedException != null) {
-            stateMachineInstance.setException((Exception) exceptionSerializer.deserialize(serializedException));
+            stateMachineInstance.setException(exceptionSerializer.deserialize(serializedException));
         }
 
         String serializedStartParams = (String) stateMachineInstance.getSerializedStartParams();
@@ -677,7 +678,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
             byte[] serializedException = (byte[]) stateInstance.getSerializedException();
             if (serializedException != null) {
-                stateInstance.setException((Exception) exceptionSerializer.deserialize(serializedException));
+                stateInstance.setException(exceptionSerializer.deserialize(serializedException));
             }
         }
     }

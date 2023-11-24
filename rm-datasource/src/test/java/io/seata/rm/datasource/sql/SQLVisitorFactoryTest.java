@@ -18,6 +18,10 @@ package io.seata.rm.datasource.sql;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.mariadb.MariadbDeleteRecognizer;
+import io.seata.sqlparser.druid.mariadb.MariadbInsertRecognizer;
+import io.seata.sqlparser.druid.mariadb.MariadbSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.mariadb.MariadbUpdateRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
@@ -26,6 +30,13 @@ import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
+import io.seata.sqlparser.druid.polardbx.PolarDBXDeleteRecognizer;
+import io.seata.sqlparser.druid.polardbx.PolarDBXInsertRecognizer;
+import io.seata.sqlparser.druid.polardbx.PolarDBXSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.polardbx.PolarDBXUpdateRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerDeleteRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerInsertRecognizer;
+import io.seata.sqlparser.druid.sqlserver.SqlServerUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,35 +56,75 @@ public class SQLVisitorFactoryTest {
         //test for ast was null
         Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL));
 
-        //test for mysql insert
+        //test for mysql/mariadb/polardb-x insert
         String sql = "insert into t(id) values (1)";
         List<SQLRecognizer> recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLInsertRecognizer.class.getName());
-
-        //test for mysql delete
-        sql = "delete from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLDeleteRecognizer.class.getName());
-
-        //test for mysql update
-        sql = "update t set a = a";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLUpdateRecognizer.class.getName());
-
-        //test for mysql select
-        sql = "select * from t";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertNull(recognizer);
-
-        //test for mysql select for update
-        sql = "select * from t for update";
-        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MariadbInsertRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), PolarDBXInsertRecognizer.class.getName());
 
         //test for oracle insert
         sql = "insert into t(id) values (1)";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
         Assertions.assertEquals(recognizer.get(0).getClass().getName(), OracleInsertRecognizer.class.getName());
+
+        //test for mysql/mariadb/polardb-x delete
+        sql = "delete from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLDeleteRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MariadbDeleteRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), PolarDBXDeleteRecognizer.class.getName());
+
+        //test for mysql/mariadb/polardb-x update
+        sql = "update t set a = a";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLUpdateRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MariadbUpdateRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), PolarDBXUpdateRecognizer.class.getName());
+
+        //test for mysql/mariadb/polardb-x select
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        Assertions.assertNull(recognizer);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        Assertions.assertNull(recognizer);
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        Assertions.assertNull(recognizer);
+
+        //test for mysql/mariadb/polardb-x select for update
+        sql = "select * from t for update";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MySQLSelectForUpdateRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), MariadbSelectForUpdateRecognizer.class.getName());
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), PolarDBXSelectForUpdateRecognizer.class.getName());
+
+        //test for sqlserver insert
+        sql = "insert into t(id) values (1)";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerInsertRecognizer.class.getName());
+
+        //test for sqlserver delete
+        sql = "delete from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerDeleteRecognizer.class.getName());
+
+        //test for sqlserver update
+        sql = "update t set a = a";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertEquals(recognizer.get(0).getClass().getName(), SqlServerUpdateRecognizer.class.getName());
+
+        //test for sqlserver select
+        sql = "select * from t";
+        recognizer = SQLVisitorFactory.get(sql, JdbcConstants.SQLSERVER);
+        Assertions.assertNull(recognizer);
 
         //test for oracle delete
         sql = "delete from t";
@@ -103,43 +154,102 @@ public class SQLVisitorFactoryTest {
 
         //TEST FOR Multi-SQL
 
-        List<SQLRecognizer> sqlRecognizers = null;
-        //test for mysql insert
+        List<SQLRecognizer> sqlRecognizers;
+        //test for mysql/mariadb/polardb-x insert
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.MYSQL);
         });
-        //test for mysql insert and update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.POLARDBX);
+        });
+
+        //test for mysql/mariadb/polardb-x insert and update
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.MYSQL);
         });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);update t set a = t;", JdbcConstants.POLARDBX);
+        });
+
         //test for mysql insert and deleted
+        //test for mysql/mariadb/polardb-x insert and deleted
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.MYSQL);
         });
-        //test for mysql delete
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.POLARDBX);
+        });
+
+        //test for mysql/mariadb/polardb-x delete
         sql = "delete from t where id =1 ; delete from t where id = 2";
         sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), MySQLDeleteRecognizer.class.getName());
         }
-        //test for mysql update
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), MariadbDeleteRecognizer.class.getName());
+        }
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), PolarDBXDeleteRecognizer.class.getName());
+        }
+
+        //test for mysql/mariadb/polardb-x update
         sql = "update t set a = a;update t set a = c;";
         sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
             Assertions.assertEquals(sqlRecognizer.getClass().getName(), MySQLUpdateRecognizer.class.getName());
         }
-        //test for mysql update and deleted
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.MARIADB);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), MariadbUpdateRecognizer.class.getName());
+        }
+        sqlRecognizers = SQLVisitorFactory.get(sql, JdbcConstants.POLARDBX);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertEquals(sqlRecognizer.getClass().getName(), PolarDBXUpdateRecognizer.class.getName());
+        }
+
+        //test for mysql/mariadb/polardb-x update and deleted
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.MYSQL);
         });
-        //test for mysql select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1", JdbcConstants.POLARDBX);
+        });
+
+        //test for mysql/mariadb/polardb-x select
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MYSQL);
         });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.POLARDBX);
+        });
 
-        //test for mysql select for update
+        //test for mysql/mariadb/polardb-x select for update
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.MYSQL);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.MARIADB);
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.POLARDBX);
         });
 
         //test for oracle insert
@@ -167,7 +277,6 @@ public class SQLVisitorFactoryTest {
         });
 
         //test for oracle select for update
-        //test for mysql select for update
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("select * from t for update; select * from t where id = 2", JdbcConstants.ORACLE);
         });
@@ -180,6 +289,16 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
         });
+        //test for sqlserver select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from d where id = 1; select * from t where id = 2", JdbcConstants.SQLSERVER);
+        });
+
+        //test for sqlserver select for update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.get("select * from t WITH(UPDLOCK); select * from t where id = 2", JdbcConstants.SQLSERVER);
+        });
+
     }
 
     @Test
@@ -188,6 +307,12 @@ public class SQLVisitorFactoryTest {
         Assertions.assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         SQLRecognizer recognizer = recognizers.get(0);
+        Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
+        Assertions.assertEquals("t1", recognizer.getTableName());
+        recognizers = SQLVisitorFactory.get("update t1 set name = 'test' where id = '1'", JdbcConstants.MARIADB);
+        Assertions.assertNotNull(recognizers);
+        Assertions.assertEquals(recognizers.size(), 1);
+        recognizer = recognizers.get(0);
         Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
         Assertions.assertEquals("t1", recognizer.getTableName());
     }

@@ -34,7 +34,7 @@ public class LockStoreSqlFactory {
     /**
      * get the lock store sql
      *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase
+     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm
      * @return lock store sql
      */
     public static LockStoreSql getLogStoreSql(String dbType) {

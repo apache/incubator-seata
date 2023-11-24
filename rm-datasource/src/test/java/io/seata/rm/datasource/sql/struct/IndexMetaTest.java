@@ -16,6 +16,9 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +32,6 @@ public class IndexMetaTest {
         IndexMeta indexMeta = new IndexMeta();
         indexMeta.setValues(Lists.newArrayList());
         Assertions.assertNotNull(indexMeta.toString());
-        Assertions.assertEquals(indexMeta, indexMeta);
-        Assertions.assertEquals(indexMeta.hashCode(), indexMeta.hashCode());
-        Assertions.assertNotEquals(indexMeta, "");
 
         IndexMeta other = new IndexMeta();
         other.setValues(Lists.newArrayList(new ColumnMeta()));

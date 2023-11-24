@@ -15,20 +15,29 @@
  */
 package io.seata.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.metrics.IdConstants;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.metrics.MetricsPublisher;
 import io.seata.server.store.StoreConfig;
@@ -38,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
+import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type Session helper.
@@ -45,6 +55,7 @@ import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
  * @author sharajava
  */
 public class SessionHelper {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHelper.class);
 
     /**
@@ -55,12 +66,16 @@ public class SessionHelper {
     private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
             ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
 
+    private static final String GROUP = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+
     /**
      * The instance of DefaultCoordinator
      */
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
-    private static final boolean DELAY_HANDLE_SESSION = StoreConfig.getSessionMode() != SessionMode.FILE;
+    private static final boolean DELAY_HANDLE_SESSION = !(Objects.equals(StoreConfig.getSessionMode(), SessionMode.FILE)
+        || Objects.equals(StoreConfig.getSessionMode(), SessionMode.RAFT));
+
 
     private SessionHelper() {
     }
@@ -81,16 +96,16 @@ public class SessionHelper {
      */
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
             String applicationData, String lockKeys, String clientId) {
-        BranchSession branchSession = new BranchSession();
+        BranchSession branchSession = new BranchSession(branchType);
 
         branchSession.setXid(globalSession.getXid());
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
-        branchSession.setBranchType(branchType);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);
         branchSession.setClientId(clientId);
         branchSession.setApplicationData(applicationData);
+        branchSession.setStatus(BranchStatus.Registered);
 
         return branchSession;
     }
@@ -126,14 +141,21 @@ public class SessionHelper {
         if (retryGlobal || !DELAY_HANDLE_SESSION) {
             long beginTime = System.currentTimeMillis();
             boolean retryBranch = globalSession.getStatus() == GlobalStatus.CommitRetrying;
-            globalSession.changeGlobalStatus(GlobalStatus.Committed);
+            if (!globalSession.getStatus().equals(GlobalStatus.Committed)) {
+                // TODO: If the globalSession status in the database is Committed, don't set status again
+                globalSession.changeGlobalStatus(GlobalStatus.Committed);
+            }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION) {
-                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+                MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
                 beginTime, retryBranch);
         } else {
+            globalSession.setStatus(GlobalStatus.Committed);
+            if (globalSession.isSaga()) {
+                globalSession.end();
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
         }
     }
@@ -189,18 +211,23 @@ public class SessionHelper {
             }
             boolean retryBranch =
                     currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
-            if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+            if (!currentStatus.equals(GlobalStatus.TimeoutRollbacked)
+                && SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
-            } else {
+            } else if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
             }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION && !timeoutDone) {
-                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+                MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                     beginTime, retryBranch);
         } else {
+            if (globalSession.isSaga()) {
+                globalSession.setStatus(GlobalStatus.Rollbacked);
+                globalSession.end();
+            }
             MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Rollbacked, false, false);
         }
     }
@@ -239,26 +266,60 @@ public class SessionHelper {
     }
 
     /**
+     * Parallel foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void parallelForEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, true);
+    }
+
+    /**
+     * Single foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void singleForEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, false);
+    }
+
+    /**
      * Foreach global sessions.
      *
      * @param sessions the global sessions
      * @param handler  the handler
-     * @since 1.5.0
+     * @param parallel  the parallel
      */
-    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler, boolean parallel) {
         if (CollectionUtils.isEmpty(sessions)) {
             return;
         }
-        sessions.parallelStream().forEach(globalSession -> {
+
+        Stream<GlobalSession> stream = StreamSupport.stream(sessions.spliterator(), parallel);
+        stream.forEach(globalSession -> {
+            SeataClusterContext.bindGroup(GROUP);
             try {
                 MDC.put(RootContext.MDC_KEY_XID, globalSession.getXid());
                 handler.handle(globalSession);
             } catch (Throwable th) {
                 LOGGER.error("handle global session failed: {}", globalSession.getXid(), th);
             } finally {
+                SeataClusterContext.unbindGroup();
                 MDC.remove(RootContext.MDC_KEY_XID);
             }
         });
+    }
+
+    /**
+     * Foreach global sessions.
+     *
+     * @param sessions the global sessions
+     * @param handler  the handler
+     */
+    public static void forEach(Collection<GlobalSession> sessions, GlobalSessionHandler handler) {
+        forEach(sessions, handler, true);
     }
 
     /**
@@ -266,23 +327,90 @@ public class SessionHelper {
      *
      * @param sessions the branch session
      * @param handler  the handler
-     * @since 1.5.0
      */
     public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
-        Boolean result;
-        for (BranchSession branchSession : sessions) {
-            try {
-                MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                result = handler.handle(branchSession);
-                if (result == null) {
-                    continue;
+        return forEach(sessions, handler, false);
+    }
+
+    /**
+     * Foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     */
+    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler, boolean parallel) throws TransactionException {
+        if (CollectionUtils.isNotEmpty(sessions)) {
+            Boolean result;
+            if (parallel) {
+                Map<String, List<BranchSession>> map = new HashMap<>(4);
+                for (BranchSession session : sessions) {
+                    map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>()).add(session);
                 }
-                return result;
-            } finally {
-                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+                List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
+                map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return SessionHelper.forEach(v, handler, false);
+                    } catch (TransactionException e) {
+                        throw new RuntimeException(e);
+                    }
+                })));
+                try {
+                    for (CompletableFuture<Boolean> completableFuture : completableFutures) {
+                        result = completableFuture.get();
+                        if (result == null) {
+                            continue;
+                        }
+                        return result;
+                    }
+                } catch (InterruptedException e) {
+                    throw new TransactionException(e);
+                } catch (ExecutionException e) {
+                    Throwable throwable = e.getCause();
+                    if (throwable instanceof RuntimeException) {
+                        Throwable cause = throwable.getCause();
+                        if (cause instanceof TransactionException) {
+                            throw (TransactionException)cause;
+                        }
+                    }
+                    throw new TransactionException(e);
+                }
+            } else {
+                for (BranchSession branchSession : sessions) {
+                    try {
+                        MDC.put(RootContext.MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
+                        result = handler.handle(branchSession);
+                        if (result == null) {
+                            continue;
+                        }
+                        return result;
+                    } finally {
+                        MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+                    }
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * Single foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     * @since 1.5.0
+     */
+    public static Boolean singleForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        return SessionHelper.forEach(sessions, handler, false);
+    }
+
+    /**
+     * Parallel foreach branch sessions.
+     *
+     * @param sessions the branch session
+     * @param handler  the handler
+     */
+    public static Boolean parallelForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+        return SessionHelper.forEach(sessions, handler, true);
     }
 
 
@@ -294,7 +422,8 @@ public class SessionHelper {
      */
     public static void removeBranch(GlobalSession globalSession, BranchSession branchSession, boolean isAsync)
             throws TransactionException {
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
+        globalSession.unlockBranch(branchSession);
+        if (isEnableBranchRemoveAsync() && isAsync) {
             COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
         } else {
             globalSession.removeBranch(branchSession);
@@ -312,12 +441,26 @@ public class SessionHelper {
         if (branchSessions == null || branchSessions.isEmpty()) {
             return;
         }
-        if (Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE) && isAsync) {
-            COORDINATOR.doBranchRemoveAllAsync(globalSession);
-        } else {
-            for (BranchSession branchSession : branchSessions) {
-                globalSession.removeBranch(branchSession);
+        boolean isAsyncRemove = isEnableBranchRemoveAsync() && isAsync;
+        for (BranchSession branchSession : branchSessions) {
+            if (isAsyncRemove) {
+                globalSession.unlockBranch(branchSession);
+            } else {
+                globalSession.removeAndUnlockBranch(branchSession);
             }
         }
+        if (isAsyncRemove) {
+            COORDINATOR.doBranchRemoveAllAsync(globalSession);
+        }
+    }
+
+    /**
+     * if true, enable delete the branch asynchronously
+     *
+     * @return the boolean
+     */
+    private static boolean isEnableBranchRemoveAsync() {
+        return Objects.equals(Boolean.TRUE, DELAY_HANDLE_SESSION)
+                && Objects.equals(Boolean.TRUE, ENABLE_BRANCH_ASYNC_REMOVE);
     }
 }

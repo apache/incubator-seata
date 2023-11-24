@@ -18,30 +18,31 @@ package io.seata.core.rpc.netty;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import io.seata.core.protocol.RegisterTMRequest;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Netty client pool manager.
@@ -163,10 +164,51 @@ class NettyClientChannelManager {
     /**
      * Reconnect to remote server of current transaction service group.
      *
+     * @param availList avail list
+     * @param transactionServiceGroup transaction service group
+     */
+    void reconnect(List<String> availList, String transactionServiceGroup) {
+        Set<String> channelAddress = new HashSet<>(availList.size());
+        Map<String, Exception> failedMap = new HashMap<>();
+        try {
+            for (String serverAddress : availList) {
+                try {
+                    acquireChannel(serverAddress);
+                    channelAddress.add(serverAddress);
+                } catch (Exception e) {
+                    failedMap.put(serverAddress, e);
+                }
+            }
+            if (failedMap.size() > 0) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(), failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                } else if (LOGGER.isDebugEnabled()) {
+                    failedMap.forEach((key, value) -> {
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                    });
+                }
+            }
+        } finally {
+            if (CollectionUtils.isNotEmpty(channelAddress)) {
+                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
+                for (String address : channelAddress) {
+                    String[] array = NetUtil.splitIPPortStr(address);
+                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
+                }
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
+            } else {
+                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
+            }
+        }
+    }
+
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
      * @param transactionServiceGroup transaction service group
      */
     void reconnect(String transactionServiceGroup) {
-        List<String> availList = null;
+        List<String> availList;
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception e) {
@@ -189,29 +231,7 @@ class NettyClientChannelManager {
             }
             return;
         }
-        Set<String> channelAddress = new HashSet<>(availList.size());
-        try {
-            for (String serverAddress : availList) {
-                try {
-                    acquireChannel(serverAddress);
-                    channelAddress.add(serverAddress);
-                } catch (Exception e) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
-                        serverAddress, e.getMessage(), e);
-                }
-            }
-        } finally {
-            if (CollectionUtils.isNotEmpty(channelAddress)) {
-                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
-                for (String address : channelAddress) {
-                    String[] array = address.split(":");
-                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
-                }
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
-            } else {
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
-            }
-        }
+        reconnect(availList, transactionServiceGroup);
     }
 
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {

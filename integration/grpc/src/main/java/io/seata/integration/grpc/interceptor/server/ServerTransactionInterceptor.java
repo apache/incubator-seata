@@ -15,10 +15,15 @@
  */
 package io.seata.integration.grpc.interceptor.server;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+import io.seata.core.context.RootContext;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
 /**
@@ -32,7 +37,11 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
         Metadata metadata,
         ServerCallHandler<ReqT, RespT> serverCallHandler) {
         String xid = getRpcXid(metadata);
-        return new ServerListenerProxy<>(xid, serverCallHandler.startCall(serverCall, metadata));
+        String branchName = getBranchName(metadata);
+        Map<String, String> context = new HashMap<>();
+        context.put(RootContext.KEY_BRANCH_TYPE, branchName);
+        return new ServerListenerProxy<>(xid, Collections.unmodifiableMap(context),
+            serverCallHandler.startCall(serverCall, metadata));
     }
 
     /**
@@ -41,11 +50,15 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
      * @return
      */
     private String getRpcXid(Metadata metadata) {
-        String rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY);
+        String rpcXid = metadata.get(GrpcHeaderKey.XID_HEADER_KEY);
         if (rpcXid == null) {
-            rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY_LOWERCASE);
+            rpcXid = metadata.get(GrpcHeaderKey.XID_HEADER_KEY_LOWERCASE);
         }
         return rpcXid;
+    }
+
+    private String getBranchName(Metadata metadata) {
+        return metadata.get(GrpcHeaderKey.BRANCH_HEADER_KEY);
     }
 
 }
