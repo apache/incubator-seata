@@ -93,7 +93,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
     protected void processColumns(TableMeta tableMeta, ResultSet rs) throws SQLException {
         while (rs.next()) {
             ColumnMeta col = toColumnMeta(rs);
-            tableMeta.getAllColumns().put(col.getColumnName(), col);
+            tableMeta.addColumnMeta(col);
         }
     }
 
@@ -105,7 +105,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
             }
 
             String colName = rs.getString("COLUMN_NAME");
-            ColumnMeta col = tableMeta.getAllColumns().get(colName);
+            ColumnMeta col = tableMeta.getColumnMeta(colName);
             if (tableMeta.getAllIndexes().containsKey(indexName)) {
                 IndexMeta index = tableMeta.getAllIndexes().get(indexName);
                 index.getValues().add(col);

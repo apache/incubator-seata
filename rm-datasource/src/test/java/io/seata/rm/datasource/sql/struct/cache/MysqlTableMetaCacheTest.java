@@ -98,10 +98,10 @@ public class MysqlTableMetaCacheTest {
 
         Assertions.assertEquals(columnMetas.length, tableMeta.getAllColumns().size());
 
-        assertColumnMetaEquals(columnMetas[0], tableMeta.getAllColumns().get("id"));
-        assertColumnMetaEquals(columnMetas[1], tableMeta.getAllColumns().get("name1"));
-        assertColumnMetaEquals(columnMetas[2], tableMeta.getAllColumns().get("name2"));
-        assertColumnMetaEquals(columnMetas[3], tableMeta.getAllColumns().get("name3"));
+        assertColumnMetaEquals(columnMetas[0], tableMeta.getColumnMeta("id"));
+        assertColumnMetaEquals(columnMetas[1], tableMeta.getColumnMeta("name1"));
+        assertColumnMetaEquals(columnMetas[2], tableMeta.getColumnMeta("name2"));
+        assertColumnMetaEquals(columnMetas[3], tableMeta.getColumnMeta("name3"));
 
         Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
