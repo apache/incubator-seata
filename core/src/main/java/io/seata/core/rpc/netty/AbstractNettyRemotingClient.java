@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -343,10 +344,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void run() {
             while (true) {
-                synchronized (MERGE_LOCK) {
-                    try {
-                        MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
-                    } catch (InterruptedException e) {
+                if(BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))){
+                    synchronized (MERGE_LOCK) {
+                        try {
+                            MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
+                        } catch (InterruptedException e) {
+                        }
                     }
                 }
                 isSending = true;
@@ -355,7 +358,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         return;
                     }
 
-                    AbstractNettyRemotingClient client = null;
+                    AbstractNettyRemotingClient client;
                     if (role.equals(NettyPoolKey.TransactionRole.RMROLE)) {
                         client = RmNettyRemotingClient.getInstance();
                     } else {
