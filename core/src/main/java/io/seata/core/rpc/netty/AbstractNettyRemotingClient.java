@@ -344,11 +344,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void run() {
             while (true) {
-                if(BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))){
+                if (BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))) {
                     synchronized (MERGE_LOCK) {
-                        try {
-                            MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
-                        } catch (InterruptedException e) {
+                        if (BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))) {
+                            try {
+                                MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
+                            } catch (InterruptedException e) {
+                            }
                         }
                     }
                 }
