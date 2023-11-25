@@ -105,7 +105,14 @@ public class RaftServer implements Disposable, Closeable {
 
     @Override
     public void destroy() {
-        Optional.ofNullable(raftGroupService).ifPresent(RaftGroupService::shutdown);
+        Optional.ofNullable(raftGroupService).ifPresent(r -> {
+            r.shutdown();
+            try {
+                r.join();
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted when RaftServer destroying", e);
+            }
+        });
     }
 
 }
