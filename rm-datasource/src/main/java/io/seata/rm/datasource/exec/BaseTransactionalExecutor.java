@@ -325,6 +325,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * the columns contains the targetColumn
+     * @param columns the column name list
+     * @param targetColumn target column
+     * @return true: contains targetColumn false: not contains targetColumn
+     */
+    protected boolean containsColumn(List<String> columns, String targetColumn) {
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return CollectionUtils.toUpperList(newColumns).contains(targetColumn.toUpperCase());
+    }
+
+    /**
      * the columns contains table meta pk
      *
      * @param columns the column name list
@@ -545,7 +556,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
 
             for (String unescapeColumn : unescapeColumns) {
-                if (!needUpdateColumns.contains(unescapeColumn)) {
+                if (!containsColumn(needUpdateColumns, unescapeColumn)) {
                     needUpdateColumns.add(ColumnUtils.addEscape(unescapeColumn, getDbType(), tableMeta));
                 }
             }
