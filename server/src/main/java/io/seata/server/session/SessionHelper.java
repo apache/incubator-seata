@@ -129,7 +129,7 @@ public class SessionHelper {
             globalSession.changeGlobalStatus(GlobalStatus.Committed);
             globalSession.end();
             if (!DELAY_HANDLE_SESSION) {
-                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+                MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
                 beginTime, retryBranch);
@@ -200,7 +200,7 @@ public class SessionHelper {
             }
             globalSession.end();
             if (!DELAY_HANDLE_SESSION && !timeoutDone) {
-                MetricsPublisher.postSessionDoneEvent(globalSession, false, false);
+                MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
             MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
                     beginTime, retryBranch);
