@@ -17,8 +17,6 @@ package io.seata.core.constants;
 
 import io.seata.common.util.StringUtils;
 
-import java.util.Optional;
-
 /**
  * database type
  *

@@ -26,7 +26,6 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
