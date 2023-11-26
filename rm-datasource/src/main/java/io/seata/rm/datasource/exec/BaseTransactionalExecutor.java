@@ -22,8 +22,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -545,8 +547,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))
                 .collect(Collectors.toList()));
         } else {
-            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().stream()
-                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta)).collect(Collectors.toList()));
+            Stream<String> allColumns = tableMeta.getAllColumns().keySet().stream();
+            if (StringUtils.isNotBlank(tableAlias)) {
+                allColumns = allColumns.map(columnName -> getColumnNameWithTablePrefix(table, tableAlias, columnName));
+            }
+            allColumns = allColumns.map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
+            allColumns.forEach(needUpdateColumns::add);
         }
         return needUpdateColumns;
     }
