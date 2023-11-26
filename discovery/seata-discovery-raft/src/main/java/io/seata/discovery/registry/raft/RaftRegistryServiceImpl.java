@@ -372,7 +372,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 LOGGER.error(e.getMessage(), e);
             }
         }
-        if (!Objects.isNull(jwtToken)) {
+        if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         if (StringUtils.isNotBlank(tcAddress)) {
