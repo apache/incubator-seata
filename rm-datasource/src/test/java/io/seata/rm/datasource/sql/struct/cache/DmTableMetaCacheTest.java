@@ -17,6 +17,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.struct.TableMeta;
@@ -65,7 +66,7 @@ public class DmTableMetaCacheTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM);
 
