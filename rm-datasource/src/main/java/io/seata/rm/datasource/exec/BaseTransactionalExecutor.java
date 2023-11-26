@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -535,13 +536,22 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            if (StringUtils.isNotBlank(tableAlias)) {
+                onUpdateColumns = onUpdateColumns.stream()
+                        .map(onUpdateColumn -> getColumnNameWithTablePrefix(table, tableAlias, onUpdateColumn))
+                        .collect(Collectors.toList());
+            }
             onUpdateColumns.removeAll(unescapeColumns);
             needUpdateColumns.addAll(onUpdateColumns.stream()
                 .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))
                 .collect(Collectors.toList()));
         } else {
-            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().stream()
-                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta)).collect(Collectors.toList()));
+            Stream<String> allColumns = tableMeta.getAllColumns().keySet().stream();
+            if (StringUtils.isNotBlank(tableAlias)) {
+                allColumns = allColumns.map(columnName -> getColumnNameWithTablePrefix(table, tableAlias, columnName));
+            }
+            allColumns = allColumns.map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
+            allColumns.forEach(needUpdateColumns::add);
         }
         return needUpdateColumns;
     }
