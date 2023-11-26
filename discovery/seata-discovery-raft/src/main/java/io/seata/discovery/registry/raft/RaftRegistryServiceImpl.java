@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.AuthenticationFailedException;
+import io.seata.common.exception.RetryableException;
 import io.seata.common.metadata.Metadata;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
@@ -318,8 +319,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         StatusLine statusLine = response.getStatusLine();
                         if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                             if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                                LOGGER.warn("Authentication failed!");
-                                throw new IOException();
+                                throw new RetryableException("Authentication failed!");
                             } else {
                                 throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                             }
@@ -386,8 +386,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                            LOGGER.warn("Authentication failed !");
-                            throw new IOException();
+                            throw new RetryableException("Authentication failed!");
                         } else {
                             throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                         }
