@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -310,7 +309,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 if (isTokenExpired()) {
                     refreshToken();
                 }
-                if (!Objects.isNull(jwtToken)) {
+                if (!StringUtils.isNotBlank(jwtToken)) {
                     header.put(AUTHORIZATION_HEADER, jwtToken);
                 }
                 try (CloseableHttpResponse response =
@@ -372,7 +371,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 LOGGER.error(e.getMessage(), e);
             }
         }
-        if (!Objects.isNull(jwtToken)) {
+        if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         if (StringUtils.isNotBlank(tcAddress)) {
@@ -409,7 +408,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     public static void refreshToken() throws IOException {
         // if username and password is not in config , return
-        if (Objects.isNull(USERNAME) || Objects.isNull(PASSWORD)) {
+        if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
             return;
         }
         String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
