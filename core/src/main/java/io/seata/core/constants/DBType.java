@@ -210,20 +210,4 @@ public enum DBType {
         }
         throw new IllegalArgumentException("unknown dbtype:" + dbType);
     }
-
-
-    /**
-     * optional of db type.
-     *
-     * @param dbType the db type
-     * @return optional of the db type
-     */
-    public static Optional<DBType> optionalof(String dbType) {
-        for (DBType dt : values()) {
-            if (StringUtils.equalsIgnoreCase(dt.name(), dbType)) {
-                return Optional.of(dt);
-            }
-        }
-        return Optional.empty();
-    }
 }

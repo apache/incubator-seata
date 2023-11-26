@@ -161,21 +161,20 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @param conn db connection
      */
     private void checkUndoLogTableExist(Connection conn) {
-        if (DBType.optionalof(dbType).isPresent()) {
-            UndoLogManager undoLogManager;
-            try {
-                undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
-            } catch (EnhancedServiceNotFoundException e) {
-                LOGGER.error("can't find undoLogManager service provider for dbtype: {}", dbType);
-                return;
-            }
-            boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
-            if (!undoLogTableExist) {
-                String undoLogTableName = ConfigurationFactory.getInstance()
-                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
-                String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
-                throw new IllegalStateException(errMsg);
-            }
+        UndoLogManager undoLogManager;
+        try {
+            undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+        } catch (EnhancedServiceNotFoundException e) {
+            String errMsg = String.format("AT mode don't support the the dbtype: %s", dbType);
+            throw new IllegalStateException(errMsg, e);
+        }
+
+        boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
+        if (!undoLogTableExist) {
+            String undoLogTableName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
+            throw new IllegalStateException(errMsg);
         }
     }
 

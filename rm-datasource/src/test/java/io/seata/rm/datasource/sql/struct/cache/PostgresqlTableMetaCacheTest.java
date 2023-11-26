@@ -18,6 +18,9 @@ package io.seata.rm.datasource.sql.struct.cache;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import io.seata.rm.datasource.DataSourceProxyTest;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +32,12 @@ import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
   * @author will.zjw
@@ -65,7 +74,7 @@ public class PostgresqlTableMetaCacheTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL);
 
