@@ -44,6 +44,8 @@ import io.seata.rm.datasource.mock.MockBlob;
 import io.seata.rm.datasource.mock.MockClob;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
@@ -54,6 +56,12 @@ import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author will
@@ -86,8 +94,7 @@ public class PreparedStatementProxyTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
-
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 

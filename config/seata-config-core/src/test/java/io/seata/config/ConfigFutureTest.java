@@ -21,7 +21,6 @@ import io.seata.common.util.ReflectionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +43,8 @@ class ConfigFutureTest {
         // mock field
         origin = Mockito.spy(origin);
         // set mocked field to object
-        FieldSetter.setField(configFuture, originField, origin);
+        originField.setAccessible(true);
+        originField.set(configFuture, origin);
 
         Mockito.doThrow(ExecutionException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertThrows(ShouldNeverHappenException.class, configFuture::get);

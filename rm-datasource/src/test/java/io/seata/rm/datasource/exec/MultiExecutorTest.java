@@ -24,6 +24,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.seata.rm.datasource.DataSourceProxyTest;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,6 +47,14 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MultiExecutorTest {
 
@@ -73,7 +84,8 @@ public class MultiExecutorTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         try {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);

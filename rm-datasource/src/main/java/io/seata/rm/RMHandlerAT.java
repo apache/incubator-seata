@@ -19,8 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.DateUtil;
 import io.seata.core.model.BranchType;
@@ -44,8 +42,6 @@ public class RMHandlerAT extends AbstractRMHandler {
 
     private static final int LIMIT_ROWS = 3000;
 
-    private final Map<String, Boolean> undoLogTableExistRecord = new ConcurrentHashMap<>();
-
     @Override
     public void handle(UndoLogDeleteRequest request) {
         String resourceId = request.getResourceId();
@@ -53,12 +49,6 @@ public class RMHandlerAT extends AbstractRMHandler {
         DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", resourceId);
-            return;
-        }
-
-        boolean hasUndoLogTable = undoLogTableExistRecord.computeIfAbsent(resourceId, id -> checkUndoLogTableExist(dataSourceProxy));
-        if (!hasUndoLogTable) {
-            LOGGER.debug("resource({}) has no undo_log table, UndoLogDeleteRequest will be ignored", resourceId);
             return;
         }
 
@@ -77,19 +67,6 @@ public class RMHandlerAT extends AbstractRMHandler {
             } while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
             // should never happen, deleteUndoLog method had catch all Exception
-        }
-    }
-
-    boolean checkUndoLogTableExist(DataSourceProxy dataSourceProxy) {
-        UndoLogManager manager = getUndoLogManager(dataSourceProxy);
-        try (Connection connection = getConnection(dataSourceProxy)) {
-            if (connection == null) {
-                return false;
-            }
-            return manager.hasUndoLogTable(connection);
-        } catch (Exception e) {
-            // should never happen, hasUndoLogTable method had catch all Exception
-            return false;
         }
     }
 

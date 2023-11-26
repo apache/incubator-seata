@@ -18,6 +18,8 @@ package io.seata.rm.datasource.undo;
 import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -29,14 +31,17 @@ import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author Geng Zhang
@@ -58,7 +63,8 @@ public abstract class BaseH2Test {
         dataSource.setUrl("jdbc:h2:./db_store/test_undo");
         dataSource.setUsername("sa");
         dataSource.setPassword("");
-        dataSourceProxy = new DataSourceProxy(dataSource);
+        dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         connection = dataSourceProxy.getConnection();
 
         tableMeta = mockTableMeta();
