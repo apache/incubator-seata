@@ -208,5 +208,4 @@ public enum DBType {
         }
         throw new IllegalArgumentException("unknown dbtype:" + dbType);
     }
-
 }
