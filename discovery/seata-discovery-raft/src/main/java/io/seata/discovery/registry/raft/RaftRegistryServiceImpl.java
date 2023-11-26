@@ -308,7 +308,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 if (isTokenExpired()) {
                     refreshToken();
                 }
-                if (!Objects.isNull(jwtToken)) {
+                if (!StringUtils.isNotBlank(jwtToken)) {
                     header.put(AUTHORIZATION_HEADER, jwtToken);
                 }
                 try (CloseableHttpResponse response =
