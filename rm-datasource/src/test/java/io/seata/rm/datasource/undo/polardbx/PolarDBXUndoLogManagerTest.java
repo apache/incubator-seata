@@ -32,15 +32,13 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.BranchUndoLog;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.rm.datasource.undo.UndoLogParserFactory;
+import io.seata.rm.datasource.undo.*;
 
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
@@ -51,6 +49,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Undo log manager test for PolarDB-X
@@ -95,7 +99,7 @@ public class PolarDBXUndoLogManagerTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        dataSourceProxy = new DataSourceProxy(dataSource);
+        dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
         connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new PolarDBXUndoLogManager();
         tableMeta = new TableMeta();

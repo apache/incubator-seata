@@ -24,6 +24,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,8 @@ public class PlainExecutorTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         StatementProxy statementProxy = new StatementProxy(connectionProxy, mockStatement);

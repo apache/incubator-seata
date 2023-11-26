@@ -19,6 +19,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 
+import io.seata.rm.datasource.DataSourceProxyTest;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.IndexMeta;
 import io.seata.sqlparser.struct.IndexType;
@@ -34,6 +37,10 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * The table meta fetch test.
@@ -84,7 +91,7 @@ public class MariadbTableMetaCacheTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt1", proxy.getResourceId());
 
@@ -133,7 +140,7 @@ public class MariadbTableMetaCacheTest {
         druidDataSource.setUrl("jdbc:mock:xxx");
         druidDataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(druidDataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(druidDataSource);
 
         TableMeta tableMeta = getTableMetaCache().getTableMeta(dataSourceProxy.getPlainConnection(), "t1",
             dataSourceProxy.getResourceId());
