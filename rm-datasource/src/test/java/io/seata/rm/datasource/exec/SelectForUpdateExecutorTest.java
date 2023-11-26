@@ -28,14 +28,21 @@ import com.google.common.collect.Lists;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockConnectionProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author will
@@ -69,7 +76,8 @@ public class SelectForUpdateExecutorTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         try {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
