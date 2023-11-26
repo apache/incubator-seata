@@ -409,7 +409,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     public static void refreshToken() throws IOException {
         // if username and password is not in config , return
-        if (Objects.isNull(USERNAME) || Objects.isNull(PASSWORD)) {
+        if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
             return;
         }
         String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
