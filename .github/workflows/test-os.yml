@@ -123,6 +123,7 @@ jobs:
       # step 3
       - name: "Test with Maven on 'alpine-linux' OS (Skip tests)"
         run: |
+          docker pull alpine:latest;
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             alpine:latest \
             bash -exc 'apt-get update -y && \
