@@ -87,7 +87,12 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
+        try {
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
+        } catch (RuntimeException e) {
+            throw new BranchTransactionException(TransactionExceptionCode.FailedToAddBranch,
+                    String.format("Failed to store branch xid = %s ", globalSession.getXid()), e);
+        }
 
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
