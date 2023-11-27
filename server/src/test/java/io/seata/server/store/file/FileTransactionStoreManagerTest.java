@@ -41,10 +41,6 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import org.assertj.core.util.Files;
-import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 /**

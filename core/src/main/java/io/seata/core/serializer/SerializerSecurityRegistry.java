@@ -115,7 +115,7 @@ public class SerializerSecurityRegistry {
         } catch (IOException ignore) {
         }
 
-        if (classNameSet.size() < 31) {
+        if (classNameSet.size() < 30) {
             // package io.seata.core.protocol
             classNameSet.add(io.seata.core.protocol.BatchResultMessage.class);
             classNameSet.add(io.seata.core.protocol.HeartbeatMessage.class);
