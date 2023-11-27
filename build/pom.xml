@@ -403,6 +403,8 @@
 
                     --add-opens java.sql/java.sql=ALL-UNNAMED
                     --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
+
+                    -Dnet.bytebuddy.experimental=true
                 </maven.surefire.argLine>
             </properties>
         </profile>
