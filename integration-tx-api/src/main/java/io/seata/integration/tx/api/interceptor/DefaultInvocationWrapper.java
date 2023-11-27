@@ -54,11 +54,7 @@ public class DefaultInvocationWrapper implements InvocationWrapper {
     }
 
     @Override
-    public Object proceed() {
-        try {
-            return method.invoke(delegate, args);
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
+    public Object proceed() throws Throwable {
+        return method.invoke(delegate, args);
     }
 }
