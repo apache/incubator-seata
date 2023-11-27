@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.discovery.registry.raft;
 
 
@@ -20,9 +35,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 class RaftRegistryServiceImplTest {
@@ -40,7 +55,7 @@ class RaftRegistryServiceImplTest {
      * test whether throws exception when login failed
      */
     @Test
-    public void testLoginFailed()  throws IOException, NoSuchMethodException {
+    public void testLoginFailed() throws IOException, NoSuchMethodException {
         String jwtToken = "null";
         String responseBody = "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":\"" + jwtToken + "\",\"success\":false}";
 
@@ -110,14 +125,14 @@ class RaftRegistryServiceImplTest {
     public void testSecureTTL() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException, InterruptedException {
         Field tokenTimeStamp = RaftRegistryServiceImpl.class.getDeclaredField("tokenTimeStamp");
         tokenTimeStamp.setAccessible(true);
-        tokenTimeStamp.setLong(null, System.currentTimeMillis());
+        tokenTimeStamp.setLong(RaftRegistryServiceImpl.class, System.currentTimeMillis());
         Method isExpiredMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("isTokenExpired");
         isExpiredMethod.setAccessible(true);
-        boolean rst= (boolean) isExpiredMethod.invoke(null);
-        assertEquals(false,rst);
+        boolean rst = (boolean) isExpiredMethod.invoke(null);
+        assertEquals(false, rst);
         Thread.sleep(10000);
-        rst= (boolean) isExpiredMethod.invoke(null);
-        assertEquals(true,rst);
+        rst = (boolean) isExpiredMethod.invoke(null);
+        assertEquals(true, rst);
     }
 
 }
