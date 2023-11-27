@@ -15,7 +15,6 @@
  */
 package io.seata.server.cluster.raft;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,7 +38,6 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.rpc.Disposable;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.MultiRegistryFactory;
 import io.seata.discovery.registry.RegistryService;
