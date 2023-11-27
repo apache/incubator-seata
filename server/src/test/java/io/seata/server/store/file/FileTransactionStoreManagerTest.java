@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.seata.server.session.SessionHolder;
 import org.assertj.core.util.Files;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,12 +41,23 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author ggndnn
  */
 @SpringBootTest
 public class FileTransactionStoreManagerTest {
+
+    @BeforeAll
+    public static void init(ApplicationContext context){
+        SessionHolder.init(StoreConfig.SessionMode.FILE);
+    }
+    @AfterAll
+    public static void destroy(){
+        SessionHolder.destroy();
+    }
+
     @Test
     public void testBigDataWrite() throws Exception {
         File seataFile = Files.newTemporaryFile();
