@@ -168,4 +168,19 @@ public class RmProperties {
         this.connectionTwoPhaseHoldTimeoutXA = connectionTwoPhaseHoldTimeoutXA;
     }
 
+    public Boolean getApplicationDataLimitCheck() {
+        return applicationDataLimitCheck;
+    }
+
+    public void setApplicationDataLimitCheck(Boolean applicationDataLimitCheck) {
+        this.applicationDataLimitCheck = applicationDataLimitCheck;
+    }
+
+    public Integer getApplicationDataLimit() {
+        return applicationDataLimit;
+    }
+
+    public void setApplicationDataLimit(Integer applicationDataLimit) {
+        this.applicationDataLimit = applicationDataLimit;
+    }
 }
