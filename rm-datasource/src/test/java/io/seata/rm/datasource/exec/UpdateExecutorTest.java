@@ -18,6 +18,7 @@ package io.seata.rm.datasource.exec;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.mock.MockStatement;
@@ -30,13 +31,22 @@ import com.alibaba.druid.util.JdbcConstants;
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * @author will
@@ -49,26 +59,31 @@ public class UpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
-        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all");
+        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name", "all", "updated");
         Object[][] returnValue = new Object[][] {
-            new Object[] {1, "Tom", "keyword"},
-            new Object[] {2, "Jack", "keyword"},
+            new Object[] {1, "Tom", "keyword", 0},
+            new Object[] {2, "Jack", "keyword", 0},
         };
         Object[][] columnMetas = new Object[][] {
             new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
             new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
             new Object[] {"", "", "table_update_executor_test", "ALL", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "updated", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
         Object[][] indexMetas = new Object[][] {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
         };
+        Object[][] onUpdateColumnsReturnValue = new Object[][] {
+            new Object[]{0, "updated", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
+        };
 
-        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         try {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
@@ -96,6 +111,18 @@ public class UpdateExecutorTest {
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(updateExecutor.beforeImage());
+    }
+
+    @Test
+    public void testBeforeImageWithTableAlias() throws SQLException {
+        Assertions.assertNotNull(updateExecutor.beforeImage());
+
+        String sql = "update table_update_executor_test t set t.name = 'WILL' where t.id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        String builtSql = updateExecutor.buildBeforeImageSQL(updateExecutor.getTableMeta(), new ArrayList<>());
+        Assertions.assertTrue(builtSql.contains("t.updated"));
     }
 
     @Test
