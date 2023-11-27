@@ -15,15 +15,17 @@
  */
 package io.seata.serializer.protobuf;
 
-import com.google.protobuf.GeneratedMessageV3;
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.serializer.Serializer;
-import io.seata.serializer.protobuf.convertor.PbConvertor;
-import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+
+import com.google.protobuf.GeneratedMessageV3;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.BufferUtils;
+import io.seata.core.serializer.Serializer;
+import io.seata.serializer.protobuf.convertor.PbConvertor;
+import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
 /**
  * The type Protobuf codec.
@@ -53,7 +55,7 @@ public class ProtobufSerializer implements Serializer {
         byteBuffer.putInt(nameBytes.length);
         byteBuffer.put(nameBytes);
         byteBuffer.put(body);
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
         return content;

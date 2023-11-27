@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;
@@ -36,11 +39,10 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type protostuff based undo log parser.
@@ -132,7 +134,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = input.readByteBuffer();
             long time = buffer.getLong();
             int nanos = buffer.getInt();
-            buffer.flip();
+            BufferUtils.flip(buffer);
             java.sql.Timestamp timestamp = new Timestamp(time);
             timestamp.setNanos(nanos);
             return timestamp;
@@ -143,7 +145,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = ByteBuffer.allocate(12);
             buffer.putLong(value.getTime());
             buffer.putInt(value.getNanos());
-            buffer.flip();
+            BufferUtils.flip(buffer);
             output.writeBytes(number, buffer, repeated);
         }
 
