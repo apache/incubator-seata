@@ -46,6 +46,9 @@ public class FileTransactionStoreManagerTest {
     @BeforeAll
     public static void init(ApplicationContext context){
         SessionHolder.init(StoreConfig.SessionMode.FILE);
+
+        // Enable experimental of 'net.bytebuddy:byte-buddy'
+        System.setProperty("net.bytebuddy.experimental", "true");
     }
     @AfterAll
     public static void destroy(){
