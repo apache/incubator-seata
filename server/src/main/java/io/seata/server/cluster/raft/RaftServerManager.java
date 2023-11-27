@@ -150,7 +150,7 @@ public class RaftServerManager {
             }
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         });
-        if (!rpcServer.init(null)) {
+        if (rpcServer != null && !rpcServer.init(null)) {
             throw new RuntimeException("start raft node fail!");
         }
     }
