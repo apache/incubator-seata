@@ -54,6 +54,9 @@ public class FileTransactionStoreManagerTest {
 
     @Test
     public void testBigDataWrite() throws Exception {
+        // Enable experimental of 'net.bytebuddy:byte-buddy'
+        System.setProperty("net.bytebuddy.experimental", "true");
+
         File seataFile = Files.newTemporaryFile();
         FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
@@ -88,6 +91,9 @@ public class FileTransactionStoreManagerTest {
 
     @Test
     public void testFindTimeoutAndSave() throws Exception {
+        // Enable experimental of 'net.bytebuddy:byte-buddy'
+        System.setProperty("net.bytebuddy.experimental", "true");
+
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
