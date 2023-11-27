@@ -17,6 +17,7 @@ package io.seata.discovery.registry.raft;
 
 
 import io.seata.common.util.HttpClientUtil;
+import io.seata.config.ConfigurationFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 class RaftRegistryServiceImplTest {
 
+
     @BeforeAll
     public static void beforeClass() {
         System.setProperty("service.vgroupMapping.tx", "default");
@@ -49,10 +51,8 @@ class RaftRegistryServiceImplTest {
         System.setProperty("registry.raft.password", "seata");
         System.setProperty("registry.raft.serverAddr", "127.0.0.1:8092");
         System.setProperty("registry.raft.tokenValidityInMilliseconds", "10000");
-        try {
-            RaftRegistryServiceImpl registryService = RaftRegistryServiceImpl.getInstance();
-        } catch (RuntimeException e) {
-        }
+        ConfigurationFactory.getInstance();
+
     }
 
     /**

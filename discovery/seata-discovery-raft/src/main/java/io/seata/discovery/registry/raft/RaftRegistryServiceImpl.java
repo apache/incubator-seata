@@ -125,10 +125,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             refreshToken();
         } catch (RetryableException e) {
             throw new RuntimeException("Init fetch token failed!", e);
-        } catch (ExceptionInInitializerError e) {
-            // Add logging or print statements to identify the cause
-            e.printStackTrace();
-            throw e;
         }
     }
 
