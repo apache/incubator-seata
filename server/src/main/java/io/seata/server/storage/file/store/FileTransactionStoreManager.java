@@ -31,10 +31,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -49,6 +49,7 @@ import io.seata.server.store.TransactionStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
 
 import static io.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
@@ -263,11 +264,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     private boolean flushWriteBuffer(ByteBuffer writeBuffer) {
-        writeBuffer.flip();
+        BufferUtils.flip(writeBuffer);
         if (!writeDataFileByBuffer(writeBuffer)) {
             return false;
         }
-        writeBuffer.clear();
+        BufferUtils.clear(writeBuffer);
         return true;
     }
 
@@ -397,12 +398,12 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             ByteBuffer buffSize = ByteBuffer.allocate(MARK_SIZE);
             while (fileChannel.position() < size) {
                 try {
-                    buffSize.clear();
+                    BufferUtils.clear(buffSize);
                     int avilReadSize = fileChannel.read(buffSize);
                     if (avilReadSize != MARK_SIZE) {
                         break;
                     }
-                    buffSize.flip();
+                    BufferUtils.flip(buffSize);
                     int bodySize = buffSize.getInt();
                     byte[] byBody = new byte[bodySize];
                     ByteBuffer buffBody = ByteBuffer.wrap(byBody);
