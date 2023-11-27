@@ -15,14 +15,14 @@
  */
 package io.seata.common.exception;
 
-import java.io.IOException;
+
 
 /**
  * Exception indicating a retryable failure. This exception is typically thrown
  * when a retryable process fails, and it extends RuntimeException to
  * signal that it is an unchecked exception.
  */
-public class RetryableException extends IOException {
+public class RetryableException extends Exception {
 
     /**
      * Constructs a new RetryableException with no detailed message.

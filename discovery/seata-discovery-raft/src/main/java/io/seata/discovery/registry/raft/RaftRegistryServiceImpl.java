@@ -121,10 +121,9 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private RaftRegistryServiceImpl() {
-
         try {
             refreshToken();
-        } catch (IOException e) {
+        } catch (RetryableException e) {
             throw new RuntimeException("Init fetch token failed!", e);
         }
     }
@@ -325,8 +324,10 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         }
                         return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                     }
+                } catch (IOException e) {
+                    throw new RetryableException(e);
                 }
-            } catch (IOException e) {
+            } catch (RetryableException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
                 try {
                     Thread.sleep(1000);
@@ -357,19 +358,19 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private static void acquireClusterMetaDataByClusterName(String clusterName) {
-        acquireClusterMetaData(clusterName, "");
+        try {
+            acquireClusterMetaData(clusterName, "");
+        } catch (RetryableException e) {
+            LOGGER.warn(e.getMessage(), e);
+        }
     }
 
-    private static void acquireClusterMetaData(String clusterName, String group) {
+    private static void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         if (isTokenExpired()) {
-            try {
-                refreshToken();
-            } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
+            refreshToken();
         }
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
@@ -401,12 +402,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     }
                 }
             } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
+                throw new RetryableException(e);
             }
         }
     }
 
-    public static void refreshToken() throws IOException {
+    private static void refreshToken() throws RetryableException {
         // if username and password is not in config , return
         if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
             return;
@@ -440,6 +441,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                 }
+            } catch (IOException e) {
+                throw new RetryableException(e);
             }
         }
     }
