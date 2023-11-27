@@ -240,7 +240,7 @@ public class ColumnUtilsTest {
         cols = new ArrayList<>();
         cols.add("SCHEME.\"ID\"");
         cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"SCHEME\".\"ID\"", cols.get(0));
+        Assertions.assertEquals("SCHEME.\"ID\"", cols.get(0));
 
         cols = new ArrayList<>();
         cols.add("\"SCHEME\".ID");
@@ -255,7 +255,7 @@ public class ColumnUtilsTest {
         cols = new ArrayList<>();
         cols.add("schEme.id");
         cols = ColumnUtils.addEscape(cols, JdbcConstants.POSTGRESQL);
-        Assertions.assertEquals("\"schEme\".\"id\"", cols.get(0));
+        Assertions.assertEquals("schEme.id", cols.get(0));
 
     }
 

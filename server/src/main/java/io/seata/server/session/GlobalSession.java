@@ -30,6 +30,7 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.GlobalTransactionException;
@@ -653,7 +654,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
