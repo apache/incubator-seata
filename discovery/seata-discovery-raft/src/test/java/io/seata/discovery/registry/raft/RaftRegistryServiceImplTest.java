@@ -49,6 +49,10 @@ class RaftRegistryServiceImplTest {
         System.setProperty("registry.raft.password", "seata");
         System.setProperty("registry.raft.serverAddr", "127.0.0.1:8092");
         System.setProperty("registry.raft.tokenValidityInMilliseconds", "10000");
+        try {
+            RaftRegistryServiceImpl registryService = RaftRegistryServiceImpl.getInstance();
+        } catch (RuntimeException e) {
+        }
     }
 
     /**
