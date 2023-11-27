@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import io.seata.common.util.CompressUtil;
+import io.seata.common.util.BufferUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -350,7 +351,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
-        byteBuffer.clear();
+        BufferUtils.clear(byteBuffer);
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
@@ -394,7 +395,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put((byte)status.getCode());
         byteBuffer.put((byte)lockStatus.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
