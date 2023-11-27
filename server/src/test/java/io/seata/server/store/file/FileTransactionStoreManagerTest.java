@@ -31,6 +31,7 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
+import net.bytebuddy.utility.OpenedClassReader;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
@@ -54,6 +55,9 @@ public class FileTransactionStoreManagerTest {
 
     @Test
     public void testBigDataWrite() throws Exception {
+        System.out.println("net.bytebuddy.experimental = " + System.getProperty("net.bytebuddy.experimental"));
+        System.out.println("OpenedClassReader.EXPERIMENTAL = " + OpenedClassReader.EXPERIMENTAL);
+
         File seataFile = Files.newTemporaryFile();
         FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
@@ -88,6 +92,9 @@ public class FileTransactionStoreManagerTest {
 
     @Test
     public void testFindTimeoutAndSave() throws Exception {
+        System.out.println("net.bytebuddy.experimental = " + System.getProperty("net.bytebuddy.experimental"));
+        System.out.println("OpenedClassReader.EXPERIMENTAL = " + OpenedClassReader.EXPERIMENTAL);
+
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
