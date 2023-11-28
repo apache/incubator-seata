@@ -22,6 +22,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -52,9 +53,12 @@ class RaftRegistryServiceImplTest {
         System.setProperty("registry.raft.serverAddr", "127.0.0.1:8092");
         System.setProperty("registry.raft.tokenValidityInMilliseconds", "10000");
         ConfigurationFactory.getInstance();
-
     }
 
+    @AfterAll
+    public static void adAfterClass() throws Exception {
+        System.clearProperty("service.vgroupMapping.tx");
+    }
     /**
      * test whether throws exception when login failed
      */
