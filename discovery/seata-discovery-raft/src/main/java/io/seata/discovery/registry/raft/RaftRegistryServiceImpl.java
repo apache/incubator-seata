@@ -402,7 +402,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     }
                 }
             } catch (IOException e) {
-                throw new RetryableException(e);
+                throw new RetryableException(e.getMessage(), e);
             }
         }
     }
