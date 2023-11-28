@@ -296,7 +296,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
         } catch (Exception e) {
             groupByPks = false;
-            logger.warn("determine group by pks or all columns error:{}",e.getMessage());
+            logger.warn("determine group by pks or all columns error:", e);
         }
         List<String> groupByColumns = groupByPks ? pkColumns : allSelectColumns;
         StringBuilder groupByStr = new StringBuilder();
