@@ -555,11 +555,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
             }
 
-            for (String unescapeColumn : unescapeColumns) {
-                if (!containsColumn(needUpdateColumns, unescapeColumn)) {
-                    needUpdateColumns.add(ColumnUtils.addEscape(unescapeColumn, getDbType(), tableMeta));
-                }
-            }
+            needUpdateColumns.addAll(unescapeColumns.stream().filter(unescapeColumn -> !containsColumn(needUpdateColumns, unescapeColumn)).collect(Collectors.toList()));
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
