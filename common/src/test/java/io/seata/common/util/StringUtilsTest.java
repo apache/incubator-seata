@@ -380,4 +380,15 @@ public class StringUtilsTest {
                     ')';
         }
     }
+
+    @Test
+    void checkDataSize() {
+        assertThat(StringUtils.checkDataSize("","testdata",10,false)).isEqualTo(Boolean.TRUE);
+        assertThat(StringUtils.checkDataSize("1234567","testdata",17,false)).isEqualTo(Boolean.TRUE);
+        assertThat(StringUtils.checkDataSize("1234567","testdata",4,false)).isEqualTo(Boolean.FALSE);
+        Assertions.assertThrows(IllegalArgumentException.class, () ->
+                StringUtils.checkDataSize("1234567","testdata",6,true)
+        );
+        assertThat( StringUtils.checkDataSize("1234567","testdata",6,false)).isEqualTo(Boolean.FALSE);
+    }
 }
