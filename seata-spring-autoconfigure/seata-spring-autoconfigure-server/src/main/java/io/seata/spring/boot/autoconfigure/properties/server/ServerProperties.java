@@ -36,6 +36,9 @@ public class ServerProperties {
     private Integer servicePort;
     private Integer xaerNotaRetryTimeout = 60000;
 
+    private Boolean applicationDataLimitCheck = false;
+    private Integer applicationDataLimit = 64000;
+
     public long getMaxCommitRetryTimeout() {
         return maxCommitRetryTimeout;
     }
@@ -114,4 +117,19 @@ public class ServerProperties {
         this.enableParallelHandleBranch = enableParallelHandleBranch;
     }
 
+    public Boolean getApplicationDataLimitCheck() {
+        return applicationDataLimitCheck;
+    }
+
+    public void setApplicationDataLimitCheck(Boolean applicationDataLimitCheck) {
+        this.applicationDataLimitCheck = applicationDataLimitCheck;
+    }
+
+    public Integer getApplicationDataLimit() {
+        return applicationDataLimit;
+    }
+
+    public void setApplicationDataLimit(Integer applicationDataLimit) {
+        this.applicationDataLimit = applicationDataLimit;
+    }
 }
