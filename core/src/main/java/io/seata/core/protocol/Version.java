@@ -101,6 +101,10 @@ public class Version {
      * @return true: client version is above or equal version 1.5.0, false: on the contrary
      */
     public static boolean isAboveOrEqualVersion150(String version) {
+        if (StringUtils.isBlank(version)) {
+            return false;
+        }
+
         boolean isAboveOrEqualVersion150 = false;
         try {
             long clientVersion = convertVersion(version);
