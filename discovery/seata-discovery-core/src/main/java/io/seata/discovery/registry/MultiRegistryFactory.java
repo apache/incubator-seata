@@ -25,6 +25,8 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type multiple Registry factory.
@@ -32,6 +34,8 @@ import io.seata.config.ConfigurationFactory;
  * @author liuqiufeng
  */
 public class MultiRegistryFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiRegistryFactory.class);
 
     /**
      * Gets instances.
@@ -51,6 +55,9 @@ public class MultiRegistryFactory {
             registryTypeNamesStr = RegistryType.File.name();
         }
         String[] registryTypeNames = registryTypeNamesStr.split(Constants.REGISTRY_TYPE_SPLIT_CHAR);
+        if (registryTypeNames.length > 1) {
+            LOGGER.info("use multi registry center type: {}", registryTypeNamesStr);
+        }
         for (String registryTypeName : registryTypeNames) {
             RegistryType registryType;
             try {

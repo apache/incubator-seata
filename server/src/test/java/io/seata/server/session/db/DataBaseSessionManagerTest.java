@@ -136,7 +136,7 @@ public class DataBaseSessionManagerTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -161,7 +161,6 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        session.setStatus(GlobalStatus.Committing);
         sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
 
         String sql = "select * from global_table where xid= '"+xid+"'";
@@ -174,7 +173,7 @@ public class DataBaseSessionManagerTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt("status"), GlobalStatus.Committing.getCode());
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -207,7 +206,7 @@ public class DataBaseSessionManagerTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
             rs.close();
 
@@ -216,7 +215,7 @@ public class DataBaseSessionManagerTest {
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }else{
                 Assertions.assertTrue(true);
             }
@@ -302,7 +301,7 @@ public class DataBaseSessionManagerTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -352,7 +351,7 @@ public class DataBaseSessionManagerTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -397,7 +396,7 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }else{
                 Assertions.assertTrue(true);
             }

@@ -25,7 +25,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -189,7 +189,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters_with_null_and_insertRows_with_placeholder_null() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>();
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();
@@ -214,7 +214,7 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters_with_number_and_insertRows_with_placeholde_null() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(5);
+        Map<Integer,ArrayList<Object>> paramters = new HashMap<>();
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         ArrayList arrayList1 = new ArrayList<>();

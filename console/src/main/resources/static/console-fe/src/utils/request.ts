@@ -43,7 +43,7 @@ const codeMessage = {
 
 const request = () => {
   const instance: AxiosInstance = axios.create({
-    baseURL: '/api/v1',
+    baseURL: 'api/v1',
     method: 'get',
   });
 
@@ -74,7 +74,7 @@ const request = () => {
       if (error.response) {
         const { status } = error.response;
         if (status === 403 || status === 401) {
-          (window as any).globalHistory.replace('login');
+          (window as any).globalHistory.replace('/login');
           return;
         }
         Message.error(`HTTP ERROR: ${status}`);

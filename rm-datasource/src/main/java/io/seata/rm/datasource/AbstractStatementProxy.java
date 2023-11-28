@@ -303,7 +303,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void closeOnCompletion() throws SQLException {
         targetStatement.closeOnCompletion();
-
     }
 
     @Override

@@ -15,10 +15,20 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.Channel;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
@@ -27,14 +37,6 @@ import io.seata.core.protocol.Version;
 import io.seata.core.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type channel manager.
@@ -97,7 +99,16 @@ public class ChannelManager {
     }
 
     private static String[] readClientId(String clientId) {
-        return clientId.split(Constants.CLIENT_ID_SPLIT_CHAR);
+        int i = clientId.indexOf(Constants.CLIENT_ID_SPLIT_CHAR);
+        String[] clientIdInfo = null;
+        if (i > -1) {
+            String applicationId = clientId.substring(0, i);
+            String[] ipPortStr = NetUtil.splitIPPortStr(clientId.substring(i + 1));
+            if (null != ipPortStr && ipPortStr.length == 2) {
+                clientIdInfo = new String[]{applicationId, ipPortStr[0], ipPortStr[1]};
+            }
+        }
+        return clientIdInfo;
     }
 
     private static RpcContext buildChannelHolder(NettyPoolKey.TransactionRole clientRole, String version, String applicationId,
@@ -276,13 +287,20 @@ public class ChannelManager {
      * @param clientId   Client ID - ApplicationId:IP:Port
      * @return Corresponding channel, NULL if not found.
      */
-    public static Channel getChannel(String resourceId, String clientId) {
+    public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
         Channel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
 
         if (clientIdInfo == null || clientIdInfo.length != 3) {
             throw new FrameworkException("Invalid Client ID: " + clientId);
+        }
+
+        if (StringUtils.isBlank(resourceId)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("No channel is available, resourceId is null or empty");
+            }
+            return null;
         }
 
         String targetApplicationId = clientIdInfo[0];
@@ -381,7 +399,7 @@ public class ChannelManager {
             }
         }
 
-        if (resultChannel == null) {
+        if (resultChannel == null && tryOtherApp) {
             resultChannel = tryOtherApp(applicationIdMap, targetApplicationId);
 
             if (resultChannel == null) {
@@ -448,7 +466,7 @@ public class ChannelManager {
      */
     public static Map<String,Channel> getRmChannels() {
         if (RM_CHANNELS.isEmpty()) {
-            return null;
+            return Collections.emptyMap();
         }
         Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
         RM_CHANNELS.forEach((resourceId, value) -> {

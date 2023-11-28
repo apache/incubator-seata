@@ -1,0 +1,39 @@
+name: "Publish OSSRH"
+
+on:
+  push:
+    branches: [ develop, 2.x, snapshot, "*.*.*" ]
+
+jobs:
+  # job 1
+  publish-to-OSSRH:
+    name: "Publish to OSSRH"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v2.4.0
+      # step 2
+      - name: "Setup Java JDK"
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: 'zulu'
+          java-version: 8
+          server-id: oss_seata
+          server-username: OSSRH_USERNAME # Environment variable name for the username for authentication to the Apache Maven repository. Default is $GITHUB_ACTOR
+          server-password: OSSRH_PASSWORD # Environment variable name for password or token for authentication to the Apache Maven repository. Default is $GITHUB_TOKEN
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE # Environment variable name for the GPG private key passphrase. Default is $GPG_PASSPHRASE
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4
+      - name: "Publish to OSSRH"
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USER }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          ./mvnw -T 4C clean deploy -Prelease,release-by-github-actions -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn

@@ -118,10 +118,29 @@ public enum TransactionExceptionCode {
     FailedStore,
 
     /**
+     * not raft leader exception code
+     */
+    NotRaftLeader,
+  
+    /**
      * Lock key conflict fail fast transaction exception code.
      */
-    LockKeyConflictFailFast
-    ;
+    LockKeyConflictFailFast,
+
+    /**
+     * transaction already timeout
+     */
+    TransactionTimeout,
+
+    /**
+     * Commit heuristic transaction exception code.
+     */
+    CommitHeuristic,
+
+    /**
+     * Broken transaction exception code.
+     */
+    Broken;
 
 
     /**

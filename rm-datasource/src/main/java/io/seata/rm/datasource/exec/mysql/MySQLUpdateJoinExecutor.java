@@ -41,7 +41,7 @@ import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.StatementCallback;
 import io.seata.rm.datasource.exec.UpdateExecutor;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
@@ -55,11 +55,11 @@ import org.slf4j.LoggerFactory;
  * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUpdateJoinExecutor.class);
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
     private static final String DOT = ".";
     private final Map<String, TableRecords> beforeImagesMap = new LinkedHashMap<>(4);
     private final Map<String, TableRecords> afterImagesMap = new LinkedHashMap<>(4);
-    private final boolean isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
+    protected boolean isLowerSupportGroupByPksVersion;
     private String sqlMode = "";
 
     /**
@@ -72,6 +72,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     public MySQLUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
         SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.isLowerSupportGroupByPksVersion = Version.convertVersionNotThrowException(getDbVersion()) < Version.convertVersionNotThrowException("5.7.5");
     }
 
     @Override
@@ -80,7 +81,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
         // update join sql,like update t1 inner join t2 on t1.id = t2.id set t1.name = ?; tableItems = {"update t1 inner join t2","t1","t2"}
-        String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
+        String[] tableItems = tableNames.split(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
         final int itemTableIndex = 1;
         String suffixCommonCondition = buildBeforeImageSQLCommonConditionSuffix(paramAppenderList);
@@ -130,13 +131,11 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix.append(GROUP_BY);
         List<String> pkColumnNames = getColumnNamesWithTablePrefixList(itemTable, recognizer.getTableAlias(itemTable), itemTableMeta.getPrimaryKeyOnlyName());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
         suffix.append(buildGroupBy(pkColumnNames,needUpdateColumns));
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoin.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
 
@@ -144,7 +143,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         String tableNames = recognizer.getTableName();
-        String[] tableItems = tableNames.split(recognizer.MULTI_TABLE_NAME_SEPERATOR);
+        String[] tableItems = tableNames.split(SQLUpdateRecognizer.MULTI_TABLE_NAME_SEPERATOR);
         String joinTable = tableItems[0];
         final int itemTableIndex = 1;
         ArrayList<List<Object>> joinConditionParams = new ArrayList<>();
@@ -202,12 +201,10 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
         //maybe duplicate row for select join sql.remove duplicate row by 'group by' condition
         suffix += GROUP_BY;
         List<String> itemTableUpdateColumns = getItemUpdateColumns(itemTableMeta, recognizer.getUpdateColumns());
-        List<String> needUpdateColumns = getNeedUpdateColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
-        suffix += buildGroupBy(pkColumns,needUpdateColumns);
+        List<String> needUpdateColumns = getNeedColumns(itemTable, recognizer.getTableAlias(itemTable), itemTableUpdateColumns);
+        suffix += buildGroupBy(pkColumns, needUpdateColumns);
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoiner.add(needUpdateColumn);
-        }
+        needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
 
@@ -261,6 +258,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
      * @param afterImage  the after image
      * @return sql undo log
      */
+    @Override
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = beforeImage.getTableName();
@@ -298,7 +296,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
         } catch (Exception e) {
             groupByPks = false;
-            LOGGER.warn("determine group by pks or all columns error:{}",e.getMessage());
+            logger.warn("determine group by pks or all columns error:{}",e.getMessage());
         }
         List<String> groupByColumns = groupByPks ? pkColumns : allSelectColumns;
         StringBuilder groupByStr = new StringBuilder();
@@ -312,6 +310,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     }
 
     private String getDbVersion() {
-        return statementProxy.getConnectionProxy().getDataSourceProxy().getVersion();
+        return statementProxy.getConnectionProxy().getDataSourceProxy().getKernelVersion();
     }
 }

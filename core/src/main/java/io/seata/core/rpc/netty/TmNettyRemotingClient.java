@@ -20,7 +20,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.DefaultValues;
@@ -57,7 +56,6 @@ import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
  * @author zhaojun
  * @author zhangchenghui.dev@gmail.com
  */
-
 public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);
     private static volatile TmNettyRemotingClient instance;
@@ -195,7 +193,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (initialized.compareAndSet(false, true)) {
             super.init();
             if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
-                getClientChannelManager().reconnect(transactionServiceGroup);
+                initConnection();
             }
         }
     }
@@ -285,4 +283,9 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(EXTRA_DATA_SPLIT_CHAR);
         return sb.toString();
     }
+
+    private void initConnection() {
+        getClientChannelManager().reconnect(transactionServiceGroup);
+    }
+
 }

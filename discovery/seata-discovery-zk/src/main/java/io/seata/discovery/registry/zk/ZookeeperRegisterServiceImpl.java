@@ -33,6 +33,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.config.exception.ConfigNotFoundException;
 import io.seata.discovery.registry.RegistryService;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkStateListener;
@@ -40,8 +41,6 @@ import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 
 /**
  * zookeeper path as /registry/zk/
@@ -179,7 +178,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         String clusterName = getServiceGroup(key);
 
         if (clusterName == null) {
-            return null;
+            String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+            throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
 
         return doLookup(clusterName);
@@ -301,7 +301,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
         for (String path : instances) {
             try {
-                String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
+                String[] ipAndPort = NetUtil.splitIPPortStr(path);
                 newAddressList.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
             } catch (Exception e) {
                 LOGGER.warn("The cluster instance info is error, instance info:{}", path);

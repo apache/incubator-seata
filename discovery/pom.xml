@@ -40,5 +40,6 @@
         <module>seata-discovery-nacos</module>
         <module>seata-discovery-etcd3</module>
         <module>seata-discovery-sofa</module>
+        <module>seata-discovery-raft</module>
     </modules>
 </project>

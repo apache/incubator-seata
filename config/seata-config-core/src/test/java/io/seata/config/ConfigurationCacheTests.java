@@ -15,11 +15,16 @@
  */
 package io.seata.config;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
+import io.seata.common.util.ReflectionUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author jsbxyyx
@@ -53,7 +58,58 @@ public class ConfigurationCacheTests {
         configuration.getLong("eee", 0);
         ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("eee", "1"));
         long eee = configuration.getLong("eee", 0);
-        Assertions.assertEquals((long) 1, eee);
+        Assertions.assertEquals(1, eee);
+
+        // test null
+        configuration.getConfig("test", null);
+        ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("test", "1"));
+        String test = configuration.getConfig("test", null);
+        Assertions.assertEquals("1", test);
+        // new value is null
+        ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent("test", null));
+        test = configuration.getConfig("test", null);
+        Assertions.assertNull(test);
+    }
+
+    // FIXME: 2023/2/19 wait bugfix
+    // @Test
+    public void testConfigListener() throws Exception {
+        Configuration configuration = new FileConfiguration("registry");
+        configuration = ConfigurationCache.getInstance().proxy(configuration);
+
+        // get config listeners map
+        Field configListenersMapField = ReflectionUtil.getField(ConfigurationCache.class, "configListenersMap");
+        Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = (Map<String,
+            HashSet<ConfigurationChangeListener>>)configListenersMapField.get(ConfigurationCache.getInstance());
+
+        boolean value = configuration.getBoolean("service.disableGlobalTransaction");
+        TestListener listener = new TestListener();
+        ConfigurationCache.addConfigListener("service.disableGlobalTransaction", listener);
+        // check listener if exist
+        HashSet<ConfigurationChangeListener> listeners = configListenersMap.get("service.disableGlobalTransaction");
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(listeners));
+        // change value,trigger listener
+        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        // remove null
+        ConfigurationCache.removeConfigListener(null);
+        // check listener if exist
+        listeners = configListenersMap.get("service.disableGlobalTransaction");
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(listeners));
+        // remove listener
+        ConfigurationCache.removeConfigListener("service.disableGlobalTransaction", listener);
+        // check listener if exist
+        listeners = configListenersMap.get("service.disableGlobalTransaction");
+        // is empty
+        Assertions.assertTrue(CollectionUtils.isEmpty(listeners));
+    }
+
+    public static class TestListener implements ConfigurationChangeListener {
+
+        @Override
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                !Boolean.parseBoolean(event.getOldValue()));
+        }
     }
 
 }

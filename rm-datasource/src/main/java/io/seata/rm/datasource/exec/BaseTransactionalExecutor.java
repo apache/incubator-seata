@@ -22,9 +22,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringJoiner;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import io.seata.common.DefaultValues;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -39,7 +38,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -486,24 +485,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
-        StringBuilder prefix = new StringBuilder("SELECT ");
+        String prefix = "SELECT ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         // build check sql
         String firstKey = pkValuesMap.keySet().stream().findFirst().get();
         int rowSize = pkValuesMap.get(firstKey).size();
         suffix.append(WHERE).append(SqlGenerateUtils.buildWhereConditionByPKs(pkColumnNameList, rowSize, getDbType()));
-        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        List<String> insertColumns = recognizer.getInsertColumns();
-        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(insertColumns)) {
-            Set<String> columns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-            columns.addAll(recognizer.getInsertColumnsIsSimplified());
-            columns.addAll(pkColumnNameList);
-            for (String columnName : columns) {
-                selectSQLJoin.add(columnName);
-            }
-        } else {
-            selectSQLJoin.add(" * ");
-        }
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
+        List<String> insertColumnsUnEscape = recognizer.getInsertColumnsUnEscape();
+        List<String> needColumns =
+            getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), insertColumnsUnEscape);
+        needColumns.forEach(selectSQLJoin::add);
         ResultSet rs = null;
         try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
 
@@ -521,6 +513,37 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } finally {
             IOUtil.close(rs);
         }
+    }
+
+    protected List<String> getNeedColumns(String table, String tableAlias, List<String> unescapeColumns) {
+        List<String> needUpdateColumns = new ArrayList<>();
+        TableMeta tableMeta = getTableMeta(table);
+        if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(unescapeColumns)) {
+            if (!containsPK(table, unescapeColumns)) {
+                List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
+                if (CollectionUtils.isNotEmpty(pkNameList)) {
+                    if (StringUtils.isNotBlank(tableAlias)) {
+                        needUpdateColumns.add(getColumnNamesWithTablePrefix(table, tableAlias, pkNameList));
+                    } else {
+                        needUpdateColumns.add(getColumnNamesInSQL(pkNameList));
+                    }
+                }
+            }
+            needUpdateColumns.addAll(unescapeColumns.stream()
+                .map(unescapeUpdateColumn -> ColumnUtils.addEscape(unescapeUpdateColumn, getDbType(), tableMeta)).collect(
+                    Collectors.toList()));
+
+            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
+            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
+            onUpdateColumns.removeAll(unescapeColumns);
+            needUpdateColumns.addAll(onUpdateColumns.stream()
+                .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))
+                .collect(Collectors.toList()));
+        } else {
+            needUpdateColumns.addAll(tableMeta.getAllColumns().keySet().stream()
+                .map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta)).collect(Collectors.toList()));
+        }
+        return needUpdateColumns;
     }
 
     /**

@@ -26,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -41,10 +41,12 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.cluster.raft.RaftServerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
@@ -63,6 +65,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
         MAX_GLOBAL_SESSION_SIZE));
+
+    /**
+     * ThreadLocal should be optimize.
+     * It is tied to the current threading model. threadlocal's public set method does nothing to protect it from abuse.
+     */
+    private static final ThreadLocal<GlobalStatus> EXPECTED_STATUS_THREAD_LOCAL = new ThreadLocal<>();
 
     /**
      * If the global session's status is (Rollbacking or Committing) and currentTime - createTime >= RETRY_DEAD_THRESHOLD
@@ -97,6 +105,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
+    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
     /**
      * Add boolean.
@@ -120,10 +129,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        return branchSessions.remove(branchSession);
+        synchronized (this) {
+            return branchSessions.remove(branchSession);
+        }
     }
 
-    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
+    /**
+     * Remove boolean.
+     *
+     * @param branchId the long
+     * @return the boolean
+     */
+    public boolean remove(Long branchId) {
+        return this.remove(this.getBranch(branchId));
+    }
 
     /**
      * Can be committed async boolean.
@@ -192,6 +211,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.status = GlobalStatus.Begin;
         this.beginTime = System.currentTimeMillis();
         this.active = true;
+        SessionHolder.getRootSessionManager().onBegin(this);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBegin(this);
         }
@@ -199,9 +219,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeGlobalStatus(GlobalStatus status) throws TransactionException {
-        if (GlobalStatus.Rollbacking == status) {
+        if (GlobalStatus.Rollbacking == status || GlobalStatus.TimeoutRollbacking == status) {
             LockerManagerFactory.getLockManager().updateLockStatus(xid, LockStatus.Rollbacking);
         }
+        SessionHolder.getRootSessionManager().onStatusChange(this, status);
+        // set session status after update successfully
         this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
@@ -209,9 +231,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
-        throws TransactionException {
-        branchSession.setStatus(status);
+    public void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException {
+        SessionHolder.getRootSessionManager().onBranchStatusChange(this, branchSession, status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
@@ -225,6 +246,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void close() throws TransactionException {
         if (active) {
+            SessionHolder.getRootSessionManager().onClose(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onClose(this);
             }
@@ -233,25 +255,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        if (isSuccessEnd()) {
+        if (GlobalStatus.isTwoPhaseSuccess(status)) {
+            // TODO: Non AT mode does not need to be unlocked
             // Clean locks first
             clean();
+            SessionHolder.getRootSessionManager().onSuccessEnd(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onSuccessEnd(this);
             }
         } else {
+            SessionHolder.getRootSessionManager().onFailEnd(this);
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
                 lifecycleListener.onFailEnd(this);
             }
         }
-    }
-
-    public boolean isSuccessEnd() {
-        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
-            return true;
-        }
-        return false;
     }
 
     public void clean() throws TransactionException {
@@ -292,11 +309,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void addBranch(BranchSession branchSession) throws TransactionException {
+        SessionHolder.getRootSessionManager().onAddBranch(this, branchSession);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
         }
-        branchSession.setStatus(BranchStatus.Registered);
-        add(branchSession);
+        if (!RaftServerFactory.getInstance().isRaftMode()) {
+            add(branchSession);
+        }
     }
 
     public void loadBranchs() {
@@ -312,18 +331,34 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(BranchSession branchSession) throws TransactionException {
+    public void unlockBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked in 'DefaultCore.commit()'
-        if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
+        if (this.status != Committing && this.status != CommitRetrying && this.status != AsyncCommitting) {
             if (!branchSession.unlock()) {
-                throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
+                throw new TransactionException(
+                    "Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
+    }
+
+    @Override
+    public void removeBranch(BranchSession branchSession) throws TransactionException {
+        SessionHolder.getRootSessionManager().onRemoveBranch(this, branchSession);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
-        remove(branchSession);
+
+        if (!RaftServerFactory.getInstance().isRaftMode()) {
+            this.remove(branchSession);
+        }
+
+    }
+
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
     }
 
     /**
@@ -616,7 +651,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         } else {
             byteBuffer.putInt(0);
         }
-
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
@@ -627,7 +661,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes,
         byte[] xidBytes, byte[] applicationDataBytes) {
-        final int size = 8 // transactionId
+        return 8 // transactionId
             + 4 // timeout
             + 2 // byApplicationIdBytes.length
             + 2 // byServiceGroupBytes.length
@@ -641,7 +675,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length)
             + (xidBytes == null ? 0 : xidBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
-        return size;
     }
 
     @Override
@@ -742,26 +775,34 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void asyncCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
-        this.setStatus(GlobalStatus.AsyncCommitting);
-        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        changeGlobalStatus(GlobalStatus.AsyncCommitting);
     }
 
     public void queueToRetryCommit() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
-        this.setStatus(GlobalStatus.CommitRetrying);
-        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
-        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         GlobalStatus currentStatus = this.getStatus();
+        GlobalStatus newStatus;
         if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
-            this.setStatus(GlobalStatus.TimeoutRollbackRetrying);
+            newStatus = GlobalStatus.TimeoutRollbackRetrying;
         } else {
-            this.setStatus(GlobalStatus.RollbackRetrying);
+            newStatus = GlobalStatus.RollbackRetrying;
         }
-        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        changeGlobalStatus(newStatus);
+    }
+
+    public void setExpectedStatusFromCurrent() {
+        EXPECTED_STATUS_THREAD_LOCAL.set(this.status);
+    }
+
+    public void cleanExpectedStatus() {
+        EXPECTED_STATUS_THREAD_LOCAL.remove();
+    }
+
+    public GlobalStatus getExpectedStatus() {
+        return EXPECTED_STATUS_THREAD_LOCAL.get();
     }
 
     @Override

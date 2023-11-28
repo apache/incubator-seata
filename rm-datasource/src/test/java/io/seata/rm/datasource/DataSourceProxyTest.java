@@ -22,7 +22,7 @@ import javax.sql.DataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +45,7 @@ public class DataSourceProxyTest {
     @Test
     public void getResourceIdTest() throws SQLException, NoSuchFieldException, IllegalAccessException {
         // Disable 'DataSourceProxy.tableMetaExecutor' to prevent unit tests from being affected
-        Field enableField = DataSourceProxy.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
+        Field enableField = TableMetaCacheFactory.class.getDeclaredField("ENABLE_TABLE_META_CHECKER_ENABLE");
         enableField.setAccessible(true);
         enableField.set(null, false);
 
@@ -112,10 +112,22 @@ public class DataSourceProxyTest {
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 
+        // case: dbType = sqlserver
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.SQLSERVER);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:mock:xxx;database=test");
+            Assertions.assertEquals("jdbc:mock:xxx;database=test", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
+
         // case: dbType = db2
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, JdbcConstants.DB2);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.DB2);
             Assertions.assertEquals("jdbc:mock:xxx", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
         }
     }

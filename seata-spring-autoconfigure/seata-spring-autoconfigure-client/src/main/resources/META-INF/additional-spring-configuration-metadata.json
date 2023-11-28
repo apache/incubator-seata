@@ -214,7 +214,7 @@
       "name": "seata.client.load-balance.type",
       "type": "java.lang.String",
       "sourceType": "io.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties",
-      "defaultValue": "RandomLoadBalance"
+      "defaultValue": "XID"
     },
     {
       "name": "seata.client.load-balance.virtual-nodes",
@@ -248,14 +248,14 @@
       "name": "seata.tcc.fence.log-table-name",
       "type": "java.lang.String",
       "description": "TCC fence log table name.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "sourceType": "io.seata.rm.fence.SpringFenceConfig",
       "defaultValue": "tcc_fence_log"
     },
     {
       "name": "seata.tcc.fence.clean-period",
       "type": "java.time.Duration",
       "description": "TCC fence log clean period. only duration type format are supported.",
-      "sourceType": "io.seata.rm.tcc.config.TCCFenceConfig",
+      "sourceType": "io.seata.rm.fence.SpringFenceConfig",
       "defaultValue": "1d"
     },
     {
@@ -348,7 +348,7 @@
       "name": "seata.client.load-balance.type",
       "values": [
         {
-          "value": "RandomLoadBalance",
+          "value": "XID",
           "description": "the default load balance."
         },
         {
@@ -359,6 +359,9 @@
         },
         {
           "value": "LeastActiveLoadBalance"
+        },
+        {
+          "value": "RandomLoadBalance"
         }
       ]
     },
@@ -402,9 +405,6 @@
         },
         {
           "value": "protostuff"
-        },
-        {
-          "value": "fst"
         }
       ]
     },

@@ -90,6 +90,46 @@ public final class ReflectionUtil {
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
 
+    /**
+     * Get the wrapped class
+     *
+     * @param clazz the class
+     * @return the wrapped class
+     */
+    public static Class<?> getWrappedClass(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (clazz.equals(byte.class)) {
+                return Byte.class;
+            }
+            if (clazz.equals(boolean.class)) {
+                return Boolean.class;
+            }
+            if (clazz.equals(char.class)) {
+                return Character.class;
+            }
+            if (clazz.equals(short.class)) {
+                return Short.class;
+            }
+            if (clazz.equals(int.class)) {
+                return Integer.class;
+            }
+            if (clazz.equals(long.class)) {
+                return Long.class;
+            }
+            if (clazz.equals(float.class)) {
+                return Float.class;
+            }
+            if (clazz.equals(double.class)) {
+                return Double.class;
+            }
+            if (clazz.equals(void.class)) {
+                return Void.class;
+            }
+        }
+
+        return clazz;
+    }
+
     //endregion
 
 
@@ -622,7 +662,7 @@ public final class ReflectionUtil {
      */
     public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
         InvocationHandler h = Proxy.getInvocationHandler(annotation);
-        return (Map<String, Object>)getFieldValue(h, "memberValues");
+        return getFieldValue(h, "memberValues");
     }
 
     //endregion

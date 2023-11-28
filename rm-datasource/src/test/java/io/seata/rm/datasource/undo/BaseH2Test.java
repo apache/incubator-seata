@@ -16,11 +16,13 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.util.IOUtil;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
@@ -29,7 +31,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -44,7 +45,9 @@ public abstract class BaseH2Test {
     
     static BasicDataSource dataSource = null;
 
-    static Connection connection = null;
+    static ConnectionProxy connection = null;
+
+    static DataSourceProxy dataSourceProxy = null;
 
     static TableMeta tableMeta = null;
     
@@ -55,8 +58,8 @@ public abstract class BaseH2Test {
         dataSource.setUrl("jdbc:h2:./db_store/test_undo");
         dataSource.setUsername("sa");
         dataSource.setPassword("");
-
-        connection = dataSource.getConnection();
+        dataSourceProxy = new DataSourceProxy(dataSource);
+        connection = dataSourceProxy.getConnection();
 
         tableMeta = mockTableMeta();
     }

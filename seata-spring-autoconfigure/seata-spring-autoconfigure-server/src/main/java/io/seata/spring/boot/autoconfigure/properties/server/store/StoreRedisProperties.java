@@ -35,8 +35,9 @@ public class StoreRedisProperties {
      * single, sentinel
      */
     private String mode = "single";
-    private String password;
+    private String type = "pipeline";
     private Integer maxConn = DEFAULT_REDIS_MAX_IDLE;
+    private String password = null;
     private Integer minConn = DEFAULT_REDIS_MIN_IDLE;
     private Integer database = 0;
     private Integer queryLimit = DEFAULT_QUERY_LIMIT;
@@ -48,6 +49,15 @@ public class StoreRedisProperties {
 
     public StoreRedisProperties setMode(String mode) {
         this.mode = mode;
+        return this;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public StoreRedisProperties setType(String type) {
+        this.type = type;
         return this;
     }
 
@@ -105,7 +115,6 @@ public class StoreRedisProperties {
         return this;
     }
 
-
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SINGLE_PREFIX)
     public static class Single {
@@ -131,8 +140,6 @@ public class StoreRedisProperties {
         }
     }
 
-
-
     @Component
     @ConfigurationProperties(prefix = STORE_REDIS_SENTINEL_PREFIX)
     public static class Sentinel {
@@ -141,6 +148,8 @@ public class StoreRedisProperties {
          * such as "10.28.235.65:26379,10.28.235.65:26380,10.28.235.65:26381"
          */
         private String sentinelHosts;
+
+        private String sentinelPassword;
 
         public String getMasterName() {
             return masterName;
@@ -157,6 +166,15 @@ public class StoreRedisProperties {
 
         public Sentinel setSentinelHosts(String sentinelHosts) {
             this.sentinelHosts = sentinelHosts;
+            return this;
+        }
+
+        public String getSentinelPassword() {
+            return sentinelPassword;
+        }
+
+        public Sentinel setSentinelPassword(String sentinelPassword) {
+            this.sentinelPassword = sentinelPassword;
             return this;
         }
     }

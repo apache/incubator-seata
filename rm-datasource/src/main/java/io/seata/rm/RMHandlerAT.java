@@ -17,11 +17,12 @@ package io.seata.rm;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Calendar;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.util.DateUtil;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
@@ -126,13 +127,15 @@ public class RMHandlerAT extends AbstractRMHandler {
         }
     }
 
-    private Date getLogCreated(int saveDays) {
-        if (saveDays <= 0) {
-            saveDays = UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
+    private Date getLogCreated(int pastDays) {
+        if (pastDays <= 0) {
+            pastDays = UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
         }
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -saveDays);
-        return calendar.getTime();
+        try {
+            return DateUtil.getDateNowPlusDays(-pastDays);
+        } catch (ParseException exx) {
+            throw new RuntimeException(exx);
+        }
     }
 
     /**
