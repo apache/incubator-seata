@@ -16,8 +16,12 @@
 package io.seata.rm;
 
 import java.util.concurrent.TimeoutException;
-
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -43,6 +47,12 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceManager.class);
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static int appDataErrSize = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_LIMIT,
+            DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT);
+
+    private static boolean throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_CHECK, false);
     /**
      * registry branch record
      *
@@ -57,6 +67,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
+
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
             request.setLockKey(lockKeys);
@@ -94,6 +106,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
             request.setBranchId(branchId);
