@@ -325,7 +325,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                     }
                 } catch (IOException e) {
-                    throw new RetryableException(e);
+                    throw new RetryableException(e.getMessage(), e);
                 }
             } catch (RetryableException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
