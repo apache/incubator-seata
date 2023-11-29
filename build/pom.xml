@@ -220,12 +220,10 @@
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
                         <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
                         <includeOnlyProperties>
-                            <property>git.branch</property>
-                            <property>git.build.time</property>
-                            <property>git.build.version</property>
-                            <property>git.commit.id</property>
-                            <property>git.commit.time</property>
-                            <property>git.dirty</property>
+                            <includeOnlyProperty>git.branch</includeOnlyProperty>
+                            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                            <includeOnlyProperty>^git.commit.(id|time)$</includeOnlyProperty>
+                            <includeOnlyProperty>git.dirty</includeOnlyProperty>
                         </includeOnlyProperties>
                     </configuration>
                 </plugin>
