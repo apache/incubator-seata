@@ -214,6 +214,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <skip>${maven.git-commit-id.skip}</skip>
                         <verbose>true</verbose>
                         <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
@@ -328,9 +329,6 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <configuration>
-                    <skip>${maven.git-commit-id.skip}</skip>
-                </configuration>
             </plugin>
         </plugins>
     </build>
