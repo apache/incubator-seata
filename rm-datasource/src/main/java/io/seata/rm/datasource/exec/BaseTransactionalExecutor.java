@@ -331,8 +331,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return true: contains targetColumn false: not contains targetColumn
      */
     protected boolean containsColumn(List<String> columns, String targetColumn) {
-        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
-        return CollectionUtils.toUpperList(newColumns).contains(targetColumn.toUpperCase());
+        if (CollectionUtils.isEmpty(columns)) {
+            return false;
+        }
+        return CollectionUtils.toUpperList(columns).contains(targetColumn.toUpperCase());
     }
 
     /**
@@ -548,9 +550,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
                 if (CollectionUtils.isNotEmpty(pkNameList)) {
                     if (StringUtils.isNotBlank(tableAlias)) {
-                        needUpdateColumns.addAll(getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList));
+                        needUpdateColumns.addAll(
+                                ColumnUtils.delEscape(getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList), getDbType())
+                        );
                     } else {
-                        needUpdateColumns.addAll(getColumnNamesInSQLList(pkNameList));
+                        needUpdateColumns.addAll(
+                                ColumnUtils.delEscape(getColumnNamesInSQLList(pkNameList), getDbType())
+                        );
                     }
                 }
             }
