@@ -44,7 +44,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
             mvn  -version;
-            mvn  clean install -DskipTests -Dmaven.git-commit-id.skip=true -e -B;
+            mvn  clean install -DskipTests -e -B;
 
   # job 2:
   test-arm64:
