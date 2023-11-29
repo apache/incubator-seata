@@ -16,9 +16,9 @@
 package io.seata.rm.tcc;
 
 
-import io.seata.rm.tcc.api.BusinessActionContext;
-
 import java.util.List;
+
+import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
  * @author leezongjie
@@ -40,8 +40,13 @@ public class NormalTccActionImpl implements NormalTccAction {
         return false;
     }
 
-    public boolean otherMethod(){
+    public boolean otherMethod() {
         return true;
+    }
+
+    @Override
+    public String prepareWithException(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
+        throw new IllegalArgumentException();
     }
 
 }

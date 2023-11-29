@@ -15,6 +15,7 @@
  */
 package io.seata.integration.tx.api.interceptor;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -55,6 +56,14 @@ public class DefaultInvocationWrapper implements InvocationWrapper {
 
     @Override
     public Object proceed() throws Throwable {
-        return method.invoke(delegate, args);
+        try {
+            return method.invoke(delegate, args);
+        } catch (Throwable t) {
+            if (t instanceof InvocationTargetException) {
+                t = t.getCause();
+            }
+            throw t;
+        }
+
     }
 }
