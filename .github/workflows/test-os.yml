@@ -37,13 +37,14 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: |
           ./mvnw clean install \
+                 -Dmaven.git-commit-id.skip=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       ## step 4.2: for Windows
       - name: "Build with Maven on 'windows-latest' OS (Skip tests)"
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
             mvn  -version;
-            mvn  clean install -DskipTests -e -B;
+            mvn  clean install -DskipTests -Dmaven.git-commit-id.skip=true -e -B;
 
   # job 2:
   test-arm64:
@@ -86,6 +87,7 @@ jobs:
                        mvn -version && \
                        mvn clean install \
                            -Dspring-boot.version=${{ matrix.springboot }} \
-                           -DskipTests \
                            -Prelease-seata \
+                           -DskipTests \
+                           -Dmaven.git-commit-id.skip=true \
                            -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
