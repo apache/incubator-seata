@@ -22,7 +22,7 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
@@ -49,7 +49,7 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         RaftClusterMetadata raftClusterMetadata =
-            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
+            RaftServerManager.getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
         raftSnapshot.setBody(raftClusterMetadata);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
         String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
@@ -76,7 +76,7 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             RaftClusterMetadata raftClusterMetadata = (RaftClusterMetadata)load(path);
-            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine()
+            RaftServerManager.getRaftServer(group).getRaftStateMachine()
                 .setRaftLeaderMetadata(raftClusterMetadata);
             return true;
         } catch (final Exception e) {

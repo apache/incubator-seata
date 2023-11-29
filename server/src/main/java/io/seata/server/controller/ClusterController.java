@@ -35,7 +35,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.Result;
 import io.seata.server.cluster.manager.ClusterWatcherManager;
 import io.seata.server.cluster.raft.RaftServer;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import io.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
@@ -80,8 +80,8 @@ public class ClusterController {
         if (!newConf.parse(raftClusterStr)) {
             result.setMessage("fail to parse initConf:" + raftClusterStr);
         } else {
-            RaftServerFactory.groups().forEach(group -> {
-                RaftServerFactory.getCliServiceInstance().changePeers(group,
+            RaftServerManager.groups().forEach(group -> {
+                RaftServerManager.getCliServiceInstance().changePeers(group,
                     RouteTable.getInstance().getConfiguration(group), newConf);
                 RouteTable.getInstance().updateConfiguration(group, newConf);
             });
@@ -96,13 +96,13 @@ public class ClusterController {
             group =
                 ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         }
-        RaftServer raftServer = RaftServerFactory.getInstance().getRaftServer(group);
+        RaftServer raftServer = RaftServerManager.getRaftServer(group);
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
             metadataResponse.setStoreMode(mode);
             RouteTable routeTable = RouteTable.getInstance();
             try {
-                routeTable.refreshLeader(RaftServerFactory.getCliClientServiceInstance(), group, 1000);
+                routeTable.refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
                 PeerId leader = routeTable.selectLeader(group);
                 if (leader != null) {
                     Set<Node> nodes = new HashSet<>();
