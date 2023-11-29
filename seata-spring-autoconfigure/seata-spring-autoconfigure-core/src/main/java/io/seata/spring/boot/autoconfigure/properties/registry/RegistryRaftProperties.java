@@ -28,7 +28,14 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = REGISTRY_RAFT_PREFIX)
 public class RegistryRaftProperties {
     private String serverAddr;
+
     private Long metadataMaxAgeMs = 30000L;
+
+    private String username;
+
+    private String password;
+
+    private Long tokenValidityInMilliseconds = 29 * 60 * 1000L;
 
     public Long getMetadataMaxAgeMs() {
         return metadataMaxAgeMs;
@@ -36,6 +43,30 @@ public class RegistryRaftProperties {
 
     public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
         this.metadataMaxAgeMs = metadataMaxAgeMs;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Long getTokenValidityInMilliseconds() {
+        return tokenValidityInMilliseconds;
+    }
+
+    public void setTokenValidityInMilliseconds(Long tokenValidityInMilliseconds) {
+        this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
     }
 
     public String getServerAddr() {

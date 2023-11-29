@@ -114,6 +114,9 @@ seata:
     raft:
       server-addr:
       metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
     file:
       name: file.conf
     consul:
