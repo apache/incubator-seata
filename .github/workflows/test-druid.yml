@@ -59,4 +59,5 @@ jobs:
         run: |
           ./mvnw -T 4C clean test \
                  -Ddruid.version=${{ matrix.druid }} \
+                 -Dmaven.git-commit-id.skip=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
