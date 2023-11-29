@@ -31,6 +31,7 @@ import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 import static io.seata.common.DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.common.DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
@@ -52,6 +53,9 @@ public class RmProperties {
     private int branchExecutionTimeoutXA = DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
     private int connectionTwoPhaseHoldTimeoutXA = DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
     private String sqlParserType = SqlParserType.SQL_PARSER_TYPE_DRUID;
+
+    private Boolean applicationDataLimitCheck = false;
+    private Integer applicationDataLimit = DEFAULT_APPLICATION_DATA_SIZE_LIMIT;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -164,4 +168,19 @@ public class RmProperties {
         this.connectionTwoPhaseHoldTimeoutXA = connectionTwoPhaseHoldTimeoutXA;
     }
 
+    public Boolean getApplicationDataLimitCheck() {
+        return applicationDataLimitCheck;
+    }
+
+    public void setApplicationDataLimitCheck(Boolean applicationDataLimitCheck) {
+        this.applicationDataLimitCheck = applicationDataLimitCheck;
+    }
+
+    public Integer getApplicationDataLimit() {
+        return applicationDataLimit;
+    }
+
+    public void setApplicationDataLimit(Integer applicationDataLimit) {
+        this.applicationDataLimit = applicationDataLimit;
+    }
 }

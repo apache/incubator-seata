@@ -24,7 +24,7 @@ import com.alipay.sofa.jraft.entity.Task;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
@@ -48,7 +48,7 @@ public class RaftTaskUtil {
         }
         task.setDone(done == null ? status -> {
         } : done);
-        RaftServerFactory.getInstance().getRaftServer(SeataClusterContext.getGroup()).getNode().apply(task);
+        RaftServerManager.getRaftServer(SeataClusterContext.getGroup()).getNode().apply(task);
         if (completableFuture != null) {
             return futureGet(completableFuture);
         }
