@@ -987,4 +987,23 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
 
+    /**
+     * The constant RM_APPLICATION_DATA_SIZE_ERROR
+     */
+    String RM_APPLICATION_DATA_SIZE_LIMIT = CLIENT_RM_PREFIX + "applicationDataLimit";
+
+    /**
+     * The constant RM_APPLICATION_DATA_SIZE_CHECK
+     */
+    String RM_APPLICATION_DATA_SIZE_CHECK = CLIENT_RM_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant SERVER_APPLICATION_DATA_SIZE_ERROR
+     */
+    String SERVER_APPLICATION_DATA_SIZE_LIMIT = SERVER_PREFIX + "applicationDataLimit";
+
+    /**
+     * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
+     */
+    String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
 }

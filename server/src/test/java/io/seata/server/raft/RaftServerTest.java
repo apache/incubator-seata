@@ -17,14 +17,11 @@ package io.seata.server.raft;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.XID;
-import io.seata.config.Configuration;
 import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationFactory;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.SessionHolder;
 import io.seata.server.store.StoreConfig;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,19 +54,19 @@ public class RaftServerTest {
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
             XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
-        Assertions.assertDoesNotThrow(() -> RaftServerFactory.getInstance().init());
-        Assertions.assertNotNull(RaftServerFactory.getInstance().getRaftServer("default"));
-        Assertions.assertNotNull(RaftServerFactory.groups());
-        Assertions.assertNotNull(RaftServerFactory.getCliServiceInstance());
-        Assertions.assertNotNull(RaftServerFactory.getCliClientServiceInstance());
-        Assertions.assertEquals(RaftServerFactory.getInstance().isLeader("default"), false);
-        RaftServerFactory.getInstance().start();
+        Assertions.assertDoesNotThrow(RaftServerManager::init);
+        Assertions.assertNotNull(RaftServerManager.getRaftServer("default"));
+        Assertions.assertNotNull(RaftServerManager.groups());
+        Assertions.assertNotNull(RaftServerManager.getCliServiceInstance());
+        Assertions.assertNotNull(RaftServerManager.getCliClientServiceInstance());
+        Assertions.assertFalse(RaftServerManager.isLeader("default"));
+        RaftServerManager.start();
     }
 
     @Test
     public void initRaftServerFail() {
         StoreConfig.setStartupParameter("raft", "raft", "raft");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RaftServerFactory.getInstance().init());
+        Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
     }
 
     @Test
@@ -77,7 +74,7 @@ public class RaftServerTest {
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
             XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> RaftServerFactory.getInstance().init());
+        Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
     }
 
 }
