@@ -22,7 +22,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -325,19 +327,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * the columns contains the targetColumn
-     * @param columns the column name list
-     * @param targetColumn target column
-     * @return true: contains targetColumn false: not contains targetColumn
-     */
-    protected boolean containsColumn(List<String> columns, String targetColumn) {
-        if (CollectionUtils.isEmpty(columns)) {
-            return false;
-        }
-        return CollectionUtils.toUpperList(columns).contains(targetColumn.toUpperCase());
-    }
-
-    /**
      * the columns contains table meta pk
      *
      * @param columns the column name list
@@ -543,7 +532,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     protected List<String> getNeedColumns(String table, String tableAlias, List<String> unescapeColumns) {
-        List<String> needUpdateColumns = new ArrayList<>();
+        Set<String> needUpdateColumns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(unescapeColumns)) {
             if (!containsPK(table, unescapeColumns)) {
@@ -560,8 +549,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                     }
                 }
             }
-
-            needUpdateColumns.addAll(unescapeColumns.stream().filter(unescapeColumn -> !containsColumn(needUpdateColumns, unescapeColumn)).collect(Collectors.toList()));
+            needUpdateColumns.addAll(unescapeColumns);
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
@@ -582,7 +570,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             allColumns = allColumns.map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
             allColumns.forEach(needUpdateColumns::add);
         }
-        return needUpdateColumns;
+        return needUpdateColumns.parallelStream().map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta)).collect(Collectors.toList());
     }
 
     /**
