@@ -32,9 +32,9 @@ jobs:
       - name: "Build with Maven"
         run: |
           if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean test -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean test -Dcheckstyle.skip=false -Dlicense.skip=false -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           elif [ "${{ matrix.java }}" == "17" ]; then
-            ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
       # step 5
       - name: "Codecov"
@@ -63,4 +63,4 @@ jobs:
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn -Prelease-seata -DskipTests clean install -U'
+                       mvn -Prelease-seata -DskipTests -Dmaven.git-commit-id.skip=true clean install -U'
