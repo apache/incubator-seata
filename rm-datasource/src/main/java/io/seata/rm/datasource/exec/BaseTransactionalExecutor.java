@@ -559,15 +559,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                         .collect(Collectors.toList());
             }
             onUpdateColumns.removeAll(unescapeColumns);
-            needUpdateColumns.addAll(onUpdateColumns.stream()
-                .map(onUpdateColumn -> ColumnUtils.addEscape(onUpdateColumn, getDbType(), tableMeta))
-                .collect(Collectors.toList()));
+            needUpdateColumns.addAll(onUpdateColumns);
         } else {
             Stream<String> allColumns = tableMeta.getAllColumns().keySet().stream();
             if (StringUtils.isNotBlank(tableAlias)) {
                 allColumns = allColumns.map(columnName -> getColumnNameWithTablePrefix(table, tableAlias, columnName));
             }
-            allColumns = allColumns.map(columnName -> ColumnUtils.addEscape(columnName, getDbType(), tableMeta));
             allColumns.forEach(needUpdateColumns::add);
         }
         return needUpdateColumns.parallelStream().map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta)).collect(Collectors.toList());
