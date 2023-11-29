@@ -34,6 +34,7 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * @author qingjiusanliangsan
@@ -97,6 +98,12 @@ public class DB2UpdateRecognizer extends BaseDB2Recognizer implements SQLUpdateR
             }
         }
         return list;
+    }
+
+    @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

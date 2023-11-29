@@ -36,7 +36,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.BaseInsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.struct.Defaultable;
 import io.seata.sqlparser.struct.Null;
@@ -44,6 +43,7 @@ import io.seata.sqlparser.struct.Sequenceable;
 import io.seata.sqlparser.struct.SqlDefaultExpr;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +176,12 @@ public class DB2InsertExecutor extends BaseInsertExecutor implements Defaultable
     @Override
     public List<Object> getPkValuesByDefault() {
         //Get form the tableMetaData
-        throw new NotSupportYetException("Default value is not yet supported");
+        throw new NotSupportYetException("Default value is not yet supported in db2");
+    }
+
+    @Override
+    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
+        throw new NotSupportYetException("Default value with multi pkKey is not yet supported in db2");
     }
 
     protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount) throws SQLException {

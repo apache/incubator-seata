@@ -13,24 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.db2.keyword;
-
+package io.seata.rm.datasource.sql.handler.db2;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author qingjiusanliangsan
+ * The type DB2 keyword checker.
+ *
+ * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.DB2)
-public class DB2KeywordChecker implements KeywordChecker {
-
-    private Set<String> keywordSet = Arrays.stream(DB2KeywordChecker.DB2Keyword.values()).map(DB2KeywordChecker.DB2Keyword::name).collect(Collectors.toSet());
+public class DB2EscapeHandler implements EscapeHandler {
+    private Set<String> keywordSet = Arrays.stream(DB2EscapeHandler.DB2Keyword.values()).map(DB2EscapeHandler.DB2Keyword::name).collect(Collectors.toSet());
 
     /**
      * db2 keyword
@@ -1184,9 +1185,8 @@ public class DB2KeywordChecker implements KeywordChecker {
             this.name = name;
         }
     }
-
     @Override
-    public boolean check(String fieldOrTableName) {
+    public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
             return true;
         }
@@ -1194,31 +1194,10 @@ public class DB2KeywordChecker implements KeywordChecker {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
-
     }
 
     @Override
-    public boolean checkEscape(String fieldOrTableName) {
-        boolean check = check(fieldOrTableName);
-        if (!check && !containsUppercase(fieldOrTableName)) {
-            // db2
-            // we are recommend table name and column name must lowercase.
-            // if exists uppercase character or full uppercase, the table name or column name must bundle escape symbol.
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean containsUppercase(String colName) {
-        if (colName == null) {
-            return false;
-        }
-        char[] chars = colName.toCharArray();
-        for (char ch : chars) {
-            if (ch >= 'A' && ch <= 'Z') {
-                return true;
-            }
-        }
-        return false;
+    public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
+        return checkIfKeyWords(columnName);
     }
 }

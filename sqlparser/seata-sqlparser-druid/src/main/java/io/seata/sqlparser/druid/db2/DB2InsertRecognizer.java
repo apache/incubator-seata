@@ -37,6 +37,7 @@ import io.seata.sqlparser.struct.NotPlaceholderExpr;
 import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * @author qingjiusanliangsan
@@ -146,6 +147,12 @@ public class DB2InsertRecognizer extends BaseDB2Recognizer implements SQLInsertR
     @Override
     public List<String> getDuplicateKeyUpdate() {
         return null;
+    }
+
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 
     @Override

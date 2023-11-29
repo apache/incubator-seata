@@ -5,3 +5,4 @@ io.seata.rm.datasource.sql.handler.mariadb.MariadbEscapeHandler
 io.seata.rm.datasource.sql.handler.sqlserver.SqlServerEscapeHandler
 io.seata.rm.datasource.sql.handler.polardbx.PolarDBXEscapeHandler
 io.seata.rm.datasource.sql.handler.dm.DmEscapeHandler
+io.seata.rm.datasource.sql.handler.db2.DB2EscapeHandler

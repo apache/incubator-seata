@@ -27,6 +27,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.druid.BaseRecognizer;
 import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author qingjiusanliangsan
@@ -83,6 +84,10 @@ public abstract class BaseDB2Recognizer extends BaseRecognizer {
         StringBuilder sb = new StringBuilder();
         executeVisit(where, new DB2OutputVisitor(sb));
         return sb.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.DB2;
     }
 
 }

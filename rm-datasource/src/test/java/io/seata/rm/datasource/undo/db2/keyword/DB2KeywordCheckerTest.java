@@ -15,8 +15,8 @@
  */
 package io.seata.rm.datasource.undo.db2.keyword;
 
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.sqlparser.EscapeHandler;
+import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 public class DB2KeywordCheckerTest {
     @Test
     public void testOracleKeywordChecker() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.DB2);
+        EscapeHandler keywordChecker = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.DB2);
         Assertions.assertNotNull(keywordChecker);
     }
 }
