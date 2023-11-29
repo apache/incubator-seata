@@ -218,6 +218,14 @@
                         <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
                         <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
+                        <includeOnlyProperties>
+                            <property>git.branch</property>
+                            <property>git.build.time</property>
+                            <property>git.build.version</property>
+                            <property>git.commit.id</property>
+                            <property>git.commit.time</property>
+                            <property>git.dirty</property>
+                        </includeOnlyProperties>
                     </configuration>
                 </plugin>
             </plugins>
