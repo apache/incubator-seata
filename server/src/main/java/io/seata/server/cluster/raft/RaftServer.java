@@ -18,6 +18,7 @@ package io.seata.server.cluster.raft;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
@@ -104,9 +105,14 @@ public class RaftServer implements Disposable, Closeable {
 
     @Override
     public void destroy() {
-        if (raftGroupService != null) {
-            raftGroupService.shutdown();
-        }
+        Optional.ofNullable(raftGroupService).ifPresent(r -> {
+            r.shutdown();
+            try {
+                r.join();
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted when RaftServer destroying", e);
+            }
+        });
     }
 
 }

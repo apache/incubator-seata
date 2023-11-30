@@ -39,8 +39,6 @@ import io.seata.common.metadata.ClusterRole;
 import io.seata.common.metadata.Node;
 import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.common.ConfigurationKeys;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import io.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
@@ -114,7 +112,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     public RaftStateMachine(String group) {
         this.group = group;
-        mode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE);
+        mode = StoreConfig.getSessionMode().getName();
         EXECUTES.put(REFRESH_CLUSTER_METADATA, syncMsg -> {
             refreshClusterMetadata(syncMsg);
             return null;
@@ -203,7 +201,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.currentTerm.set(term);
         SeataClusterContext.bindGroup(group);
         syncMetadata();
-        if (!leader && RaftServerFactory.getInstance().isRaftMode()) {
+        if (!leader && RaftServerManager.isRaftMode()) {
             CompletableFuture.runAsync(() -> {
                 LOGGER.info("reload session, groupId: {}, session map size: {} ", group,
                     SessionHolder.getRootSessionManager().allSessions().size());

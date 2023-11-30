@@ -1,0 +1,80 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.server.raft;
+
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.XID;
+import io.seata.config.ConfigurationCache;
+import io.seata.server.cluster.raft.RaftServerManager;
+import io.seata.server.lock.LockerManagerFactory;
+import io.seata.server.session.SessionHolder;
+import io.seata.server.store.StoreConfig;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootTest
+public class RaftServerTest {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) {
+        LockerManagerFactory.destroy();
+        SessionHolder.destroy();
+    }
+
+    @AfterEach
+    public void destroy() {
+        System.setProperty("server.raftPort", "0");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
+        ConfigurationCache.clear();
+        StoreConfig.setStartupParameter("file", "file", "file");
+        LockerManagerFactory.destroy();
+        SessionHolder.destroy();
+    }
+
+    @Test
+    public void initRaftServerStart() {
+        System.setProperty("server.raftPort", "9091");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
+            XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
+        StoreConfig.setStartupParameter("raft", "raft", "raft");
+        Assertions.assertDoesNotThrow(RaftServerManager::init);
+        Assertions.assertNotNull(RaftServerManager.getRaftServer("default"));
+        Assertions.assertNotNull(RaftServerManager.groups());
+        Assertions.assertNotNull(RaftServerManager.getCliServiceInstance());
+        Assertions.assertNotNull(RaftServerManager.getCliClientServiceInstance());
+        Assertions.assertFalse(RaftServerManager.isLeader("default"));
+        RaftServerManager.start();
+    }
+
+    @Test
+    public void initRaftServerFail() {
+        StoreConfig.setStartupParameter("raft", "raft", "raft");
+        Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
+    }
+
+    @Test
+    public void initRaftServerFailByRaftPortNull() {
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
+            XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
+        StoreConfig.setStartupParameter("raft", "raft", "raft");
+        Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
+    }
+
+}

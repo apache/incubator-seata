@@ -30,6 +30,7 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.GlobalTransactionException;
@@ -41,7 +42,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -313,8 +314,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
         }
-        if (!RaftServerFactory.getInstance().isRaftMode()) {
-            branchSession.setStatus(BranchStatus.Registered);
+        if (!RaftServerManager.isRaftMode()) {
             add(branchSession);
         }
     }
@@ -350,7 +350,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
 
-        if (!RaftServerFactory.getInstance().isRaftMode()) {
+        if (!RaftServerManager.isRaftMode()) {
             this.remove(branchSession);
         }
 
@@ -654,7 +654,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;

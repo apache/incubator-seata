@@ -39,8 +39,7 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
-import io.seata.server.cluster.raft.RaftServer;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
 import static io.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
 import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 
 /**
  * The type Session holder.
@@ -100,8 +99,8 @@ public class SessionHolder {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             reload(sessionMode);
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
-            RaftServerFactory.getInstance().init();
-            if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
+            RaftServerManager.init();
+            if (CollectionUtils.isNotEmpty(RaftServerManager.getRaftServers())) {
                 sessionMode = SessionMode.RAFT;
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
@@ -110,7 +109,7 @@ public class SessionHolder {
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
                 SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
-                RaftServerFactory.getInstance().start();
+                RaftServerManager.start();
             } else {
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
@@ -183,7 +182,13 @@ public class SessionHolder {
                     case Committing:
                     case CommitRetrying:
                         if (Objects.equals(SessionMode.RAFT, storeMode)) {
-                            globalSession.unlock();
+                            // When a state change occurs, re-electing the leader may result in the lock not being unlocked yet
+                            // so a COMMIT unlock operation needs to be performed at the time of re-election
+                            try {
+                                globalSession.clean();
+                            } catch (TransactionException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                         break;
                     default: {
@@ -374,17 +379,11 @@ public class SessionHolder {
     }
 
     public static void destroy() {
-        Collection<RaftServer> raftServers = RaftServerFactory.getInstance().getRaftServers();
-        if (raftServers != null) {
-            try {
-                raftServers.forEach(RaftServer::close);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage());
-            }
-        }
+        RaftServerManager.destroy();
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }
+        SESSION_MANAGER_MAP = null;
     }
 
     @FunctionalInterface

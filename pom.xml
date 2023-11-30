@@ -93,6 +93,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
@@ -360,6 +365,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>${maven.surefire.argLine}</argLine>
+                    <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
         </plugins>
