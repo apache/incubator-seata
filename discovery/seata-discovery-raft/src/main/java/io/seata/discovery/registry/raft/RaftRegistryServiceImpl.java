@@ -121,11 +121,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private RaftRegistryServiceImpl() {
-        try {
-            refreshToken();
-        } catch (RetryableException e) {
-            throw new RuntimeException("Init fetch token failed!", e);
-        }
     }
 
     /**
@@ -306,9 +301,9 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             String tcAddress = queryHttpAddress(clusterName, group);
             try {
                 if (isTokenExpired()) {
-                    refreshToken();
+                    refreshToken(tcAddress);
                 }
-                if (!StringUtils.isNotBlank(jwtToken)) {
+                if (StringUtils.isNotBlank(jwtToken)) {
                     header.put(AUTHORIZATION_HEADER, jwtToken);
                 }
                 try (CloseableHttpResponse response =
@@ -370,7 +365,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         if (isTokenExpired()) {
-            refreshToken();
+            refreshToken(tcAddress);
         }
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
@@ -407,43 +402,38 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    private static void refreshToken() throws RetryableException {
+    private static void refreshToken(String tcAddress) throws RetryableException {
         // if username and password is not in config , return
         if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
             return;
         }
-        String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
         // get token and set it in cache
-        if (StringUtils.isNotBlank(raftClusterAddress)) {
-            String[] tcAddressList = raftClusterAddress.split(",");
-            String tcAddress = tcAddressList[0];
-            Map<String, String> param = new HashMap<>();
-            param.put(PRO_USERNAME_KEY, USERNAME);
-            param.put(PRO_PASSWORD_KEY, PASSWORD);
-            Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-            String response = null;
-            tokenTimeStamp = System.currentTimeMillis();
-            try (CloseableHttpResponse httpResponse =
-                     HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
-                if (httpResponse != null) {
-                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                        response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                        JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
-                        String codeStatus = jsonNode.get("code").asText();
-                        if (!StringUtils.equals(codeStatus, "200")) {
-                            //authorized failed,throw exception to kill process
-                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
-                        }
-                        jwtToken = jsonNode.get("data").asText();
-                    } else {
+        Map<String, String> param = new HashMap<>();
+        param.put(PRO_USERNAME_KEY, USERNAME);
+        param.put(PRO_PASSWORD_KEY, PASSWORD);
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        String response = null;
+        tokenTimeStamp = System.currentTimeMillis();
+        try (CloseableHttpResponse httpResponse =
+                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+            if (httpResponse != null) {
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                    JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                    String codeStatus = jsonNode.get("code").asText();
+                    if (!StringUtils.equals(codeStatus, "200")) {
                         //authorized failed,throw exception to kill process
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
+                    jwtToken = jsonNode.get("data").asText();
+                } else {
+                    //authorized failed,throw exception to kill process
+                    throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                 }
-            } catch (IOException e) {
-                throw new RetryableException(e.getMessage(), e);
             }
+        } catch (IOException e) {
+            throw new RetryableException(e.getMessage(), e);
         }
     }
 
@@ -471,6 +461,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     return null;
                 }
                 INIT_ADDRESSES.put(clusterName, list);
+                // init jwt token
+                try {
+                    refreshToken(queryHttpAddress(clusterName, key));
+                } catch (Exception e) {
+                    throw new RuntimeException("Init fetch token failed!", e);
+                }
                 // Refresh the metadata by initializing the address
                 acquireClusterMetaDataByClusterName(clusterName);
                 startQueryMetadata();
