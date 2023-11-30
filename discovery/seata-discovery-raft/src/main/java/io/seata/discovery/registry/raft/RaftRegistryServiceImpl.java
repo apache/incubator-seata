@@ -461,7 +461,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     return null;
                 }
                 try {
-                    refreshToken(addresses[0]);
+                    refreshToken(queryHttpAddress(clusterName, key));
                 } catch (RetryableException e) {
                     throw new RuntimeException("Init fetch token failed!", e);
                 }
