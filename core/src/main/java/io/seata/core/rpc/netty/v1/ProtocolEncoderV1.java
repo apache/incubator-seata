@@ -114,6 +114,8 @@ public class ProtocolEncoderV1 implements ProtocolEncoder {
 
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
+            // todo
+            throw e;
         }
     }
 }

@@ -15,9 +15,6 @@
  */
 package io.seata.serializer.seata.protocol.v0;
 
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.MergeResultMessage;
-import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageType;
 import io.seata.serializer.seata.MessageSeataCodec;
 import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;

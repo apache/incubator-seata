@@ -150,7 +150,7 @@ public class MessageCodecFactoryV1 extends MessageCodecFactory {
      * @param typeCode the type code
      * @return the merge response instance by code
      */
-    protected static MessageSeataCodec getMergeResponseMessageSeataCodec(int typeCode) {
+    public static MessageSeataCodec getMergeResponseMessageSeataCodec(int typeCode) {
         switch (typeCode) {
             case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
                 return new GlobalBeginResponseCodec();

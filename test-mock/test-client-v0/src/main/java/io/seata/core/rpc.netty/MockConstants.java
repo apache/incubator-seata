@@ -13,16 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.serializer.seata.protocol.v0;
+package io.seata.core.rpc.netty;
 
 /**
- * the type BatchResultMessage Codec
+ * Mock Constants
  *
- * @author Bughue
- * @date 2023/9/21
+ * @author minghua.xie
+ * @date 2023/11/21
  **/
-public class BatchResultMessageCodec extends io.seata.serializer.seata.protocol.v1.BatchResultMessageCodec {
-    public BatchResultMessageCodec(){
-        this.factory = new MessageCodecFactoryV0();
-    }
+public class MockConstants {
+    public static final String APPLICATION_ID = "my_app_test";
+    public static final String SERVICE_GROUP = "default";
+    public static final String SERVER_ADDRESS = "0.0.0.0:8091";
 }

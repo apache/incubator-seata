@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.loader.Scope;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
@@ -32,13 +33,13 @@ import java.util.Map;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "SEATA")
+@LoadLevel(name = "SEATA", scope = Scope.PROTOTYPE)
 public class SeataSerializer implements Serializer {
 
     MessageCodecFactory factory;
     byte protocolVersion ;
     static Map<Byte, MessageCodecFactory> FACTORY_MAP = ImmutableMap.<Byte, MessageCodecFactory>builder()
-//            .put(ProtocolConstants.VERSION_0, new ?())
+            .put(ProtocolConstants.VERSION_0, new MessageCodecFactoryV1())
             .put(ProtocolConstants.VERSION_1, new MessageCodecFactoryV1())
             .build();
 
@@ -53,7 +54,7 @@ public class SeataSerializer implements Serializer {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
         AbstractMessage abstractMessage = (AbstractMessage)t;
-        //typecode
+        //type code
         short typecode = abstractMessage.getTypeCode();
         //msg codec
         MessageSeataCodec messageCodec = factory.getMessageCodec(typecode);
@@ -103,43 +104,4 @@ public class SeataSerializer implements Serializer {
         messageCodec.decode(abstractMessage, in);
         return (T)abstractMessage;
     }
-
-//    public Class<? extends MessageSeataCodec> getCodecClass(short typeCode){
-//        Pair<Class<? extends MessageSeataCodec>, Class<? extends AbstractMessage>> pair = classMap.get(typeCode);
-//        if(pair !=null && pair.fst !=null){
-//            return pair.fst;
-//        }else {
-//            return null;
-//        }
-//    }
-//
-//    public Class<? extends AbstractMessage> getMessageClass(short typeCode){
-//        Pair<Class<? extends MessageSeataCodec>, Class<? extends AbstractMessage>> pair = classMap.get(typeCode);
-//        if(pair !=null && pair.snd !=null){
-//            return pair.snd;
-//        }else {
-//            return null;
-//        }
-//    }
-
-//    protected AbstractMessage getMessageByType(short typecode) {
-//        try {
-//            return getMessageClass(typecode).newInstance();
-//        } catch (InstantiationException e) {
-//            throw new RuntimeException(e);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    protected MessageSeataCodec getCodecByType(short typecode) {
-//        try {
-//            return getCodecClass(typecode).newInstance();
-//        } catch (InstantiationException e) {
-//            throw new RuntimeException(e);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
 }

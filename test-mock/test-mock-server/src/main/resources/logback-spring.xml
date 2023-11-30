@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright 1999-2019 Seata.io Group.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- Context listeners -->
+    <contextListener class="io.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
+
+    <!-- The conversion rules are copied from `defaults.xml` in the `spring-boot-xxx.jar` -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
+    <!-- The custom conversion rules -->
+    <conversionRule conversionWord="wEx2" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!-- common properties -->
+    <springProperty name="PORT" source="server.port" defaultValue="7091"/>
+    <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
+    <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
+
+    <if condition='property("LOG_BASH_DIR").equals("")' >
+        <then>
+            <!-- console-appender -->
+            <include resource="logback/console-appender.xml"/>
+
+            <!-- file-appender -->
+            <include resource="logback/file-appender.xml"/>
+
+            <!-- logstash-appender: off by default -->
+            <!--<include resource="logback/logstash-appender.xml"/>-->
+            <!-- metric-appender: off by default -->
+            <!--<include resource="logback/metric-appender.xml"/>-->
+            <!-- kafka-appender: off by default -->
+            <!--<include resource="logback/kafka-appender.xml"/>-->
+        </then>
+        <else>
+            <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
+            <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
+            <!-- logstash-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>-->
+            <!-- metric-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>-->
+            <!-- kafka-appender: off by default -->
+            <!--<include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>-->
+        </else>
+    </if>
+
+
+
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- console-appender -->
+        <appender-ref ref="CONSOLE"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_ALL" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- file-appender -->
+        <appender-ref ref="FILE_ALL"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_WARN" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_WARN"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+    <appender name="ASYNC_FILE_ERROR" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_ERROR"/>
+        <includeCallerData>true</includeCallerData>
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE_ALL"/>
+        <appender-ref ref="ASYNC_FILE_WARN"/>
+        <appender-ref ref="ASYNC_FILE_ERROR"/>
+        <!-- logstash-appender: off by default -->
+        <!--<appender-ref ref="LOGSTASH"/>-->
+
+        <!-- kafka-appender: off by default -->
+        <!--<appender-ref ref="KAFKA"/>-->
+
+        <!-- metric-appender: off by default -->
+        <!--<appender-ref ref="METRIC"/>-->
+    </root>
+    <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
+    <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
+</configuration>
