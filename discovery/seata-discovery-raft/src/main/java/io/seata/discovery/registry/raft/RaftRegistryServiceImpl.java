@@ -464,7 +464,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 // init jwt token
                 try {
                     refreshToken(queryHttpAddress(clusterName, key));
-                } catch (RetryableException e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Init fetch token failed!", e);
                 }
                 // Refresh the metadata by initializing the address
