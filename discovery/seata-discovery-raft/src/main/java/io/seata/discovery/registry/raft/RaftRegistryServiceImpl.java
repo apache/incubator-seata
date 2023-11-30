@@ -460,12 +460,13 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 if (CollectionUtils.isEmpty(list)) {
                     return null;
                 }
+                INIT_ADDRESSES.put(clusterName, list);
+                // init jwt token
                 try {
-                    refreshToken(addresses[0]);
+                    refreshToken(queryHttpAddress(clusterName, key));
                 } catch (RetryableException e) {
                     throw new RuntimeException("Init fetch token failed!", e);
                 }
-                INIT_ADDRESSES.put(clusterName, list);
                 // Refresh the metadata by initializing the address
                 acquireClusterMetaDataByClusterName(clusterName);
                 startQueryMetadata();
