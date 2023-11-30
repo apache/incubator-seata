@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.loader.Scope;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.ProtocolConstants;
@@ -75,7 +76,7 @@ public class SeataSerializer implements Serializer {
         }
         byteBuffer.put(body);
 
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
         return content;
