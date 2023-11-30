@@ -185,7 +185,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                                             // prevents an exception from being thrown that causes the thread to break
                                             LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
                                             if (e instanceof RetryableException) {
-                                                throw (RetryableException) e;
+                                                throw e;
                                             }
                                         }
                                     }
