@@ -63,7 +63,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>2.0.0-SNAPSHOT</revision>
+        <revision>2.1.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -75,10 +75,6 @@
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
         <spring-boot.version>2.5.13</spring-boot.version>
         <spring-framework.version>5.3.20</spring-framework.version>
-
-        <!-- For test -->
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <junit-platform.version>1.8.2</junit-platform.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -124,7 +120,9 @@
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
         <maven.test.skip>false</maven.test.skip>
+        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
+        <maven.surefire.excludes></maven.surefire.excludes>
         <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
         <gpg.arg2/>
@@ -201,6 +199,32 @@
                     <configuration>
                         <simplifiedPomFileName>.flattened-pom.xml</simplifiedPomFileName>
                         <useTabIndent>true</useTabIndent>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${git-commit-id-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>get-the-git-infos</id>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skip>${maven.git-commit-id.skip}</skip>
+                        <verbose>true</verbose>
+                        <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                        <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
+                        <includeOnlyProperties>
+                            <includeOnlyProperty>git.branch</includeOnlyProperty>
+                            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                            <includeOnlyProperty>^git.commit.(id|time)$</includeOnlyProperty>
+                            <includeOnlyProperty>git.dirty</includeOnlyProperty>
+                        </includeOnlyProperties>
                     </configuration>
                 </plugin>
             </plugins>
@@ -298,6 +322,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Git commit id -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -403,6 +432,14 @@
                     --add-opens java.sql/java.sql=ALL-UNNAMED
                     --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
                 </maven.surefire.argLine>
+            </properties>
+        </profile>
+
+        <!-- profile: args-for-client-test -->
+        <profile>
+            <id>args-for-client-test</id>
+            <properties>
+                <maven.surefire.excludes>io/seata/server/**/*.java,io/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>
