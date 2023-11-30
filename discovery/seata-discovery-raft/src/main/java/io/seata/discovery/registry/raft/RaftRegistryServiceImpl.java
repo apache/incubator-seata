@@ -183,9 +183,10 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                                             acquireClusterMetaData(clusterName, group);
                                         } catch (Exception e) {
                                             // prevents an exception from being thrown that causes the thread to break
-                                            LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
                                             if (e instanceof RetryableException) {
                                                 throw e;
+                                            } else {
+                                                LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
                                             }
                                         }
                                     }
