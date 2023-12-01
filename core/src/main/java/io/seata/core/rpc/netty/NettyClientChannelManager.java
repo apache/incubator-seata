@@ -211,7 +211,10 @@ class NettyClientChannelManager {
         try {
             doReconnect(availList, transactionServiceGroup);
         } catch (Exception e) {
-            if (failFast) throw e;
+            if (failFast) {
+                throw e;
+            }
+            LOGGER.error("connect TC failed. {}", e.getMessage(), e);
         }
     }
 
