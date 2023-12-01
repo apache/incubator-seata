@@ -42,7 +42,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw.cmd clean install;
 
   # job 2:
   test-arm64:
