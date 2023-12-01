@@ -78,19 +78,20 @@ public class TmNettyClientTest extends AbstractServerTest {
         });
         thread.start();
 
-        //then test client
-        int n = 5;
-        while (n-- > 0) {
-            Thread.sleep(3000);
+        //Wait for the seata-server to start.
+        long start = System.nanoTime();
+        long maxWaitNanoTime = 10 * 1000 * 1000 * 1000L; // 10s
+        while (System.nanoTime() - start < maxWaitNanoTime) {
+            Thread.sleep(100);
             if (serverStatus.get()) {
                 break;
             }
         }
-
         if (!serverStatus.get()) {
-            throw new RuntimeException("The seata-server did not start successfully.");
+            throw new RuntimeException("Waiting for a while, but the seata-server did not start successfully.");
         }
 
+        //then test client
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
