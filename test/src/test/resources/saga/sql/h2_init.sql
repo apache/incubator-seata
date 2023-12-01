@@ -1,3 +1,4 @@
+-- adapted for h2 versions 2.x and above.
 CREATE TABLE IF NOT EXISTS seata_state_machine_def (
    id VARCHAR(32) NOT NULL COMMENT 'id',
    name VARCHAR(128) NOT NULL COMMENT 'name',
