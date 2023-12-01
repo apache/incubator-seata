@@ -24,9 +24,9 @@ CREATE TABLE IF NOT EXISTS seata_state_machine_inst (
     gmt_end TIMESTAMP (3) COMMENT 'end time',
     excep BLOB COMMENT 'exception',
     end_params CLOB COMMENT 'end parameters',
-    "status" VARCHAR (2) COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    status VARCHAR (2) COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
     compensation_status VARCHAR (2) COMMENT 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    is_running TINYINT (1) COMMENT 'is running(0 no|1 yes)',
+    is_running TINYINT COMMENT 'is running(0 no|1 yes)',
     gmt_updated TIMESTAMP (3) NOT NULL,
     PRIMARY KEY (ID)
     );
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS seata_state_inst (
     state_id_compensated_for VARCHAR(50) COMMENT 'state compensated for',
     state_id_retried_for VARCHAR(50) COMMENT 'state retried for',
     gmt_started TIMESTAMP(3) NOT NULL COMMENT 'start time',
-    is_for_update TINYINT(1) COMMENT 'is service for update',
+    is_for_update TINYINT COMMENT 'is service for update',
     input_params CLOB COMMENT 'input parameters',
     output_params CLOB COMMENT 'output parameters',
     status VARCHAR(2) NOT NULL COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
