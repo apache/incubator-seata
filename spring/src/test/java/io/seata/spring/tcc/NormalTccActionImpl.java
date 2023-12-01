@@ -13,40 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc;
-
-
-import java.util.List;
+package io.seata.spring.tcc;
 
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
  * @author leezongjie
+ * @date 2023/11/29
  */
 public class NormalTccActionImpl implements NormalTccAction {
-
     @Override
-    public String prepare(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
-        return "a";
-    }
-
-    @Override
-    public boolean commit(BusinessActionContext actionContext, TccParam param) {
-        return false;
-    }
-
-    @Override
-    public boolean rollback(BusinessActionContext actionContext, TccParam param) {
-        return false;
-    }
-
-    public boolean otherMethod() {
+    public boolean prepare(BusinessActionContext actionContext) {
         return true;
     }
 
     @Override
-    public String prepareWithException(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
+    public boolean prepareWithException(BusinessActionContext actionContext) {
         throw new IllegalArgumentException();
     }
 
+    @Override
+    public boolean commit(BusinessActionContext actionContext) {
+        return false;
+    }
+
+    @Override
+    public boolean rollback(BusinessActionContext actionContext) {
+        return false;
+    }
 }
