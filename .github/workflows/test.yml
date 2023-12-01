@@ -83,6 +83,5 @@ jobs:
           ./mvnw -T 4C clean test \
                  -P args-for-client-test \
                  -Dspring-boot.version=${{ matrix.springboot }} \
-                 -Dkotlin-maven-plugin.version=1.7.22 \
                  -Dmaven.git-commit-id.skip=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
