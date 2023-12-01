@@ -197,10 +197,10 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     protected void reportTransactionFinished(StateMachineInstance machineInstance, ProcessContext context) {
         if (sagaTransactionalTemplate != null) {
+            GlobalTransaction globalTransaction = null;
             try {
-                GlobalTransaction globalTransaction = getGlobalTransaction(machineInstance, context);
+                globalTransaction = getGlobalTransaction(machineInstance, context);
                 if (globalTransaction == null) {
-
                     throw new EngineExecutionException("Global transaction is not exists",
                             FrameworkErrorCode.ObjectNotExists);
                 }
@@ -234,7 +234,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 // clear
                 RootContext.unbind();
                 RootContext.unbindBranchType();
-                sagaTransactionalTemplate.triggerAfterCompletion();
+                sagaTransactionalTemplate.triggerAfterCompletion(globalTransaction);
                 sagaTransactionalTemplate.cleanUp();
             }
         }

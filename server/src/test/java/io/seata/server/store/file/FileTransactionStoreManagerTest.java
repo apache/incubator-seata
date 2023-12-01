@@ -21,6 +21,14 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.assertj.core.util.Files;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.seata.common.util.BufferUtils;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -30,11 +38,6 @@ import io.seata.server.storage.file.session.FileSessionManager;
 import io.seata.server.storage.file.store.FileTransactionStoreManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import org.assertj.core.util.Files;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * @author ggndnn
@@ -166,7 +169,7 @@ public class FileTransactionStoreManagerTest {
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
         return bytes;
