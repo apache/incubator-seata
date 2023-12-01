@@ -61,4 +61,12 @@ public interface NormalTccAction {
      * @return the boolean
      */
     boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
+
+
+    @TwoPhaseBusinessAction(name = "tccActionForTestWithException", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    String prepareWithException(BusinessActionContext actionContext,
+                   @BusinessActionContextParameter("a") int a,
+                   @BusinessActionContextParameter(paramName = "b", index = 0) List b,
+                   @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
+
 }
