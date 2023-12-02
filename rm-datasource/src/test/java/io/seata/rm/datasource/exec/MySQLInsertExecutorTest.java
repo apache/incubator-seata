@@ -80,6 +80,8 @@ public class MySQLInsertExecutorTest {
 
     protected StatementProxy statementProxy;
 
+    protected StatementProxy newStatementProxy;
+
     protected SQLInsertRecognizer sqlInsertRecognizer;
 
     protected TableMeta tableMeta;
@@ -149,7 +151,7 @@ public class MySQLInsertExecutorTest {
             field.set(newDataSourceProxy, "mysql");
             ConnectionProxy newConnectionProxy = new ConnectionProxy(newDataSourceProxy, dataSource.getConnection().getConnection());
             MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-            statementProxy = new StatementProxy(newConnectionProxy, mockStatement);
+            newStatementProxy = new StatementProxy(newConnectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");
         }
@@ -160,7 +162,7 @@ public class MySQLInsertExecutorTest {
         String sql = "insert into table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        newInsertExecutor = new MySQLInsertExecutor(statementProxy, (statement, args) -> null, recognizer);
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(newInsertExecutor.beforeImage());
     }
 
@@ -169,7 +171,7 @@ public class MySQLInsertExecutorTest {
         String sql = "insert into seata.table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        newInsertExecutor = new MySQLInsertExecutor(statementProxy, (statement, args) -> null, recognizer);
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(newInsertExecutor.beforeImage());
     }
 
@@ -178,7 +180,7 @@ public class MySQLInsertExecutorTest {
         String sql = "insert into `seata`.table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        newInsertExecutor = new MySQLInsertExecutor(statementProxy, (statement, args) -> null, recognizer);
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(newInsertExecutor.beforeImage());
     }
 
@@ -187,7 +189,7 @@ public class MySQLInsertExecutorTest {
         String sql = "insert into `seata`.`table_insert_executor_test`(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
-        newInsertExecutor = new MySQLInsertExecutor(statementProxy, (statement, args) -> null, recognizer);
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(newInsertExecutor.beforeImage());
     }
 
