@@ -83,7 +83,7 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
         // new test init property
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "user_id", "name", "sex", "update_time");
         Object[][] returnValue = new Object[][] {
-                new Object[] {1}
+                new Object[] {1, 1, "will", 1, 0},
         };
         Object[][] columnMetas = new Object[][] {
                 new Object[] {"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
