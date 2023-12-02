@@ -158,57 +158,81 @@ public class MySQLInsertExecutorTest {
     }
 
     @Test
-    public void testBeforeImage() throws SQLException {
+    public void testBeforeAndAfterImage() throws SQLException {
         String sql = "insert into table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageTableSchemaAndTableName() throws SQLException {
+    public void testBeforeAndAfterImageTableSchemaAndTableName() throws SQLException {
         String sql = "insert into seata.table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageTableSchemaWithQuoteAndTableName() throws SQLException {
+    public void testBeforeAndAfterImageTableSchemaWithQuoteAndTableName() throws SQLException {
         String sql = "insert into `seata`.table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageTableSchemaWithQuoteAndTableNameWithQuote() throws SQLException {
+    public void testBeforeAndAfterImageTableSchemaWithQuoteAndTableNameWithQuote() throws SQLException {
         String sql = "insert into `seata`.`table_insert_executor_test`(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageColumnWithQuote() throws SQLException {
+    public void testBeforeAndAfterImageColumnWithQuote() throws SQLException {
         String sql = "insert into table_insert_executor_test(`id`, `user_id`, `name`, `sex`) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageUpperColumn() throws SQLException {
+    public void testBeforeAndAfterImageUpperColumn() throws SQLException {
         String sql = "insert into table_insert_executor_test(ID, USER_ID, NMAE, SEX) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+
+        TableRecords beforeImage = newInsertExecutor.beforeImage();
+        TableRecords afterImage = newInsertExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
