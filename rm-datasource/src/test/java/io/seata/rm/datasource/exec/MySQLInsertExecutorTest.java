@@ -194,6 +194,24 @@ public class MySQLInsertExecutorTest {
     }
 
     @Test
+    public void testBeforeImageColumnWithQuote() throws SQLException {
+        String sql = "insert into table_insert_executor_test(`id`, `user_id`, `name`, `sex`) values (1, 1, 'will', 1)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
+        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+    }
+
+    @Test
+    public void testBeforeImageUpperColumn() throws SQLException {
+        String sql = "insert into table_insert_executor_test(ID, USER_ID, NMAE, SEX) values (1, 1, 'will', 1)";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
+        newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);
+        Assertions.assertNotNull(newInsertExecutor.beforeImage());
+    }
+
+    @Test
     public void testAfterImage_ByColumn() throws SQLException {
         doReturn(true).when(insertExecutor).containsPK();
         Map<String,List<Object>> pkValuesMap =new HashMap<>();
