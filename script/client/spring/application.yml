@@ -22,6 +22,8 @@ seata:
       saga-compensate-persist-mode-update: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       sql-parser-type: druid
+      applicationDataLimit: 64000
+      applicationDataLimitCheck: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -112,6 +114,9 @@ seata:
     raft:
       server-addr:
       metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
     file:
       name: file.conf
     consul:

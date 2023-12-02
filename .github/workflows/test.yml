@@ -47,9 +47,9 @@ jobs:
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
           if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=false -Dlicense.skip=false -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
 
   # job 2
@@ -80,7 +80,7 @@ jobs:
       # step 4
       - name: "Test with Maven"
         run: |
-          ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dkotlin-maven-plugin.version=1.7.22 -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dkotlin-maven-plugin.version=1.7.22 -Dcheckstyle.skip=true -Dlicense.skip=true -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 3
   arm64-test:
@@ -125,4 +125,4 @@ jobs:
       # step 5
       - name: "test-arm64"
         run: |
-          ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn          
+          ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dcheckstyle.skip=true -Dlicense.skip=true -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn          

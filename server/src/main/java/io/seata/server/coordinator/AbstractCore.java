@@ -18,6 +18,11 @@ package io.seata.server.coordinator;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
@@ -59,6 +64,10 @@ public abstract class AbstractCore implements Core {
 
     protected LockManager lockManager = LockerManagerFactory.getLockManager();
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    private int appDataErrSize ;
+    private boolean throwDataSizeExp ;
+
     protected RemotingServer remotingServer;
 
     public AbstractCore(RemotingServer remotingServer) {
@@ -66,6 +75,10 @@ public abstract class AbstractCore implements Core {
             throw new IllegalArgumentException("remotingServer must be not null");
         }
         this.remotingServer = remotingServer;
+        this.appDataErrSize = CONFIG.getInt(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_LIMIT,
+            DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT);
+        this.throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.SERVER_APPLICATION_DATA_SIZE_CHECK, false);
+
     }
 
     public abstract BranchType getHandleBranchType();
@@ -74,6 +87,13 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
+        try {
+            StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
+        } catch (RuntimeException e) {
+            throw new BranchTransactionException(TransactionExceptionCode.FailedToAddBranch,
+                    String.format("Failed to store branch xid = %s ", globalSession.getXid()), e);
+        }
+
         return SessionHolder.lockAndExecute(globalSession, () -> {
             globalSessionStatusCheck(globalSession);
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
@@ -90,7 +110,7 @@ public abstract class AbstractCore implements Core {
             }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Register branch successfully, xid = {}, branchId = {}, resourceId = {} ,lockKeys = {}",
-                        globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
+                    globalSession.getXid(), branchSession.getBranchId(), resourceId, lockKeys);
             }
             return branchSession.getBranchId();
         });
