@@ -30,6 +30,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -287,7 +288,7 @@ public class ChannelManager {
      * @param clientId   Client ID - ApplicationId:IP:Port
      * @return Corresponding channel, NULL if not found.
      */
-    public static Channel getChannel(String resourceId, String clientId) {
+    public static Channel getChannel(String resourceId, String clientId, BranchType branchType) {
         Channel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
@@ -399,7 +400,7 @@ public class ChannelManager {
             }
         }
 
-        if (resultChannel == null) {
+        if (resultChannel == null && BranchType.TCC == branchType) {
             resultChannel = tryOtherApp(applicationIdMap, targetApplicationId);
 
             if (resultChannel == null) {

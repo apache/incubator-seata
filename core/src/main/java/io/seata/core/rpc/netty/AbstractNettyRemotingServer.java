@@ -28,6 +28,7 @@ import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
+import io.seata.core.model.BranchType;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -63,9 +64,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     @Override
-    public Object sendSyncRequest(String resourceId, String clientId, Object msg)
+    public Object sendSyncRequest(String resourceId, String clientId, Object msg, BranchType branchType)
         throws TimeoutException {
-        Channel channel = ChannelManager.getChannel(resourceId, clientId);
+        Channel channel = ChannelManager.getChannel(resourceId, clientId, branchType);
         if (channel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
