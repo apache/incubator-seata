@@ -45,8 +45,8 @@ import static io.seata.server.store.StoreConfig.StoreMode;
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";
-    private String retryCommiting = "RetryCommiting";
     private String retryRollbacking2 = "RetryRollbacking2";
+    private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
     private static DistributedLocker distributedLocker;
     private static Jedis jedis;
@@ -82,10 +82,10 @@ public class RedisDistributedLockerTest {
     }
 
     @Test
-    public void test_acquireScheduledLock_success_() throws UnknownHostException {
+    public void test_acquireScheduledLock_success_() {
         String lockKey = retryRollbacking2;
-
         SessionHolder.init(SessionMode.REDIS);
+
         boolean accquire = SessionHolder.acquireDistributedLock(lockKey);
         Assertions.assertTrue(accquire);
         String lockValueExisted = jedis.get(lockKey);
