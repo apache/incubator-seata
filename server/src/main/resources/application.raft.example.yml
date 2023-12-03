@@ -95,6 +95,8 @@ seata:
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
     enableParallelRequestHandle: true
+    applicationDataLimitCheck: true
+    applicationDataLimit: 64000
     recovery:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
