@@ -37,11 +37,10 @@ public interface RemotingServer {
      * @param resourceId rm client resourceId
      * @param clientId   rm client id
      * @param msg        transaction message {@code io.seata.core.protocol}
-     * @param tryOtherApp   try other app
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
-    Object sendSyncRequest(String resourceId, String clientId, Object msg, boolean tryOtherApp) throws TimeoutException;
+    Object sendSyncRequest(String resourceId, String clientId, Object msg) throws TimeoutException;
 
     /**
      * server send sync request.

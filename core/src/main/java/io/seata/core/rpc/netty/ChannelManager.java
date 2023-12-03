@@ -287,7 +287,7 @@ public class ChannelManager {
      * @param clientId   Client ID - ApplicationId:IP:Port
      * @return Corresponding channel, NULL if not found.
      */
-    public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
+    public static Channel getChannel(String resourceId, String clientId) {
         Channel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
@@ -399,7 +399,7 @@ public class ChannelManager {
             }
         }
 
-        if (resultChannel == null && tryOtherApp) {
+        if (resultChannel == null) {
             resultChannel = tryOtherApp(applicationIdMap, targetApplicationId);
 
             if (resultChannel == null) {
