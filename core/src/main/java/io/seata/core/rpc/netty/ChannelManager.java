@@ -286,9 +286,10 @@ public class ChannelManager {
      *
      * @param resourceId Resource ID
      * @param clientId   Client ID - ApplicationId:IP:Port
+     * @param tryOtherApp try other app
      * @return Corresponding channel, NULL if not found.
      */
-    public static Channel getChannel(String resourceId, String clientId, BranchType branchType) {
+    public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
         Channel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
@@ -400,7 +401,7 @@ public class ChannelManager {
             }
         }
 
-        if (resultChannel == null && BranchType.TCC == branchType) {
+        if (resultChannel == null && tryOtherApp) {
             resultChannel = tryOtherApp(applicationIdMap, targetApplicationId);
 
             if (resultChannel == null) {
