@@ -39,7 +39,7 @@ import io.seata.core.store.DistributedLockDO;
 import io.seata.core.store.DistributedLocker;
 import io.seata.server.cluster.raft.context.SeataClusterContext;
 import io.seata.server.lock.distributed.DistributedLockerFactory;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
@@ -99,8 +99,8 @@ public class SessionHolder {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             reload(sessionMode);
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
-            RaftServerFactory.getInstance().init();
-            if (CollectionUtils.isNotEmpty(RaftServerFactory.getInstance().getRaftServers())) {
+            RaftServerManager.init();
+            if (CollectionUtils.isNotEmpty(RaftServerManager.getRaftServers())) {
                 sessionMode = SessionMode.RAFT;
             }
             if (SessionMode.RAFT.equals(sessionMode)) {
@@ -109,7 +109,7 @@ public class SessionHolder {
                     new Object[] {ROOT_SESSION_MANAGER_NAME});
                 SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
-                RaftServerFactory.getInstance().start();
+                RaftServerManager.start();
             } else {
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
@@ -379,7 +379,7 @@ public class SessionHolder {
     }
 
     public static void destroy() {
-        RaftServerFactory.getInstance().destroy();
+        RaftServerManager.destroy();
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }

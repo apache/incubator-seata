@@ -30,7 +30,7 @@ public interface InvocationWrapper {
 
     Object[] getArguments();
 
-    Object proceed();
+    Object proceed() throws Throwable;
 
 
 }
