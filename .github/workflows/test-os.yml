@@ -70,7 +70,7 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v3
       # step 3
-      - name: "Build with Maven on 'arm64v8/ubuntu' OS (Skip tests)"
+      - name: "Build with Maven on 'arm64v8/ubuntu:20.04' OS (Skip tests)"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
