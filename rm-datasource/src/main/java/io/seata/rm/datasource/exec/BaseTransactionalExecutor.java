@@ -558,7 +558,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                         .map(onUpdateColumn -> getColumnNameWithTablePrefix(table, tableAlias, onUpdateColumn))
                         .collect(Collectors.toList());
             }
-            onUpdateColumns.removeAll(unescapeColumns);
             needUpdateColumns.addAll(onUpdateColumns);
         } else {
             Stream<String> allColumns = tableMeta.getAllColumns().keySet().stream();
