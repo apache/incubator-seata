@@ -55,7 +55,7 @@ jobs:
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4
-      - name: "Test with Maven"
+      - name: "Test with Maven and Druid ${{ matrix.druid }}"
         run: |
           ./mvnw -T 4C clean test \
                  -Ddruid.version=${{ matrix.druid }} \

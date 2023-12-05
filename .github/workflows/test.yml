@@ -37,7 +37,7 @@ jobs:
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4
-      - name: "Test with Maven"
+      - name: "Test with Maven and Java${{ matrix.java }}"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
           ./mvnw -T 4C clean install \
@@ -73,7 +73,7 @@ jobs:
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4
-      - name: "Test with Maven"
+      - name: "Test with Maven and Java${{ matrix.java }}"
         run: |
           ./mvnw -T 4C clean test \
                  -P args-for-client-test \
