@@ -566,7 +566,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             allColumns.forEach(needUpdateColumns::add);
         }
-        return needUpdateColumns.parallelStream().map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta)).collect(Collectors.toList());
+        return needUpdateColumns.stream().map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta)).collect(Collectors.toList());
     }
 
     /**
