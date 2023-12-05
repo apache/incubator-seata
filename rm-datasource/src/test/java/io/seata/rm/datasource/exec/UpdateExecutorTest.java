@@ -240,4 +240,30 @@ public class UpdateExecutorTest {
         Assertions.assertNotNull(beforeImage);
         Assertions.assertNotNull(afterImage);
     }
+
+    @Test
+    public void testBeforeAndAfterImageWithOnUpdateColumn() throws SQLException {
+        String sql = "update table_update_executor_test set updated = 1 where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithOnUpdateUpperColumn() throws SQLException {
+        String sql = "update table_update_executor_test set UPDATED = 1 where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
 }
