@@ -204,7 +204,7 @@ public class UpdateExecutorTest {
 
     @Test
     public void testBeforeAndAfterImageWithUpperColumn() throws SQLException {
-        String sql = "update table_update_executor_test set NAME = 'WILL' where ID = 1";
+        String sql = "update table_update_executor_test set NAME = 'WILL', UPDATED = `567` where ID = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
