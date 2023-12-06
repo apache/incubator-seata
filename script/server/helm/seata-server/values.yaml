@@ -1,7 +1,5 @@
 replicaCount: 1
 
-namespace: default
-
 image:
   repository: seataio/seata-server
   tag: latest
