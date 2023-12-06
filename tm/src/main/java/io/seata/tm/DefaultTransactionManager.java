@@ -35,6 +35,7 @@ import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
+import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -51,7 +52,7 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
-        if (response.getResultCode() == ResultCode.Failed) {
+        if (Objects.isNull(response) || response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
         return response.getXid();
