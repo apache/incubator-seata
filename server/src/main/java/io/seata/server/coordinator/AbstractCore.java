@@ -192,7 +192,7 @@ public abstract class AbstractCore implements Core {
                                             BranchSession branchSession) throws IOException, TimeoutException {
 
         BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
-            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.getBranchType() == BranchType.TCC);
+            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isTCC());
         return response.getBranchStatus();
     }
 
@@ -217,7 +217,7 @@ public abstract class AbstractCore implements Core {
                                               BranchSession branchSession) throws IOException, TimeoutException {
 
         BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
-            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.getBranchType() == BranchType.TCC);
+            branchSession.getResourceId(), branchSession.getClientId(), request, branchSession.isTCC());
         return response.getBranchStatus();
     }
 
