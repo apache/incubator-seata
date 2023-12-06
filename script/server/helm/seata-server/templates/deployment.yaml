@@ -1,9 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-{{- if .Values.namespace }}
-  namespace: {{ .Values.namespace }}
-{{- end}}
+  namespace: {{ .Release.Namespace | quote }}
   name: {{ include "seata-server.name" . }}
   labels:
 {{ include "seata-server.labels" . | indent 4 }}
