@@ -13,24 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.tx.api.interceptor;
+package io.seata.spring.tcc;
 
-import java.lang.reflect.Method;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.LocalTCC;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
-/**
- * @author leezongjie
- */
-public interface InvocationWrapper {
+@LocalTCC
+public interface NormalTccAction {
 
-    Method getMethod();
+    @TwoPhaseBusinessAction(name = "tccActionForTestWithException")
+    boolean prepare(BusinessActionContext actionContext);
 
-    Object getProxy();
+    @TwoPhaseBusinessAction(name = "tccActionForTestWithException")
+    boolean prepareWithException(BusinessActionContext actionContext);
 
-    Object getTarget();
+    boolean commit(BusinessActionContext actionContext);
 
-    Object[] getArguments();
-
-    Object proceed() throws Throwable;
-
+    boolean rollback(BusinessActionContext actionContext);
 
 }
