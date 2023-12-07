@@ -111,7 +111,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             try {
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             } catch (Exception ex) {
-                LOGGER.warn("reconnect TC error. reason: {}", ex.getMessage());
+                LOGGER.warn("reconnect server failed. {}", ex.getMessage());
             }
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {

@@ -214,7 +214,7 @@ class NettyClientChannelManager {
             if (failFast) {
                 throw e;
             }
-            LOGGER.error("connect TC failed. {}", e.getMessage(), e);
+            LOGGER.error("connect server failed. {}", e.getMessage(), e);
         }
     }
 
