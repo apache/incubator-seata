@@ -249,7 +249,7 @@ public class DefaultCoordinatorTest {
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
-        public Object sendSyncRequest(String resourceId, String clientId, Object message, boolean tryOtherApp)
+        public Object sendSyncRequest(String resourceId, String clientId, Object message)
             throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();

@@ -314,11 +314,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return this.getBranchType() == BranchType.AT;
     }
 
-
-    public boolean isTCC() {
-        return this.getBranchType() == BranchType.TCC;
-    }
-
     public LockStatus getLockStatus() {
         return lockStatus;
     }
