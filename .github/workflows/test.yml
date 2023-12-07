@@ -40,7 +40,7 @@ jobs:
       - name: "Test with Maven and Java${{ matrix.java }}"
         # https://docs.github.com/cn/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#github-context
         run: |
-          ./mvnw -T 4C clean install \
+          ./mvnw -T 4C clean test \
                  -P args-for-client-test \
                  -Dspring-boot.version=${{ matrix.springboot }} \
                  -Dmaven.git-commit-id.skip=true \
