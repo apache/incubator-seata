@@ -14,12 +14,12 @@ jobs:
       matrix:
         java: [ 8, 11, 17, 21 ]
         springboot: [
-          2.7.18         -Dspring-framework.version=5.3.31,
-          2.6.15         -Dspring-framework.version=5.3.27,
-          2.5.15         -Dspring-framework.version=5.3.27,
-          2.4.13         -Dspring-framework.version=5.3.13,
-          2.3.12.RELEASE -Dspring-framework.version=5.2.15.RELEASE,
-          2.2.13.RELEASE -Dspring-framework.version=5.2.12.RELEASE,
+          2.7.18         -D spring-framework.version=5.3.31,
+          2.6.15         -D spring-framework.version=5.3.27,
+          2.5.15         -D spring-framework.version=5.3.27,
+          2.4.13         -D spring-framework.version=5.3.13,
+          2.3.12.RELEASE -D spring-framework.version=5.2.15.RELEASE,
+          2.2.13.RELEASE -D spring-framework.version=5.2.12.RELEASE,
           #2.1.18.RELEASE,
           #2.0.9.RELEASE,
         ]
@@ -54,7 +54,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd -Dspring-boot.version=${{ matrix.springboot }} clean install -DskipTests -e -B;
+          ./mvnw.cmd clean install -D spring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
 
   # job 2
   test-springboot3x:
@@ -65,9 +65,9 @@ jobs:
       matrix:
         java: [ 17, 21 ]
         springboot: [
-          3.2.0  -Dspring-framework.version=6.1.1,
-          3.1.6  -Dspring-framework.version=6.0.14,
-          3.0.13 -Dspring-framework.version=6.0.14,
+          3.2.0  -D spring-framework.version=6.1.1,
+          3.1.6  -D spring-framework.version=6.0.14,
+          3.0.13 -D spring-framework.version=6.0.14,
         ]
         os: [
           ubuntu-latest,
@@ -100,7 +100,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd -D spring-boot.version=${{ matrix.springboot }} clean install -DskipTests -e -B;
+          ./mvnw.cmd clean install -D spring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
 
   # job 3
   test-arm64:
