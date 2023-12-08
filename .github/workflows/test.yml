@@ -54,7 +54,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -D spring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
+          ./mvnw.cmd clean install ^
+                     -P args-for-client-test ^
+                     -DskipTests ^
+                     -D spring-boot.version=${{ matrix.springboot }} ^
+                     -D maven.git-commit-id.skip=true ^
+                     -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 2
   test-springboot3x:
@@ -100,7 +105,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -D spring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
+          ./mvnw.cmd clean install ^
+                     -P args-for-client-test ^
+                     -DskipTests ^
+                     -D spring-boot.version=${{ matrix.springboot }} ^
+                     -D maven.git-commit-id.skip=true ^
+                     -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 3
   test-arm64:
