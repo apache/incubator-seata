@@ -54,12 +54,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -DskipTests -e -B;
+          ./mvnw.cmd clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
 
   # job 2
   test-springboot3x:
     name: "test-springboot3.x"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -100,7 +100,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -DskipTests -e -B;
+          ./mvnw.cmd clean install -Dspring-boot.version=${{ matrix.springboot }} -DskipTests -e -B;
 
   # job 3
   test-arm64:
