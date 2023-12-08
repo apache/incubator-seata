@@ -44,7 +44,7 @@ jobs:
         if: matrix.os != 'windows'
         run: |
           ./mvnw     -version;
-          ./mvnw     clean install \
+          ./mvnw     -T 4C clean test \
                      -P args-for-client-test \
                      -Dspring-boot.version=${{ matrix.springboot }} \
                      -Dmaven.git-commit-id.skip=true \
@@ -90,7 +90,7 @@ jobs:
         if: matrix.os != 'windows'
         run: |
           ./mvnw     -version;
-          ./mvnw     clean install \
+          ./mvnw     -T 4C clean install \
                      -P args-for-client-test \
                      -Dspring-boot.version=${{ matrix.springboot }} \
                      -Dmaven.git-commit-id.skip=true \
@@ -135,7 +135,7 @@ jobs:
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn clean install \
+                       mvn -T 4C clean install \
                            -Dspring-boot.version=${{ matrix.springboot }} \
                            -Prelease-seata \
                            -DskipTests \
