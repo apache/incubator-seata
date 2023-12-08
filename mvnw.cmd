@@ -1,12 +1,12 @@
 @REM ----------------------------------------------------------------------------
 @REM Copyright 1999-2019 Seata.io Group.
-@REM 
+@REM
 @REM Licensed under the Apache License, Version 2.0 (the "License");
 @REM you may not use this file except in compliance with the License.
 @REM You may obtain a copy of the License at
-@REM 
+@REM
 @REM      http://www.apache.org/licenses/LICENSE-2.0
-@REM 
+@REM
 @REM Unless required by applicable law or agreed to in writing, software
 @REM distributed under the License is distributed on an "AS IS" BASIS,
 @REM WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,10 +16,10 @@
 
 @REM ----------------------------------------------------------------------------
 @REM Maven2 Start Up Batch script
-@REM 
+@REM
 @REM Required ENV vars:
 @REM JAVA_HOME - location of a JDK home dir
-@REM 
+@REM
 @REM Optional ENV vars
 @REM M2_HOME - location of maven2's installed home dir
 @REM MAVEN_BATCH_ECHO - set to 'on' to enable the echoing of the batch commands
