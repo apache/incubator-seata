@@ -118,7 +118,7 @@
         <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
         <!-- # for test -->
-        <mockito.version>4.5.1</mockito.version>
+        <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
