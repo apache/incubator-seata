@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * @author jsbxyyx
  */
-@LoadLevel(name = "oracleTimestamp")
+@LoadLevel(name = "oracleTimestamp", dependsOnClasses = oracle.sql.TIMESTAMP.class)
 public class OracleTimestampJacksonSerializer implements JacksonSerializer<oracle.sql.TIMESTAMP> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleTimestampJacksonSerializer.class);

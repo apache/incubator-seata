@@ -21,15 +21,17 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
-import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.IndexMeta;
 import io.seata.sqlparser.struct.IndexType;
 import io.seata.sqlparser.struct.TableMeta;
+import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final List<IColumnMetaProcessor> COLUMN_META_PROCESSORS = EnhancedServiceLoader.loadAll(IColumnMetaProcessor.class);
+
+
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
         StringBuilder cacheKey = new StringBuilder(resourceId);
@@ -52,7 +57,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
         String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
-        DatabaseMetaData databaseMetaData = null;
+        DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
@@ -80,7 +85,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+            return resultSetMetaToSchema(connection, stmt, rs, rs.getMetaData(), connection.getMetaData());
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -88,7 +93,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
+    protected TableMeta resultSetMetaToSchema(Connection connection, Statement stmt, ResultSet rs, ResultSetMetaData rsmd, DatabaseMetaData dbmd)
         throws SQLException {
         //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
@@ -120,6 +125,12 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
              ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
+
+            // Build context
+            ColumnMetaProcessorContext context = new ColumnMetaProcessorContext(connection, stmt, rs,
+                    rsmd, dbmd, tm, rsColumns);
+
+            int columnIndex = 0;
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -145,17 +156,24 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
-                tm.getAllColumns().put(col.getColumnName(), col);
+
+                for (IColumnMetaProcessor processor : COLUMN_META_PROCESSORS) {
+                    processor.process(col, columnIndex, context);
+                }
+
+                tm.addColumnMeta(col);
+
+                columnIndex++;
             }
 
             while (onUpdateColumns.next()) {
-                tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
+                tm.getColumnMeta(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
             }
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
                 String colName = rsIndex.getString("COLUMN_NAME");
-                ColumnMeta col = tm.getAllColumns().get(colName);
+                ColumnMeta col = tm.getColumnMeta(colName);
 
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);

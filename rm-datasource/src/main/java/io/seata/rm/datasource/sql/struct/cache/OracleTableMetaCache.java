@@ -120,7 +120,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
                 }
-                tm.getAllColumns().put(col.getColumnName(), col);
+                tm.addColumnMeta(col);
             }
 
             while (rsIndex.next()) {
@@ -129,7 +129,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     continue;
                 }
                 String colName = rsIndex.getString("COLUMN_NAME");
-                ColumnMeta col = tm.getAllColumns().get(colName);
+                ColumnMeta col = tm.getColumnMeta(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
                     index.getValues().add(col);

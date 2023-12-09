@@ -28,11 +28,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.sqlparser.util.ColumnUtils;
@@ -296,7 +296,7 @@ public abstract class AbstractUndoExecutor {
 
         // pares pk values
         Map<String, List<Field>> pkRowValues = parsePkValues(getUndoRows());
-        if (pkRowValues.size() == 0) {
+        if (pkRowValues.isEmpty()) {
             return TableRecords.empty(tableMeta);
         }
         // build check sql
@@ -313,8 +313,8 @@ public abstract class AbstractUndoExecutor {
             int paramIndex = 1;
             int rowSize = pkRowValues.get(pkNameList.get(0)).size();
             for (int r = 0; r < rowSize; r++) {
-                for (int c = 0; c < pkNameList.size(); c++) {
-                    List<Field> pkColumnValueList = pkRowValues.get(pkNameList.get(c));
+                for (String pkName : pkNameList) {
+                    List<Field> pkColumnValueList = pkRowValues.get(pkName);
                     Field field = pkColumnValueList.get(r);
                     int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
                     statement.setObject(paramIndex, field.getValue(), dataType);
@@ -379,8 +379,8 @@ public abstract class AbstractUndoExecutor {
      */
     protected Map<String, List<Field>> parsePkValues(List<Row> rows, List<String> pkNameList) {
         List<Field> pkFieldList = new ArrayList<>();
-        for (int i = 0; i < rows.size(); i++) {
-            List<Field> fields = rows.get(i).getFields();
+        for (Row row : rows) {
+            List<Field> fields = row.getFields();
             if (fields != null) {
                 for (Field field : fields) {
                     if (pkNameList.stream().anyMatch(e -> field.getName().equalsIgnoreCase(e))) {

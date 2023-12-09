@@ -44,7 +44,7 @@ public class TableMetaTest {
         Assertions.assertNotEquals(tableMeta, other);
 
         other = new TableMeta();
-        other.getAllColumns().put("columnName", new ColumnMeta());
+        other.addColumnMeta(new ColumnMeta("columnName"));
         Assertions.assertNotEquals(tableMeta, other);
 
         other = new TableMeta();
@@ -55,8 +55,8 @@ public class TableMetaTest {
     @Test
     public void testGetColumnMeta() {
         TableMeta tableMeta = new TableMeta();
-        tableMeta.getAllColumns().put("id", new ColumnMeta());
-        tableMeta.getAllColumns().put("name", new ColumnMeta());
+        tableMeta.addColumnMeta(new ColumnMeta("id"));
+        tableMeta.addColumnMeta(new ColumnMeta("name"));
         Assertions.assertNull(tableMeta.getColumnMeta("`id`"));
         Assertions.assertNotNull(tableMeta.getColumnMeta("name"));
     }
@@ -64,13 +64,13 @@ public class TableMetaTest {
     @Test
     public void testGetAutoIncreaseColumn() {
         TableMeta tableMeta = new TableMeta();
-        ColumnMeta id = new ColumnMeta();
+        ColumnMeta id = new ColumnMeta("id");
         id.setIsAutoincrement("YES");
-        tableMeta.getAllColumns().put("id", id);
+        tableMeta.addColumnMeta(id);
         Assertions.assertNotNull(tableMeta.getAutoIncreaseColumn());
 
         tableMeta = new TableMeta();
-        tableMeta.getAllColumns().put("name", new ColumnMeta());
+        tableMeta.addColumnMeta(new ColumnMeta("name"));
         Assertions.assertNull(tableMeta.getAutoIncreaseColumn());
     }
 

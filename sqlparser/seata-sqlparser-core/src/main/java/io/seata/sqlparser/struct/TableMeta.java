@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.LowerCaseLinkHashMap;
+import io.seata.common.util.StringUtils;
 import io.seata.sqlparser.util.ColumnUtils;
 
 /**
@@ -77,6 +78,18 @@ public class TableMeta {
      */
     public ColumnMeta getColumnMeta(String colName) {
         return allColumns.get(colName);
+    }
+
+    /**
+     * Add column meta.
+     *
+     * @param columnMeta the column meta
+     */
+    public void addColumnMeta(ColumnMeta columnMeta) {
+        if (StringUtils.isBlank(columnMeta.getColumnName())) {
+            throw new IllegalArgumentException("The column name must be not null or blank");
+        }
+        allColumns.put(columnMeta.getColumnName(), columnMeta);
     }
 
     /**

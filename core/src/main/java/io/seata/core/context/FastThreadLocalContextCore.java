@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * @author ph3636
  */
-@LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1)
+@LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1, dependsOnClasses = FastThreadLocal.class)
 public class FastThreadLocalContextCore implements ContextCore {
 
     private FastThreadLocal<Map<String, Object>> fastThreadLocal = new FastThreadLocal<Map<String, Object>>() {

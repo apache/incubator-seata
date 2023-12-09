@@ -27,6 +27,7 @@ public class ColumnMeta {
     private String tableSchemaName;
     private String tableName;
     private String columnName;
+    private Integer realDataType;
     private int dataType;
     private String dataTypeName;
     private int columnSize;
@@ -51,6 +52,11 @@ public class ColumnMeta {
     public ColumnMeta() {
     }
 
+    public ColumnMeta(String columnName) {
+        this.columnName = columnName;
+    }
+
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ColumnMeta{");
@@ -58,6 +64,7 @@ public class ColumnMeta {
         sb.append(", tableSchemaName='").append(tableSchemaName).append('\'');
         sb.append(", tableName='").append(tableName).append('\'');
         sb.append(", columnName='").append(columnName).append('\'');
+        sb.append(", realDataType=").append(realDataType);
         sb.append(", dataType=").append(dataType);
         sb.append(", dataTypeName='").append(dataTypeName).append('\'');
         sb.append(", columnSize=").append(columnSize);
@@ -157,6 +164,24 @@ public class ColumnMeta {
      */
     public void setColumnName(String columnName) {
         this.columnName = columnName;
+    }
+
+    /**
+     * Gets real data type.
+     *
+     * @return the real data type
+     */
+    public Integer getRealDataType() {
+        return realDataType;
+    }
+
+    /**
+     * Sets real data type.
+     *
+     * @param realDataType the real data type
+     */
+    public void setRealDataType(Integer realDataType) {
+        this.realDataType = realDataType;
     }
 
     /**
@@ -448,6 +473,9 @@ public class ColumnMeta {
         if (!Objects.equals(columnMeta.columnName, this.columnName)) {
             return false;
         }
+        if (!Objects.equals(columnMeta.realDataType, this.realDataType)) {
+            return false;
+        }
         if (!Objects.equals(columnMeta.dataType, this.dataType)) {
             return false;
         }
@@ -505,6 +533,7 @@ public class ColumnMeta {
         hash += Objects.hashCode(tableSchemaName);
         hash += Objects.hashCode(tableName);
         hash += Objects.hashCode(columnName);
+        hash += Objects.hashCode(realDataType);
         hash += Objects.hashCode(dataType);
         hash += Objects.hashCode(dataTypeName);
         hash += Objects.hashCode(columnSize);
