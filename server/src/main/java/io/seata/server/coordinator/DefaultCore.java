@@ -307,7 +307,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            List<BranchSession> branchSessions = globalSession.getSortedBranches();
+            List<BranchSession> branchSessions = globalSession.getReverseSortedBranches();
             Boolean result = SessionHelper.forEach(branchSessions, branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
