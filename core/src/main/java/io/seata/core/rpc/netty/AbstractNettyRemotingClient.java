@@ -269,7 +269,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.error("Select the address failed: {}", ex.getMessage());
         }
         if (address == null) {
             throw new FrameworkException(NoAvailableService);
