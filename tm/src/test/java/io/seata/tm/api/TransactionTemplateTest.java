@@ -18,6 +18,7 @@ package io.seata.tm.api;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -63,6 +64,7 @@ public class TransactionTemplateTest {
         txInfo.setTimeOut(DEFAULT_TIME_OUT);
         txInfo.setName(DEFAULT_NAME);
         when(transactionalExecutor.getTransactionInfo()).thenReturn(txInfo);
+        RootContext.unbind();
     }
 
     @AfterEach
