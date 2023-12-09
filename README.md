@@ -8,8 +8,6 @@
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/seata/seata.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seata/seata/context:java)
-
 
 ## What is Seata?
 
