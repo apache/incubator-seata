@@ -45,6 +45,7 @@ import static io.seata.server.store.StoreConfig.StoreMode;
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";
+    private String retryRollbacking2 = "RetryRollbacking2";
     private String retryCommiting = "RetryCommiting";
     private String lockValue = "127.1.1.1:9081";
     private static DistributedLocker distributedLocker;
@@ -69,25 +70,29 @@ public class RedisDistributedLockerTest {
 
     @Test
     public void test_acquireScheduledLock_success() {
-        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000L));
+        String lockKey = retryRollbacking;
+
+        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(lockKey, lockValue, 60000L));
         Assertions.assertTrue(acquire);
-        String lockValueExisted = jedis.get(retryRollbacking);
+        String lockValueExisted = jedis.get(lockKey);
         Assertions.assertEquals(lockValue, lockValueExisted);
-        boolean release = distributedLocker.releaseLock(new DistributedLockDO(retryRollbacking, lockValue, null));
+        boolean release = distributedLocker.releaseLock(new DistributedLockDO(lockKey, lockValue, null));
         Assertions.assertTrue(release);
-        Assertions.assertNull(jedis.get(retryRollbacking));
+        Assertions.assertNull(jedis.get(lockKey));
     }
 
     @Test
-    public void test_acquireScheduledLock_success_() throws UnknownHostException {
+    public void test_acquireScheduledLock_success_() {
+        String lockKey = retryRollbacking2;
         SessionHolder.init(SessionMode.REDIS);
-        boolean accquire = SessionHolder.acquireDistributedLock(retryRollbacking);
+
+        boolean accquire = SessionHolder.acquireDistributedLock(lockKey);
         Assertions.assertTrue(accquire);
-        String lockValueExisted = jedis.get(retryRollbacking);
+        String lockValueExisted = jedis.get(lockKey);
         Assertions.assertEquals(XID.getIpAddressAndPort(), lockValueExisted);
-        boolean release = SessionHolder.releaseDistributedLock(retryRollbacking);
+        boolean release = SessionHolder.releaseDistributedLock(lockKey);
         Assertions.assertTrue(release);
-        Assertions.assertNull(jedis.get(retryRollbacking));
+        Assertions.assertNull(jedis.get(lockKey));
     }
 
     @Test
