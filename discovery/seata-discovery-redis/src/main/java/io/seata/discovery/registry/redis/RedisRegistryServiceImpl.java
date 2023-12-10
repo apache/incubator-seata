@@ -244,6 +244,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                         break;
                     case RedisListener.UN_REGISTER:
                         CLUSTER_ADDRESS_MAP.get(clusterName).remove(NetUtil.toInetSocketAddress(serverAddr));
+
+                        removeOfflineAddressesIfNecessary(clusterName, CLUSTER_ADDRESS_MAP.get(clusterName));
                         break;
                     default:
                         throw new ShouldNeverHappenException("unknown redis msg:" + msg);

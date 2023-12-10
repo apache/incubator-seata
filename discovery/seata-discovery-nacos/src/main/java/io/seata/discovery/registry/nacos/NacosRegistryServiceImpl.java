@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -186,12 +187,16 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                         List<Instance> instances = ((NamingEvent) event).getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
                             LOGGER.info("receive empty server list,cluster:{}", clusterName);
+
+                            removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
                         } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())
                                     .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
                                     .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+                            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
                         }
                     });
                 }
