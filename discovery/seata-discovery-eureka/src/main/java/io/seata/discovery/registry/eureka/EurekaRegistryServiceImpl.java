@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -162,12 +163,16 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         Application application = getEurekaClient(false).getApplication(clusterName);
         if (application == null || CollectionUtils.isEmpty(application.getInstances())) {
             LOGGER.info("refresh cluster success,but cluster empty! cluster name:{}", clusterName);
+
+            removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
         } else {
             List<InetSocketAddress> newAddressList = application.getInstances().stream()
                     .filter(instance -> InstanceInfo.InstanceStatus.UP.equals(instance.getStatus()) && instance.getIPAddr() != null && instance.getPort() > 0 && instance.getPort() < 0xFFFF)
                     .map(instance -> new InetSocketAddress(instance.getIPAddr(), instance.getPort()))
                     .collect(Collectors.toList());
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
         }
     }
 

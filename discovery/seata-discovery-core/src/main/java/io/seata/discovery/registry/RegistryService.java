@@ -21,7 +21,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -117,12 +121,33 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ArrayList<>());
+        return CURRENT_ADDRESS_MAP.computeIfAbsent(getServiceGroup(transactionServiceGroup), k -> new ArrayList<>());
     }
 
     default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
         List<InetSocketAddress> aliveAddress) {
-        return CURRENT_ADDRESS_MAP.put(transactionServiceGroup, aliveAddress);
+        return CURRENT_ADDRESS_MAP.put(getServiceGroup(transactionServiceGroup), aliveAddress);
+    }
+
+
+    /**
+     *
+     * remove offline addresses if necessary.
+     *
+     * Intersection of the old and new addresses
+     *
+     * @param clusterName
+     * @param newAddressed
+     */
+    default void removeOfflineAddressesIfNecessary(String clusterName, Collection<InetSocketAddress> newAddressed) {
+
+        List<InetSocketAddress> currentAddresses = CURRENT_ADDRESS_MAP.getOrDefault(clusterName, Collections.emptyList());
+
+        List<InetSocketAddress> inetSocketAddresses = currentAddresses
+                .stream().filter(newAddressed::contains).collect(
+                        Collectors.toList());
+
+        CURRENT_ADDRESS_MAP.put(clusterName, inetSocketAddresses);
     }
 
 }
