@@ -190,6 +190,7 @@ class NettyClientChannelManager {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception e) {
             LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            throwFailFastException(failFast, "Failed to get available servers");
             return;
         }
         if (CollectionUtils.isEmpty(availList)) {
@@ -200,12 +201,14 @@ class NettyClientChannelManager {
                 LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
                         ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
                         transactionServiceGroup);
+                throwFailFastException(failFast, "can not get cluster name in registry config.");
                 return;
             }
 
             if (!(registryService instanceof FileRegistryServiceImpl)) {
                 LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
             }
+            throwFailFastException(failFast, "no available service found in cluster.");
             return;
         }
         try {
@@ -337,6 +340,12 @@ class NettyClientChannelManager {
             }
         }
         return null;
+    }
+
+    private void throwFailFastException(boolean failFast, String message) {
+        if (failFast) {
+            throw new FrameworkException(message);
+        }
     }
 
 }
