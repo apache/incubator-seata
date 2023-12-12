@@ -59,6 +59,7 @@ class RaftRegistryServiceImplTest {
     public static void adAfterClass() throws Exception {
         System.clearProperty("service.vgroupMapping.tx");
     }
+
     /**
      * test whether throws exception when login failed
      */
@@ -81,9 +82,9 @@ class RaftRegistryServiceImplTest {
                 .thenReturn(mockResponse);
 
             // Use reflection to access and invoke the private method
-            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken");
+            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
             refreshTokenMethod.setAccessible(true);
-            assertThrows(Exception.class, () -> refreshTokenMethod.invoke(null));
+            assertThrows(Exception.class, () -> refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092"));
 
         }
     }
@@ -111,9 +112,9 @@ class RaftRegistryServiceImplTest {
                 .thenReturn(mockResponse);
 
 
-            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken");
+            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
             refreshTokenMethod.setAccessible(true);
-            refreshTokenMethod.invoke(null);
+            refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092");
             Field jwtTokenField = RaftRegistryServiceImpl.class.getDeclaredField("jwtToken");
             jwtTokenField.setAccessible(true);
             String jwtTokenAct = (String) jwtTokenField.get(null);
