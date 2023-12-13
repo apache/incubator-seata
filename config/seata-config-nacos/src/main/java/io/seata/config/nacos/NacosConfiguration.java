@@ -27,6 +27,7 @@ import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -63,6 +64,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
+    private static final String RAM_ROLE_NAME_KEY = "ramRoleName";
     private static final String USE_PARSE_RULE = "false";
     private static final String CONTEXT_PATH = "contextPath";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -224,32 +226,51 @@ public class NacosConfiguration extends AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
-        if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
-            if (StringUtils.isNotBlank(password)) {
-                properties.setProperty(USER_NAME, userName);
-                properties.setProperty(PASSWORD, password);
-                LOGGER.info("Nacos check auth with userName/password.");
-            }
-        } else {
-            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ?
-                System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
-            if (StringUtils.isNotBlank(accessKey)) {
-                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ?
-                    System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
-                if (StringUtils.isNotBlank(secretKey)) {
-                    properties.put(ACCESS_KEY, accessKey);
-                    properties.put(SECRET_KEY, secretKey);
-                    LOGGER.info("Nacos check auth with ak/sk.");
-                }
-            }
+        if (!initNacosAuthProperties(properties)) {
+            LOGGER.info("Nacos config auth properties empty.");
         }
         String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
         return properties;
+    }
+
+    /**
+     * init nacos auth properties
+     *
+     * username/password > ak/sk > ramRoleName
+     * @param sourceProperties the source properties
+     * @return auth properties
+     */
+    private static boolean initNacosAuthProperties(Properties sourceProperties) {
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
+        if (StringUtils.isNotBlank(userName)) {
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
+            if (StringUtils.isNotBlank(password)) {
+                sourceProperties.setProperty(USER_NAME, userName);
+                sourceProperties.setProperty(PASSWORD, password);
+                LOGGER.info("Nacos check auth with userName/password.");
+                return true;
+            }
+        } else {
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
+            String ramRoleName = StringUtils.isNotBlank(System.getProperty(RAM_ROLE_NAME_KEY)) ? System.getProperty(RAM_ROLE_NAME_KEY) : FILE_CONFIG.getConfig(getNacosRamRoleNameKey());
+            if (StringUtils.isNotBlank(accessKey)) {
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                if (StringUtils.isNotBlank(secretKey)) {
+                    sourceProperties.put(ACCESS_KEY, accessKey);
+                    sourceProperties.put(SECRET_KEY, secretKey);
+                    LOGGER.info("Nacos check auth with ak/sk.");
+                    return true;
+                }
+            } else if (StringUtils.isNotBlank(ramRoleName)) {
+                sourceProperties.put(RAM_ROLE_NAME_KEY, ramRoleName);
+                LOGGER.info("Nacos check auth with ram role.");
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String getNacosNameSpaceFileKey() {
@@ -284,6 +305,10 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     public static String getNacosSecretKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
+    }
+
+    public static String getNacosRamRoleNameKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, RAM_ROLE_NAME_KEY);
     }
 
     private static String getNacosGroup() {

@@ -38,12 +38,15 @@ seata:
       server-addr: 127.0.0.1:8848
       namespace:
       group: SEATA_GROUP
+      context-path:
+      ##1.The following configuration is for the open source version of Nacos
       username:
       password:
-      context-path:
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
@@ -76,12 +79,15 @@ seata:
       group: SEATA_GROUP
       namespace:
       cluster: default
+      context-path:
+      ##1.The following configuration is for the open source version of Nacos
       username:
       password:
-      context-path:
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
