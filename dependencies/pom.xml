@@ -53,7 +53,7 @@
         <apollo-client.version>2.0.1</apollo-client.version>
         <eureka-clients.version>1.10.17</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.2</nacos-client.version>
+        <nacos-client.version>1.4.6</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>32.0.0-jre</guava.version>
