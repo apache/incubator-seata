@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.config;
 
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
