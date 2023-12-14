@@ -19,6 +19,7 @@ import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.netty.channel.Channel;
 import io.seata.common.XID;
@@ -32,11 +33,16 @@ import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author slievrly
  */
 public class TmNettyClientTest extends AbstractServerTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
+
 
     public static ThreadPoolExecutor initMessageExecutor() {
         return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
@@ -53,21 +59,39 @@ public class TmNettyClientTest extends AbstractServerTest {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         //start services server first
+        AtomicBoolean serverStatus = new AtomicBoolean();
         Thread thread = new Thread(() -> {
-            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-            // set registry
-            XID.setIpAddress(NetUtil.getLocalIp());
-            XID.setPort(8091);
-            // init snowflake for transactionId, branchId
-            UUIDGenerator.init(1L);
-            System.out.println("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
-            nettyRemotingServer.init();
+            try {
+                nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+                // set registry
+                XID.setIpAddress(NetUtil.getLocalIp());
+                XID.setPort(8091);
+                // init snowflake for transactionId, branchId
+                UUIDGenerator.init(1L);
+                System.out.println("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                nettyRemotingServer.init();
+                serverStatus.set(true);
+            } catch (Throwable t) {
+                serverStatus.set(false);
+                LOGGER.error("The seata-server failed to start", t);
+            }
         });
         thread.start();
 
-        //then test client
-        Thread.sleep(3000);
+        //Wait for the seata-server to start.
+        long start = System.nanoTime();
+        long maxWaitNanoTime = 10 * 1000 * 1000 * 1000L; // 10s
+        while (System.nanoTime() - start < maxWaitNanoTime) {
+            Thread.sleep(100);
+            if (serverStatus.get()) {
+                break;
+            }
+        }
+        if (!serverStatus.get()) {
+            throw new RuntimeException("Waiting for a while, but the seata-server did not start successfully.");
+        }
 
+        //then test client
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
