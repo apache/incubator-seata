@@ -16,7 +16,6 @@
 package io.seata.server.session.redis;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import io.seata.common.XID;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -58,6 +57,14 @@ public class RedisDistributedLockerTest {
         DistributedLockerFactory.cleanLocker();
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();
+    }
+
+    @AfterAll
+    public static void after() throws IOException {
+        EnhancedServiceLoader.unload(DistributedLocker.class);
+        DistributedLockerFactory.cleanLocker();
+        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
+        jedis.close();
     }
 
     @Test
@@ -135,14 +142,6 @@ public class RedisDistributedLockerTest {
         Assertions.assertEquals("OK",set);
         boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
         Assertions.assertFalse(acquire);
-    }
-
-    @AfterAll
-    public static void after() throws IOException {
-        EnhancedServiceLoader.unload(DistributedLocker.class);
-        DistributedLockerFactory.cleanLocker();
-        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
-        jedis.close();
     }
 
 }
