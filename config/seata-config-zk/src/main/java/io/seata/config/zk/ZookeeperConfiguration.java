@@ -16,7 +16,6 @@
 package io.seata.config.zk;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
