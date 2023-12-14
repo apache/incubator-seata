@@ -19,7 +19,7 @@
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
 
 ### test:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
+- [[#6151](https://github.com/seata/seata/pull/6151)] 添加对 `MacOS` 和 `Windows` 的测试
 
 非常感谢以下 contributors 的代码贡献。若有无意遗漏，请报告。
 
