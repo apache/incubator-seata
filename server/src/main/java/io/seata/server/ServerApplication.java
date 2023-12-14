@@ -29,6 +29,7 @@ public class ServerApplication {
         try {
             // run the spring-boot application
             SpringApplication.run(ServerApplication.class, args);
+            System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
         } catch (Throwable t) {
             // This exception is used to end `spring-boot-maven-plugin:process-aot`, so ignore it.
             if ("org.springframework.boot.SpringApplication$AbandonedRunException".equals(t.getClass().getName())) {

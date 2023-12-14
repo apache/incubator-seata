@@ -21,6 +21,15 @@
                     defaultValue="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%25.25t]){faint} %clr([%-30.30logger]){cyan} %clr([%20.20M]){faint}  %clr([%X{X-TX-XID:-}]){faint} %clr(:){faint} %m%n%wEx2"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    return !"true".equals(System.getProperty("ENV_LOG_SYS_BOOT_COMPLETED"));
+                </expression>
+            </evaluator>
+            <OnMatch>ACCEPT</OnMatch>
+            <OnMismatch>DENY</OnMismatch>
+        </filter>
         <encoder>
             <Pattern>${CONSOLE_LOG_PATTERN}</Pattern>
             <charset>UTF-8</charset>
