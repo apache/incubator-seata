@@ -15,9 +15,6 @@
  */
 package io.seata.config.zk;
 
-import org.I0Itec.zkclient.exception.ZkMarshallingError;
-import org.I0Itec.zkclient.serialize.ZkSerializer;
-
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -28,15 +25,13 @@ import java.nio.charset.StandardCharsets;
  * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
-public class DefaultZkSerializer implements ZkSerializer {
+public class DefaultZkSerializer {
 
-    @Override
-    public byte[] serialize(Object data) throws ZkMarshallingError {
+    public static byte[] serialize(Object data) {
         return String.valueOf(data).getBytes(StandardCharsets.UTF_8);
     }
 
-    @Override
-    public Object deserialize(byte[] bytes) throws ZkMarshallingError {
+    public static String deserialize(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 }
