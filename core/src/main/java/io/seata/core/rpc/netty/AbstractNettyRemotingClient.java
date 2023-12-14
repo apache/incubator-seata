@@ -137,7 +137,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientBootstrap.setChannelHandlers(new ClientHandler());
         clientChannelManager = new NettyClientChannelManager(
-                new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
 
     @Override
@@ -163,7 +163,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
-                        serverAddress, rpcMessage);
+                    serverAddress, rpcMessage);
                 return null;
             }
             if (LOGGER.isDebugEnabled()) {
@@ -210,8 +210,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             return;
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
-                ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+            ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+            : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         if (rpcMessage.getBody() instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
         }
@@ -262,7 +262,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         try {
             @SuppressWarnings("unchecked")
             List<InetSocketAddress> inetSocketAddressList =
-                    RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
+                RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
             LOGGER.error("Select the address failed: {}", ex.getMessage());
@@ -481,7 +481,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-                    NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
+                NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
             clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("remove exception rm channel:{}", ctx.channel());
