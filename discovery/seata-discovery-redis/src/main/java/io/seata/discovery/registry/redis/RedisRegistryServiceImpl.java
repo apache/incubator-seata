@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
@@ -243,7 +244,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                         CLUSTER_ADDRESS_MAP.get(clusterName).add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
-                        CLUSTER_ADDRESS_MAP.get(clusterName).remove(NetUtil.toInetSocketAddress(serverAddr));
+                        removeServerAddressByPushEmptyProtection(clusterName, serverAddr);
                         break;
                     default:
                         throw new ShouldNeverHappenException("unknown redis msg:" + msg);
@@ -251,6 +252,30 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             });
         }
         return new ArrayList<>(CLUSTER_ADDRESS_MAP.getOrDefault(clusterName, Collections.emptySet()));
+    }
+
+    /**
+     *
+     * if the serverAddr is unique in the address list and
+     * the callback cluster is current cluster, then enable push-empty protection
+     * Otherwise, remove it.
+     *
+     * @param notifyCluserName notifyCluserName
+     * @param serverAddr serverAddr
+     */
+    private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
+
+        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.get(notifyCluserName);
+        InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+        if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
+            String txServiceGroupName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+            String clusterName = getServiceGroup(txServiceGroupName);
+            if (notifyCluserName.equals(clusterName)) {
+                return;
+            }
+        }
+        CLUSTER_ADDRESS_MAP.get(notifyCluserName).remove(inetSocketAddress);
     }
 
     @Override
