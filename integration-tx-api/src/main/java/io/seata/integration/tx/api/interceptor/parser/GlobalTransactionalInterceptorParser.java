@@ -21,6 +21,7 @@ import java.util.Set;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
@@ -60,13 +61,14 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
     }
 
     @Override
-    public IfNeedEnhanceBean parseIfNeedEnhanceBean(Object target) throws Exception {
-        Class<?> serviceInterface = DefaultTargetClassParser.get().findTargetClass(target);
-        Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
+    public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(beanClass);
+        Class<?>[] interfaceClasseArray = interfaceClasses.toArray(new Class<?>[0]);
+
         IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
-        if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
+        if (existsAnnotation(beanClass) || existsAnnotation(interfaceClasseArray)) {
             ifNeedEnhanceBean.setIfNeed(true);
-            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.GLOBE_BEAN);
+            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN);
         }
         return ifNeedEnhanceBean;
     }

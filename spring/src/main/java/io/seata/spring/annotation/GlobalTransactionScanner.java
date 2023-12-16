@@ -288,7 +288,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                if(!NEED_ENHANCE_BEAN_NAME_SET.contains(beanName)) {
+                if (!NEED_ENHANCE_BEAN_NAME_SET.contains(beanName)) {
                     return bean;
                 }
                 interceptor = null;
@@ -486,42 +486,44 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private void findBusinessBeanNamesNeededEnhancement() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ConfigurableApplicationContext configurableApplicationContext = ((ConfigurableApplicationContext) applicationContext);
+            ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) applicationContext;
             ConfigurableListableBeanFactory configurableListableBeanFactory = configurableApplicationContext.getBeanFactory();
 
             String[] beanNames = applicationContext.getBeanDefinitionNames();
-            for (String  contextBeanName : beanNames) {
+            for (String contextBeanName : beanNames) {
                 BeanDefinition beanDefinition = configurableListableBeanFactory.getBeanDefinition(contextBeanName);
-                if(IGNORE_ENHANCE_CHECK_SET.contains(beanDefinition.getBeanClassName())) {
+                if (IGNORE_ENHANCE_CHECK_SET.contains(beanDefinition.getBeanClassName())) {
                     continue;
                 }
                 try {
-                    Object object = Class.forName(beanDefinition.getBeanClassName()).newInstance();
-                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhanceBean(object);
-                    if(!ifNeedEnhanceBean.isIfNeed()) {
+                    // get the class by bean definition class name
+                    Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
+                    // check if it needs enhancement by the class
+                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
+                    if (!ifNeedEnhanceBean.isIfNeed()) {
                         continue;
                     }
-                    if(ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
-                        // dubbo, sofa
+                    if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
+                        // the native bean which dubbo, sofa bean service bean referenced
                         PropertyValue propertyValue = beanDefinition.getPropertyValues().getPropertyValue("ref");
-                        if(propertyValue == null) {
-                            // HSF
+                        if (propertyValue == null) {
+                            // the native bean which HSF service bean referenced
                             propertyValue = beanDefinition.getPropertyValues().getPropertyValue("target");
                         }
-                        if(propertyValue != null) {
+                        if (propertyValue != null) {
                             RuntimeBeanReference r = (RuntimeBeanReference) propertyValue.getValue();
                             if (r != null && StringUtils.isNotBlank(r.getBeanName())) {
                                 NEED_ENHANCE_BEAN_NAME_SET.add(r.getBeanName());
                                 continue;
                             }
                         }
-                        // local tcc
+                        // the native bean which local tcc service bean referenced
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
-                    } else {
-                        // globe bean
+                    } else if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN)) {
+                        // global transactional bean
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     }
-                } catch (Exception e) {
+                } catch (ClassNotFoundException e) {
                     LOGGER.warn("check if need enhance bean error, it can be ignore", e);
                 }
             }

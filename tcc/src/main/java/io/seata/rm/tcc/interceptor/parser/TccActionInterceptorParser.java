@@ -49,9 +49,9 @@ public class TccActionInterceptorParser implements InterfaceParser {
     }
 
     @Override
-    public IfNeedEnhanceBean parseIfNeedEnhanceBean(Object target) {
+    public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
         IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
-        if (DefaultRemotingParser.get().isService(target, target.getClass().getName())) {
+        if (DefaultRemotingParser.get().isService(beanClass)) {
             ifNeedEnhanceBean.setIfNeed(true);
             ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.SERVICE_BEAN);
         }

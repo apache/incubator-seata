@@ -15,12 +15,16 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 
+/**
+ * @author ruishansun
+ */
+
 public enum NeedEnhanceEnum {
 
     /**
-     * globe bean type
+     * global transactional bean type
      */
-    GLOBE_BEAN,
+    GLOBAL_TRANSACTIONAL_BEAN,
     /**
      * service bean type
      */
