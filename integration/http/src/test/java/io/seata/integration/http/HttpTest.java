@@ -15,13 +15,6 @@
  */
 package io.seata.integration.http;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import io.seata.core.context.RootContext;
-import org.apache.http.HttpResponse;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +24,14 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import io.seata.common.util.BufferUtils;
+import io.seata.core.context.RootContext;
+import org.apache.http.HttpResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
@@ -205,14 +206,14 @@ class HttpTest {
         ByteBuffer bb = ByteBuffer.allocate(4096);
 
         while (src.read(bb) != -1) {
-            bb.flip();
+            BufferUtils.flip(bb);
             dest.write(bb);
             bb.clear();
         }
 
         src.close();
         dest.close();
-        return new String(bos.toByteArray(), "UTF-8");
+        return bos.toString("UTF-8");
     }
 
     @Test

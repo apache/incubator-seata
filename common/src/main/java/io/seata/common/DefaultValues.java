@@ -34,8 +34,15 @@ public interface DefaultValues {
     long DEFAULT_TABLE_META_CHECKER_INTERVAL = 60000L;
     boolean DEFAULT_TM_DEGRADE_CHECK = false;
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
+
+    /**
+     * The default session store dir
+     */
+    String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
     boolean DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = false;
     boolean DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = false;
+    String DEFAULT_RAFT_SERIALIZATION = "jackson";
+    String DEFAULT_RAFT_COMPRESSOR = "none";
 
     /**
      * Shutdown timeout default 3s
@@ -52,7 +59,6 @@ public interface DefaultValues {
     boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
     boolean DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST = true;
     boolean DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = false;
-
 
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
@@ -120,6 +126,8 @@ public interface DefaultValues {
     String DEFAULT_LOAD_BALANCE = "XID";
     int VIRTUAL_NODES_DEFAULT = 10;
 
+    String DEFAULT_SEATA_GROUP = "default";
+
     /**
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE
      */
@@ -134,6 +142,7 @@ public interface DefaultValues {
      * the constant DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD
      */
     String DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD = "64k";
+
 
     /**
      * the constant DEFAULT_RETRY_DEAD_THRESHOLD
@@ -189,6 +198,11 @@ public interface DefaultValues {
     long DEFAULT_RPC_TC_REQUEST_TIMEOUT = Duration.ofSeconds(15).toMillis();
 
     /**
+     * the constant DEFAULT_APPLICATION_DATA_SIZE_LIMIT
+     */
+    int DEFAULT_APPLICATION_DATA_SIZE_LIMIT = 64000;
+
+    /**
      * the constant DEFAULT_XAER_NOTA_RETRY_TIMEOUT
      */
     int DEFAULT_XAER_NOTA_RETRY_TIMEOUT = 60000;
@@ -203,6 +217,10 @@ public interface DefaultValues {
      */
     int DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = 10000;
 
+    /**
+     * the constant DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS
+     */
+    int DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS = 1000;
     /**
      * the constant DEFAULT_COMMITING_RETRY_PERIOD
      */

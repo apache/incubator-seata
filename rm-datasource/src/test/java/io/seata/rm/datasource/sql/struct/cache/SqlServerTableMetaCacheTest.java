@@ -22,16 +22,26 @@ import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author GoodBoyCoder
@@ -49,9 +59,9 @@ public class SqlServerTableMetaCacheTest {
             };
     private static Object[][] indexMetas =
             new Object[][]{
-                    new Object[]{"id", "id", false, "", 3, 0, "A", 34},
-                    new Object[]{"name1", "name1", false, "", 3, 1, "A", 34},
-                    new Object[]{"name2", "name2", true, "", 3, 2, "A", 34},
+                    new Object[]{"id", "id", false, "", 3, 0, "A", 34L},
+                    new Object[]{"name1", "name1", false, "", 3, 1, "A", 34L},
+                    new Object[]{"name2", "name2", true, "", 3, 2, "A", 34L},
             };
 
     private static Object[][] pkMetas =
@@ -82,7 +92,7 @@ public class SqlServerTableMetaCacheTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.mt1", proxy.getResourceId());
 

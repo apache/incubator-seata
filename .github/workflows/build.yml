@@ -21,27 +21,34 @@ jobs:
         uses: actions/checkout@v3
       # step 2
       - name: "Set up Java JDK"
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
       # step 3
       - name: "Print maven version"
         run: ./mvnw -version
-      # step 4
-      - name: "Build with Maven"
+      # step 4.1
+      - name: "Test, Check style, Check license with Maven and Java8"
+        if: matrix.java == '8'
         run: |
-          if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean test -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          elif [ "${{ matrix.java }}" == "17" ]; then
-            ./mvnw -T 4C clean test -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          fi
+          ./mvnw -T 4C clean test \
+                 -Dcheckstyle.skip=false -Dlicense.skip=false \
+                 -Dmaven.git-commit-id.skip=true \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+      # step 4.2
+      - name: "Test with Maven and Java${{ matrix.java }}"
+        if: matrix.java != '8'
+        run: |
+          ./mvnw -T 4C clean test \
+                 -Dmaven.git-commit-id.skip=true \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       # step 5
       - name: "Codecov"
-        if: matrix.java == '17'
-        uses: codecov/codecov-action@v2.1.0
+        if: matrix.java == '8'
+        uses: codecov/codecov-action@v3.1.4
 
-  # job 2: Test on 'arm64v8/ubuntu' OS.
+  # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
@@ -54,13 +61,17 @@ jobs:
       # step 2
       - name: "Set up QEMU"
         id: qemu
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
       # step 3
-      - name: "Build arm-binary"
+      - name: "Build with Maven on 'arm64v8/ubuntu:20.04' OS (Skip tests)"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        mvn -version && \
-                       mvn -Prelease-seata -DskipTests clean install -U'
+                       mvn clean install \
+                           -Prelease-seata \
+                           -DskipTests \
+                           -Dmaven.git-commit-id.skip=true \
+                           -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'

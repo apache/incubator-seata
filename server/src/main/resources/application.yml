@@ -22,7 +22,7 @@ spring:
 logging:
   config: classpath:logback-spring.xml
   file:
-    path: ${user.home}/logs/seata
+    path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
       destination: 127.0.0.1:4560
@@ -34,7 +34,6 @@ console:
   user:
     username: seata
     password: seata
-
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3
@@ -43,7 +42,7 @@ seata:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
     type: file
   store:
-    # support: file 、 db 、 redis
+    # support: file 、 db 、 redis 、 raft
     mode: file
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'

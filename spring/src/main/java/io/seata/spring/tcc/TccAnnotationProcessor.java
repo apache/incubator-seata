@@ -103,7 +103,7 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
                 RemotingDesc remotingDesc = new RemotingDesc();
                 remotingDesc.setServiceClass(serviceClass);
 
-                Object proxyBean = ProxyUtil.createProxy(bean);
+                Object proxyBean = ProxyUtil.createProxy(bean, beanName);
                 field.setAccessible(true);
                 field.set(bean, proxyBean);
                 LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy");

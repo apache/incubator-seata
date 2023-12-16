@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
 
 import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type String utils.
@@ -38,6 +41,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
  */
 public class StringUtils {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StringUtils.class);
     private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
     private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
 
@@ -347,6 +351,53 @@ public class StringUtils {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    /**
+     * check string data size
+     *
+     * @param data the str
+     * @param dataName the data name
+     * @param errorSize throw exception if size > errorSize
+     * @return boolean
+     */
+    public static boolean checkDataSize(String data, String dataName, int errorSize, boolean throwIfErr) {
+        if (isBlank(data)) {
+            return true;
+        }
+        int length = data.getBytes(StandardCharsets.UTF_8).length;
+        if (length > errorSize) {
+            LOGGER.warn("{} data is large(errorSize), size={}", dataName, length);
+            if (!throwIfErr) {
+                return false;
+            }
+            throw new IllegalArgumentException(dataName + " data is too large, size=" + length);
+        }
+        return true;
+    }
+
+    public static boolean hasLowerCase(String str) {
+        if (null == str) {
+            return false;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isLowerCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasUpperCase(String str) {
+        if (null == str) {
+            return false;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            if (Character.isUpperCase(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

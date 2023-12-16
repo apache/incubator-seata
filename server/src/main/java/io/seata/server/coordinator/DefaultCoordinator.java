@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -90,7 +91,7 @@ import static io.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
  */
 public class DefaultCoordinator extends AbstractTCInboundHandler implements TransactionMessageHandler, Disposable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
     private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
@@ -185,7 +186,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      *
      * @param remotingServer the remoting server
      */
-    private DefaultCoordinator(RemotingServer remotingServer) {
+    protected DefaultCoordinator(RemotingServer remotingServer) {
         if (remotingServer == null) {
             throw new IllegalArgumentException("RemotingServer not allowed be null.");
         }
@@ -210,7 +211,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (null == instance) {
             synchronized (DefaultCoordinator.class) {
                 if (null == instance) {
-                    instance = new DefaultCoordinator(remotingServer);
+                    StoreConfig.SessionMode storeMode = StoreConfig.getSessionMode();
+                    instance = Objects.equals(StoreConfig.SessionMode.RAFT, storeMode)
+                        ? new RaftCoordinator(remotingServer) : new DefaultCoordinator(remotingServer);
                 }
             }
         }
@@ -410,7 +413,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
                 // prevent repeated commit
-                if (GlobalStatus.Committing.equals(committingSession.getStatus()) && !committingSession.isDeadSession()) {
+                if ((GlobalStatus.Committing.equals(committingSession.getStatus())
+                        || GlobalStatus.Committed.equals(committingSession.getStatus()))
+                        && !committingSession.isDeadSession()) {
                     // The function of this 'return' is 'continue'.
                     return;
                 }

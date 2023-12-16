@@ -269,10 +269,6 @@ public class DefaultCore implements Core {
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
         if (success && globalSession.getBranchSessions().isEmpty()) {
-            if (!retrying) {
-                //contains not AT branch
-                globalSession.setStatus(GlobalStatus.Committed);
-            }
             SessionHelper.endCommitted(globalSession, retrying);
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
@@ -311,7 +307,7 @@ public class DefaultCore implements Core {
         if (globalSession.isSaga()) {
             success = getCore(BranchType.SAGA).doGlobalRollback(globalSession, retrying);
         } else {
-            List<BranchSession> branchSessions = globalSession.getSortedBranches();
+            List<BranchSession> branchSessions = globalSession.getReverseSortedBranches();
             Boolean result = SessionHelper.forEach(branchSessions, branchSession -> {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {

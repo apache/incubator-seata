@@ -119,7 +119,7 @@ public class OracleInsertRecognizerTest {
     @Test
     public void testNotPlaceholder_giveValidPkIndex() {
         String sql = "insert into test(create_time) values(sysdate)";
-        List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DB_TYPE);;
+        List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleInsertRecognizer oracle = new OracleInsertRecognizer(sql, sqlStatements.get(0));
         List<List<Object>> insertRows = oracle.getInsertRows(Collections.singletonList(-1));

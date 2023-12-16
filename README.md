@@ -7,9 +7,7 @@
 [![Build Status](https://github.com/seata/seata/workflows/build/badge.svg?branch=develop)](https://github.com/seata/seata/actions)
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/seata/seata.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seata/seata/context:java)
-
+[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
 
 ## What is Seata?
 
@@ -83,23 +81,31 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 
 ## Maven dependency
+
+Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` or `io.seata:seata-spring-boot-starter`.
 ```xml
-<seata.version>1.6.1</seata.version>
-<dependency>
+<properties>
+  <seata.version>2.0.0</seata.version>
+</properties>
+
+<dependencies>
+<!--dependencies for non-SpringBoot application framework-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
-</dependency>
+  </dependency>
 
 <!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
-<!--Notice: `seata-spring-boot-starter` has included `seata-all` dependency-->
-<dependency>
+<!--Notice: `seata-spring-boot-starter` has already included `seata-all` dependency-->
+  <dependency>
     <groupId>io.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
-</dependency>
-
+  </dependency>
+</dependencies>
 ```
+
 ## Quick Start
 
 [Quick Start](https://seata.io/zh-cn/docs/ops/deploy-guide-beginner.html)

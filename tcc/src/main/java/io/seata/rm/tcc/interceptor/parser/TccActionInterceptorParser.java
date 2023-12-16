@@ -37,7 +37,7 @@ import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
-    public ProxyInvocationHandler parserInterfaceToProxy(Object target) {
+    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
         // eliminate the bean without two phase annotation.
         Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
         if (methodsToProxy.isEmpty()) {

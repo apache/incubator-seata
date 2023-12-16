@@ -74,8 +74,8 @@ public class TransactionalTemplate {
                     // If transaction is existing, suspend it, and then begin new transaction.
                     if (existingTransaction(tx)) {
                         suspendedResourcesHolder = tx.suspend(false);
-                        tx = GlobalTransactionContext.createNew();
                     }
+                    tx = GlobalTransactionContext.createNew();
                     // Continue and execute with new transaction
                     break;
                 case SUPPORTS:
@@ -86,8 +86,8 @@ public class TransactionalTemplate {
                     // Continue and execute with new transaction
                     break;
                 case REQUIRED:
-                    // If current transaction is existing, execute with current transaction,
-                    // else continue and execute with new transaction.
+                    // If current transaction is existing, execute with current transaction,else create
+                    tx = GlobalTransactionContext.getCurrentOrCreate();
                     break;
                 case NEVER:
                     // If transaction is existing, throw exception.
@@ -110,13 +110,12 @@ public class TransactionalTemplate {
                     throw new TransactionException("Not Supported Propagation:" + propagation);
             }
 
-            // 1.3 If null, create new transaction with role 'GlobalTransactionRole.Launcher'.
-            if (tx == null) {
-                tx = GlobalTransactionContext.createNew();
-            }
-
             // set current tx config to holder
             GlobalLockConfig previousConfig = replaceGlobalLockConfig(txInfo);
+            
+            if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Participant) {
+                LOGGER.info("join into a existing global transaction,xid={}", tx.getXid());
+            }
 
             try {
                 // 2. If the tx role is 'GlobalTransactionRole.Launcher', send the request of beginTransaction to TC,
@@ -140,7 +139,7 @@ public class TransactionalTemplate {
             } finally {
                 //5. clear
                 resumeGlobalLockConfig(previousConfig);
-                triggerAfterCompletion();
+                triggerAfterCompletion(tx);
                 cleanUp();
             }
         } finally {
@@ -201,6 +200,12 @@ public class TransactionalTemplate {
 
     private void commitTransaction(GlobalTransaction tx, TransactionInfo txInfo)
             throws TransactionalExecutor.ExecutionException, TransactionException {
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore commit: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         if (isTimeout(tx.getCreateTime(), txInfo)) {
             // business execution timeout
             Exception exx = new TmTransactionException(TransactionExceptionCode.TransactionTimeout,
@@ -211,9 +216,6 @@ public class TransactionalTemplate {
 
         try {
             triggerBeforeCommit();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be commit", tx.getXid());
-            }
             tx.commit();
             GlobalStatus afterCommitStatus = tx.getLocalStatus();
             TransactionalExecutor.Code code = TransactionalExecutor.Code.Unknown;
@@ -249,13 +251,14 @@ public class TransactionalTemplate {
     }
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable originalException) throws TransactionException, TransactionalExecutor.ExecutionException {
-
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore rollback: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         try {
             triggerBeforeRollback();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("transaction {} will be rollback, cause by:{}", tx.getXid(),
-                    originalException.getMessage());
-            }
             tx.rollback();
             triggerAfterRollback();
         } catch (TransactionException txe) {
@@ -293,6 +296,12 @@ public class TransactionalTemplate {
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+        if (tx.getGlobalTransactionRole() != GlobalTransactionRole.Launcher) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore begin: just involved in global transaction [{}]", tx.getXid());
+            }
+            return;
+        }
         try {
             triggerBeforeBegin();
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
@@ -364,12 +373,14 @@ public class TransactionalTemplate {
         }
     }
 
-    private void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCompletion();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+    private void triggerAfterCompletion(GlobalTransaction tx) {
+        if (tx == null || tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCompletion();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+                }
             }
         }
     }

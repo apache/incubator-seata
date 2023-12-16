@@ -29,6 +29,7 @@ service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
 service.disableGlobalTransaction=false
 
+client.metadataMaxAgeMs=30000
 #Transaction rule configuration, only for the client
 client.rm.asyncCommitBufferLimit=10000
 client.rm.lock.retryInterval=10
@@ -42,6 +43,7 @@ client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
 client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
+client.rm.sqlParserType=druid
 client.tm.commitRetryCount=5
 client.tm.rollbackRetryCount=5
 client.tm.defaultGlobalTransactionTimeout=60000
@@ -105,6 +107,7 @@ store.redis.single.host=127.0.0.1
 store.redis.single.port=6379
 store.redis.sentinel.masterName=
 store.redis.sentinel.sentinelHosts=
+store.redis.sentinel.sentinelPassword=
 store.redis.maxConn=10
 store.redis.minConn=1
 store.redis.maxTotal=100
@@ -121,11 +124,27 @@ server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
 server.rollbackRetryTimeoutUnlockEnable=false
 server.distributedLockExpireTime=10000
-server.xaerNotaRetryTimeout=60000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
 server.enableParallelRequestHandle=true
 server.enableParallelHandleBranch=false
+server.applicationDataLimit=64000
+server.applicationDataLimitCheck=false
+
+server.raft.cluster=127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093
+server.raft.snapshotInterval=600
+server.raft.applyBatch=32
+server.raft.maxAppendBufferSize=262144
+server.raft.maxReplicatorInflightMsgs=256
+server.raft.disruptorBufferSize=16384
+server.raft.electionTimeoutMs=2000
+server.raft.reporterEnabled=false
+server.raft.reporterInitialDelay=60
+server.raft.serialization=jackson
+server.raft.compressor=none
+server.raft.sync=true
+
+
 
 #Metrics configuration, only for the server
 metrics.enabled=false

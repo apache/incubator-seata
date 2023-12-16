@@ -52,6 +52,10 @@ public class LockerManagerFactory {
         init(null);
     }
 
+    public static void destroy() {
+        LOCK_MANAGER = null;
+    }
+
     public static void init(LockMode lockMode) {
         if (LOCK_MANAGER == null) {
             synchronized (LockerManagerFactory.class) {

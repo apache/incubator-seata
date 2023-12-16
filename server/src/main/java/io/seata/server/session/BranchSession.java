@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -304,7 +304,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (this.branchType == BranchType.AT && CollectionUtils.isNotEmpty(this.lockHolder)) {
+        if (this.branchType == BranchType.AT) {
             return lockManager.releaseLock(this);
         }
         return true;
@@ -407,7 +407,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put((byte)status.getCode());
         byteBuffer.put((byte)lockStatus.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;

@@ -55,7 +55,7 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
     @Override
     public boolean isReference(Object bean, String beanName) {
         String beanClassName = bean.getClass().getName();
-        return isHsf && ("com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName) || "org.springframework.beans.factory.FactoryBean".equals(beanClassName));
+        return isHsf && "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean".equals(beanClassName);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
                 Object metadata = ReflectionUtil.invokeMethod(consumerBean, "getMetadata");
 
                 String interfaceClassName = (String) ReflectionUtil.invokeMethod(metadata, "getInterfaceName");
-                Class<?> interfaceClass = (Class<?>) Class.forName(interfaceClassName);
+                Class<?> interfaceClass = Class.forName(interfaceClassName);
                 String uniqueId = (String) ReflectionUtil.invokeMethod(metadata, "getVersion");
                 String group = (String) ReflectionUtil.invokeMethod(metadata, "getGroup");
                 RemotingDesc serviceBeanDesc = new RemotingDesc();

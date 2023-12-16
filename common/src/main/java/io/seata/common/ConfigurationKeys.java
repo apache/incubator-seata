@@ -29,6 +29,7 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_REGISTRY.
      */
     String FILE_ROOT_REGISTRY = "registry";
+
     /**
      * The constant FILE_ROOT_CONFIG.
      */
@@ -37,6 +38,22 @@ public interface ConfigurationKeys {
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
     String FILE_CONFIG_SPLIT_CHAR = ".";
+
+    /**
+     * The constant FILE_ROOT_PREFIX_REGISTRY.
+     */
+    String FILE_ROOT_PREFIX_REGISTRY = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant FILE_ROOT_PREFIX_CONFIG.
+     */
+    String FILE_ROOT_PREFIX_CONFIG = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant SEATA_FILE_PREFIX_ROOT_CONFIG
+     */
+    String SEATA_FILE_PREFIX_ROOT_CONFIG = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
     /**
      * The constant FILE_ROOT_TYPE.
      */
@@ -346,6 +363,11 @@ public interface ConfigurationKeys {
      * The constant SERVER_RPC_PORT.
      */
     String SERVER_SERVICE_PORT_CAMEL = SERVER_PREFIX + "servicePort";
+
+    /**
+     * The constant SERVER_RAFT_PORT.
+     */
+    String SERVER_RAFT_PORT_CAMEL = SERVER_PREFIX + "raftPort";
 
     /**
      * The constant SERVER_SERVICE_PORT_CONFIG.
@@ -727,6 +749,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_SENTINEL_HOST = STORE_REDIS_SENTINEL_PREFIX + "sentinelHosts";
 
     /**
+     * STORE_REDIS_SENTINEL_PASSWORD.
+     */
+    String STORE_REDIS_SENTINEL_PASSWORD = STORE_REDIS_SENTINEL_PREFIX + "sentinelPassword";
+
+    /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
     String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
@@ -845,6 +872,81 @@ public interface ConfigurationKeys {
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 
     /**
+     * The constant SERVER_RAFT.
+     */
+    String SERVER_RAFT = SERVER_PREFIX + "raft.";
+
+    /**
+     * The constant SERVER_RAFT_SERVER_ADDR.
+     */
+    String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
+
+    /**
+     * The constant SERVER_RAFT_GROUP.
+     */
+    String SERVER_RAFT_GROUP = SERVER_RAFT + "group";
+
+    /**
+     * The constant SERVER_RAFT_SNAPSHOT_INTERVAL.
+     */
+    String SERVER_RAFT_SNAPSHOT_INTERVAL = SERVER_RAFT + "snapshotInterval";
+
+    /**
+     * The constant SERVER_RAFT_DISRUPTOR_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_DISRUPTOR_BUFFER_SIZE = SERVER_RAFT + "disruptorBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS.
+     */
+    String SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS = SERVER_RAFT + "maxReplicatorInflightMsgs";
+
+    /**
+     * The constant SERVER_RAFT_SYNC.
+     */
+    String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
+     * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
+     */
+    String SERVER_RAFT_MAX_APPEND_BUFFER_SIZE = SERVER_RAFT + "maxAppendBufferSize";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_APPLY_BATCH = SERVER_RAFT + "applyBatch";
+
+    /**
+     * The constant SERVER_RAFT_APPLY_BATCH.
+     */
+    String SERVER_RAFT_ELECTION_TIMEOUT_MS = SERVER_RAFT + "electionTimeoutMs";
+
+    /**
+     * The constant SERVER_RAFT_REPORTER_ENABLED.
+     */
+    String SERVER_RAFT_REPORTER_ENABLED = SERVER_RAFT + "reporterEnabled";
+
+    /**
+     * The constant SERVER_RAFT_REPORTER_INITIAL_DELAY.
+     */
+    String SERVER_RAFT_REPORTER_INITIAL_DELAY = SERVER_RAFT + "reporterInitialDelay";
+
+    /**
+     * The constant SERVER_RAFT_SERIALIZATION.
+     */
+    String SERVER_RAFT_SERIALIZATION = SERVER_RAFT + "serialization";
+
+    /**
+     * The constant SERVER_RAFT_COMPRESSOR.
+     */
+    String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
+
+    /**
+     * The constant CLIENT_METADATA_MAX_AGE_MS.
+     */
+    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
@@ -869,6 +971,7 @@ public interface ConfigurationKeys {
      */
     String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
 
+
     /**
      * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
      */
@@ -879,4 +982,23 @@ public interface ConfigurationKeys {
      */
     String ENABLE_PARALLEL_HANDLE_BRANCH_KEY = SERVER_PREFIX + "enableParallelHandleBranch";
 
+    /**
+     * The constant RM_APPLICATION_DATA_SIZE_ERROR
+     */
+    String RM_APPLICATION_DATA_SIZE_LIMIT = CLIENT_RM_PREFIX + "applicationDataLimit";
+
+    /**
+     * The constant RM_APPLICATION_DATA_SIZE_CHECK
+     */
+    String RM_APPLICATION_DATA_SIZE_CHECK = CLIENT_RM_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant SERVER_APPLICATION_DATA_SIZE_ERROR
+     */
+    String SERVER_APPLICATION_DATA_SIZE_LIMIT = SERVER_PREFIX + "applicationDataLimit";
+
+    /**
+     * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
+     */
+    String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
 }
