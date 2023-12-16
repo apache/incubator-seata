@@ -44,7 +44,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
             return null;
         }
         // register resource and enhance with interceptor
-        DefaultResourceRegisterParser.get().registerResource(target);
+        DefaultResourceRegisterParser.get().registerResource(target, objectName);
         return new TccActionInterceptorHandler(target, methodsToProxy);
     }
 
