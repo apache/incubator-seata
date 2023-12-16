@@ -265,7 +265,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      */
     private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
-        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.get(notifyCluserName);
+        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.getOrDefault(notifyCluserName, Collections.emptySet());
         InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
         if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
             String txServiceGroupName = ConfigurationFactory.getInstance()
