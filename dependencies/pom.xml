@@ -51,9 +51,10 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <mock-jedis.version>0.3.0</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
-        <eureka-clients.version>1.10.17</eureka-clients.version>
+        <eureka-clients.version>1.10.18</eureka-clients.version>
+        <jettison.version>1.5.4</jettison.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.2</nacos-client.version>
+        <nacos-client.version>1.4.6</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>32.0.0-jre</guava.version>
@@ -118,7 +119,7 @@
         <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
         <!-- # for test -->
-        <mockito.version>4.5.1</mockito.version>
+        <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
@@ -410,7 +411,16 @@
                         <groupId>javax.servlet</groupId>
                         <artifactId>servlet-api</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jettison</groupId>
+                        <artifactId>jettison</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>${jettison.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.netflix.archaius</groupId>
