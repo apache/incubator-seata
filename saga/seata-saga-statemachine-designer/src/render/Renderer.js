@@ -531,6 +531,33 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
 
       return diamond;
     },
+    Succeed(parentGfx, element) {
+      return drawCircle(parentGfx, element.width, element.height, {
+        strokeWidth: 4,
+        fill: getFillColor(element, defaultFillColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+    },
+    Fail(parentGfx, element) {
+      const circle = handlers.Succeed(parentGfx, element);
+      const pathData = pathMap.getScaledPath('EVENT_ERROR', {
+        xScaleFactor: 1.1,
+        yScaleFactor: 1.1,
+        containerWidth: element.width,
+        containerHeight: element.height,
+        position: {
+          mx: 0.2,
+          my: 0.722,
+        },
+      });
+      drawPath(parentGfx, pathData, {
+        strokeWidth: 1,
+        fill: getStrokeColor(element, defaultStrokeColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+
+      return circle;
+    },
   };
   function drawShape(parent, element) {
     const h = handlers[element.type];

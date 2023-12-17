@@ -21,6 +21,8 @@ import StartState from '../spec/StartState';
 import ScriptTask from '../spec/ScriptTask';
 import Choice from '../spec/Choice';
 import ChoiceEntry from '../spec/ChoiceEntry';
+import Succeed from '../spec/Succeed';
+import Fail from '../spec/Fail';
 
 export default function SagaFactory() {
   const typeToSpec = new Map();
@@ -31,6 +33,8 @@ export default function SagaFactory() {
   typeToSpec.set('ScriptTask', ScriptTask);
   typeToSpec.set('Choice', Choice);
   typeToSpec.set('ChoiceEntry', ChoiceEntry);
+  typeToSpec.set('Succeed', Succeed);
+  typeToSpec.set('Fail', Fail);
   this.typeToSpec = typeToSpec;
 }
 
