@@ -20,7 +20,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
 
 ### test:
-- [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
+- [[#6151](https://github.com/seata/seata/pull/6151)] add test for `MacOS` and `Windows`
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
