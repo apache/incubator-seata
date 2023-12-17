@@ -255,7 +255,7 @@ class NettyClientChannelManager {
         }
         Channel channelFromPool;
         try {
-            NettyPoolKey nettyPoolKey = poolKeyMap.computeIfAbsent(serverAddress, (address) -> poolKeyBuilder.apply(address));
+            NettyPoolKey nettyPoolKey = poolKeyMap.computeIfAbsent(serverAddress, key -> poolKeyBuilder.apply(key));
             poolKeyUpdater.accept(nettyPoolKey);
             channelFromPool = nettyClientKeyPool.borrowObject(nettyPoolKey);
             channels.put(serverAddress, channelFromPool);

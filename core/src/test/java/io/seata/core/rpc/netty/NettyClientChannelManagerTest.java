@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
@@ -51,8 +52,11 @@ class NettyClientChannelManagerTest {
     private NettyPoolableFactory poolableFactory;
     
     @Mock
-    private Function<String, NettyPoolKey> poolKeyFunction;
-    
+    private Function<String, NettyPoolKey> poolKeyBuilder;
+
+    @Mock
+    private Consumer<NettyPoolKey> poolKeyUpdater;
+
     private NettyClientConfig nettyClientConfig = new NettyClientConfig();
     
     @Mock
@@ -69,7 +73,7 @@ class NettyClientChannelManagerTest {
     
     @BeforeEach
     void setUp() {
-        channelManager = new NettyClientChannelManager(poolableFactory, poolKeyFunction, nettyClientConfig);
+        channelManager = new NettyClientChannelManager(poolableFactory, poolKeyBuilder, poolKeyUpdater, nettyClientConfig);
     }
     
     @AfterEach
@@ -85,7 +89,7 @@ class NettyClientChannelManagerTest {
     }
     
     private void setupPoolFactory(final NettyPoolKey nettyPoolKey, final Channel channel) {
-        when(poolKeyFunction.apply(anyString())).thenReturn(nettyPoolKey);
+        when(poolKeyBuilder.apply(anyString())).thenReturn(nettyPoolKey);
         when(poolableFactory.makeObject(nettyPoolKey)).thenReturn(channel);
         when(poolableFactory.validateObject(nettyPoolKey, channel)).thenReturn(true);
     }
