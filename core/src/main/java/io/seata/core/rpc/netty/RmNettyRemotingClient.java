@@ -48,6 +48,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
@@ -279,7 +280,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+    protected Function<String, NettyPoolKey> getPoolKeyBuilder() {
         return serverAddress -> {
             String resourceIds = getMergedResourceKeys();
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
@@ -288,6 +289,14 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
             message.setResourceIds(resourceIds);
             return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
+        };
+    }
+
+    @Override
+    protected Consumer<NettyPoolKey> getPoolKeyUpdater() {
+        return nettyPoolKey -> {
+            RegisterRMRequest registerRMRequest = (RegisterRMRequest) nettyPoolKey.getMessage();
+            registerRMRequest.setResourceIds(getMergedResourceKeys());
         };
     }
 

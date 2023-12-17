@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
@@ -126,7 +127,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientBootstrap.setChannelHandlers(new ClientHandler());
         clientChannelManager = new NettyClientChannelManager(
-            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyBuilder(), getPoolKeyUpdater(), nettyClientConfig);
     }
 
     @Override
@@ -296,11 +297,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     /**
-     * Get pool key function.
+     * Get function to build a pool key.
      *
      * @return lambda function
      */
-    protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
+    protected abstract Function<String, NettyPoolKey> getPoolKeyBuilder();
+
+    /**
+     * Get consumer to update a pool key.
+     *
+     * @return lambda consumer
+     */
+    protected abstract Consumer<NettyPoolKey> getPoolKeyUpdater();
 
     /**
      * Get transaction service group.

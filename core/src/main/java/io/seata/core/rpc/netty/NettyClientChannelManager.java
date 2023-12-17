@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,8 +36,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -62,13 +61,16 @@ class NettyClientChannelManager {
 
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
 
-    private Function<String, NettyPoolKey> poolKeyFunction;
+    private Function<String, NettyPoolKey> poolKeyBuilder;
 
-    NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
-                                     final NettyClientConfig clientConfig) {
+    private Consumer<NettyPoolKey> poolKeyUpdater;
+
+    NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyBuilder,
+                                     final Consumer<NettyPoolKey> poolKeyUpdater, final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
-        this.poolKeyFunction = poolKeyFunction;
+        this.poolKeyBuilder = poolKeyBuilder;
+        this.poolKeyUpdater = poolKeyUpdater;
     }
 
     private GenericKeyedObjectPool.Config getNettyPoolConfig(final NettyClientConfig clientConfig) {
@@ -253,17 +255,9 @@ class NettyClientChannelManager {
         }
         Channel channelFromPool;
         try {
-            NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
-                poolKeyMap.put(serverAddress, currentPoolKey);
-            } else {
-                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
-                }
-            }
-            channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            NettyPoolKey nettyPoolKey = poolKeyMap.computeIfAbsent(serverAddress, (address) -> poolKeyBuilder.apply(address));
+            poolKeyUpdater.accept(nettyPoolKey);
+            channelFromPool = nettyClientKeyPool.borrowObject(nettyPoolKey);
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
