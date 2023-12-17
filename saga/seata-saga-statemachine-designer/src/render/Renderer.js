@@ -64,6 +64,16 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
   const defaultStrokeColor = (config && config.defaultStrokeColor) || BLACK;
   const defaultLabelColor = (config && config.defaultLabelColor);
 
+  function shapeStyle(attrs) {
+    return styles.computeStyle(attrs, {
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      stroke: BLACK,
+      strokeWidth: 2,
+      fill: 'white',
+    });
+  }
+
   function addMarker(id, options) {
     const attrs = assign({
       strokeWidth: 1,
@@ -116,15 +126,32 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
     const end = svgCreate('path');
     svgAttr(end, { d: 'M 1 5 L 11 10 L 1 15 Z' });
 
-    addMarker(id, {
-      element: end,
-      attrs: {
-        fill: stroke,
-        stroke: 'none',
-      },
-      ref: { x: 11, y: 10 },
-      scale: 1,
-    });
+    if (type === 'connection-end') {
+      addMarker(id, {
+        element: end,
+        attrs: {
+          fill: stroke,
+          stroke: 'none',
+        },
+        ref: { x: 11, y: 10 },
+        scale: 1,
+      });
+    }
+
+    if (type === 'default-choice-marker') {
+      const defaultChoiceMarker = svgCreate('path', {
+        d: 'M 6 4 L 10 16',
+        ...shapeStyle({
+          stroke,
+        }),
+      });
+
+      addMarker(id, {
+        element: defaultChoiceMarker,
+        ref: { x: 0, y: 10 },
+        scale: 1,
+      });
+    }
   }
 
   function marker(type, fill, stroke) {
@@ -146,13 +173,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
 
     offset = offset || 0;
 
-    attrs = computeStyle(attrs, {
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-      stroke: BLACK,
-      strokeWidth: 2,
-      fill: 'white',
-    });
+    attrs = shapeStyle(attrs);
 
     if (attrs.fill === 'none') {
       delete attrs.fillOpacity;
@@ -243,6 +264,33 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
     return path;
   }
 
+  function drawDiamond(parentGfx, width, height, attrs) {
+    const x2 = width / 2;
+    const y2 = height / 2;
+
+    const points = [
+      { x: x2, y: 0 },
+      { x: width, y: y2 },
+      { x: x2, y: height },
+      { x: 0, y: y2 },
+    ];
+
+    const pointsString = points.map((point) => {
+      return `${point.x},${point.y}`;
+    }).join(' ');
+
+    attrs = shapeStyle(attrs);
+
+    const polygon = svgCreate('polygon', {
+      ...attrs,
+      points: pointsString,
+    });
+
+    svgAppend(parentGfx, polygon);
+
+    return polygon;
+  }
+
   function drawLine(p, waypoints, attrs) {
     attrs = computeStyle(attrs, ['no-fill'], {
       stroke: BLACK,
@@ -317,6 +365,27 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
       };
 
       return drawLine(p, element.waypoints, attrs);
+    },
+    ChoiceEntry(p, element) {
+      const fill = getFillColor(element, defaultFillColor);
+      const stroke = getStrokeColor(element, defaultStrokeColor);
+      const attrs = {
+        stroke,
+        strokeWidth: 1,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        markerEnd: marker('connection-end', fill, stroke),
+      };
+
+      const path = drawLine(p, element.waypoints, attrs);
+
+      if (getSemantic(element).Default) {
+        svgAttr(path, {
+          markerStart: marker('default-choice-marker', fill, stroke),
+        });
+      }
+
+      return path;
     },
     StartState(parentGfx, element) {
       return drawCircle(parentGfx, element.width, element.height, {
@@ -432,6 +501,35 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
         fill: getFillColor(element, defaultFillColor),
         stroke: getStrokeColor(element, defaultStrokeColor),
       });
+    },
+    Gateway(parentGfx, element) {
+      return drawDiamond(parentGfx, element.width, element.height, {
+        fill: getFillColor(element, defaultFillColor),
+        fillOpacity: DEFAULT_FILL_OPACITY,
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+    },
+    Choice(parentGfx, element) {
+      const diamond = renderer('Gateway')(parentGfx, element);
+
+      const pathData = pathMap.getScaledPath('GATEWAY_EXCLUSIVE', {
+        xScaleFactor: 0.4,
+        yScaleFactor: 0.4,
+        containerWidth: element.width,
+        containerHeight: element.height,
+        position: {
+          mx: 0.32,
+          my: 0.3,
+        },
+      });
+
+      drawPath(parentGfx, pathData, {
+        strokeWidth: 1,
+        fill: getStrokeColor(element, defaultStrokeColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+
+      return diamond;
     },
   };
   function drawShape(parent, element) {

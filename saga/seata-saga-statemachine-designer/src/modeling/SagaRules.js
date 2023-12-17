@@ -17,6 +17,7 @@
 import inherits from 'inherits-browser';
 
 import RuleProvider from 'diagram-js/lib/features/rules/RuleProvider';
+import { is } from '../utils';
 
 export default function SagaRules(injector) {
   injector.invoke(RuleProvider, this);
@@ -34,6 +35,11 @@ function canConnect(source, target) {
   if (target.parent !== source.parent || source === target) {
     return false;
   }
+
+  if (is(source, 'Choice')) {
+    return { type: 'ChoiceEntry' };
+  }
+
   return { type: 'Transition' };
 }
 

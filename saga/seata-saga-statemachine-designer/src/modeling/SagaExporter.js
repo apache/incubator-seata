@@ -54,7 +54,23 @@ SagaExporter.prototype.parseEdge = function (definitions, edge) {
     }
   } else {
     const stateRef = definitions.States[source];
-    stateRef.Next = target;
+    switch (businessObject.Type) {
+      case 'ChoiceEntry':
+        if (!stateRef.Choices) {
+          stateRef.Choices = [];
+        }
+        stateRef.Choices.push({
+          Expression: businessObject.Expression,
+          Next: target,
+        });
+        if (businessObject.Default) {
+          stateRef.Default = target;
+        }
+        break;
+      case 'Transition':
+      default:
+        stateRef.Next = target;
+    }
 
     if (stateRef.edge === undefined) {
       stateRef.edge = {};

@@ -18,8 +18,9 @@ import { assign } from 'min-dash';
 import ServiceTask from '../spec/ServiceTask';
 import StartState from '../spec/StartState';
 import ScriptTask from '../spec/ScriptTask';
+import Choice from '../spec/Choice';
 
-const SPEC_LIST = [StartState, ServiceTask, ScriptTask];
+const SPEC_LIST = [StartState, ServiceTask, ScriptTask, Choice];
 
 /**
  * A palette provider.

@@ -139,6 +139,15 @@ export default function PathMap() {
       heightElements: [6, 14],
       widthElements: [10.5, 21],
     },
+    GATEWAY_EXCLUSIVE: {
+      d: 'm {mx},{my} {e.x0},{e.y0} {e.x1},{e.y0} {e.x2},0 {e.x4},{e.y2} '
+        + '{e.x4},{e.y1} {e.x2},0 {e.x1},{e.y3} {e.x0},{e.y3} '
+        + '{e.x3},0 {e.x5},{e.y1} {e.x5},{e.y2} {e.x3},0 z',
+      height: 17.5,
+      width: 17.5,
+      heightElements: [8.5, 6.5312, -6.5312, -8.5],
+      widthElements: [6.5, -6.5, 3, -3, 5, -5],
+    },
   };
 
   this.getRawPath = function getRawPath(pathId) {
