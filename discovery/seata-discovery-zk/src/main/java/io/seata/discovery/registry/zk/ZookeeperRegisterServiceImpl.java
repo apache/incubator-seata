@@ -287,8 +287,6 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             String clusterName = parentPath.replace(ROOT_PATH, "");
             if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
                 CLUSTER_ADDRESS_MAP.remove(clusterName);
-
-                removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
             } else if (!CollectionUtils.isEmpty(currentChilds)) {
                 refreshClusterAddressMap(clusterName, currentChilds);
             }
@@ -299,8 +297,6 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         List<InetSocketAddress> newAddressList = new ArrayList<>();
         if (instances == null) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-
-            removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
             return;
         }
         for (String path : instances) {

@@ -15,13 +15,17 @@
  */
 package io.seata.discovery.registry.zk;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.util.NetUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.config.exception.ConfigNotFoundException;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -31,6 +35,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Geng Zhang
@@ -101,6 +111,30 @@ public class ZookeeperRegisterServiceImplTest {
 
         service.unsubscribe("default", listener);
         service.unsubscribe("default", listener2);
+    }
+
+    @Test
+    public void testLookUp() throws Exception {
+        ZookeeperRegisterServiceImpl zookeeperRegisterService = ZookeeperRegisterServiceImpl.getInstance();
+
+        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
+        client.createPersistent("/registry/zk/cluster");
+        client.createEphemeral("/registry/zk/cluster/127.0.0.1:8091");
+
+        Field field = ZookeeperRegisterServiceImpl.class.getDeclaredField("zkClient");
+        field.setAccessible(true);
+        field.set(zookeeperRegisterService, client);
+
+        MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = Mockito.mockStatic(ConfigurationFactory.class);
+        Configuration configuration = mock(Configuration.class);
+        configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
+        when(configuration.getConfig(anyString())).thenReturn("cluster");
+
+        List<InetSocketAddress> addressList = zookeeperRegisterService.lookup("group");
+
+        configurationFactoryMockedStatic.close();
+
+        Assertions.assertEquals(addressList, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
     }
 
 }

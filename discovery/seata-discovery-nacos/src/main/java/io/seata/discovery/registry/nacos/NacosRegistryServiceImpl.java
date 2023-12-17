@@ -187,8 +187,6 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                         List<Instance> instances = ((NamingEvent) event).getInstances();
                         if (CollectionUtils.isEmpty(instances) && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
                             LOGGER.info("receive empty server list,cluster:{}", clusterName);
-
-                            removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
                         } else {
                             List<InetSocketAddress> newAddressList = instances.stream()
                                     .filter(eachInstance -> eachInstance.isEnabled() && eachInstance.isHealthy())

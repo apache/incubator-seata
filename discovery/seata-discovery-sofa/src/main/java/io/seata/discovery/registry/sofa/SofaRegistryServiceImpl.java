@@ -167,8 +167,6 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                 Map<String, List<String>> instances = data.getZoneData();
                 if (instances == null && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
                     CLUSTER_ADDRESS_MAP.remove(clusterName);
-
-                    removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
                 } else {
                     List<InetSocketAddress> newAddressList = flatData(instances);
                     CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);

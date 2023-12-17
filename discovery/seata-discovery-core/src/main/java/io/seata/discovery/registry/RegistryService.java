@@ -16,16 +16,12 @@
 package io.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -146,6 +142,15 @@ public interface RegistryService<T> {
         List<InetSocketAddress> inetSocketAddresses = currentAddresses
                 .stream().filter(newAddressed::contains).collect(
                         Collectors.toList());
+
+        // empty addresses && currentClusterName == clusterName, enable push empty protection
+        if (CollectionUtils.isEmpty(inetSocketAddresses)) {
+            String txServiceGroupName = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+            String currentClusterName = getServiceGroup(txServiceGroupName);
+            if (Objects.equals(currentClusterName, clusterName)) {
+                return;
+            }
+        }
 
         CURRENT_ADDRESS_MAP.put(clusterName, inetSocketAddresses);
     }

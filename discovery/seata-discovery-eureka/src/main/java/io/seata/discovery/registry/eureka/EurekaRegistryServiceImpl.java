@@ -163,8 +163,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         Application application = getEurekaClient(false).getApplication(clusterName);
         if (application == null || CollectionUtils.isEmpty(application.getInstances())) {
             LOGGER.info("refresh cluster success,but cluster empty! cluster name:{}", clusterName);
-
-            removeOfflineAddressesIfNecessary(clusterName, Collections.emptyList());
         } else {
             List<InetSocketAddress> newAddressList = application.getInstances().stream()
                     .filter(instance -> InstanceInfo.InstanceStatus.UP.equals(instance.getStatus()) && instance.getIPAddr() != null && instance.getPort() > 0 && instance.getPort() < 0xFFFF)
