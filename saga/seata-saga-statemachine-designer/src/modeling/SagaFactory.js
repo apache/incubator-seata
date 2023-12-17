@@ -18,6 +18,7 @@ import Transition from '../spec/Transition';
 import StateMachine from '../spec/StateMachine';
 import ServiceTask from '../spec/ServiceTask';
 import StartState from '../spec/StartState';
+import ScriptTask from '../spec/ScriptTask';
 
 export default function SagaFactory() {
   const typeToSpec = new Map();
@@ -25,6 +26,7 @@ export default function SagaFactory() {
   typeToSpec.set('StartState', StartState);
   typeToSpec.set('StateMachine', StateMachine);
   typeToSpec.set('ServiceTask', ServiceTask);
+  typeToSpec.set('ScriptTask', ScriptTask);
   this.typeToSpec = typeToSpec;
 }
 

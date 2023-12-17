@@ -380,6 +380,22 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
 
       return task;
     },
+    ScriptTask(parentGfx, element) {
+      const task = renderer('Task')(parentGfx, element);
+      const pathData = pathMap.getScaledPath('TASK_TYPE_SCRIPT', {
+        abspos: {
+          x: 15,
+          y: 20,
+        },
+      });
+
+      /* script path */ drawPath(parentGfx, pathData, {
+        strokeWidth: 1,
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+
+      return task;
+    },
     LoopMarker(parentGfx, element, position) {
       const markerPath = pathMap.getScaledPath('MARKER_LOOP', {
         xScaleFactor: 1,

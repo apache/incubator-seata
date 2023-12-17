@@ -25,3 +25,8 @@ export default class TaskState extends State {
     this.Retry = [];
   }
 }
+
+TaskState.prototype.DEFAULT_SIZE = {
+  width: 100,
+  height: 80,
+};
