@@ -400,6 +400,20 @@ public class ChannelManager {
             }
         }
 
+        if (resultChannel == null && tryOtherApp) {
+            resultChannel = tryOtherApp(applicationIdMap, targetApplicationId);
+
+            if (resultChannel == null) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("No channel is available for resource[{}] as alternative of {}", resourceId, clientId);
+                }
+            } else {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Choose {} on the same resource[{}] as alternative of {}", resultChannel, resourceId, clientId);
+                }
+            }
+        }
+
         return resultChannel;
 
     }
