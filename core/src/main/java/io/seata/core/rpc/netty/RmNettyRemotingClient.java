@@ -295,8 +295,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     protected Consumer<NettyPoolKey> getPoolKeyUpdater() {
         return nettyPoolKey -> {
-            RegisterRMRequest registerRMRequest = (RegisterRMRequest) nettyPoolKey.getMessage();
-            registerRMRequest.setResourceIds(getMergedResourceKeys());
+            RegisterRMRequest message = (RegisterRMRequest) nettyPoolKey.getMessage();
+            message.setResourceIds(getMergedResourceKeys());
         };
     }
 
