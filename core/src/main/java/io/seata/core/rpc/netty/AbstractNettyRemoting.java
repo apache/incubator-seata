@@ -93,7 +93,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
     /**
      * The Is sending.
      */
-    protected static volatile boolean isSending = false;
+    protected volatile boolean isSending = false;
     private String group = "DEFAULT";
 
     /**
