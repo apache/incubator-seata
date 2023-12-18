@@ -14,35 +14,15 @@
  *  limitations under the License.
  */
 
-import State from './State';
+import TaskState from './TaskState';
 
-export default class TaskState extends State {
+export default class SubStateMachine extends TaskState {
   constructor() {
     super();
-    this.IsForCompensation = false;
-    this.Input = [{}];
-    this.Output = {};
-    this.Status = {};
-    this.Retry = [];
-  }
-
-  importJson(json) {
-    super.importJson(json);
-    delete this.catch;
-  }
-
-  exportJson() {
-    const json = super.exportJson();
-    const { Catch } = json;
-    if (Catch) {
-      json.catch = json.Catch.exportJson();
-      json.Catch = [];
-    }
-    return json;
+    this.StateMachineName = '';
   }
 }
 
-TaskState.prototype.DEFAULT_SIZE = {
-  width: 100,
-  height: 80,
-};
+SubStateMachine.prototype.Type = 'SubStateMachine';
+
+SubStateMachine.prototype.THUMBNAIL_CLASS = 'bpmn-icon-subprocess-collapsed';

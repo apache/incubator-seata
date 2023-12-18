@@ -23,9 +23,10 @@ import Succeed from '../spec/Succeed';
 import Fail from '../spec/Fail';
 import Catch from '../spec/Catch';
 import CompensationTrigger from '../spec/CompensationTrigger';
+import SubStateMachine from '../spec/SubStateMachine';
 
-const SPEC_LIST = [StartState, ServiceTask, ScriptTask, Choice, Succeed, Fail, Catch,
-  CompensationTrigger];
+const SPEC_LIST = [StartState, ServiceTask, ScriptTask, SubStateMachine, Choice, Succeed, Fail,
+  Catch, CompensationTrigger];
 
 /**
  * A palette provider.

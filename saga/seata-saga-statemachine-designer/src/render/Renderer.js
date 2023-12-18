@@ -25,7 +25,7 @@ import { append as svgAppend, attr as svgAttr, create as svgCreate } from 'tiny-
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
 
 import { createLine } from 'diagram-js/lib/util/RenderUtil';
-import CompensationTrigger from '../spec/CompensationTrigger';
+import { translate } from 'diagram-js/lib/util/SvgTransformUtil';
 
 const BLACK = 'hsl(225, 10%, 15%)';
 const TASK_BORDER_RADIUS = 10;
@@ -319,7 +319,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
   function attachTaskMarkers(p, element, taskMarkers) {
     const obj = getSemantic(element);
 
-    const sub = taskMarkers && taskMarkers.indexOf('SubStateMachine') !== -1;
+    const sub = taskMarkers && taskMarkers.indexOf('SubStateMachineMarker') !== -1;
     let position;
 
     if (sub) {
@@ -397,7 +397,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
         stroke: getStrokeColor(element, defaultStrokeColor),
       });
     },
-    Task(parentGfx, element) {
+    Task(parentGfx, element, additionalMarkers) {
       const attrs = {
         fill: getFillColor(element, defaultFillColor),
         stroke: getStrokeColor(element, defaultStrokeColor),
@@ -407,7 +407,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
       const rect = drawRect(parentGfx, element.width, element.height, TASK_BORDER_RADIUS, attrs);
 
       renderEmbeddedLabel(parentGfx, element, 'center-middle');
-      attachTaskMarkers(parentGfx, element);
+      attachTaskMarkers(parentGfx, element, additionalMarkers);
 
       return rect;
     },
@@ -468,6 +468,34 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
       });
 
       return task;
+    },
+    SubStateMachine(parentGfx, element) {
+      return renderer('Task')(parentGfx, element, ['SubStateMachineMarker']);
+    },
+    SubStateMachineMarker(parentGfx, element) {
+      const markerRect = drawRect(parentGfx, 14, 14, 0, {
+        strokeWidth: 1,
+        fill: getFillColor(element, defaultFillColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
+
+      translate(markerRect, element.width / 2 - 7.5, element.height - 20);
+
+      const markerPath = pathMap.getScaledPath('MARKER_SUB_PROCESS', {
+        xScaleFactor: 1.5,
+        yScaleFactor: 1.5,
+        containerWidth: element.width,
+        containerHeight: element.height,
+        position: {
+          mx: (element.width / 2 - 7.5) / element.width,
+          my: (element.height - 20) / element.height,
+        },
+      });
+
+      drawMarker('sub-process', parentGfx, markerPath, {
+        fill: getFillColor(element, defaultFillColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
     },
     LoopMarker(parentGfx, element, position) {
       const markerPath = pathMap.getScaledPath('MARKER_LOOP', {

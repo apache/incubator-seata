@@ -127,6 +127,13 @@ export default function PathMap() {
       heightElements: [],
       widthElements: [],
     },
+    MARKER_SUB_PROCESS: {
+      d: 'm{mx},{my} m 7,2 l 0,10 m -5,-5 l 10,0',
+      height: 10,
+      width: 10,
+      heightElements: [],
+      widthElements: [],
+    },
     TASK_TYPE_SCRIPT: {
       d: 'm {mx},{my} c 9.966553,-6.27276 -8.000926,-7.91932 2.968968,-14.938 l -8.802728,0 '
         + 'c -10.969894,7.01868 6.997585,8.66524 -2.968967,14.938 z '
