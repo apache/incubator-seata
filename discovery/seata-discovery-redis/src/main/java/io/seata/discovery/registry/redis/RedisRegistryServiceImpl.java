@@ -18,8 +18,6 @@ package io.seata.discovery.registry.redis;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -242,7 +240,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 String eventType = msgr[1];
                 switch (eventType) {
                     case RedisListener.REGISTER:
-                        CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> new HashSet<>(2))
+                        CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> ConcurrentHashMap.newKeySet(2))
                             .add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
@@ -253,7 +251,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return new ArrayList<>(CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> new HashSet<>(2)));
+        return new ArrayList<>(CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> ConcurrentHashMap.newKeySet(2)));
     }
 
     /**
@@ -267,7 +265,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      */
     private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
-        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.getOrDefault(notifyCluserName, Collections.emptySet());
+        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.computeIfAbsent(notifyCluserName, value -> ConcurrentHashMap.newKeySet(2));
         InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
         if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
             String txServiceGroupName = ConfigurationFactory.getInstance()
@@ -318,7 +316,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         scanParams.count(10);
         scanParams.match(redisRegistryKey + "_*");
         String cursor = ScanParams.SCAN_POINTER_START;
-        Set<InetSocketAddress> newAddressSet = new HashSet<>();
+        Set<InetSocketAddress> newAddressSet = ConcurrentHashMap.newKeySet(2);
         do {
             ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
             cursor = scanResult.getCursor();

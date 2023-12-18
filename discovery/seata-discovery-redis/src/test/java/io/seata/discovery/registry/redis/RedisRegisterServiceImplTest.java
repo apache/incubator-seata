@@ -52,7 +52,7 @@ public class RedisRegisterServiceImplTest {
             List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
             Assertions.assertEquals(2, list.size());
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
-            //redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
+            redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
             list = redisRegistryService.lookup("default_tx_group");
             logger.info("after time: {}", System.currentTimeMillis());
             Assertions.assertEquals(1, list.size());
