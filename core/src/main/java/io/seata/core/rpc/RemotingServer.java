@@ -37,7 +37,7 @@ public interface RemotingServer {
      * @param resourceId rm client resourceId
      * @param clientId   rm client id
      * @param msg        transaction message {@code io.seata.core.protocol}
-     * @param tryOtherApp   try other app
+     * @param tryOtherApp try other app
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
