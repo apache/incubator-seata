@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -332,7 +333,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             }
         } while (!cursor.equals(ScanParams.SCAN_POINTER_START));
 
-        if (!newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
+        if (CollectionUtils.isNotEmpty(newAddressSet) && !newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
         }
     }
