@@ -19,7 +19,6 @@ import io.netty.channel.Channel;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.TransportServerType;
 
-import static io.seata.common.DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST;
 import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
@@ -60,7 +59,6 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
     private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
-    private static final boolean ENABLE_CLIENT_CHANNEL_CHECK_FAIL_FAST = CONFIG.getBoolean(io.seata.common.ConfigurationKeys.ENABLE_CLIENT_CHANNEL_CHECK_FAIL_FAST, DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
 
     /**
      * Gets connect timeout millis.
@@ -458,7 +456,4 @@ public class NettyClientConfig extends NettyBaseConfig {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }
 
-    public static boolean isEnableClientChannelCheckFailFast() {
-        return ENABLE_CLIENT_CHANNEL_CHECK_FAIL_FAST;
-    }
 }

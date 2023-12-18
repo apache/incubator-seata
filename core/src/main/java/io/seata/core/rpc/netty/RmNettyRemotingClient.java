@@ -82,7 +82,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             if (resourceManager != null
                     && !resourceManager.getManagedResources().isEmpty()
                     && StringUtils.isNotBlank(transactionServiceGroup)) {
-                boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
+                boolean failFast = ConfigurationFactory.getInstance().getBoolean(
+                        ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                        DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
                 getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
             }
         }
@@ -217,7 +219,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
-            boolean failFast = NettyClientConfig.isEnableClientChannelCheckFailFast();
+            boolean failFast = ConfigurationFactory.getInstance().getBoolean(
+                    ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                    DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
             getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
             return;
         }
