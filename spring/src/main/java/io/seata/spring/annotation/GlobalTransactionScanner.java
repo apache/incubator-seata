@@ -59,7 +59,6 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -327,8 +326,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private boolean doCheckers(Object bean, String beanName) {
-        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
-                || FactoryBean.class.isAssignableFrom(bean.getClass())) {
+        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)) {
             return false;
         }
 

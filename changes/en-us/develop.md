@@ -11,6 +11,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6025](https://github.com/seata/seata/pull/6025)] fix the white screen after click the "View Global Lock" button on the transaction info page in the console
 - [[#6026](https://github.com/seata/seata/pull/6026)] fix incorrect metric report
 - [[#4410](https://github.com/seata/seata/pull/4410)] support jdk9+ compile code
+- [[#6104](https://github.com/seata/seata/pull/6104)] fix dubbo 3.x consumer can't generate TCC proxy in tcc mode.
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
@@ -29,6 +30,7 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [liuqiufeng](https://github.com/liuqiufeng)
 - [ptyin](https://github.com/ptyin)
 - [funky-eyes](https://github.com/funky-eyes)
+- [laywin](https://github.com/laywin)
 
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
