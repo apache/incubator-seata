@@ -45,11 +45,11 @@ public class RedisRegisterServiceImplTest {
         try {
             server.listener("127.0.0.1", 6789);
             redisRegistryService = RedisRegistryServiceImpl.getInstance();
+            logger.info("before time: {}", System.currentTimeMillis());
             redisRegistryService.lookup("default_tx_group");
             redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
             redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
             List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
-            logger.info("before time: {}", System.currentTimeMillis());
             Assertions.assertEquals(2, list.size());
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
             //redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
