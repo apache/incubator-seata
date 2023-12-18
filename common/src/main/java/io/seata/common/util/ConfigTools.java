@@ -118,25 +118,4 @@ public class ConfigTools {
         return Base64.getDecoder().decode(base64Key);
     }
 
-    public static void main(String[] args) throws Exception {
-        Scanner scan = new Scanner(System.in);
-        KeyPair keyPair = getKeyPair();
-        String publicKeyStr = ConfigTools.getPublicKey(keyPair);
-        String privateKeyStr = ConfigTools.getPrivateKey(keyPair);
-        System.out.println("publicKeyStr:\n" + publicKeyStr);
-        System.out.println("privateKeyStr:\n" + privateKeyStr);
-        System.out.println(
-            "after the key is generated, please keep your key pair properly, if you need to encrypt, please enter your database password");
-        System.out.println("input 'q' exit");
-        while (scan.hasNextLine()) {
-            String password = scan.nextLine();
-            if (StringUtils.isNotBlank(password) && !"q".equalsIgnoreCase(password)) {
-                String byte2Base64 = ConfigTools.privateEncrypt(password, privateKeyStr);
-                System.out.println("encryption completed: \n" + byte2Base64);
-            }
-            break;
-        }
-        scan.close();
-    }
-
 }
