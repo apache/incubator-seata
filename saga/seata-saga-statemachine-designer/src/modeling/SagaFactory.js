@@ -27,6 +27,7 @@ import Catch from '../spec/Catch';
 import ExceptionMatch from '../spec/ExceptionMatch';
 import CompensationTrigger from '../spec/CompensationTrigger';
 import SubStateMachine from '../spec/SubStateMachine';
+import Compensation from '../spec/Compensation';
 
 export default function SagaFactory() {
   const typeToSpec = new Map();
@@ -43,6 +44,7 @@ export default function SagaFactory() {
   typeToSpec.set('ExceptionMatch', ExceptionMatch);
   typeToSpec.set('CompensationTrigger', CompensationTrigger);
   typeToSpec.set('SubStateMachine', SubStateMachine);
+  typeToSpec.set('Compensation', Compensation);
   this.typeToSpec = typeToSpec;
 }
 

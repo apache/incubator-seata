@@ -38,6 +38,10 @@ export default class TaskState extends State {
       json.catch = json.Catch.exportJson();
       json.Catch = [];
     }
+
+    if (this.CompensateState) {
+      json.CompensateState = this.CompensateState.Name;
+    }
     return json;
   }
 }

@@ -391,6 +391,18 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
     ExceptionMatch(p, element) {
       return renderer('Transition')(p, element);
     },
+    Compensation(p, element) {
+      const stroke = getStrokeColor(element, defaultStrokeColor);
+      const attrs = {
+        stroke,
+        strokeWidth: 1,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        strokeDasharray: '10, 11',
+      };
+
+      return drawLine(p, element.waypoints, attrs);
+    },
     StartState(parentGfx, element) {
       return drawCircle(parentGfx, element.width, element.height, {
         fill: getFillColor(element, defaultFillColor),

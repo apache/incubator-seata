@@ -37,6 +37,10 @@ function canConnect(source, target) {
     return false;
   }
 
+  if (is(source, 'Task') && is(target, 'Task') && target.businessObject.IsForCompensation) {
+    return { type: 'Compensation' };
+  }
+
   if (is(source, 'Choice')) {
     return { type: 'ChoiceEntry' };
   }

@@ -61,11 +61,11 @@ export function is(element, target) {
   const type = element?.businessObject?.Type || element?.Type || element;
 
   if (target === 'Task') {
-    return type === 'ServiceTask' || type === 'ScriptTask';
+    return type === 'ServiceTask' || type === 'ScriptTask' || type === 'SubStateMachine';
   }
 
   if (target === 'Connection') {
-    return type === 'Transition' || type === 'ChoiceEntry';
+    return type === 'Transition' || type === 'ChoiceEntry' || type === 'ExceptionMatch' || type === 'Compensation';
   }
 
   return type === target;
