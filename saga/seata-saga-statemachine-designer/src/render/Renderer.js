@@ -25,6 +25,7 @@ import { append as svgAppend, attr as svgAttr, create as svgCreate } from 'tiny-
 import BaseRenderer from 'diagram-js/lib/draw/BaseRenderer';
 
 import { createLine } from 'diagram-js/lib/util/RenderUtil';
+import CompensationTrigger from '../spec/CompensationTrigger';
 
 const BLACK = 'hsl(225, 10%, 15%)';
 const TASK_BORDER_RADIUS = 10;
@@ -563,7 +564,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
       renderer('Error')(parentGfx, element, true);
       return circle;
     },
-    Catch(parentGfx, element) {
+    Event(parentGfx, element) {
       const attrs = {
         strokeWidth: 1.5,
         fill: getFillColor(element, defaultFillColor),
@@ -584,8 +585,34 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
 
       const outer = drawCircle(parentGfx, element.width, element.height, outerAttrs);
       drawCircle(parentGfx, element.width, element.height, 3, innerAttrs);
+      return outer;
+    },
+    Catch(parentGfx, element) {
+      const outer = renderer('Event')(parentGfx, element);
       renderer('Error')(parentGfx, element);
 
+      return outer;
+    },
+    CompensationTrigger(parentGfx, element) {
+      const outer = renderer('Event')(parentGfx, element);
+      const pathData = pathMap.getScaledPath('EVENT_COMPENSATION', {
+        xScaleFactor: 1,
+        yScaleFactor: 1,
+        containerWidth: element.width,
+        containerHeight: element.height,
+        position: {
+          mx: 0.22,
+          my: 0.5,
+        },
+      });
+
+      const fill = 'none';
+
+      drawPath(parentGfx, pathData, {
+        strokeWidth: 1,
+        fill,
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      });
       return outer;
     },
   };
