@@ -72,7 +72,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static volatile JedisPool jedisPool;
 
     // redis registry key live 5 seconds, auto refresh key every 2 seconds
-    private static final int KEY_TTL = 5;
+    private static final long KEY_TTL = 5L;
     private static final long KEY_REFRESH_PERIOD = 2000L;
 
     private ScheduledExecutorService threadPoolExecutorForSubscribe = new ScheduledThreadPoolExecutor(1,
@@ -263,7 +263,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      * @param notifyCluserName notifyCluserName
      * @param serverAddr serverAddr
      */
-    private synchronized void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
+    private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
         Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.getOrDefault(notifyCluserName, Collections.emptySet());
         InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);

@@ -19,6 +19,8 @@ import com.github.microwww.redis.RedisServer;
 import io.seata.common.util.NetUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -29,8 +31,10 @@ import java.util.List;
  */
 public class RedisRegisterServiceImplTest {
 
+    Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Test public void testRemoveServerAddressByPushEmptyProtection() {
+    @Test
+    public void testRemoveServerAddressByPushEmptyProtection() {
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
@@ -45,10 +49,12 @@ public class RedisRegisterServiceImplTest {
             redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
             redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
             List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
+            logger.info("before time: {}", System.currentTimeMillis());
             Assertions.assertEquals(2, list.size());
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
             list = redisRegistryService.lookup("default_tx_group");
+            logger.info("after time: {}", System.currentTimeMillis());
             Assertions.assertEquals(1, list.size());
         } catch (Exception e) {
             e.printStackTrace();
