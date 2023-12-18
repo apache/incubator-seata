@@ -17,28 +17,12 @@ package io.seata.discovery.registry.redis;
 
 import com.github.microwww.redis.RedisServer;
 import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.redis.RedisRegistryProvider;
-import io.seata.discovery.registry.redis.RedisRegistryServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.internal.util.collections.Sets;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author laywin
@@ -47,8 +31,7 @@ public class RedisRegisterServiceImplTest {
 
 
     @Test
-    public void testRemoveServerAddressByPushEmptyProtection()
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public void testRemoveServerAddressByPushEmptyProtection() {
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
