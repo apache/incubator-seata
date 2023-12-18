@@ -47,10 +47,11 @@ public class RedisRegisterServiceImplTest {
             List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
             Assertions.assertEquals(2, list.size());
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+            Thread.sleep(100);
             redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
             list = redisRegistryService.lookup("default_tx_group");
             Assertions.assertEquals(1, list.size());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }finally {
             try {
