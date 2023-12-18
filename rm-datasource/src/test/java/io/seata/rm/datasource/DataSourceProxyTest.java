@@ -26,6 +26,7 @@ import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -153,7 +154,19 @@ public class DataSourceProxyTest {
 
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
-            Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+            Assertions.assertEquals("jdbc:mysql:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
+
+        // case: dbType = OceanBaseOracle
+        {
+            resourceIdField.set(proxy, null);
+            rawDbTypeField.set(proxy, JdbcConstants.OCEANBASE_ORACLE);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:oceanbase:loadbalance://192.168.100.2:3306,192.168.100.3:3306,192.168.100.1:3306/seata");
+            Assertions.assertEquals("jdbc:oceanbase:loadbalance://192.168.100.2:3306|192.168.100.3:3306|192.168.100.1:3306/seata", proxy.getResourceId(), "rawDbType=" + rawDbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 

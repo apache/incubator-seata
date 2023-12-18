@@ -17,6 +17,7 @@ package io.seata.sqlparser.druid;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SQLType;
@@ -117,5 +118,19 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.POLARDBX));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.POSTGRESQL));
+
+        String sql12 = "insert all into t1 values(1) into t2 values(2)";
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql11, JdbcConstants.MYSQL));
+        Assertions.assertTrue(CollectionUtils.isEmpty(recognizerFactory.create(sql11, JdbcConstants.ORACLE)));
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql11, JdbcConstants.POSTGRESQL));
+        Assertions.assertFalse(CollectionUtils.isEmpty(recognizerFactory.create(sql11, JdbcConstants.OCEANBASE_ORACLE)));
+        Assertions.assertEquals(2, recognizerFactory.create(sql11, JdbcConstants.OCEANBASE_ORACLE).size());
+
+        String sql13 = "insert all when col1 > 1 then into t1 values(1) when col2 > 1 then into t2 values(2) select col1, col2 from t3";
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql12, JdbcConstants.MYSQL));
+        Assertions.assertTrue(CollectionUtils.isEmpty(recognizerFactory.create(sql12, JdbcConstants.ORACLE)));
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql12, JdbcConstants.POSTGRESQL));
+        Assertions.assertFalse(CollectionUtils.isEmpty(recognizerFactory.create(sql12, JdbcConstants.OCEANBASE_ORACLE)));
+        Assertions.assertEquals(2, recognizerFactory.create(sql12, JdbcConstants.OCEANBASE_ORACLE).size());
     }
 }

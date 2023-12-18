@@ -7,3 +7,4 @@ io.seata.core.store.db.sql.lock.SqlServerLockStoreSql
 io.seata.core.store.db.sql.lock.MariadbLockStoreSql
 io.seata.core.store.db.sql.lock.PolarDBXLockStoreSql
 io.seata.core.store.db.sql.lock.DmLockStoreSql
+io.seata.core.store.db.sql.lock.OceanBaseOracleLockStoreSql

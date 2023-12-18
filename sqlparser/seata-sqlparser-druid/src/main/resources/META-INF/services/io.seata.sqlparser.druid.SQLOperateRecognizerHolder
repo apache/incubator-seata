@@ -5,3 +5,4 @@ io.seata.sqlparser.druid.postgresql.PostgresqlOperateRecognizerHolder
 io.seata.sqlparser.druid.sqlserver.SqlServerOperateRecognizerHolder
 io.seata.sqlparser.druid.polardbx.PolarDBXOperateRecognizerHolder
 io.seata.sqlparser.druid.dm.DmOperateRecognizerHolder
+io.seata.sqlparser.druid.oceanbaseoracle.OceanBaseOracleOperateRecognizerHolder
