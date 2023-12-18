@@ -60,12 +60,12 @@ export function setProperties(businessObject, properties, override) {
 export function is(element, target) {
   const type = element?.businessObject?.Type || element?.Type || element;
 
-  if (target === 'State') {
-    return type === 'ServiceTask';
+  if (target === 'Task') {
+    return type === 'ServiceTask' || type === 'ScriptTask';
   }
 
   if (target === 'Connection') {
-    return type === 'Transition';
+    return type === 'Transition' || type === 'ChoiceEntry';
   }
 
   return type === target;

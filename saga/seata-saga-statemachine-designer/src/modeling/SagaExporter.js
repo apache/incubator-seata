@@ -66,16 +66,20 @@ SagaExporter.prototype.parseEdge = function (definitions, edge) {
         if (businessObject.Default) {
           stateRef.Default = target;
         }
+        stateRef.edge = assign(stateRef.edge || {}, { [target]: elementJson });
+        break;
+      case 'ExceptionMatch':
+        stateRef.Catch.push({
+          Exceptions: businessObject.Exceptions,
+          Next: target,
+        });
+        stateRef.catch = assign(stateRef.catch || {}, { edge: { [target]: elementJson } });
         break;
       case 'Transition':
       default:
         stateRef.Next = target;
+        stateRef.edge = assign(stateRef.edge || {}, { [target]: elementJson });
     }
-
-    if (stateRef.edge === undefined) {
-      stateRef.edge = {};
-    }
-    assign(stateRef.edge, { [target]: elementJson });
   }
 };
 

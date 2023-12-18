@@ -20,6 +20,7 @@ import { innerSVG } from 'tiny-svg';
 import Diagram from 'diagram-js';
 
 import AlignElementsModule from 'diagram-js/lib/features/align-elements';
+import AttachSupport from 'diagram-js/lib/features/attach-support';
 import AutoScrollModule from 'diagram-js/lib/features/auto-scroll';
 import BendpointsModule from 'diagram-js/lib/features/bendpoints';
 import ConnectModule from 'diagram-js/lib/features/connect';
@@ -79,6 +80,7 @@ Editor.prototype.modules = [
 
   // Built-in modules
   AlignElementsModule,
+  AttachSupport,
   AutoScrollModule,
   BendpointsModule,
   ConnectModule,

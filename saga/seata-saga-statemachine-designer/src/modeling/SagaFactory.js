@@ -23,6 +23,8 @@ import Choice from '../spec/Choice';
 import ChoiceEntry from '../spec/ChoiceEntry';
 import Succeed from '../spec/Succeed';
 import Fail from '../spec/Fail';
+import Catch from '../spec/Catch';
+import ExceptionMatch from '../spec/ExceptionMatch';
 
 export default function SagaFactory() {
   const typeToSpec = new Map();
@@ -35,6 +37,8 @@ export default function SagaFactory() {
   typeToSpec.set('ChoiceEntry', ChoiceEntry);
   typeToSpec.set('Succeed', Succeed);
   typeToSpec.set('Fail', Fail);
+  typeToSpec.set('Catch', Catch);
+  typeToSpec.set('ExceptionMatch', ExceptionMatch);
   this.typeToSpec = typeToSpec;
 }
 

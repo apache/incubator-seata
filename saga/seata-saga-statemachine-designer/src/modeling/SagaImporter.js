@@ -46,12 +46,14 @@ export default function SagaImporter(
   canvas,
   elementFactory,
   elementRegistry,
+  modeling,
 ) {
   this.sagaFactory = sagaFactory;
   this.eventBus = eventBus;
   this.canvas = canvas;
   this.elementRegistry = elementRegistry;
   this.elementFactory = elementFactory;
+  this.modeling = modeling;
 }
 
 SagaImporter.$inject = [
@@ -60,6 +62,7 @@ SagaImporter.$inject = [
   'canvas',
   'elementFactory',
   'elementRegistry',
+  'modeling',
 ];
 
 SagaImporter.prototype.import = function (definitions) {
@@ -79,12 +82,27 @@ SagaImporter.prototype.import = function (definitions) {
     this.add(start);
 
     const edges = [];
+    const catches = [];
     forEach(definitions.States, (semantic) => {
       const state = this.sagaFactory.create(semantic.Type);
       state.importJson(semantic);
-      this.add(state);
+      const host = this.add(state);
       if (semantic.edge) {
         edges.push(...Object.values(semantic.edge));
+      }
+      if (semantic.catch) {
+        const node = this.sagaFactory.create('Catch');
+        node.importJson(semantic.catch);
+        const source = this.add(node);
+        if (semantic.catch.edge) {
+          semantic.Catch.forEach((exceptionMatch) => {
+            if (semantic.catch.edge[exceptionMatch.Next]) {
+              semantic.catch.edge[exceptionMatch.Next].Exceptions = exceptionMatch.Exceptions;
+            }
+          });
+        }
+        this.modeling.updateAttachment(source, host);
+        catches.push({ source, edges: Object.values(semantic.catch.edge) });
       }
     });
 
@@ -99,6 +117,15 @@ SagaImporter.prototype.import = function (definitions) {
       const transition = this.sagaFactory.create(semantic.Type);
       transition.importJson(semantic);
       this.add(transition);
+    });
+
+    forEach(catches, (oneCatch) => {
+      const { source, edges: exceptionMatches } = oneCatch;
+      forEach(exceptionMatches, (semantic) => {
+        const exceptionMatch = this.sagaFactory.create(semantic.Type);
+        exceptionMatch.importJson(semantic);
+        this.add(exceptionMatch, { source });
+      });
     });
   } catch (e) {
     error = e;

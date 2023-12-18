@@ -14,34 +14,26 @@
  *  limitations under the License.
  */
 
-import State from './State';
+import Transition from './Transition';
 
-export default class TaskState extends State {
+export default class ExceptionMatch extends Transition {
   constructor() {
     super();
-    this.Input = [{}];
-    this.Output = {};
-    this.Status = {};
-    this.Retry = [];
+    this.Exceptions = [];
   }
 
   importJson(json) {
     super.importJson(json);
-    delete this.catch;
+    this.Exceptions = json.Exceptions;
   }
 
   exportJson() {
     const json = super.exportJson();
-    const { Catch } = json;
-    if (Catch) {
-      json.catch = json.Catch.exportJson();
-      json.Catch = [];
-    }
+    json.style.source = this.style.source.host.businessObject.Name;
     return json;
   }
 }
 
-TaskState.prototype.DEFAULT_SIZE = {
-  width: 100,
-  height: 80,
-};
+ExceptionMatch.prototype.Type = 'ExceptionMatch';
+
+ExceptionMatch.prototype.THUMBNAIL_CLASS = 'bpmn-icon-connection';

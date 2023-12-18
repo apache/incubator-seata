@@ -21,8 +21,9 @@ import ScriptTask from '../spec/ScriptTask';
 import Choice from '../spec/Choice';
 import Succeed from '../spec/Succeed';
 import Fail from '../spec/Fail';
+import Catch from '../spec/Catch';
 
-const SPEC_LIST = [StartState, ServiceTask, ScriptTask, Choice, Succeed, Fail];
+const SPEC_LIST = [StartState, ServiceTask, ScriptTask, Choice, Succeed, Fail, Catch];
 
 /**
  * A palette provider.

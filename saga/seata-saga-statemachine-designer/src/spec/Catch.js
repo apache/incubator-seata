@@ -14,34 +14,17 @@
  *  limitations under the License.
  */
 
-import State from './State';
+import Node from './style/Node';
 
-export default class TaskState extends State {
-  constructor() {
-    super();
-    this.Input = [{}];
-    this.Output = {};
-    this.Status = {};
-    this.Retry = [];
-  }
+export default class Catch extends Node {
 
-  importJson(json) {
-    super.importJson(json);
-    delete this.catch;
-  }
-
-  exportJson() {
-    const json = super.exportJson();
-    const { Catch } = json;
-    if (Catch) {
-      json.catch = json.Catch.exportJson();
-      json.Catch = [];
-    }
-    return json;
-  }
 }
 
-TaskState.prototype.DEFAULT_SIZE = {
-  width: 100,
-  height: 80,
+Catch.prototype.Type = 'Catch';
+
+Catch.prototype.THUMBNAIL_CLASS = 'bpmn-icon-intermediate-event-catch-error';
+
+Catch.prototype.DEFAULT_SIZE = {
+  width: 36,
+  height: 36,
 };

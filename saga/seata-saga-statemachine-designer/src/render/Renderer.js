@@ -387,6 +387,9 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
 
       return path;
     },
+    ExceptionMatch(p, element) {
+      return renderer('Transition')(p, element);
+    },
     StartState(parentGfx, element) {
       return drawCircle(parentGfx, element.width, element.height, {
         fill: getFillColor(element, defaultFillColor),
@@ -538,8 +541,7 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
         stroke: getStrokeColor(element, defaultStrokeColor),
       });
     },
-    Fail(parentGfx, element) {
-      const circle = handlers.Succeed(parentGfx, element);
+    Error(parentGfx, element, fill) {
       const pathData = pathMap.getScaledPath('EVENT_ERROR', {
         xScaleFactor: 1.1,
         yScaleFactor: 1.1,
@@ -550,13 +552,41 @@ export default function Renderer(config, eventBus, pathMap, styles, textRenderer
           my: 0.722,
         },
       });
-      drawPath(parentGfx, pathData, {
+      return drawPath(parentGfx, pathData, {
         strokeWidth: 1,
-        fill: getStrokeColor(element, defaultStrokeColor),
+        fill: fill ? getStrokeColor(element, defaultStrokeColor) : 'none',
         stroke: getStrokeColor(element, defaultStrokeColor),
       });
-
+    },
+    Fail(parentGfx, element) {
+      const circle = handlers.Succeed(parentGfx, element);
+      renderer('Error')(parentGfx, element, true);
       return circle;
+    },
+    Catch(parentGfx, element) {
+      const attrs = {
+        strokeWidth: 1.5,
+        fill: getFillColor(element, defaultFillColor),
+        stroke: getStrokeColor(element, defaultStrokeColor),
+      };
+
+      // apply fillOpacity
+      const outerAttrs = {
+        ...attrs,
+        fillOpacity: 1,
+      };
+
+      // apply no-fill
+      const innerAttrs = {
+        ...attrs,
+        fill: 'none',
+      };
+
+      const outer = drawCircle(parentGfx, element.width, element.height, outerAttrs);
+      drawCircle(parentGfx, element.width, element.height, 3, innerAttrs);
+      renderer('Error')(parentGfx, element);
+
+      return outer;
     },
   };
   function drawShape(parent, element) {

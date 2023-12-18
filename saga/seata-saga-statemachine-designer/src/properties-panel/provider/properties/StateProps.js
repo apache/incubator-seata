@@ -39,6 +39,8 @@ function State(props) {
       const value = assign({}, e.businessObject);
       // Exclude style
       delete value.style;
+      // Exclude Catch for Task
+      delete value.Catch;
       return JSON.stringify(value, null, 2);
     },
     validate: (value) => {
