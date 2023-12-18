@@ -242,7 +242,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 String eventType = msgr[1];
                 switch (eventType) {
                     case RedisListener.REGISTER:
-                        CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value-> new HashSet<>(2)).add(NetUtil.toInetSocketAddress(serverAddr));
+                        CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> new HashSet<>(2))
+                            .add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
                         removeServerAddressByPushEmptyProtection(clusterName, serverAddr);
@@ -252,7 +253,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return new ArrayList<>(CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value-> new HashSet<>(2)));
+        return new ArrayList<>(CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> new HashSet<>(2)));
     }
 
     /**
