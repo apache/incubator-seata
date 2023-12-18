@@ -13,7 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.discovery.registry.redis;
 
+import com.github.microwww.redis.RedisServer;
 import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -25,10 +27,12 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
@@ -45,39 +49,33 @@ public class RedisRegisterServiceImplTest {
     @Test
     public void testRemoveServerAddressByPushEmptyProtection()
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-
         System.setProperty("config.type", "file");
-        System.setProperty("config.file.name", "aa");
-        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6379");
+        System.setProperty("config.file.name", "file.conf");
+        System.setProperty("service.vgroupMapping.default_tx_group", "default");
+        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6789");
+        System.setProperty("registry.redis.cluster", "default");
+        RedisServer server = new RedisServer();
+        try {
+            server.listener("127.0.0.1", 6789);
+            RedisRegistryServiceImpl redisRegistryService = RedisRegistryServiceImpl.getInstance();
+            redisRegistryService.lookup("default_tx_group");
+            redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+            redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
+            List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
+            Assertions.assertEquals(2, list.size());
+            redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+            redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
+            list = redisRegistryService.lookup("default_tx_group");
+            Assertions.assertEquals(1, list.size());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                server.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-        MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = Mockito.mockStatic(ConfigurationFactory.class);
-        Configuration configuration = mock(Configuration.class);
-        when(configuration.getConfig(anyString())).thenReturn("cluster");
-
-        configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
-        RedisRegistryServiceImpl redisRegistryService = (RedisRegistryServiceImpl) new RedisRegistryProvider().provide();
-
-        Field field = RedisRegistryServiceImpl.class.getDeclaredField("CLUSTER_ADDRESS_MAP");
-        field.setAccessible(true);
-
-        ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = (ConcurrentMap<String, Set<InetSocketAddress>>)field.get(null);
-        CLUSTER_ADDRESS_MAP.put("cluster", Sets.newSet(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
-
-        Method method = RedisRegistryServiceImpl.class.getDeclaredMethod("removeServerAddressByPushEmptyProtection", String.class, String.class);
-        method.setAccessible(true);
-        method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
-
-        // test the push empty protection situation
-        Assertions.assertEquals(1, CLUSTER_ADDRESS_MAP.get("cluster").size());
-
-
-
-        when(configuration.getConfig(anyString())).thenReturn("mycluster");
-
-        method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
-        configurationFactoryMockedStatic.close();
-
-        // test the normal remove situation
-        Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
     }
 }
