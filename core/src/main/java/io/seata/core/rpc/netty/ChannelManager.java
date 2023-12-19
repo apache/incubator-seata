@@ -285,6 +285,7 @@ public class ChannelManager {
      *
      * @param resourceId Resource ID
      * @param clientId   Client ID - ApplicationId:IP:Port
+     * @param tryOtherApp try other app
      * @return Corresponding channel, NULL if not found.
      */
     public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
