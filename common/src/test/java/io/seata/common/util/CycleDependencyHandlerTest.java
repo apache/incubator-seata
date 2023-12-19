@@ -38,7 +38,8 @@ public class CycleDependencyHandlerTest {
 
     @Test
     public void testContainsObject() {
-        Assertions.assertDoesNotThrow(() -> CycleDependencyHandler.containsObject(null));
-        Assertions.assertDoesNotThrow(() -> CycleDependencyHandler.containsObject(new Object()));
+        Assertions.assertFalse(CycleDependencyHandler.containsObject(null));
+        CycleDependencyHandler.start();
+        Assertions.assertFalse(CycleDependencyHandler.containsObject(new Object()));
     }
 }
