@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
@@ -153,9 +154,11 @@ public interface RegistryService<T> {
         // empty addresses && currentClusterName == clusterName, enable push empty protection
         if (CollectionUtils.isEmpty(inetSocketAddresses)) {
             String txServiceGroupName = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
-            String currentClusterName = getServiceGroup(txServiceGroupName);
-            if (Objects.equals(currentClusterName, clusterName)) {
-                return;
+            if (StringUtils.isNotBlank(txServiceGroupName)) {
+                String currentClusterName = getServiceGroup(txServiceGroupName);
+                if (Objects.equals(currentClusterName, clusterName)) {
+                    return;
+                }
             }
         }
 
