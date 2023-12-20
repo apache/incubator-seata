@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.core.auth;
 
@@ -23,8 +24,6 @@ import java.lang.reflect.Method;
 
 /**
  * The RamSignAdapter Test
- *
- * @author zhongxiang.wang
  */
 public class RamSignAdapterTest {
     @Test
@@ -36,16 +35,11 @@ public class RamSignAdapterTest {
 
         RamSignAdapter adapter = new RamSignAdapter();
         // Use reflection to access the private method
-        Method getDateSigningKeyMethod = null;
-        try {
-            getDateSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getDateSigningKey", String.class, String.class, String.class);
+        Method getDateSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getDateSigningKey", String.class, String.class, String.class);
             getDateSigningKeyMethod.setAccessible(true);
             byte[] signingKey = (byte[]) getDateSigningKeyMethod.invoke(adapter, secret, date, signMethod);
             Assertions.assertEquals(32, signingKey.length);
             Assertions.assertArrayEquals(expectArray, signingKey);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test
@@ -58,16 +52,11 @@ public class RamSignAdapterTest {
 
         RamSignAdapter adapter = new RamSignAdapter();
         // Use reflection to access the private method
-        Method getRegionSigningKeyMethod = null;
-        try {
-            getRegionSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getRegionSigningKey", String.class, String.class, String.class, String.class);
+        Method getRegionSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getRegionSigningKey", String.class, String.class, String.class, String.class);
             getRegionSigningKeyMethod.setAccessible(true);
             byte[] signingKey = (byte[]) getRegionSigningKeyMethod.invoke(adapter, secret, date, region, signMethod);
             Assertions.assertEquals(32, signingKey.length);
             Assertions.assertArrayEquals(expectArray, signingKey);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test
@@ -80,16 +69,11 @@ public class RamSignAdapterTest {
         byte[] expectArray = new byte[]{62, 98, -65, 30, -8, -3, 66, -111, 0, 123, 126, 78, -30, -74, 55, -79, 101, -18, -97, -5, 78, -19, -17, 0, 88, 30, -92, 108, 103, 87, 49, -22};
 
         RamSignAdapter adapter = new RamSignAdapter();
-        Method getProductSigningKeyMethod = null;
-        try {
-            getProductSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getProductSigningKey", String.class, String.class, String.class, String.class, String.class);
+        Method getProductSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getProductSigningKey", String.class, String.class, String.class, String.class, String.class);
             getProductSigningKeyMethod.setAccessible(true);
             byte[] signingKey = (byte[]) getProductSigningKeyMethod.invoke(adapter, secret, date, region, productCode, signMethod);
             Assertions.assertEquals(32, signingKey.length);
             Assertions.assertArrayEquals(expectArray, signingKey);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Test
