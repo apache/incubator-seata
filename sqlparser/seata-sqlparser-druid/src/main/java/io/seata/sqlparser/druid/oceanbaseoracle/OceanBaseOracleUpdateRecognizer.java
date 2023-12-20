@@ -123,7 +123,12 @@ public class OceanBaseOracleUpdateRecognizer extends BaseOceanBaseOracleRecogniz
     }
 
     @Override
-    public List<String> getUpdateColumnsIsSimplified() {
+    public String getTableAlias(String tableName) {
+        return SQLUpdateRecognizer.super.getTableAlias(tableName);
+    }
+
+    @Override
+    public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());
     }

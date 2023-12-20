@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement.InsertIntoClause;
+import io.seata.sqlparser.util.ColumnUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +46,6 @@ public class OceanBaseOracleMultiInsertItemRecognizer extends BaseOceanBaseOracl
         this.conditionSQL = conditionSQL;
     }
 
-    @Override
     public String getConditionSQL() {
         return conditionSQL;
     }
@@ -86,5 +86,11 @@ public class OceanBaseOracleMultiInsertItemRecognizer extends BaseOceanBaseOracl
     protected List<List<Object>> handleEmptyValues(List<SQLInsertStatement.ValuesClause> valuesClauses,
                                                    Collection<Integer> primaryKeyIndex) {
         return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
     }
 }

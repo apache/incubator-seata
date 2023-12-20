@@ -16,30 +16,13 @@
 package io.seata.sqlparser.druid.oceanbaseoracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLDefaultExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
-import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
-import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
-import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
+import com.alibaba.druid.sql.ast.expr.*;
+import com.alibaba.druid.sql.ast.statement.*;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.struct.NotPlaceholderExpr;
-import io.seata.sqlparser.struct.Null;
-import io.seata.sqlparser.struct.SqlDefaultExpr;
-import io.seata.sqlparser.struct.SqlMethodExpr;
-import io.seata.sqlparser.struct.SqlSequenceExpr;
-import io.seata.sqlparser.util.ColumnUtils;
+import io.seata.sqlparser.struct.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,11 +90,6 @@ public abstract class BaseOceanBaseOracleInsertRecognizer extends BaseOceanBaseO
         return null;
     }
 
-    @Override
-    public List<String> getInsertColumnsIsSimplified() {
-        List<String> insertColumns = getInsertColumns();
-        return ColumnUtils.delEscape(insertColumns, getDbType());
-    }
 
     protected List<String> getInsertColumns(List<SQLExpr> columnExprList) {
         List<String> insertColumns = new ArrayList<>(columnExprList.size());

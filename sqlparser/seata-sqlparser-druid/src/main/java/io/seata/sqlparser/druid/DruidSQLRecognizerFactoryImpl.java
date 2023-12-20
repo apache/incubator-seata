@@ -72,7 +72,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         }
         // filter recognizers that are not supported
         recognizers = recognizers.stream().filter(this::isSupportedRecognizer).collect(Collectors.toList());
-        return recognizers;
+        return recognizers.isEmpty() ? null : recognizers;
     }
 
     private boolean isSupportedRecognizer(SQLRecognizer sqlRecognizer) {

@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
+import io.seata.sqlparser.util.ColumnUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,4 +78,9 @@ public class OceanBaseOracleInsertRecognizer extends BaseOceanBaseOracleInsertRe
         return Collections.emptyList();
     }
 
+    @Override
+    public List<String> getInsertColumnsUnEscape() {
+        List<String> insertColumns = getInsertColumns();
+        return ColumnUtils.delEscape(insertColumns, getDbType());
+    }
 }
