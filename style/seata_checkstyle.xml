@@ -28,12 +28,12 @@
 
     <!-- header -->
     <module name="RegexpHeader">
-        <property name="header" value="^.*$\n[\*\s]Copyright 1999-2019 Seata.io Group."/>
+        <property name="header" value="^.*$\n[\*\s]Licensed to the Apache Software Foundation"/>
         <property name="fileExtensions" value="java"/>
     </module>
 
     <module name="RegexpHeader">
-        <property name="header" value="^.*$\n[#\s]Copyright 1999-2019 Seata.io Group."/>
+        <property name="header" value="^.*$\n[#\s]Licensed to the Apache Software Foundation"/>
         <property name="fileExtensions" value="properties"/>
     </module>
 
