@@ -251,8 +251,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return new ArrayList<>(CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName,
-                value -> ConcurrentHashMap.newKeySet(2)));
+        return new ArrayList<>(CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName, value -> ConcurrentHashMap.newKeySet(2)));
     }
 
     /**
@@ -266,8 +265,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      */
     private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
-        Set<InetSocketAddress> socketAddresses = CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, notifyCluserName,
-                value -> ConcurrentHashMap.newKeySet(2));
+        Set<InetSocketAddress> socketAddresses = CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, notifyCluserName, value -> ConcurrentHashMap.newKeySet(2));
         InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
         if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
             String txServiceGroupName = ConfigurationFactory.getInstance()
