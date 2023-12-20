@@ -1,58 +1,58 @@
-create table if not exists seata_state_machine_def
-(
-    id               varchar(32)  not null comment 'id',
-    name             varchar(128) not null comment 'name',
-    tenant_id        varchar(32)  not null comment 'tenant id',
-    app_name         varchar(32)  not null comment 'application name',
-    type             varchar(20) comment 'state language type',
-    comment_         varchar(255) comment 'comment',
-    ver              varchar(16)  not null comment 'version',
-    gmt_create       timestamp(3)    not null comment 'create time',
-    status           varchar(2)   not null comment 'status(AC:active|IN:inactive)',
-    content          clob comment 'content',
-    recover_strategy varchar(16) comment 'transaction recover strategy(compensate|retry)',
-    primary key (id)
+-- adapted for h2 versions 2.x and above.
+CREATE TABLE IF NOT EXISTS seata_state_machine_def (
+   id VARCHAR(32) NOT NULL COMMENT 'id',
+   name VARCHAR(128) NOT NULL COMMENT 'name',
+   tenant_id VARCHAR(32) NOT NULL COMMENT 'tenant id',
+   app_name VARCHAR(32) NOT NULL COMMENT 'application name',
+   type VARCHAR(20) COMMENT 'state language type',
+   comment_ VARCHAR(255) COMMENT 'comment',
+   ver VARCHAR(16) NOT NULL COMMENT 'version',
+   gmt_create TIMESTAMP(3) NOT NULL COMMENT 'create time',
+   status VARCHAR(2) NOT NULL COMMENT 'status(AC:active|IN:inactive)',
+   content CLOB COMMENT 'content',
+   recover_strategy VARCHAR(16) COMMENT 'transaction recover strategy(compensate|retry)',
+   PRIMARY KEY (id)
 );
 
-create table if not exists seata_state_machine_inst
-(
-    id                  varchar(128) not null comment 'id',
-    machine_id          varchar(32) not null comment 'state machine definition id',
-    tenant_id           varchar(32) not null comment 'tenant id',
-    parent_id           varchar(128) comment 'parent id',
-    gmt_started         timestamp(3)   not null comment 'start time',
-    business_key        varchar(48) comment 'business key',
-    start_params        clob comment 'start parameters',
-    gmt_end             timestamp(3) comment 'end time',
-    excep               blob comment 'exception',
-    end_params          clob comment 'end parameters',
-    status              varchar(2) comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    compensation_status varchar(2) comment 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    is_running          tinyint(1) comment 'is running(0 no|1 yes)',
-    gmt_updated         timestamp(3)   not null,
-    primary key (id),
-    unique key unikey_buz_tenant (business_key, tenant_id)
-);
+CREATE TABLE IF NOT EXISTS seata_state_machine_inst (
+    ID VARCHAR (128) NOT NULL COMMENT 'id',
+    machine_id VARCHAR (32) NOT NULL COMMENT 'state machine definition id',
+    tenant_id VARCHAR (32) NOT NULL COMMENT 'tenant id',
+    parent_id VARCHAR (128) COMMENT 'parent id',
+    gmt_started TIMESTAMP (3) NOT NULL COMMENT 'start time',
+    business_key VARCHAR (48) COMMENT 'business key',
+    start_params CLOB COMMENT 'start parameters',
+    gmt_end TIMESTAMP (3) COMMENT 'end time',
+    excep BLOB COMMENT 'exception',
+    end_params CLOB COMMENT 'end parameters',
+    status VARCHAR (2) COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    compensation_status VARCHAR (2) COMMENT 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    is_running TINYINT COMMENT 'is running(0 no|1 yes)',
+    gmt_updated TIMESTAMP (3) NOT NULL,
+    PRIMARY KEY (ID)
+    );
 
-create table if not exists seata_state_inst
-(
-    id                       varchar(48)  not null comment 'id',
-    machine_inst_id          varchar(128)  not null comment 'state machine instance id',
-    name                     varchar(128) not null comment 'state name',
-    type                     varchar(20) comment 'state type',
-    service_name             varchar(128) comment 'service name',
-    service_method           varchar(128) comment 'method name',
-    service_type             varchar(16) comment 'service type',
-    business_key             varchar(48) comment 'business key',
-    state_id_compensated_for varchar(50) comment 'state compensated for',
-    state_id_retried_for     varchar(50) comment 'state retried for',
-    gmt_started              timestamp(3)    not null comment 'start time',
-    is_for_update            tinyint(1) comment 'is service for update',
-    input_params             clob comment 'input parameters',
-    output_params            clob comment 'output parameters',
-    status                   varchar(2)   not null comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    excep                    blob comment 'exception',
-    gmt_updated              timestamp(3) comment 'update time',
-    gmt_end                  timestamp(3) comment 'end time',
-    primary key (id, machine_inst_id)
+ALTER TABLE seata_state_machine_inst ADD CONSTRAINT unikey_buz_tenant UNIQUE (business_key, tenant_id);
+
+
+CREATE TABLE IF NOT EXISTS seata_state_inst (
+    id VARCHAR(48) NOT NULL COMMENT 'id',
+    machine_inst_id VARCHAR(128) NOT NULL COMMENT 'state machine instance id',
+    name VARCHAR(128) NOT NULL COMMENT 'state name',
+    type VARCHAR(20) COMMENT 'state type',
+    service_name VARCHAR(128) COMMENT 'service name',
+    service_method VARCHAR(128) COMMENT 'method name',
+    service_type VARCHAR(16) COMMENT 'service type',
+    business_key VARCHAR(48) COMMENT 'business key',
+    state_id_compensated_for VARCHAR(50) COMMENT 'state compensated for',
+    state_id_retried_for VARCHAR(50) COMMENT 'state retried for',
+    gmt_started TIMESTAMP(3) NOT NULL COMMENT 'start time',
+    is_for_update TINYINT COMMENT 'is service for update',
+    input_params CLOB COMMENT 'input parameters',
+    output_params CLOB COMMENT 'output parameters',
+    status VARCHAR(2) NOT NULL COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    excep BLOB COMMENT 'exception',
+    gmt_updated TIMESTAMP(3) COMMENT 'update time',
+    gmt_end TIMESTAMP(3) COMMENT 'end time',
+    PRIMARY KEY (id, machine_inst_id)
 );
