@@ -239,6 +239,9 @@
                                 <include>**/*.sh</include>
                                 <include>**/*.bat</include>
                                 <include>**/*.lua</include>
+                                <include>**/*.properties</include>
+                                <include>**/*.txt</include>
+                                <include>**/*.def</include>
                             </includes>
                             <excludes>
                                 <exclude>**/generated/**</exclude>
@@ -250,6 +253,8 @@
                             <mapping>
                                 <java>SLASHSTAR_STYLE</java>
                                 <lua>DOUBLEBAR_STYLE</lua>
+                                <conf>SCRIPT_STYLE</conf>
+                                <def>SCRIPT_STYLE</def>
                             </mapping>
                         </configuration>
                     </plugin>
