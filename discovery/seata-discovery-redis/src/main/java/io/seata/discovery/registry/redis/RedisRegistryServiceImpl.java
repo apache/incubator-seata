@@ -270,9 +270,12 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
             String txServiceGroupName = ConfigurationFactory.getInstance()
                     .getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
-            String clusterName = getServiceGroup(txServiceGroupName);
-            if (notifyCluserName.equals(clusterName)) {
-                return;
+
+            if (StringUtils.isNotEmpty(txServiceGroupName)) {
+                String clusterName = getServiceGroup(txServiceGroupName);
+                if (notifyCluserName.equals(clusterName)) {
+                    return;
+                }
             }
         }
         CLUSTER_ADDRESS_MAP.get(notifyCluserName).remove(inetSocketAddress);
