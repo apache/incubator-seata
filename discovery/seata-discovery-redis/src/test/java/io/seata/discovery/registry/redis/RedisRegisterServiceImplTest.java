@@ -66,13 +66,11 @@ public class RedisRegisterServiceImplTest {
     @Test
     public void testFlow() {
 
-        redisRegistryService.lookup("default_tx_group");
-
         redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
 
         redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
 
-        Assertions.assertTrue(true);
+        Assertions.assertTrue(redisRegistryService.lookup("default_tx_group").size() > 0);
     }
 
     @Test
