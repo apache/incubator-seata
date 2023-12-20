@@ -187,7 +187,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public void subscribe(String cluster, RedisListener listener) {
         String redisRegistryKey = REDIS_FILEKEY_PREFIX + cluster;
-        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+        CollectionUtils.computeIfAbsent(LISTENER_SERVICE_MAP, cluster, key -> new ArrayList<>())
                 .add(listener);
 
 
@@ -240,7 +240,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 String eventType = msgr[1];
                 switch (eventType) {
                     case RedisListener.REGISTER:
-                        CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> ConcurrentHashMap.newKeySet(2))
+                        CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName, value -> ConcurrentHashMap.newKeySet(2))
                             .add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
@@ -251,7 +251,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return new ArrayList<>(CLUSTER_ADDRESS_MAP.computeIfAbsent(clusterName, value -> ConcurrentHashMap.newKeySet(2)));
+        return new ArrayList<>(CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName,
+                value -> ConcurrentHashMap.newKeySet(2)));
     }
 
     /**
@@ -265,7 +266,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
      */
     private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
-        Set<InetSocketAddress> socketAddresses = CLUSTER_ADDRESS_MAP.computeIfAbsent(notifyCluserName, value -> ConcurrentHashMap.newKeySet(2));
+        Set<InetSocketAddress> socketAddresses = CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, notifyCluserName,
+                value -> ConcurrentHashMap.newKeySet(2));
         InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
         if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
             String txServiceGroupName = ConfigurationFactory.getInstance()

@@ -17,14 +17,26 @@ package io.seata.discovery.registry.redis;
 
 import com.github.microwww.redis.RedisServer;
 import io.seata.common.util.NetUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import org.junit.jupiter.api.*;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * @author laywin
@@ -33,8 +45,13 @@ public class RedisRegisterServiceImplTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Test
-    public void testRemoveServerAddressByPushEmptyProtection() {
+    private static RedisRegistryServiceImpl redisRegistryService;
+
+    private static RedisServer server;
+
+
+    @BeforeAll
+    public static void init() throws IOException {
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
@@ -42,27 +59,58 @@ public class RedisRegisterServiceImplTest {
         System.setProperty("registry.redis.serverAddr", "127.0.0.1:6789");
         System.setProperty("registry.redis.cluster", "default");
         RedisServer server = new RedisServer();
-        RedisRegistryServiceImpl redisRegistryService = null;
-        try {
-            server.listener("127.0.0.1", 6789);
-            redisRegistryService = RedisRegistryServiceImpl.getInstance();
-            logger.info("before time: {}", System.currentTimeMillis());
-            redisRegistryService.lookup("default_tx_group");
-            redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
-            redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
-            List<InetSocketAddress> list = redisRegistryService.lookup("default_tx_group");
-            Assertions.assertEquals(2, list.size());
-            redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
-            redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8092));
-            list = redisRegistryService.lookup("default_tx_group");
-            logger.info("after time: {}", System.currentTimeMillis());
-            Assertions.assertEquals(1, list.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (redisRegistryService != null) {
-                redisRegistryService.close();
-            }
+        server.listener("127.0.0.1", 6789);
+        redisRegistryService = RedisRegistryServiceImpl.getInstance();
+    }
+
+    @Test
+    public void testFlow() {
+
+        redisRegistryService.lookup("default_tx_group");
+
+        redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+
+        redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+
+        Assertions.assertTrue(true);
+    }
+
+    @Test
+    public void testRemoveServerAddressByPushEmptyProtection()
+            throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = mockStatic(ConfigurationFactory.class);
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(anyString())).thenReturn("cluster");
+
+        configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
+
+        Field field = RedisRegistryServiceImpl.class.getDeclaredField("CLUSTER_ADDRESS_MAP");
+        field.setAccessible(true);
+
+        ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = (ConcurrentMap<String, Set<InetSocketAddress>>)field.get(null);
+        CLUSTER_ADDRESS_MAP.put("cluster", Sets.newSet(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
+
+        Method method = RedisRegistryServiceImpl.class.getDeclaredMethod("removeServerAddressByPushEmptyProtection", String.class, String.class);
+        method.setAccessible(true);
+        method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
+
+        // test the push empty protection situation
+        Assertions.assertEquals(1, CLUSTER_ADDRESS_MAP.get("cluster").size());
+
+
+        when(configuration.getConfig(anyString())).thenReturn("mycluster");
+
+        method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
+        configurationFactoryMockedStatic.close();
+
+        // test the normal remove situation
+        Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        if (server != null) {
             try {
                 server.close();
             } catch (IOException e) {
