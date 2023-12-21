@@ -33,6 +33,7 @@ public class ConfigNacosProperties {
     private String password;
     private String accessKey;
     private String secretKey;
+    private String ramRoleName;
     private String dataId = "seata.properties";
     private String contextPath;
 
@@ -114,6 +115,15 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setContextPath(String contextPath) {
         this.contextPath = contextPath;
+        return this;
+    }
+
+    public String getRamRoleName() {
+        return ramRoleName;
+    }
+
+    public ConfigNacosProperties setRamRoleName(String ramRoleName) {
+        this.ramRoleName = ramRoleName;
         return this;
     }
 }

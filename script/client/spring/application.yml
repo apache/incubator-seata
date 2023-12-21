@@ -110,13 +110,16 @@ seata:
       namespace:
       server-addr: 127.0.0.1:8848
       group: SEATA_GROUP
+      context-path:
+      data-id: seata.properties
+      ##1.The following configuration is for the open source version of Nacos
       username:
       password:
-      context-path:
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
-      data-id: seata.properties
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
     zk:
       server-addr: 127.0.0.1:2181
       session-timeout: 6000
@@ -149,13 +152,16 @@ seata:
       server-addr: 127.0.0.1:8848
       group : "SEATA_GROUP"
       namespace:
-      username:
-      password:
       context-path:
       client-application: ${spring.application.name}
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##1.The following configuration is for the open source version of Nacos
+      username:
+      password:
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
       ##if use Nacos naming meta-data for SLB service registry, specify nacos address pattern rules here
       #slbPattern =
     redis:
