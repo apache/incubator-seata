@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Global begin response codec test.
  *
- * @author zhangsen
  */
 public class GlobalBeginResponseSerializerTest {
 

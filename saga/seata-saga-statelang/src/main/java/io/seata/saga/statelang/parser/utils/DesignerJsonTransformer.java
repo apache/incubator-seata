@@ -34,7 +34,6 @@ import java.util.Map;
 /**
  * Transform designer json to standard Saga State language json
  *
- * @author lorne.cl
  */
 public class DesignerJsonTransformer {
 

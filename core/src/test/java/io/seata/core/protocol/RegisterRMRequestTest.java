@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type RegisterRMRequest test.
  *
- * @author leizhiyuan
  */
 public class RegisterRMRequestTest {
 

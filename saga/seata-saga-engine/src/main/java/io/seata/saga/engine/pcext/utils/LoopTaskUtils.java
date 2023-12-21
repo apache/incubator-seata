@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Loop Task Util
  *
- * @author anselleeyy
  */
 public class LoopTaskUtils {
 

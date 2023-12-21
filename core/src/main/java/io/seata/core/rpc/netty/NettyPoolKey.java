@@ -21,7 +21,6 @@ import io.seata.core.protocol.AbstractMessage;
 /**
  * The type Netty pool key.
  *
- * @author slievrly
  */
 public class NettyPoolKey {
 

@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Default event bus implement with Guava EventBus.
  *
- * @author zhengyangyong
  */
 public class GuavaEventBus implements EventBus {
     private static final Logger LOGGER = LoggerFactory.getLogger(GuavaEventBus.class);

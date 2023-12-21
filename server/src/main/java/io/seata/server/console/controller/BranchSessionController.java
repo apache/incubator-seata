@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Branch Session Controller
- * @author zhongxiang.wang
  */
 @RestController
 @RequestMapping("console/branchSession")

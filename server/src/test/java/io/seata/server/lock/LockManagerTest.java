@@ -53,8 +53,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Lock manager test.
  *
- * @author tianming.xm @gmail.com
- * @author miaoxueyu
  * @since 2019 /1/23
  */
 @SpringBootTest

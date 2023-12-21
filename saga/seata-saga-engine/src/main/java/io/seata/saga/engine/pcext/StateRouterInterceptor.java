@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * StateRouter Interceptor
  *
- * @author lorne.cl
  * @see StateRouter
  */
 public interface StateRouterInterceptor {

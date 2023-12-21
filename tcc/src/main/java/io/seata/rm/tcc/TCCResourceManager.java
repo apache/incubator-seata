@@ -37,8 +37,6 @@ import io.seata.rm.tcc.api.BusinessActionContextUtil;
 /**
  * TCC resource manager
  *
- * @author zhangsen
- * @author Yujianfei
  */
 public class TCCResourceManager extends AbstractResourceManager {
 

@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * The type Rpc message.
  *
- * @author slievrly
  */
 public class RpcMessage implements Serializable {
 

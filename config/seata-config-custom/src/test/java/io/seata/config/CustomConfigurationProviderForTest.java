@@ -19,7 +19,6 @@ package io.seata.config;
 import io.seata.common.loader.LoadLevel;
 
 /**
- * @author ggndnn
  */
 @LoadLevel(name = "forTest")
 public class CustomConfigurationProviderForTest implements ConfigurationProvider {

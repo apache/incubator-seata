@@ -25,7 +25,6 @@ import java.util.Set;
 /**
  * Rule to check if all the state name exists
  *
- * @author ptyin
  */
 public class StateNameExistsRule extends AbstractRule {
 

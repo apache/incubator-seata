@@ -34,7 +34,6 @@ import io.seata.sqlparser.SQLType;
 /**
  * The type SqlServer delete recognizer.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerDeleteRecognizer extends BaseSqlServerRecognizer implements SQLDeleteRecognizer {
     private final SQLDeleteStatement ast;

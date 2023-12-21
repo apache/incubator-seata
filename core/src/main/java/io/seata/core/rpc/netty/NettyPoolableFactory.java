@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Netty key poolable factory.
  *
- * @author slievrly
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 

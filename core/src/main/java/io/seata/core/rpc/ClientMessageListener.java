@@ -21,7 +21,6 @@ import io.seata.core.protocol.RpcMessage;
 /**
  * The interface Client message listener.
  *
- * @author slievrly
  */
 @Deprecated
 public interface ClientMessageListener {

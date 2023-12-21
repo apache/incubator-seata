@@ -37,7 +37,6 @@ import java.util.List;
 /**
  * The type My sql delete recognizer.
  *
- * @author sharajava
  */
 public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDeleteRecognizer {
 

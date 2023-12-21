@@ -23,7 +23,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalBeginRequestConvertor implements PbConvertor<GlobalBeginRequest, GlobalBeginRequestProto> {
 

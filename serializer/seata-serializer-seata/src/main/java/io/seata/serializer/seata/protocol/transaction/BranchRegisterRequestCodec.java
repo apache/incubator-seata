@@ -25,7 +25,6 @@ import io.seata.core.protocol.transaction.BranchRegisterRequest;
 /**
  * The type Branch register request codec.
  *
- * @author zhangsen
  */
 public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCodec {
 

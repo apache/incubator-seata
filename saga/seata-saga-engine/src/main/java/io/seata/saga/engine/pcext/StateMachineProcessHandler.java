@@ -39,7 +39,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * StateMachine ProcessHandler
  *
- * @author lorne.cl
  * @see ProcessHandler
  */
 public class StateMachineProcessHandler implements ProcessHandler {

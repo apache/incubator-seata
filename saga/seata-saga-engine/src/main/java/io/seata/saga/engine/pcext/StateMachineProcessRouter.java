@@ -37,7 +37,6 @@ import io.seata.saga.statelang.domain.StateMachine;
 /**
  * StateMachine ProcessRouter
  *
- * @author lorne.cl
  * @see ProcessRouter
  */
 public class StateMachineProcessRouter implements ProcessRouter {

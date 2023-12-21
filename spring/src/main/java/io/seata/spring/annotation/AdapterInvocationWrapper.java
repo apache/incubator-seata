@@ -22,7 +22,6 @@ import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * @author leezongjie
  */
 public class AdapterInvocationWrapper implements InvocationWrapper {
 

@@ -30,7 +30,6 @@ import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author GoodBoyCoder
  */
 public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
     /**

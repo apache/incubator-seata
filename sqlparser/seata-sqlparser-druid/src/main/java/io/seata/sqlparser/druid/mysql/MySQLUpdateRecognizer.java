@@ -46,7 +46,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 /**
  * The type My sql update recognizer.
  *
- * @author sharajava
  */
 public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpdateRecognizer, JoinRecognizer {
 

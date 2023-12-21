@@ -28,7 +28,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.BranchReportResponse;
 
 /**
- * @author leizhiyuan
  */
 public class BranchReportResponseConvertor implements PbConvertor<BranchReportResponse, BranchReportResponseProto> {
     @Override

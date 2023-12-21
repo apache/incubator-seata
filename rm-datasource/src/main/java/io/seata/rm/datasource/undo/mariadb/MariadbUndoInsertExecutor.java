@@ -28,7 +28,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 /**
  * The type Mariadb undo insert executor.
  *
- * @author funkye
  */
 public class MariadbUndoInsertExecutor extends MySQLUndoInsertExecutor {
 

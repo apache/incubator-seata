@@ -23,7 +23,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 /**
  * The type Mariadb undo delete executor.
  *
- * @author funkye
  */
 public class MariadbUndoDeleteExecutor extends MySQLUndoDeleteExecutor {
 

@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.event;
 import io.seata.core.event.Event;
 
 /**
- * @author slievrly
  */
 public class DegradeCheckEvent implements Event {
     private boolean requestSuccess;

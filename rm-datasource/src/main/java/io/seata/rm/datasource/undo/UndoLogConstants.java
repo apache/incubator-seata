@@ -22,7 +22,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 
 /**
- * @author Geng Zhang
  */
 public interface UndoLogConstants {
 

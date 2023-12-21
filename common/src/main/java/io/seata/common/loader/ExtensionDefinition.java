@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
  * The type ExtensionDefinition
  *
  * @param <S> type of serviceClass
- * @author haozhibei
  */
 final class ExtensionDefinition<S> {
 

@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * SeqGenerator
  *
- * @author lorne.cl
  */
 public interface SeqGenerator {
 

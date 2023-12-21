@@ -30,7 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 /**
  * Package scanner checker.
  *
- * @author wang.liang
  */
 @LoadLevel(name = "Packages", order = 100)
 public class PackageScannerChecker implements ScannerChecker {

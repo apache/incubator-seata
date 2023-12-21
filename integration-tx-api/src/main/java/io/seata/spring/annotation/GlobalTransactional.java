@@ -29,7 +29,6 @@ import java.lang.annotation.Target;
 /**
  * The interface Global transactional.
  *
- * @author slievrly
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) io.seata.spring
  * .annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object)// the scanner for TM, GlobalLock, and
  * TCC mode

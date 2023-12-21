@@ -25,7 +25,6 @@ import io.seata.common.metadata.Node;
 import io.seata.common.util.StringUtils;
 
 /**
- * @author jianbin.chen
  */
 public class RaftClusterMetadata implements Serializable {
 

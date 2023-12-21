@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Register tm request test.
  *
- * @author linqiuping
  */
 public class RegisterTMRequestTest {
 

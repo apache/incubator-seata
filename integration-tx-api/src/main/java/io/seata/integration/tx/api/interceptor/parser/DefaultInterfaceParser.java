@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author leezongjie
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 

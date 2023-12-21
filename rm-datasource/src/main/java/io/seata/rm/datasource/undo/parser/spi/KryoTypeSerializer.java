@@ -22,7 +22,6 @@ import com.esotericsoftware.kryo.Serializer;
  * The interface Kryo type serializer.
  *
  * @param <T> the type parameter
- * @author jsbxyyx
  */
 public interface KryoTypeSerializer<T> {
 

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * the Zstd Util test
  *
- * @author chd
  */
 public class ZstdUtilTest {
 

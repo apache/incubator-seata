@@ -25,7 +25,6 @@ import io.seata.core.protocol.transaction.BranchRegisterResponse;
 /**
  * The type Branch register response codec.
  *
- * @author zhangsen
  */
 public class BranchRegisterResponseCodec extends AbstractTransactionResponseCodec implements Serializable {
 

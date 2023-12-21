@@ -44,7 +44,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 /**
  * Saga auto configuration.
  *
- * @author wang.liang
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty({StarterConstants.SEATA_PREFIX + ".enabled", StarterConstants.SAGA_PREFIX + ".enabled"})

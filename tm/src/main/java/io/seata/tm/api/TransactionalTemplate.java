@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Template of executing business logic with a global transaction.
  *
- * @author sharajava
  */
 public class TransactionalTemplate {
 

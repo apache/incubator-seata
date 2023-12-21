@@ -21,7 +21,6 @@ import java.util.Set;
 /**
  * The interface for event bus.
  *
- * @author zhengyangyong
  */
 public interface EventBus {
     /**

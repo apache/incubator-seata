@@ -26,7 +26,6 @@ import java.util.Map;
 /**
  * Common serializer of map (this generally refers to header).
  *
- * @author Geng Zhang
  * @since 0.7.0
  */
 public class HeadMapSerializer {

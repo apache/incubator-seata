@@ -19,7 +19,6 @@ package io.seata.common;
 /**
  * The type Configuration keys.
  *
- * @author slievrly
  */
 public interface ConfigurationKeys {
     /**

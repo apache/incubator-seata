@@ -69,8 +69,6 @@ import static io.seata.tm.api.GlobalTransactionRole.Participant;
 /**
  * The type Global transactional interceptor handler.
  *
- * @author slievrly
- * @author leezongjie
  */
 public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocationHandler implements ConfigurationChangeListener {
 

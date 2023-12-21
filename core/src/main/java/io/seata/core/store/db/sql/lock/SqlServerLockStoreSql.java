@@ -21,7 +21,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * the database lock store ms-sqlserver sql
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = "sqlserver")
 public class SqlServerLockStoreSql extends AbstractLockStoreSql {

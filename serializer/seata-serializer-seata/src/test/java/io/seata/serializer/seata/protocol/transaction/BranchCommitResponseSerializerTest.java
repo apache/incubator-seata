@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Branch commit response codec test.
  *
- * @author zhangsen
  */
 public class BranchCommitResponseSerializerTest {
 

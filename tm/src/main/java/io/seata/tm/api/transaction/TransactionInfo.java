@@ -23,7 +23,6 @@ import io.seata.common.LockStrategyMode;
 import io.seata.common.util.CollectionUtils;
 
 /**
- * @author guoyao
  */
 public final class TransactionInfo implements Serializable {
 

@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.StateMachine;
 /**
  * BaseState
  *
- * @author lorne.cl
  */
 public abstract class BaseState implements State {
 

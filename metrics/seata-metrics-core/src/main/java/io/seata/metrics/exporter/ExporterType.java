@@ -19,7 +19,6 @@ package io.seata.metrics.exporter;
 /**
  * Supported metrics exporter type
  *
- * @author zhengyangyong
  */
 public enum ExporterType {
     /**

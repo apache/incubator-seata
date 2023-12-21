@@ -46,7 +46,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 
 /**
- * @author ptyin
  */
 @SpringBootTest
 class LockExecuteTest {

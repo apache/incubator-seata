@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.remoting;
 /**
  * remoting bean info
  *
- * @author zhangsen
  */
 public class RemotingDesc {
 

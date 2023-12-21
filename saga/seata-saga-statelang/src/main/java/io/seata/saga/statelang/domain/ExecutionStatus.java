@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Execution Status
  *
- * @author lorne.cl
  */
 public enum ExecutionStatus {
 

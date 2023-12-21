@@ -23,7 +23,6 @@ import io.seata.server.session.GlobalSession;
 /**
  * The interface Core.
  *
- * @author sharajava
  */
 public interface Core extends TransactionCoordinatorInbound, TransactionCoordinatorOutbound {
 

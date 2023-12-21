@@ -60,7 +60,6 @@ import java.util.stream.Collectors;
 import static io.netty.util.CharsetUtil.UTF_8;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
 

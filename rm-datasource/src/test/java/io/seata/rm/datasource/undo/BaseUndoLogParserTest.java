@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Geng Zhang
  */
 public abstract class BaseUndoLogParserTest extends BaseH2Test {
 

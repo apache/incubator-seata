@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * process message type:
  * {@link RegisterTMRequest}
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class RegTmProcessor implements RemotingProcessor {

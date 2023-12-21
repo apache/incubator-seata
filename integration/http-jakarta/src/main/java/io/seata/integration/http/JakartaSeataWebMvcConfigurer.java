@@ -21,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 /**
  * The Jakarta Seata Web Mvc Configurer
  *
- * @author wang.liang
  */
 public class JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer {
 

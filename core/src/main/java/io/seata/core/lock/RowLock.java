@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
 /**
  * The type Row lock.
  *
- * @author zhangsen
  */
 public class RowLock implements java.io.Serializable {
 

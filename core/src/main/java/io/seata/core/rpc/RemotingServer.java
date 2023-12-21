@@ -26,8 +26,6 @@ import java.util.concurrent.TimeoutException;
 /**
  * The interface Remoting server.
  *
- * @author slievrly
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public interface RemotingServer {

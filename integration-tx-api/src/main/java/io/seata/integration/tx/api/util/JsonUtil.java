@@ -25,8 +25,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.integration.tx.api.json.JsonParserFactory;
 
 /**
- * @author leezongjie
- * @author zouwei
  */
 public class JsonUtil {
 

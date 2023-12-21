@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Compensation trigger State
  *
- * @author lorne.cl
  */
 public interface CompensationTriggerState extends State {
 

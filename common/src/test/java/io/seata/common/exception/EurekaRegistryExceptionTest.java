@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The eurekaRegistry exception.
  *
- * @author lzf971107
  */
 public class EurekaRegistryExceptionTest {
 

@@ -26,7 +26,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type OracleOperateRecognizerHolder
  *
- * @author Zhibei Hao
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {

@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type My sql undo delete executor.
  *
- * @author sharajava
  */
 public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
 

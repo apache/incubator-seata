@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type String utils.
  *
- * @author slievrly
- * @author Geng Zhang
  */
 public class StringUtils {
 

@@ -18,8 +18,6 @@ package io.seata.core.store;
 
 /**
  * Distributed lock DO
- * @author zhongxiang.wang 
- * @author chd
  */
 public class DistributedLockDO {
 

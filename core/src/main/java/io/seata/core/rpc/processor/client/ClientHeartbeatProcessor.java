@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * process message type:
  * {@link HeartbeatMessage}
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class ClientHeartbeatProcessor implements RemotingProcessor {

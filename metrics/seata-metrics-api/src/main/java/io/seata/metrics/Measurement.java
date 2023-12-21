@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Value of meter
  *
- * @author zhengyangyong
  */
 public class Measurement {
     private final Id id;

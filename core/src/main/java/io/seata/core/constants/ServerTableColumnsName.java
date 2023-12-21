@@ -19,7 +19,6 @@ package io.seata.core.constants;
 /**
  * server table columns name.
  *
- * @author zjinlei
  */
 public interface ServerTableColumnsName {
 

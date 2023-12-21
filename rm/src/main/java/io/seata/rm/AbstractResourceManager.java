@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * abstract ResourceManager
  *
- * @author zhangsen
  */
 public abstract class AbstractResourceManager implements ResourceManager {
 

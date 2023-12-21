@@ -60,7 +60,6 @@ import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
 import static java.io.File.separator;
 
 /**
- * @author funkye
  */
 public class RaftServerManager {
 

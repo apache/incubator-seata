@@ -22,7 +22,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global begin request.
  *
- * @author slievrly
  */
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 

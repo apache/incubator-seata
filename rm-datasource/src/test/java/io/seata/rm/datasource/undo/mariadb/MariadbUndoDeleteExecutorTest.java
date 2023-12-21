@@ -33,7 +33,6 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.SQLType;
 
 /**
- * @author funkye
  */
 public class MariadbUndoDeleteExecutorTest extends BaseExecutorTest {
 

@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * State Language Domain Constants
  *
- * @author lorne.cl
  */
 public interface DomainConstants {
 

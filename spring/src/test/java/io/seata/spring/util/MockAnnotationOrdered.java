@@ -19,7 +19,6 @@ package io.seata.spring.util;
 import org.springframework.core.annotation.Order;
 
 /**
- * @author wang.liang
  */
 @Order(1)
 public class MockAnnotationOrdered {

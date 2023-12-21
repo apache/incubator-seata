@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * State machine language parser
  *
- * @author lorne.cl
  */
 public class StateMachineParserImpl implements StateMachineParser {
 

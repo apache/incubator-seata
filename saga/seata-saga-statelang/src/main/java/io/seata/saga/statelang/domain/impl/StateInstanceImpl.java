@@ -26,7 +26,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 /**
  * state execution instance
  *
- * @author lorne.cl
  */
 public class StateInstanceImpl implements StateInstance {
 

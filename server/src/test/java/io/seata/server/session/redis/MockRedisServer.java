@@ -23,7 +23,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * @author funkye
  */
 public class MockRedisServer {
 

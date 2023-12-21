@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Gauge interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Gauge<T extends Number> extends Meter {
     T get();

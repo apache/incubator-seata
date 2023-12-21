@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 /**
  * The escape symbol of keyword
  *
- * @author goodboycoder
  */
 public class EscapeSymbol {
     private final char leftSymbol;

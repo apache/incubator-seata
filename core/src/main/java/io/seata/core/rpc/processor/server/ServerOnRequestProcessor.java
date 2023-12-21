@@ -81,7 +81,6 @@ import org.slf4j.LoggerFactory;
  * 5) {@link GlobalRollbackRequest}
  * 6) {@link GlobalStatusRequest}
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {

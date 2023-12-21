@@ -27,7 +27,6 @@ import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
 /**
- * @author lizhao
  */
 public class StoreConfig {
 

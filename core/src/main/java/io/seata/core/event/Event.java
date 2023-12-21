@@ -19,7 +19,6 @@ package io.seata.core.event;
 /**
  * The base interface for seata event.
  *
- * @author zhengyangyong
  */
 public interface Event {
 }

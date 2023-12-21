@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Clock interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Clock {
     double getCurrentMilliseconds();
