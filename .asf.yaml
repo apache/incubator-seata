@@ -18,10 +18,10 @@ github:
   description: ":fire: Seata is an easy-to-use, high-performance, open source distributed transaction solution."
   homepage: https://seata.apache.org/
   labels:
-    - "mode: AT"
-    - "mode: TCC"
-    - "mode: SAGA"
-    - "mode: XA"
+    - AT
+    - TCC
+    - SAGA
+    - XA
   enabled_merge_buttons:
     squash:  true
     merge:   false
