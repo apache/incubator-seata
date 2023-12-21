@@ -24,13 +24,8 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationFactory;
 
