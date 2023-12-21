@@ -33,7 +33,6 @@ import java.util.Map;
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
 
 /**
- * @author : wangxb
  */
 public class MockWebServer {
 

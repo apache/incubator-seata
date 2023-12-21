@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Branch report response codec test.
  *
- * @author zhangsen
  */
 public class BranchReportResponseSerializerTest {
 

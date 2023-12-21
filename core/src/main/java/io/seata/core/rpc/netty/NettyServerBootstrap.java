@@ -49,7 +49,6 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAME
 /**
  * Rpc server bootstrap.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.1.0
  */
 public class NettyServerBootstrap implements RemotingBootstrap {

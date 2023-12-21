@@ -53,9 +53,6 @@ import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
 /**
  * The rm netty client.
  *
- * @author slievrly
- * @author zhaojun
- * @author zhangchenghui.dev@gmail.com
  */
 public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyRemotingClient.class);

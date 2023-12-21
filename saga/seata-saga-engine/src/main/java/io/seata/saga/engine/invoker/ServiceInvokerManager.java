@@ -25,7 +25,6 @@ import org.springframework.util.StringUtils;
 /**
  * Service Invoker Manager
  *
- * @author lorne.cl
  */
 public class ServiceInvokerManager {
 

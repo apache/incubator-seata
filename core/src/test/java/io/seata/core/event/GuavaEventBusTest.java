@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test default GuavaEventBus.
  *
- * @author zhengyangyong
  */
 public class GuavaEventBusTest {
     @Test

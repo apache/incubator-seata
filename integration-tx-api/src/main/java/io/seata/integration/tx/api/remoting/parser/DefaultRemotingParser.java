@@ -30,8 +30,6 @@ import io.seata.integration.tx.api.remoting.RemotingParser;
 /**
  * parsing remoting bean
  *
- * @author zhangsen
- * @author Yujianfei
  */
 public class DefaultRemotingParser {
 

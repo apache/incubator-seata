@@ -26,7 +26,6 @@ import io.seata.sqlparser.SQLRecognizer;
 /**
  * Update join executor for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUpdateJoinExecutor<T, S extends Statement> extends MySQLUpdateJoinExecutor<T, S> {
     public PolarDBXUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,

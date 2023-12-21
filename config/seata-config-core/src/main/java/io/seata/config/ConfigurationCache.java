@@ -29,7 +29,6 @@ import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
 /**
- * @author funkye
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 

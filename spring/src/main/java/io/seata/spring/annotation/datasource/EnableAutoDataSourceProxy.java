@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 /**
- * @author xingfudeshi@gmail.com
  * This annotation will enable auto proxying of datasource bean.
  */
 @Target(ElementType.TYPE)

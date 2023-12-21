@@ -26,7 +26,6 @@ import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.ResultCode;
 
 /**
- * @author leizhiyuan
  */
 public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMResponse, RegisterRMResponseProto> {
     @Override

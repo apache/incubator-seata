@@ -25,7 +25,6 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author guoyao
  */
 public class RollbackRuleTest {
 

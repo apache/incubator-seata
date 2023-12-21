@@ -28,7 +28,6 @@ import java.util.Properties;
 /**
  * The properties Processor.
  *
- * @author zhixing
  */
 @LoadLevel(name = "properties")
 public class ProcessorProperties implements Processor {

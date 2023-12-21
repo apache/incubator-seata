@@ -22,7 +22,6 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * @author ruishansun
  */
 public interface TestAction {
 

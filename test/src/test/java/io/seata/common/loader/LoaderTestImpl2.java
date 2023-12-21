@@ -17,7 +17,6 @@
 package io.seata.common.loader;
 
 /**
- * @author zhangsen
  */
 @LoadLevel(name = "two", order = 2)
 public class LoaderTestImpl2 implements LoaderTestSPI {

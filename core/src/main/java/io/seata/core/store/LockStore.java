@@ -22,7 +22,6 @@ import io.seata.core.model.LockStatus;
 /**
  * The interface Lock store.
  *
- * @author zhangsen
  */
 public interface LockStore {
 

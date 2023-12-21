@@ -22,7 +22,6 @@ import io.seata.core.compressor.Compressor;
 /**
  * the Zip Compressor
  *
- * @author ph3636
  */
 @LoadLevel(name = "ZIP")
 public class ZipCompressor implements Compressor {

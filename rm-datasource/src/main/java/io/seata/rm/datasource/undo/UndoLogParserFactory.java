@@ -26,8 +26,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * The type Undo log parser factory.
  *
- * @author sharajava
- * @author Geng Zhang
  */
 public class UndoLogParserFactory {
 

@@ -23,7 +23,6 @@ import io.seata.rm.datasource.StatementProxy;
 /**
  * The type Plain executor.
  *
- * @author sharajava
  *
  * @param <T> the type parameter
  * @param <S> the type parameter

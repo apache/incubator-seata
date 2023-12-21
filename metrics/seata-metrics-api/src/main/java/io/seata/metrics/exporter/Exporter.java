@@ -23,7 +23,6 @@ import io.seata.metrics.registry.Registry;
 /**
  * Exporter interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Exporter extends Closeable {
     void setRegistry(Registry registry);

@@ -27,7 +27,6 @@ import io.seata.rm.datasource.undo.parser.KryoUndoLogParser;
 import io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser;
 
 /**
- * @author Geng Zhang
  */
 class UndoLogParserProviderTest {
 

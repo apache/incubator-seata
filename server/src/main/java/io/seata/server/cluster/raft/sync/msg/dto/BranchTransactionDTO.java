@@ -19,7 +19,6 @@ package io.seata.server.cluster.raft.sync.msg.dto;
 import io.seata.core.store.BranchTransactionDO;
 
 /**
- * @author jianbin.chen
  */
 public class BranchTransactionDTO extends BranchTransactionDO {
 

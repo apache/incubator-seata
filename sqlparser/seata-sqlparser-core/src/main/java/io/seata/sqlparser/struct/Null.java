@@ -19,7 +19,6 @@ package io.seata.sqlparser.struct;
 /**
  * The type Null.
  *
- * @author sharajava
  */
 public class Null {
     private static Null instance = new Null();

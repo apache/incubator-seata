@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test cases for update recognizer of PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUpdateRecognizerTest extends AbstractPolarDBXRecognizerTest {
     @Test

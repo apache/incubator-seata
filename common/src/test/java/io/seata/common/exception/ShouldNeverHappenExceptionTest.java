@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The shouldNeverHappen exception.
  *
- * @author lzf971107
  */
 public class ShouldNeverHappenExceptionTest {
 

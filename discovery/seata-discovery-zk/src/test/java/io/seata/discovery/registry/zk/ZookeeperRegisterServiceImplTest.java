@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 /**
- * @author Geng Zhang
  */
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;

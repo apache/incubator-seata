@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type oralce undo insert executor.
  *
- * @author ccg
  */
 public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
 

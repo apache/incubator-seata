@@ -22,7 +22,6 @@ import io.seata.saga.engine.sequence.SeqGenerator;
 /**
  * Generate sequence expression
  *
- * @author lorne.cl
  */
 public class SequenceExpression implements Expression {
 

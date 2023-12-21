@@ -46,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Default server message listener.
  *
- * @author slievrly
  */
 @Deprecated
 public class DefaultServerMessageListenerImpl implements ServerMessageListener {

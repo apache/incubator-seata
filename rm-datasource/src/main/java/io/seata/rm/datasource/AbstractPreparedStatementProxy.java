@@ -45,7 +45,6 @@ import java.util.Map;
 /**
  * The type Abstract prepared statement proxy.
  *
- * @author sharajava
  */
 public abstract class AbstractPreparedStatementProxy extends StatementProxy<PreparedStatement>
     implements PreparedStatement {

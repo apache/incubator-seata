@@ -26,7 +26,6 @@ import io.seata.common.exception.NotSupportYetException;
 /**
  * db page util
  *
- * @author lvekee 734843455@qq.com
  */
 public class PageUtil {
     /**

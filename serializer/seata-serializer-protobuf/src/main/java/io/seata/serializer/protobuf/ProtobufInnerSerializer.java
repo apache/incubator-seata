@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * @author leizhiyuan
  */
 public class ProtobufInnerSerializer {
 

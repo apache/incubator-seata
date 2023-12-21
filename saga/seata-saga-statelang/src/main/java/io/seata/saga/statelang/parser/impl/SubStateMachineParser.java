@@ -27,7 +27,6 @@ import org.springframework.util.StringUtils;
 /**
  * SubStateMachineParser
  *
- * @author lorne.cl
  */
 public class SubStateMachineParser extends AbstractTaskStateParser implements StateParser<SubStateMachine> {
 

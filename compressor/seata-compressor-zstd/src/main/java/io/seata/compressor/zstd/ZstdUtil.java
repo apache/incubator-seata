@@ -21,7 +21,6 @@ import com.github.luben.zstd.Zstd;
 /**
  * the Zstd Util
  *
- * @author chd
  */
 public class ZstdUtil {
 

@@ -49,7 +49,6 @@ import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 /**
  * The type Database transaction store manager.
  *
- * @author zhangsen
  */
 public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager {

@@ -24,7 +24,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = STORE_PREFIX)

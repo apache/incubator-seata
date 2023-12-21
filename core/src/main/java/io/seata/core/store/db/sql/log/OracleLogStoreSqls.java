@@ -21,7 +21,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * Database log store oracle sql
- * @author will
  */
 @LoadLevel(name = "oracle")
 public class OracleLogStoreSqls extends AbstractLogStoreSqls {

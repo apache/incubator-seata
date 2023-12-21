@@ -24,7 +24,6 @@ import static io.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SA
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = SERVER_UNDO_PREFIX)

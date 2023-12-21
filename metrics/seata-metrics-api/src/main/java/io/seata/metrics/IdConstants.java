@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Seata metrics constants for id
  *
- * @author zhengyangyong
  */
 public interface IdConstants {
     String SEATA_TRANSACTION = "seata.transaction";

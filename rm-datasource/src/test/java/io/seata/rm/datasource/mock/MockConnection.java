@@ -23,7 +23,6 @@ import java.util.Properties;
 
 /**
  * Mock connection
- * @author will
  */
 public class MockConnection extends com.alibaba.druid.mock.MockConnection {
 

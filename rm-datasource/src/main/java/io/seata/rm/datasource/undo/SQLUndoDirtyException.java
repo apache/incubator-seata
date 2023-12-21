@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.sql.SQLException;
 
 /**
- * @author zouwei
  */
 class SQLUndoDirtyException extends SQLException implements Serializable {
 

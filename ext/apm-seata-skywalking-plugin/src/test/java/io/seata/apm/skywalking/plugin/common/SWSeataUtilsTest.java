@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author zhaoyuguang
  */
 public class SWSeataUtilsTest {
 

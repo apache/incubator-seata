@@ -22,7 +22,6 @@ import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 /**
  * The type Global lock query request codec.
  *
- * @author zhangsen
  */
 public class GlobalLockQueryRequestCodec extends BranchRegisterRequestCodec {
 

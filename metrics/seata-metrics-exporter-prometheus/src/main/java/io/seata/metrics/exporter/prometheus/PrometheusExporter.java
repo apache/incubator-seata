@@ -37,7 +37,6 @@ import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETH
 /**
  * Exporter for Prometheus
  *
- * @author zhengyangyong
  */
 @LoadLevel(name = "prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {

@@ -26,7 +26,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalLockQueryRequestConvertor
     implements PbConvertor<GlobalLockQueryRequest, GlobalLockQueryRequestProto> {

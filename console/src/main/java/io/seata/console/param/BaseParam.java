@@ -20,7 +20,6 @@ import java.io.Serializable;
 
 /**
  * The base param
- * @author zhongxiang.wang
  */
 public class BaseParam implements Serializable {
 

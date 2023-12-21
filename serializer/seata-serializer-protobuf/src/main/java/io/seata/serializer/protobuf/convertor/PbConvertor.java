@@ -17,7 +17,6 @@
 package io.seata.serializer.protobuf.convertor;
 
 /**
- * @author leizhiyuan
  */
 public interface PbConvertor<T, S> {
 

@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The Net Validator util test.
  *
- * @author Ifdevil
  */
 public class NetAddressValidatorUtilTest {
 

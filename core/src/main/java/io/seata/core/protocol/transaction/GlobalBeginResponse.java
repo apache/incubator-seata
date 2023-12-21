@@ -21,7 +21,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Global begin response.
  *
- * @author slievrly
  */
 public class GlobalBeginResponse extends AbstractTransactionResponse {
 

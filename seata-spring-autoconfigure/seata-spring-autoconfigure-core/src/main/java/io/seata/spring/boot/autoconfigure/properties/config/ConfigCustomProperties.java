@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
 
 /**
- * @author jrial95@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_CUSTOM_PREFIX)

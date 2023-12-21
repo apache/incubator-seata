@@ -26,7 +26,6 @@ import static io.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = METRICS_PREFIX)

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 /**
  * The Scanner checker for {@link GlobalTransactionScanner}
  *
- * @author wang.liang
  * @see GlobalTransactionScanner#wrapIfNecessary(Object, String, Object)
  */
 public interface ScannerChecker {

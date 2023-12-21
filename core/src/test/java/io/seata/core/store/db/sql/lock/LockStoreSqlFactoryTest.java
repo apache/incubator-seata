@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * the Lock Store Sql Factory Test
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
 public class LockStoreSqlFactoryTest {

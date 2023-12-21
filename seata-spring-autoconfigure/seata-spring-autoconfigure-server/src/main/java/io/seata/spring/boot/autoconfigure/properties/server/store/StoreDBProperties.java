@@ -25,7 +25,6 @@ import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = STORE_DB_PREFIX)

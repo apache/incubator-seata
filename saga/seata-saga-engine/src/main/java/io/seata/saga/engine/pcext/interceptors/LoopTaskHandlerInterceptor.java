@@ -44,7 +44,6 @@ import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 /**
  * State Interceptor For ServiceTask, SubStateMachine, ScriptTask With Loop Attribute
  *
- * @author anselleeyy
  */
 @LoadLevel(name = "LoopTask", order = 90)
 public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {

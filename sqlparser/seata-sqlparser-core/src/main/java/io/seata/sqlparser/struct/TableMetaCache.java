@@ -21,7 +21,6 @@ import java.sql.Connection;
 /**
  * The type Table meta cache.
  *
- * @author sharajava
  */
 public interface TableMetaCache {
 

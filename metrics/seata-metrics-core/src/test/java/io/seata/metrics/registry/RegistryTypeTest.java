@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit test for {@link RegistryType}
  *
- * @author Mia0451
  */
 class RegistryTypeTest {
 
