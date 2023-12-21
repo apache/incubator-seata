@@ -21,7 +21,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,19 +30,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author laywin
  */
 public class RedisRegisterServiceImplTest {
-
-    Logger logger = LoggerFactory.getLogger(getClass());
 
     private static RedisRegistryServiceImpl redisRegistryService;
 
@@ -67,6 +65,8 @@ public class RedisRegisterServiceImplTest {
     public void testFlow() {
 
         redisRegistryService.register(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
+
+        Assertions.assertTrue(redisRegistryService.lookup("default_tx_group").size() > 0);
 
         redisRegistryService.unregister(new InetSocketAddress(NetUtil.getLocalIp(), 8091));
 
