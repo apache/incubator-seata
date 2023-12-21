@@ -1,6 +1,6 @@
-# 为 Seata 做贡献
+# 为 Apache Seata(incubating) 做贡献
 
-如果你有兴趣寻找关于Seata的漏洞，我们会热烈欢迎。首先，我们非常鼓励这种意愿。这是为您提供的贡献指南列表。
+如果你有兴趣寻找关于Apache Seata(incubating)的漏洞，我们会热烈欢迎。首先，我们非常鼓励这种意愿。这是为您提供的贡献指南列表。
 
 [[English Contributing Document](./CONTRIBUTING.md)]
 
@@ -15,11 +15,11 @@
 
 ## 报告安全问题
 
-安全问题总会认真对待。通常，我们不鼓励任何人传播安全问题。如果您发现Seata的安全问题，请不要公开讨论，甚至不要公开问题。相反，我们鼓励您向 [dev-seata@googlegroups.com](mailto:dev-seata@googlegroups.com) 发送私人电子邮件 以报告此情况。
+安全问题总会认真对待。通常，我们不鼓励任何人传播安全问题。如果您发现Apache Seata(incubating)的安全问题，请不要公开讨论，甚至不要公开问题。相反，我们鼓励您向 [private@seata.apache.org](mailto:private@seata.apache.org) 发送私人电子邮件 以报告此情况。
 
 ## 报告一般问题
 
-老实说，我们认为每一个 Seata 用户都是非常好的贡献者。在体验了 Seata 之后，您可能会对项目有一些反馈。那么随时可以通过 [NEW ISSUE](https://github.com/seata/seata/issues/new/choose) 来提交。
+老实说，我们认为每一个 Seata 用户都是非常好的贡献者。在体验了 Seata 之后，您可能会对项目有一些反馈。那么随时可以通过 [NEW ISSUE](https://github.com/apache/incubator-seata/issues/new/choose) 来提交。
 
 由于我们通过分布式方式协作Seata，我们欣赏高质量，详细的，准确的问题报告。为了让沟通更高效，我们希望每个人都可以搜索下您的问题是否在搜索列表中。如果您发现它存在，请在现有问题评论中添加您的详细信息，而不是打开一个全新的问题。
 
@@ -70,14 +70,14 @@
 
 为了提出 PR，我们假设你已经注册了一个 GitHub ID。然后您可以通过以下步骤完成准备工作：
 
-1. **FORK** Seata 到您的仓库。要完成这项工作，您只需单击 [seata/seata](https://github.com/seata/seata) 主页右侧的 Fork 按钮。然后你将得到以你的仓库为路径的项目地址：`https://github.com/<your-username>/seata`，其中your-username是你的 GitHub 用户名。
+1. **FORK** Seata 到您的仓库。要完成这项工作，您只需单击 [apache/incubator-seata](https://github.com/apache/incubator-seata) 主页右侧的 Fork 按钮。然后你将得到以你的仓库为路径的项目地址：`https://github.com/<your-username>/incubator-seata`，其中your-username是你的 GitHub 用户名。
 
-2. **克隆** 您自己的存储库以在本地开发. 使用 `git clone git@github.com:<your-username>/seata.git` 将存储库克隆到本地计算机。 然后您可以创建新分支来完成您希望进行的更改。
+2. **克隆** 您自己的存储库以在本地开发. 使用 `git clone git@github.com:<your-username>/incubator-seata.git` 将存储库克隆到本地计算机。 然后您可以创建新分支来完成您希望进行的更改。
 
-3. **设置远程** 将上游设置为 `git@github.com:seata/seata.git` 使用以下两个命令：
+3. **设置远程** 将上游设置为 `git@github.com:apache/incubator-seata.git` 使用以下两个命令：
 
 ```bash
-git remote add upstream git@github.com:seata/seata.git
+git remote add upstream git@github.com:apache/incubator-seata.git
 git remote set-url --push upstream no-pushing
 ```
 
@@ -85,9 +85,9 @@ git remote set-url --push upstream no-pushing
 
 ```shell
 $ git remote -v
-origin     git@github.com:<your-username>/seata.git (fetch)
-origin     git@github.com:<your-username>/seata.git (push)
-upstream   git@github.com:seata/seata.git (fetch)
+origin     git@github.com:<your-username>/incubator-seata.git (fetch)
+origin     git@github.com:<your-username>/incubator-seata.git (push)
+upstream   git@github.com:apache/incubator-seata.git (fetch)
 upstream   no-pushing (push)
 ```
 
@@ -95,7 +95,7 @@ upstream   no-pushing (push)
 
 ### 分支定义
 
-现在我们假设通过拉取请求的每个贡献都是针对Seata 中的 [开发分支](https://github.com/seata/seata/tree/develop) 。在贡献之前，请注意分支定义会很有帮助。
+现在我们假设通过拉取请求的每个贡献都是针对Seata 中的 [开发分支](https://github.com/apache/incubator-seata/tree/2.x) 。在贡献之前，请注意分支定义会很有帮助。
 
 作为贡献者，请再次记住，通过拉取请求的每个贡献都是针对分支开发的。而在Seata项目中，还有其他几个分支，我们一般称它们为release分支（如0.6.0、0.6.1）、feature分支、hotfix分支和master分支。
 
@@ -103,7 +103,7 @@ upstream   no-pushing (push)
 
 在发布之后，我们会将发布分支的提交合并到主分支中。
 
-当我们发现某个版本有bug时，我们会决定在以后的版本中修复它，或者在特定的hotfix版本中修复它。当我们决定修复hotfix版本时，我们会根据对应的release分支checkout hotfix分支，进行代码修复和验证，合并到develop分支和master分支。
+当我们发现某个版本有bug时，我们会决定在以后的版本中修复它，或者在特定的hotfix版本中修复它。当我们决定修复hotfix版本时，我们会根据对应的release分支checkout hotfix分支，进行代码修复和验证，合并到开发分支和master分支。
 
 对于较大的功能，我们将拉出功能分支进行开发和验证。
 
@@ -195,7 +195,7 @@ Seata 代码风格 符合阿里巴巴 Java 编码指南。
 
 
 #### idea IDE
-[p3c-idea-plugin-install](https://github.com/alibaba/p3c/blob/master/idea-plugin/README.md) 
+[p3c-idea-plugin-install](https://github.com/alibaba/p3c/blob/master/idea-plugin/README.md)
 
 #### eclipse IDE
 [p3c-eclipse-plugin-install](https://github.com/alibaba/p3c/blob/master/eclipse-plugin/README.md)
