@@ -204,8 +204,8 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void testUnload() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> EnhancedServiceLoader.unload(Hello.class, null));
-        Hello load = EnhancedServiceLoader.load(Hello.class);
-        Assertions.assertDoesNotThrow(() -> EnhancedServiceLoader.unload(Hello.class, "LatinHello"));
+        Hello load = EnhancedServiceLoader.load(Hello.class, "FrenchHello");
+        Assertions.assertDoesNotThrow(() -> EnhancedServiceLoader.unload(Hello.class, "FrenchHello"));
     }
 
 
