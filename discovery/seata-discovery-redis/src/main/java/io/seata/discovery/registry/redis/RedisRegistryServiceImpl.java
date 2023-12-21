@@ -1,25 +1,24 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.discovery.registry.redis;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,8 +28,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -71,7 +72,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static volatile JedisPool jedisPool;
 
     // redis registry key live 5 seconds, auto refresh key every 2 seconds
-    private static final int KEY_TTL = 5;
+    private static final long KEY_TTL = 5L;
     private static final long KEY_REFRESH_PERIOD = 2000L;
 
     private ScheduledExecutorService threadPoolExecutorForSubscribe = new ScheduledThreadPoolExecutor(1,
@@ -187,7 +188,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     @Override
     public void subscribe(String cluster, RedisListener listener) {
         String redisRegistryKey = REDIS_FILEKEY_PREFIX + cluster;
-        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
+        CollectionUtils.computeIfAbsent(LISTENER_SERVICE_MAP, cluster, key -> new ArrayList<>())
                 .add(listener);
 
 
@@ -240,17 +241,45 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 String eventType = msgr[1];
                 switch (eventType) {
                     case RedisListener.REGISTER:
-                        CLUSTER_ADDRESS_MAP.get(clusterName).add(NetUtil.toInetSocketAddress(serverAddr));
+                        CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName, value -> ConcurrentHashMap.newKeySet(2))
+                            .add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
-                        CLUSTER_ADDRESS_MAP.get(clusterName).remove(NetUtil.toInetSocketAddress(serverAddr));
+                        removeServerAddressByPushEmptyProtection(clusterName, serverAddr);
                         break;
                     default:
                         throw new ShouldNeverHappenException("unknown redis msg:" + msg);
                 }
             });
         }
-        return new ArrayList<>(CLUSTER_ADDRESS_MAP.getOrDefault(clusterName, Collections.emptySet()));
+        return new ArrayList<>(CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName, value -> ConcurrentHashMap.newKeySet(2)));
+    }
+
+    /**
+     *
+     * if the serverAddr is unique in the address list and
+     * the callback cluster is current cluster, then enable push-empty protection
+     * Otherwise, remove it.
+     *
+     * @param notifyCluserName notifyCluserName
+     * @param serverAddr serverAddr
+     */
+    private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
+
+        Set<InetSocketAddress> socketAddresses = CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, notifyCluserName, value -> ConcurrentHashMap.newKeySet(2));
+        InetSocketAddress inetSocketAddress = NetUtil.toInetSocketAddress(serverAddr);
+        if (socketAddresses.size() == 1 && socketAddresses.contains(inetSocketAddress)) {
+            String txServiceGroupName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+
+            if (StringUtils.isNotEmpty(txServiceGroupName)) {
+                String clusterName = getServiceGroup(txServiceGroupName);
+                if (notifyCluserName.equals(clusterName)) {
+                    return;
+                }
+            }
+        }
+        CLUSTER_ADDRESS_MAP.get(notifyCluserName).remove(inetSocketAddress);
     }
 
     @Override
@@ -291,7 +320,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         scanParams.count(10);
         scanParams.match(redisRegistryKey + "_*");
         String cursor = ScanParams.SCAN_POINTER_START;
-        Set<InetSocketAddress> newAddressSet = new HashSet<>();
+        Set<InetSocketAddress> newAddressSet = ConcurrentHashMap.newKeySet(2);
         do {
             ScanResult<String> scanResult = jedis.scan(cursor, scanParams);
             cursor = scanResult.getCursor();
@@ -307,7 +336,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             }
         } while (!cursor.equals(ScanParams.SCAN_POINTER_START));
 
-        if (!newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
+        if (CollectionUtils.isNotEmpty(newAddressSet) && !newAddressSet.equals(CLUSTER_ADDRESS_MAP.get(clusterName))) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
         }
     }
