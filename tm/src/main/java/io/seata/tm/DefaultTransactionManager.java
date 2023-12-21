@@ -41,7 +41,6 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Default transaction manager.
  *
- * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
 

@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Enhanced service loader.
  *
- * @author slievrly
  */
 public class EnhancedServiceLoader {
 

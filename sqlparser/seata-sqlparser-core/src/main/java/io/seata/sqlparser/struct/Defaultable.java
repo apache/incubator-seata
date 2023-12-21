@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * The default expr able.
  *
- * @author jsbxyyx
  */
 public interface Defaultable {
 

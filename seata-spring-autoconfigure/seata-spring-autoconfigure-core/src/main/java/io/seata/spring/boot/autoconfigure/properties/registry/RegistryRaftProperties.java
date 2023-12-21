@@ -23,7 +23,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = REGISTRY_RAFT_PREFIX)

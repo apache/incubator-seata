@@ -24,8 +24,6 @@ import io.seata.core.model.Resource;
 /**
  * The type Tcc resource.
  *
- * @author zhangsen
- * @author Yujianfei
  */
 public class TCCResource implements Resource {
 

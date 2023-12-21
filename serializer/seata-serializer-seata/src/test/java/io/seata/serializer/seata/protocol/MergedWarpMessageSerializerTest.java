@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Merged warp message codec test.
  *
- * @author zhangsen
  */
 public class MergedWarpMessageSerializerTest {
 

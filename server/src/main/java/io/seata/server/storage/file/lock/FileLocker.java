@@ -37,7 +37,6 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFa
 /**
  * The type Memory locker.
  *
- * @author zhangsen
  */
 public class FileLocker extends AbstractLocker {
 

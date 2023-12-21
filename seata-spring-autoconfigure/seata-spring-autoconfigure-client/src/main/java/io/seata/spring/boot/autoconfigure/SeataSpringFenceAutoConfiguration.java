@@ -38,7 +38,6 @@ import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 /**
  * Spring fence auto configuration.
  *
- * @author kaka2code
  */
 @ConditionalOnExpression("${seata.enabled:true}")
 @ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})

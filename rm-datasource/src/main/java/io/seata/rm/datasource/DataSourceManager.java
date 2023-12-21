@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Data source manager.
  *
- * @author sharajava
  */
 public class DataSourceManager extends AbstractResourceManager {
 

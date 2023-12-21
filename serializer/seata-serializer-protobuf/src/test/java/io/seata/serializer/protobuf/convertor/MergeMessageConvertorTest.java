@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author leizhiyuan
  */
 public class MergeMessageConvertorTest {
 

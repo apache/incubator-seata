@@ -39,7 +39,6 @@ import java.util.Map;
 /**
  * The type DM insert executor.
  *
- * @author chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM, scope = Scope.PROTOTYPE)
 public class DmInsertExecutor extends BaseInsertExecutor implements Sequenceable {

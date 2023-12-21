@@ -27,7 +27,6 @@ import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
 
 /**
- * @author funkye
  */
 public class RaftSyncMessage implements java.io.Serializable {
 

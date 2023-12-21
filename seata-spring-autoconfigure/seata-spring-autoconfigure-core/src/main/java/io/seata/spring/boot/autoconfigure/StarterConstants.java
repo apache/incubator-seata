@@ -21,7 +21,6 @@ import java.util.HashMap;
 import io.seata.config.ConfigurationKeys;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public interface StarterConstants {
     String SEATA_PREFIX = "seata";

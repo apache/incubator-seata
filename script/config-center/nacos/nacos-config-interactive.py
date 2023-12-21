@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 #  -*- coding: UTF-8 -*-
-# @Author : wangyeuwen
 import http.client
 import urllib.parse
 import re

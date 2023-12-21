@@ -45,7 +45,6 @@ import java.util.Arrays;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author Geng Zhang
  */
 public abstract class BaseH2Test {
     

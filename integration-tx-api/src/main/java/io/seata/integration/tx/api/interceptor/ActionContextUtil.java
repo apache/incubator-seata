@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Extracting TCC Context from Method
  *
- * @author zhangsen
- * @author wang.liang
  */
 public final class ActionContextUtil {
 

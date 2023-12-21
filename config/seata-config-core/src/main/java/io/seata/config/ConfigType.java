@@ -19,7 +19,6 @@ package io.seata.config;
 /**
  * The enum Config type.
  *
- * @author slievrly
  */
 public enum ConfigType {
     /**

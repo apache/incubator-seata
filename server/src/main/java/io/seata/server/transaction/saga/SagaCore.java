@@ -41,7 +41,6 @@ import io.seata.server.session.SessionHolder;
 /**
  * The type saga core.
  *
- * @author ph3636
  */
 public class SagaCore extends AbstractCore {
 

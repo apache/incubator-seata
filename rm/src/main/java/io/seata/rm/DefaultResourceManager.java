@@ -33,7 +33,6 @@ import io.seata.core.model.ResourceManager;
 /**
  * default resource manager, adapt all resource managers
  *
- * @author zhangsen
  */
 public class DefaultResourceManager implements ResourceManager {
 

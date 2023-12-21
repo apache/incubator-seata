@@ -22,7 +22,6 @@ import io.seata.core.event.GuavaEventBus;
 /**
  * Manager hold the singleton event bus instance.
  *
- * @author zhengyangyong
  */
 public class EventBusManager {
     private static class SingletonHolder {

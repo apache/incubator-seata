@@ -29,7 +29,6 @@ import static io.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = CLIENT_TM_PREFIX)

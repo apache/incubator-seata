@@ -56,7 +56,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_
 /**
  * The type File based session manager.
  *
- * @author slievrly
  */
 @LoadLevel(name = "file", scope = Scope.PROTOTYPE)
 public class FileSessionManager extends AbstractSessionManager implements Reloadable {

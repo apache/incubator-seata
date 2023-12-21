@@ -46,7 +46,6 @@ import static io.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
 /**
  * The type Log store data base dao.
  *
- * @author zhangsen
  */
 public class LogStoreDataBaseDAO implements LogStore {
 

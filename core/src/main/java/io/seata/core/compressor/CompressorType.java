@@ -17,7 +17,6 @@
 package io.seata.core.compressor;
 
 /**
- * @author Geng Zhang
  */
 public enum CompressorType {
 

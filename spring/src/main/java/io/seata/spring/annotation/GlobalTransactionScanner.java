@@ -78,7 +78,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 /**
  * The type Global transaction scanner.
  *
- * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {

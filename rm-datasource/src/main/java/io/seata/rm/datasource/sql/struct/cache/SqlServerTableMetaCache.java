@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type SqlServer Table meta cache.
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerTableMetaCache extends AbstractTableMetaCache {

@@ -19,7 +19,6 @@ package io.seata.core.exception;
 /**
  * The type BranchTransaction exception.
  *
- * @author will
  */
 public class BranchTransactionException extends TransactionException {
 

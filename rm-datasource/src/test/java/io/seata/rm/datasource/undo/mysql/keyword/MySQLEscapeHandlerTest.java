@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type My sql keyword checker test.
  *
- * @author Wu
  */
 public class MySQLEscapeHandlerTest {
 

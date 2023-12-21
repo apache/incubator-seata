@@ -32,7 +32,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 /**
  * Process Context Builder
  *
- * @author lorne.cl
  */
 public class ProcessContextBuilder {
 

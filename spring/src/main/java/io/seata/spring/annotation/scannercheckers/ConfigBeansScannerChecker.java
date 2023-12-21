@@ -25,7 +25,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 /**
  * Config scanner checker.
  *
- * @author wang.liang
  */
 @LoadLevel(name = "ConfigBeans", order = 150)
 public class ConfigBeansScannerChecker implements ScannerChecker {

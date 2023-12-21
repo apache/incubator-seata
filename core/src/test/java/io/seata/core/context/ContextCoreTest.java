@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Context core test.
  *
- * @author guoyao
  */
 public class ContextCoreTest {
 

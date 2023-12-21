@@ -19,7 +19,6 @@ package io.seata.common;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 
 /**
- * @author wang.liang
  */
 public class SagaCostPrint {
 

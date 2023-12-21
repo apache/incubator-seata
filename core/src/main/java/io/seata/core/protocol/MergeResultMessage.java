@@ -20,7 +20,6 @@ package io.seata.core.protocol;
 /**
  * The type Merge result message.
  *
- * @author slievrly
  */
 public class MergeResultMessage extends AbstractMessage implements MergeMessage {
 

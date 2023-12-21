@@ -21,7 +21,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Event publisher
  *
- * @author lorne.cl
  */
 public interface EventPublisher<E> {
 

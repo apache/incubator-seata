@@ -19,7 +19,6 @@ package io.seata.core.rpc;
 /**
  * The interface Remoting service.
  *
- * @author slievrly
  */
 @Deprecated
 public interface RemotingService {

@@ -17,7 +17,6 @@
 package io.seata.integration.tx.api.interceptor.parser;
 
 /**
- * @author leezongjie
  */
 public interface RegisterResourceParser {
 

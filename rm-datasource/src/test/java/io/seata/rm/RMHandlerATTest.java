@@ -40,7 +40,6 @@ import static org.mockito.Mockito.anyString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
- * @author selfishlover
  */
 class RMHandlerATTest {
 

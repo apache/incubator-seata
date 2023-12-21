@@ -18,7 +18,6 @@ package io.seata.sqlparser.struct;
 
 /**
  * The not placeholder expression.
- * @author jsbxyyx
  */
 public class NotPlaceholderExpr {
 

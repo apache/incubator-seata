@@ -25,7 +25,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type MariadbUndoExecutorHolder
  *
- * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbUndoExecutorHolder implements UndoExecutorHolder {

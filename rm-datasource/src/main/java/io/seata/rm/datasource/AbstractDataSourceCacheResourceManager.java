@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Abstract RM with DataSource Cache.
  *
- * @author sharajava
  */
 public abstract class AbstractDataSourceCacheResourceManager extends AbstractResourceManager implements Initialize {
 

@@ -22,7 +22,6 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 /**
  * The interface Tcc action.
  *
- * @author zhangsen
  */
 public interface TccAction {
 

@@ -34,7 +34,6 @@ import java.util.List;
 /**
  * The type dm delete recognizer.
  *
- * @author chengxiaoxiao
  */
 public class DmDeleteRecognizer extends BaseDmRecognizer implements SQLDeleteRecognizer {
 

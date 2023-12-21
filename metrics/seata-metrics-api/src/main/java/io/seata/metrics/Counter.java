@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Counter interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Counter extends Meter {
     long increase(long value);

@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import static io.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
 /**
- * @author jsbxyyx
  */
 public final class StackTraceLogger {
 

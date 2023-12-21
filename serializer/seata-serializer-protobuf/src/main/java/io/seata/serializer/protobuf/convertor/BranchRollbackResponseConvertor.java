@@ -31,7 +31,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 
 /**
- * @author leizhiyuan
  */
 public class BranchRollbackResponseConvertor
     implements PbConvertor<BranchRollbackResponse, BranchRollbackResponseProto> {

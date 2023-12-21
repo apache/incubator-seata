@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * The type MergeResultMessage test.
  *
- * @author leizhiyuan
  */
 public class MergeResultMessageTest {
 

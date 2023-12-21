@@ -55,7 +55,6 @@ import org.springframework.util.StringUtils;
 /**
  * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
  *
- * @author lorne.cl
  */
 @LoadLevel(name = "ServiceTask", order = 100)
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {

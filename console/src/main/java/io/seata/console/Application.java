@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * The type Application.
  *
- * @author jameslcj
  */
 @SpringBootApplication(scanBasePackages = {"io.seata.console"})
 public class Application {

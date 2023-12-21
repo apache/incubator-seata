@@ -25,7 +25,6 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
 /**
- * @author xingfudeshi@gmail.com
  * The type auto data source proxy registrar
  */
 public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistrar {

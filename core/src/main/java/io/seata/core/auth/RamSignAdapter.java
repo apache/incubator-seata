@@ -31,7 +31,6 @@ import java.time.format.DateTimeFormatter;
 /**
  * adapt ram sign interface
  *
- * @author onlinechild
  */
 public class RamSignAdapter {
     

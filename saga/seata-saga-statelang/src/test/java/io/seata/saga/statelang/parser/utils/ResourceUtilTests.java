@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * ResourceUtil tests
  *
- * @author wang.liang
  */
 public class ResourceUtilTests {
 

@@ -29,7 +29,6 @@ import java.sql.Statement;
 /**
  * The type Table meta cache.
  *
- * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbTableMetaCache extends MysqlTableMetaCache {

@@ -23,7 +23,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * Escape handler for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.POLARDBX)
 public class PolarDBXEscapeHandler extends MySQLEscapeHandler {

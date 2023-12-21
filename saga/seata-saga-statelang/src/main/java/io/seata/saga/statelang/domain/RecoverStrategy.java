@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Recover Strategy
  *
- * @author lorne.cl
  */
 public enum RecoverStrategy {
 

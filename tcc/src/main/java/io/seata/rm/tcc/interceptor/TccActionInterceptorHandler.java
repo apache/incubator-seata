@@ -43,7 +43,6 @@ import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
 /**
- * @author leezongjie
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 

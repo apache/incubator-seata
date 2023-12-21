@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author jsbxyyx
  */
 public class ColumnUtilsTest {
 

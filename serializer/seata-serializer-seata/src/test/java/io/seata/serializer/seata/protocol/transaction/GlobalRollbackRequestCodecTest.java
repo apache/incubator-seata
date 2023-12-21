@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Global rollback request codec test.
  *
- * @author zhangsen
  */
 public class GlobalRollbackRequestCodecTest {
 

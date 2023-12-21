@@ -20,7 +20,6 @@ import io.seata.serializer.protobuf.generated.HeartbeatMessageProto;
 import io.seata.core.protocol.HeartbeatMessage;
 
 /**
- * @author leizhiyuan
  */
 public class HeartbeatMessageConvertor implements PbConvertor<HeartbeatMessage, HeartbeatMessageProto> {
     @Override

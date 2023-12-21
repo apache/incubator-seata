@@ -19,7 +19,6 @@ package io.seata.rm.datasource.xa;
 /**
  * XA-Xid builder.
  *
- * @author sharajava
  */
 public class XAXidBuilder {
 

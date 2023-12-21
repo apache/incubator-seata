@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Framework exception.
  *
- * @author slievrly
  */
 public class FrameworkException extends RuntimeException {
     private static final Logger LOGGER = LoggerFactory.getLogger(FrameworkException.class);

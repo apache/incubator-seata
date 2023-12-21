@@ -44,7 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author jsbxyyx
  */
 public class PostgresqlInsertExecutorTest {
 

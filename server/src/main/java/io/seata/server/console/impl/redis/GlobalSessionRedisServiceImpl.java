@@ -41,8 +41,6 @@ import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
 /**
  * Global Session Redis ServiceImpl
- * @author zhongxiang.wang
- * @author doubleDimple
  */
 @Component
 @org.springframework.context.annotation.Configuration

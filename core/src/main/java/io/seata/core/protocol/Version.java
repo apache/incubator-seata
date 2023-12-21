@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Version.
  *
- * @author slievrly
  */
 public class Version {
 

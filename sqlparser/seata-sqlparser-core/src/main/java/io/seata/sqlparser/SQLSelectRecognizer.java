@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 /**
  * The interface Sql select recognizer.
  *
- * @author sharajava
  */
 public interface SQLSelectRecognizer extends WhereRecognizer {
 }

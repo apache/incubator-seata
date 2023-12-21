@@ -39,7 +39,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Mariadb delete recognizer test.
  *
- * @author funkye
  */
 public class MariadbDeleteRecognizerTest extends AbstractRecognizerTest {
 

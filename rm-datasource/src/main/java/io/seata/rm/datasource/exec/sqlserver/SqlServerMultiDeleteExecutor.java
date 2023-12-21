@@ -38,7 +38,6 @@ import io.seata.sqlparser.util.ColumnUtils;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author GoodBoyCoder
  */
 public class SqlServerMultiDeleteExecutor<T, S extends Statement> extends MultiDeleteExecutor<T, S> {
     public SqlServerMultiDeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {

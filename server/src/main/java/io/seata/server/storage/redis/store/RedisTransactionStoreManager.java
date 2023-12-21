@@ -72,10 +72,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 /**
  * The redis transaction store manager
  *
- * @author funkye
- * @author wangzhongxiang
- * @author doubleDimple
- * @author conghuhu
  */
 public class RedisTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager {
 

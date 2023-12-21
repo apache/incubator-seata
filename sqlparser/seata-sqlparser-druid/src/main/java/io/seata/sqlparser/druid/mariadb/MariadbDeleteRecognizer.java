@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 /**
  * The type Mariadb delete recognizer.
  *
- * @author funkye
  */
 public class MariadbDeleteRecognizer extends MySQLDeleteRecognizer {
 

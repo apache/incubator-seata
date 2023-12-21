@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 /**
  * The type Data compare utils.
  *
- * @author Geng Zhang
  */
 public class DataCompareUtils {
 

@@ -27,7 +27,6 @@ import java.sql.Statement;
 /**
  * The type Abstract statement proxy.
  *
- * @author sharajava
  *
  * @param <T> the type parameter
  */

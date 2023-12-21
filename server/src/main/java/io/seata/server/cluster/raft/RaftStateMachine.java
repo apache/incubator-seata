@@ -81,7 +81,6 @@ import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANC
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
- * @author funkye
  */
 public class RaftStateMachine extends StateMachineAdapter {
 

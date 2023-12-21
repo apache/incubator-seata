@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 
 /**
  * The datasource provider
- * @author will
  */
 public interface DataSourceProvider {
 

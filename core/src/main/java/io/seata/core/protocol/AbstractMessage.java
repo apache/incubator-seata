@@ -28,7 +28,6 @@ import java.nio.charset.Charset;
 /**
  * The type Abstract message.
  *
- * @author slievrly
  */
 public abstract class AbstractMessage implements MessageTypeAware, Serializable {
 

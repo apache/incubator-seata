@@ -24,7 +24,6 @@ import io.seata.common.util.ReflectionUtil;
 /**
  * dubbo attribute analysis
  *
- * @author zhangsen
  */
 public class DubboUtil {
 

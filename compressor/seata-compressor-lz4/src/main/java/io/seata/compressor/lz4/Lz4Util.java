@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 /**
  * the Lz4 Util
  *
- * @author diguage
  */
 public class Lz4Util {
     private static final Logger LOGGER = LoggerFactory.getLogger(Lz4Util.class);

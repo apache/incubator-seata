@@ -22,8 +22,6 @@ import javax.annotation.Nonnull;
  * Holder for suspended resources to support propagation or nested logic.
  * Used by {@code suspend} and {@code resume}
  *
- * @author wangzhongxiang
- * @author wang.liang
  */
 public class SuspendedResourcesHolder {
 

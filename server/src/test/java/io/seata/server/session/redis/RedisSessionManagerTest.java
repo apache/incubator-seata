@@ -46,7 +46,6 @@ import org.springframework.context.ApplicationContext;
 import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
- * @author funkye
  */
 @SpringBootTest
 public class RedisSessionManagerTest {

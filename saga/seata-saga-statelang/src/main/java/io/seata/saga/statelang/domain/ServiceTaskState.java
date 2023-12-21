@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * ServiceTask State, be used to invoke a service
  *
- * @author lorne.cl
  */
 public interface ServiceTaskState extends TaskState {
 

@@ -39,7 +39,6 @@ import io.seata.sqlparser.SQLRecognizer;
 /**
  * The type Base recognizer.
  *
- * @author sharajava
  */
 public abstract class BaseRecognizer implements SQLRecognizer {
 

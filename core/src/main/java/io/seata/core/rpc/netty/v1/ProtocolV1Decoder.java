@@ -56,7 +56,6 @@ import java.util.Map;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @author Geng Zhang
  * @see ProtocolV1Encoder
  * @since 0.7.0
  */

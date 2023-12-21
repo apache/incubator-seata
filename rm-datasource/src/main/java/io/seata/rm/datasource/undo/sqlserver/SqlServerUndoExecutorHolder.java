@@ -23,7 +23,6 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerUndoExecutorHolder implements UndoExecutorHolder {

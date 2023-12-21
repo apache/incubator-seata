@@ -23,7 +23,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 /**
  * Undo delete executor for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUndoDeleteExecutor extends MySQLUndoDeleteExecutor {
     public PolarDBXUndoDeleteExecutor(SQLUndoLog sqlUndoLog) {

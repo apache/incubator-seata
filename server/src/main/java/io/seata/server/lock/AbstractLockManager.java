@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract lock manager.
  *
- * @author zhangsen
  */
 public abstract class AbstractLockManager implements LockManager {
 

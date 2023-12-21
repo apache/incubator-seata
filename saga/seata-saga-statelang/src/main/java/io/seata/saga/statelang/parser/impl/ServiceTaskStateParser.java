@@ -26,7 +26,6 @@ import io.seata.saga.statelang.parser.StateParser;
 /**
  * ServcieTaskTask parser
  *
- * @author lorne.cl
  */
 public class ServiceTaskStateParser extends AbstractTaskStateParser implements StateParser<ServiceTaskState> {
 

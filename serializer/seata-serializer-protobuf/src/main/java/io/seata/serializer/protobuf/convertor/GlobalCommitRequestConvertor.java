@@ -24,7 +24,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalCommitRequestConvertor implements PbConvertor<GlobalCommitRequest, GlobalCommitRequestProto> {
     @Override

@@ -22,7 +22,6 @@ import io.seata.core.model.Resource;
 /**
  * Saga resource (Only register application as a saga resource)
  *
- * @author lorne.cl
  */
 public class SagaResource implements Resource {
 

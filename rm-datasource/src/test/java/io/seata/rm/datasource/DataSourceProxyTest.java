@@ -38,7 +38,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
- * @author ph3636
  */
 public class DataSourceProxyTest {
 

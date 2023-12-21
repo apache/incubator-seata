@@ -19,7 +19,6 @@ package io.seata.core.event;
 /**
  * Event data for exception.
  *
- * @author Bughue
  */
 public class ExceptionEvent implements Event {
 

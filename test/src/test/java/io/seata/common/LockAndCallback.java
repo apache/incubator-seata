@@ -27,7 +27,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @author wang.liang
  */
 public class LockAndCallback {
     private final Lock lock;

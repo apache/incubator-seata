@@ -21,8 +21,6 @@ import io.seata.core.context.RootContext;
 /**
  * The Jakarta SpringMVC Interceptor.
  *
- * @author wangxb
- * @author wang.liang
  */
 public class JakartaTransactionPropagationInterceptor extends TransactionPropagationInterceptor {
 

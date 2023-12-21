@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 
 /**
  * Database log store oceanbase sql
- * @author will
  */
 @LoadLevel(name = "oceanbase")
 public class OceanbaseLogStoreSqls extends MysqlLogStoreSqls {

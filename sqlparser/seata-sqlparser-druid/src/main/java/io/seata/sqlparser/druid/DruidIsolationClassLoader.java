@@ -25,7 +25,6 @@ import java.util.List;
 /**
  * Used for druid isolation.
  *
- * @author ggndnn
  */
 class DruidIsolationClassLoader extends URLClassLoader {
     private final static String[] DRUID_CLASS_PREFIX = new String[]{"com.alibaba.druid.", "io.seata.sqlparser.druid."};

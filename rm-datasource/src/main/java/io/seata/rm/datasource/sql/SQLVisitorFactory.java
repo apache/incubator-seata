@@ -26,7 +26,6 @@ import io.seata.sqlparser.SqlParserType;
 import java.util.List;
 
 /**
- * @author ggndnn
  */
 public class SQLVisitorFactory {
     /**

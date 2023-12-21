@@ -45,8 +45,6 @@ import static java.util.Objects.isNull;
 /**
  * Global Lock File ServiceImpl
  *
- * @author zhongxiang.wang
- * @author miaoxueyu
  */
 @Component
 @org.springframework.context.annotation.Configuration

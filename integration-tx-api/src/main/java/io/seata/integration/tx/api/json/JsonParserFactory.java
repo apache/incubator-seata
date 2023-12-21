@@ -25,7 +25,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 
 /**
- * @author zouwei
  */
 public class JsonParserFactory {
 

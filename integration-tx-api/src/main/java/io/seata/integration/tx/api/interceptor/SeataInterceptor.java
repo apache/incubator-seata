@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.interceptor;
 /**
  * The interface Seata interceptor.
  *
- * @author wang.liang
  */
 public interface SeataInterceptor {
 

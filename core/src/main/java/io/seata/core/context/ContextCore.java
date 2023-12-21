@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * The interface Context core.
  *
- * @author sharajava
  */
 public interface ContextCore {
 

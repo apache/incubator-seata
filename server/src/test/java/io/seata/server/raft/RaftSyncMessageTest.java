@@ -49,7 +49,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author jianbin.chen
  */
 @SpringBootTest
 public class RaftSyncMessageTest {

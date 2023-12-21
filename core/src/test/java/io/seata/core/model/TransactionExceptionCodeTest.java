@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Montos
  */
 public class TransactionExceptionCodeTest {
     private static final int BEGIN_CODE = 1;

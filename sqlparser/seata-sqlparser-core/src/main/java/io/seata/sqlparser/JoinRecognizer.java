@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * The interface Where recognizer.
  *
- * @author renliangyu857
  */
 public interface JoinRecognizer {
     /**

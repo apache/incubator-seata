@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author Geng Zhang
  */
 public class MySQLUndoDeleteExecutorTest extends BaseExecutorTest {
 

@@ -49,7 +49,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * Test events come from Default Core.
  *
- * @author zhengyangyong
  */
 @SpringBootTest
 public class DefaultCoreForEventBusTest {

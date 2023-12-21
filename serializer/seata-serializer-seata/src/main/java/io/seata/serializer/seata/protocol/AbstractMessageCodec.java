@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * The type Abstract message codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractMessageCodec implements MessageSeataCodec {
 

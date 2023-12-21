@@ -27,7 +27,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The class MariadbOperateRecognizerHolder
  *
- * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbOperateRecognizerHolder implements SQLOperateRecognizerHolder {

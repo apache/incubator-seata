@@ -25,7 +25,6 @@ import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
 /**
  * The type Abstract global end response codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractGlobalEndResponseCodec extends AbstractTransactionResponseCodec {
 

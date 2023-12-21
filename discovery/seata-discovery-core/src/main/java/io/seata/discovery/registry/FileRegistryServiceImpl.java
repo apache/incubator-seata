@@ -30,7 +30,6 @@ import io.seata.config.exception.ConfigNotFoundException;
 /**
  * The type File registry service.
  *
- * @author slievrly
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
 

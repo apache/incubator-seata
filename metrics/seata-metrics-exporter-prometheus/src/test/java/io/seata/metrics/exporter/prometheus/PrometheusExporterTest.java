@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * test {@link PrometheusExporter}
  *
- * @author wang.liang
  */
 public class PrometheusExporterTest {
 

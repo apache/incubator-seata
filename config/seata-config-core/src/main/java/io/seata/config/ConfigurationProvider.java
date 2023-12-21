@@ -18,7 +18,6 @@ package io.seata.config;
 
 /**
  * the interface configuration provider
- * @author xingfudeshi@gmail.com
  */
 public interface ConfigurationProvider {
     /**

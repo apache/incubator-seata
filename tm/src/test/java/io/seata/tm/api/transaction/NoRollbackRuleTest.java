@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
-  * @author l81893521
   */
 public class NoRollbackRuleTest {
 

@@ -19,7 +19,6 @@ package io.seata.saga.rm;
 import io.seata.saga.engine.StateMachineEngine;
 
 /**
- * @author lorne.cl
  */
 public class StateMachineEngineHolder {
 

@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Asynchronized EventBus
  *
- * @author lorne.cl
  */
 public class AsyncEventBus extends AbstractEventBus<ProcessContext> {
 

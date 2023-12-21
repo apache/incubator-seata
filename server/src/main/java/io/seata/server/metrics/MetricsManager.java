@@ -31,7 +31,6 @@ import static io.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
 /**
  * Metrics manager for init
  *
- * @author zhengyangyong
  */
 public class MetricsManager {
     private static class SingletonHolder {

@@ -22,7 +22,6 @@ import io.seata.console.param.BaseParam;
 
 /**
  * Global session param
- * @author zhongxiang.wang
  */
 public class GlobalSessionParam extends BaseParam implements Serializable {
 

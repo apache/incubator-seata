@@ -26,7 +26,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 
 /**
- * @author lorne.cl
  */
 public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportRequest, GlobalReportRequestProto> {
     @Override

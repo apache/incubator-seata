@@ -31,7 +31,6 @@ import io.seata.core.model.GlobalLockConfig;
 /**
  * Lock retry controller
  *
- * @author sharajava
  */
 public class LockRetryController {
 

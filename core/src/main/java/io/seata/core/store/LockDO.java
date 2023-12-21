@@ -24,7 +24,6 @@ import static io.seata.core.model.LockStatus.Locked;
 /**
  * The type Lock do.
  *
- * @author zhangsen
  */
 public class LockDO {
 

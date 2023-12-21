@@ -24,7 +24,6 @@ import io.seata.sqlparser.SQLType;
 /**
  * The type Sql undo log.
  *
- * @author sharajava
  */
 public class SQLUndoLog implements java.io.Serializable {
 

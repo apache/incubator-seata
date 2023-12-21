@@ -18,7 +18,6 @@ package io.seata.common.exception;
 
 /**
  * the data access exception
- * @author jsbxyyx
  */
 public class DataAccessException extends StoreException {
 

@@ -38,7 +38,6 @@ import static io.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
 /**
  * Event subscriber for metrics
  *
- * @author zhengyangyong
  */
 public class MetricsSubscriber {
 

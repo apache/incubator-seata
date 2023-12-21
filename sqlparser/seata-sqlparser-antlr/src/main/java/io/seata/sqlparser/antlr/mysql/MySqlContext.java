@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * MySqlContext
  *
- * @author zhihou
  */
 public class MySqlContext {
 

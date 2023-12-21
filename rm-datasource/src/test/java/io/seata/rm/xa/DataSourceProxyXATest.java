@@ -43,7 +43,6 @@ import static org.mockito.ArgumentMatchers.any;
 /**
  * Tests for DataSourceProxyXA
  *
- * @author sharajava
  */
 public class DataSourceProxyXATest {
 

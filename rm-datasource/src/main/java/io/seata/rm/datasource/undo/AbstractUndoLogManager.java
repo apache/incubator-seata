@@ -53,7 +53,6 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Unretriable;
 
 /**
- * @author jsbxyyx
  */
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 

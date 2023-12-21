@@ -32,7 +32,6 @@ import java.util.List;
 
 /**
  * kryo serializer
- * @author jsbxyyx
  */
 @LoadLevel(name = KryoUndoLogParser.NAME)
 public class KryoUndoLogParser implements UndoLogParser, Initialize {

@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type postgresql undo delete executor.
  *
- * @author japsercloud
  */
 public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
 

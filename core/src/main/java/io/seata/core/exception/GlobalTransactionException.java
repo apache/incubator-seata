@@ -19,7 +19,6 @@ package io.seata.core.exception;
 /**
  * The type GlobalTransaction exception.
  *
- * @author will
  */
 public class GlobalTransactionException extends TransactionException {
 

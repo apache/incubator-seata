@@ -18,7 +18,6 @@ package io.seata.core.store.db.sql.log;
 
 /**
  * Database log store sql
- * @author will
  */
 public interface LogStoreSqls {
 

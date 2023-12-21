@@ -21,7 +21,6 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 /**
  * The type Tcc action.
  *
- * @author zhangsen
  */
 public class TccActionImpl implements TccAction {
 

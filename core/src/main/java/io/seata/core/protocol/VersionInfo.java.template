@@ -19,7 +19,6 @@ package io.seata.core.protocol;
 /**
  * The interface VersionInfo.
  *
- * @author wang.liang
  */
 interface VersionInfo {
 

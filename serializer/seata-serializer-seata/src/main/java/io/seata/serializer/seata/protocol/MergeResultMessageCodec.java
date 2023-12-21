@@ -28,7 +28,6 @@ import io.seata.core.protocol.MergeResultMessage;
 /**
  * The type Merge result message codec.
  *
- * @author zhangsen
  */
 public class MergeResultMessageCodec extends AbstractMessageCodec {
 

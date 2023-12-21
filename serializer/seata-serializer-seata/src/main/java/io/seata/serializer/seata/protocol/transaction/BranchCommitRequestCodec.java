@@ -21,7 +21,6 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 /**
  * The type Branch commit request codec.
  *
- * @author zhangsen
  */
 public class BranchCommitRequestCodec extends AbstractBranchEndRequestCodec {
 

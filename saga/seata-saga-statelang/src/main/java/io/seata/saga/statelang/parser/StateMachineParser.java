@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.StateMachine;
 /**
  * State machine parser
  *
- * @author lorne.cl
  */
 public interface StateMachineParser {
 

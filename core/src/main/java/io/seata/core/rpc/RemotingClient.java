@@ -28,8 +28,6 @@ import io.seata.core.rpc.processor.RemotingProcessor;
 /**
  * The interface remoting client.
  *
- * @author zhaojun
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public interface RemotingClient {

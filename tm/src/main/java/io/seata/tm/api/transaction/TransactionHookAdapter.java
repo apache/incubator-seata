@@ -17,7 +17,6 @@
 package io.seata.tm.api.transaction;
 
 /**
- * @author guoyao
  */
 public class TransactionHookAdapter implements TransactionHook {
 

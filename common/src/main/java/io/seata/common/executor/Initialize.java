@@ -19,7 +19,6 @@ package io.seata.common.executor;
 /**
  * The interface Initialize.
  *
- * @author zhangsen
  */
 public interface Initialize {
 

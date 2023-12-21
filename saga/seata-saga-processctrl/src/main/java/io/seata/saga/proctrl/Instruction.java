@@ -19,9 +19,6 @@ package io.seata.saga.proctrl;
 /**
  * Instruction
  *
- * @author jin.xie
- * @author xi.chen
- * @author lorne.cl
  */
 public interface Instruction {
 

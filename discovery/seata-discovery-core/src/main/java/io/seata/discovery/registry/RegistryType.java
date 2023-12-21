@@ -19,7 +19,6 @@ package io.seata.discovery.registry;
 /**
  * The enum Registry type.
  *
- * @author slievrly
  */
 public enum RegistryType {
     /**

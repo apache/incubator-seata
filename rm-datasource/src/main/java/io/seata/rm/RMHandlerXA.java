@@ -22,7 +22,6 @@ import io.seata.core.model.ResourceManager;
 /**
  * The type RM handler XA.
  *
- * @author sharajava
  */
 public class RMHandlerXA extends AbstractRMHandler {
 

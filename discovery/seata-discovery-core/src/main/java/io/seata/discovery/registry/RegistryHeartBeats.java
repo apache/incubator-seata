@@ -29,7 +29,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 
 /**
- * @author <a href="mailto:xyz327@outlook.com">xizhou</a>
  * @since 2021/6/13 5:09 pm
  */
 public class RegistryHeartBeats {

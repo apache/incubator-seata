@@ -25,7 +25,6 @@ import io.seata.core.protocol.transaction.AbstractBranchEndResponse;
 /**
  * The type Abstract branch end response codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractBranchEndResponseCodec extends AbstractTransactionResponseCodec {
 

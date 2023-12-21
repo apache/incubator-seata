@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 /**
  * State Instruction
  *
- * @author lorne.cl
  * @see Instruction
  */
 public class StateInstruction implements Instruction {

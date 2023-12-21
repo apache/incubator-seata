@@ -28,7 +28,6 @@ import java.util.Map;
 import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 
 /**
- * @author leezongjie
  */
 public class ProxyUtil {
 

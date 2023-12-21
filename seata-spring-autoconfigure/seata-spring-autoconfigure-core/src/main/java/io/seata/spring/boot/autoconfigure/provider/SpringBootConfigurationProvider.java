@@ -48,8 +48,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_SE
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author funkye
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
 
@@ -147,7 +145,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @param propertyObj the property object
      * @param fieldName   the field name
      * @return defaultValue
-     * @author xingfudeshi@gmail.com
      */
     @Nullable
     private Object getDefaultValueFromPropertyObject(Object propertyObj, String fieldName) throws IllegalAccessException {

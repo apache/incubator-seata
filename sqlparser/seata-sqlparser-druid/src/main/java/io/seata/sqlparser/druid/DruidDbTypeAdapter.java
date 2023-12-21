@@ -21,7 +21,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * A db type adapter for druid parser.
  *
- * @author hsien999
  **/
 class DruidDbTypeAdapter {
     /**

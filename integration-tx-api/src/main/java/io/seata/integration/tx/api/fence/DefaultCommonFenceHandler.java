@@ -22,7 +22,6 @@ import java.util.Date;
 import io.seata.common.executor.Callback;
 
 /**
- * @author leezongjie
  */
 public class DefaultCommonFenceHandler implements FenceHandler {
 

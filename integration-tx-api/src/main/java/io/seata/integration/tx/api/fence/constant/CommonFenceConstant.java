@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.fence.constant;
 /**
  * Common Fence Constant
  *
- * @author kaka2code
  */
 public class CommonFenceConstant {
 

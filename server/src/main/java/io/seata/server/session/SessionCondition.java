@@ -21,7 +21,6 @@ import io.seata.core.model.GlobalStatus;
 /**
  * The type Session condition.
  *
- * @author slievrly
  */
 public class SessionCondition {
     private Long transactionId;

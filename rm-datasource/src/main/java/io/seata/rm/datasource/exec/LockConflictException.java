@@ -22,7 +22,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 /**
  * The type Lock conflict exception.
  *
- * @author sharajava
  */
 public class LockConflictException extends SQLException {
 

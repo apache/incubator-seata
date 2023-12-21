@@ -19,7 +19,6 @@ package io.seata.core.constants;
 /**
  * DubboConstants
  *
- * @author funkye
  */
 public class DubboConstants {
 

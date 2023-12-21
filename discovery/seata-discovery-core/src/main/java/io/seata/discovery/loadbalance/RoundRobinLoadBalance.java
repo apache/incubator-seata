@@ -26,7 +26,6 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.ROUND_ROBIN_LOAD
 /**
  * The type Round robin load balance.
  *
- * @author slievrly
  */
 @LoadLevel(name = ROUND_ROBIN_LOAD_BALANCE)
 public class RoundRobinLoadBalance implements LoadBalance {

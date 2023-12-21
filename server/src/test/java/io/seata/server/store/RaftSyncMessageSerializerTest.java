@@ -31,7 +31,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.storage.SessionConverter;
 
 /**
- * @author funkye
  */
 @SpringBootTest
 public class RaftSyncMessageSerializerTest {

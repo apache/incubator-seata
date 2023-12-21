@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * The type rpc context.
  *
- * @author slievrly
  */
 public class RpcContext {
 

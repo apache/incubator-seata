@@ -38,7 +38,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Global session test.
  *
- * @author tianming.xm @gmail.com
  * @since 2019 /1/23
  */
 @SpringBootTest

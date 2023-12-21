@@ -17,7 +17,6 @@
 package io.seata.core.auth;
 
 /**
- * @author slievrly
  */
 public interface AuthSigner {
     

@@ -30,7 +30,6 @@ import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX_KEBAB_STYLE)

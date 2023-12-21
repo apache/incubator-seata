@@ -23,7 +23,6 @@ import java.util.List;
 
 /**
  * test  EnhancedServiceLoader
- * @author zhangsen
  */
 public class EnhancedServiceLoaderTest {
 

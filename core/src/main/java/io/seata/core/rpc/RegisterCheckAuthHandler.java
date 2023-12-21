@@ -22,7 +22,6 @@ import io.seata.core.protocol.RegisterTMRequest;
 /**
  * The interface Register check auth handler.
  *
- * @author slievrly
  */
 public interface RegisterCheckAuthHandler {
 

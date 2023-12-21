@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author slievrly
  */
 public class FileConfiguration extends AbstractConfiguration {
 

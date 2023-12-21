@@ -21,7 +21,6 @@ import io.seata.tm.api.transaction.TransactionInfo;
 /**
  * Callback for executing business logic in a global transaction.
  *
- * @author sharajava
  */
 public interface TransactionalExecutor {
 

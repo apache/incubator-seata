@@ -23,7 +23,6 @@ import io.seata.saga.statelang.domain.impl.BaseState;
 /**
  * BaseStatePaser
  *
- * @author lorne.cl
  */
 public abstract class BaseStatePaser {
 

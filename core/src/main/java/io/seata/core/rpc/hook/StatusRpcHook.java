@@ -20,7 +20,6 @@ import io.seata.common.rpc.RpcStatus;
 import io.seata.core.protocol.RpcMessage;
 
 /**
- * @author ph3636
  */
 public class StatusRpcHook implements RpcHook {
 

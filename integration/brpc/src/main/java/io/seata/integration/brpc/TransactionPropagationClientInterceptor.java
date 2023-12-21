@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * load SEATA xid for brpc request
  *
- * @author mxz0828@163.com
  */
 public class TransactionPropagationClientInterceptor extends AbstractInterceptor implements ConsumerRpcFilter<Request> {
 

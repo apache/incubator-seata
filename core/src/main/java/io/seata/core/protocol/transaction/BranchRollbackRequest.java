@@ -22,7 +22,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Branch rollback request.
  *
- * @author slievrly
  */
 public class BranchRollbackRequest extends AbstractBranchEndRequest {
 

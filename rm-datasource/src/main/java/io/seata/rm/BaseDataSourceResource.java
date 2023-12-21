@@ -39,7 +39,6 @@ import io.seata.rm.datasource.xa.Holder;
 /**
  * Base class of those DataSources working as Seata Resource.
  *
- * @author sharajava
  */
 public abstract class BaseDataSourceResource<T extends Holdable> implements SeataDataSourceProxy, Resource, Holder<T> {
 

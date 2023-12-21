@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type SqlServer update recognizer test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerUpdateRecognizerTest extends AbstractRecognizerTest {
     @Override

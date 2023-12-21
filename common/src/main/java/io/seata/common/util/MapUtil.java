@@ -24,7 +24,6 @@ import java.util.Map;
 /**
  * Map Util
  *
- * @author zhixing
  */
 public class MapUtil {
 

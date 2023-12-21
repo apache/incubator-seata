@@ -27,7 +27,6 @@ import java.io.Writer;
  * IOUtils
  * copy from commons-io
  *
- * @author lorne.cl
  */
 public class IOUtils {
 

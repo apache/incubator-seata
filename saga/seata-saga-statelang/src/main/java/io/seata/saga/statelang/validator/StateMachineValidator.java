@@ -23,7 +23,6 @@ import java.util.List;
 /**
  * State machine validator used to validate rules.
  *
- * @author ptyin
  */
 public class StateMachineValidator {
 

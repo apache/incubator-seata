@@ -17,7 +17,6 @@
 package io.seata.common.util;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public class StringFormatUtils {
     private static final char MINUS = '-';

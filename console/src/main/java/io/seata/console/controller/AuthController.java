@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * auth user
  *
- * @author jameslcj wfnuser
  */
 @RestController
 @RequestMapping("/api/v1/auth")

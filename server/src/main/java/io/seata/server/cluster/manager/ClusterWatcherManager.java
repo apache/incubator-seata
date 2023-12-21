@@ -37,7 +37,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * @author funkye
  */
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {

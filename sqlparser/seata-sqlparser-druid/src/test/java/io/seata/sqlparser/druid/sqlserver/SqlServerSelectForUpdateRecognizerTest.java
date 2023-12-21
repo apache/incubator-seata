@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type SqlServer select for update recognizer test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerSelectForUpdateRecognizerTest extends AbstractRecognizerTest {
     @Override

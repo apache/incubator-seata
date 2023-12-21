@@ -22,7 +22,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 /**
  * Status of lock.
  *
- * @author funkye
  */
 public enum LockStatus {
 

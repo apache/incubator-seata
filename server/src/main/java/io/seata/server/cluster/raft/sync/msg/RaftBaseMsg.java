@@ -19,7 +19,6 @@ package io.seata.server.cluster.raft.sync.msg;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
- * @author jianbin.chen
  */
 public class RaftBaseMsg implements java.io.Serializable {
 

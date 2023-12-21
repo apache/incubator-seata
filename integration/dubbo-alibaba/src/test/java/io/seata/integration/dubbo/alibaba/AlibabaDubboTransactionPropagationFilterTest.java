@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author wang.liang
  */
 public class AlibabaDubboTransactionPropagationFilterTest {
 

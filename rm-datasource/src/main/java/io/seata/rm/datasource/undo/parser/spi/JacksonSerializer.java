@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
  * The interface Jackson serializer.
  *
  * @param <T> the type parameter
- * @author jsbxyyx
  */
 public interface JacksonSerializer<T> {
 

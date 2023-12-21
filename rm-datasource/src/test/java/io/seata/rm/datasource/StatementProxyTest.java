@@ -53,7 +53,6 @@ import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author will
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class StatementProxyTest {

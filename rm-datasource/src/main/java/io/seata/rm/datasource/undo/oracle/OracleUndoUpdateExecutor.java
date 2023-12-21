@@ -33,7 +33,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type oracle undo update executor.
  *
- * @author ccg
  */
 public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
 

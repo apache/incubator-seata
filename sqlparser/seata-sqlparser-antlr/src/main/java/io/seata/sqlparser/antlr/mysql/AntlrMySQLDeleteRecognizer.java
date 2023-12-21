@@ -32,7 +32,6 @@ import java.util.List;
 /**
  * AntlrMySQLDeleteRecognizer
  *
- * @author zhihou
  */
 public class AntlrMySQLDeleteRecognizer implements SQLDeleteRecognizer {
 

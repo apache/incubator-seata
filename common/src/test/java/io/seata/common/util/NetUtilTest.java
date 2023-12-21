@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * The type Net util test.
  *
- * @author Otis.z
  */
 public class NetUtilTest {
 

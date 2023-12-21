@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author funkye
  */
 public class HttpClientUtil {
 

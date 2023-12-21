@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.interceptor.parser;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 
 /**
- * @author leezongjie
  */
 public interface InterfaceParser {
 

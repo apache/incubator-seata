@@ -28,7 +28,6 @@ import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResponse, GlobalBeginResponseProto> {
     @Override

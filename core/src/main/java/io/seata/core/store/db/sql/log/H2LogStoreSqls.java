@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 
 /**
  * Database log store h2 sql
- * @author will
  */
 @LoadLevel(name = "h2")
 public class H2LogStoreSqls extends MysqlLogStoreSqls {

@@ -30,7 +30,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type postgresql keyword checker.
  *
- * @author japsercloud
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlEscapeHandler implements EscapeHandler {

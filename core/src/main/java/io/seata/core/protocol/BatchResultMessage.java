@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * The type batch result message.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class BatchResultMessage extends AbstractMessage {

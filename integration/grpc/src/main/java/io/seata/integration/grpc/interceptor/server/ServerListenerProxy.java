@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author eddyxu1213@126.com
  */
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);

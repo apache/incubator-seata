@@ -24,7 +24,6 @@ import java.util.Map;
  * The interface Insert executor.
  *
  * @param <T> the type parameter
- * @author jsbxyyx
  */
 public interface InsertExecutor<T> extends Executor<T> {
 

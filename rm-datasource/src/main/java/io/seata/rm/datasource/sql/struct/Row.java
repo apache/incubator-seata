@@ -23,7 +23,6 @@ import java.util.List;
 /**
  * The type Row.
  *
- * @author sharajava
  */
 public class Row implements java.io.Serializable {
 

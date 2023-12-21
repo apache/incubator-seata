@@ -25,7 +25,6 @@ import io.seata.server.storage.SessionConverter;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
- * @author jianbin.chen
  */
 public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 

@@ -23,7 +23,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 /**
  * The type Mariadb undo update executor.
  *
- * @author funkye
  */
 public class MariadbUndoUpdateExecutor extends MySQLUndoUpdateExecutor {
 

@@ -28,7 +28,6 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
- * @author leezongjie
  */
 public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor, Ordered {
 

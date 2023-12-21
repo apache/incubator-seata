@@ -28,7 +28,6 @@ import java.util.Properties;
 /**
  * The Config Processor.
  *
- * @author zhixing
  */
 public class ConfigProcessor {
     private static final String SEPARATOR = ".";

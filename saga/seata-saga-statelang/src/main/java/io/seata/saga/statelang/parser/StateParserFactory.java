@@ -32,7 +32,6 @@ import io.seata.saga.statelang.parser.impl.SucceedEndStateParser;
 /**
  * A simple factory of state parser
  *
- * @author lorne.cl
  */
 public class StateParserFactory {
 

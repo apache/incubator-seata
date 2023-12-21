@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type SqlServerOperateRecognizerHolder
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerOperateRecognizerHolder implements SQLOperateRecognizerHolder {

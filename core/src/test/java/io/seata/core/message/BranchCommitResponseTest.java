@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Branch commit response test.
  *
- * @author xiajun.0706 @163.com
  * @since 2019 /1/23
  */
 public class BranchCommitResponseTest {

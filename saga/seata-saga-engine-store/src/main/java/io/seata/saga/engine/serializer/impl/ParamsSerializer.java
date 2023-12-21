@@ -24,7 +24,6 @@ import io.seata.saga.statelang.parser.JsonParserFactory;
 /**
  * Parameter serializer based on Fastjson
  *
- * @author lorne.cl
  */
 public class ParamsSerializer implements Serializer<Object, String> {
 

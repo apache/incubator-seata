@@ -29,7 +29,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.integration.tx.api.json.JsonParser;
 
 /**
- * @author zouwei
  */
 @LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {

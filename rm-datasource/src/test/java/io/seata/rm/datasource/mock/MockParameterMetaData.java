@@ -20,7 +20,6 @@ import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 
 /**
- * @author will
  */
 public class MockParameterMetaData implements ParameterMetaData {
 

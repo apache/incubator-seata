@@ -22,7 +22,6 @@ import io.seata.sqlparser.struct.TableMeta;
 /**
  * The interface Keyword checker.
  *
- * @author Wu
  */
 public interface EscapeHandler {
 

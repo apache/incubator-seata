@@ -24,7 +24,6 @@ import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 /**
  * The type Global lock query response codec.
  *
- * @author zhangsen
  */
 public class GlobalLockQueryResponseCodec extends AbstractTransactionResponseCodec {
 

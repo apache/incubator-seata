@@ -29,7 +29,6 @@ import static io.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
 /**
  * Registry Factory for load configured metrics registry
  *
- * @author zhengyangyong
  */
 public class RegistryFactory {
     public static Registry getInstance() {

@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 /**
  * The enum Sql type.
  *
- * @author sharajava
  */
 public enum SQLType {
 

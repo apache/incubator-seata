@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Default state machine execution status decision strategy
  *
- * @author lorne.cl
  * @see StatusDecisionStrategy
  */
 public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {

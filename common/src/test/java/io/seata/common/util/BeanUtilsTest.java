@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The bean utils test
  *
- * @author wangzhongxiang
  */
 public class BeanUtilsTest {
 

@@ -21,7 +21,6 @@ import io.seata.core.model.BranchType;
 /**
  * The type Abstract branch end request.
  *
- * @author sharajava
  */
 public abstract class AbstractBranchEndRequest extends AbstractTransactionRequestToRM {
 

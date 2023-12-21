@@ -24,7 +24,6 @@ import io.seata.saga.engine.expression.ExpressionResolver;
 /**
  * Default {@link ExpressionResolver} implementation
  *
- * @author ptyin
  */
 public class DefaultExpressionResolver implements ExpressionResolver {
 

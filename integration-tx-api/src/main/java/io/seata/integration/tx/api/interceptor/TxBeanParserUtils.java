@@ -23,7 +23,6 @@ import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 /**
  * parser transaction bean
  *
- * @author zhangsen
  */
 public class TxBeanParserUtils {
 

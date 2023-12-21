@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * The Handler Interceptor Adapter
  *
- * @author wang.liang
  */
 public interface HandlerInterceptorAdapter extends HandlerInterceptor {
 

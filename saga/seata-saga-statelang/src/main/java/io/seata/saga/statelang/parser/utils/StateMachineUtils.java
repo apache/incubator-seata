@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 /**
  * Util class for parsing StateMachine
  *
- * @author ptyin
  */
 public class StateMachineUtils {
     public static Set<String> getAllPossibleSubsequentStates(State state) {

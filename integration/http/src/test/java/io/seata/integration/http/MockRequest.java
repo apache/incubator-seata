@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author : wangxb
  */
 public class MockRequest {
     private String url;

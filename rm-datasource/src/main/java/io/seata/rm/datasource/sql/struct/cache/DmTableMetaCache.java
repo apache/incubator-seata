@@ -32,7 +32,6 @@ import java.sql.SQLException;
 /**
  * The type Table meta cache.
  *
- * @author chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmTableMetaCache extends OracleTableMetaCache {

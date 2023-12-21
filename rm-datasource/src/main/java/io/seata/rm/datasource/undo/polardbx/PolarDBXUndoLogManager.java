@@ -28,7 +28,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * Undo log manager for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.POLARDBX)
 public class PolarDBXUndoLogManager extends MySQLUndoLogManager {

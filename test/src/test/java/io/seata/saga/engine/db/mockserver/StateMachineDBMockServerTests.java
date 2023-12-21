@@ -38,7 +38,6 @@ import java.util.Map;
 /**
  * State machine tests with db log store
  *
- * @author lorne.cl
  */
 public class StateMachineDBMockServerTests {
 

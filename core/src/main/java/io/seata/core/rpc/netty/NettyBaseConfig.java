@@ -44,7 +44,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 /**
  * The type Netty base config.
  *
- * @author slievrly
  */
 public class NettyBaseConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);

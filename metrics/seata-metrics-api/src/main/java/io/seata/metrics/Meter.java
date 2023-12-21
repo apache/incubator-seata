@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Meter interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Meter {
     Id getId();

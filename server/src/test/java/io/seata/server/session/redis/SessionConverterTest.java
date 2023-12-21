@@ -33,7 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * The session converter utils
  *
- * @author wangzhongxiang
  */
 @SpringBootTest
 public class SessionConverterTest {

@@ -19,7 +19,6 @@ package io.seata.discovery.registry;
 import io.seata.common.loader.LoadLevel;
 
 /**
- * @author slievrly
  */
 @LoadLevel(name = "File", order = 1)
 public class FileRegistryProvider implements RegistryProvider {

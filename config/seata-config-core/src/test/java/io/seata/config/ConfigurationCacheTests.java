@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 /**
- * @author jsbxyyx
  */
 public class ConfigurationCacheTests {
 

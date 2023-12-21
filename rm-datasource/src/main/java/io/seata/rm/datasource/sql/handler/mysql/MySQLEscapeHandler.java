@@ -30,7 +30,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type MySQL keyword checker.
  *
- * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLEscapeHandler implements EscapeHandler {

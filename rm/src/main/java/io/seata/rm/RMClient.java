@@ -21,7 +21,6 @@ import io.seata.core.rpc.netty.RmNettyRemotingClient;
 /**
  * The Rm client Initiator.
  *
- * @author slievrly
  */
 public class RMClient {
 

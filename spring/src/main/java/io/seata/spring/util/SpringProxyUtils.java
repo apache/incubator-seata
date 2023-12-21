@@ -32,7 +32,6 @@ import org.springframework.aop.support.AopUtils;
 /**
  * Proxy tools base on spring
  *
- * @author zhangsen
  */
 public class SpringProxyUtils {
     private SpringProxyUtils() {

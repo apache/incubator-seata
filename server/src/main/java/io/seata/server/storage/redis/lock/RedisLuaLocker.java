@@ -44,7 +44,6 @@ import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
- * @author conghuhu
  */
 public class RedisLuaLocker extends RedisLocker {
 

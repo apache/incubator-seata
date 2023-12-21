@@ -26,7 +26,6 @@ import io.seata.tm.api.transaction.TransactionInfo;
 /**
  * Template of executing business logic with a global transaction for SAGA mode
  *
- * @author lorne.cl
  */
 public interface SagaTransactionalTemplate {
 

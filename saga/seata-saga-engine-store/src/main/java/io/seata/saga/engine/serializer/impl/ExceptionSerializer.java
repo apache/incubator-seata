@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Exception serializer
  *
- * @author lorne.cl
  */
 public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 

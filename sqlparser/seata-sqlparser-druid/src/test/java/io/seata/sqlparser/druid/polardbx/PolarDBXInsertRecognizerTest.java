@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test cases for delete recognizer of PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXInsertRecognizerTest extends AbstractPolarDBXRecognizerTest {
     private final int pkIndex = 0;

@@ -25,7 +25,6 @@ import java.io.Serializable;
 /**
  * The type to delete undolog  request.
  *
- * @author github-ygy
  */
 public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM implements Serializable {
 

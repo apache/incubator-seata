@@ -19,7 +19,6 @@ package io.seata.core.constants;
 /**
  * The redis key constants
  *
- * @author wangzhongxiang
  */
 public class RedisKeyConstants {
 

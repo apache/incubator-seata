@@ -55,7 +55,6 @@ import org.springframework.util.StringUtils;
 /**
  * ProcessCtrl-based state machine engine
  *
- * @author lorne.cl
  */
 public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 

@@ -23,7 +23,6 @@ import io.seata.saga.statelang.parser.StateParser;
 /**
  * 'trigger compensation process' state parser
  *
- * @author lorne.cl
  */
 public class CompensationTriggerStateParser extends BaseStatePaser implements StateParser<CompensationTriggerState> {
 

@@ -25,7 +25,6 @@ import io.seata.rm.DefaultResourceManager;
 /**
  * The type Rm handler tcc.
  *
- * @author zhangsen
  */
 public class RMHandlerTCC extends AbstractRMHandler {
 

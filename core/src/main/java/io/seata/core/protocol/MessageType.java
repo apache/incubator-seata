@@ -19,7 +19,6 @@ package io.seata.core.protocol;
 /**
  * The type Message codec type.
  *
- * @author zhangsen
  */
 public interface MessageType {
 

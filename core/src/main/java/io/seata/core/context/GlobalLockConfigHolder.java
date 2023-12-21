@@ -19,7 +19,6 @@ package io.seata.core.context;
 import io.seata.core.model.GlobalLockConfig;
 
 /** use this class to access current GlobalLockConfig from anywhere
- * @author selfishlover
  */
 public class GlobalLockConfigHolder {
 

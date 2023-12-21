@@ -26,7 +26,6 @@ import java.lang.annotation.Target;
  * <p>
  * add this annotation on the parameters of the try method, and the parameters will be passed to the action context
  *
- * @author zhangsen
  * @see io.seata.spring.interceptor.ActionContextUtil
  */
 @Retention(RetentionPolicy.RUNTIME)

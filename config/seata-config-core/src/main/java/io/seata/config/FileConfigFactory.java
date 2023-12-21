@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 /**
- * @author wangwei-ying
  */
 public class FileConfigFactory {
 

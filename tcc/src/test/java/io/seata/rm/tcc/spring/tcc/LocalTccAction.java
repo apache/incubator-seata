@@ -21,7 +21,6 @@ import io.seata.rm.tcc.api.LocalTCC;
 /**
  * The interface Local tcc action.
  *
- * @author zhangsen
  */
 @LocalTCC
 public interface LocalTccAction extends TccAction {

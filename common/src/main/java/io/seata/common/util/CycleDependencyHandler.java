@@ -23,7 +23,6 @@ import java.util.function.Function;
 /**
  * The type CycleDependency handler.
  *
- * @author wang.liang
  */
 public class CycleDependencyHandler {
 

@@ -19,7 +19,6 @@ package io.seata.core.serializer;
 /**
  * The enum serialize type.
  *
- * @author leizhiyuan
  */
 public enum SerializerType {
 

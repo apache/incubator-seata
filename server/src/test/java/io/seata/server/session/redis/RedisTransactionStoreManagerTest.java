@@ -49,7 +49,6 @@ import redis.clients.jedis.Jedis;
 
 import static io.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 /**
- * @author doubleDimple
  */
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {

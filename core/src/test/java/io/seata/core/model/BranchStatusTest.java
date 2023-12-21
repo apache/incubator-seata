@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * A unit test for {@link BranchStatus}
  *
- * @author Lay
  */
 public class BranchStatusTest {
 

@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 /**
  * Update statement recognizer for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUpdateRecognizer extends MySQLUpdateRecognizer {
     public PolarDBXUpdateRecognizer(String originalSQL, SQLStatement ast) {

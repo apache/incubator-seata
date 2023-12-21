@@ -19,7 +19,6 @@ package io.seata.core.exception;
 /**
  * The enum Transaction exception code.
  *
- * @author sharajava
  */
 public enum TransactionExceptionCode {
 

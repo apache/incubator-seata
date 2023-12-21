@@ -49,7 +49,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 /**
  * Template of executing business logic with a global transaction for SAGA mode
  *
- * @author lorne.cl
  */
 public class DefaultSagaTransactionalTemplate
     implements SagaTransactionalTemplate, ApplicationContextAware, DisposableBean, InitializingBean {

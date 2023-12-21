@@ -22,7 +22,6 @@ import io.seata.core.protocol.transaction.GlobalReportResponse;
 /**
  * The type Global report response codec.
  *
- * @author lorne.cl
  */
 public class GlobalReportResponseCodec extends AbstractGlobalEndResponseCodec {
 

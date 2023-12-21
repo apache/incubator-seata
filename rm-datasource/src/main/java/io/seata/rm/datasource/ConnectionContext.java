@@ -45,7 +45,6 @@ import static io.seata.common.Constants.SKIP_CHECK_LOCK;
 /**
  * The type Connection context.
  *
- * @author sharajava
  */
 public class ConnectionContext {
     private static final Savepoint DEFAULT_SAVEPOINT = new Savepoint() {

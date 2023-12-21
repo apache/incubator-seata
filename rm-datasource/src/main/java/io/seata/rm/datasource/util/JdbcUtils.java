@@ -30,8 +30,6 @@ import java.sql.Driver;
 import java.sql.SQLException;
 
 /**
- * @author ggndnn
- * @author sharajava
  */
 public final class JdbcUtils {
 

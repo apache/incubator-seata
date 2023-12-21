@@ -41,7 +41,6 @@ import org.springframework.context.ApplicationContext;
 
 
 /**
- * @author ptyin
  */
 @SpringBootTest
 class GlobalSessionExecuteTest {

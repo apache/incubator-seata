@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Local tcc remoting parser test.
  *
- * @author zhangsen
  */
 public class LocalTCCRemotingParserTest {
 

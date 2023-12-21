@@ -24,7 +24,6 @@ import io.seata.core.protocol.transaction.GlobalBeginResponse;
 /**
  * The type Global begin response codec.
  *
- * @author zhangsen
  */
 public class GlobalBeginResponseCodec extends AbstractTransactionResponseCodec {
 

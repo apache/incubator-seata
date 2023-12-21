@@ -24,7 +24,6 @@ import io.seata.core.model.BranchStatus;
 /**
  * branch transaction data object
  *
- * @author zhangsen
  */
 public class BranchTransactionDO implements Comparable<BranchTransactionDO>, java.io.Serializable {
 

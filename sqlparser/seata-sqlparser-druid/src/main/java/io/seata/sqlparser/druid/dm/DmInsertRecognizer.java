@@ -43,7 +43,6 @@ import java.util.List;
 /**
  * The type dm insert recognizer.
  *
- * @author chengxiaoxiao
  */
 public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRecognizer {
 

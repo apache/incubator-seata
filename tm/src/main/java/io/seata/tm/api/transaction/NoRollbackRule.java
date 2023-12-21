@@ -18,7 +18,6 @@ package io.seata.tm.api.transaction;
 
 
 /**
- * @author guoyao
  */
 public class NoRollbackRule extends RollbackRule {
 

@@ -21,7 +21,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * Database log store postgresql sql
- * @author will
  */
 @LoadLevel(name = "postgresql")
 public class PostgresqlLogStoreSqls extends AbstractLogStoreSqls {

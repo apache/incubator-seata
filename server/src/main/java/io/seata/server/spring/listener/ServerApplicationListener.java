@@ -37,8 +37,6 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAME
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
 /**
- * @author slievrly
- * @author funkye
  */
 public class ServerApplicationListener implements GenericApplicationListener {
 

@@ -35,7 +35,6 @@ import javax.script.ScriptEngineManager;
 /**
  * StateMachineConfig
  *
- * @author lorne.cl
  */
 public interface StateMachineConfig {
 

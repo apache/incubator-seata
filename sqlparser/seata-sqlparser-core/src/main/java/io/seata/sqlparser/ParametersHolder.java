@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * The interface Parameters holder.
  *
- * @author sharajava
  */
 public interface ParametersHolder {
 

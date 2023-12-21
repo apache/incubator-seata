@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 /**
  * The type Mariadb select for update recognizer.
  *
- * @author funkye
  */
 public class MariadbSelectForUpdateRecognizer extends MySQLSelectForUpdateRecognizer {
 

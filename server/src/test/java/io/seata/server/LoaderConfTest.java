@@ -25,7 +25,6 @@ import org.springframework.core.env.Environment;
 
 /**
  *
- * @author funkye
  */
 @SpringBootTest
 public class LoaderConfTest {

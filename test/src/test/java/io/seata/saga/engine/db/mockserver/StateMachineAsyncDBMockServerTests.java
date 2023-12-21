@@ -34,7 +34,6 @@ import java.util.Map;
 /**
  * State machine async tests with db log store
  *
- * @author lorne.cl
  */
 public class StateMachineAsyncDBMockServerTests {
 

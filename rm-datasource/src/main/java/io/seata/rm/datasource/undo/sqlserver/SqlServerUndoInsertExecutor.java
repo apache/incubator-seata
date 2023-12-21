@@ -32,7 +32,6 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author GoodBoyCoder
  */
 public class SqlServerUndoInsertExecutor extends BaseSqlServerUndoExecutor {
     /**

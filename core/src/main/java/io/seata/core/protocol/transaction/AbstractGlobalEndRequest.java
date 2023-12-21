@@ -19,7 +19,6 @@ package io.seata.core.protocol.transaction;
 /**
  * The type Abstract global end request.
  *
- * @author sharajava
  */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC {
 

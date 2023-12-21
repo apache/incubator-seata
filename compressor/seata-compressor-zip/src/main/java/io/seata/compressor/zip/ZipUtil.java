@@ -26,7 +26,6 @@ import java.util.zip.ZipOutputStream;
 /**
  * the Zip Util
  *
- * @author ph3636
  */
 public class ZipUtil {
 

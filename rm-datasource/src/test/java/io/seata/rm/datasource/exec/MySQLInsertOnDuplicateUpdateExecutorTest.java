@@ -49,7 +49,6 @@ import static org.mockito.Mockito.when;
 
 
 /**
- * @author: yangyicong
  */
 public class MySQLInsertOnDuplicateUpdateExecutorTest {
 

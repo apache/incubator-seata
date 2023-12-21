@@ -20,7 +20,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 
 /**
- * @author jianbin.chen
  */
 public class RaftClusterMetadataMsg extends RaftBaseMsg {
 

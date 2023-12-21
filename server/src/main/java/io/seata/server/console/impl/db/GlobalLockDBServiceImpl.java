@@ -48,8 +48,6 @@ import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 /**
  * Global Lock DB ServiceImpl
  *
- * @author zhongxiang.wang
- * @author lvekee 734843455@qq.com
  */
 @Component
 @org.springframework.context.annotation.Configuration

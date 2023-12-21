@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * The interface Sql update recognizer.
  *
- * @author sharajava
  */
 public interface SQLUpdateRecognizer extends WhereRecognizer {
     String MULTI_TABLE_NAME_SEPERATOR = "#";

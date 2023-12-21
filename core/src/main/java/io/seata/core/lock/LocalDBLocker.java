@@ -22,7 +22,6 @@ import io.seata.core.model.LockStatus;
 /**
  * The type Local db locker.
  *
- * @author zhangsen
  */
 public class LocalDBLocker extends AbstractLocker {
 

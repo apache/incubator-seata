@@ -22,7 +22,6 @@ import io.seata.saga.statelang.domain.LoopStartState;
 /**
  * Start the "loop" execution for the state with loop attribute
  *
- * @author anselleeyy
  */
 public class LoopStartStateImpl extends BaseState implements LoopStartState {
 

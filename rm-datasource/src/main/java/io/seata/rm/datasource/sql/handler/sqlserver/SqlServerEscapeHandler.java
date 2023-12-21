@@ -29,7 +29,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type SqlServer keyword checker.
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerEscapeHandler implements EscapeHandler {

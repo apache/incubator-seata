@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Geng Zhang
  */
 public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
 

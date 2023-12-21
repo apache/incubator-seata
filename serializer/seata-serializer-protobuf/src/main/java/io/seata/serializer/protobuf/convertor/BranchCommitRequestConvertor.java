@@ -26,7 +26,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 
 /**
- * @author leizhiyuan
  */
 public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitRequest, BranchCommitRequestProto> {
     @Override

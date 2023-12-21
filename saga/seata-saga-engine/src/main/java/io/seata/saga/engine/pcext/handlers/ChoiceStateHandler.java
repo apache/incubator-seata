@@ -39,7 +39,6 @@ import org.springframework.util.StringUtils;
 /**
  * ChoiceState Handler
  *
- * @author lorne.cl
  */
 public class ChoiceStateHandler implements StateHandler {
 

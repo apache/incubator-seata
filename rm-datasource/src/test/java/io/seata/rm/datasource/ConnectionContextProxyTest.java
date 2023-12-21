@@ -30,7 +30,6 @@ import java.util.List;
 /**
  * ConnectionContextProxy test
  *
- * @author chd
  */
 public class ConnectionContextProxyTest {
     ConnectionContext connectionContext = new ConnectionContext();

@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Choice State, We can choose only one choice
  *
- * @author lorne.cl
  */
 public interface ChoiceState extends State {
 

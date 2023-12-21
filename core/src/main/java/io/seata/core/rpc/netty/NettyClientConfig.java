@@ -30,7 +30,6 @@ import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 /**
  * The type Netty client config.
  *
- * @author slievrly
  */
 public class NettyClientConfig extends NettyBaseConfig {
 

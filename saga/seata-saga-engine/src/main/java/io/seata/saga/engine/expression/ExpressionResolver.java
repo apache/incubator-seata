@@ -19,7 +19,6 @@ package io.seata.saga.engine.expression;
 /**
  * Expression structure resolver
  *
- * @author ptyin
  */
 public interface ExpressionResolver {
     Expression getExpression(String expressionStr);

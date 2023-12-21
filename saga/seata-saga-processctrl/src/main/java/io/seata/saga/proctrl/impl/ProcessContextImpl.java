@@ -28,7 +28,6 @@ import io.seata.saga.proctrl.ProcessContext;
 /**
  * The default process context implementation
  *
- * @author lorne.cl
  */
 public class ProcessContextImpl implements HierarchicalProcessContext, ProcessContext {
 

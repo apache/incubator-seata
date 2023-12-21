@@ -22,7 +22,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global status request.
  *
- * @author slievrly
  */
 public class GlobalStatusRequest extends AbstractGlobalEndRequest {
 

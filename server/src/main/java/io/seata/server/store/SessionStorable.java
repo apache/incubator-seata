@@ -19,7 +19,6 @@ package io.seata.server.store;
 /**
  * The interface Session storable.
  *
- * @author slievrly
  */
 public interface SessionStorable {
 

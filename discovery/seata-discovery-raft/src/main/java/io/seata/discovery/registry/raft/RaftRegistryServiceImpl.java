@@ -62,7 +62,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type File registry service.
  *
- * @author funkye
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
 

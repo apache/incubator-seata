@@ -21,7 +21,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Global report response.
  *
- * @author lorne.cl
  */
 public class GlobalReportResponse extends AbstractGlobalEndResponse {
 

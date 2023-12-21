@@ -28,7 +28,6 @@ import io.seata.metrics.SystemClock;
 /**
  * Compact Counter implement with AtomicLong
  *
- * @author zhengyangyong
  */
 public class CompactCounter implements Counter {
     private final Id id;

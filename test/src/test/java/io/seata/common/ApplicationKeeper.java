@@ -26,7 +26,6 @@ import org.springframework.context.support.AbstractApplicationContext;
 /**
  * The type Application keeper.
  *
- * @author sharajava
  */
 public class ApplicationKeeper {
 

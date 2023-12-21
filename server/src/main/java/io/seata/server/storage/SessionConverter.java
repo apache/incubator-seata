@@ -39,8 +39,6 @@ import org.springframework.beans.BeanUtils;
 /**
  * The session converter
  *
- * @author wangzhongxiang
- * @author doubleDimple
  */
 public class SessionConverter {
 

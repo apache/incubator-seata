@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Mariadb keyword checker test.
  *
- * @author funkye
  */
 public class MariadbEscapeHandlerTest {
     /**

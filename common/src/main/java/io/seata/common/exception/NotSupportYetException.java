@@ -19,7 +19,6 @@ package io.seata.common.exception;
 /**
  * The type Not support yet exception.
  *
- * @author slievrly
  */
 public class NotSupportYetException extends RuntimeException {
 

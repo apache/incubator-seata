@@ -31,9 +31,6 @@ import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-/**
- * @author sustly
- */
 class TransactionScopeTest {
 
     companion object {

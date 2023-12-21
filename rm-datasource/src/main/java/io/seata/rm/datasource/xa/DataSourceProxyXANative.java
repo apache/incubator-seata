@@ -29,7 +29,6 @@ import java.sql.SQLException;
 /**
  * DataSource proxy to wrap a XADataSource.
  *
- * @author sharajava
  */
 public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 

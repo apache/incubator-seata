@@ -32,7 +32,6 @@ import org.springframework.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * @author wang.liang
  */
 public class PortHelper {
 

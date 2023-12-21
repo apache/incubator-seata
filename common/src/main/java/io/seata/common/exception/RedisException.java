@@ -19,7 +19,6 @@ package io.seata.common.exception;
 /**
  * The redis operate exception
  *
- * @author wangzhongxiang
  */
 public class RedisException extends FrameworkException {
 

@@ -17,7 +17,6 @@
 #
 
 # etcd REST API v3.
-# author:wangyuewen
 
 # shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002
 echo -e "Please enter the host of etcd3.\n请输入etcd3的host [localhost]:"

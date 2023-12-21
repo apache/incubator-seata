@@ -30,7 +30,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * EndState Router
  *
- * @author lorne.cl
  */
 public class EndStateRouter implements StateRouter, InterceptableStateRouter {
 

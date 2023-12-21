@@ -24,7 +24,6 @@ import io.seata.integration.tx.api.remoting.RemotingDesc;
 /**
  * HSF Remote Bean Parser
  *
- * @author ppf@jiumao.org
  */
 public class HSFRemotingParser extends AbstractedRemotingParser {
 

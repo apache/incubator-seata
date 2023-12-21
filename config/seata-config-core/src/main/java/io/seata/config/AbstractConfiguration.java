@@ -24,7 +24,6 @@ import io.seata.common.util.StringUtils;
 /**
  * The type Abstract configuration.
  *
- * @author slievrly
  */
 public abstract class AbstractConfiguration implements Configuration {
 

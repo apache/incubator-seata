@@ -24,7 +24,6 @@ import io.seata.saga.proctrl.eventing.EventConsumer;
 /**
  * ProcessCtrl Event Consumer
  *
- * @author lorne.cl
  */
 public class ProcessCtrlEventConsumer implements EventConsumer<ProcessContext> {
 

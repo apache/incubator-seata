@@ -17,7 +17,6 @@
 package io.seata.config.exception;
 
 /**
- * @author slievrly
  */
 public class ConfigNotFoundException extends RuntimeException {
 

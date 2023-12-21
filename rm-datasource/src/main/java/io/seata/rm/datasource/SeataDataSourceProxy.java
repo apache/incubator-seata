@@ -23,7 +23,6 @@ import io.seata.core.model.BranchType;
 /**
  * The interface Seata data source.
  *
- * @author wang.liang
  */
 public interface SeataDataSourceProxy extends DataSource {
 

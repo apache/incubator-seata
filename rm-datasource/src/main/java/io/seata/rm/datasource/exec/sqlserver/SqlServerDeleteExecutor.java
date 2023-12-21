@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.ColumnUtils;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author GoodBoyCoder
  */
 public class SqlServerDeleteExecutor<T, S extends Statement> extends DeleteExecutor<T, S> {
     /**

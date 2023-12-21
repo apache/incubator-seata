@@ -26,7 +26,6 @@ import java.sql.Statement;
 /**
  * The type Execute template.
  *
- * @author sharajava
  */
 public class ExecuteTemplateXA {
 

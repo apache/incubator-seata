@@ -20,7 +20,6 @@ import com.alibaba.druid.util.JdbcUtils;
 import io.seata.sqlparser.util.DbTypeParser;
 
 /**
- * @author ggndnn
  */
 class DruidDbTypeParserImpl implements DbTypeParser {
     @Override

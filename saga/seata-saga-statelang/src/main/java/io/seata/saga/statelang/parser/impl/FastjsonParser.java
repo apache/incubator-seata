@@ -25,7 +25,6 @@ import io.seata.saga.statelang.parser.JsonParser;
 /**
  * JsonParser implement by Fastjson
  *
- * @author lorne.cl
  */
 @LoadLevel(name = FastjsonParser.NAME)
 public class FastjsonParser implements JsonParser {

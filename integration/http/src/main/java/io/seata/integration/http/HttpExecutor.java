@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * Http executor.
  *
- * @author wangxb
  */
 public interface HttpExecutor {
 

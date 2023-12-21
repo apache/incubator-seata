@@ -25,7 +25,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbUndoLogManager extends MySQLUndoLogManager {

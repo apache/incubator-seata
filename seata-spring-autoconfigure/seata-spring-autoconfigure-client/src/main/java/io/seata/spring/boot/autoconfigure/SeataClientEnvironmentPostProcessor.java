@@ -49,8 +49,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 
 /**
- * @author xingfudeshi@gmail.com
- * @author wang.liang
  */
 public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 

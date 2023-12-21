@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * StateRouter
  *
- * @author lorne.cl
  */
 public interface StateRouter {
 

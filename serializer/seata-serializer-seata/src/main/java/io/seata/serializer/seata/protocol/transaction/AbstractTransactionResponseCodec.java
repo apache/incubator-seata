@@ -26,7 +26,6 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 /**
  * The type Abstract transaction response codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractTransactionResponseCodec extends AbstractResultMessageCodec {
 

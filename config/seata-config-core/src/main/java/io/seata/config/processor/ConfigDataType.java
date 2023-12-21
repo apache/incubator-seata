@@ -19,7 +19,6 @@ package io.seata.config.processor;
 /**
  * The enum Config Data type.
  *
- * @author zhixing
  */
 public enum ConfigDataType {
     /**

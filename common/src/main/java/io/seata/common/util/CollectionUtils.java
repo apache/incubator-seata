@@ -26,8 +26,6 @@ import java.util.function.Function;
 /**
  * The type Collection utils.
  *
- * @author zhangsen
- * @author Geng Zhang
  */
 public class CollectionUtils {
 

@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 /**
  * State Log Repository
  *
- * @author lorne.cl
  */
 public interface StateLogRepository {
 

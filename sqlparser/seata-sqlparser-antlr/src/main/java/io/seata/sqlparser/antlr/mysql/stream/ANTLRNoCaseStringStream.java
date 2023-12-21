@@ -22,7 +22,6 @@ import org.antlr.v4.runtime.IntStream;
 /**
  * ANTLRNoCaseStringStream
  *
- * @author zhihou
  */
 public class ANTLRNoCaseStringStream extends ANTLRInputStream {
 

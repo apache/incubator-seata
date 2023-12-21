@@ -37,7 +37,6 @@ import java.util.Date;
 /**
  * The type Data source basic test.
  *
- * @author services
  */
 @Disabled
 public class LocalTransactionWithGlobalLockDataSourceBasicTest {

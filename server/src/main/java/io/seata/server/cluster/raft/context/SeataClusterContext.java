@@ -27,7 +27,6 @@ import io.seata.core.context.ContextCoreLoader;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
- * @author funkye
  */
 public class SeataClusterContext {
 

@@ -17,7 +17,6 @@
 package io.seata.rm.datasource.exec.oracle;
 
 /**
- * @author doubleDimple lovele.cn@gmail.com
  */
 public class OracleJdbcType {
 
