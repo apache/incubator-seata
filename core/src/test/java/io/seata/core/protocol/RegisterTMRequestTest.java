@@ -22,8 +22,6 @@ import static io.netty.buffer.Unpooled.buffer;
 /**
  * RegisterTMRequest Test
  * 
- * @author kaitithoma
- * @author Danaykap
  * 
  *
  */

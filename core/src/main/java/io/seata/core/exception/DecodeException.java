@@ -17,7 +17,6 @@
 package io.seata.core.exception;
 
 /**
- * @author slievrly
  */
 public class DecodeException extends Exception {
 

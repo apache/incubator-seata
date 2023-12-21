@@ -19,7 +19,6 @@ package io.seata.core.rpc;
 /**
  * The enum Transport server type.
  *
- * @author slievrly
  */
 public enum TransportServerType {
     /**

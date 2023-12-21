@@ -28,7 +28,6 @@ import io.seata.metrics.IdConstants;
 /**
  * Compact Summary implement with SummaryValue
  *
- * @author zhengyangyong
  */
 public class CompactSummary implements Summary {
     private final Id id;

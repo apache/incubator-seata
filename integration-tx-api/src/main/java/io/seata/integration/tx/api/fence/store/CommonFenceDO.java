@@ -21,7 +21,6 @@ import java.util.Date;
 /**
  * Common Fence Domain
  *
- * @author kaka2code
  */
 public class CommonFenceDO {
 

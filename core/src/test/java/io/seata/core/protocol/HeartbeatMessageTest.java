@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit test for {@link HeartbeatMessage}.
  *
- * @author Mia0451
  */
 class HeartbeatMessageTest {
 

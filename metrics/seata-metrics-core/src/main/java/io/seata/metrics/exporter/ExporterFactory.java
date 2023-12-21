@@ -32,7 +32,6 @@ import static io.seata.common.DefaultValues.DEFAULT_METRICS_EXPORTER_LIST;
 /**
  * Exporter Factory for load all configured exporters
  *
- * @author zhengyangyong
  */
 public class ExporterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExporterFactory.class);

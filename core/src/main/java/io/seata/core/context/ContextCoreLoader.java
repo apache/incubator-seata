@@ -23,7 +23,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 /**
  * The type Context core loader.
  *
- * @author sharajava
  */
 public class ContextCoreLoader {
 

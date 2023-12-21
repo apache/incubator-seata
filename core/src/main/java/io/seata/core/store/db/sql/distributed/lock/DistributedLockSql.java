@@ -17,7 +17,6 @@
 package io.seata.core.store.db.sql.distributed.lock;
 
 /**
- * @author chd
  * @since 1.5.0
  */
 public interface DistributedLockSql {

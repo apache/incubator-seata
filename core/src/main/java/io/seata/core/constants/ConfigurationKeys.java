@@ -19,7 +19,6 @@ package io.seata.core.constants;
 /**
  * The type Configuration keys.
  *
- * @author slievrly
  * @deprecated The constants are moved to {@link io.seata.common.ConfigurationKeys}
  */
 @Deprecated

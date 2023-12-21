@@ -31,7 +31,6 @@ import io.seata.serializer.seata.MessageSeataCodec;
 /**
  * the type batch result message codec
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class BatchResultMessageCodec extends AbstractMessageCodec {

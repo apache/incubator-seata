@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Rm RPC client test.
  *
- * @author zhaojun
  */
 class RmNettyClientTest {
     

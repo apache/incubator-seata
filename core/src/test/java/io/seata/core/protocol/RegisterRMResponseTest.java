@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit test for {@link RegisterRMResponse}.
  *
- * @author Mia0451
  */
 class RegisterRMResponseTest {
 

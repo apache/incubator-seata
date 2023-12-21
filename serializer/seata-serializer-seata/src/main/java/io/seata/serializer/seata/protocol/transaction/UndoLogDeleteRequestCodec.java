@@ -25,7 +25,6 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 /**
  * The type UndoLog Delete end request codec.
  *
- * @author yuanguoyao
  */
 public class UndoLogDeleteRequestCodec extends AbstractTransactionRequestToRMCodec {
 

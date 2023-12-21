@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Merge result message codec test.
  *
- * @author zhangsen
  */
 public class MergeResultMessageSerializerTest {
 

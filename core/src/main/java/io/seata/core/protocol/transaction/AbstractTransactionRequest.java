@@ -23,7 +23,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Abstract transaction request.
  *
- * @author sharajava
  */
 public abstract class AbstractTransactionRequest extends AbstractMessage {
 

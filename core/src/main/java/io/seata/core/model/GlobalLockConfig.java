@@ -19,7 +19,6 @@ package io.seata.core.model;
 import io.seata.common.LockStrategyMode;
 
 /**
- * @author selfishlover
  */
 public class GlobalLockConfig {
 
