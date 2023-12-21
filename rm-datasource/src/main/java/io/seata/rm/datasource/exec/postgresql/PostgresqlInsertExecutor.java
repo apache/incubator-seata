@@ -46,7 +46,6 @@ import java.util.Set;
 /**
  * The type Postgresql insert executor.
  *
- * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL, scope = Scope.PROTOTYPE)
 public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {

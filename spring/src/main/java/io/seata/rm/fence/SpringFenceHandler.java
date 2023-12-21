@@ -49,7 +49,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * Common Fence Handler(idempotent, non_rollback, suspend)
  *
- * @author kaka2code
  */
 public class SpringFenceHandler implements FenceHandler {
 

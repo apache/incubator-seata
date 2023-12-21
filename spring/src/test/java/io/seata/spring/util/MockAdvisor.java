@@ -21,7 +21,6 @@ import org.springframework.aop.Advisor;
 import org.springframework.core.Ordered;
 
 /**
- * @author wang.liang
  */
 public class MockAdvisor implements Advisor, Ordered {
 

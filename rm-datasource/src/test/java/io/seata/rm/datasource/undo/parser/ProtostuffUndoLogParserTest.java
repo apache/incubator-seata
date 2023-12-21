@@ -21,7 +21,6 @@ import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
 /**
- * @author Geng Zhang
  */
 class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
 

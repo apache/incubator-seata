@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Otis.z
  */
 public class NamedThreadFactoryTest {
     private static final int THREAD_TOTAL_SIZE = 3;

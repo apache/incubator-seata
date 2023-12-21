@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 /**
  * Branch Session File ServiceImpl
  *
- * @author: zhongxiang.wang
  */
 @Component
 @org.springframework.context.annotation.Configuration

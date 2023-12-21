@@ -36,7 +36,6 @@ import java.util.Set;
 /**
  * The type Net util.
  *
- * @author slievrly
  */
 public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);

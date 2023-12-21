@@ -17,7 +17,6 @@
 package io.seata.common.util;
 
 /**
- * @author jsbxyyx
  */
 public class IOUtil {
 

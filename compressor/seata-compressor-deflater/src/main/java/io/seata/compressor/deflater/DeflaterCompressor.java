@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.Compressor;
 
 /**
- * @author dongzl
  */
 @LoadLevel(name = "DEFLATER")
 public class DeflaterCompressor implements Compressor {

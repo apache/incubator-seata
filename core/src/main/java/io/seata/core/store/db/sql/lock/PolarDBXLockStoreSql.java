@@ -21,7 +21,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * Database lock store for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = "polardb-x")
 public class PolarDBXLockStoreSql extends MysqlLockStoreSql {

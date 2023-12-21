@@ -24,7 +24,6 @@ import org.springframework.util.IdGenerator;
 /**
  * Based On Spring AlternativeJdkIdGenerator
  *
- * @author lorne.cl
  */
 public class SpringJvmUUIDSeqGenerator implements SeqGenerator {
 

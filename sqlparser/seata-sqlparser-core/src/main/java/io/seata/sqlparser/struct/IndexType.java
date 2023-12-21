@@ -19,7 +19,6 @@ package io.seata.sqlparser.struct;
 /**
  * The enum Index type.
  *
- * @author sharajava
  */
 public enum IndexType {
     /**

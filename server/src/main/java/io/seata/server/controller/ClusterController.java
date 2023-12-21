@@ -53,7 +53,6 @@ import static io.seata.common.ConfigurationKeys.STORE_MODE;
 import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
- * @author funkye
  */
 @RestController
 @RequestMapping("/metadata/v1")

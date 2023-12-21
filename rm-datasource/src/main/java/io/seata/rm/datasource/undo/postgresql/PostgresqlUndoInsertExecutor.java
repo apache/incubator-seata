@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type postgresql undo insert executor.
  *
- * @author japsercloud
  */
 public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
 

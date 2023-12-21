@@ -39,7 +39,6 @@ import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
-  * @author will.zjw
   */
 public class OracleTableMetaCacheTest {
 

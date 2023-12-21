@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type SqlServer delete recognizer test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerDeleteRecognizerTest extends AbstractRecognizerTest {
     @Test

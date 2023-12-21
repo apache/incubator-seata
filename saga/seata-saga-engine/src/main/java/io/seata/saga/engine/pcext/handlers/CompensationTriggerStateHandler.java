@@ -36,7 +36,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * CompensationTriggerState Handler
  * Start to execute compensation
  *
- * @author lorne.cl
  */
 public class CompensationTriggerStateHandler implements StateHandler {
 

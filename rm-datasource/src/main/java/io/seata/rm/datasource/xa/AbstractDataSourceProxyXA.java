@@ -24,7 +24,6 @@ import io.seata.rm.BaseDataSourceResource;
 /**
  * Abstract DataSource proxy for XA mode.
  *
- * @author sharajava
  */
 public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<ConnectionProxyXA> {
 

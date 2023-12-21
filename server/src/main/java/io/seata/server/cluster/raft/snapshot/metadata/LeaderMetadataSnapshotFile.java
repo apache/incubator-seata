@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jianbin.chen
  */
 public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final long serialVersionUID = 78637164618855724L;

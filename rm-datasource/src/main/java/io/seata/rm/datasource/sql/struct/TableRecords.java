@@ -49,7 +49,6 @@ import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
 /**
  * The type Table records.
  *
- * @author sharajava
  */
 public class TableRecords implements java.io.Serializable {
 

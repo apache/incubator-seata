@@ -21,7 +21,6 @@ import io.seata.saga.statelang.validator.Rule;
 /**
  * Abstract class for {@link Rule}
  *
- * @author ptyin
  */
 public abstract class AbstractRule implements Rule {
 

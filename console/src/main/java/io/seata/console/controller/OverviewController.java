@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Overview
  *
- * @author jameslcj
  */
 @RestController
 @RequestMapping("/api/v1/overview")

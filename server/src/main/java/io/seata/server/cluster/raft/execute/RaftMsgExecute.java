@@ -19,7 +19,6 @@ package io.seata.server.cluster.raft.execute;
 import io.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 
 /**
- * @author jianbin.chen
  */
 public interface RaftMsgExecute<T> {
 

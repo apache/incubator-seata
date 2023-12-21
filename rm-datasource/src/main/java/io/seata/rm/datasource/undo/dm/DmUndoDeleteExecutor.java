@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type dm undo delete executor.
  *
- * @author chengxiaoxiao
  */
 public class DmUndoDeleteExecutor extends AbstractUndoExecutor {
 

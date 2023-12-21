@@ -45,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 
 /**
- * @author GoodBoyCoder
  */
 public class SqlServerTableMetaCacheTest {
     private static Object[][] columnMetas =

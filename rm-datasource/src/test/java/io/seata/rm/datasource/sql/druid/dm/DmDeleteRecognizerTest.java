@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Jefferlau
  */
 public class DmDeleteRecognizerTest {
 

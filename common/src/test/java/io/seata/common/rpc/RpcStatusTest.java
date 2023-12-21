@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The state statistics test.
  *
- * @author ph3636
  */
 public class RpcStatusTest {
 

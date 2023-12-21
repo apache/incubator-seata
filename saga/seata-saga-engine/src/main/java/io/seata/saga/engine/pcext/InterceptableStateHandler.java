@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Interceptible State Handler
  *
- * @author lorne.cl
  */
 public interface InterceptableStateHandler extends StateHandler {
 

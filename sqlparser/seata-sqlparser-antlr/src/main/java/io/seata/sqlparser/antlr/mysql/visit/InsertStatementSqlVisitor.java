@@ -23,7 +23,6 @@ import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 /**
  * InsertStatementSqlVisitor
  *
- * @author zhihou
  */
 public class InsertStatementSqlVisitor extends MySqlParserBaseVisitor<MySqlContext> {
 

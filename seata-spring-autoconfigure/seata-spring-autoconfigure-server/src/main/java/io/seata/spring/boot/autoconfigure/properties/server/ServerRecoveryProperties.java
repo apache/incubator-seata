@@ -26,7 +26,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)

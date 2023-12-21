@@ -29,7 +29,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 /**
  * the database abstract lock store sql interface
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
 public class AbstractLockStoreSql implements LockStoreSql {

@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Registry factory.
  *
- * @author slievrly
  */
 public class RegistryFactory {
 

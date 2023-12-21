@@ -20,7 +20,6 @@ import io.grpc.Metadata;
 import io.seata.core.context.RootContext;
 
 /**
- * @author eddyxu1213@126.com
  */
 public interface GrpcHeaderKey {
 

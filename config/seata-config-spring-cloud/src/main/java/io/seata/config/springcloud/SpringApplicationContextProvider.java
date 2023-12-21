@@ -27,8 +27,6 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author funkye
  * The type spring application context provider
  */
 public class SpringApplicationContextProvider implements ApplicationContextAware, BeanFactoryPostProcessor {

@@ -27,8 +27,6 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author selfishlover
  */
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 

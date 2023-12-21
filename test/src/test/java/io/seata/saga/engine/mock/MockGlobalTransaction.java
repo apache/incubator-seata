@@ -26,7 +26,6 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
 /**
  *
- * @author lorne.cl
  */
 public class MockGlobalTransaction implements GlobalTransaction {
 

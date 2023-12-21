@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Default Router handler
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public class DefaultRouterHandler implements RouterHandler {
 

@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract store
  *
- * @author lorne.cl
  */
 public class AbstractStore {
 

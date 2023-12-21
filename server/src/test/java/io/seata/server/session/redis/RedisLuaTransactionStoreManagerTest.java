@@ -29,7 +29,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * test RedisLuaTransactionStoreManager
  *
- * @author conghuhu
  */
 @SpringBootTest
 public class RedisLuaTransactionStoreManagerTest extends RedisTransactionStoreManagerTest {

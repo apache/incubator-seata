@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
 /**
  * Sequence expression factory
  *
- * @author lorne.cl
  */
 public class SequenceExpressionFactory implements ExpressionFactory {
 

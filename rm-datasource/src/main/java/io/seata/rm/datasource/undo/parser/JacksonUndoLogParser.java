@@ -63,7 +63,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Json based undo log parser.
  *
- * @author jsbxyyx
  */
 @LoadLevel(name = JacksonUndoLogParser.NAME)
 public class JacksonUndoLogParser implements UndoLogParser, Initialize {

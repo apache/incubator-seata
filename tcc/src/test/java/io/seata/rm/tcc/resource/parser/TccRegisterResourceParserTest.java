@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 
 /**
- * @author leezongjie
  */
 class TccRegisterResourceParserTest {
 

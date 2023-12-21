@@ -18,7 +18,6 @@ package io.seata.sqlparser.struct;
 
 /**
  * sql default expression
- * @author jsbxyyx
  */
 public class SqlDefaultExpr {
 

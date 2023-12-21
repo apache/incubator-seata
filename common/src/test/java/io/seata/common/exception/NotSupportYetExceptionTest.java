@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The notSupportYet exception.
  *
- * @author lzf971107
  */
 public class NotSupportYetExceptionTest {
 

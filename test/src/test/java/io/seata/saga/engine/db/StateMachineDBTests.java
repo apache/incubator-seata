@@ -53,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * State machine tests with db log store
  *
- * @author lorne.cl
  */
 public class StateMachineDBTests extends AbstractServerTest {
 

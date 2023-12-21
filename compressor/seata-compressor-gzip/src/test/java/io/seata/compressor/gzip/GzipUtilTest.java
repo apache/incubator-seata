@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.util.zip.GZIPInputStream;
 
 /**
- * @author jsbxyyx
  */
 public class GzipUtilTest {
 

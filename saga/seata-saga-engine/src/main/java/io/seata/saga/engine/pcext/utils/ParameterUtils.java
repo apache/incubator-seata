@@ -34,7 +34,6 @@ import java.util.Map;
  *
  * ParameterUtils
  *
- * @author lorne.cl
  */
 public class ParameterUtils {
 

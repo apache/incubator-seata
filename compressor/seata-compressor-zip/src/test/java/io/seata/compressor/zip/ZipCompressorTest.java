@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * the Zip Compressor test
  *
- * @author ph3636
  */
 public class ZipCompressorTest {
 

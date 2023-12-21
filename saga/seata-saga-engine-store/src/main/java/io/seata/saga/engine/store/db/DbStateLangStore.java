@@ -33,7 +33,6 @@ import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 /**
  * State language definition store in DB
  *
- * @author lorne.cl
  */
 public class DbStateLangStore extends AbstractStore implements StateLangStore {
 

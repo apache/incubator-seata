@@ -19,7 +19,6 @@ package io.seata.tm.api;
 /**
  * Callback on failure.
  *
- * @author slievrly
  */
 public interface FailureHandler {
 
