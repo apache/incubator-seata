@@ -27,11 +27,6 @@ import org.junit.jupiter.api.Test;
 public class CycleDependencyHandlerTest {
 
     @Test
-    public void testInit() {
-        Assertions.assertNotNull(new CycleDependencyHandler());
-    }
-
-    @Test
     public void testContainsObject() {
         Assertions.assertFalse(CycleDependencyHandler.containsObject(null));
         CycleDependencyHandler.start();
