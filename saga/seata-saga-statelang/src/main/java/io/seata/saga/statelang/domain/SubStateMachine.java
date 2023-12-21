@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * SubStateMachine
  *
- * @author lorne.cl
  * @see TaskState
  */
 public interface SubStateMachine extends TaskState {

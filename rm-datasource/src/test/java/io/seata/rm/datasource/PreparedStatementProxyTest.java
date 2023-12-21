@@ -65,7 +65,6 @@ import javax.sql.DataSource;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author will
  */
 public class PreparedStatementProxyTest {
 

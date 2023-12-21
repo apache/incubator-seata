@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 /**
  * The interface Load level.
  *
- * @author slievrly
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

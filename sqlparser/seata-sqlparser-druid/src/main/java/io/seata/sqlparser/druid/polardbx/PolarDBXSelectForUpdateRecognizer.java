@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 /**
  * Select for update statement recognizer for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXSelectForUpdateRecognizer extends MySQLSelectForUpdateRecognizer {
     public PolarDBXSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * A unit test for {@link BranchType}
  *
- * @author Lay
  */
 public class BranchTypeTest {
 

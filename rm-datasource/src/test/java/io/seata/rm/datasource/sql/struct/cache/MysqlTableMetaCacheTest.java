@@ -49,7 +49,6 @@ import static org.mockito.Mockito.mock;
 /**
  * The table meta fetch test.
  *
- * @author hanwen created at 2019-02-01
  */
 public class MysqlTableMetaCacheTest {
 

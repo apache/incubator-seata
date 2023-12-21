@@ -24,7 +24,6 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 
 /**
- * @author slievrly
  */
 public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
 

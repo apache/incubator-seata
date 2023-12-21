@@ -21,7 +21,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * Database log store mysql sql
- * @author will
  */
 @LoadLevel(name = "mysql")
 public class MysqlLogStoreSqls extends AbstractLogStoreSqls {

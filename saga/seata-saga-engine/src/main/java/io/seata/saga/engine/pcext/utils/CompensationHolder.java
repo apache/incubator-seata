@@ -39,7 +39,6 @@ import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 /**
  * CompensationHolder
  *
- * @author lorne.cl
  */
 public class CompensationHolder {
 

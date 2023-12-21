@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * A state used to execute a task
  *
- * @author lorne.cl
  */
 public interface TaskState extends State {
 

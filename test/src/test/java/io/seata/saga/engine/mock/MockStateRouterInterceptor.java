@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author lorne.cl
  */
 public class MockStateRouterInterceptor implements StateRouterInterceptor {
 

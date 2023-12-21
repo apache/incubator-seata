@@ -27,7 +27,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * to be UN (the data is inconsistent),
  * otherwise FA (failure: no data inconsistency)
  *
- * @author lorne.cl
  */
 public interface StatusDecisionStrategy {
 

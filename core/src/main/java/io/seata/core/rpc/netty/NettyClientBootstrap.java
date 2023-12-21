@@ -47,8 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Rpc client.
  *
- * @author slievrly
- * @author zhaojun
  */
 public class NettyClientBootstrap implements RemotingBootstrap {
 

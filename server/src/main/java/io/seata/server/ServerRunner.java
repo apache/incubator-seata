@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 public class ServerRunner implements CommandLineRunner, DisposableBean,

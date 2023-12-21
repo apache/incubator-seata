@@ -69,9 +69,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author wang.liang
- * @author funkye
  */
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 

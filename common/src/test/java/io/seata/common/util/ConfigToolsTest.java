@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author funkye
  */
 public class ConfigToolsTest {
 

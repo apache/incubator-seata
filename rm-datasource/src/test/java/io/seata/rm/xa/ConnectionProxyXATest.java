@@ -41,7 +41,6 @@ import static org.mockito.Mockito.times;
 /**
  * Tests for ConnectionProxyXA
  *
- * @author sharajava
  */
 public class ConnectionProxyXATest {
 

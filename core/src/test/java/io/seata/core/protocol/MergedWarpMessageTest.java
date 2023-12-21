@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * The type MergedWarpMessageTest test.
  *
- * @author leizhiyuan
  */
 public class MergedWarpMessageTest {
 

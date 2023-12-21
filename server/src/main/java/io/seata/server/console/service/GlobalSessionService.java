@@ -22,7 +22,6 @@ import io.seata.console.result.PageResult;
 
 /**
  * Global session service
- * @author wangzhongxiang
  */
 public interface GlobalSessionService {
 

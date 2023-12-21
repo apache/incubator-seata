@@ -45,7 +45,6 @@ import java.util.concurrent.Executor;
 /**
  * The type Abstract connection proxy.
  *
- * @author sharajava
  */
 public abstract class AbstractConnectionProxy implements Connection {
 

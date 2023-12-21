@@ -24,7 +24,6 @@ import io.seata.saga.proctrl.eventing.EventPublisher;
 /**
  * ProcessCtrl Event Pulisher
  *
- * @author lorne.cl
  */
 public class ProcessCtrlEventPublisher implements EventPublisher<ProcessContext> {
 

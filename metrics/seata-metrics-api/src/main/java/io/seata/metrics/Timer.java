@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Default clock implement use system
  *
- * @author zhengyangyong
  */
 public interface Timer extends Meter {
     void record(long value, TimeUnit unit);

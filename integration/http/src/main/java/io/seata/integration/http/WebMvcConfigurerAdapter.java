@@ -40,7 +40,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * The Web Mvc Configurer Adapter
  *
- * @author wang.liang
  */
 public interface WebMvcConfigurerAdapter extends WebMvcConfigurer {
 

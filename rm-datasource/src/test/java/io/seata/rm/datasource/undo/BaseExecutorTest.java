@@ -21,7 +21,6 @@ import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 
 /**
- * @author Geng Zhang
  */
 public abstract class BaseExecutorTest {
 

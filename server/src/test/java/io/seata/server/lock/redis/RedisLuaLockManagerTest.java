@@ -32,7 +32,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * RedisLocker use lua script
  *
- * @author conghuhu
  */
 @SpringBootTest
 public class RedisLuaLockManagerTest extends RedisLockManagerTest {

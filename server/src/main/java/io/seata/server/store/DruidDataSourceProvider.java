@@ -26,9 +26,6 @@ import java.sql.Connection;
 
 /**
  * The druid datasource provider
- * @author zhangsen
- * @author ggndnn
- * @author will
  */
 @LoadLevel(name = "druid")
 public class DruidDataSourceProvider extends AbstractDataSourceProvider {

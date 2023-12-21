@@ -49,7 +49,6 @@ import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFF
 /**
  * The type Async worker.
  *
- * @author sharajava
  */
 public class AsyncWorker {
 

@@ -22,7 +22,6 @@ import io.seata.saga.statelang.domain.DomainConstants;
 /**
  * Triggering the "compensation" process for the state machine
  *
- * @author lorne.cl
  */
 public class CompensationTriggerStateImpl extends BaseState implements CompensationTriggerState {
 

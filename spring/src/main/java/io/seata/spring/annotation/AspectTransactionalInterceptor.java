@@ -31,7 +31,6 @@ import org.springframework.util.ClassUtils;
 /**
  * Aspect transactional interceptor. 
  *
- * @author ruishansun
  */
 public class AspectTransactionalInterceptor implements MethodInterceptor {
 

@@ -38,7 +38,6 @@ import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
 import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
 
 /**
- * @author wangxb
  */
 class HttpTest {
 

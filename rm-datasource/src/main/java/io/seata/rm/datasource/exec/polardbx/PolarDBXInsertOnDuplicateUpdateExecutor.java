@@ -27,7 +27,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * Insert on duplicated update executor for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.POLARDBX, scope = Scope.PROTOTYPE)
 public class PolarDBXInsertOnDuplicateUpdateExecutor extends MySQLInsertOnDuplicateUpdateExecutor {

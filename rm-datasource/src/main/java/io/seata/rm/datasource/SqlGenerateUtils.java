@@ -27,7 +27,6 @@ import io.seata.sqlparser.util.ColumnUtils;
 /**
  * generate sql and set value to sql
  *
- * @author JerryYin
  */
 public class SqlGenerateUtils {
 

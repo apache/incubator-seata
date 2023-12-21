@@ -19,7 +19,6 @@ package io.seata.saga.engine.store.db;
 /**
  * State log store sqls
  *
- * @author lorne.cl
  */
 public class StateLogStoreSqls {
 

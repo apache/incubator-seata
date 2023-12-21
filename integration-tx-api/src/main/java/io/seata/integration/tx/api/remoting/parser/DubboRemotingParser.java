@@ -24,7 +24,6 @@ import io.seata.integration.tx.api.remoting.RemotingDesc;
 /**
  * dubbo  remoting bean parsing
  *
- * @author zhangsen
  */
 public class DubboRemotingParser extends AbstractedRemotingParser {
 

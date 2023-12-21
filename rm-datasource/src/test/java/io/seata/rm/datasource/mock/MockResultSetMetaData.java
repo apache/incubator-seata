@@ -24,7 +24,6 @@ import io.seata.common.util.ReflectionUtil;
 import io.seata.sqlparser.struct.ColumnMeta;
 
 /**
- * @author will
  */
 public class MockResultSetMetaData implements ResultSetMetaData {
 

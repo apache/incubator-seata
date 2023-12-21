@@ -26,7 +26,6 @@ import org.apache.tools.bzip2.CBZip2OutputStream;
 /**
  * the BZip2 Util
  *
- * @author ph3636
  */
 public class BZip2Util {
 

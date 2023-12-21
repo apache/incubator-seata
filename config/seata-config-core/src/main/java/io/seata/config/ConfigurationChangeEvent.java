@@ -19,7 +19,6 @@ package io.seata.config;
 /**
  * The type Configuration change event.
  *
- * @author slievrly
  */
 public class ConfigurationChangeEvent {
 

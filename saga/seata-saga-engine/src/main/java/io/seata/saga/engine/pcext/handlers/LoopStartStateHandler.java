@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * Loop State Handler
  * Start Loop Execution
  *
- * @author anselleeyy
  */
 public class LoopStartStateHandler implements StateHandler {
 

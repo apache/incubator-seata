@@ -24,7 +24,6 @@ import io.seata.core.protocol.AbstractIdentifyResponse;
 /**
  * The type Abstract identify response.
  *
- * @author sharajava
  */
 public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessageCodec {
 

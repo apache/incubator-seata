@@ -20,7 +20,6 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
- * @author GoodBoyCoder
  * @date 2021-07-26
  */
 public abstract class BaseSqlServerUndoExecutor extends AbstractUndoExecutor {

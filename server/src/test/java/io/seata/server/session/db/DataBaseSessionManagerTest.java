@@ -50,7 +50,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Data base session manager test.
  *
- * @author zhangsen
  */
 @SpringBootTest
 public class DataBaseSessionManagerTest {

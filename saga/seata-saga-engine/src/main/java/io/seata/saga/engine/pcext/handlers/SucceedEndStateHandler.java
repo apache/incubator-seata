@@ -23,7 +23,6 @@ import io.seata.saga.proctrl.ProcessContext;
 /**
  * SucceedEndState Handler
  *
- * @author lorne.cl
  */
 public class SucceedEndStateHandler implements StateHandler {
 

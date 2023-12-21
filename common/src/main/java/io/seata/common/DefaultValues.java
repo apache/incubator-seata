@@ -19,7 +19,6 @@ package io.seata.common;
 import java.time.Duration;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public interface DefaultValues {
     int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;

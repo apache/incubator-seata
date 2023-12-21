@@ -28,7 +28,6 @@ import io.seata.sqlparser.struct.TableMeta;
 /**
  * column utils
  *
- * @author jsbxyyx
  */
 public final class ColumnUtils {
 

@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author japsercloud
  */
 public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognizer implements SQLSelectRecognizer {
 

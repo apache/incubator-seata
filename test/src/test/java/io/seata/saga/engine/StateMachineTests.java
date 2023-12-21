@@ -36,7 +36,6 @@ import java.util.Map;
 /**
  * State machine tests
  *
- * @author lorne.cl
  */
 public class StateMachineTests {
 

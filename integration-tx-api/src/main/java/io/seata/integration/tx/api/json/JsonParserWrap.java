@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.json;
 import io.seata.common.exception.JsonParseException;
 
 /**
- * @author zouwei
  */
 public class JsonParserWrap implements JsonParser {
 

@@ -29,7 +29,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 /**
  * The type App test.
  *
- * @author sharajava
  */
 public class AppTest {
 

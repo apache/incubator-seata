@@ -22,8 +22,6 @@ import io.seata.saga.proctrl.ProcessContext;
 /**
  * Router Handler
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public interface RouterHandler {
 

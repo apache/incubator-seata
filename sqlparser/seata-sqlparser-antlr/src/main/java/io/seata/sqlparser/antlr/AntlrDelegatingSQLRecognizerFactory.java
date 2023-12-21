@@ -26,7 +26,6 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
- * @author zhihou
  */
 @LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_ANTLR)
 public class AntlrDelegatingSQLRecognizerFactory implements SQLRecognizerFactory {

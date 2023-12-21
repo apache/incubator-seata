@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Nacos registry serivce impl test
  *
- * @author xingfudeshi@gmail.com
  */
 public class NacosRegistryServiceImplTest {
 

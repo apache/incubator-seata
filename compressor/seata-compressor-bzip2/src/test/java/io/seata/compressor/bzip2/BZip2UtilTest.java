@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * the BZip2 Util test
  *
- * @author ph3636
  */
 public class BZip2UtilTest {
 

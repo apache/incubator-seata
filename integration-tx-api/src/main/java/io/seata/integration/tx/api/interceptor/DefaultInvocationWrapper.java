@@ -20,7 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * @author leezongjie
  */
 public class DefaultInvocationWrapper implements InvocationWrapper {
     private Object proxy;

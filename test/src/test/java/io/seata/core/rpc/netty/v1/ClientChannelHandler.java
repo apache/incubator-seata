@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Geng Zhang
  */
 public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 

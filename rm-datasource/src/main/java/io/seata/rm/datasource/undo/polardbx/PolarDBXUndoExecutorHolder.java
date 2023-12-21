@@ -25,7 +25,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * Undo executor holder for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.POLARDBX)
 public class PolarDBXUndoExecutorHolder implements UndoExecutorHolder {

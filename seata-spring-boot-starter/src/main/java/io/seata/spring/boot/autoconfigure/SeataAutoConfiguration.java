@@ -41,7 +41,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 /**
  * The type Seata auto configuration
  *
- * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @AutoConfigureAfter({SeataCoreAutoConfiguration.class})

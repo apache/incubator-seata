@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type OrderUtil test
  *
- * @author wang.liang
  */
 public class OrderUtilTest {
 

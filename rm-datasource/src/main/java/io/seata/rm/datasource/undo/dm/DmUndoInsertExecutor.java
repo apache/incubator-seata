@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 /**
  * The type dm undo insert executor.
  *
- * @author chengxiaoxiao
  */
 public class DmUndoInsertExecutor extends AbstractUndoExecutor {
 

@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
 
 /**
- * @author funkye
  */
 @Component
 @ConfigurationProperties(prefix = SERVER_RAFT_PREFIX)

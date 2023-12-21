@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Xid handler.
  *
- * @author wangxb
  */
 public class XidResource {
 

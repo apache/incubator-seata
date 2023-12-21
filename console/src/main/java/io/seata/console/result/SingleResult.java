@@ -22,7 +22,6 @@ import io.seata.console.constant.Code;
 
 /**
  * The single result
- * @author zhongxiang.wang
  */
 public class SingleResult<T> extends Result<T>  implements Serializable {
     private static final long serialVersionUID = 77612626624298767L;

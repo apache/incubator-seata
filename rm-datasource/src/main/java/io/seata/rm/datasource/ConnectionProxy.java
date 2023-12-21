@@ -42,7 +42,6 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE
 /**
  * The type Connection proxy.
  *
- * @author sharajava
  */
 public class ConnectionProxy extends AbstractConnectionProxy {
 

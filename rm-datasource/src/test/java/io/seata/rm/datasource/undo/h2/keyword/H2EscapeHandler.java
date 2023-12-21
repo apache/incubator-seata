@@ -21,7 +21,6 @@ import io.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author JerryYin
  */
 @LoadLevel(name = JdbcConstants.H2)
 public class H2EscapeHandler extends MySQLEscapeHandler {

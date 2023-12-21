@@ -41,7 +41,6 @@ import org.springframework.core.io.Resource;
 /**
  * StateMachineRepository Implementation
  *
- * @author lorne.cl
  */
 public class StateMachineRepositoryImpl implements StateMachineRepository {
 

@@ -48,7 +48,6 @@ import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static io.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 
 /**
- * @author conghuhu
  */
 public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManager {
 

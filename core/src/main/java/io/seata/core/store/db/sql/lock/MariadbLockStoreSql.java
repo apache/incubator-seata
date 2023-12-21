@@ -21,7 +21,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * the database lock store mariadb sql
  *
- * @author funkye
  * @since 1.7.0
  */
 @LoadLevel(name = "mariadb")

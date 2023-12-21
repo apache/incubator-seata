@@ -41,7 +41,6 @@ import static org.mockito.Mockito.when;
 /**
  * Netty client channel manager test.
  *
- * @author zhaojun
  */
 @ExtendWith(MockitoExtension.class)
 class NettyClientChannelManagerTest {

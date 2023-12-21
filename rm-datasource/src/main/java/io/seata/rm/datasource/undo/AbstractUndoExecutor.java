@@ -56,8 +56,6 @@ import java.util.stream.Collectors;
 /**
  * The type Abstract undo executor.
  *
- * @author sharajava
- * @author Geng Zhang
  */
 public abstract class AbstractUndoExecutor {
 

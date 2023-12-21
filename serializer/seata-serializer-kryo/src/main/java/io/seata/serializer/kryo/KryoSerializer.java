@@ -21,7 +21,6 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
 
 /**
- * @author jsbxyyx
  */
 @LoadLevel(name = "KRYO")
 public class KryoSerializer implements Serializer {

@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author : wangxb
  */
 public class MockHttpExecuter extends AbstractHttpExecutor {
 

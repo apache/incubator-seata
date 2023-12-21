@@ -44,7 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * ScriptTaskState Handler
  *
- * @author lorne.cl
  */
 public class ScriptTaskStateHandler implements StateHandler, InterceptableStateHandler {
 

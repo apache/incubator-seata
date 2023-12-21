@@ -17,7 +17,6 @@
 package io.seata.core.compressor;
 
 /**
- * @author jsbxyyx
  */
 public interface Compressor {
 

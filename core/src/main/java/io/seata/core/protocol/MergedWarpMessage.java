@@ -23,7 +23,6 @@ import java.util.List;
 /**
  * The type Merged warp message.
  *
- * @author slievrly
  */
 public class MergedWarpMessage extends AbstractMessage implements Serializable, MergeMessage {
 

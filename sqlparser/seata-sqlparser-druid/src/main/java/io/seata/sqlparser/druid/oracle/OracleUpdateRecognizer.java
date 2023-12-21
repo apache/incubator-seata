@@ -39,7 +39,6 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
 /**
  * The type oracle update recognizer.
  *
- * @author ccg
  */
 public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLUpdateRecognizer {
 

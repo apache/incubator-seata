@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Collection utils test.
  *
- * @author Geng Zhang
  */
 public class CollectionUtilsTest {
 

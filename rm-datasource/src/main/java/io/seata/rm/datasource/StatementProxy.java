@@ -27,7 +27,6 @@ import io.seata.rm.datasource.exec.ExecuteTemplate;
  * The type Statement proxy.
  *
  * @param <T> the type parameter
- * @author sharajava
  */
 public class StatementProxy<T extends Statement> extends AbstractStatementProxy<T> {
 

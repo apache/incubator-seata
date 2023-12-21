@@ -29,7 +29,6 @@ import io.seata.saga.statelang.parser.StateParser;
 /**
  * Single item selection state parser
  *
- * @author lorne.cl
  */
 public class ChoiceStateParser extends BaseStatePaser implements StateParser<ChoiceState> {
 

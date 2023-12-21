@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.SubStateMachine;
 /**
  * Rule to check if all SubStateMachines has no recursive call
  *
- * @author ptyin
  */
 public class NoRecursiveSubStateMachineRule extends AbstractRule {
 

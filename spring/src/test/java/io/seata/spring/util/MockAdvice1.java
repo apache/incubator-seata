@@ -20,7 +20,6 @@ import org.aopalliance.aop.Advice;
 import org.springframework.core.Ordered;
 
 /**
- * @author wang.liang
  */
 public class MockAdvice1 implements Advice, Ordered {
 

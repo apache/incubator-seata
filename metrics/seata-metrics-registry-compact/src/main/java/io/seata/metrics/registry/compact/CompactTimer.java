@@ -29,7 +29,6 @@ import io.seata.metrics.IdConstants;
 /**
  * Compact Timer implement with TimerValue
  *
- * @author zhengyangyong
  */
 public class CompactTimer implements Timer {
     private final Id id;

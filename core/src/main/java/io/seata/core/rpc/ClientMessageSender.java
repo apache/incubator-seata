@@ -23,7 +23,6 @@ import java.util.concurrent.TimeoutException;
 /**
  * The interface Client message sender.
  *
- * @author slievrly
  */
 @Deprecated
 public interface ClientMessageSender {

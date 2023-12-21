@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type dm undo update executor.
  *
- * @author chengxiaoxiao
  */
 public class DmUndoUpdateExecutor extends AbstractUndoExecutor {
 

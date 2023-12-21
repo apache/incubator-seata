@@ -35,7 +35,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Load balance factory test.
  *
- * @author slievrly
  */
 public class LoadBalanceFactoryTest {
 

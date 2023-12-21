@@ -19,7 +19,6 @@ package io.seata.sqlparser.struct;
 /**
  * TODO
  * sql sequence expression
- * @author jsbxyyx
  */
 public class SqlSequenceExpr {
 

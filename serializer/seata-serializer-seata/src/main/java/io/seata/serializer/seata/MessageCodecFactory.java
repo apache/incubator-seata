@@ -81,7 +81,6 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 /**
  * The type Message codec factory.
  *
- * @author zhangsen
  */
 public class MessageCodecFactory {
 

@@ -28,7 +28,6 @@ import io.seata.rm.datasource.undo.UndoLogParser;
 /**
  * The type Json based undo log parser.
  *
- * @author sharajava
  */
 @LoadLevel(name = FastjsonUndoLogParser.NAME)
 public class FastjsonUndoLogParser implements UndoLogParser, Initialize {

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type SqlServer insert recognizer test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
 

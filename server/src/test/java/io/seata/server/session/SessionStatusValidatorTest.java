@@ -24,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * the type change status validator test
  *
- * @author Bughue
  */
 @SpringBootTest
 public class SessionStatusValidatorTest {

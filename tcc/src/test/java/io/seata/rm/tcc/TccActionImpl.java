@@ -24,7 +24,6 @@ import java.util.List;
 /**
  * The type Tcc action.
  *
- * @author zhangsen
  */
 public class TccActionImpl implements TccAction {
 

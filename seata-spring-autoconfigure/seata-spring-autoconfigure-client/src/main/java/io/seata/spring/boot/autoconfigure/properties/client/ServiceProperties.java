@@ -31,7 +31,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = SERVICE_PREFIX)

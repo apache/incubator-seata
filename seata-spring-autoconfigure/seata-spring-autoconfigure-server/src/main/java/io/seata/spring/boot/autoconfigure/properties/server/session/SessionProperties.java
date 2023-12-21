@@ -24,7 +24,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SESSION_PREFIX
 /**
  * session properties
  *
- * @author yangwenpeng
  * @since 2022-01-07 17:39
  */
 @Component

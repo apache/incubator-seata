@@ -33,7 +33,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 /**
  * The type Default global transaction.
  *
- * @author sharajava
  */
 public class DefaultGlobalTransaction implements GlobalTransaction {
 

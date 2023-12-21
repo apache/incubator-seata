@@ -29,7 +29,6 @@ import io.seata.core.store.LockStore;
 /**
  * The type Data base locker.
  *
- * @author zhangsen
  */
 public class DataBaseLocker extends AbstractLocker {
 

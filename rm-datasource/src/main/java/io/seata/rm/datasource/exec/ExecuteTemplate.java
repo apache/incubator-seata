@@ -43,7 +43,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Execute template.
  *
- * @author sharajava
  */
 public class ExecuteTemplate {
 

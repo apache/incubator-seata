@@ -36,7 +36,6 @@ import java.lang.reflect.Method;
 /**
  * The RemoteProcessor deal.
  *
- * @author zhaoyuguang
  */
 public class RemotingProcessorProcessInterceptor implements
         InstanceMethodsAroundInterceptor {

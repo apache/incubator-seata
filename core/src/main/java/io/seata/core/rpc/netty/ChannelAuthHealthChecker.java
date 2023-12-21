@@ -24,7 +24,6 @@ import io.netty.util.concurrent.Future;
 /**
  * The interface Channel auth health checker.
  *
- * @author slievrly
  */
 @Deprecated
 public interface ChannelAuthHealthChecker extends ChannelHealthChecker {

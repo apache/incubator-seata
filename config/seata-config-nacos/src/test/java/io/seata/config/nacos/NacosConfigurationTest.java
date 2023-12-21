@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Nacos configuration test
  *
- * @author xingfudeshi@gmail.com
  */
 public class NacosConfigurationTest {
 

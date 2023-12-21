@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
 /**
  * TaskState Router
  *
- * @author lorne.cl
  */
 public class TaskStateRouter implements StateRouter {
 

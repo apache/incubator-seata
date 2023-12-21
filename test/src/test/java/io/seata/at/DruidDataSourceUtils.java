@@ -24,9 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 
-/**
- * author doubleDimple
- */
 public class DruidDataSourceUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DruidDataSourceUtils.class);

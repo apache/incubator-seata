@@ -60,7 +60,6 @@ import static io.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 

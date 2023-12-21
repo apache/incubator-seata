@@ -31,7 +31,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalStatusResponseConvertor implements PbConvertor<GlobalStatusResponse, GlobalStatusResponseProto> {
     @Override

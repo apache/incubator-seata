@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 /**
  * Insert statement recognizer for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXInsertRecognizer extends MySQLInsertRecognizer {
     public PolarDBXInsertRecognizer(String originalSQL, SQLStatement ast) {

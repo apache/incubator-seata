@@ -21,7 +21,6 @@ import java.sql.SQLException;
 /**
  * The type Message.
  *
- * @author Otis.z
  * @since 2019 /3/1
  */
 public class Message {

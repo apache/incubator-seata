@@ -44,7 +44,6 @@ import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author funkye
  */
 public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 

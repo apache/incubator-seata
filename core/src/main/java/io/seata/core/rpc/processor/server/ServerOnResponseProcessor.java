@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
  * 1) {@link BranchCommitResponse}
  * 2) {@link BranchRollbackResponse}
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class ServerOnResponseProcessor implements RemotingProcessor {

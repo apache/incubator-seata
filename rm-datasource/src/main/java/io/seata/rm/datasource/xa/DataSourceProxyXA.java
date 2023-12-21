@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * DataSource proxy for XA mode.
  *
- * @author sharajava
  */
 public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 

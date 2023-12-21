@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Escape handler test.
  *
- * @author slievrly
  */
 public class EscapeHandlerTest {
     /**

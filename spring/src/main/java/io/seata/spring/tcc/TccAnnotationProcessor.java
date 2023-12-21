@@ -38,7 +38,6 @@ import java.util.Set;
 /**
  * An annotation adapter for TCC
  *
- * @author ppf
  */
 public class TccAnnotationProcessor implements BeanPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TccAnnotationProcessor.class);

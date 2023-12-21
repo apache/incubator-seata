@@ -24,7 +24,6 @@ import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.util.jdbc.PreparedStatementBase;
 
 /**
- * @author will
  */
 public class MockPreparedStatement extends PreparedStatementBase implements MockStatementBase {
 

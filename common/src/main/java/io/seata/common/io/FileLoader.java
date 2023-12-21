@@ -28,7 +28,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * file loader
  *
- * @author tianyu.li
  */
 public class FileLoader {
 

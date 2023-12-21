@@ -25,7 +25,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 
 /**
- * @author xingfudeshi@gmail.com
  * The type spring application context provider registrar
  */
 public class SpringApplicationContextProviderRegistrar implements ImportBeanDefinitionRegistrar {

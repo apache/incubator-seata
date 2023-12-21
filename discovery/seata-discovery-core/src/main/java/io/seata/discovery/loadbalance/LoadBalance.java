@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * The interface Load balance.
  *
- * @author slievrly
  */
 public interface LoadBalance {
 

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type sqlserver sql keyword checker test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerKeywordCheckerTest {
     @Test

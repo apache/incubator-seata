@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type My sql undo insert executor.
  *
- * @author sharajava
  */
 public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 

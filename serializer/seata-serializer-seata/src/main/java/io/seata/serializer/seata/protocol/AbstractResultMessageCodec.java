@@ -26,7 +26,6 @@ import io.seata.core.protocol.ResultCode;
 /**
  * The type Abstract result message codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 

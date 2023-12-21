@@ -33,7 +33,6 @@ import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 /**
  * The type batch result message protobuf convertor.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class BatchResultMessageConvertor implements PbConvertor<BatchResultMessage, BatchResultMessageProto> {

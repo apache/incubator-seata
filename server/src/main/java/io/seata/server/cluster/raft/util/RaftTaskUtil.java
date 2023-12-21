@@ -31,7 +31,6 @@ import io.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import io.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 
 /**
- * @author funkye
  */
 public class RaftTaskUtil {
 

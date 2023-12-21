@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Action interceptor handler test.
  *
- * @author zhangsen
  */
 public class ActionInterceptorHandlerTest {
 

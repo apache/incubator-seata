@@ -23,7 +23,6 @@ import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
- * @author jianbin.chen
  */
 public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
 

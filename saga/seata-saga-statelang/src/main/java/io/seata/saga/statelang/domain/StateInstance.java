@@ -21,7 +21,6 @@ import java.util.Date;
 /**
  * State execution instance
  *
- * @author lorne.cl
  */
 public interface StateInstance {
 

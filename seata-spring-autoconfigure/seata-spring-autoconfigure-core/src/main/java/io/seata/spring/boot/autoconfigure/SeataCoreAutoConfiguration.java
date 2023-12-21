@@ -27,7 +27,6 @@ import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PRO
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")

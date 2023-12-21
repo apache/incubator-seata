@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 /**
  * TransactionContext on consumer side.
  * 
- * @author Geng Zhang
  * @since 0.6.0
  */
 @Extension(value = "transactionContextConsumer")

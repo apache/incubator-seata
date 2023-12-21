@@ -27,7 +27,6 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.LEAST_ACTIVE_LOA
 /**
  * The type Least Active load balance.
  *
- * @author ph3636
  */
 @LoadLevel(name = LEAST_ACTIVE_LOAD_BALANCE)
 public class LeastActiveLoadBalance implements LoadBalance {

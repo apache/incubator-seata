@@ -25,7 +25,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * GlobalSessionVO
- * @author zhongxiang.wang
  */
 public class GlobalSessionVO {
 

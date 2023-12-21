@@ -23,7 +23,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Event bus
  *
- * @author lorne.cl
  */
 public interface EventBus<E> {
 

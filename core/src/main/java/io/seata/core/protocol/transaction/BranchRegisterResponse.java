@@ -23,7 +23,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch register response.
  *
- * @author slievrly
  */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 

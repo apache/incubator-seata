@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * Record container for CompactSummary
  *
- * @author zhengyangyong
  */
 public class SummaryValue {
     private final LongAdder count;

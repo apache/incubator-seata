@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type oracle undo delete executor.
  *
- * @author ccg
  */
 public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 

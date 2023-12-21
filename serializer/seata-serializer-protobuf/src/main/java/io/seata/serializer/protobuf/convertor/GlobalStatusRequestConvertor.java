@@ -24,7 +24,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalStatusRequestConvertor implements PbConvertor<GlobalStatusRequest, GlobalStatusRequestProto> {
     @Override

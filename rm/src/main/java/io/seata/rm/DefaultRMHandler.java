@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * the default RM event handler implement, deal with the phase two events
  *
- * @author zhangsen
  */
 public class DefaultRMHandler extends AbstractRMHandler {
 

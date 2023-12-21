@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutorService;
 /**
  * The interface Config change listener.
  *
- * @author slievrly
  */
 public interface ConfigChangeListener {
 

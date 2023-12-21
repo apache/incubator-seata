@@ -41,7 +41,6 @@ import static io.seata.common.ConfigurationKeys.XA_BRANCH_EXECUTION_TIMEOUT;
 /**
  * Connection proxy for XA mode.
  *
- * @author sharajava
  */
 public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Holdable {
 

@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
 /**
  * the TCC method result
  *
- * @author zhangsen
  */
 public class TwoPhaseResult {
 

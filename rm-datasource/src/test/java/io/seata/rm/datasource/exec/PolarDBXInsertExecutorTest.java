@@ -47,7 +47,6 @@ import static org.mockito.Mockito.when;
 /**
  * Insert executor test for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
     @BeforeEach

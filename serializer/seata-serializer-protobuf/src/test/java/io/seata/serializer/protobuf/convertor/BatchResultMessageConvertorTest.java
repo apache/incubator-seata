@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type batch result message protobuf convertor test.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class BatchResultMessageConvertorTest {

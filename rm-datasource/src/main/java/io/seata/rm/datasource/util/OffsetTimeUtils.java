@@ -33,7 +33,6 @@ import static java.time.ZoneOffset.UTC;
  * @see java.time.ZoneId
  *
  *
- * @author doubleDimple
  */
 public class OffsetTimeUtils {
 

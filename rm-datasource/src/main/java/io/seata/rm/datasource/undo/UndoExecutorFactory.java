@@ -21,7 +21,6 @@ import io.seata.common.exception.NotSupportYetException;
 /**
  * The type Undo executor factory.
  *
- * @author sharajava
  */
 public class UndoExecutorFactory {
 

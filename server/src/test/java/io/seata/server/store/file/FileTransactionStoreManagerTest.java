@@ -45,7 +45,6 @@ import io.seata.server.store.TransactionStoreManager;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author ggndnn
  */
 @SpringBootTest
 public class FileTransactionStoreManagerTest {

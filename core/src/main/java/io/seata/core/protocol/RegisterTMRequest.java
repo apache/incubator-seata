@@ -26,7 +26,6 @@ import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 /**
  * The type Register tm request.
  *
- * @author slievrly
  */
 public class RegisterTMRequest extends AbstractIdentifyRequest implements Serializable {
     private static final long serialVersionUID = -5929081344190543690L;

@@ -60,7 +60,6 @@ import org.slf4j.LoggerFactory;
  * 5) {@link GlobalReportResponse}
  * 6) {@link GlobalRollbackResponse}
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class ClientOnResponseProcessor implements RemotingProcessor {

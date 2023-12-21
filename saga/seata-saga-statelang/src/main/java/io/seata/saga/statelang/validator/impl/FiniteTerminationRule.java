@@ -30,7 +30,6 @@ import java.util.Stack;
 /**
  * Rule to check if the state machine can terminate in finite time, i.e. if there is an infinite loop
  *
- * @author ptyin
  */
 public class FiniteTerminationRule extends AbstractRule {
 

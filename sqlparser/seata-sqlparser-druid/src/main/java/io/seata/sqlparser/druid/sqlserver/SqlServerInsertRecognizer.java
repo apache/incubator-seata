@@ -46,7 +46,6 @@ import io.seata.sqlparser.util.ColumnUtils;
 /**
  * The type SqlServer insert recognizer.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerInsertRecognizer extends BaseSqlServerRecognizer implements SQLInsertRecognizer {
     private final SQLServerInsertStatement ast;

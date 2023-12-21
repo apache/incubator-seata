@@ -34,8 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Reflection tools
  *
- * @author zhangsen
- * @author wang.liang
  */
 public final class ReflectionUtil {
 

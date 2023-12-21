@@ -49,7 +49,6 @@ import org.springframework.util.StringUtils;
 /**
  * ServiceTaskState Handler
  *
- * @author lorne.cl
  */
 public class ServiceTaskStateHandler implements StateHandler, InterceptableStateHandler {
 

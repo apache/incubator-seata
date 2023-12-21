@@ -21,7 +21,6 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 /**
  * The type Tcc param.
  *
- * @author zhangsen
  */
 public class TestParam {
 

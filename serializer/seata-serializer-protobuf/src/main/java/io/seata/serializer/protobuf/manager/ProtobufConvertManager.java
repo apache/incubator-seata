@@ -109,7 +109,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author leizhiyuan
  */
 public class ProtobufConvertManager {
 

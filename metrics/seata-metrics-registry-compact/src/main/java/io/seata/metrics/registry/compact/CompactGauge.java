@@ -28,7 +28,6 @@ import io.seata.metrics.SystemClock;
 /**
  * Compact Gauge implement with Supplier
  *
- * @author zhengyangyong
  */
 public class CompactGauge<T extends Number> implements Gauge<T> {
     private final Id id;

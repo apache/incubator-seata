@@ -21,7 +21,6 @@ import java.util.Map;
 /**
  * Resource Manager: common behaviors.
  *
- * @author sharajava
  */
 public interface ResourceManager extends ResourceManagerInbound, ResourceManagerOutbound {
 

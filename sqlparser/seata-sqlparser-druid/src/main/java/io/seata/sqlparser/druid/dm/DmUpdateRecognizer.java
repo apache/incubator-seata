@@ -40,7 +40,6 @@ import java.util.List;
 /**
  * The type dm update recognizer.
  *
- * @author chengxiaoxiao
  */
 public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRecognizer {
 

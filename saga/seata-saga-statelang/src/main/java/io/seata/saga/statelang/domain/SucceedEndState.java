@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * SucceedEndState
  *
- * @author lorne.cl
  */
 public interface SucceedEndState extends EndState {
 

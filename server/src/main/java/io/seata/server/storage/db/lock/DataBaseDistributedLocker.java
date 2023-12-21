@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
 /**
- * @author chd
  */
 @LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class DataBaseDistributedLocker implements DistributedLocker {

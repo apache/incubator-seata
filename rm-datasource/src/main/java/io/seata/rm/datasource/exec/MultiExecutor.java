@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author wangwei.ying
  */
 public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 

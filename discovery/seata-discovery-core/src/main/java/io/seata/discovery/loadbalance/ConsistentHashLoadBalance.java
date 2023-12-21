@@ -32,7 +32,6 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.LOAD_BALANCE_PRE
 /**
  * The type consistent hash load balance.
  *
- * @author ph3636
  */
 @LoadLevel(name = CONSISTENT_HASH_LOAD_BALANCE)
 public class ConsistentHashLoadBalance implements LoadBalance {

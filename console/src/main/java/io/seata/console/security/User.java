@@ -19,7 +19,6 @@ package io.seata.console.security;
 /**
  * mock user info
  *
- * @author jameslcj
  */
 public class User {
     /**

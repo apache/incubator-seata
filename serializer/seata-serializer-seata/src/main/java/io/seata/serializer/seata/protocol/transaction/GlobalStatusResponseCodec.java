@@ -22,7 +22,6 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 /**
  * The type Global status response codec.
  *
- * @author zhangsen
  */
 public class GlobalStatusResponseCodec extends AbstractGlobalEndResponseCodec {
 

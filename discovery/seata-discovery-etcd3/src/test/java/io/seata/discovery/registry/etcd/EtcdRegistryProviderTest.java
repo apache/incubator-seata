@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author xingfudeshi@gmail.com
  * the type etcd registry provider test
  */
 public class EtcdRegistryProviderTest {

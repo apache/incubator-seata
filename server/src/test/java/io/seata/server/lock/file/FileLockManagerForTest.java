@@ -22,7 +22,6 @@ import io.seata.server.storage.file.lock.FileLocker;
 import io.seata.server.session.BranchSession;
 
 /**
- * @author zhangsen
  */
 public class FileLockManagerForTest extends FileLockManager {
 

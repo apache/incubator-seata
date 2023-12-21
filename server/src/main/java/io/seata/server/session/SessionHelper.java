@@ -53,7 +53,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 /**
  * The type Session helper.
  *
- * @author sharajava
  */
 public class SessionHelper {
 

@@ -23,7 +23,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * @author jsbxyyx
  */
 public class GzipUtil {
 

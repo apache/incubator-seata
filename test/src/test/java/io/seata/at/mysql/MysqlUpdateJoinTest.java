@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
 
 
 /**
- * @author renliangyu857
  */
 public class MysqlUpdateJoinTest {
     private static final int testRecordId = 1;

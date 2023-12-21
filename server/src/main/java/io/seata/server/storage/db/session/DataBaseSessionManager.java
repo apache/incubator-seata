@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The Data base session manager.
  *
- * @author zhangsen
  */
 @LoadLevel(name = "db", scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager implements Initialize {

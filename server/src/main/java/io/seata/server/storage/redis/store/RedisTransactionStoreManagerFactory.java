@@ -23,7 +23,6 @@ import io.seata.config.ConfigurationFactory;
 import static io.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
 
 /**
- * @author conghuhu
  */
 public class RedisTransactionStoreManagerFactory {
 

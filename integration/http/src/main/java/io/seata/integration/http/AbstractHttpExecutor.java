@@ -44,7 +44,6 @@ import java.util.Map;
 /**
  * Abstract http executor.
  *
- * @author wangxb
  */
 public abstract class AbstractHttpExecutor implements HttpExecutor {
 

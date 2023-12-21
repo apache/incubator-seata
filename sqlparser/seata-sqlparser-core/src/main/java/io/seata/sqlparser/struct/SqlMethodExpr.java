@@ -19,7 +19,6 @@ package io.seata.sqlparser.struct;
 /**
  * TODO
  * sql method invoke expression
- * @author jsbxyyx
  */
 public class SqlMethodExpr {
 

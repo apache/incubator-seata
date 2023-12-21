@@ -29,7 +29,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * Table meta cache for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = JdbcConstants.POLARDBX)
 public class PolarDBXTableMetaCache extends MysqlTableMetaCache {

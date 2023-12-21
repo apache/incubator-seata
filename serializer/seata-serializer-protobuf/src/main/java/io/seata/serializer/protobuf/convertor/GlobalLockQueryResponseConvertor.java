@@ -28,7 +28,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalLockQueryResponseConvertor
     implements PbConvertor<GlobalLockQueryResponse, GlobalLockQueryResponseProto> {

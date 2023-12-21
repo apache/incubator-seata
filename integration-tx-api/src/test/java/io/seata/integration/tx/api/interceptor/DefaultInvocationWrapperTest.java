@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author leezongjie
  * @date 2023/11/29
  */
 class DefaultInvocationWrapperTest {

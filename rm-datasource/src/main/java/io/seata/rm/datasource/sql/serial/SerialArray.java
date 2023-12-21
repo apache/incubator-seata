@@ -32,7 +32,6 @@ import java.util.Map;
 /**
  * used for jdbc type is JDBCType.ARRAY serialize.
  *
- * @author jsbxyyx
  */
 public class SerialArray implements java.sql.Array, java.io.Serializable {
 

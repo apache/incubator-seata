@@ -21,7 +21,6 @@ import io.seata.common.exception.FrameworkErrorCode;
 /**
  * Forward operation invalid exception
  *
- * @author lorne.cl
  */
 public class ForwardInvalidException extends EngineExecutionException {
 

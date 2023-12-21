@@ -17,7 +17,6 @@
 package io.seata.common.exception;
 
 /**
- * @author zouwei
  */
 public class JsonParseException extends RuntimeException {
 

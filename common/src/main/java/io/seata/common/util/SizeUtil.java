@@ -17,7 +17,6 @@
 package io.seata.common.util;
 
 /**
- * @author chd
  */
 public class SizeUtil {
     private static final long RADIX = 1024;

@@ -43,7 +43,6 @@ import io.seata.sqlparser.struct.SqlSequenceExpr;
 /**
  * The type oracle insert recognizer.
  *
- * @author ccg
  */
 public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLInsertRecognizer {
 

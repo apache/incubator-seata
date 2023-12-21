@@ -29,7 +29,6 @@ import java.lang.annotation.Target;
  * Define a TCC interface, which added on the try method.
  * Must be used with `@LocalTCC`.
  *
- * @author zhangsen
  * @see io.seata.rm.tcc.api.LocalTCC // TCC annotation, which added on the TCC interface. It can't be left out.
  * @see io.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see TccActionInterceptorHandler // the interceptor of TCC mode

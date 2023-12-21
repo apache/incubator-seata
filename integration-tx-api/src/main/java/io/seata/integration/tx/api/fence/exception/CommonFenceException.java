@@ -22,7 +22,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Common Fence Exception
  *
- * @author kaka2code
  */
 public class CommonFenceException extends FrameworkException {
 

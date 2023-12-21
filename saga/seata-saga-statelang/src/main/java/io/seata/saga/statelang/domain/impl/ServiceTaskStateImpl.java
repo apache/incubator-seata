@@ -26,7 +26,6 @@ import io.seata.saga.statelang.domain.ServiceTaskState;
 /**
  * A state used to invoke a service
  *
- * @author lorne.cl
  */
 public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTaskState {
 

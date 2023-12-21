@@ -19,7 +19,6 @@ package io.seata.common.util;
 /**
  * Number utility
  *
- * @author helloworlde
  */
 public class NumberUtils {
 

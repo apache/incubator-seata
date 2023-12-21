@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.StringUtils;
 
 /**
- * @author slievrly
  */
 @LoadLevel(name = "defaultAuthSigner", order = 100)
 public class DefaultAuthSigner implements AuthSigner {

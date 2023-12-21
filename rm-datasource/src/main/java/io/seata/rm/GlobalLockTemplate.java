@@ -22,7 +22,6 @@ import io.seata.core.model.GlobalLockConfig;
 
 /**
  * executor template for local transaction which need global lock
- * @author selfishlover
  */
 public class GlobalLockTemplate {
 

@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * the type compressor factory
- * @author jsbxyyx
  */
 public class CompressorFactory {
 

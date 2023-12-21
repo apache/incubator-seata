@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type SqlServer operate holder test.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerOperateRecognizerHolderTest extends AbstractRecognizerTest {
 

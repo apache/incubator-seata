@@ -30,7 +30,6 @@ import io.seata.core.protocol.MergedWarpMessage;
 /**
  * The type Merged warp message codec.
  *
- * @author zhangsen
  */
 public class MergedWarpMessageCodec extends AbstractMessageCodec {
 

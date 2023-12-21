@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = SERVER_PREFIX)

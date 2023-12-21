@@ -57,7 +57,6 @@ import static io.seata.core.model.GlobalStatus.Committing;
 /**
  * The type Global session.
  *
- * @author sharajava
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 

@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
 /**
  * Global Transaction data object
  *
- * @author zhangsen
  */
 public class GlobalTransactionDO implements java.io.Serializable {
 

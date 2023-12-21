@@ -46,7 +46,6 @@ import org.springframework.util.StringUtils;
 /**
  * SubStateMachine Handler
  *
- * @author lorne.cl
  */
 public class SubStateMachineHandler implements StateHandler, InterceptableStateHandler {
 

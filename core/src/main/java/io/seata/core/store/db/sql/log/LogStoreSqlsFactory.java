@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author will
  */
 public class LogStoreSqlsFactory {
 

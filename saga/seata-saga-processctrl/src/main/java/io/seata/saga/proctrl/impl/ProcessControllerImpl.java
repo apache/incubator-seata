@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Default implementation of Process controller
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public class ProcessControllerImpl implements ProcessController {
 

@@ -24,7 +24,6 @@ import java.util.UUID;
 /**
  * Meter id
  *
- * @author zhengyangyong
  */
 public class Id {
     private final UUID id;

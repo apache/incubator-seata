@@ -21,8 +21,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Process Controller
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public interface ProcessController {
 

@@ -25,7 +25,6 @@ import io.seata.saga.statelang.parser.StateParser;
 /**
  * Failed end state parser
  *
- * @author lorne.cl
  */
 public class FailEndStateParser extends BaseStatePaser implements StateParser<FailEndState> {
 

@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 /**
  * The type Mariadb update recognizer.
  *
- * @author funkye
  */
 public class MariadbUpdateRecognizer extends MySQLUpdateRecognizer {
     /**

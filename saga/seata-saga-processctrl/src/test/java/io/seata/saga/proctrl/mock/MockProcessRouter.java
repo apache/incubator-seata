@@ -22,7 +22,6 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessRouter;
 
 /**
- * @author lorne.cl
  */
 public class MockProcessRouter implements ProcessRouter {
 

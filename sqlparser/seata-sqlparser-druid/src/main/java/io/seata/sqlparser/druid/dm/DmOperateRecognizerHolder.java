@@ -25,7 +25,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 /** * The Type DmOperateRecognizerHolder
  *
- * @author: chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmOperateRecognizerHolder implements SQLOperateRecognizerHolder {

@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.StateMachine;
 /**
  * State language definition store
  *
- * @author lorne.cl
  */
 public interface StateLangStore {
 

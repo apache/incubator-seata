@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Server test.
  *
- * @author slievrly
  */
 public class ServerTest {
 

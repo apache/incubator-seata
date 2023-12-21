@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rm handler at.
  *
- * @author sharajava
  */
 public class RMHandlerAT extends AbstractRMHandler {
 

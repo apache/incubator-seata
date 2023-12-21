@@ -32,7 +32,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 /**
  * SpringELExpression factory
  *
- * @author lorne.cl
  */
 public class SpringELExpressionFactory implements ExpressionFactory, ApplicationContextAware {
 

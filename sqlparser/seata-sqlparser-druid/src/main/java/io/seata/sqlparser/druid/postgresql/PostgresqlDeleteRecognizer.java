@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author japsercloud
  */
 public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer implements SQLDeleteRecognizer {
 

@@ -23,7 +23,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 
 /**
- * @author jianbin.chen
  */
 @LoadLevel(name = "JACKSON")
 public class JacksonSerializer implements Serializer {

@@ -33,7 +33,6 @@ import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
 /**
- * @author will
  */
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 

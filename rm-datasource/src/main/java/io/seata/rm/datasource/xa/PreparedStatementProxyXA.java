@@ -40,7 +40,6 @@ import java.util.Calendar;
 /**
  * PreparedStatement proxy for XA mode.
  *
- * @author sharajava
  */
 public class PreparedStatementProxyXA extends StatementProxyXA implements PreparedStatement {
 

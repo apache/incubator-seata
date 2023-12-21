@@ -30,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * The type Blob utils test.
  *
- * @author Otis.z
- * @author Geng Zhang
  */
 public class BlobUtilsTest {
 

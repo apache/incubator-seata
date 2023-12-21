@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * The type Select for update executor.
  *
  * @param <S> the type parameter
- * @author sharajava
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 

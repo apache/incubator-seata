@@ -19,7 +19,6 @@ package io.seata.saga.engine.expression;
 /**
  * Expression Factory
  *
- * @author lorne.cl
  */
 public interface ExpressionFactory {
 

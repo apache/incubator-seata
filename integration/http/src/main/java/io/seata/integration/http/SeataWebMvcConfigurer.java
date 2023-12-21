@@ -21,8 +21,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 /**
  * The Seata Web Mvc Configurer
  *
- * @author wangxb
- * @author wang.liang
  */
 public class SeataWebMvcConfigurer implements WebMvcConfigurerAdapter {
 

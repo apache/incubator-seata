@@ -21,7 +21,6 @@ import io.seata.saga.engine.expression.Expression;
 /**
  * Expression base on Spring EL
  *
- * @author lorne.cl
  */
 public class SpringELExpression implements Expression {
 

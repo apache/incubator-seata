@@ -35,7 +35,6 @@ import java.util.Map;
 /**
  * InSagaBranchHandler Interceptor
  *
- * @author wang.liang
  */
 @LoadLevel(name = "InSagaBranch", order = 50)
 public class InSagaBranchHandlerInterceptor implements StateHandlerInterceptor {

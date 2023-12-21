@@ -17,7 +17,6 @@
 package io.seata.spring.annotation.datasource;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public interface SeataProxy {
 }

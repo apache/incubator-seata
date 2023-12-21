@@ -21,7 +21,6 @@ import io.seata.integration.tx.api.fence.constant.CommonFenceConstant;
 /**
  * TCC Fence Store Sqls
  *
- * @author kaka2code
  */
 public class CommonFenceStoreSqls {
 

@@ -22,7 +22,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 /**
  * Database log store ms-sqlserver sql
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = "sqlserver")
 public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {

@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Transaction propagation filter.
  *
- * @author slievrly
  */
 public class HsfTransactionFilter implements ClientFilter, ServerFilter {
 

@@ -49,8 +49,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author wang.liang
  */
 public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 

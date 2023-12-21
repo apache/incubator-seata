@@ -30,7 +30,6 @@ import io.seata.sqlparser.SQLRecognizer;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author GoodBoyCoder
  */
 public class SqlServerMultiUpdateExecutor<T, S extends Statement> extends MultiUpdateExecutor<T, S> {
     /**

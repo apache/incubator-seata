@@ -23,7 +23,6 @@ import java.util.List;
 /**
  * Factorial class to get all rules.
  *
- * @author ptyin
  */
 public class RuleFactory {
     private static final List<Rule> RULES = EnhancedServiceLoader.loadAll(Rule.class);

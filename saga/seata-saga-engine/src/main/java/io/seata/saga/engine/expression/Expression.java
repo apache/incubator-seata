@@ -19,7 +19,6 @@ package io.seata.saga.engine.expression;
 /**
  * Expression
  *
- * @author lorne.cl
  */
 public interface Expression {
 

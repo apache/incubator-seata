@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public class CorePropertiesTest {
     private static AnnotationConfigApplicationContext context;

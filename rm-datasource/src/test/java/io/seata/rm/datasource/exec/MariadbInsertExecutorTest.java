@@ -48,7 +48,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author funkye
  */
 public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
 

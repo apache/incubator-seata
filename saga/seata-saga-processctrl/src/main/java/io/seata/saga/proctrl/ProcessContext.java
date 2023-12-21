@@ -21,8 +21,6 @@ import java.util.Map;
 /**
  * Process Context
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public interface ProcessContext {
 

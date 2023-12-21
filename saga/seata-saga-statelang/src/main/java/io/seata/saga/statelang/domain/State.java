@@ -21,7 +21,6 @@ import java.util.Map;
 /**
  * A State in StateMachine
  *
- * @author lorne.cl
  */
 public interface State {
 

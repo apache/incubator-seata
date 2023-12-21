@@ -42,7 +42,6 @@ import java.util.Set;
 /**
  * The type Oracle insert executor.
  *
- * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
 public class OracleInsertExecutor extends BaseInsertExecutor implements Sequenceable {

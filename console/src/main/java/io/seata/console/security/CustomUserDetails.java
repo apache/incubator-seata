@@ -25,7 +25,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 /**
  * custem user
  *
- * @author wfnuser
  */
 public class CustomUserDetails implements UserDetails {
     private User user;

@@ -21,7 +21,6 @@ import io.seata.tm.api.TransactionalExecutor;
 /**
  * Propagation level of global transactions.
  *
- * @author haozhibei
  * @see io.seata.spring.annotation.GlobalTransactional#propagation() // TM annotation
  * @see io.seata.spring.annotation.GlobalTransactionalInterceptor#invoke(MethodInvocation) // the interceptor of TM
  * @see io.seata.tm.api.TransactionalTemplate#execute(TransactionalExecutor) // the transaction template of TM

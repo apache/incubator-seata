@@ -22,7 +22,6 @@ import io.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
 import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
 /**
- * @author houzhi
  */
 public class DeleteSpecificationSqlListener extends MySqlParserBaseListener {
 

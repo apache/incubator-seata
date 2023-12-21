@@ -44,7 +44,6 @@ import static org.mockito.Mockito.when;
 /**
  * Insert on duplicate update executor test for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 

@@ -20,7 +20,6 @@ package io.seata.core.protocol.transaction;
 /**
  * The type Abstract transaction request to tc.
  *
- * @author sharajava
  */
 public abstract class AbstractTransactionRequestToTC extends AbstractTransactionRequest {
 

@@ -24,7 +24,6 @@ import java.util.Set;
 /**
  * The common Fence Store
  *
- * @author kaka2code
  */
 public interface CommonFenceStore {
 

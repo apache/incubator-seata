@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.Compressor;
 
 /**
- * @author jsbxyyx
  */
 @LoadLevel(name = "GZIP")
 public class GzipCompressor implements Compressor {

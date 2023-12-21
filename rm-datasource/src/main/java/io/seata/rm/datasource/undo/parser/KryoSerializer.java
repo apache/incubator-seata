@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
 /**
- * @author jsbxyyx
  */
 public class KryoSerializer {
 

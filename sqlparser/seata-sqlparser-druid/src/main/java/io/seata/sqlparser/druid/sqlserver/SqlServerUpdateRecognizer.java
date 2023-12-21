@@ -48,7 +48,6 @@ import io.seata.sqlparser.util.ColumnUtils;
 /**
  * The type SqlServer update recognizer.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implements SQLUpdateRecognizer {
     private SQLServerUpdateStatement ast;

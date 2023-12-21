@@ -21,7 +21,6 @@ import io.seata.console.result.PageResult;
 
 /**
  * Branch session service
- * @author wangzhongxiang
  */
 public interface BranchSessionService {
 

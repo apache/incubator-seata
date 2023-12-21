@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * @author liuqiufeng
  */
 class ConfigFutureTest {
 

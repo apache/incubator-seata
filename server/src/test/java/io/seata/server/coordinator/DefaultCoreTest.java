@@ -43,7 +43,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * The type Default core test.
  *
- * @author zhimo.xiao @gmail.com
  */
 @SpringBootTest
 public class DefaultCoreTest {

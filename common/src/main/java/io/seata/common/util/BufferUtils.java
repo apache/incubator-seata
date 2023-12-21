@@ -41,7 +41,6 @@ import java.nio.Buffer;
  * child classes (e.g the ByteBuffer), but the return type is the specialized one and not the abstract {@link Buffer}.
  * So the code compiled with newer Java is not working on Java 8 unless a workaround with explicit casting is used.
  *
- * @author funkye
  */
 public class BufferUtils {
 

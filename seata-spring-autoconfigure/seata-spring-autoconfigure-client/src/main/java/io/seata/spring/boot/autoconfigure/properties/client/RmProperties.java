@@ -36,7 +36,6 @@ import static io.seata.common.DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = CLIENT_RM_PREFIX)

@@ -21,7 +21,6 @@ import java.sql.SQLException;
 /**
  * The type Lock wait timeout exception.
  *
- * @author sharajava
  */
 public class LockWaitTimeoutException extends SQLException {
     private static final long serialVersionUID = -6754599774015964707L;

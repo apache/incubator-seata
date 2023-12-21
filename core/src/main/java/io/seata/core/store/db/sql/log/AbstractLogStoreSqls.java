@@ -21,7 +21,6 @@ import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * The type Abstract log store sqls
- * @author will
  */
 public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 

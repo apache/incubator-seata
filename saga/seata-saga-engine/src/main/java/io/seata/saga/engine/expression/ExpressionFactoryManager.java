@@ -24,7 +24,6 @@ import io.seata.common.util.StringUtils;
 /**
  * Expression factory manager
  *
- * @author lorne.cl
  */
 public class ExpressionFactoryManager {
 

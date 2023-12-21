@@ -61,7 +61,6 @@ import static io.seata.at.oracle.OracleSqlConstant.TEST_STRING_TYPE_UPDATE_SQL;
 /**
  * add AT transaction mode tests to support database data types (Oracle)
  *
- * author doubleDimple
  */
 @Disabled
 public class SupportOracleDataTypeTest {

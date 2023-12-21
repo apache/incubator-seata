@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 /**
  * The type Sql parsing exception.
  *
- * @author sharajava
  */
 public class SQLParsingException extends RuntimeException {
     /**

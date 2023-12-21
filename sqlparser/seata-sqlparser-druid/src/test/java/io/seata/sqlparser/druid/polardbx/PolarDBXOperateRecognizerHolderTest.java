@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test cases for recognizer holder of PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXOperateRecognizerHolderTest extends AbstractPolarDBXRecognizerTest {
     @Test

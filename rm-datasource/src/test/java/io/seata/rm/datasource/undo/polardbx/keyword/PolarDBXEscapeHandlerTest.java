@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type PolarDB-X keyword checker test.
  *
- * @author hsien999
  */
 public class PolarDBXEscapeHandlerTest {
     @Test

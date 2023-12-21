@@ -19,7 +19,6 @@ package io.seata.core.event;
 /**
  * Event data for global transaction.
  *
- * @author zhengyangyong
  */
 public class GlobalTransactionEvent implements Event {
     /**

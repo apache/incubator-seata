@@ -22,7 +22,6 @@ import io.seata.core.protocol.RegisterTMRequest;
 /**
  * The type Register tm request codec.
  *
- * @author zhangsen
  */
 public class RegisterTMRequestCodec extends AbstractIdentifyRequestCodec {
 

@@ -22,7 +22,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 /**
  * Policies for RejectedExecutionHandler
  *
- * @author guoyao
  */
 public final class RejectedPolicies {
 

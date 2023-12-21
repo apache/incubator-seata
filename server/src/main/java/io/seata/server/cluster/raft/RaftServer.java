@@ -38,7 +38,6 @@ import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 
 /**
- * @author funkye
  */
 public class RaftServer implements Disposable, Closeable {
 

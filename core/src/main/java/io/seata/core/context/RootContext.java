@@ -35,7 +35,6 @@ import static io.seata.core.model.BranchType.XA;
 /**
  * The type Root context.
  *
- * @author slievrly
  */
 public class RootContext {
 

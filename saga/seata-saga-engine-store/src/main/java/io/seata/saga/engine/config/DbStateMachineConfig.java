@@ -44,7 +44,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 /**
  * DbStateMachineConfig
  *
- * @author lorne.cl
  */
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 

@@ -31,7 +31,6 @@ import io.seata.sqlparser.SQLSelectRecognizer;
  * The type SqlServer Select for update executor.
  *
  * @param <S> the type parameter
- * @author GoodBoyCoder
  */
 public class SqlServerSelectForUpdateExecutor<T, S extends Statement> extends SelectForUpdateExecutor<T, S> {
     /**

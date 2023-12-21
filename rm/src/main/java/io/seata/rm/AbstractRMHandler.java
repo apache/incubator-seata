@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The Abstract RM event handler
  *
- * @author sharajava
  */
 public abstract class AbstractRMHandler extends AbstractExceptionHandler
     implements RMInboundHandler, TransactionMessageHandler {

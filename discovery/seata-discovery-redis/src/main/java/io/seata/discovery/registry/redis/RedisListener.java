@@ -19,7 +19,6 @@ package io.seata.discovery.registry.redis;
 /**
  * The RedisListener
  *
- * @author kl @kailing.pub
  */
 public interface RedisListener {
     /**

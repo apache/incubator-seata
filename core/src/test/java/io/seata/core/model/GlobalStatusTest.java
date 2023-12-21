@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * A unit test for {@link GlobalStatus}
  *
- * @author Lay
  */
 public class GlobalStatusTest {
     private static final int BEGIN_CODE = 1;

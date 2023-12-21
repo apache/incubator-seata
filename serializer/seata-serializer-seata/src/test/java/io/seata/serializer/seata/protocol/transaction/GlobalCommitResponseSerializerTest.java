@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Global commit response codec test.
  *
- * @author zhangsen
  */
 public class GlobalCommitResponseSerializerTest {
 

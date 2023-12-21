@@ -39,8 +39,6 @@ import static io.seata.server.store.StoreConfig.StoreMode;
 /**
  * @description redis distributed lock test
  *
- * @author zhongxiang.wang
- * @author funkye
  */
 @SpringBootTest
 public class RedisDistributedLockerTest {

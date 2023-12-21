@@ -28,7 +28,6 @@ import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 
 /**
- * @author funkye
  */
 public class RaftSnapshot implements Serializable {
 

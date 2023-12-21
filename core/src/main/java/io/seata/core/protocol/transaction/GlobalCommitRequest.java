@@ -22,7 +22,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global commit request.
  *
- * @author slievrly
  */
 public class GlobalCommitRequest extends AbstractGlobalEndRequest {
     @Override

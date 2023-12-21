@@ -19,7 +19,6 @@ package io.seata.core.exception;
 /**
  * The type Transaction exception.
  *
- * @author sharajava
  */
 public class TransactionException extends Exception {
 

@@ -22,7 +22,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 /**
  * StatementSqlVisitor
  *
- * @author zhihou
  */
 public class StatementSqlVisitor extends MySqlParserBaseVisitor<StringBuilder> {
 

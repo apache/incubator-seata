@@ -21,7 +21,6 @@ import java.sql.SQLException;
 /**
  * The type TableMetaException exception.
  *
- * @author Bughue
  */
 public class TableMetaException extends SQLException {
     private String columnName;

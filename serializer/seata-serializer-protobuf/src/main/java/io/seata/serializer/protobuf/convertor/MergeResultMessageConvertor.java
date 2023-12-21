@@ -32,7 +32,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
 /**
- * @author leizhiyuan
  */
 public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessage, MergedResultMessageProto> {
     @Override

@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
 import java.io.Serializable;
 
 /**
- * @author guoyao
  */
 public class RollbackRule implements Serializable {
 

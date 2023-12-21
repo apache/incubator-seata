@@ -39,7 +39,6 @@ import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
 import static io.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
 
 /**
- * @author funkye
  */
 public class JedisPooledFactory {
     /**

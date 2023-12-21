@@ -32,8 +32,7 @@ import kotlin.coroutines.coroutineContext
  *  service1.XXX()
  *  service2.XXX()
  * }
- * 
- * @author sustly
+ *
  */
 suspend fun <T> transactionScope(block: suspend CoroutineScope.() -> T): T {
     return if (coroutineContext[TransactionCoroutineContext] != null) {

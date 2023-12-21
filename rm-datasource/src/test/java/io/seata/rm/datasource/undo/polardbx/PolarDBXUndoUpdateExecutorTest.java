@@ -34,7 +34,6 @@ import org.mockito.Mockito;
 /**
  * Undo update executor test for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUndoUpdateExecutorTest extends BaseExecutorTest {
     private static PolarDBXUndoUpdateExecutor executor;

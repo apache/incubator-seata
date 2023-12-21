@@ -41,7 +41,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Disabled
 public class EtcdRegistryServiceImplTest {

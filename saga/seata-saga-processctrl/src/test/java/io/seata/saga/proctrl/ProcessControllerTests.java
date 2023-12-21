@@ -41,7 +41,6 @@ import org.junit.jupiter.api.Test;
 /**
  * ProcessController Tests
  *
- * @author lorne.cl
  */
 public class ProcessControllerTests {
 

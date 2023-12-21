@@ -17,7 +17,6 @@
 package io.seata.server.cluster.raft.sync.msg;
 
 /**
- * @author jianbin.chen
  */
 public enum RaftSyncMsgType {
 

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author will
  */
 public class OracleUpdateRecognizerTest {
 

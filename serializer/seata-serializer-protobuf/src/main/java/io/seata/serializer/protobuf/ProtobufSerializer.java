@@ -31,7 +31,6 @@ import io.seata.serializer.protobuf.manager.ProtobufConvertManager;
 /**
  * The type Protobuf codec.
  *
- * @author leizhiyuan
  */
 @LoadLevel(name = "PROTOBUF", order = 0)
 public class ProtobufSerializer implements Serializer {

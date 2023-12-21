@@ -41,7 +41,6 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * @author : wangxb
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 

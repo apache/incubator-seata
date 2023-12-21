@@ -37,7 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 /**
- * @author GoodBoyCoder
  */
 public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     private static SqlServerUndoInsertExecutor executor;

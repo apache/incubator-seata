@@ -26,7 +26,6 @@ import io.seata.core.rpc.Disposable;
 /**
  * The interface Session manager.
  *
- * @author sharajava
  */
 public interface SessionManager extends Disposable {
 

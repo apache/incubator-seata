@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author ggndnn
  */
 public class DruidDbTypeParserTest {
     @Test

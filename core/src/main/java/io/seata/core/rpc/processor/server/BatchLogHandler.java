@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 /**
  * handle ServerOnRequestProcessor and ServerOnResponseProcessor log print.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public class BatchLogHandler {

@@ -22,7 +22,6 @@ import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 /**
  * Delete statement recognizer for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXDeleteRecognizer extends MySQLDeleteRecognizer {
     public PolarDBXDeleteRecognizer(String originalSQL, SQLStatement ast) {

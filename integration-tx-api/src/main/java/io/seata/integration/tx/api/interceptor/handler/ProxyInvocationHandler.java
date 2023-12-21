@@ -23,7 +23,6 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptor;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 
 /**
- * @author leezongjie
  */
 public interface ProxyInvocationHandler extends SeataInterceptor {
 

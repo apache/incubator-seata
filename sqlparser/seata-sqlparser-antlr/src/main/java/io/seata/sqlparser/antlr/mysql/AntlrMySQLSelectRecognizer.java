@@ -32,7 +32,6 @@ import java.util.List;
 /**
  * AntlrMySQLSelectRecognizer
  *
- * @author zhihou
  */
 public class AntlrMySQLSelectRecognizer implements SQLSelectRecognizer {
 

@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Global Lock Controller
- * @author zhongxiang.wang
  */
 @RestController
 @RequestMapping("/api/v1/console/globalLock")

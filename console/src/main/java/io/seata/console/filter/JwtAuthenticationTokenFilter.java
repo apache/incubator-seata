@@ -33,7 +33,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 /**
  * jwt auth token filter
  *
- * @author jameslcj wfnuser
  */
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 

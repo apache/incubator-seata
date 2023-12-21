@@ -23,7 +23,6 @@ import io.seata.console.result.PageResult;
 
 /**
  * Global lock service
- * @author wangzhongxiang
  */
 public interface GlobalLockService {
 

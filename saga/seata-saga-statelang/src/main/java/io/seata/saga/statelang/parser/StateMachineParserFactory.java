@@ -21,7 +21,6 @@ import io.seata.saga.statelang.parser.impl.StateMachineParserImpl;
 /**
  * A simple factory of State machine language parser
  *
- * @author lorne.cl
  */
 public class StateMachineParserFactory {
 

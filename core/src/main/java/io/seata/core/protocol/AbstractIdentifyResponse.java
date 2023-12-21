@@ -19,7 +19,6 @@ package io.seata.core.protocol;
 /**
  * The type Abstract identify response.
  *
- * @author sharajava
  */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 

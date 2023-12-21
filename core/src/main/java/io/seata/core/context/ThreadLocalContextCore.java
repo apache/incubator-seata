@@ -23,7 +23,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * The type Thread local context core.
  *
- * @author slievrly
  */
 @LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {

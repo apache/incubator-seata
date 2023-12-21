@@ -54,8 +54,6 @@ import org.slf4j.MDC;
 /**
  * The abstract netty remoting.
  *
- * @author slievrly
- * @author zhangchenghui.dev@gmail.com
  */
 public abstract class AbstractNettyRemoting implements Disposable {
 

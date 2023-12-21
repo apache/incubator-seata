@@ -21,7 +21,6 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
 /**
- * @author XCXCXCXCX
  */
 public class DurationUtil {
 

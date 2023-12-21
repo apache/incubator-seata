@@ -17,7 +17,6 @@
 package io.seata.server.cluster.listener;
 
 /**
- * @author funkye
  */
 public interface ClusterChangeListener {
 

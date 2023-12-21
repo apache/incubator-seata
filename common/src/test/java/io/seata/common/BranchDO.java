@@ -20,7 +20,6 @@ import java.util.Date;
 
 /**
  * The branch do for test
- * @author wangzhongxiang
  */
 public class BranchDO {
     private String xid;

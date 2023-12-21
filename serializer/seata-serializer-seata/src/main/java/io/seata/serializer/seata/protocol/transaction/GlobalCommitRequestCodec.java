@@ -22,7 +22,6 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 /**
  * The type Global commit request codec.
  *
- * @author zhangsen
  */
 public class GlobalCommitRequestCodec extends AbstractGlobalEndRequestCodec {
 

@@ -40,7 +40,6 @@ import org.springframework.util.MultiValueMap;
 /**
  * Scope scanner checker.
  *
- * @author wang.liang
  */
 @LoadLevel(name = "ScopeBeans", order = 200)
 public class ScopeBeansScannerChecker implements ScannerChecker {

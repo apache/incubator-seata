@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * The interface Sql insert recognizer.
  *
- * @author sharajava
  */
 public interface SQLInsertRecognizer extends SQLRecognizer {
 

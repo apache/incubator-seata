@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 /**
  * The type Global status report codec.
  *
- * @author lorne.cl
  */
 public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
 

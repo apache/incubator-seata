@@ -37,7 +37,6 @@ import java.util.List;
 /**
  * The type My sql select for update recognizer.
  *
- * @author sharajava
  */
 public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implements SQLSelectRecognizer {
 

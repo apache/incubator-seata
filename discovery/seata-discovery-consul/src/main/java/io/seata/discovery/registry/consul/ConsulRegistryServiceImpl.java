@@ -50,7 +50,6 @@ import io.seata.discovery.registry.RegistryHeartBeats;
 import io.seata.discovery.registry.RegistryService;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener> {
 

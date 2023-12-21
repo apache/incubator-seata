@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * Record container for CompactTimer
  *
- * @author zhengyangyong
  */
 public class TimerValue {
     private final LongAdder count;

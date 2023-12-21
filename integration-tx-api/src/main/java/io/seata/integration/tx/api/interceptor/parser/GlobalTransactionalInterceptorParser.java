@@ -31,7 +31,6 @@ import io.seata.spring.annotation.GlobalTransactional;
 import io.seata.tm.api.FailureHandlerHolder;
 
 /**
- * @author leezongjie
  */
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 

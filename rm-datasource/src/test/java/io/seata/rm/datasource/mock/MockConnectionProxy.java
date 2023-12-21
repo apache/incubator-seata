@@ -23,7 +23,6 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 
 /**
- * @author will
  */
 public class MockConnectionProxy extends ConnectionProxy {
     /**

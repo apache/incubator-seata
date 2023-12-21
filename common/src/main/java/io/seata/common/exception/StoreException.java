@@ -19,7 +19,6 @@ package io.seata.common.exception;
 /**
  * the store exception
  *
- * @author zhangsen
  */
 public class StoreException extends FrameworkException {
 

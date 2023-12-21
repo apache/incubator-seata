@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Common Fence Config
  *
- * @author kaka2code
  */
 public class CommonFenceConfig implements Disposable {
 

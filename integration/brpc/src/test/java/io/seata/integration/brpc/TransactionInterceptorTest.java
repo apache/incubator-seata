@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author mxz0828@163.com
  */
 public class TransactionInterceptorTest {
 

@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * @author leezongjie
  */
 public class BusinessActionContextParameterDesc {
     private String paramName;

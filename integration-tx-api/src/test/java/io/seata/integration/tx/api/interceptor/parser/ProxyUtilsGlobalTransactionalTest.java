@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @author leezongjie
  */
 public class ProxyUtilsGlobalTransactionalTest {
 

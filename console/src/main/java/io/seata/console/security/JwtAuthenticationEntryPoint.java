@@ -31,7 +31,6 @@ import org.springframework.stereotype.Component;
 /**
  * jwt auth fail point
  *
- * @author wfnuser
  */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {

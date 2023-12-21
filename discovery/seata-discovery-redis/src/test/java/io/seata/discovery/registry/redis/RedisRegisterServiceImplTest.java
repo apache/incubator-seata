@@ -40,7 +40,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
- * @author laywin
  */
 public class RedisRegisterServiceImplTest {
 

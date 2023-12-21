@@ -23,7 +23,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 
 /**
- * @author slievrly
  */
 public interface BaseRpcFilter<T> {
     String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_BRANCH_TYPE};

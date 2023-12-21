@@ -19,7 +19,6 @@ package io.seata.saga.engine.serializer;
 /**
  * Object serializer
  *
- * @author lorne.cl
  */
 public interface Serializer<S, T> {
 

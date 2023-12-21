@@ -51,7 +51,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author eddyxu1213@126.com
  */
 public class GrpcTest {
 

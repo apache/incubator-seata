@@ -22,7 +22,6 @@ import java.util.List;
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
- * @author leezongjie
  */
 public class NormalTccActionImpl implements NormalTccAction {
 

@@ -21,8 +21,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Process Router
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public interface ProcessRouter {
 

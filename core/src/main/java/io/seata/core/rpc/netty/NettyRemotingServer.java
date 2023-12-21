@@ -36,9 +36,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The netty remoting server.
  *
- * @author slievrly
- * @author xingfudeshi@gmail.com
- * @author zhangchenghui.dev@gmail.com
  */
 public class NettyRemotingServer extends AbstractNettyRemotingServer {
 

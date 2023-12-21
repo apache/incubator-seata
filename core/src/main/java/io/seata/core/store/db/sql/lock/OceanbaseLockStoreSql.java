@@ -21,7 +21,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * the database lock store oceanbase sql
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
 @LoadLevel(name = "oceanbase")

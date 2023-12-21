@@ -36,7 +36,6 @@ import io.seata.sqlparser.SQLType;
 /**
  * The type SqlServer select for update recognizer.
  *
- * @author GoodBoyCoder
  */
 public class SqlServerSelectForUpdateRecognizer extends BaseSqlServerRecognizer implements SQLSelectRecognizer {
 

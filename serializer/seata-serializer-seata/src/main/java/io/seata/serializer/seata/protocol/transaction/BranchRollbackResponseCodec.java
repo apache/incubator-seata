@@ -22,7 +22,6 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 /**
  * The type Branch rollback response codec.
  *
- * @author zhangsen
  */
 public class BranchRollbackResponseCodec extends AbstractBranchEndResponseCodec {
 

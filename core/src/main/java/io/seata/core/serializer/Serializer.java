@@ -19,7 +19,6 @@ package io.seata.core.serializer;
 /**
  * The interface Codec.
  *
- * @author zhangsen
  */
 public interface Serializer {
 

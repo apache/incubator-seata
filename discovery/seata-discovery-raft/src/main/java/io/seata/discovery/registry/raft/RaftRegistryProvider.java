@@ -21,7 +21,6 @@ import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
 /**
- * @author funkye
  */
 @LoadLevel(name = "Raft", order = 1)
 public class RaftRegistryProvider implements RegistryProvider {

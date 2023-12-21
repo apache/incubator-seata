@@ -19,7 +19,6 @@ package io.seata.common.metadata;
 import java.util.List;
 
 /**
- * @author funkye
  */
 public class MetadataResponse {
 

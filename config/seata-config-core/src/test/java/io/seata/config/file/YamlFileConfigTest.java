@@ -24,7 +24,6 @@ import java.io.IOException;
 
 
 /**
- * @author liuqiufeng
  */
 class YamlFileConfigTest {
 

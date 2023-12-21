@@ -21,7 +21,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * extract remoting bean info
  *
- * @author zhangsen
  */
 public interface RemotingParser {
 

@@ -42,7 +42,6 @@ import redis.clients.jedis.exceptions.JedisNoScriptException;
 /**
  * lua related utils
  *
- * @author conghuhu
  */
 public class LuaParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(LuaParser.class);

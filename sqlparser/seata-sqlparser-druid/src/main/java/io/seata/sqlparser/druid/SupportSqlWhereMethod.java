@@ -19,9 +19,6 @@ package io.seata.sqlparser.druid;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * author: doubleDimple lovele.cn@gmail.com
- */
 public class SupportSqlWhereMethod {
 
     public SupportSqlWhereMethod() {

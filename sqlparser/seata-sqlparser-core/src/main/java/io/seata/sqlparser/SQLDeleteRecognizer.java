@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 /**
  * The interface Sql delete recognizer.
  *
- * @author sharajava
  */
 public interface SQLDeleteRecognizer extends WhereRecognizer {
 }

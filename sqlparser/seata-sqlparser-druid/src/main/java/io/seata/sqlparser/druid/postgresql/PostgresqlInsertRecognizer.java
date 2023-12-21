@@ -44,7 +44,6 @@ import io.seata.sqlparser.struct.SqlMethodExpr;
 import io.seata.sqlparser.struct.SqlSequenceExpr;
 
 /**
- * @author japsercloud
  */
 public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer implements SQLInsertRecognizer {
 

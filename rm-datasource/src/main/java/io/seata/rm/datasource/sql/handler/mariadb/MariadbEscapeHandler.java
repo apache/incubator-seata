@@ -23,7 +23,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Mariadb escape handler.
  *
- * @author slievrly
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbEscapeHandler extends MySQLEscapeHandler {

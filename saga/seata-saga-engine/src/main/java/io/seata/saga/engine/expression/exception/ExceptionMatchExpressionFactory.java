@@ -22,7 +22,6 @@ import io.seata.saga.engine.expression.ExpressionFactory;
 /**
  * Exception match expression factory
  *
- * @author ptyin
  */
 public class ExceptionMatchExpressionFactory implements ExpressionFactory {
     @Override

@@ -19,7 +19,6 @@ package io.seata.rm.tcc.spring.tcc;
 /**
  * The type Local tcc action.
  *
- * @author zhangsen
  */
 public class LocalTccActionImpl extends TccActionImpl implements LocalTccAction {
 

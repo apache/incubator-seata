@@ -21,7 +21,6 @@ import io.seata.core.protocol.transaction.GlobalCommitResponse;
 /**
  * The type Global commit response codec.
  *
- * @author zhangsen
  */
 public class GlobalCommitResponseCodec extends AbstractGlobalEndResponseCodec {
 

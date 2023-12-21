@@ -19,7 +19,6 @@ package io.seata.core.protocol;
 /**
  * The type Abstract result message.
  *
- * @author slievrly
  */
 public abstract class AbstractResultMessage extends AbstractMessage  {
 

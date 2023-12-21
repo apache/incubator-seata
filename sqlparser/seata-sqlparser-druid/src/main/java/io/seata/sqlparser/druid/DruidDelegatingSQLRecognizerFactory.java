@@ -26,7 +26,6 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 /**
- * @author ggndnn
  */
 @LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
 public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory {

@@ -22,7 +22,6 @@ import io.seata.integration.tx.api.remoting.RemotingParser;
 /**
  * The type Abstracted remoting parser.
  *
- * @author zhangsen
  */
 public abstract class AbstractedRemotingParser implements RemotingParser {
 
