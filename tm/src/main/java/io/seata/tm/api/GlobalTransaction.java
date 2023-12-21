@@ -23,7 +23,6 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 /**
  * Global transaction.
  *
- * @author sharajava
  */
 public interface GlobalTransaction {
 

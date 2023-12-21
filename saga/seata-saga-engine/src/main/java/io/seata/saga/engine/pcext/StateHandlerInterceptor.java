@@ -22,7 +22,6 @@ import io.seata.saga.proctrl.ProcessContext;
 /**
  * StateHandler Interceptor
  *
- * @author lorne.cl
  */
 public interface StateHandlerInterceptor {
 

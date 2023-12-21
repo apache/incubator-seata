@@ -21,7 +21,6 @@ import io.seata.common.util.IdWorker;
 /**
  * The type Uuid generator.
  *
- * @author sharajava
  */
 public class UUIDGenerator {
 

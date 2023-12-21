@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Nacos registry service.
  *
- * @author slievrly
- * @author xingfudeshi@gmail.com
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
 

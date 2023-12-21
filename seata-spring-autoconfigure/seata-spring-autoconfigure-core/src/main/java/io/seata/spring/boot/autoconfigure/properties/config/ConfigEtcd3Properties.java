@@ -23,7 +23,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_P
 
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_ETCD3_PREFIX)

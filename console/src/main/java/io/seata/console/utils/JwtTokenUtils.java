@@ -42,7 +42,6 @@ import org.springframework.stereotype.Component;
 /**
  * Jwt token tool
  *
- * @author jameslcj wfnuser
  */
 @Component
 public class JwtTokenUtils {

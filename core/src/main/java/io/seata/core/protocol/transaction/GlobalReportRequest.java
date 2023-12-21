@@ -23,7 +23,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global report request.
  *
- * @author lorne.cl
  */
 public class GlobalReportRequest extends AbstractGlobalEndRequest {
 

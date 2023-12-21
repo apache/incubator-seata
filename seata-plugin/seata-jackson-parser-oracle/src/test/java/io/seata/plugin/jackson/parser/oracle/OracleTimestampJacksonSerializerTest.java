@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 /**
- * @author jsbxyyx
  */
 public class OracleTimestampJacksonSerializerTest {
 

@@ -21,7 +21,6 @@ import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 /**
  * The type Abstract transaction request to tc codec.
  *
- * @author zhangsen
  */
 public abstract class AbstractTransactionRequestToTCCodec extends AbstractTransactionRequestCodec {
 

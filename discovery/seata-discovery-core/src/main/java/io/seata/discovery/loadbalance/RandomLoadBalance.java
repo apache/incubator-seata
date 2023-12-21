@@ -26,7 +26,6 @@ import static io.seata.discovery.loadbalance.LoadBalanceFactory.RANDOM_LOAD_BALA
 /**
  * The type Random load balance.
  *
- * @author yuoyao
  */
 @LoadLevel(name = RANDOM_LOAD_BALANCE)
 public class RandomLoadBalance implements LoadBalance {

@@ -20,7 +20,6 @@ import io.seata.integration.tx.api.interceptor.parser.TargetClassParser;
 import io.seata.spring.util.SpringProxyUtils;
 
 /**
- * @author leezongjie
  */
 public class SpringTargetClassParser implements TargetClassParser {
     @Override

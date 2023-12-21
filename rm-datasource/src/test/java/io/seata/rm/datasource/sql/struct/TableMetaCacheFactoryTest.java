@@ -27,7 +27,6 @@ import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author guoyao
  */
 public class TableMetaCacheFactoryTest {
 

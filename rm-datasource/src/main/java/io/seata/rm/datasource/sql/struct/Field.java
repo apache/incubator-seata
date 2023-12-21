@@ -19,7 +19,6 @@ package io.seata.rm.datasource.sql.struct;
 /**
  * Field
  *
- * @author sharajava
  */
 public class Field implements java.io.Serializable {
 

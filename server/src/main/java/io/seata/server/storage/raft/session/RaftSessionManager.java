@@ -44,7 +44,6 @@ import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANC
 import static io.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
- * @author funkye
  */
 @LoadLevel(name = "raft", scope = Scope.PROTOTYPE)
 public class RaftSessionManager extends FileSessionManager {

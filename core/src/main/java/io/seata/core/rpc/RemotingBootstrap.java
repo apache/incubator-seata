@@ -19,7 +19,6 @@ package io.seata.core.rpc;
 /**
  * The boot strap of the remoting process, generally there are client and server implementation classes
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public interface RemotingBootstrap {

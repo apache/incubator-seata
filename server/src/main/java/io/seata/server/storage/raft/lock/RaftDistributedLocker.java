@@ -30,7 +30,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @description raft distributed lock
- * @author  funkye
  */
 @LoadLevel(name = "raft")
 public class RaftDistributedLocker implements DistributedLocker {

@@ -26,7 +26,6 @@ import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
 
 
 /**
- * @author wangwei-ying
  */
 class RegistryConfigurationFactoryTest {
 

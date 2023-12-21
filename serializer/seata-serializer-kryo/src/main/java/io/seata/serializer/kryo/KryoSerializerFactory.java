@@ -21,7 +21,6 @@ import com.esotericsoftware.kryo.util.Pool;
 import io.seata.core.serializer.SerializerSecurityRegistry;
 
 /**
- * @author jsbxyyx
  */
 public class KryoSerializerFactory {
 

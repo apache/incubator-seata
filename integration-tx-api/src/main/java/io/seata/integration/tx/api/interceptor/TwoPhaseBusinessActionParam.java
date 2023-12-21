@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * The two phase business action parameters.
  *
- * @author ruishansun
  */
 public class TwoPhaseBusinessActionParam {
 

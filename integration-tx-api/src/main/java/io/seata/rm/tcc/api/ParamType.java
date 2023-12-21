@@ -19,7 +19,6 @@ package io.seata.rm.tcc.api;
 /**
  * The enum ParamType
  *
- * @author wang.liang
  */
 public enum ParamType {
 

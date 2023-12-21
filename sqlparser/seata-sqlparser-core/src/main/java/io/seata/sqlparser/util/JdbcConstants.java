@@ -17,7 +17,6 @@
 package io.seata.sqlparser.util;
 
 /**
- * @author ggndnn
  */
 public interface JdbcConstants {
 

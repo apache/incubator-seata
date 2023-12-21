@@ -68,9 +68,6 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 /**
  * The netty remoting client.
  *
- * @author slievrly
- * @author zhaojun
- * @author zhangchenghui.dev@gmail.com
  */
 public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 

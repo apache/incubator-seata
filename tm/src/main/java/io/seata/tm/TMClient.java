@@ -21,7 +21,6 @@ import io.seata.core.rpc.netty.TmNettyRemotingClient;
 /**
  * The type Tm client.
  *
- * @author slievrly
  */
 public class TMClient {
 

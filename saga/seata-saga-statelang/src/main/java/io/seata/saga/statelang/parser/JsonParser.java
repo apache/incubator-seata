@@ -20,7 +20,6 @@ package io.seata.saga.statelang.parser;
  *
  * Json Parser
  *
- * @author lorne.cl
  */
 public interface JsonParser {
 

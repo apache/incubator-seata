@@ -37,7 +37,6 @@ import java.util.List;
 /**
  * The type oracle select for update recognizer.
  *
- * @author ccg
  */
 public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implements SQLSelectRecognizer {
 

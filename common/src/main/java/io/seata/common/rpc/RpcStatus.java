@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.LongAdder;
 /**
  * The state statistics.
  *
- * @author ph3636
  */
 public class RpcStatus {
 

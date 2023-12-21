@@ -79,7 +79,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 /**
  * Default state machine configuration
  *
- * @author lorne.cl
  */
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 

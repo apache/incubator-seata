@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Netty base config test.
  *
- * @author slievrly
- * @author wang.liang
  */
 class NettyBaseConfigTest {
     /**

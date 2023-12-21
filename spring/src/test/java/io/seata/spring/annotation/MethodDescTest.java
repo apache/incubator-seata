@@ -31,7 +31,6 @@ import org.springframework.aop.framework.ProxyFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author Wu
  */
 public class MethodDescTest {
 

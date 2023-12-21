@@ -65,7 +65,6 @@ import org.springframework.util.StringUtils;
 /**
  * State machine logs and definitions persist to database and report status to TC (Transaction Coordinator)
  *
- * @author lorne.cl
  */
 public class DbAndReportTcStateLogStore extends AbstractStore implements StateLogStore {
 

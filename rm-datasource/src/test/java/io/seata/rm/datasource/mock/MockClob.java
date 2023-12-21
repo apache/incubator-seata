@@ -26,7 +26,6 @@ import java.sql.Clob;
 import java.sql.SQLException;
 
 /**
- * @author will
  */
 public class MockClob implements Clob {
 

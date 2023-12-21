@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Summary interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Summary extends Meter {
     default void increase() {

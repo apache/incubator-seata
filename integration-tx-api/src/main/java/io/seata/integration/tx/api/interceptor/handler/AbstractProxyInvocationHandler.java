@@ -20,7 +20,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 
 /**
- * @author leezongjie
  */
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
 

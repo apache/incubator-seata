@@ -32,7 +32,6 @@ import java.util.List;
 /**
  * AntlrMySQLRecognizerFactory
  *
- * @author zhihou
  */
 class AntlrMySQLRecognizerFactory implements SQLRecognizerFactory {
 

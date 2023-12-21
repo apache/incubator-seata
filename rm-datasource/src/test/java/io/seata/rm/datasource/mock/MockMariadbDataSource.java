@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * @author funkye
  */
 public class MockMariadbDataSource extends MockDataSource {
     @Override

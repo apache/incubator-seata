@@ -21,7 +21,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch commit response.
  *
- * @author sharajava
  */
 public class BranchCommitResponse extends AbstractBranchEndResponse {
 

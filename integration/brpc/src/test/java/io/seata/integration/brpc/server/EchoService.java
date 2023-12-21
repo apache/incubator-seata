@@ -20,7 +20,6 @@ import com.baidu.brpc.protocol.BrpcMeta;
 import io.seata.integration.brpc.dto.Echo;
 
 /**
- * @author mxz0828@163.com
  */
 public interface EchoService {
 

@@ -40,7 +40,6 @@ import java.util.Map;
 /**
  * StateInterceptor for ScriptTask
  *
- * @author lorne.cl
  */
 @LoadLevel(name = "ScriptTask", order = 100)
 public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {

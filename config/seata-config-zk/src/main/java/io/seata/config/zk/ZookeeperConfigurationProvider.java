@@ -21,7 +21,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = "ZK", order = 1)
 public class ZookeeperConfigurationProvider implements ConfigurationProvider {

@@ -24,7 +24,6 @@ import io.seata.integration.brpc.server.EchoService;
 import java.util.Objects;
 
 /**
- * @author mxz0828@163.com
  */
 public class EchoServiceImpl implements EchoService {
     @Override

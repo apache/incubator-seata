@@ -31,7 +31,6 @@ import java.sql.SQLException;
 /**
  * Tests for DataSourceProxyXANative
  *
- * @author sharajava
  */
 public class DataSourceProxyXANativeTest {
 

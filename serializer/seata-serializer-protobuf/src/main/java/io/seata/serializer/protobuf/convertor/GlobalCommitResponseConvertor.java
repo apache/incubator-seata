@@ -31,7 +31,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitResponse, GlobalCommitResponseProto> {
     @Override

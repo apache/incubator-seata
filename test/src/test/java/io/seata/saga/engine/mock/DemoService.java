@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author lorne.cl
  */
 public class DemoService {
 

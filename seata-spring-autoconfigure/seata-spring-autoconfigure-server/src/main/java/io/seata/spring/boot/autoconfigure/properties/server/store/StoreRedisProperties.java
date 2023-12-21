@@ -27,7 +27,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SI
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = STORE_REDIS_PREFIX)

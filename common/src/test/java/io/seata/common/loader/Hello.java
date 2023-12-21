@@ -19,7 +19,6 @@ package io.seata.common.loader;
 /**
  * The interface Hello.
  *
- * @author Otis.z
  */
 public interface Hello {
     /**

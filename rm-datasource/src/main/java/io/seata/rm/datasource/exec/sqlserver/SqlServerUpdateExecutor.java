@@ -33,7 +33,6 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author GoodBoyCoder
  * @date 2021-07-21
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER, scope = Scope.PROTOTYPE)

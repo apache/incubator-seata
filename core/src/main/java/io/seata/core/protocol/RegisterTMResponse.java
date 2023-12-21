@@ -21,7 +21,6 @@ import java.io.Serializable;
 /**
  * The type Register tm response.
  *
- * @author slievrly
  */
 public class RegisterTMResponse extends AbstractIdentifyResponse implements Serializable {
 

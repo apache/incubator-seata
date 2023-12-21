@@ -24,7 +24,6 @@ import static io.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 /**
  * The type Load balance factory.
  *
- * @author slievrly
  */
 public class LoadBalanceFactory {
 

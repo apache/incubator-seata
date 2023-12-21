@@ -31,7 +31,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * @author Geng Zhang
  */
 public class AbstractUndoExecutorTest extends BaseH2Test {
 

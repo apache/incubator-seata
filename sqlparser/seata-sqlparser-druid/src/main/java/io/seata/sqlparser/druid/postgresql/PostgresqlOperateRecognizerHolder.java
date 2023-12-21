@@ -27,7 +27,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type PostgresqlOperateRecognizerHolder
  *
- * @author will.zjw
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {

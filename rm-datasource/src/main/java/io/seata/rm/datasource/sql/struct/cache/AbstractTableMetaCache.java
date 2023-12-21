@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Table meta cache.
  *
- * @author sharajava
  */
 public abstract class AbstractTableMetaCache implements TableMetaCache {
 

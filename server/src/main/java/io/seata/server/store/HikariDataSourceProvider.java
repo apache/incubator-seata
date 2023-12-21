@@ -27,8 +27,6 @@ import java.util.Properties;
 
 /**
  * The hikari datasource provider
- * @author diguage
- * @author will
  */
 @LoadLevel(name = "hikari")
 public class HikariDataSourceProvider extends AbstractDataSourceProvider {

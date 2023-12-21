@@ -29,7 +29,6 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
 /**
- * @author zhaoyuguang
  */
 public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 

@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 /**
  * Xid in XA Protocol. Wrap info of Seata xid and branchId.
  *
- * @author sharajava
  */
 public class XABranchXid implements XAXid {
 

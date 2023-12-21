@@ -28,7 +28,6 @@ import java.util.List;
 import com.alibaba.druid.mock.MockStatementBase;
 
 /**
-  * @author will
   */
 public class MockDatabaseMetaData implements DatabaseMetaData {
 

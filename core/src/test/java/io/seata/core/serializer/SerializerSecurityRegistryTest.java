@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author slievrly
  */
 public class SerializerSecurityRegistryTest {
     @Test

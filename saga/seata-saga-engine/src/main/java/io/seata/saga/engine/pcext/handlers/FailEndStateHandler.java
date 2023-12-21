@@ -28,7 +28,6 @@ import io.seata.saga.statelang.domain.FailEndState;
 /**
  * FailEndState Handler
  *
- * @author lorne.cl
  */
 public class FailEndStateHandler implements StateHandler {
 

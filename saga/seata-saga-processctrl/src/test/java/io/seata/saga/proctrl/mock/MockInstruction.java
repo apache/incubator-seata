@@ -19,7 +19,6 @@ package io.seata.saga.proctrl.mock;
 import io.seata.saga.proctrl.Instruction;
 
 /**
- * @author lorne.cl
  */
 public class MockInstruction implements Instruction {
 

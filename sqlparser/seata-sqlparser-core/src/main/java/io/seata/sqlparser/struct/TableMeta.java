@@ -35,7 +35,6 @@ import io.seata.sqlparser.util.ColumnUtils;
 /**
  * The type Table meta.
  *
- * @author sharajava
  */
 public class TableMeta {
     private String tableName;

@@ -21,7 +21,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * Event Consumer
  *
- * @author lorne.cl
  */
 public interface EventConsumer<E> {
 

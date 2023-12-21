@@ -25,7 +25,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type PostgresqlUndoExecutorHolder
  *
- * @author will
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlUndoExecutorHolder implements UndoExecutorHolder {

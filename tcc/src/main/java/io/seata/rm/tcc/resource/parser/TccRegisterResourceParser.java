@@ -37,7 +37,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author leezongjie
  */
 public class TccRegisterResourceParser implements RegisterResourceParser {
 

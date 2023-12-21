@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * positive atomic counter, begin with 0, ensure the number is positive.
  *
- * @author Geng Zhang
  */
 public class PositiveAtomicCounter {
     private static final int MASK = 0x7FFFFFFF;

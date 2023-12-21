@@ -24,7 +24,6 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 
 /**
- * @author jianbin.chen
  */
 public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
 

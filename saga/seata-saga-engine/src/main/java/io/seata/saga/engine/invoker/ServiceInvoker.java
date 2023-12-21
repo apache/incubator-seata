@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.ServiceTaskState;
 /**
  * Service invoker
  *
- * @author lorne.cl
  */
 public interface ServiceInvoker {
 

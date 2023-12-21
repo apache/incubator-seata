@@ -19,7 +19,6 @@ package io.seata.sqlparser;
 import java.util.List;
 
 /**
- * @author ggndnn
  */
 public interface SQLRecognizerFactory {
     List<SQLRecognizer> create(String sql, String dbType);

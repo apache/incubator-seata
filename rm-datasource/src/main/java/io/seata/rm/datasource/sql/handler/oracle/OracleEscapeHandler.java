@@ -30,7 +30,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type oracle sql keyword checker.
  *
- * @author ccg
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleEscapeHandler implements EscapeHandler {

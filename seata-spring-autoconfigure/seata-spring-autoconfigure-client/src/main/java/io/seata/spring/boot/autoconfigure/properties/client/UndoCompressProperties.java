@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 
 /**
- * @author chd
  */
 @Component
 @ConfigurationProperties(prefix = COMPRESS_PREFIX)

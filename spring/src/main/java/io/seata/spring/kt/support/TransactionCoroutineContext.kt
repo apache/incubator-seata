@@ -23,8 +23,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * TransactionCoroutineContext
- * 
- * @author sustly
+ *
  */
 class TransactionCoroutineContext(private val xid: String? = RootContext.getXID()) :
     AbstractCoroutineContextElement(TransactionCoroutineContext),

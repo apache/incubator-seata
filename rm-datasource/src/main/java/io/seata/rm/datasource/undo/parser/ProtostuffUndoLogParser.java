@@ -48,7 +48,6 @@ import io.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
 /**
  * The type protostuff based undo log parser.
  *
- * @author Geng Zhang
  */
 @LoadLevel(name = ProtostuffUndoLogParser.NAME)
 public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
@@ -116,7 +115,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Timestamp
      *
-     * @author zhangsen
      */
     public static class TimestampDelegate implements Delegate<java.sql.Timestamp> {
 
@@ -159,7 +157,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Date
      *
-     * @author zhangsen
      */
     public static class SqlDateDelegate implements Delegate<java.sql.Date> {
 
@@ -192,7 +189,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Time
      *
-     * @author zhangsen
      */
     public static class TimeDelegate implements Delegate<java.sql.Time> {
 
@@ -225,7 +221,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.util.Date
      *
-     * @author zhangsen
      */
     public static class DateDelegate implements Delegate<java.util.Date> {
 

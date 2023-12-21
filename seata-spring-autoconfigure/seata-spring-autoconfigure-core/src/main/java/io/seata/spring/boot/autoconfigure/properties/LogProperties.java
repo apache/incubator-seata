@@ -23,7 +23,6 @@ import static io.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
 /**
- * @author jsbxyyx
  */
 @Component
 @ConfigurationProperties(prefix = LOG_PREFIX)

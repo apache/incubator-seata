@@ -24,7 +24,6 @@ import io.seata.core.lock.Locker;
 import static io.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
 
 /**
- * @author conghuhu
  */
 public class RedisLockerFactory {
 

@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type batch result message codec test.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class BatchResultMessageSerializerTest {

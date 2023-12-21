@@ -25,8 +25,6 @@ import io.seata.saga.proctrl.eventing.EventConsumer;
 /**
  * Abstract Event Bus
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public abstract class AbstractEventBus<E> implements EventBus<E> {
 

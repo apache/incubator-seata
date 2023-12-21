@@ -21,7 +21,6 @@ import com.ecwid.consul.v1.health.model.HealthService;
 import java.util.List;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 public interface ConsulListener {
     /**

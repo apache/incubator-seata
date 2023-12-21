@@ -32,8 +32,6 @@ import java.util.List;
 /**
  * DruidSQLRecognizerFactoryImpl
  *
- * @author sharajava
- * @author ggndnn
  */
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override

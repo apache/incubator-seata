@@ -36,7 +36,6 @@ import io.seata.metrics.Timer;
 /**
  * Compact Registry implement, this registry only compute all Measurements when call measure method and do not cache
  *
- * @author zhengyangyong
  */
 @LoadLevel(name = "compact", order = 1)
 public class CompactRegistry implements Registry {

@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author jsbxyyx
  */
 public class OracleUndoDeleteExecutorTest extends BaseExecutorTest {
 

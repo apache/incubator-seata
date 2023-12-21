@@ -25,7 +25,6 @@ import java.sql.Statement;
 /**
  * Statement proxy for XA mode.
  *
- * @author sharajava
  */
 public class StatementProxyXA implements Statement {
 

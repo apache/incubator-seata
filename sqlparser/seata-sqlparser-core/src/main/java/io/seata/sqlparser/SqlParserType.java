@@ -17,7 +17,6 @@
 package io.seata.sqlparser;
 
 /**
- * @author ggndnn
  */
 public interface SqlParserType {
     /**
