@@ -18,6 +18,8 @@ package io.seata.core.rpc.netty;
 
 import io.seata.core.protocol.AbstractMessage;
 
+import java.util.Objects;
+
 /**
  * The type Netty pool key.
  *
@@ -123,6 +125,24 @@ public class NettyPoolKey {
         sb.append(message.toString());
         sb.append(" >");
         return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return address.hashCode() ^ transactionRole.value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof NettyPoolKey)) {
+            return false;
+        }
+        final NettyPoolKey other = (NettyPoolKey) obj;
+
+        return Objects.equals(other.address, this.address) && Objects.equals(other.transactionRole, this.transactionRole);
     }
 
     /**
