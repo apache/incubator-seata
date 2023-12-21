@@ -20,7 +20,6 @@ import io.seata.core.model.GlobalLockConfig;
 
 /**
  * executor to execute business logic that require global lock
- * @author selfishlover
  */
 public interface GlobalLockExecutor {
 

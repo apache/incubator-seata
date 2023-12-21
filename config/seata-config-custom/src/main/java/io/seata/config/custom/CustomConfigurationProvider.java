@@ -28,7 +28,6 @@ import io.seata.config.ConfigurationProvider;
 import java.util.stream.Stream;
 
 /**
- * @author ggndnn
  */
 @LoadLevel(name = "Custom")
 public class CustomConfigurationProvider implements ConfigurationProvider {

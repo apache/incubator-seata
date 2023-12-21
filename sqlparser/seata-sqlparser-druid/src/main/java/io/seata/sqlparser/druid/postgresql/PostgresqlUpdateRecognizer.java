@@ -37,7 +37,6 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 
 /**
- * @author japsercloud
  */
 public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer implements SQLUpdateRecognizer {
 

@@ -34,7 +34,6 @@ import io.seata.server.session.SessionHolder;
 /**
  * Abstract Server Test
  *
- * @author lorne.cl
  */
 public abstract class AbstractServerTest {
 

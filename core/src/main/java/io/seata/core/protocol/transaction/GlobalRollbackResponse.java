@@ -21,7 +21,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Global rollback response.
  *
- * @author slievrly
  */
 public class GlobalRollbackResponse extends AbstractGlobalEndResponse {
 

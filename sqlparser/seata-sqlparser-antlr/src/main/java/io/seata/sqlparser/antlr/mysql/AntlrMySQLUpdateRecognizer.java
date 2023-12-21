@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 /**
  * AntlrMySQLUpdateRecognizer
  *
- * @author zhihou
  */
 public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
 

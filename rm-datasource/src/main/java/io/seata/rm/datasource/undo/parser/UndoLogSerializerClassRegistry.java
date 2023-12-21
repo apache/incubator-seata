@@ -49,7 +49,6 @@ import io.seata.rm.datasource.undo.BranchUndoLog;
 /**
  * Provide a unified serialization registry, this class used for {@code seata-serializer-fst}
  * and {@code seata-serializer-kryo}, it will register some classes at startup time (for example {@link KryoSerializerFactory#create})
- * @author funkye
  */
 public class UndoLogSerializerClassRegistry {
 

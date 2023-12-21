@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 /**
  * ipv4 ipv6 check util.
  *
- * @author Ifdevil
  */
 public class NetAddressValidatorUtil {
 

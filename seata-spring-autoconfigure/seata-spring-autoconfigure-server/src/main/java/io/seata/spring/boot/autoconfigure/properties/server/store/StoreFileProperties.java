@@ -23,7 +23,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 
 /**
- * @author spilledyear@outlook.com
  */
 @Component
 @ConfigurationProperties(prefix = STORE_FILE_PREFIX)

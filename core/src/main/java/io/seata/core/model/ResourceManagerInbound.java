@@ -23,7 +23,6 @@ import io.seata.core.exception.TransactionException;
  *
  * Control a branch transaction commit or rollback.
  *
- * @author sharajava
  */
 public interface ResourceManagerInbound {
 

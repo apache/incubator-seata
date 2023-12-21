@@ -19,7 +19,6 @@ package io.seata.spring.tcc;
 import io.seata.rm.tcc.api.BusinessActionContext;
 
 /**
- * @author leezongjie
  * @date 2023/11/29
  */
 public class NormalTccActionImpl implements NormalTccAction {

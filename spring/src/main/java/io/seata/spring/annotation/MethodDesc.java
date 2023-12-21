@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 /**
  * The type Method desc.
  *
- * @author slievrly
  */
 public class MethodDesc {
     private GlobalTransactional transactionAnnotation;

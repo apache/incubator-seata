@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.remoting;
 /**
  * remoting protocols enum
  *
- * @author zhangsen
  */
 public interface Protocols {
 

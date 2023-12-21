@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 /**
  * The type dm sql keyword checker.
  *
- * @author chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmEscapeHandler implements EscapeHandler {

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract locker.
  *
- * @author zhangsen
  */
 public abstract class AbstractLocker implements Locker {
 

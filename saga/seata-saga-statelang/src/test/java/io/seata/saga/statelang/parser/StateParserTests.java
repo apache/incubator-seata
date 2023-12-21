@@ -30,7 +30,6 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * StateParser tests
  *
- * @author lorne.cl
  */
 public class StateParserTests {
 

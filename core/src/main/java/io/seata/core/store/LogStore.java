@@ -22,7 +22,6 @@ import java.util.List;
 /**
  * the transaction log store
  *
- * @author zhangsen
  */
 public interface LogStore {
 

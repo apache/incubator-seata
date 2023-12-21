@@ -21,7 +21,6 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 /**
  * The type Global rollback request codec.
  *
- * @author zhangsen
  */
 public class GlobalRollbackRequestCodec extends AbstractGlobalEndRequestCodec {
 

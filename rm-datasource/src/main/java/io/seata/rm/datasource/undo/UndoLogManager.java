@@ -28,8 +28,6 @@ import io.seata.rm.datasource.DataSourceProxy;
 /**
  * The type Undo log manager.
  *
- * @author sharajava
- * @author Geng Zhang
  */
 public interface UndoLogManager {
 

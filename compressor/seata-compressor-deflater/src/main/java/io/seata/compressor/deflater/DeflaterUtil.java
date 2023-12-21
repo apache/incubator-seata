@@ -22,7 +22,6 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 /**
- * @author dongzl
  */
 public class DeflaterUtil {
 

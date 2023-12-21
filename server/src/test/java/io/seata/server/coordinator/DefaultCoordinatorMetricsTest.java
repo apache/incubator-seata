@@ -44,7 +44,6 @@ import static io.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessa
 /**
  * Test Metrics
  *
- * @author zhengyangyong
  */
 @SpringBootTest
 @Disabled

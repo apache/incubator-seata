@@ -26,7 +26,6 @@ import static io.seata.config.ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME;
 import static io.seata.config.ConfigProperty.REGISTRY_CONF_DEFAULT;
 
 /**
- * @author wangwei-ying
  */
 class YamlConfigurationFactoryTest {
 

@@ -26,7 +26,6 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 /**
  * State lang resource util.
  *
- * @author wang.liang
  */
 public class ResourceUtil {
 

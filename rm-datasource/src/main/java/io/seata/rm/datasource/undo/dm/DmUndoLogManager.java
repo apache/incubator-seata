@@ -35,7 +35,6 @@ import java.sql.SQLException;
 import java.util.Date;
 
 /**
- * @author chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmUndoLogManager extends AbstractUndoLogManager {

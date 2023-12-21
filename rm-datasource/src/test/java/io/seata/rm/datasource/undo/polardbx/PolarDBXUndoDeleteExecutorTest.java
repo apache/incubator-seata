@@ -34,7 +34,6 @@ import org.mockito.Mockito;
 /**
  * Undo delete executor test for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUndoDeleteExecutorTest extends BaseExecutorTest {
     private static PolarDBXUndoDeleteExecutor executor;

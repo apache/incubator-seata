@@ -24,7 +24,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 
 /**
- * @author leizhiyuan
  */
 public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbackRequest, GlobalRollbackRequestProto> {
     @Override

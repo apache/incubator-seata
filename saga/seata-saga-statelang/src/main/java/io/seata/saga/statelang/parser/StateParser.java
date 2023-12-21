@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * State Parser
  *
- * @author lorne.cl
  */
 public interface StateParser<T extends State> {
 

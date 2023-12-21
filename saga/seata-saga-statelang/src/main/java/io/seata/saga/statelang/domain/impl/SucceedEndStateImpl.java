@@ -22,7 +22,6 @@ import io.seata.saga.statelang.domain.SucceedEndState;
 /**
  * SucceedEndState
  *
- * @author lorne.cl
  */
 public class SucceedEndStateImpl extends BaseState implements SucceedEndState {
 

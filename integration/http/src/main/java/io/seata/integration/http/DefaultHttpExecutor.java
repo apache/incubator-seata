@@ -29,7 +29,6 @@ import java.util.Map;
 /**
  * Default http executor.
  *
- * @author wangxb
  */
 public class DefaultHttpExecutor extends AbstractHttpExecutor {
 

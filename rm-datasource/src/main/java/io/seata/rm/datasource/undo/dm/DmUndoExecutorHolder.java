@@ -25,7 +25,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type DmUndoExecutorHolder
  *
- * @author: chengxiaoxiao
  */
 @LoadLevel(name = JdbcConstants.DM)
 public class DmUndoExecutorHolder implements UndoExecutorHolder {

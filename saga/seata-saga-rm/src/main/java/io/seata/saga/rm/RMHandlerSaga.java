@@ -25,7 +25,6 @@ import io.seata.rm.DefaultResourceManager;
 /**
  * The type Rm handler SAGA.
  *
- * @author lorne.cl
  */
 public class RMHandlerSaga extends AbstractRMHandler {
 

@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author sharajava
  */
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 

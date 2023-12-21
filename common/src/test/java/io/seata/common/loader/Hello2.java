@@ -17,7 +17,6 @@
 package io.seata.common.loader;
 
 /**
- * @author liuqiufeng
  */
 public interface Hello2 {
 }

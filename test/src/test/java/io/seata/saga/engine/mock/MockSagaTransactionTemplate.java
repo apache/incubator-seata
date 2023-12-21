@@ -27,7 +27,6 @@ import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
  *
- * @author lorne.cl
  */
 public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
 

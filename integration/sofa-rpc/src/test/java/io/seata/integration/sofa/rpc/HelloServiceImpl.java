@@ -20,7 +20,6 @@ import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 
 /**
- * @author Geng Zhang
  */
 public class HelloServiceImpl implements HelloService {
 

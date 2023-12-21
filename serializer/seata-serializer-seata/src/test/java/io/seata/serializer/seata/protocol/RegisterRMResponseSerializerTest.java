@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Register rm response codec test.
  *
- * @author zhangsen
  */
 public class RegisterRMResponseSerializerTest {
 

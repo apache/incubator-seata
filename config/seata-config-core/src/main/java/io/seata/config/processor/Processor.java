@@ -22,7 +22,6 @@ import java.util.Properties;
 /**
  * The processing configuration.
  *
- * @author zhixing
  */
 public interface Processor {
 

@@ -35,7 +35,6 @@ import java.util.List;
 /**
  * The type dm select for update recognizer.
  *
- * @author chengxiaoxiao
  */
 public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQLSelectRecognizer {
 

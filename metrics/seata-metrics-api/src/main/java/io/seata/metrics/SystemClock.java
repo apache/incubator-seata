@@ -19,7 +19,6 @@ package io.seata.metrics;
 /**
  * Default clock implement use system
  *
- * @author zhengyangyong
  */
 public class SystemClock implements Clock {
     public static final Clock INSTANCE = new SystemClock();

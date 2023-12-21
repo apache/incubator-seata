@@ -22,7 +22,6 @@ import io.seata.saga.statelang.domain.ScriptTaskState;
 /**
  * A state used to execute script such as groovy
  *
- * @author lorne.cl
  */
 public class ScriptTaskStateImpl extends AbstractTaskState implements ScriptTaskState {
 

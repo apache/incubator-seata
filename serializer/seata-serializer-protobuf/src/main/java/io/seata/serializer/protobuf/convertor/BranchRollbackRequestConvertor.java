@@ -26,7 +26,6 @@ import io.seata.serializer.protobuf.generated.MessageTypeProto;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 
 /**
- * @author leizhiyuan
  */
 public class BranchRollbackRequestConvertor implements PbConvertor<BranchRollbackRequest, BranchRollbackRequestProto> {
     @Override

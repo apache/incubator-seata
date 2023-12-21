@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Common Fence store data base dao
  *
- * @author kaka2code
  */
 public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
 

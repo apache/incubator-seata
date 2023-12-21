@@ -29,7 +29,6 @@ import java.util.Set;
 /**
  * local tcc bean parsing
  *
- * @author zhangsen
  */
 public class LocalTCCRemotingParser extends AbstractedRemotingParser {
 

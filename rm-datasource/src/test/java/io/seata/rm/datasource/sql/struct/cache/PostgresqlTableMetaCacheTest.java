@@ -41,7 +41,6 @@ import javax.sql.DataSource;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
-  * @author will.zjw
   */
 public class PostgresqlTableMetaCacheTest {
 

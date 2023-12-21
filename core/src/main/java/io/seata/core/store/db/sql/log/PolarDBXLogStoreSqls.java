@@ -21,7 +21,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * Database log store for PolarDB-X
  *
- * @author hsien999
  */
 @LoadLevel(name = "polardb-x")
 public class PolarDBXLogStoreSqls extends MysqlLogStoreSqls {

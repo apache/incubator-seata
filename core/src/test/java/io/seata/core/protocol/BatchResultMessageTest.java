@@ -25,7 +25,6 @@ import java.util.List;
 /**
  * Unit test for {@link BatchResultMessage}.
  *
- * @author Mia0451
  */
 class BatchResultMessageTest {
 

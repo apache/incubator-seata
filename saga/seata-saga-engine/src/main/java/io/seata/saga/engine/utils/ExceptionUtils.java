@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 /**
  * Exception Utils
  *
- * @author lorne.cl
  */
 public class ExceptionUtils {
 

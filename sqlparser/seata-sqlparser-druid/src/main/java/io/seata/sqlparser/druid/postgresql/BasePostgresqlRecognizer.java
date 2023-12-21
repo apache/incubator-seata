@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author will
  */
 public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 

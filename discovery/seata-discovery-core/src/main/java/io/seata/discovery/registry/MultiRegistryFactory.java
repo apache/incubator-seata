@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type multiple Registry factory.
  *
- * @author liuqiufeng
  */
 public class MultiRegistryFactory {
 

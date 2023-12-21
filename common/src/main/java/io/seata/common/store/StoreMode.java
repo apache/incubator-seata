@@ -19,7 +19,6 @@ package io.seata.common.store;
 /**
  * transaction log store mode
  *
- * @author zhangsen
  */
 public enum StoreMode {
 

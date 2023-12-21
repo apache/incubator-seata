@@ -24,7 +24,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 /**
- * @author wang.liang
  */
 public class MockDataSource implements DataSource {
     @Override

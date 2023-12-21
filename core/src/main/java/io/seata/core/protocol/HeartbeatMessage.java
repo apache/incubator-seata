@@ -21,7 +21,6 @@ import java.io.Serializable;
 /**
  * The type Heartbeat message.
  *
- * @author slievrly
  */
 public class HeartbeatMessage implements MessageTypeAware, Serializable {
     private static final long serialVersionUID = -985316399527884899L;

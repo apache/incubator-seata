@@ -28,7 +28,6 @@ import io.seata.core.serializer.Serializer;
 /**
  * The Seata codec.
  *
- * @author zhangsen
  */
 @LoadLevel(name = "SEATA")
 public class SeataSerializer implements Serializer {

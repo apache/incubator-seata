@@ -46,7 +46,6 @@ import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author will
  */
 public class SelectForUpdateExecutorTest {
 

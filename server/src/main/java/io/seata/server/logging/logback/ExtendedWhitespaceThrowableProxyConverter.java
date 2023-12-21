@@ -24,7 +24,6 @@ import ch.qos.logback.core.CoreConstants;
  * {@link ExtendedThrowableProxyConverter} that adds some additional whitespace around the
  * stack trace.
  * Copied from spring-boot-xxx.jar by wang.liang
- * @author Phillip Webb
  */
 public class ExtendedWhitespaceThrowableProxyConverter extends ExtendedThrowableProxyConverter {
 

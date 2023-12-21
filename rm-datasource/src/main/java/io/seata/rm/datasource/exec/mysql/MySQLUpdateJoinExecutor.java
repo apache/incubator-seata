@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * @author renliangyu857
  */
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());

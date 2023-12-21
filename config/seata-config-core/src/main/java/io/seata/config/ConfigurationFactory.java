@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Configuration factory.
  *
- * @author slievrly
- * @author Geng Zhang
  */
 public final class ConfigurationFactory {
 

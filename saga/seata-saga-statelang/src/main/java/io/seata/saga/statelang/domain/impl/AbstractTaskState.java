@@ -25,7 +25,6 @@ import io.seata.saga.statelang.domain.TaskState;
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
  *
- * @author lorne.cl
  */
 public abstract class AbstractTaskState extends BaseState implements TaskState {
 

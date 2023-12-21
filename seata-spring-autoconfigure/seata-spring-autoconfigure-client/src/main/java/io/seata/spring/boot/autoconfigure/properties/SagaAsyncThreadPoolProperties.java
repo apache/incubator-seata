@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 /**
  * Saga state machine async thread pool properties.
  *
- * @author wang.liang
  */
 @Component
 @ConfigurationProperties(StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX)

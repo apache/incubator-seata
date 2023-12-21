@@ -22,7 +22,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Global lock query request.
  *
- * @author slievrly
  */
 public class GlobalLockQueryRequest extends BranchRegisterRequest  {
 

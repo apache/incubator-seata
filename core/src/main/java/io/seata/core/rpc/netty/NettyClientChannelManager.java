@@ -48,8 +48,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Netty client pool manager.
  *
- * @author slievrly
- * @author zhaojun
  */
 class NettyClientChannelManager {
 

@@ -25,7 +25,6 @@ import io.seata.common.util.StringUtils;
 /**
  * The interface Configuration.
  *
- * @author slievrly
  */
 public interface Configuration {
 

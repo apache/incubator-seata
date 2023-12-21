@@ -33,8 +33,6 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 
 /**
- * @author xingfudeshi@gmail.com
- * @author selfishlover
  */
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 

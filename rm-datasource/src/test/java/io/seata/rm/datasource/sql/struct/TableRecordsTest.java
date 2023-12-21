@@ -38,7 +38,6 @@ import java.util.List;
 
 /**
  * the table records test
- * @author will
  */
 public class TableRecordsTest {
 

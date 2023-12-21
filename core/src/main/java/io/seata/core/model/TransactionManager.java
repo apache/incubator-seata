@@ -23,7 +23,6 @@ import io.seata.core.exception.TransactionException;
  *
  * Define a global transaction and control it.
  *
- * @author sharajava
  */
 public interface TransactionManager {
 

@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type My sql insert executor.
  *
- * @author jsbxyyx
  */
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultable {

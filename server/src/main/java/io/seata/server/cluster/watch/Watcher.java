@@ -19,7 +19,6 @@ package io.seata.server.cluster.watch;
 import static io.seata.server.cluster.watch.Watcher.Protocol.HTTP;
 
 /**
- * @author funkye
  */
 public class Watcher<T> {
 

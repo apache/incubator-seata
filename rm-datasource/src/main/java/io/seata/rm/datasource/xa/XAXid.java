@@ -21,7 +21,6 @@ import javax.transaction.xa.Xid;
 /**
  * Seata XA Mode defined XA-Xid.
  *
- * @author sharajava
  */
 public interface XAXid extends Xid {
 

@@ -39,7 +39,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Spring security config
  *
- * @author jameslcj
  */
 @Configuration(proxyBeanMethods = false)
 @EnableGlobalMethodSecurity(prePostEnabled = true)

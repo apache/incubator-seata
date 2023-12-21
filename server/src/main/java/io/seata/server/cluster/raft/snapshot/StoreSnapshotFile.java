@@ -24,7 +24,6 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import org.apache.commons.io.FileUtils;
 
 /**
- * @author funkye
  */
 public interface StoreSnapshotFile {
 

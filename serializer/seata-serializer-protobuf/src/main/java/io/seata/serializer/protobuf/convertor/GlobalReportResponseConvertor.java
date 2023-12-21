@@ -31,7 +31,6 @@ import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalReportResponse;
 
 /**
- * @author lorne.cl
  */
 public class GlobalReportResponseConvertor implements PbConvertor<GlobalReportResponse, GlobalReportResponseProto> {
     @Override

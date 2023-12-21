@@ -32,7 +32,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Geng Zhang
  */
 public class TransactionContextFilterTest {
 

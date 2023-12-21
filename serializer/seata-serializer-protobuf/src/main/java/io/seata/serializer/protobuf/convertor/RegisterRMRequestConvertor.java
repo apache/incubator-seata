@@ -23,7 +23,6 @@ import io.seata.serializer.protobuf.generated.RegisterRMRequestProto;
 import io.seata.core.protocol.RegisterRMRequest;
 
 /**
- * @author leizhiyuan
  */
 public class RegisterRMRequestConvertor implements PbConvertor<RegisterRMRequest, RegisterRMRequestProto> {
     @Override
