@@ -1,24 +1,23 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -79,13 +78,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
-    private static final int MAX_MERGE_SEND_MILLS = 10;
+    private static final int MAX_MERGE_SEND_MILLS = 1;
+    private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
-    private static final String MERGE_THREAD_NAME = "rpcMergeMessageSend";
-    protected static final Object MERGE_LOCK = new Object();
+    private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
+    protected final Object mergeLock = new Object();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -97,11 +97,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * Send via asynchronous thread {@link io.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
-    protected static final ConcurrentHashMap<String/*serverAddress*/, Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>>> BASKET_MAP = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
     private final NettyClientBootstrap clientBootstrap;
     private final NettyClientChannelManager clientChannelManager;
     private final NettyPoolKey.TransactionRole transactionRole;
-    private static volatile ExecutorService mergeSendExecutorService;
+    private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
 
@@ -109,25 +109,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public void init() {
         timerExecutor.scheduleAtFixedRate(() -> clientChannelManager.reconnect(getTransactionServiceGroup()), SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
-            startMergeSendThread();
+            mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
+                MAX_MERGE_SEND_THREAD,
+                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+            mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
         clientBootstrap.start();
-    }
-
-    private void startMergeSendThread() {
-        if (mergeSendExecutorService == null) {
-            synchronized (AbstractNettyRemoting.class) {
-                if (mergeSendExecutorService == null) {
-                    mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
-                            MAX_MERGE_SEND_THREAD,
-                            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                            new LinkedBlockingQueue<>(),
-                            new NamedThreadFactory(MERGE_THREAD_NAME, MAX_MERGE_SEND_THREAD));
-                    mergeSendExecutorService.submit(new MergedSendRunnable());
-                }
-            }
-        }
     }
 
     public AbstractNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
@@ -157,14 +147,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             futures.put(rpcMessage.getId(), messageFuture);
 
             // put message into basketMap
-            Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> roleMessage = CollectionUtils.computeIfAbsent(BASKET_MAP, serverAddress,
-                key -> {
-                    Map<NettyPoolKey.TransactionRole, BlockingQueue<RpcMessage>> map = new HashMap<>(2);
-                    map.put(NettyPoolKey.TransactionRole.TMROLE, new LinkedBlockingQueue<>());
-                    map.put(NettyPoolKey.TransactionRole.RMROLE, new LinkedBlockingQueue<>());
-                    return map;
-                });
-            BlockingQueue<RpcMessage> basket = roleMessage.get(transactionRole);
+            BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
+                key -> new LinkedBlockingQueue<>());
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
                     serverAddress, rpcMessage);
@@ -174,8 +158,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());
             }
             if (!isSending) {
-                synchronized (MERGE_LOCK) {
-                    MERGE_LOCK.notifyAll();
+                synchronized (mergeLock) {
+                    mergeLock.notifyAll();
                 }
             }
 
@@ -269,7 +253,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
+            LOGGER.error("Select the address failed: {}", ex.getMessage());
         }
         if (address == null) {
             throw new FrameworkException(NoAvailableService);
@@ -308,6 +292,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
     }
 
+    private String getThreadPrefix() {
+        return AbstractNettyRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
+    }
+
     /**
      * Get pool key function.
      *
@@ -339,35 +327,22 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     /**
      * The type Merged send runnable.
      */
-    private static class MergedSendRunnable implements Runnable {
+    private class MergedSendRunnable implements Runnable {
 
         @Override
         public void run() {
             while (true) {
-                if (BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))) {
-                    synchronized (MERGE_LOCK) {
-                        if (BASKET_MAP.values().stream().allMatch(map -> map.values().stream().allMatch(Collection::isEmpty))) {
-                            try {
-                                MERGE_LOCK.wait(MAX_MERGE_SEND_MILLS);
-                            } catch (InterruptedException e) {
-                            }
-                        }
+                synchronized (mergeLock) {
+                    try {
+                        mergeLock.wait(MAX_MERGE_SEND_MILLS);
+                    } catch (InterruptedException e) {
                     }
                 }
                 isSending = true;
-                BASKET_MAP.forEach((address, roleMessage) -> roleMessage.forEach((role, basket) -> {
+                basketMap.forEach((address, basket) -> {
                     if (basket.isEmpty()) {
                         return;
                     }
-
-                    AbstractNettyRemotingClient client;
-                    if (role.equals(NettyPoolKey.TransactionRole.RMROLE)) {
-                        client = RmNettyRemotingClient.getInstance();
-                    } else {
-                        client = TmNettyRemotingClient.getInstance();
-                    }
-
-                    ConcurrentHashMap<Integer, MessageFuture> clientFutures = client.getFutures();
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
                     while (!basket.isEmpty()) {
@@ -376,35 +351,35 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         mergeMessage.msgIds.add(msg.getId());
                     }
                     if (mergeMessage.msgIds.size() > 1) {
-                        printMergeMessageLog(clientFutures, mergeMessage);
+                        printMergeMessageLog(mergeMessage);
                     }
                     Channel sendChannel = null;
                     try {
                         // send batch message is sync request, but there is no need to get the return value.
                         // Since the messageFuture has been created before the message is placed in basketMap,
                         // the return value will be obtained in ClientOnResponseProcessor.
-                        sendChannel = client.getClientChannelManager().acquireChannel(address);
-                        client.sendAsyncRequest(sendChannel, mergeMessage);
+                        sendChannel = clientChannelManager.acquireChannel(address);
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
-                            client.destroyChannel(address, sendChannel);
+                            destroyChannel(address, sendChannel);
                         }
                         // fast fail
                         for (Integer msgId : mergeMessage.msgIds) {
-                            MessageFuture messageFuture = clientFutures.remove(msgId);
+                            MessageFuture messageFuture = futures.remove(msgId);
                             if (messageFuture != null) {
                                 messageFuture.setResultMessage(
-                                        new RuntimeException(String.format("%s is unreachable", address), e));
+                                    new RuntimeException(String.format("%s is unreachable", address), e));
                             }
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
-                }));
+                });
                 isSending = false;
             }
         }
 
-        private void printMergeMessageLog(ConcurrentHashMap<Integer, MessageFuture> clientFutures, MergedWarpMessage mergeMessage) {
+        private void printMergeMessageLog(MergedWarpMessage mergeMessage) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("merge msg size:{}", mergeMessage.msgIds.size());
                 for (AbstractMessage cm : mergeMessage.msgs) {
@@ -415,7 +390,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
                 }
                 sb.append("\n");
-                for (long l : clientFutures.keySet()) {
+                for (long l : futures.keySet()) {
                     sb.append(FUTURES_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
                 }
                 LOGGER.debug(sb.toString());
