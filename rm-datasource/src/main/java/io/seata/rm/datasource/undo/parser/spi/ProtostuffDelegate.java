@@ -22,7 +22,6 @@ import io.protostuff.runtime.Delegate;
  * The interface Protostuff delegate.
  *
  * @param <T> the type parameter
- * @author jsbxyyx
  */
 public interface ProtostuffDelegate<T> {
 

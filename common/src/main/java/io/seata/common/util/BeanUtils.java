@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The bean utils
  *
- * @author wangzhongxiang
  */
 public class BeanUtils {
 

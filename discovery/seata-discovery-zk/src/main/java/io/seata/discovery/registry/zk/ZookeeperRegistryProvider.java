@@ -21,7 +21,6 @@ import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = "ZK", order = 1)
 public class ZookeeperRegistryProvider implements RegistryProvider {

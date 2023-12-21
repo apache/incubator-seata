@@ -43,7 +43,6 @@ import java.util.concurrent.Executor;
 /**
  * The type Abstract connection proxy on XA mode.
  *
- * @author sharajava
  */
 public abstract class AbstractConnectionProxyXA implements Connection {
 

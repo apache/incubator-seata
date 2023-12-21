@@ -19,7 +19,6 @@ package io.seata.sqlparser.struct;
 /**
  * The sequence able.
  *
- * @author jsbxyyx
  */
 public interface Sequenceable {
 

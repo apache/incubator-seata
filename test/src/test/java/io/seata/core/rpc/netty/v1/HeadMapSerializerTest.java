@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Geng Zhang
  */
 class HeadMapSerializerTest {
 

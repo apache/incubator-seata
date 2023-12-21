@@ -23,7 +23,6 @@ import io.seata.core.rpc.RpcContext;
 /**
  * The type Branch register request.
  *
- * @author sharajava
  */
 public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
 

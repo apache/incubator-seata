@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
  * <p>1. load SEATA xid from brpc request in handleRequest</p>
  * <p>2. clear SEATA xid when brpc request done in aroundProcess</p>
  *
- * @author mxz0828@163.com
  */
 public class TransactionPropagationServerInterceptor extends AbstractInterceptor implements ProviderRpcFilter<Request> {
 

@@ -28,7 +28,6 @@ import io.seata.sqlparser.ParametersHolder;
 /**
  * The type Prepared statement proxy.
  *
- * @author sharajava
  */
 public class PreparedStatementProxy extends AbstractPreparedStatementProxy
     implements PreparedStatement, ParametersHolder {

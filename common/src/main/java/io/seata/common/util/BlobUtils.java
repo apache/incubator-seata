@@ -26,8 +26,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 /**
  * The type Blob utils.
  *
- * @author slievrly
- * @author Geng Zhang
  */
 public class BlobUtils {
 

@@ -19,7 +19,6 @@ package io.seata.console.constant;
 /**
  * The Code for the response of message
  *
- * @author jameslcj
  */
 public enum Code {
     /**

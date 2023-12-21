@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 /**
  * The type Constants.
  *
- * @author slievrly
  */
 public interface Constants {
 

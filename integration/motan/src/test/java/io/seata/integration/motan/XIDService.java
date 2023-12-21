@@ -17,7 +17,6 @@
 package io.seata.integration.motan;
 
 /**
- * @author slievrly
  */
 public interface XIDService {
     String getXid();

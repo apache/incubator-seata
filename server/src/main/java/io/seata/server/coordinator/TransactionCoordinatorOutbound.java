@@ -24,7 +24,6 @@ import io.seata.server.session.GlobalSession;
 /**
  * send outbound request to RM.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.1.0
  */
 public interface TransactionCoordinatorOutbound {

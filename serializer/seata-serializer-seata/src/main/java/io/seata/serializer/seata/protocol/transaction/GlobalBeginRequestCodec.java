@@ -24,7 +24,6 @@ import io.seata.core.protocol.transaction.GlobalBeginRequest;
 /**
  * The type Global begin request codec.
  *
- * @author zhangsen
  */
 public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec {
 

@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.interceptor;
 /**
  * The enum Seata interceptor position.
  *
- * @author wang.liang
  */
 public enum SeataInterceptorPosition {
 

@@ -29,7 +29,6 @@ import java.util.Scanner;
 import javax.crypto.Cipher;
 
 /**
- * @author funkye
  */
 public class ConfigTools {
 

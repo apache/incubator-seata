@@ -21,7 +21,6 @@ import java.io.Serializable;
 /**
  * The interface Merge message.
  *
- * @author slievrly
  */
 public interface MergeMessage extends Serializable {
 }

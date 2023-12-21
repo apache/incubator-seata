@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * zookeeper path as /registry/zk/
  *
- * @author crazier.huang
  */
 public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegisterServiceImpl.class);

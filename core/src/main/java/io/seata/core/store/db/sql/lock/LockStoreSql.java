@@ -19,7 +19,6 @@ package io.seata.core.store.db.sql.lock;
 /**
  * the database lock store sql interface
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
 public interface LockStoreSql {

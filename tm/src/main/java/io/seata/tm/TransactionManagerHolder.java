@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default transaction manager.
  *
- * @author sharajava
  */
 public class TransactionManagerHolder {
 

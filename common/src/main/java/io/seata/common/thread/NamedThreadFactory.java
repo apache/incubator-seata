@@ -27,8 +27,6 @@ import io.seata.common.util.CollectionUtils;
 /**
  * The type Named thread factory.
  *
- * @author slievrly
- * @author ggndnn
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final static Map<String, AtomicInteger> PREFIX_COUNTER = new ConcurrentHashMap<>();

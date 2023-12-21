@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
- * @author zhangheng
  **/
 @Import(SpringApplicationContextProvider.class)
 @org.springframework.context.annotation.Configuration

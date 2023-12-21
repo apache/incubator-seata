@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type raft tx coordinator.
- * @author funkye
  */
 public class RaftCoordinator extends DefaultCoordinator implements ApplicationListener<ClusterChangeEvent> {
 

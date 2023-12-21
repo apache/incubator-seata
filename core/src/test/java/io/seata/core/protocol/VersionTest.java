@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Test {@link Version}.
  *
- * @author wang.liang
  */
 public class VersionTest {
 

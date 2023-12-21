@@ -21,7 +21,6 @@ import java.lang.reflect.Array;
 /**
  * The type Array utils.
  *
- * @author wang.liang
  */
 public class ArrayUtils {
 

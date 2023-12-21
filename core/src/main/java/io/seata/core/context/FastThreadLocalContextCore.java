@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * The type Fast Thread local context core.
  *
- * @author ph3636
  */
 @LoadLevel(name = "FastThreadLocalContextCore", order = Integer.MIN_VALUE + 1)
 public class FastThreadLocalContextCore implements ContextCore {

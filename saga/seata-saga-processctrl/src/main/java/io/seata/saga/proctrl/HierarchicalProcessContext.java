@@ -21,7 +21,6 @@ import java.util.Map;
 /**
  * Hierarchical process context
  *
- * @author lorne.cl
  */
 public interface HierarchicalProcessContext extends ProcessContext {
 

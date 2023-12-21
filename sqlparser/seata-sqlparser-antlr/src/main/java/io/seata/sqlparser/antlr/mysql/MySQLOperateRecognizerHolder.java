@@ -24,7 +24,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The class MySqlOperateRecognizerHolder
  *
- * @author zhihou
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {

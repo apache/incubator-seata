@@ -44,7 +44,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Geng Zhang
  */
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;

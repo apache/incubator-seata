@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author liuqiufeng
  */
 @Configuration(proxyBeanMethods = false)
 public class JacksonConfig {

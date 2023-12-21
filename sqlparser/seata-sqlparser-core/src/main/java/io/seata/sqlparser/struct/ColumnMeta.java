@@ -21,7 +21,6 @@ import java.util.Objects;
 /**
  * The type Column meta.
  *
- * @author sharajava
  */
 public class ColumnMeta {
     private String tableCat;

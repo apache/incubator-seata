@@ -19,7 +19,6 @@ package io.seata.common.loader;
 /**
  * the scope of the extension
  *
- * @author haozhibei
  */
 public enum Scope {
     /**

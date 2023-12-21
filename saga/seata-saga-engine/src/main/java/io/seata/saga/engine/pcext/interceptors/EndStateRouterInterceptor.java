@@ -29,7 +29,6 @@ import io.seata.saga.statelang.domain.State;
 /**
  * EndStateRouter Interceptor
  *
- * @author lorne.cl
  */
 @LoadLevel(name = "EndState", order = 100)
 public class EndStateRouterInterceptor implements StateRouterInterceptor {

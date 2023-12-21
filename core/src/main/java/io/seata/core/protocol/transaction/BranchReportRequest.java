@@ -24,7 +24,6 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch report request.
  *
- * @author slievrly
  */
 public class BranchReportRequest extends AbstractTransactionRequestToTC {
 

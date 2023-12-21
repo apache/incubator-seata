@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Transaction propagation filter.
  *
- * @author sharajava
  */
 @Activate(group = {DubboConstants.PROVIDER, DubboConstants.CONSUMER}, order = 100)
 public class AlibabaDubboTransactionPropagationFilter implements Filter {

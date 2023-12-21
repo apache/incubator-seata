@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * the database lock store factory
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.2.0
  */
 public class LockStoreSqlFactory {

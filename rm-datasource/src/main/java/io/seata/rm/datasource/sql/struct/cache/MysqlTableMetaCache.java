@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Table meta cache.
  *
- * @author sharajava
  */
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MysqlTableMetaCache extends AbstractTableMetaCache {

@@ -46,7 +46,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 /**
  * The table meta fetch test.
  *
- * @author funkye
  */
 public class MariadbTableMetaCacheTest {
 

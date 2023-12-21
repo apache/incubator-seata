@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 
 /**
- * @author ph3636
  */
 public class ChannelUtil {
 

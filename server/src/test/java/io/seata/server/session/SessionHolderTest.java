@@ -42,7 +42,6 @@ import static java.io.File.separator;
 /**
  * The type Session holder test.
  *
- * @author Wu
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest

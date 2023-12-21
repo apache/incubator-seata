@@ -22,7 +22,6 @@ import io.seata.core.compressor.Compressor;
 /**
  * the Lz4 Compressor
  *
- * @author diguage
  */
 @LoadLevel(name = "LZ4")
 public class Lz4Compressor implements Compressor {

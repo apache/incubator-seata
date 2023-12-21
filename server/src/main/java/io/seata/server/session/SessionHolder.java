@@ -55,7 +55,6 @@ import static io.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 /**
  * The type Session holder.
  *
- * @author sharajava
  */
 public class SessionHolder {
 

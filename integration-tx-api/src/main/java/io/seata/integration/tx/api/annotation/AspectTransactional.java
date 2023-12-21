@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.tm.api.transaction.Propagation;
 
 /**
- * @author funkye
  */
 public class AspectTransactional {
     

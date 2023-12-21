@@ -19,7 +19,6 @@ package io.seata.core.rpc.processor;
 /**
  * Currently used to associate first and second object.
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.3.0
  */
 public final class Pair<T1, T2> {

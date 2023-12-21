@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Tm rpc client test.
  *
- * @author slievrly xiajun.0706@163.com
  */
 public class TmNettyClientTest {
 

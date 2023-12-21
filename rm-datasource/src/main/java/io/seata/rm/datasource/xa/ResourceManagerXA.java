@@ -39,7 +39,6 @@ import static io.seata.core.constants.ConfigurationKeys.XA_CONNECTION_TWO_PHASE_
 /**
  * RM for XA mode.
  *
- * @author sharajava
  */
 public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
 

@@ -34,7 +34,6 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFa
 /**
  * The type Abstract exception handler.
  *
- * @author sharajava
  */
 public abstract class AbstractExceptionHandler {
 

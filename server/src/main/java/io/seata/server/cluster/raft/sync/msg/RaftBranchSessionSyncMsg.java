@@ -22,7 +22,6 @@ import io.seata.common.util.StringUtils;
 import io.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 
 /**
- * @author funkye
  */
 public class RaftBranchSessionSyncMsg extends RaftBaseMsg {
 

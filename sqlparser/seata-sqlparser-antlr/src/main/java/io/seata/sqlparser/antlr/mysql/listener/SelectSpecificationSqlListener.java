@@ -24,7 +24,6 @@ import io.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 import java.util.List;
 
 /**
- * @author houzhi
  */
 public class SelectSpecificationSqlListener extends MySqlParserBaseListener {
 

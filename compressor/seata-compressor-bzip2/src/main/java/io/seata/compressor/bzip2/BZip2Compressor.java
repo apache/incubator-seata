@@ -22,7 +22,6 @@ import io.seata.core.compressor.Compressor;
 /**
  * the BZip2 Compressor
  *
- * @author ph3636
  */
 @LoadLevel(name = "BZIP2")
 public class BZip2Compressor implements Compressor {

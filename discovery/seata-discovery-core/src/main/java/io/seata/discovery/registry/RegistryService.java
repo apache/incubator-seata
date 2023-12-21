@@ -33,7 +33,6 @@ import io.seata.config.ConfigurationFactory;
  * The interface Registry service.
  *
  * @param <T> the type parameter
- * @author slievrly
  */
 public interface RegistryService<T> {
 

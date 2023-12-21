@@ -34,7 +34,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Table meta cache.
  *
- * @author jaspercloud
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlTableMetaCache extends AbstractTableMetaCache {

@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The SpringMVC Interceptor.
  *
- * @author wangxb
- * @author wang.liang
  */
 public class TransactionPropagationInterceptor implements HandlerInterceptorAdapter {
 

@@ -22,7 +22,6 @@ import io.seata.core.compressor.Compressor;
 /**
  * the Zstd Compressor
  *
- * @author chd
  */
 @LoadLevel(name = "ZSTD")
 public class ZstdCompressor implements Compressor {

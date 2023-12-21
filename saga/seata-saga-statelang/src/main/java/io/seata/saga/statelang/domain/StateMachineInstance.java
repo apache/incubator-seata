@@ -23,7 +23,6 @@ import java.util.Map;
 /**
  * StateMachine execution instance
  *
- * @author lorne.cl
  */
 public interface StateMachineInstance {
 

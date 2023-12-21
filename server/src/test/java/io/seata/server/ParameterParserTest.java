@@ -25,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * The type parameter parser test
  *
- * @author xingfudeshi@gmail.com
  */
 @SpringBootTest
 public class ParameterParserTest {

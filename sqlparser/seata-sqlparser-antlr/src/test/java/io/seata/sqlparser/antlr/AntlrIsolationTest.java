@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 /**
- * @author zhihou
  */
 public class AntlrIsolationTest {
 

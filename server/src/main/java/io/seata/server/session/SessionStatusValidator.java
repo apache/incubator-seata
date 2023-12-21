@@ -21,7 +21,6 @@ import io.seata.core.model.GlobalStatus;
 /**
  * The type change status validator.
  *
- * @author Bughue
  */
 public class SessionStatusValidator {
 

@@ -56,9 +56,6 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 /**
  * The Rm netty client.
  *
- * @author slievrly
- * @author zhaojun
- * @author zhangchenghui.dev@gmail.com
  */
 
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {

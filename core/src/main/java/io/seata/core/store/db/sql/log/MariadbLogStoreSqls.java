@@ -20,7 +20,6 @@ import io.seata.common.loader.LoadLevel;
 
 /**
  * Database log store mariadb sql
- * @author funkye
  */
 @LoadLevel(name = "mariadb")
 public class MariadbLogStoreSqls extends MysqlLogStoreSqls {

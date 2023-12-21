@@ -26,7 +26,6 @@ import java.util.Map;
 /**
  * ScriptTaskState parser
  *
- * @author lorne.cl
  */
 public class ScriptTaskStateParser extends AbstractTaskStateParser implements StateParser<ScriptTaskState> {
 

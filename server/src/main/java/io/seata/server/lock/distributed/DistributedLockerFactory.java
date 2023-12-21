@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Distributed locker factory
- * @author zhongxiang.wang
  */
 public class DistributedLockerFactory {
 

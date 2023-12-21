@@ -23,7 +23,6 @@ import io.seata.core.model.GlobalStatus;
 /**
  * GlobalTransaction API
  *
- * @author sharajava
  */
 public class GlobalTransactionContext {
 

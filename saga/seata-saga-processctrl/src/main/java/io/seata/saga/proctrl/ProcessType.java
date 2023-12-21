@@ -19,8 +19,6 @@ package io.seata.saga.proctrl;
 /**
  * Process type
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public enum ProcessType {
 

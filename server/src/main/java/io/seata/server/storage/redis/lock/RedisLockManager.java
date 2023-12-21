@@ -25,7 +25,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
 /**
- * @author funkye
  */
 @LoadLevel(name = "redis")
 public class RedisLockManager extends AbstractLockManager implements Initialize {

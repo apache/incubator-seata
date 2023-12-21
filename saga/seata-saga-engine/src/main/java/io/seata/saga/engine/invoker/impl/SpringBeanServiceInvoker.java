@@ -48,7 +48,6 @@ import org.springframework.context.ApplicationContextAware;
 /**
  * SpringBean Service Invoker
  *
- * @author lorne.cl
  */
 public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationContextAware {
 

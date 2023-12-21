@@ -31,8 +31,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Customizable Business Processor
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public class CustomizeBusinessProcessor implements BusinessProcessor {
 

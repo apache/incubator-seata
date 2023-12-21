@@ -42,8 +42,6 @@ import static io.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 /**
  * The abstract datasource provider
  * 
- * @author zhangsen
- * @author will
  */
 public abstract class AbstractDataSourceProvider implements DataSourceProvider, Initialize {
 

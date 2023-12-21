@@ -22,7 +22,6 @@ import io.seata.saga.statelang.domain.DomainConstants;
 /**
  * Used to compensate the state of the sub state machine, inherited from ServiceTaskState
  *
- * @author lorne.cl
  */
 public class CompensateSubStateMachineStateImpl extends ServiceTaskStateImpl implements CompensateSubStateMachineState {
     public CompensateSubStateMachineStateImpl() {

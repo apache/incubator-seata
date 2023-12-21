@@ -24,7 +24,6 @@ import org.apache.skywalking.apm.agent.core.logging.api.LogManager;
 import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 /**
- * @author zhaoyuguang
  */
 public class SWSeataUtils {
 

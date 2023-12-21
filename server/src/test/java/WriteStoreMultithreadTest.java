@@ -32,7 +32,6 @@ import java.util.concurrent.CountDownLatch;
 /**
  * The interface Session storable.
  *
- * @author lizhao
  */
 public class WriteStoreMultithreadTest {
     private static String vgroup = "vgroupMock";

@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * The page util test.
  *
- * @author lvekee@734843455@qq.com
  */
 public class PageUtilTest {
 

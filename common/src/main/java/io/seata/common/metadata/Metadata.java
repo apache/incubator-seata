@@ -28,7 +28,6 @@ import io.seata.common.store.StoreMode;
 import io.seata.common.util.StringUtils;
 
 /**
- * @author funkye
  */
 public class Metadata {
 

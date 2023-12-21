@@ -19,8 +19,6 @@ package io.seata.integration.tx.api.json;
 import java.io.IOException;
 
 /**
- * @author leezongjie
- * @author zouwei
  */
 public interface JsonParser {
 

@@ -38,7 +38,6 @@ import org.springframework.context.ApplicationContext;
 
 
 /**
- * @author zhangsen
  */
 @SpringBootTest
 public class LogStoreDataBaseDAOTest {

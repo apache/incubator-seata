@@ -43,7 +43,6 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author will
  */
 public abstract class BaseOracleRecognizer extends BaseRecognizer {
 

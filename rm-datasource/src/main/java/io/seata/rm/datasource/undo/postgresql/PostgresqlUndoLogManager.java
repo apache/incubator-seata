@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author japsercloud
  */
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlUndoLogManager extends AbstractUndoLogManager {

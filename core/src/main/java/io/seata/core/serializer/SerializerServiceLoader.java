@@ -23,7 +23,6 @@ import io.seata.common.util.ReflectionUtil;
 /**
  * The Service Loader for the interface {@link Serializer}
  *
- * @author wang.liang
  */
 public final class SerializerServiceLoader {
 

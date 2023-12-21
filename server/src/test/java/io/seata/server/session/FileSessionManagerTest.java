@@ -57,7 +57,6 @@ import static io.seata.server.session.SessionHolder.CONFIG;
 /**
  * The type File based session manager test.
  *
- * @author tianming.xm @gmail.com
  * @since 2019 /1/22
  */
 @SpringBootTest

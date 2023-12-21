@@ -18,7 +18,6 @@ package io.seata.core.store;
 
 /**
  * Default distributed locker
- * @author zhongxiang.wang
  */
 public class DefaultDistributedLocker implements DistributedLocker {
 

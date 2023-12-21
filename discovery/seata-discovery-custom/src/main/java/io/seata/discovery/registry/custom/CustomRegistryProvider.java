@@ -27,7 +27,6 @@ import io.seata.discovery.registry.RegistryType;
 import java.util.stream.Stream;
 
 /**
- * @author ggndnn
  */
 @LoadLevel(name = "Custom")
 public class CustomRegistryProvider implements RegistryProvider {

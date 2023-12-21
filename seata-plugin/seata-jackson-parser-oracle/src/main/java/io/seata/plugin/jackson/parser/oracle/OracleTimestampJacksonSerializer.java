@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * @author jsbxyyx
  */
 @LoadLevel(name = "oracleTimestamp")
 public class OracleTimestampJacksonSerializer implements JacksonSerializer<oracle.sql.TIMESTAMP> {

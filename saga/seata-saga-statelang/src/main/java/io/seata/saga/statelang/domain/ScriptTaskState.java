@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * ScriptTask State, execute scripts
  *
- * @author lorne.cl
  */
 public interface ScriptTaskState extends TaskState {
 

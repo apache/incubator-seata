@@ -37,7 +37,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Mariadb insert recognizer test.
  *
- * @author funkye
  */
 public class MariadbInsertRecognizerTest extends AbstractRecognizerTest {
 

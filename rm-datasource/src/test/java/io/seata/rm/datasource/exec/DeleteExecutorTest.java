@@ -49,7 +49,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * @author will
  */
 public class DeleteExecutorTest {
 

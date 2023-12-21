@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Deliver event to event consumer directly
  *
- * @author lorne.cl
  */
 public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 

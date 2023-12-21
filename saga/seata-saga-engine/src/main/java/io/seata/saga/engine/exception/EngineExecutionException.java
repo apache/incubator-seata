@@ -22,7 +22,6 @@ import io.seata.common.exception.FrameworkException;
 /**
  * StateMachineEngine Execution Exception
  *
- * @author lorne.cl
  */
 public class EngineExecutionException extends FrameworkException {
 

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type My sql insert recognizer test.
  *
- * @author hanwen created at 2019-01-25
  */
 public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
 

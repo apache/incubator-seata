@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Global commit response test.
  *
- * @author xiajun.0706 @163.com
  * @since 2019 /1/24
  */
 public class GlobalCommitResponseTest {

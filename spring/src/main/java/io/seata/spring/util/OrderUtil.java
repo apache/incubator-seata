@@ -23,7 +23,6 @@ import org.springframework.core.annotation.OrderUtils;
 /**
  * The type Order util.
  *
- * @author wang.liang
  */
 public class OrderUtil {
 

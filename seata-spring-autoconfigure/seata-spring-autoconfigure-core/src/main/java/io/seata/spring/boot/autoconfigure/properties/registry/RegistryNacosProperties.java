@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = REGISTRY_NACOS_PREFIX)
@@ -35,6 +34,7 @@ public class RegistryNacosProperties {
     private String password;
     private String accessKey;
     private String secretKey;
+    private String ramRoleName;
     private String application = "seata-server";
     private String slbPattern;
     private String contextPath;
@@ -141,7 +141,17 @@ public class RegistryNacosProperties {
         return clientApplication;
     }
 
-    public void setClientApplication(String clientApplication) {
+    public RegistryNacosProperties setClientApplication(String clientApplication) {
         this.clientApplication = clientApplication;
+        return this;
+    }
+
+    public String getRamRoleName() {
+        return ramRoleName;
+    }
+
+    public RegistryNacosProperties setRamRoleName(String ramRoleName) {
+        this.ramRoleName = ramRoleName;
+        return this;
     }
 }

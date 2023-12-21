@@ -24,7 +24,6 @@ import io.seata.integration.tx.api.remoting.RemotingDesc;
 /**
  * sofa-rpc remoting bean parsing
  *
- * @author zhangsen
  */
 public class SofaRpcRemotingParser extends AbstractedRemotingParser {
 

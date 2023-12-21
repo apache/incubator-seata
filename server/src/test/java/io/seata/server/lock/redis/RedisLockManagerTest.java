@@ -38,8 +38,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
- * @author funkye
- * @author conghuhu
  */
 @SpringBootTest
 public class RedisLockManagerTest {

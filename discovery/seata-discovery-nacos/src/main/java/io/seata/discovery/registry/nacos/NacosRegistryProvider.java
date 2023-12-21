@@ -21,7 +21,6 @@ import io.seata.discovery.registry.RegistryService;
 import io.seata.discovery.registry.RegistryProvider;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @LoadLevel(name = "Nacos", order = 1)
 public class NacosRegistryProvider implements RegistryProvider {

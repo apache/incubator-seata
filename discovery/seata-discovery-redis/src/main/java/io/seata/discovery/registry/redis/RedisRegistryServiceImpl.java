@@ -53,7 +53,6 @@ import redis.clients.jedis.ScanResult;
 /**
  * The type Redis registry service.
  *
- * @author kl @kailing.pub
  */
 public class RedisRegistryServiceImpl implements RegistryService<RedisListener> {
 

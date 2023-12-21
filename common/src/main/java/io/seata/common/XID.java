@@ -21,7 +21,6 @@ import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 /**
  * The type Xid.
  *
- * @author slievrly
  */
 public class XID {
 

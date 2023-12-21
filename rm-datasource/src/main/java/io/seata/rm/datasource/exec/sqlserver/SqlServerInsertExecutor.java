@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type MS SqlServer insert executor.
  *
- * @author GoodBoyCoder
  */
 @LoadLevel(name = JdbcConstants.SQLSERVER, scope = Scope.PROTOTYPE)
 public class SqlServerInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {

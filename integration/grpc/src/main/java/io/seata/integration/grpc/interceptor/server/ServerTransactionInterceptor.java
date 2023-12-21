@@ -28,7 +28,6 @@ import io.seata.core.context.RootContext;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
 /**
- * @author eddyxu1213@126.com
  */
 public class ServerTransactionInterceptor implements ServerInterceptor {
 

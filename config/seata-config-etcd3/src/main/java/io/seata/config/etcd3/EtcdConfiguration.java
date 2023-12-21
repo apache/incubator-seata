@@ -68,7 +68,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 /**
  * The type Etcd configuration.
  *
- * @author xingfudeshi @gmail.com
  */
 public class EtcdConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfiguration.class);

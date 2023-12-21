@@ -26,7 +26,6 @@ import io.seata.server.session.SessionHolder;
 import io.seata.server.storage.raft.session.RaftSessionManager;
 
 /**
- * @author jianbin.chen
  */
 public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 

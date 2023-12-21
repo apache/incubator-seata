@@ -25,7 +25,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 /**
- * @author yuanguoyao
  */
 public class UndoLogDeleteRequestConvertor implements PbConvertor<UndoLogDeleteRequest, UndoLogDeleteRequestProto> {
     @Override
