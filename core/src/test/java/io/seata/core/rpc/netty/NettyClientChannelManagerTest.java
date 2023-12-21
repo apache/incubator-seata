@@ -52,7 +52,7 @@ class NettyClientChannelManagerTest {
     
     @Mock
     private Function<String, NettyPoolKey> poolKeyFunction;
-
+    
     private NettyClientConfig nettyClientConfig = new NettyClientConfig();
     
     @Mock
