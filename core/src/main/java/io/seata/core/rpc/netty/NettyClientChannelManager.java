@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -61,16 +60,13 @@ class NettyClientChannelManager {
 
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
 
-    private Function<String, NettyPoolKey> poolKeyBuilder;
+    private Function<String, NettyPoolKey> poolKeyFunction;
 
-    private Consumer<NettyPoolKey> poolKeyUpdater;
-
-    NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyBuilder,
-                                     final Consumer<NettyPoolKey> poolKeyUpdater, final NettyClientConfig clientConfig) {
+    NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
+                                     final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
-        this.poolKeyBuilder = poolKeyBuilder;
-        this.poolKeyUpdater = poolKeyUpdater;
+        this.poolKeyFunction = poolKeyFunction;
     }
 
     private GenericKeyedObjectPool.Config getNettyPoolConfig(final NettyClientConfig clientConfig) {
@@ -255,9 +251,9 @@ class NettyClientChannelManager {
         }
         Channel channelFromPool;
         try {
-            NettyPoolKey nettyPoolKey = poolKeyMap.computeIfAbsent(serverAddress, key -> poolKeyBuilder.apply(key));
-            poolKeyUpdater.accept(nettyPoolKey);
-            channelFromPool = nettyClientKeyPool.borrowObject(nettyPoolKey);
+            NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
+            poolKeyMap.put(serverAddress, currentPoolKey);
+            channelFromPool = nettyClientKeyPool.borrowObject(currentPoolKey);
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);

@@ -19,7 +19,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
@@ -243,19 +242,10 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    protected Function<String, NettyPoolKey> getPoolKeyBuilder() {
+    protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return severAddress -> {
             RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup, getExtraData());
             return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, severAddress, message);
-        };
-    }
-
-    @Override
-    protected Consumer<NettyPoolKey> getPoolKeyUpdater() {
-        return nettyPoolKey -> {
-            RegisterTMRequest message = (RegisterTMRequest) nettyPoolKey.getMessage();
-            message.setApplicationId(applicationId);
-            message.setTransactionServiceGroup(transactionServiceGroup);
         };
     }
 
