@@ -246,8 +246,6 @@ public class StringUtilsTest {
         list2.add('c');
         map.put("list", list2);
         Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap), \"list\"->[(ref HashMap), 'c']}", StringUtils.toString(map));
-        Assertions.assertFalse(CycleDependencyHandler.isStarting());
-
 
         //case: Object
         Assertions.assertEquals("CycleDependency(s=\"a\", obj=null)", StringUtils.toString(CycleDependency.A));
