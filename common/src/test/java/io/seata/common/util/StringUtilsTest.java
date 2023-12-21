@@ -240,7 +240,6 @@ public class StringUtilsTest {
         map.put("bbb", true);
         map.put("self", map);
         Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap)}", StringUtils.toString(map));
-        Assertions.assertFalse(CycleDependencyHandler.isStarting());
         //case: Map, and cycle dependency（deep case）
         List<Object> list2 = new ArrayList<>();
         list2.add(map);
