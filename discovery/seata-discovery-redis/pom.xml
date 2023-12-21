@@ -39,5 +39,10 @@
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.microwww</groupId>
+            <artifactId>redis-server</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
