@@ -25,7 +25,6 @@ import static io.seata.common.DefaultValues.DEFAULT_CLIENT_LOCK_RETRY_TIMES;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 
 /**
- * @author xingfudeshi@gmail.com
  */
 @Component
 @ConfigurationProperties(prefix = LOCK_PREFIX)

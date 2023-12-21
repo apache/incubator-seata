@@ -32,8 +32,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.HTTP_PREFIX;
 /**
  * Auto bean add for spring webmvc if in springboot env.
  *
- * @author wangxb
- * @author wang.liang
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication

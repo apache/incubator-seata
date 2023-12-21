@@ -60,7 +60,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 /**
  * Undo log manager test for PolarDB-X
  *
- * @author hsien999
  **/
 public class PolarDBXUndoLogManagerTest {
 

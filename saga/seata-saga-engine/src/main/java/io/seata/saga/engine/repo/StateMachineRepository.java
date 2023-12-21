@@ -24,7 +24,6 @@ import org.springframework.core.io.Resource;
 /**
  * StateMachineRepository
  *
- * @author lorne.cl
  */
 public interface StateMachineRepository {
 

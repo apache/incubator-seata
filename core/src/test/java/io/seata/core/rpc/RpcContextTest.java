@@ -24,8 +24,6 @@ import java.util.HashSet;
 /**
  * RpcContext Test
  * 
- * @author kaitithoma
- * @author Danaykap
  * 
  *
  */

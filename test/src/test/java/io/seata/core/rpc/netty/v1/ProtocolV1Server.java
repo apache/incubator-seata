@@ -37,7 +37,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Geng Zhang
  */
 public class ProtocolV1Server {
 

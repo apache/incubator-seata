@@ -22,7 +22,6 @@ import io.seata.core.protocol.RegisterTMResponse;
 /**
  * The type Register tm response codec.
  *
- * @author zhangsen
  */
 public class RegisterTMResponseCodec extends AbstractIdentifyResponseCodec {
 

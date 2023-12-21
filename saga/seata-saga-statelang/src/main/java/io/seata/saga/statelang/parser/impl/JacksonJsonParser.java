@@ -32,7 +32,6 @@ import java.util.List;
 /**
  * JsonParser implement by Jackson
  *
- * @author lorne.cl
  */
 @LoadLevel(name = JacksonJsonParser.NAME)
 public class JacksonJsonParser implements JsonParser {

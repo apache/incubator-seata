@@ -25,7 +25,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 /**
- * @author leezongjie
  */
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 

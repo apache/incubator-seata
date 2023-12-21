@@ -27,7 +27,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 
 /**
- * @author leizhiyuan
  */
 public class BranchReportRequestConvertor implements PbConvertor<BranchReportRequest, BranchReportRequestProto> {
     @Override

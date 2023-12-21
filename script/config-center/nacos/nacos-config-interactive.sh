@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-# author:wangyuewen
-
 # shellcheck disable=SC2039,SC2162,SC2046,SC2013,SC2002,SC2086
 echo -e "Please enter the host of nacos.\n请输入nacos的host [localhost]:"
 read -p ">>> " host

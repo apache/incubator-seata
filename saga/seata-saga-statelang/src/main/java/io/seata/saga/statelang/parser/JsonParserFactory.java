@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * JsonParserFactory
  *
- * @author lorne.cl
  */
 public class JsonParserFactory {
 

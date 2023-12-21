@@ -28,7 +28,6 @@ import io.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 
 /**
- * @author leizhiyuan
  */
 public class BranchRegisterResponseConvertor
     implements PbConvertor<BranchRegisterResponse, BranchRegisterResponseProto> {

@@ -19,7 +19,6 @@ package io.seata.metrics.registry;
 /**
  * Supported metrics registry type
  *
- * @author zhengyangyong
  */
 public enum RegistryType {
     /**

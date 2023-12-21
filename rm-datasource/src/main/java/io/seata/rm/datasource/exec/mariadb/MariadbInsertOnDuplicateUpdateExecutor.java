@@ -25,7 +25,6 @@ import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author funkye
  */
 @LoadLevel(name = JdbcConstants.MARIADB, scope = Scope.PROTOTYPE)
 public class MariadbInsertOnDuplicateUpdateExecutor extends MySQLInsertOnDuplicateUpdateExecutor {

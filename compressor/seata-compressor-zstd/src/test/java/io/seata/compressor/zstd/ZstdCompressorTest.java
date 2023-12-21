@@ -24,7 +24,6 @@ import java.util.UUID;
 /**
  * the Zstd Compressor test
  *
- * @author chd
  */
 public class ZstdCompressorTest {
 

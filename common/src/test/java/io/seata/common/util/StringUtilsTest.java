@@ -43,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * The type String utils test.
  *
- * @author Otis.z
- * @author Geng Zhang
  */
 public class StringUtilsTest {
 

@@ -24,7 +24,6 @@ import java.util.Date;
 /**
  * The type Date util.
  *
- * @author slievrly
  */
 public class DateUtil {
 

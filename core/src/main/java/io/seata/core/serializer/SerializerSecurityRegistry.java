@@ -40,7 +40,6 @@ import io.seata.core.protocol.ResultCode;
 
 /**
  * Serializer Security Registry
- * @author funkye
  */
 public class SerializerSecurityRegistry {
     private static final Set<Class<?>> ALLOW_CLAZZ_SET = new HashSet<>();

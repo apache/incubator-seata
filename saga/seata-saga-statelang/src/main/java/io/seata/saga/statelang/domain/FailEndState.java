@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Fail End State
  *
- * @author lorne.cl
  */
 public interface FailEndState extends EndState {
 

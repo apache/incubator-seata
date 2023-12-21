@@ -19,7 +19,6 @@ package io.seata.core.model;
 /**
  * Generic return result class
  *
- * @author zjinlei
  */
 public class Result<T> {
 

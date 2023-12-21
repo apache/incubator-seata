@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 /**
  * Exception match evaluator expression
  *
- * @author ptyin
  */
 public class ExceptionMatchExpression implements Expression {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionMatchExpression.class);

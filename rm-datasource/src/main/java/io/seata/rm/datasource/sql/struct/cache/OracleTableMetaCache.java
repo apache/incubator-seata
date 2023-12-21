@@ -38,7 +38,6 @@ import java.util.Map;
 /**
  * The type Table meta cache.
  *
- * @author ygy
  */
 @LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleTableMetaCache extends AbstractTableMetaCache {

@@ -22,7 +22,6 @@ import io.seata.console.param.BaseParam;
 
 /**
  * Global lock param
- * @author zhongxiang.wang
  */
 public class GlobalLockParam extends BaseParam implements Serializable {
 

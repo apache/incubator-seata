@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 /**
  * AntlrMySQLInsertRecognizer
  *
- * @author zhihou
  */
 public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
 

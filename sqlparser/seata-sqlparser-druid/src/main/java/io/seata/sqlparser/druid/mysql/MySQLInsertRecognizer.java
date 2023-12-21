@@ -42,7 +42,6 @@ import io.seata.sqlparser.struct.SqlMethodExpr;
 /**
  * The type My sql insert recognizer.
  *
- * @author sharajava
  */
 public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLInsertRecognizer {
 

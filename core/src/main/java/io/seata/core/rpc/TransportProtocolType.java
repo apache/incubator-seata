@@ -19,7 +19,6 @@ package io.seata.core.rpc;
 /**
  * The enum Transport protocol type.
  *
- * @author slievrly
  */
 public enum TransportProtocolType {
     /**

@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 /**
  * ensure the shutdownHook is singleton
  *
- * @author 563868273@qq.com
  */
 public class ShutdownHook extends Thread {
 

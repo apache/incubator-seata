@@ -17,7 +17,6 @@
 package io.seata.config;
 
 /**
- * @author wangwei-ying
  */
 public interface ConfigProperty {
     final String ENV_PROPERTY_KEY = "seataEnv";

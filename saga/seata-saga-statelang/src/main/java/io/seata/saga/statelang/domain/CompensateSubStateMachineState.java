@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Compensate SubStateMachine State
  *
- * @author lorne.cl
  */
 public interface CompensateSubStateMachineState extends ServiceTaskState {
 

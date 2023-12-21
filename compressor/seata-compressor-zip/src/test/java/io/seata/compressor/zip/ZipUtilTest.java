@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 /**
  * the Zip Util test
  *
- * @author ph3636
  */
 public class ZipUtilTest {
 

@@ -25,8 +25,6 @@ import io.seata.rm.datasource.SeataDataSourceProxy;
 /**
  * the type data source proxy holder
  *
- * @author xingfudeshi@gmail.com
- * @author selfishlover
  */
 public class DataSourceProxyHolder {
 

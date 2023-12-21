@@ -33,7 +33,6 @@ import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 /**
- * @author slievrly
  */
 public class BasePropertiesTest {
     protected static AnnotationConfigApplicationContext applicationContex;

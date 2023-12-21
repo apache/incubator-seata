@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The type Keyword checker factory.
  *
- * @author Wu
  */
 public class EscapeHandlerFactory {
 

@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Saga resource manager
  *
- * @author lorne.cl
  */
 public class SagaResourceManager extends AbstractResourceManager {
 

@@ -17,7 +17,6 @@
 package io.seata.common.loader;
 
 /**
- * @author liuqiufeng
  */
 @LoadLevel(name = "JapaneseHello", order = Integer.MAX_VALUE)
 public class JapaneseHello implements Hello2{

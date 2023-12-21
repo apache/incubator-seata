@@ -41,7 +41,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 /**
  * Table meta cache factory
  *
- * @author guoyao
  */
 public class TableMetaCacheFactory {
 

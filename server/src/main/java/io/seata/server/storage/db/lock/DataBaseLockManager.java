@@ -32,7 +32,6 @@ import io.seata.server.session.GlobalSession;
 /**
  * The type db lock manager.
  *
- * @author zjinlei
  */
 @LoadLevel(name = "db")
 public class DataBaseLockManager extends AbstractLockManager implements Initialize {

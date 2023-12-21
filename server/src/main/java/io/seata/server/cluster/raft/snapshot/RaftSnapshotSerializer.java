@@ -32,7 +32,6 @@ import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerType;
 
 /**
- * @author funkye
  */
 public class RaftSnapshotSerializer {
 

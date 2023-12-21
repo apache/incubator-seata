@@ -65,7 +65,6 @@ import org.springframework.context.ApplicationContext;
 /**
  * The type DefaultCoordinator test.
  *
- * @author leizhiyuan
  */
 @SpringBootTest
 public class DefaultCoordinatorTest {

@@ -27,7 +27,6 @@ import java.util.Properties;
 /**
  * The Yaml Processor.
  *
- * @author zhixing
  */
 @LoadLevel(name = "yaml")
 public class ProcessorYaml implements Processor {

@@ -26,7 +26,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.sql.DataSource;
 
 /**
- * @author leezongjie
  */
 public class SpringFenceConfig extends CommonFenceConfig implements InitializingBean {
 

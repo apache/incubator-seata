@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * The type Message future test.
  *
- * @author guoyao
  */
 public class MessageFutureTest {
 

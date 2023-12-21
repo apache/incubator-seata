@@ -19,7 +19,6 @@ package io.seata.config.file;
 import java.util.Map;
 
 /**
- * @author wangwei-ying
  */
 public interface FileConfig {
     /**

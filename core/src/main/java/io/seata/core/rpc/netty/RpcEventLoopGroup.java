@@ -23,7 +23,6 @@ import java.util.concurrent.ThreadFactory;
 /**
  * The interface Rpc event loop group.
  *
- * @author slievrly
  */
 @Deprecated
 public interface RpcEventLoopGroup {

@@ -22,7 +22,6 @@ import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * @author Geng Zhang
  * @since 0.7.0
  */
 public interface ProtocolConstants {

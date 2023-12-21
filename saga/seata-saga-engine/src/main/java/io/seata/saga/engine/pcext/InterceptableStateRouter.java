@@ -21,7 +21,6 @@ import java.util.List;
 /**
  * Interceptable State Router
  *
- * @author lorne.cl
  */
 public interface InterceptableStateRouter extends StateRouter {
 

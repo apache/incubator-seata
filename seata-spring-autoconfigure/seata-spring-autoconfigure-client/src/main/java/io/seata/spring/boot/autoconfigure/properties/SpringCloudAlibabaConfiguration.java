@@ -28,7 +28,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Spring cloud alibaba configuration.
  *
- * @author slievrly
  */
 @Component
 @ConfigurationProperties(prefix = StarterConstants.SEATA_SPRING_CLOUD_ALIBABA_PREFIX)

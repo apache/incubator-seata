@@ -19,7 +19,6 @@ package io.seata.core.constants;
 /**
  * the RpcMessage Constants
  *
- * @author zhangchenghui.dev@gmail.com
  * @since 1.5.0
  */
 public class RpcMessageConstants {

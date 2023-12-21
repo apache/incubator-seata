@@ -21,7 +21,6 @@ package io.seata.common.executor;
  *
  * @param <T> the type parameter
  *
- * @author zhangsen
  */
 public interface Callback<T> {
 

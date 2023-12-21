@@ -21,7 +21,6 @@ import io.seata.common.util.StringUtils;
 /**
  * Validation exception throws if exception occurs in validation phase.
  *
- * @author ptyin
  */
 public class ValidationException extends RuntimeException {
 

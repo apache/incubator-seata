@@ -29,7 +29,6 @@ import io.seata.server.event.EventBusManager;
 /**
  * The type metric logback appender
  *
- * @author Bughue
  */
 public class MetricLogbackAppender extends AppenderBase<ILoggingEvent> {
 

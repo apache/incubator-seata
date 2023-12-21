@@ -22,7 +22,6 @@ import io.seata.metrics.Id;
 /**
  * Constants for meter id in tc
  *
- * @author zhengyangyong
  */
 public interface MeterIdConstants {
     Id COUNTER_ACTIVE = new Id(IdConstants.SEATA_TRANSACTION)

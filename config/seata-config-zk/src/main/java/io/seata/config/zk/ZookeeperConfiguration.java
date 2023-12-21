@@ -55,7 +55,6 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
 /**
  * The type Zookeeper configuration.
  *
- * @author crazier.huang
  */
 public class ZookeeperConfiguration extends AbstractConfiguration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);

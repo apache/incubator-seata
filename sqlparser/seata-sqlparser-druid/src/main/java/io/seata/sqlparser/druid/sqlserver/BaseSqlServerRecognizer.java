@@ -38,7 +38,6 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author GoodBoyCoder
  */
 public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
     /**

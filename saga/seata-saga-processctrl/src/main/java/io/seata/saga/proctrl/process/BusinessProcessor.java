@@ -22,8 +22,6 @@ import io.seata.saga.proctrl.ProcessContext;
 /**
  * Business logic processor
  *
- * @author jin.xie
- * @author lorne.cl
  */
 public interface BusinessProcessor {
 

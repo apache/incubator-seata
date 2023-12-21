@@ -26,7 +26,6 @@ import java.util.List;
 /**
  * The interface Tcc action.
  *
- * @author zhangsen
  */
 @LocalTCC
 public interface NormalTccAction {

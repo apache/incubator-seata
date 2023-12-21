@@ -25,7 +25,6 @@ import io.seata.saga.statelang.domain.DomainConstants;
 /**
  * Single selection status
  *
- * @author lorne.cl
  */
 public class ChoiceStateImpl extends BaseState implements ChoiceState {
 

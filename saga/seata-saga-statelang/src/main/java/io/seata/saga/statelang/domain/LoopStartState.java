@@ -19,7 +19,6 @@ package io.seata.saga.statelang.domain;
 /**
  * Loop Starter
  *
- * @author anselleeyy
  */
 public interface LoopStartState extends State {
 

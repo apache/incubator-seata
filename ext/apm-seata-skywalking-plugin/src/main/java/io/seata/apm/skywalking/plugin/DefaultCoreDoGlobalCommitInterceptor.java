@@ -31,7 +31,6 @@ import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 import java.lang.reflect.Method;
 
 /**
- * @author zhaoyuguang
  */
 public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsAroundInterceptor {
 

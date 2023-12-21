@@ -21,7 +21,6 @@ import io.seata.core.protocol.transaction.BranchReportResponse;
 /**
  * The type Branch report response codec.
  *
- * @author zhangsen
  */
 public class BranchReportResponseCodec extends AbstractTransactionResponseCodec {
 

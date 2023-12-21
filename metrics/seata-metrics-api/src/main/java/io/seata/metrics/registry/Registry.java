@@ -28,7 +28,6 @@ import io.seata.metrics.Timer;
 /**
  * Registry interface for metrics
  *
- * @author zhengyangyong
  */
 public interface Registry {
     <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier);

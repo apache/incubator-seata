@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type channel manager.
  *
- * @author slievrly
  */
 public class ChannelManager {
 

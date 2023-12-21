@@ -69,7 +69,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author guoyao, jsbxyyx
  */
 public class MySQLInsertExecutorTest {
 

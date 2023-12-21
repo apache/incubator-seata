@@ -38,7 +38,6 @@ import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 /**
  * The type at core.
  *
- * @author ph3636
  */
 public class ATCore extends AbstractCore {
     

@@ -19,7 +19,6 @@ package io.seata.integration.tx.api.interceptor;
 import java.lang.reflect.Method;
 
 /**
- * @author leezongjie
  */
 public interface InvocationWrapper {
 

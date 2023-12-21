@@ -24,7 +24,6 @@ import io.seata.sqlparser.EscapeHandlerFactory;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author will
  */
 public class PostgresqlEscapeHandlerTest {
 

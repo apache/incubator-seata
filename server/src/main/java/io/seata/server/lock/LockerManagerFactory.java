@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Lock manager factory.
  *
- * @author sharajava
  */
 public class LockerManagerFactory {
 

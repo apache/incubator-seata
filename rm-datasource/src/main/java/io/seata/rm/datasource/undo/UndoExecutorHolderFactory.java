@@ -25,7 +25,6 @@ import io.seata.common.util.CollectionUtils;
 /**
  * The Type UndoExecutorHolderFactory
  *
- * @author Zhibei Hao
  */
 public class UndoExecutorHolderFactory {
 

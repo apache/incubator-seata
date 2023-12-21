@@ -23,7 +23,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 /**
  * Undo update executor for PolarDB-X
  *
- * @author hsien999
  */
 public class PolarDBXUndoUpdateExecutor extends MySQLUndoUpdateExecutor {
     public PolarDBXUndoUpdateExecutor(SQLUndoLog sqlUndoLog) {

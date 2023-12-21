@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationContextAware;
 import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 /**
- * @author xingfudeshi@gmail.com
  * The type spring application context provider
  */
 public class SpringApplicationContextProvider implements ApplicationContextAware {

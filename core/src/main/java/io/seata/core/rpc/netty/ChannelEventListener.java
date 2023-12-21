@@ -21,7 +21,6 @@ import io.netty.channel.Channel;
 /**
  * The interface Channel event listener.
  *
- * @author slievrly
  */
 @Deprecated
 public interface ChannelEventListener {

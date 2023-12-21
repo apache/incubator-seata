@@ -45,7 +45,6 @@ import org.slf4j.MDC;
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  *
- * @author zhangsen
  */
 public class ActionInterceptorHandler {
 

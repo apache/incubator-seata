@@ -21,7 +21,6 @@ import io.seata.saga.statelang.domain.StateMachine;
 /**
  * Validation rule interface, use SPI to inject rules
  *
- * @author ptyin
  */
 public interface Rule {
     /**
