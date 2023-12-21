@@ -152,17 +152,6 @@ public interface RegistryService<T> {
                 .stream().filter(newAddressed::contains).collect(
                         Collectors.toList());
 
-        // empty addresses && currentClusterName == clusterName, enable push empty protection
-        if (CollectionUtils.isEmpty(inetSocketAddresses)) {
-            String txServiceGroupName = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
-            if (StringUtils.isNotBlank(txServiceGroupName)) {
-                String currentClusterName = getServiceGroup(txServiceGroupName);
-                if (Objects.equals(currentClusterName, clusterName)) {
-                    return;
-                }
-            }
-        }
-
         CURRENT_ADDRESS_MAP.put(clusterName, inetSocketAddresses);
     }
 
