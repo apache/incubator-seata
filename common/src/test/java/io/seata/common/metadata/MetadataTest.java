@@ -75,6 +75,10 @@ public class MetadataTest {
         Assertions.assertEquals(StoreMode.RAFT, metadata.getStoreMode());
     }
 
+    @Test void testIsRaftMode() {
+        Assertions.assertTrue(metadata.isRaftMode());
+    }
+
     @Test
     public void testGetClusterTerm() {
         Assertions.assertDoesNotThrow(() -> metadata.getClusterTerm("cluster"));
