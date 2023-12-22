@@ -22,6 +22,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
@@ -44,11 +45,16 @@ public class ServerApplicationListener implements GenericApplicationListener {
     @Override
     public boolean supportsEventType(ResolvableType eventType) {
         return eventType.getRawClass() != null
-                && ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass());
+                && (ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass()) ||
+                ApplicationReadyEvent.class.isAssignableFrom(eventType.getRawClass()));
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ApplicationReadyEvent) {
+            System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
+            return;
+        }
         if (!(event instanceof ApplicationEnvironmentPreparedEvent)) {
             return;
         }

@@ -28,6 +28,5 @@ public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application
         SpringApplication.run(ServerApplication.class, args);
-        System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
     }
 }
