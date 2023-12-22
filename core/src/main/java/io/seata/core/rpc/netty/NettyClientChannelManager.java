@@ -36,8 +36,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -253,16 +251,8 @@ class NettyClientChannelManager {
         Channel channelFromPool;
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
-                poolKeyMap.put(serverAddress, currentPoolKey);
-            } else {
-                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
-                }
-            }
-            channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            poolKeyMap.put(serverAddress, currentPoolKey);
+            channelFromPool = nettyClientKeyPool.borrowObject(currentPoolKey);
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
