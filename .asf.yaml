@@ -53,8 +53,8 @@ github:
         required_pull_request_reviews:
           dismiss_stale_reviews: true
           required_approving_review_count: 1
-  notifications:
-    commits: notifications@seata.apache.org
-    issues: dev@seata.apache.org
-    pullrequests: dev@seata.apache.org
-    discussions: dev@seata.apache.org
+notifications:
+  commits: notifications@seata.apache.org
+  issues: dev@seata.apache.org
+  pullrequests: dev@seata.apache.org
+  discussions: dev@seata.apache.org
