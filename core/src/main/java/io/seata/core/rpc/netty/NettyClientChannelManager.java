@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.core.rpc.netty;
 
@@ -35,8 +36,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -47,8 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Netty client pool manager.
  *
- * @author slievrly
- * @author zhaojun
  */
 class NettyClientChannelManager {
 
@@ -287,16 +284,8 @@ class NettyClientChannelManager {
         Channel channelFromPool;
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
-                poolKeyMap.put(serverAddress, currentPoolKey);
-            } else {
-                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
-                }
-            }
-            channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            poolKeyMap.put(serverAddress, currentPoolKey);
+            channelFromPool = nettyClientKeyPool.borrowObject(currentPoolKey);
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
