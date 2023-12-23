@@ -31,16 +31,21 @@ import io.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
 import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class TccActionInterceptorParser implements InterfaceParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorParser.class);
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
         // eliminate the bean without two phase annotation.
         Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
         if (methodsToProxy.isEmpty()) {
+            LOGGER.warn("Only the methods of classes with two phase annotations can be proxied by Tcc interceptor!!! The target({})'s methods must be with @TwoPhaseBusinessAction annotation.", objectName);
             return null;
         }
         // register resource and enhance with interceptor
