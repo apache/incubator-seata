@@ -25,8 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.config.exception.ConfigNotFoundException;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -36,12 +34,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  */
@@ -125,16 +117,57 @@ public class ZookeeperRegisterServiceImplTest {
         field.setAccessible(true);
         field.set(zookeeperRegisterService, client);
 
-        MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = Mockito.mockStatic(ConfigurationFactory.class);
-        Configuration configuration = mock(Configuration.class);
-        configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
-        when(configuration.getConfig(anyString())).thenReturn("cluster");
 
-        List<InetSocketAddress> addressList = zookeeperRegisterService.lookup("group");
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
 
-        configurationFactoryMockedStatic.close();
+
+        List<InetSocketAddress> addressList = zookeeperRegisterService.lookup("default_tx_group");
 
         Assertions.assertEquals(addressList, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
     }
 
+    @Test
+    public void testRemoveOfflineAddressesIfNecessaryNoRemoveCase() {
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+
+        Assertions.assertEquals(1, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+    }
+
+    @Test
+    public void testRemoveOfflineAddressesIfNecessaryRemoveCase() {
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+
+        Assertions.assertEquals(0, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+    }
+
+    @Test
+    public void testAliveLookup() {
+
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
+
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        List<InetSocketAddress> result = service.aliveLookup("default_tx_group");
+
+        Assertions.assertEquals(result, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+    }
+
+
+    @Test
+    public void tesRefreshAliveLookup() {
+
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
+
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+
+        service.refreshAliveLookup("default_tx_group",
+                Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+
+        Assertions.assertEquals(service.CURRENT_ADDRESS_MAP.get("cluster"),
+                Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+    }
 }
