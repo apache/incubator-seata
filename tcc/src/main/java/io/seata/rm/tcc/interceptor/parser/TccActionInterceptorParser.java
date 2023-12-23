@@ -45,7 +45,6 @@ public class TccActionInterceptorParser implements InterfaceParser {
         // eliminate the bean without two phase annotation.
         Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
         if (methodsToProxy.isEmpty()) {
-            LOGGER.warn("Only the methods of classes with two phase annotations can be proxied by Tcc interceptor!!! The target({})'s methods must be with @TwoPhaseBusinessAction annotation.", objectName);
             return null;
         }
         // register resource and enhance with interceptor

@@ -492,6 +492,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String contextBeanName : beanNames) {
                 BeanDefinition beanDefinition = configurableListableBeanFactory.getBeanDefinition(contextBeanName);
+                if(StringUtils.isBlank(beanDefinition.getBeanClassName())) {
+                    continue;
+                }
                 if (IGNORE_ENHANCE_CHECK_SET.contains(beanDefinition.getBeanClassName())) {
                     continue;
                 }
