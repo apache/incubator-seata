@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.server.cluster.raft.snapshot.metadata;
 
@@ -22,7 +23,7 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import io.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import io.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
@@ -30,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jianbin.chen
  */
 public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final long serialVersionUID = 78637164618855724L;
@@ -49,7 +49,7 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         RaftClusterMetadata raftClusterMetadata =
-            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
+            RaftServerManager.getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
         raftSnapshot.setBody(raftClusterMetadata);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
         String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
@@ -76,7 +76,7 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             RaftClusterMetadata raftClusterMetadata = (RaftClusterMetadata)load(path);
-            RaftServerFactory.getInstance().getRaftServer(group).getRaftStateMachine()
+            RaftServerManager.getRaftServer(group).getRaftStateMachine()
                 .setRaftLeaderMetadata(raftClusterMetadata);
             return true;
         } catch (final Exception e) {

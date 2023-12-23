@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.discovery.registry.raft;
 
@@ -33,8 +34,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.exception.AuthenticationFailedException;
+import io.seata.common.exception.RetryableException;
 import io.seata.common.metadata.Metadata;
 import io.seata.common.metadata.MetadataResponse;
 import io.seata.common.metadata.Node;
@@ -49,22 +53,41 @@ import io.seata.discovery.registry.RegistryService;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The type File registry service.
  *
- * @author funkye
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
-   
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftRegistryServiceImpl.class);
 
     private static final String REGISTRY_TYPE = "raft";
 
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+
+    private static final String PRO_USERNAME_KEY = "username";
+
+    private static final String PRO_PASSWORD_KEY = "password";
+
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
+    private static final String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
+
+    private static final long TOKEN_EXPIRE_TIME_IN_MILLISECONDS;
+
+    private static final String USERNAME;
+
+    private static final String PASSWORD;
+
+    public static String jwtToken;
+
+    private static long tokenTimeStamp = -1;
 
     private static volatile RaftRegistryServiceImpl instance;
 
@@ -91,7 +114,14 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
      */
     private static final Map<String, List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
 
-    private RaftRegistryServiceImpl() {}
+    static {
+        TOKEN_EXPIRE_TIME_IN_MILLISECONDS = CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
+        USERNAME = CONFIG.getConfig(getRaftUserNameKey());
+        PASSWORD = CONFIG.getConfig(getRaftPassWordKey());
+    }
+
+    private RaftRegistryServiceImpl() {
+    }
 
     /**
      * Gets instance.
@@ -139,29 +169,37 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (!CLOSED.get()) {
-                            // Forced refresh of metadata information after set age
-                            boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
-                            String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
-                            if (!fetch) {
-                                fetch = watch();
-                            }
-                            // Cluster changes or reaches timeout refresh time
-                            if (fetch) {
-                                AtomicBoolean success = new AtomicBoolean(true);
-                                METADATA.groups(clusterName).parallelStream().forEach(group -> {
-                                    try {
-                                        acquireClusterMetaData(clusterName, group);
-                                    } catch (Exception e) {
-                                        success.set(false);
-                                        // prevents an exception from being thrown that causes the thread to break
-                                        LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
+                            try {
+                                // Forced refresh of metadata information after set age
+                                boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
+                                String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
+                                if (!fetch) {
+                                    fetch = watch();
+                                }
+                                // Cluster changes or reaches timeout refresh time
+                                if (fetch) {
+                                    for (String group : METADATA.groups(clusterName)) {
+                                        try {
+                                            acquireClusterMetaData(clusterName, group);
+                                        } catch (Exception e) {
+                                            // prevents an exception from being thrown that causes the thread to break
+                                            if (e instanceof RetryableException) {
+                                                throw e;
+                                            } else {
+                                                LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
+                                            }
+                                        }
                                     }
-                                });
-                                if (success.get()) {
                                     currentTime = System.currentTimeMillis();
                                     if (LOGGER.isDebugEnabled()) {
                                         LOGGER.debug("refresh seata cluster metadata time: {}", currentTime);
                                     }
+                                }
+                            } catch (RetryableException e) {
+                                LOGGER.error(e.getMessage(), e);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ignored) {
                                 }
                             }
                         }
@@ -215,6 +253,29 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
+    private static String getRaftUserNameKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, PRO_USERNAME_KEY);
+    }
+
+    private static String getRaftPassWordKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, PRO_PASSWORD_KEY);
+    }
+
+    private static String getTokenExpireTimeInMillisecondsKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, TOKEN_VALID_TIME_MS_KEY);
+    }
+
+    private static boolean isTokenExpired() {
+        if (tokenTimeStamp == -1) {
+            return true;
+        }
+        long tokenExpiredTime = tokenTimeStamp + TOKEN_EXPIRE_TIME_IN_MILLISECONDS;
+        return System.currentTimeMillis() >= tokenExpiredTime;
+    }
+
     private InetSocketAddress convertInetSocketAddress(Node node) {
         Node.Endpoint endpoint = node.getTransaction();
         return new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
@@ -237,26 +298,37 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         return RegistryService.super.aliveLookup(transactionServiceGroup);
     }
 
-    private static boolean watch() {
+    private static boolean watch() throws RetryableException {
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
         String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
         Map<String, Long> groupTerms = METADATA.getClusterTerm(clusterName);
         groupTerms.forEach((k, v) -> param.put(k, String.valueOf(v)));
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
+            if (isTokenExpired()) {
+                refreshToken(tcAddress);
+            }
+            if (StringUtils.isNotBlank(jwtToken)) {
+                header.put(AUTHORIZATION_HEADER, jwtToken);
+            }
             try (CloseableHttpResponse response =
-                HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, null, 30000)) {
+                     HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
+                    if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                        if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                            throw new RetryableException("Authentication failed!");
+                        } else {
+                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        }
+                    }
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
             } catch (IOException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                }
-                continue;
+                throw new RetryableException(e.getMessage(), e);
             }
             break;
         }
@@ -265,7 +337,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+                                                      List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
@@ -281,19 +353,39 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private static void acquireClusterMetaDataByClusterName(String clusterName) {
-        acquireClusterMetaData(clusterName, "");
+        try {
+            acquireClusterMetaData(clusterName, "");
+        } catch (RetryableException e) {
+            LOGGER.warn(e.getMessage(), e);
+        }
     }
 
-    private static void acquireClusterMetaData(String clusterName, String group) {
+    private static void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        if (isTokenExpired()) {
+            refreshToken(tcAddress);
+        }
+        if (StringUtils.isNotBlank(jwtToken)) {
+            header.put(AUTHORIZATION_HEADER, jwtToken);
+        }
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, null, 1000)) {
-                if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                     HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                if (httpResponse != null) {
+                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                        response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                    } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                        if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                            throw new RetryableException("Authentication failed!");
+                        } else {
+                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        }
+                    }
                 }
                 MetadataResponse metadataResponse;
                 if (StringUtils.isNotBlank(response)) {
@@ -305,10 +397,46 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     }
                 }
             } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
+                throw new RetryableException(e.getMessage(), e);
             }
         }
     }
+
+    private static void refreshToken(String tcAddress) throws RetryableException {
+        // if username and password is not in config , return
+        if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
+            return;
+        }
+        // get token and set it in cache
+        Map<String, String> param = new HashMap<>();
+        param.put(PRO_USERNAME_KEY, USERNAME);
+        param.put(PRO_PASSWORD_KEY, PASSWORD);
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        String response = null;
+        tokenTimeStamp = System.currentTimeMillis();
+        try (CloseableHttpResponse httpResponse =
+                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+            if (httpResponse != null) {
+                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                    JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                    String codeStatus = jsonNode.get("code").asText();
+                    if (!StringUtils.equals(codeStatus, "200")) {
+                        //authorized failed,throw exception to kill process
+                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                    }
+                    jwtToken = jsonNode.get("data").asText();
+                } else {
+                    //authorized failed,throw exception to kill process
+                    throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                }
+            }
+        } catch (IOException e) {
+            throw new RetryableException(e.getMessage(), e);
+        }
+    }
+
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
@@ -333,6 +461,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     return null;
                 }
                 INIT_ADDRESSES.put(clusterName, list);
+                // init jwt token
+                try {
+                    refreshToken(queryHttpAddress(clusterName, key));
+                } catch (Exception e) {
+                    throw new RuntimeException("Init fetch token failed!", e);
+                }
                 // Refresh the metadata by initializing the address
                 acquireClusterMetaDataByClusterName(clusterName);
                 startQueryMetadata();

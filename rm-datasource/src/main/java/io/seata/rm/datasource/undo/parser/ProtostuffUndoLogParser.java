@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource.undo.parser;
 
@@ -19,6 +20,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
@@ -36,16 +40,14 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type protostuff based undo log parser.
  *
- * @author Geng Zhang
  */
 @LoadLevel(name = ProtostuffUndoLogParser.NAME)
 public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
@@ -113,7 +115,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Timestamp
      *
-     * @author zhangsen
      */
     public static class TimestampDelegate implements Delegate<java.sql.Timestamp> {
 
@@ -132,7 +133,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = input.readByteBuffer();
             long time = buffer.getLong();
             int nanos = buffer.getInt();
-            buffer.flip();
+            BufferUtils.flip(buffer);
             java.sql.Timestamp timestamp = new Timestamp(time);
             timestamp.setNanos(nanos);
             return timestamp;
@@ -143,7 +144,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             ByteBuffer buffer = ByteBuffer.allocate(12);
             buffer.putLong(value.getTime());
             buffer.putInt(value.getNanos());
-            buffer.flip();
+            BufferUtils.flip(buffer);
             output.writeBytes(number, buffer, repeated);
         }
 
@@ -156,7 +157,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Date
      *
-     * @author zhangsen
      */
     public static class SqlDateDelegate implements Delegate<java.sql.Date> {
 
@@ -189,7 +189,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.sql.Time
      *
-     * @author zhangsen
      */
     public static class TimeDelegate implements Delegate<java.sql.Time> {
 
@@ -222,7 +221,6 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
     /**
      * Delegate for java.util.Date
      *
-     * @author zhangsen
      */
     public static class DateDelegate implements Delegate<java.util.Date> {
 

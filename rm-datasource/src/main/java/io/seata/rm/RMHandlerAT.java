@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm;
 
@@ -19,8 +20,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.util.DateUtil;
 import io.seata.core.model.BranchType;
@@ -36,15 +35,12 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rm handler at.
  *
- * @author sharajava
  */
 public class RMHandlerAT extends AbstractRMHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RMHandlerAT.class);
 
     private static final int LIMIT_ROWS = 3000;
-
-    private final Map<String, Boolean> undoLogTableExistRecord = new ConcurrentHashMap<>();
 
     @Override
     public void handle(UndoLogDeleteRequest request) {
@@ -53,12 +49,6 @@ public class RMHandlerAT extends AbstractRMHandler {
         DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", resourceId);
-            return;
-        }
-
-        boolean hasUndoLogTable = undoLogTableExistRecord.computeIfAbsent(resourceId, id -> checkUndoLogTableExist(dataSourceProxy));
-        if (!hasUndoLogTable) {
-            LOGGER.debug("resource({}) has no undo_log table, UndoLogDeleteRequest will be ignored", resourceId);
             return;
         }
 
@@ -77,19 +67,6 @@ public class RMHandlerAT extends AbstractRMHandler {
             } while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
             // should never happen, deleteUndoLog method had catch all Exception
-        }
-    }
-
-    boolean checkUndoLogTableExist(DataSourceProxy dataSourceProxy) {
-        UndoLogManager manager = getUndoLogManager(dataSourceProxy);
-        try (Connection connection = getConnection(dataSourceProxy)) {
-            if (connection == null) {
-                return false;
-            }
-            return manager.hasUndoLogTable(connection);
-        } catch (Exception e) {
-            // should never happen, hasUndoLogTable method had catch all Exception
-            return false;
         }
     }
 

@@ -1,16 +1,19 @@
-#  Copyright 1999-2019 Seata.io Group.
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
 #
-#  http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 server:
   port: 7091
@@ -38,12 +41,15 @@ seata:
       server-addr: 127.0.0.1:8848
       namespace:
       group: SEATA_GROUP
+      context-path:
+      ##1.The following configuration is for the open source version of Nacos
       username:
       password:
-      context-path:
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
       data-id: seataServer.properties
     consul:
       server-addr: 127.0.0.1:8500
@@ -76,12 +82,15 @@ seata:
       group: SEATA_GROUP
       namespace:
       cluster: default
+      context-path:
+      ##1.The following configuration is for the open source version of Nacos
       username:
       password:
-      context-path:
-      ##if use MSE Nacos with auth, mutex with username/password attribute
+      ##2.The following configuration is for the MSE Nacos on aliyun
       #access-key:
       #secret-key:
+      ##3.The following configuration is used to deploy on Aliyun ECS or ACK without authentication
+      #ram-role-name:
     eureka:
       service-url: http://localhost:8761/eureka
       application: default
@@ -140,6 +149,8 @@ seata:
     retry-dead-threshold: 130000
     xaer-nota-retry-timeout: 60000
     enableParallelRequestHandle: true
+    applicationDataLimitCheck: true
+    applicationDataLimit: 64000
     recovery:
       committing-retry-period: 1000
       async-committing-retry-period: 1000

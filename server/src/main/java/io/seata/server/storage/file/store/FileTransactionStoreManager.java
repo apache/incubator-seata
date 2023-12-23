@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.server.storage.file.store;
 
@@ -31,10 +32,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-
 import io.seata.common.exception.StoreException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.BufferUtils;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -50,12 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+
 import static io.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
 /**
  * The type File transaction store manager.
  *
- * @author slievrly
  */
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, ReloadableStore {
@@ -263,11 +264,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     private boolean flushWriteBuffer(ByteBuffer writeBuffer) {
-        writeBuffer.flip();
+        BufferUtils.flip(writeBuffer);
         if (!writeDataFileByBuffer(writeBuffer)) {
             return false;
         }
-        writeBuffer.clear();
+        BufferUtils.clear(writeBuffer);
         return true;
     }
 
@@ -397,12 +398,12 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             ByteBuffer buffSize = ByteBuffer.allocate(MARK_SIZE);
             while (fileChannel.position() < size) {
                 try {
-                    buffSize.clear();
+                    BufferUtils.clear(buffSize);
                     int avilReadSize = fileChannel.read(buffSize);
                     if (avilReadSize != MARK_SIZE) {
                         break;
                     }
-                    buffSize.flip();
+                    BufferUtils.flip(buffSize);
                     int bodySize = buffSize.getInt();
                     byte[] byBody = new byte[bodySize];
                     ByteBuffer buffBody = ByteBuffer.wrap(byBody);

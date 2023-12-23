@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource;
 
@@ -22,22 +23,28 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
+
 /**
  * The type Data source proxy.
  *
- * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
@@ -101,6 +108,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 validMySQLVersion(connection);
                 checkDerivativeProduct();
             }
+            checkUndoLogTableExist(connection);
+
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -141,6 +150,31 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             }
         }
         return false;
+    }
+
+    /**
+     * check existence of undolog table
+     *
+     * if the table not exist fast fail, or else keep silence
+     *
+     * @param conn db connection
+     */
+    private void checkUndoLogTableExist(Connection conn) {
+        UndoLogManager undoLogManager;
+        try {
+            undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+        } catch (EnhancedServiceNotFoundException e) {
+            String errMsg = String.format("AT mode don't support the the dbtype: %s", dbType);
+            throw new IllegalStateException(errMsg, e);
+        }
+
+        boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
+        if (!undoLogTableExist) {
+            String undoLogTableName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
+            throw new IllegalStateException(errMsg);
+        }
     }
 
     /**
