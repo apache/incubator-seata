@@ -77,9 +77,9 @@ SagaImporter.prototype.import = function (definitions) {
     this.root(root);
 
     // Add start state
-    const start = this.sagaFactory.create('StartState');
+    let start = this.sagaFactory.create('StartState');
     start.importJson(definitions);
-    this.add(start);
+    start = this.add(start);
 
     const edges = [];
     const catches = [];
@@ -169,7 +169,7 @@ SagaImporter.prototype.add = function (semantic, attrs = {}) {
   } else if (style.Type === 'Edge') {
     waypoints = collectWaypoints(style);
 
-    source = this.getSource(semantic) || attrs.source;
+    source = attrs.source || this.getSource(semantic);
     target = this.getTarget(semantic);
     semantic.style.source = source;
     semantic.style.target = target;

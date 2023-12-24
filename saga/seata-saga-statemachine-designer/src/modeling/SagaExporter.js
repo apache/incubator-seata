@@ -77,6 +77,7 @@ SagaExporter.prototype.parseEdge = function (definitions, edge) {
         break;
       case 'Compensation':
         stateRef.CompensateState = target;
+        stateRef.edge = assign(stateRef.edge || {}, { [target]: elementJson });
         break;
       case 'Transition':
       default:
