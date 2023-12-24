@@ -51,7 +51,7 @@ function JsonGroup(element) {
     ...StyleProps({ element }),
   ];
 
-  if (is(element, 'Connection') || is(element, 'StartState') || is(element, 'Catch')) {
+  if (is(element, 'Transition') || is(element, 'Compensation') || is(element, 'StartState') || is(element, 'Catch')) {
     entries.splice(0, 1);
   }
 
