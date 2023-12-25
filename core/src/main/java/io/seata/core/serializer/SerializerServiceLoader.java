@@ -20,6 +20,9 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.common.util.ReflectionUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Service Loader for the interface {@link Serializer}
  *
@@ -29,6 +32,7 @@ public final class SerializerServiceLoader {
     private SerializerServiceLoader() {
     }
 
+    private static Map<String, Serializer> serializerMap = new HashMap<>();
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "io.seata.serializer.protobuf.ProtobufSerializer";
 
@@ -39,7 +43,7 @@ public final class SerializerServiceLoader {
      * @return the service of {@link Serializer}
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static Serializer load(SerializerType type) throws EnhancedServiceNotFoundException {
+    public static Serializer load(SerializerType type, byte version) throws EnhancedServiceNotFoundException {
         if (type == SerializerType.PROTOBUF) {
             try {
                 ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
@@ -48,6 +52,25 @@ public final class SerializerServiceLoader {
                         "Please manually reference 'io.seata:seata-serializer-protobuf' dependency ", e);
             }
         }
-        return EnhancedServiceLoader.load(Serializer.class, type.name());
+
+        String key = serialzerKey(type, version);
+        Serializer serializer = serializerMap.get(key);
+        if (serializer == null) {
+            if (type == SerializerType.SEATA) {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
+            } else {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+            }
+            serializerMap.put(key,serializer);
+        }
+        return serializer;
+
+    }
+
+    private static String serialzerKey(SerializerType type, byte version){
+        if (type == SerializerType.SEATA) {
+            return type.name() + version;
+        }
+        return type.name();
     }
 }

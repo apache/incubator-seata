@@ -26,12 +26,15 @@ import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
 
 /**
  * The type Merged warp message codec.
  *
  */
 public class MergedWarpMessageCodec extends AbstractMessageCodec {
+
+    protected MessageCodecFactory factory = new MessageCodecFactoryV1();
 
     @Override
     public Class<?> getMessageClassType() {
@@ -51,7 +54,7 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -96,8 +99,8 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
-            AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            AbstractMessage abstractMessage = factory.getMessage(typeCode);
+            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
             messageCodec.decode(abstractMessage, byteBuffer);
             msgs.add(abstractMessage);
         }

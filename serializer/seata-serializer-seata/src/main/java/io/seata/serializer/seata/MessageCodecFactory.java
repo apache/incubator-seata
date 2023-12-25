@@ -82,7 +82,7 @@ import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
  * The type Message codec factory.
  *
  */
-public class MessageCodecFactory {
+public abstract class MessageCodecFactory {
 
     /**
      * The constant UTF8.
@@ -95,7 +95,7 @@ public class MessageCodecFactory {
      * @param abstractMessage the abstract message
      * @return the message codec
      */
-    public static MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage) {
+    public MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage) {
         return getMessageCodec(abstractMessage.getTypeCode());
     }
 
@@ -105,7 +105,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the msg instance by code
      */
-    public static MessageSeataCodec getMessageCodec(short typeCode) {
+    public MessageSeataCodec getMessageCodec(short typeCode) {
         MessageSeataCodec msgCodec = null;
         switch (typeCode) {
             case MessageType.TYPE_SEATA_MERGE:
@@ -166,7 +166,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the merge request instance by code
      */
-    protected static MessageSeataCodec getMergeRequestMessageSeataCodec(int typeCode) {
+    protected MessageSeataCodec getMergeRequestMessageSeataCodec(int typeCode) {
         switch (typeCode) {
             case MessageType.TYPE_GLOBAL_BEGIN:
                 return new GlobalBeginRequestCodec();
@@ -195,7 +195,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the merge response instance by code
      */
-    protected static MessageSeataCodec getMergeResponseMessageSeataCodec(int typeCode) {
+    protected MessageSeataCodec getMergeResponseMessageSeataCodec(int typeCode) {
         switch (typeCode) {
             case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
                 return new GlobalBeginResponseCodec();
@@ -230,7 +230,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the message
      */
-    public static AbstractMessage getMessage(short typeCode) {
+    public AbstractMessage getMessage(short typeCode) {
         AbstractMessage abstractMessage = null;
         switch (typeCode) {
             case MessageType.TYPE_SEATA_MERGE:
@@ -295,7 +295,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the merge request instance by code
      */
-    protected static AbstractMessage getMergeRequestInstanceByCode(int typeCode) {
+    protected AbstractMessage getMergeRequestInstanceByCode(int typeCode) {
         switch (typeCode) {
             case MessageType.TYPE_GLOBAL_BEGIN:
                 return new GlobalBeginRequest();
@@ -324,7 +324,7 @@ public class MessageCodecFactory {
      * @param typeCode the type code
      * @return the merge response instance by code
      */
-    protected static AbstractMessage getMergeResponseInstanceByCode(int typeCode) {
+    protected AbstractMessage getMergeResponseInstanceByCode(int typeCode) {
         switch (typeCode) {
             case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
                 return new GlobalBeginResponse();
