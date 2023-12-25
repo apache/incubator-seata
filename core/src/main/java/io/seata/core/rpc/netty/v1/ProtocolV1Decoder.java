@@ -70,7 +70,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     public ProtocolV1Decoder(int maxFrameLength) {
         /*
-        int maxFrameLength,      
+        int maxFrameLength,
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
         int lengthFieldLength,  FullLength is int(4B). so values is 4
         int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
@@ -117,7 +117,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
-        RpcMessage rpcMessage = new RpcMessage();
+        ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);

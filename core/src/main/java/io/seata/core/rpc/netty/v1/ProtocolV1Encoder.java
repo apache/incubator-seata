@@ -65,8 +65,10 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
     public void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
         try {
             if (msg instanceof RpcMessage) {
-                RpcMessage rpcMessage = (RpcMessage) msg;
+                RpcMessage rpcMsg = (RpcMessage) msg;
 
+                ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
+                rpcMessage.rpcMsg2ProtocolMsg(rpcMsg);
                 int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
                 int headLength = ProtocolConstants.V1_HEAD_LENGTH;
 

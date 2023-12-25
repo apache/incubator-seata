@@ -1,41 +1,37 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+ *  Copyright 1999-2019 Seata.io Group.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-package io.seata.core.protocol;
+package io.seata.core.rpc.netty.v1;
 
 import io.seata.common.util.StringUtils;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.ProtocolRpcMessage;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The type Rpc message.
- *
- */
-public class RpcMessage implements Serializable {
-
+ * protocol v1 rpc message
+ **/
+public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
     private int id;
     private byte messageType;
     private byte codec;
     private byte compressor;
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
-
-    private String version;
 
     /**
      * Gets id.
@@ -88,9 +84,8 @@ public class RpcMessage implements Serializable {
      * @param codec the codec
      * @return the codec
      */
-    public RpcMessage setCodec(byte codec) {
+    public void setCodec(byte codec) {
         this.codec = codec;
-        return this;
     }
 
     /**
@@ -108,9 +103,8 @@ public class RpcMessage implements Serializable {
      * @param compressor the compressor
      * @return the compressor
      */
-    public RpcMessage setCompressor(byte compressor) {
+    public void setCompressor(byte compressor) {
         this.compressor = compressor;
-        return this;
     }
 
     /**
@@ -128,9 +122,8 @@ public class RpcMessage implements Serializable {
      * @param headMap the head map
      * @return the head map
      */
-    public RpcMessage setHeadMap(Map<String, String> headMap) {
+    public void setHeadMap(Map<String, String> headMap) {
         this.headMap = headMap;
-        return this;
     }
 
     /**
@@ -171,16 +164,33 @@ public class RpcMessage implements Serializable {
         this.messageType = messageType;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public RpcMessage protocolMsg2RpcMsg() {
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setId(this.id);
+        rpcMessage.setMessageType(this.messageType);
+        rpcMessage.setCodec(this.codec);
+        rpcMessage.setCompressor(this.compressor);
+        rpcMessage.setHeadMap(this.headMap);
+        rpcMessage.setBody(this.body);
+        rpcMessage.setVersion(ProtocolRpcMessage.getVersion(this.body));
+        return rpcMessage;
+    }
+
+
+    @Override
+    public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
+        this.body = rpcMessage.getBody();
+        ProtocolRpcMessage.setVersion(this.body, rpcMessage.getVersion());
+        this.headMap = rpcMessage.getHeadMap();
+        this.id = rpcMessage.getId();
+        this.messageType = rpcMessage.getMessageType();
+        this.codec = rpcMessage.getCodec();
+        this.compressor = rpcMessage.getCompressor();
     }
 }
