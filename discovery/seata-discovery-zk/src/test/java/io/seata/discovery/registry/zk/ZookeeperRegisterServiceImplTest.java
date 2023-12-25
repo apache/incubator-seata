@@ -79,6 +79,9 @@ public class ZookeeperRegisterServiceImplTest {
 
     @Test
     public void testAll() throws Exception {
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "default");
+
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
         Assertions.assertThrows(ConfigNotFoundException.class, new Executable() {
@@ -147,7 +150,7 @@ public class ZookeeperRegisterServiceImplTest {
         configurationFactoryMockedStatic.close();
 
         // test the normal remove situation
-        Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
+        Assertions.assertNull(CLUSTER_ADDRESS_MAP.get("cluster"));
     }
 
 }
