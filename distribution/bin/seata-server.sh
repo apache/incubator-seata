@@ -193,8 +193,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 function start_server() {
-  echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS} >> /dev/null 2>&1 &"
-  nohup $JAVACMD ${JAVA_OPT} ${NEW_ARGS} >> /dev/null 2>&1 &
+  echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS} &"
+  nohup $JAVACMD ${JAVA_OPT} ${NEW_ARGS} &
   echo "seata-server is starting, you can check the ${LOG_HOME}/ *.log"
 }
 
