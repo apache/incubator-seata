@@ -127,7 +127,7 @@ seata:
   server:
     raft:
       group: default
-      cluster:
+      server-addr:
       snapshot-interval: 600
       apply-batch: 32
       max-append-bufferSize: 262144
