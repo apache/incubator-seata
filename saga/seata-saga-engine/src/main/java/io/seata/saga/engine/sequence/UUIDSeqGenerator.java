@@ -16,6 +16,7 @@
 package io.seata.saga.engine.sequence;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Based On Spring AlternativeJdkIdGenerator
@@ -24,11 +25,9 @@ import java.util.List;
  */
 public class UUIDSeqGenerator implements SeqGenerator {
 
-    private final AlternativeJdkIdGenerator idGenerator = new AlternativeJdkIdGenerator();
-
     @Override
     public String generate(String entity, String ruleName, List<Object> shardingParameters) {
-        String uuid = idGenerator.generateId().toString();
+        String uuid = UUID.randomUUID().toString();
         StringBuilder sb = new StringBuilder(uuid.length() - 4);
         for (String seg : uuid.split("-")) {
             sb.append(seg);
