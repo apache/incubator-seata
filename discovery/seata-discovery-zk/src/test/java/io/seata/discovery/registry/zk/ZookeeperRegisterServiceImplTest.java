@@ -16,13 +16,10 @@
  */
 package io.seata.discovery.registry.zk;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.collect.Lists;
 import io.seata.common.util.NetUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.config.exception.ConfigNotFoundException;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
@@ -32,6 +29,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.MockedStatic;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  */
@@ -101,6 +113,41 @@ public class ZookeeperRegisterServiceImplTest {
 
         service.unsubscribe("default", listener);
         service.unsubscribe("default", listener2);
+    }
+
+    @Test
+    public void testPushEmptyProtection() throws Exception {
+
+        service.subscribe("cluster", (s, list) -> {});
+
+        // mock config
+        MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = mockStatic(ConfigurationFactory.class);
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(anyString())).thenReturn("cluster");
+        configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
+
+        // set CLUSTER_ADDRESS_MAP
+        Field field = ZookeeperRegisterServiceImpl.class.getDeclaredField("CLUSTER_ADDRESS_MAP");
+        field.setAccessible(true);
+        ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = (ConcurrentMap<String, List<InetSocketAddress>>)field.get(null);
+        CLUSTER_ADDRESS_MAP.put("cluster", Lists.newArrayList(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
+
+        // invoke
+        Method refreshClusterAddressMapMethod = ZookeeperRegisterServiceImpl.class.getDeclaredMethod("refreshClusterAddressMap", String.class, List.class);
+        refreshClusterAddressMapMethod.setAccessible(true);
+        refreshClusterAddressMapMethod.invoke(service, "cluster", null);
+
+        // test the push empty protection situation
+        Assertions.assertEquals(1, CLUSTER_ADDRESS_MAP.get("cluster").size());
+
+
+        when(configuration.getConfig(anyString())).thenReturn("mycluster");
+
+        refreshClusterAddressMapMethod.invoke(service, "cluster", null);
+        configurationFactoryMockedStatic.close();
+
+        // test the normal remove situation
+        Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
     }
 
 }

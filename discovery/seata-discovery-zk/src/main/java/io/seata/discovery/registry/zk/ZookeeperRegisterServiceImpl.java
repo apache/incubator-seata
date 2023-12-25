@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
@@ -193,7 +194,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
                 lock = CLUSTER_LOCK.get(clusterName);
             }
             synchronized (lock) {
-                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+                if (!LISTENER_SERVICE_MAP.containsKey(clusterName) && isCurrentCluster(clusterName)) {
                     boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
                     if (!exist) {
                         return null;
@@ -285,18 +286,17 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private void subscribeCluster(String cluster) throws Exception {
         subscribe(cluster, (parentPath, currentChilds) -> {
             String clusterName = parentPath.replace(ROOT_PATH, "");
-            if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
-                CLUSTER_ADDRESS_MAP.remove(clusterName);
-            } else if (!CollectionUtils.isEmpty(currentChilds)) {
-                refreshClusterAddressMap(clusterName, currentChilds);
-            }
+            refreshClusterAddressMap(clusterName, currentChilds);
         });
     }
 
     private void refreshClusterAddressMap(String clusterName, List<String> instances) {
         List<InetSocketAddress> newAddressList = new ArrayList<>();
-        if (instances == null) {
-            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+        if (CollectionUtils.isEmpty(instances)) {
+            if (!isCurrentCluster(clusterName)) {
+                CLUSTER_ADDRESS_MAP.remove(clusterName);
+                clearClusterListener(clusterName);
+            }
             return;
         }
         for (String path : instances) {
@@ -308,6 +308,41 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             }
         }
         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+    }
+
+    /**
+     *
+     * clear cluster's zk listener
+     *
+     * @param clusterName clusterName
+     */
+    private void clearClusterListener(String clusterName) {
+        List<IZkChildListener> listeners = LISTENER_SERVICE_MAP.get(clusterName);
+        for (IZkChildListener listener : listeners) {
+            try {
+                unsubscribe(clusterName, listener);
+            } catch (Exception e) {
+                LOGGER.warn("unsubscribe cluster {} failed", clusterName);
+            }
+        }
+    }
+
+    /***
+     *
+     * check whether it is current cluster
+     *
+     * @param clusterName cluserName
+     */
+    private boolean isCurrentCluster(String clusterName) {
+        String txServiceGroupName = ConfigurationFactory.getInstance()
+                .getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
+
+        if (StringUtils.isNotEmpty(txServiceGroupName)) {
+            String currentClusterName = getServiceGroup(txServiceGroupName);
+            return clusterName.equals(currentClusterName);
+        }
+
+        return false;
     }
 
     private String getClusterName() {
