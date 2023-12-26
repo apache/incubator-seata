@@ -17,7 +17,6 @@
 package io.seata.mockserver.processor;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -32,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Mock Remoting Processor
- *
  **/
 public class MockRegisterProcessor implements RemotingProcessor {
 

@@ -21,14 +21,11 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.core.rpc.processor.RemotingProcessor;
 
 import java.util.concurrent.ConcurrentMap;
 
 /**
  * Mock Remoting Processor
- *
  **/
 public class MockOnRespProcessor extends MockRemotingProcessor {
 

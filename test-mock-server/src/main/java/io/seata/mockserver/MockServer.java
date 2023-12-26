@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The type Mock Server.
- *
  */
 @SpringBootApplication
 public class MockServer {
@@ -65,6 +64,6 @@ public class MockServer {
         nettyRemotingServer.setHandler(coordinator);
         nettyRemotingServer.init();
 
-        LOGGER.info("pid info: "+ ManagementFactory.getRuntimeMXBean().getName());
+        LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
     }
 }

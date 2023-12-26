@@ -26,7 +26,6 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ import java.util.List;
 
 /**
  * Mock Remoting Processor
- *
  **/
 public class MockOnReqProcessor extends MockRemotingProcessor {
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockOnReqProcessor.class);
@@ -45,6 +43,7 @@ public class MockOnReqProcessor extends MockRemotingProcessor {
     public MockOnReqProcessor(RemotingServer remotingServer, TransactionMessageHandler handler) {
         super(remotingServer, handler);
     }
+
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         super.process(ctx, rpcMessage);

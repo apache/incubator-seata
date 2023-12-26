@@ -21,11 +21,9 @@ import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.AbstractNettyRemotingServer;
 import io.seata.core.rpc.netty.NettyServerConfig;
-import io.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
 import io.seata.mockserver.processor.MockHeartbeatProcessor;
 import io.seata.mockserver.processor.MockOnReqProcessor;
 import io.seata.mockserver.processor.MockOnRespProcessor;
-import io.seata.mockserver.processor.MockRemotingProcessor;
 import io.seata.mockserver.processor.MockRegisterProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * The mock netty remoting server.
- *
  */
 public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
 
@@ -85,7 +82,7 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE, onRequestProcessor, messageExecutor);
 
         // 2. registry on response message processor
-        MockOnRespProcessor onResponseProcessor = new MockOnRespProcessor(this, handler,getFutures());
+        MockOnRespProcessor onResponseProcessor = new MockOnRespProcessor(this, handler, getFutures());
         super.registerProcessor(MessageType.TYPE_BRANCH_COMMIT_RESULT, onResponseProcessor, messageExecutor);
         super.registerProcessor(MessageType.TYPE_BRANCH_ROLLBACK_RESULT, onResponseProcessor, messageExecutor);
 
@@ -98,7 +95,7 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
         super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
 
         // 5. registry heartbeat message processor
-        MockHeartbeatProcessor heartbeatMessageProcessor = new MockHeartbeatProcessor(this,handler);
+        MockHeartbeatProcessor heartbeatMessageProcessor = new MockHeartbeatProcessor(this, handler);
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 

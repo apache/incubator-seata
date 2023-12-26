@@ -21,10 +21,24 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
-import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.Version;
-import io.seata.core.protocol.transaction.*;
+import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.BranchReportResponse;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackResponse;
+import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
@@ -34,11 +48,11 @@ import io.seata.server.AbstractTCInboundHandler;
 
 /**
  * Mock Coordinator
- *
  **/
 public class MockCoordinator extends AbstractTCInboundHandler implements TransactionMessageHandler, Disposable {
 
     RemotingServer remotingServer;
+
     @Override
     public void destroy() {
 
