@@ -17,6 +17,7 @@
 package io.seata.serializer.seata.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.serializer.seata.SeataSerializer;
 import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterTMRequest;
@@ -37,7 +38,7 @@ public class RegisterTMRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
 
     private static       RegisterTMRequest       registerTMRequest;
     private static       AbstractIdentifyRequest air;

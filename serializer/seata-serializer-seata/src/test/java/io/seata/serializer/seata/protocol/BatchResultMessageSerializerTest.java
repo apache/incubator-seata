@@ -22,6 +22,7 @@ import java.util.List;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.serializer.seata.SeataSerializer;
@@ -39,7 +40,7 @@ public class BatchResultMessageSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
 
 
     @Test

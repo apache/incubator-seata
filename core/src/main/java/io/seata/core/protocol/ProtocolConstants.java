@@ -44,7 +44,7 @@ public interface ProtocolConstants {
     /**
      * Protocol version
      */
-    byte VERSION = 1;
+    byte VERSION = VERSION_1;
 
     /**
      * Max frame length
