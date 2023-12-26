@@ -25,7 +25,6 @@ import java.util.Map;
 
 /**
  * The Service Loader for the interface {@link Serializer}
- *
  */
 public final class SerializerServiceLoader {
 
@@ -61,13 +60,12 @@ public final class SerializerServiceLoader {
             } else {
                 serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
             }
-            serializerMap.put(key,serializer);
+            serializerMap.put(key, serializer);
         }
         return serializer;
-
     }
 
-    private static String serialzerKey(SerializerType type, byte version){
+    private static String serialzerKey(SerializerType type, byte version) {
         if (type == SerializerType.SEATA) {
             return type.name() + version;
         }
