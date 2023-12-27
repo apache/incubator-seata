@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * @description:
- * @author: zhangjiawei
- * @date: 2023/12/22
  */
 public class HttpClientUtilTest {
 

@@ -22,9 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 /**
- * @description:
- * @author: zhangjiawei
- * @date: 2023/12/21
  */
 public class NodeTest {
 

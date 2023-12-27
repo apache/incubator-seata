@@ -22,9 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.nio.ByteBuffer;
 
 /**
- * @description:
- * @author: zhangjiawei
- * @date: 2023/12/18
  */
 public class BufferUtilsTest {
 

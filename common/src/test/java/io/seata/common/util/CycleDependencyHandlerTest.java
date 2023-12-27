@@ -20,9 +20,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @description:
- * @author: zhangjiawei
- * @date: 2023/12/19
  */
 public class CycleDependencyHandlerTest {
 
