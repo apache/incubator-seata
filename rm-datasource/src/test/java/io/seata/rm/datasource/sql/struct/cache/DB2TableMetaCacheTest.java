@@ -22,6 +22,7 @@ import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.sqlparser.struct.IndexMeta;
@@ -84,7 +85,7 @@ public class DB2TableMetaCacheTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "t.mt1", proxy.getResourceId());
 
@@ -131,7 +132,7 @@ public class DB2TableMetaCacheTest {
         druidDataSource.setUrl("jdbc:mock:xxx");
         druidDataSource.setDriver(mockDriver);
 
-        DataSourceProxy dataSourceProxy = new DataSourceProxy(druidDataSource);
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(druidDataSource);
 
         getTableMetaCache().getTableMeta(dataSourceProxy.getPlainConnection(), "t.t1", dataSourceProxy.getResourceId());
         //change the columns meta

@@ -32,6 +32,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -98,7 +99,7 @@ public class DB2UndoLogManagerTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        dataSourceProxy = new DataSourceProxy(dataSource);
+        dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
         connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new DB2UndoLogManager();
         tableMeta = new TableMeta();
