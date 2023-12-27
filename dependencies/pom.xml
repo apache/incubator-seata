@@ -117,6 +117,8 @@
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
+        <!-- rocketmq -->
+        <rocketmq-version>4.9.7</rocketmq-version>
 
         <!-- # for kotlin -->
         <kotlin.version>1.4.32</kotlin.version>
@@ -775,6 +777,11 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
                 <version>${janino-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
