@@ -32,8 +32,7 @@ public interface TCCRocketMQ {
      * @throws MQClientException
      */
     @TwoPhaseBusinessAction(name = "tccRocketMQ", commitMethod = "commit", rollbackMethod = "rollback")
-    SendResult prepare(BusinessActionContext context, Message message)
-            throws MQBrokerException, RemotingException, InterruptedException, MQClientException;
+    void prepare(BusinessActionContext context, Message message, SendResult sendResult);
 
     /**
      * RocketMQ half send commit

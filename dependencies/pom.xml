@@ -118,7 +118,7 @@
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
         <!-- rocketmq -->
-        <rocketmq-version>4.9.7</rocketmq-version>
+        <rocketmq-version>5.0.0</rocketmq-version>
 
         <!-- # for kotlin -->
         <kotlin.version>1.4.32</kotlin.version>
