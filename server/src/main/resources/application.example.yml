@@ -125,20 +125,6 @@ seata:
       address-wait-time: 3000
 
   server:
-    raft:
-      group: default
-      cluster:
-      snapshot-interval: 600
-      apply-batch: 32
-      max-append-bufferSize: 262144
-      max-replicator-inflight-msgs: 256
-      disruptor-buffer-size: 16384
-      election-timeout-ms: 1000
-      reporter-enabled: false
-      reporter-initial-delay: 60
-      serialization: jackson
-      compressor: none
-      sync: true # sync log&snapshot to disk
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
