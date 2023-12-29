@@ -45,6 +45,8 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.mockserver.call.CallRm;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.GlobalSession;
 
 /**
  * Mock Coordinator
@@ -76,7 +78,9 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setXid("666");
+        GlobalSession session = GlobalSession.createGlobalSession(rpcContext.getApplicationId(),
+                rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout());
+        response.setXid(session.getXid());
         response.setResultCode(ResultCode.Success);
     }
 
@@ -94,7 +98,7 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setBranchId(9L);
+        response.setBranchId(UUIDGenerator.generateUUID());
         response.setResultCode(ResultCode.Success);
 
         String resourceId = request.getResourceId();
