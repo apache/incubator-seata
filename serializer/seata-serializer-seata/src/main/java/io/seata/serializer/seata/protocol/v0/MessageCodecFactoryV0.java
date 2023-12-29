@@ -41,6 +41,7 @@ public class MessageCodecFactoryV0 extends MessageCodecFactory {
      * @param typeCode the type code
      * @return the msg instance by code
      */
+    @Override
     public MessageSeataCodec getMessageCodec(short typeCode) {
         MessageSeataCodec msgCodec = null;
         switch (typeCode) {
