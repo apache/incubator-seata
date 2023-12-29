@@ -31,14 +31,12 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * <pre>
- * </pre>
+ * Compatible Protocol Encoder
  * <p>
  * <li>Full Length: include all data </li>
  * <li>Head Length: include head data from magic code to head map. </li>
  * <li>Body Length: Full Length - Head Length</li>
  * </p>
- * https://github.com/seata/seata/issues/893
  *
  */
 public class CompatibleProtocolEncoder extends MessageToByteEncoder {
