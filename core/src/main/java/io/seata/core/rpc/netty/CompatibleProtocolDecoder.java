@@ -136,6 +136,8 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         in.markReaderIndex();
         byte b0 = in.readByte();
         byte b1 = in.readByte();
+        // v1/v2/v3 : b2 = version
+        // v0 : 1st byte in FLAG(2byte:0x10/0x20/0x40/0x80)
         byte b2 = in.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
                 && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1
