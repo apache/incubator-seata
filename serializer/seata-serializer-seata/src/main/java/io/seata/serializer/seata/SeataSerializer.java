@@ -42,6 +42,9 @@ public class SeataSerializer implements Serializer {
 
     public SeataSerializer(Byte version){
         versionSeataSerializer =  VERSION_MAP.get(version);
+        if (versionSeataSerializer == null) {
+            throw new IllegalArgumentException("version is not supported");
+        }
     }
     @Override
     public <T> byte[] serialize(T t) {
