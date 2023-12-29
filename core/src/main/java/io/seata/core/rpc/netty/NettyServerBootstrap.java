@@ -36,8 +36,6 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingBootstrap;
-import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
-import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import io.seata.discovery.registry.MultiRegistryFactory;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
@@ -157,8 +155,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                        .addLast(new ProtocolV1Decoder())
-                        .addLast(new ProtocolV1Encoder());
+                        .addLast(new CompatibleProtocolDecoder())
+                        .addLast(new CompatibleProtocolEncoder());
                     if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
