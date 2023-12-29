@@ -59,7 +59,7 @@ public class MockServer {
         // init snowflake for transactionId, branchId
         UUIDGenerator.init(1L);
 
-        MockCoordinator coordinator = new MockCoordinator();
+        MockCoordinator coordinator = MockCoordinator.getInstance();
         coordinator.setRemotingServer(nettyRemotingServer);
         nettyRemotingServer.setHandler(coordinator);
         nettyRemotingServer.init();
