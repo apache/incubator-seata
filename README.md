@@ -144,7 +144,6 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client and server
 * [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata
 * [Seata GoLang Simples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
-* [Seata Docker](https://github.com/seata/fescar-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with k8s
 * [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata
 * [Awesome Seata](https://github.com/seata/awesome-fescar) - Seata's slides and video address in meetup
