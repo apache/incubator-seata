@@ -18,12 +18,8 @@ package io.seata.serializer.seata.protocol.v1;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
 import io.seata.common.util.BufferUtils;
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;

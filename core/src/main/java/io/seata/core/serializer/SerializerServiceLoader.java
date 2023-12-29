@@ -31,7 +31,7 @@ public final class SerializerServiceLoader {
     private SerializerServiceLoader() {
     }
 
-    private static Map<String, Serializer> serializerMap = new HashMap<>();
+    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "io.seata.serializer.protobuf.ProtobufSerializer";
 
@@ -53,14 +53,14 @@ public final class SerializerServiceLoader {
         }
 
         String key = serialzerKey(type, version);
-        Serializer serializer = serializerMap.get(key);
+        Serializer serializer = SERIALIZER_MAP.get(key);
         if (serializer == null) {
             if (type == SerializerType.SEATA) {
                 serializer = EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
             } else {
                 serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
             }
-            serializerMap.put(key, serializer);
+            SERIALIZER_MAP.put(key, serializer);
         }
         return serializer;
     }
