@@ -16,7 +16,10 @@
  */
 package io.seata.mockserver;
 
-
+/**
+ * The enum Expect transaction result.
+ *
+ */
 public enum ExpectTransactionResult {
 
     AllCommitted(0, "all success"),

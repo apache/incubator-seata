@@ -24,10 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * ?
+ * Mock Help Controller
  *
- * @author minghua.xie
- * @date 2023/12/29
  **/
 @RequestMapping("/help")
 public class MockHelpController {
