@@ -35,7 +35,7 @@ public class SeataSerializerV0 implements Serializer {
 
     MessageCodecFactory factory;
 
-    public SeataSerializerV0(Byte version){
+    public SeataSerializerV0(){
         factory =  new MessageCodecFactoryV0();
     }
     @Override

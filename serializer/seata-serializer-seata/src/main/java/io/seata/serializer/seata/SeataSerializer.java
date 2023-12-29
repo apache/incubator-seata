@@ -16,19 +16,15 @@
  */
 package io.seata.serializer.seata;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.seata.common.exception.NotSupportYetException;
+import com.google.common.collect.ImmutableMap;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
-import io.seata.common.util.BufferUtils;
-import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
-import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
+import io.seata.serializer.seata.protocol.v0.SeataSerializerV0;
 import io.seata.serializer.seata.protocol.v1.SeataSerializerV1;
+
+import java.util.Map;
 
 /**
  * The Seata codec.
@@ -39,8 +35,13 @@ public class SeataSerializer implements Serializer {
 
     Serializer versionSeataSerializer;
 
+    static Map<Byte, Serializer> VERSION_MAP = ImmutableMap.<Byte, MessageCodecFactory>builder()
+            .put(ProtocolConstants.VERSION_0, new SeataSerializerV0())
+            .put(ProtocolConstants.VERSION_1, new SeataSerializerV1())
+            .build();
+
     public SeataSerializer(Byte version){
-        versionSeataSerializer =  new SeataSerializerV1();
+        versionSeataSerializer =  VERSION_MAP.get(version);
     }
     @Override
     public <T> byte[] serialize(T t) {
