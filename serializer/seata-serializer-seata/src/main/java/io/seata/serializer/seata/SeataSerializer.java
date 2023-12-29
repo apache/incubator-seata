@@ -35,7 +35,7 @@ public class SeataSerializer implements Serializer {
 
     Serializer versionSeataSerializer;
 
-    static Map<Byte, Serializer> VERSION_MAP = ImmutableMap.<Byte, MessageCodecFactory>builder()
+    static Map<Byte, Serializer> VERSION_MAP = ImmutableMap.<Byte, Serializer>builder()
             .put(ProtocolConstants.VERSION_0, new SeataSerializerV0())
             .put(ProtocolConstants.VERSION_1, new SeataSerializerV1())
             .build();
