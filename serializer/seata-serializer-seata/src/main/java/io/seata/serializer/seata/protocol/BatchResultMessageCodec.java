@@ -27,7 +27,6 @@ import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.BatchResultMessage;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
-import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
 
 /**
  * the type batch result message codec
@@ -36,8 +35,11 @@ import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
  */
 public class BatchResultMessageCodec extends AbstractMessageCodec {
 
-    protected MessageCodecFactory factory = new MessageCodecFactoryV1();
+    private byte version;
 
+    public BatchResultMessageCodec(byte version) {
+        this.version = version;
+    }
     @Override
     public Class<?> getMessageClassType() {
         return BatchResultMessage.class;
@@ -56,7 +58,7 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -109,8 +111,8 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         List<Integer> msgIds = new ArrayList<>();
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
-            AbstractMessage abstractResultMessage = factory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
+            AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs.add((AbstractResultMessage) abstractResultMessage);
         }

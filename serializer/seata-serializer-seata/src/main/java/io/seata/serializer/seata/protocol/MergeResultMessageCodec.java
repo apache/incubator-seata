@@ -24,7 +24,6 @@ import io.seata.serializer.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
-import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
 
 /**
  * The type Merge result message codec.
@@ -32,8 +31,11 @@ import io.seata.serializer.seata.protocol.v1.MessageCodecFactoryV1;
  */
 public class MergeResultMessageCodec extends AbstractMessageCodec {
 
-    protected MessageCodecFactory factory = new MessageCodecFactoryV1();
+    private byte version;
 
+    public MergeResultMessageCodec(byte version) {
+        this.version = version;
+    }
     @Override
     public Class<?> getMessageClassType() {
         return MergeResultMessage.class;
@@ -51,7 +53,7 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
             short typeCode = msg.getTypeCode();
             //put typeCode
             out.writeShort(typeCode);
-            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, out);
         }
 
@@ -93,8 +95,8 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
         AbstractResultMessage[] msgs = new AbstractResultMessage[msgNum];
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
-            AbstractMessage abstractResultMessage = factory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = factory.getMessageCodec(typeCode);
+            AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs[idx] = (AbstractResultMessage)abstractResultMessage;
         }

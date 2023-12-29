@@ -16,15 +16,12 @@
  */
 package io.seata.serializer.seata;
 
-import com.google.common.collect.ImmutableMap;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.loader.Scope;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.seata.protocol.v0.SeataSerializerV0;
 import io.seata.serializer.seata.protocol.v1.SeataSerializerV1;
-
-import java.util.Map;
 
 /**
  * The Seata codec.
@@ -34,17 +31,18 @@ public class SeataSerializer implements Serializer {
 
     Serializer versionSeataSerializer;
 
-    static Map<Byte, Serializer> VERSION_MAP = ImmutableMap.<Byte, Serializer>builder()
-            .put(ProtocolConstants.VERSION_0, new SeataSerializerV0())
-            .put(ProtocolConstants.VERSION_1, new SeataSerializerV1())
-            .build();
 
-    public SeataSerializer(Byte version){
-        versionSeataSerializer =  VERSION_MAP.get(version);
+    public SeataSerializer(Byte version) {
+        if (version == ProtocolConstants.VERSION_0) {
+            versionSeataSerializer = SeataSerializerV0.getInstance();
+        } else if (version == ProtocolConstants.VERSION_1) {
+            versionSeataSerializer = SeataSerializerV1.getInstance();
+        }
         if (versionSeataSerializer == null) {
             throw new IllegalArgumentException("version is not supported");
         }
     }
+
     @Override
     public <T> byte[] serialize(T t) {
         return versionSeataSerializer.serialize(t);

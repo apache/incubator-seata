@@ -20,33 +20,39 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.util.BufferUtils;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
+import io.seata.serializer.seata.protocol.v0.SeataSerializerV0;
 
 import java.nio.ByteBuffer;
 
 /**
  * The Seata codec v1.
- *
  */
 public class SeataSerializerV1 implements Serializer {
 
-    MessageCodecFactory factory;
 
-    public SeataSerializerV1(){
-        factory =  new MessageCodecFactoryV1();
+    static Serializer instance = new SeataSerializerV1();
+
+    public static Serializer getInstance() {
+        return instance;
     }
+
+    private SeataSerializerV1() {
+    }
+
     @Override
     public <T> byte[] serialize(T t) {
         if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
-        AbstractMessage abstractMessage = (AbstractMessage)t;
+        AbstractMessage abstractMessage = (AbstractMessage) t;
         //type code
         short typecode = abstractMessage.getTypeCode();
         //msg codec
-        MessageSeataCodec messageCodec = factory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, ProtocolConstants.VERSION_1);
         //get empty ByteBuffer
         ByteBuf out = Unpooled.buffer(1024);
         //msg encode
@@ -83,12 +89,12 @@ public class SeataSerializerV1 implements Serializer {
         byteBuffer.get(body);
         ByteBuffer in = ByteBuffer.wrap(body);
         //new Messgae
-        AbstractMessage abstractMessage = factory.getMessage(typecode);
+        AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
         //get messageCodec
-        MessageSeataCodec messageCodec = factory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, ProtocolConstants.VERSION_1);
         //decode
         messageCodec.decode(abstractMessage, in);
-        return (T)abstractMessage;
+        return (T) abstractMessage;
     }
 
 }

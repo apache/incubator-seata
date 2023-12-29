@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.util.BufferUtils;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
@@ -28,25 +29,37 @@ import java.nio.ByteBuffer;
 
 /**
  * The Seata codec v0.
- *
  */
 public class SeataSerializerV0 implements Serializer {
 
-    MessageCodecFactory factory;
 
-    public SeataSerializerV0(){
-        factory =  new MessageCodecFactoryV0();
+    private SeataSerializerV0() {
     }
+
+    static Serializer instance;
+
+    public static Serializer getInstance() {
+        if (instance == null) {
+            synchronized (SeataSerializerV0.class) {
+                if (instance == null) {
+                    instance = new SeataSerializerV0();
+                }
+            }
+        }
+        return instance;
+    }
+
+
     @Override
     public <T> byte[] serialize(T t) {
         if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
-        AbstractMessage abstractMessage = (AbstractMessage)t;
+        AbstractMessage abstractMessage = (AbstractMessage) t;
         //type code
         short typecode = abstractMessage.getTypeCode();
         //msg codec
-        MessageSeataCodec messageCodec = factory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, ProtocolConstants.VERSION_0);
         //get empty ByteBuffer
         ByteBuf out = Unpooled.buffer(1024);
         //msg encode
@@ -81,12 +94,12 @@ public class SeataSerializerV0 implements Serializer {
         byteBuffer.get(body);
         ByteBuffer in = ByteBuffer.wrap(body);
         //new Messgae
-        AbstractMessage abstractMessage = factory.getMessage(typecode);
+        AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
         //get messageCodec
-        MessageSeataCodec messageCodec = factory.getMessageCodec(typecode);
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, ProtocolConstants.VERSION_0);
         //decode
         messageCodec.decode(abstractMessage, in);
-        return (T)abstractMessage;
+        return (T) abstractMessage;
     }
 
 }
