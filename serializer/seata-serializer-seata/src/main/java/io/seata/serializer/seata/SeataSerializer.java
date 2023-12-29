@@ -28,7 +28,6 @@ import java.util.Map;
 
 /**
  * The Seata codec.
- *
  */
 @LoadLevel(name = "SEATA", scope = Scope.PROTOTYPE)
 public class SeataSerializer implements Serializer {
