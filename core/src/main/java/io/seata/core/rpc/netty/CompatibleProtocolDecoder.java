@@ -100,7 +100,7 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     }
                     return decoder.decodeFrame(frame);
                 } finally {
-                    if (!isV0(version)) {
+                    if (version != ProtocolConstants.VERSION_0) {
                         frame.release();
                     }
                 }
@@ -136,10 +136,10 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         in.markReaderIndex();
         byte b0 = in.readByte();
         byte b1 = in.readByte();
-        byte version = in.readByte();
+        byte b2 = in.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
                 && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1
-                && isV0(version)) {
+                && 0 == b2) {
             isV0 = true;
         }
 
