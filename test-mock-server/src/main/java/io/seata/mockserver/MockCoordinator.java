@@ -23,7 +23,23 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.*;
+import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.BranchReportResponse;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackResponse;
+import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
@@ -31,7 +47,6 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.mockserver.call.CallRm;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
@@ -112,9 +127,9 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
         response.setGlobalStatus(GlobalStatus.Committed);
         response.setResultCode(ResultCode.Success);
 
-        int retry = expectRetryTimesMap.getOrDefault(request.getXid(),0);
+        int retry = expectRetryTimesMap.getOrDefault(request.getXid(), 0);
         List<BranchSession> branchSessions = branchMap.get(request.getXid());
-        if(CollectionUtils.isEmpty(branchSessions)){
+        if (CollectionUtils.isEmpty(branchSessions)) {
             LOGGER.info("branchSessions is empty,XID=" + request.getXid());
         }
         branchSessions.forEach(branch -> {
@@ -130,9 +145,9 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
         response.setResultCode(ResultCode.Success);
 
 
-        int retry = expectRetryTimesMap.getOrDefault(request.getXid(),0);
+        int retry = expectRetryTimesMap.getOrDefault(request.getXid(), 0);
         List<BranchSession> branchSessions = branchMap.get(request.getXid());
-        if(CollectionUtils.isEmpty(branchSessions)){
+        if (CollectionUtils.isEmpty(branchSessions)) {
             LOGGER.info("branchSessions is empty,XID=" + request.getXid());
         }
         branchSessions.forEach(branch -> {
