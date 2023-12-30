@@ -430,7 +430,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                     sb.append("_");
                 }
                 Object pkVal = rowMap.get(pkName).getValue();
-                validPk((String) pkVal);
+                validPk(String.valueOf(pkVal));
                 sb.append(pkVal);
                 pkSplitIndex++;
             }
