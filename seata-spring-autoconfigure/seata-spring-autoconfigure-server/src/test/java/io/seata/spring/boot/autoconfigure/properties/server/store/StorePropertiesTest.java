@@ -29,7 +29,15 @@ public class StorePropertiesTest {
         storeProperties.setMode("mode");
         storeProperties.setPublicKey("public");
 
+        StoreProperties.Session session = new StoreProperties.Session();
+        session.setMode("mode");
+
+        StoreProperties.Lock lock = new StoreProperties.Lock();
+        lock.setMode("mode");
+
         Assertions.assertEquals("mode", storeProperties.getMode());
         Assertions.assertEquals("public", storeProperties.getPublicKey());
+        Assertions.assertEquals("mode", session.getMode());
+        Assertions.assertEquals("mode", lock.getMode());
     }
 }

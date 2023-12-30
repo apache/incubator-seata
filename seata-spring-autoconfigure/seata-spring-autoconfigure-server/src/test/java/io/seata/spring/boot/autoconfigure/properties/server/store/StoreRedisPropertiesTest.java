@@ -43,5 +43,19 @@ public class StoreRedisPropertiesTest {
         Assertions.assertEquals(1, storeRedisProperties.getMinConn());
         Assertions.assertEquals(1, storeRedisProperties.getQueryLimit());
         Assertions.assertEquals(1, storeRedisProperties.getMaxTotal());
+
+        StoreRedisProperties.Single single = new StoreRedisProperties.Single();
+        single.setHost("host");
+        single.setPort(80);
+        Assertions.assertEquals("host", single.getHost());
+        Assertions.assertEquals(80, single.getPort());
+
+        StoreRedisProperties.Sentinel sentinel = new StoreRedisProperties.Sentinel();
+        sentinel.setSentinelHosts("host");
+        sentinel.setMasterName("master");
+        sentinel.setSentinelPassword("pwd");
+        Assertions.assertEquals("host", sentinel.getSentinelHosts());
+        Assertions.assertEquals("master", sentinel.getMasterName());
+        Assertions.assertEquals("pwd", sentinel.getSentinelPassword());
     }
 }
