@@ -397,6 +397,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * validate that the primary key is free of illegal characters
+     *
+     * @param pkVal primary key value
+     */
+    protected void validPk(String pkVal) {
+        if (pkVal.contains(",")) {
+            throw new IllegalArgumentException(pkVal + " contains illegal character!");
+        }
+    }
+
+    /**
      * build lockKey
      *
      * @param rowsIncludingPK the records
@@ -406,7 +417,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (rowsIncludingPK.size() == 0) {
             return null;
         }
-
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
@@ -419,7 +429,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 if (pkSplitIndex > 0) {
                     sb.append("_");
                 }
-                sb.append(rowMap.get(pkName).getValue());
+                Object pkVal = rowMap.get(pkName).getValue();
+                validPk((String) pkVal);
+                sb.append(pkVal);
                 pkSplitIndex++;
             }
             rowSequence++;
