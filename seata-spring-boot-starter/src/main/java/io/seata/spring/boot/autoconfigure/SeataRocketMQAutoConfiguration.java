@@ -24,31 +24,4 @@ public class SeataRocketMQAutoConfiguration {
     public TCCRocketMQ tccRocketMQ() {
         return new TCCRocketMQImpl();
     }
-
-    @Bean
-    public BeanPostProcessor rocketMQBeanPostProcessor(TCCRocketMQ tccRocketMQ) {
-        TCCRocketMQHolder.setTCCRocketMQ(tccRocketMQ);
-        return new BeanPostProcessor() {
-
-            @Override
-            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-                try {
-                    Class<?> clazz = Class.forName("org.apache.rocketmq.client.producer.TransactionMQProducer");
-                    if (clazz.isInstance(bean)) {
-                        Object proxy = ProxyUtil.createProxy(bean, beanName);
-                        return proxy;
-                    }
-                } catch (ClassNotFoundException e) {
-                    //todo log?
-                    return bean;
-                }
-                return bean;
-            }
-
-            @Override
-            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-                return bean;
-            }
-        };
-    }
 }

@@ -17,8 +17,6 @@
 package io.seata.integration.rocketmq;
 
 import com.google.common.collect.Sets;
-import io.seata.common.DefaultValues;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
@@ -29,6 +27,7 @@ import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.client.producer.LocalTransactionExecuter;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.TransactionCheckListener;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.client.producer.TransactionSendResult;
@@ -41,25 +40,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
-
 /**
- * todo
+ * RocketMQ Interceptor Handler
  */
 public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RocketMQInterceptorHandler.class);
-
-    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
-            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
-
-
 
     private TCCRocketMQ tccRocketMQ;
     private TransactionMQProducer producer;
 
     public RocketMQInterceptorHandler(TransactionMQProducer producer) {
         this.producer = producer;
+        TransactionCheckListener checkListener = producer.getTransactionCheckListener();
+        TransactionListener transactionListener = producer.getTransactionListener();
+        if(transactionListener !=null){
+            this.producer.setTransactionListener(new SeataTransactionListener(transactionListener));
+        }
+        if(checkListener !=null){
+            this.producer.setTransactionCheckListener(new SeataTransactionCheckListener(checkListener));
+        }
         tccRocketMQ = TCCRocketMQHolder.getTCCRocketMQ();
     }
 
@@ -68,34 +68,34 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
         Message msg = null;
         LocalTransactionExecuter tranExecuter = null;
         Object arg = null;
-        try{
+        try {
             Object[] arguments = invocation.getArguments();
             if (arguments.length == 2) {
-                msg = (Message)arguments[0];
+                msg = (Message) arguments[0];
                 arg = arguments[1];
-            }else if (arguments.length == 3) {
-                msg = (Message)arguments[0];
-                tranExecuter = (LocalTransactionExecuter)arguments[1];
+                if (null == producer.getTransactionListener()) {
+                    throw new MQClientException("TransactionListener is null", null);
+                }
+            } else if (arguments.length == 3) {
+                msg = (Message) arguments[0];
+                tranExecuter = (LocalTransactionExecuter) arguments[1];
                 arg = arguments[2];
-            }else {
-                // todo log
-                return invocation.proceed();
+                if (null == producer.getTransactionCheckListener()) {
+                    throw new MQClientException("localTransactionBranchCheckListener is null", null);
+                }
+            } else {
+                throw new UnsupportedOperationException("unsupported method, can not be proxy");
             }
-        }catch (Exception e){
-            // todo log
+        } catch (Exception e) {
+            LOGGER.warn("covert arguments error", e);
             return invocation.proceed();
         }
-
-
-        if (null == producer.getTransactionCheckListener()) {
-            throw new MQClientException("localTransactionBranchCheckListener is null", null);
-        }
-        if(null == this.tccRocketMQ){
+        if (null == this.tccRocketMQ) {
             throw new MQClientException("tccRocketMQ is null", null);
         }
 
         msg.setTopic(NamespaceUtil.wrapNamespace(producer.getNamespace(), msg.getTopic()));
-        return doSendMessageInTransaction(msg, tranExecuter, arg,producer);
+        return doSendMessageInTransaction(msg, tranExecuter, arg, producer);
     }
 
 
@@ -150,20 +150,23 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
                     }
 
                     if (localTransactionState != LocalTransactionState.COMMIT_MESSAGE) {
-                        LOGGER.info("executeLocalTransactionBranch return {}", localTransactionState);
+                        LOGGER.warn("executeLocalTransactionBranch return {}", localTransactionState);
                         LOGGER.info(msg.toString());
                     }
 
-                    if (RootContext.inGlobalTransaction() && localTransactionState == LocalTransactionState.COMMIT_MESSAGE) {
-
-                        tccRocketMQ.prepare(null, msg,sendResult);
-
-                        LOGGER.info("executeLocalTransactionBranch state=COMMIT_MESSAGE, but global transaction not complete,return UNKNOW");
-                        localTransactionState = LocalTransactionState.UNKNOW;
+                    if (RootContext.inGlobalTransaction()) {
+                        if(localTransactionState == LocalTransactionState.UNKNOW){
+                            LOGGER.warn("seata global transaction fail cause executeLocalTransactionBranch return UNKNOW," +
+                                    "localTransactionState will be mark as ROLLBACK_MESSAGE");
+                            localTransactionState = LocalTransactionState.ROLLBACK_MESSAGE;
+                        }else {
+                            tccRocketMQ.prepare(null, msg, sendResult);
+                            LOGGER.info("executeLocalTransactionBranch state=COMMIT_MESSAGE, but global transaction not complete,return UNKNOW");
+                            localTransactionState = LocalTransactionState.UNKNOW;
+                        }
                     }
                 } catch (Throwable e) {
-                    LOGGER.info("executeLocalTransactionBranch exception", e);
-                    LOGGER.info(msg.toString());
+                    LOGGER.error("executeLocalTransactionBranch exception", e);
                     localException = e;
                 }
             }
@@ -197,11 +200,6 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
     @Override
     public Set<String> getMethodsToProxy() {
         return Sets.newHashSet("sendMessageInTransaction");
-    }
-
-    @Override
-    public int getOrder() {
-        return ORDER_NUM;
     }
 
     @Override

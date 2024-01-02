@@ -15,17 +15,11 @@ import java.util.Set;
  **/
 public class RocketMQInterceptorParser implements InterfaceParser {
 
-
-    private final Set<String> methodsToProxy = new HashSet<>();
-
-
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
         if (target instanceof TransactionMQProducer) {
-            TCCRocketMQ tccRocket;
-            ProxyInvocationHandler proxyInvocationHandler = new RocketMQInterceptorHandler((TransactionMQProducer) target);
+            return new RocketMQInterceptorHandler((TransactionMQProducer) target);
         }
-
         return null;
     }
 

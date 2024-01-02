@@ -25,9 +25,6 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     String ROCKET_MSG_KEY = "ROCKET_MSG";
     String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
 
-    private ConcurrentHashMap resultMap = new ConcurrentHashMap();
-
-
     @Override
     public void setDefaultMQProducer(DefaultMQProducer defaultMQProducer) {
         this.producerImpl = new DefaultMQProducerImpl(defaultMQProducer);
@@ -47,6 +44,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
             throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
         Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
         SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
+        // todo null?
         producerImpl.endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
@@ -57,6 +55,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
             throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
         Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
         SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
+        // todo null?
         producerImpl.endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
         LOGGER.info("RocketMQ message send rollback, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;

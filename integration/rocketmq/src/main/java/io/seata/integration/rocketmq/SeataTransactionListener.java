@@ -29,13 +29,13 @@ public class SeataTransactionListener implements TransactionListener {
 
     @Override
     public final LocalTransactionState checkLocalTransaction(MessageExt msg) {
-        LocalTransactionState state = listener.checkLocalTransaction(msg);
         String inGlobalTransaction = msg.getProperty(SeataRocketMQConst.PROP_KEY_IN_GLOBAL_TRANSACTION);
-        if ("true".equals(inGlobalTransaction) && state == LocalTransactionState.COMMIT_MESSAGE) {
+        // msg是seata相关的
+        if ("true".equals(inGlobalTransaction)&& timeout?) {
             LOGGER.info("checkLocalTransaction state=COMMIT_MESSAGE, but global transaction not complete,return UNKNOW");
             return LocalTransactionState.UNKNOW;
         }
-        return state;
+        return listener.checkLocalTransaction(msg);
     }
 
 }

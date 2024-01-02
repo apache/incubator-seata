@@ -26,10 +26,6 @@ public interface TCCRocketMQ {
      * @param context thre context
      * @param message the message
      * @return SendResult
-     * @throws MQBrokerException
-     * @throws RemotingException
-     * @throws InterruptedException
-     * @throws MQClientException
      */
     @TwoPhaseBusinessAction(name = "tccRocketMQ", commitMethod = "commit", rollbackMethod = "rollback")
     void prepare(BusinessActionContext context, Message message, SendResult sendResult);
