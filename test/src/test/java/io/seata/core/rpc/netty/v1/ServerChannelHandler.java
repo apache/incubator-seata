@@ -46,7 +46,6 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             LOGGER.error("rpcMessage type error");
             return;
         }
-
         channel.writeAndFlush(rpcMessage);
     }
 
