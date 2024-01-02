@@ -53,7 +53,6 @@ public class SeataTransactionListener implements TransactionListener {
     public final LocalTransactionState checkLocalTransaction(MessageExt msg) {
         String inGlobalTransaction = msg.getProperty(SeataRocketMQConst.PROP_KEY_IN_GLOBAL_TRANSACTION);
         String sendTime = msg.getProperty(SeataRocketMQConst.PROP_KEY_MSG_SEND_TIME);
-        // msg是seata相关的
         if ("true".equals(inGlobalTransaction)) {
             if(System.currentTimeMillis() - Long.parseLong(sendTime) > ROCKET_MQ_MSG_TIMEOUT){
                 LOGGER.error("rocketmq sent a message in global transaction, and it is timeout, return ROLLBACK_MESSAGE");
