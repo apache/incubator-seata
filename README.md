@@ -8,8 +8,6 @@
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
 [![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/seata/seata.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/seata/seata/context:java)
-
 
 ## What is Seata?
 
@@ -133,7 +131,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 ## Contact
 
 * Mailing list: 
-  * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
+  * dev@seata.apache.org , for dev/user discussion. [subscribe](mailto:dev-subscribe@seata.apache.org), [unsubscribe](mailto:dev-unsubscribe@seata.apache.org), [archive](https://lists.apache.org/list.html?dev@seata.apache.org)
 * Online chat: 
 
 <img src="https://img.alicdn.com/imgextra/i2/O1CN01nQG77T1VNcpPDOMVi_!!6000000002641-0-tps-1566-424.jpg"  height="200" width="630">
@@ -141,13 +139,14 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 
 ## Seata ecosystem
 
-* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
+* [Seata Website](https://github.com/apache/incubator-seata.github.io) - Seata official website
 * [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
-* [Seata GoLang](https://github.com/opentrx/seata-golang) - Seata GoLang client and server
-* [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
-* [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
-* [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
-* [Awesome Seata](https://github.com/seata/awesome-seata) - Seata's slides and video address in meetup
+* [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client and server
+* [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata
+* [Seata GoLang Simples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
+* [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with k8s
+* [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata
+* [Awesome Seata](https://github.com/seata/awesome-fescar) - Seata's slides and video address in meetup
 
 ## Contributors
 

@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.discovery.registry.raft;
 
@@ -61,7 +62,6 @@ import org.slf4j.LoggerFactory;
 /**
  * The type File registry service.
  *
- * @author funkye
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
 
@@ -169,29 +169,37 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (!CLOSED.get()) {
-                            // Forced refresh of metadata information after set age
-                            boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
-                            String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
-                            if (!fetch) {
-                                fetch = watch();
-                            }
-                            // Cluster changes or reaches timeout refresh time
-                            if (fetch) {
-                                AtomicBoolean success = new AtomicBoolean(true);
-                                METADATA.groups(clusterName).parallelStream().forEach(group -> {
-                                    try {
-                                        acquireClusterMetaData(clusterName, group);
-                                    } catch (Exception e) {
-                                        success.set(false);
-                                        // prevents an exception from being thrown that causes the thread to break
-                                        LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
+                            try {
+                                // Forced refresh of metadata information after set age
+                                boolean fetch = System.currentTimeMillis() - currentTime > metadataMaxAgeMs;
+                                String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
+                                if (!fetch) {
+                                    fetch = watch();
+                                }
+                                // Cluster changes or reaches timeout refresh time
+                                if (fetch) {
+                                    for (String group : METADATA.groups(clusterName)) {
+                                        try {
+                                            acquireClusterMetaData(clusterName, group);
+                                        } catch (Exception e) {
+                                            // prevents an exception from being thrown that causes the thread to break
+                                            if (e instanceof RetryableException) {
+                                                throw e;
+                                            } else {
+                                                LOGGER.error("failed to get the leader address,error: {}", e.getMessage());
+                                            }
+                                        }
                                     }
-                                });
-                                if (success.get()) {
                                     currentTime = System.currentTimeMillis();
                                     if (LOGGER.isDebugEnabled()) {
                                         LOGGER.debug("refresh seata cluster metadata time: {}", currentTime);
                                     }
+                                }
+                            } catch (RetryableException e) {
+                                LOGGER.error(e.getMessage(), e);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ignored) {
                                 }
                             }
                         }
@@ -290,7 +298,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         return RegistryService.super.aliveLookup(transactionServiceGroup);
     }
 
-    private static boolean watch() {
+    private static boolean watch() throws RetryableException {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
@@ -299,36 +307,28 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         groupTerms.forEach((k, v) -> param.put(k, String.valueOf(v)));
         for (String group : groupTerms.keySet()) {
             String tcAddress = queryHttpAddress(clusterName, group);
-            try {
-                if (isTokenExpired()) {
-                    refreshToken(tcAddress);
-                }
-                if (StringUtils.isNotBlank(jwtToken)) {
-                    header.put(AUTHORIZATION_HEADER, jwtToken);
-                }
-                try (CloseableHttpResponse response =
-                         HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
-                    if (response != null) {
-                        StatusLine statusLine = response.getStatusLine();
-                        if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                            if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                                throw new RetryableException("Authentication failed!");
-                            } else {
-                                throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
-                            }
+            if (isTokenExpired()) {
+                refreshToken(tcAddress);
+            }
+            if (StringUtils.isNotBlank(jwtToken)) {
+                header.put(AUTHORIZATION_HEADER, jwtToken);
+            }
+            try (CloseableHttpResponse response =
+                     HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+                if (response != null) {
+                    StatusLine statusLine = response.getStatusLine();
+                    if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                        if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                            throw new RetryableException("Authentication failed!");
+                        } else {
+                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                         }
-                        return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                     }
-                } catch (IOException e) {
-                    throw new RetryableException(e.getMessage(), e);
+                    return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
                 }
-            } catch (RetryableException e) {
+            } catch (IOException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                }
-                continue;
+                throw new RetryableException(e.getMessage(), e);
             }
             break;
         }

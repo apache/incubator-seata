@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.server.spring.listener;
 
@@ -22,6 +23,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.GenericApplicationListener;
@@ -36,19 +38,22 @@ import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAME
 import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
 /**
- * @author slievrly
- * @author funkye
  */
 public class ServerApplicationListener implements GenericApplicationListener {
 
     @Override
     public boolean supportsEventType(ResolvableType eventType) {
         return eventType.getRawClass() != null
-                && ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass());
+                && (ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass()) ||
+                ApplicationReadyEvent.class.isAssignableFrom(eventType.getRawClass()));
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
+        if (event instanceof ApplicationReadyEvent) {
+            System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
+            return;
+        }
         if (!(event instanceof ApplicationEnvironmentPreparedEvent)) {
             return;
         }

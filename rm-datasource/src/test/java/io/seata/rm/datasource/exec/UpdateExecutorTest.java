@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource.exec;
 
@@ -35,21 +36,12 @@ import io.seata.rm.datasource.DataSourceProxyTest;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-
-import javax.sql.DataSource;
-
-import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author will
  */
 public class UpdateExecutorTest {
 
@@ -103,49 +95,175 @@ public class UpdateExecutorTest {
     }
 
     @Test
-    public void testBeforeImage() throws SQLException {
+    public void testBeforeAndAfterImage() throws SQLException {
         Assertions.assertNotNull(updateExecutor.beforeImage());
 
         String sql = "update table_update_executor_test set name = 'WILL' where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(updateExecutor.beforeImage());
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testBeforeImageWithTableAlias() throws SQLException {
+    public void testBeforeAndAfterImageWithTableAlias() throws SQLException {
         Assertions.assertNotNull(updateExecutor.beforeImage());
 
         String sql = "update table_update_executor_test t set t.name = 'WILL' where t.id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
-        String builtSql = updateExecutor.buildBeforeImageSQL(updateExecutor.getTableMeta(), new ArrayList<>());
-        Assertions.assertTrue(builtSql.contains("t.updated"));
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testKeyword() throws SQLException {
-        String sql = "update table_update_executor_test set `all` = '1234' where id = 1";
+    public void testBeforeAndAfterImageWithTableSchema() throws SQLException {
+        String sql = "update seata.table_update_executor_test set name = 'WILL' where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
         TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
         Assertions.assertNotNull(beforeImage);
-        Assertions.assertNotNull(updateExecutor.afterImage(beforeImage));
+        Assertions.assertNotNull(afterImage);
     }
 
     @Test
-    public void testAfterImage() throws SQLException {
+    public void testBeforeAndAfterImageWithTableSchemaAndTableAlias() throws SQLException {
+        String sql = "update seata.table_update_executor_test t set t.name = 'WILL' where t.id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
         TableRecords beforeImage = updateExecutor.beforeImage();
         TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
         Assertions.assertNotNull(afterImage);
+    }
 
-        afterImage = updateExecutor.afterImage(new TableRecords());
+    @Test
+    public void testBeforeAndAfterImageWithTableSchemaQuote() throws SQLException {
+        String sql = "update `seata`.table_update_executor_test set name = 'WILL' where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
         Assertions.assertNotNull(afterImage);
+    }
 
-        afterImage = updateExecutor.afterImage(null);
+    @Test
+    public void testBeforeAndAfterImageWithTableSchemaAndTableNameQuote() throws SQLException {
+        String sql = "update seata.`table_update_executor_test` set name = 'WILL' where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithTableSchemaQuoteAndTableNameQuote() throws SQLException {
+        String sql = "update `seata`.`table_update_executor_test` set name = 'WILL' where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithColumnQuote() throws SQLException {
+        String sql = "update table_update_executor_test set `name` = 'WILL' where `id` = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithUpperColumn() throws SQLException {
+        String sql = "update table_update_executor_test set NAME = 'WILL', UPDATED = `567` where ID = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithTableAliasAndUpperColumn() throws SQLException {
+        String sql = "update table_update_executor_test t set t.NAME = 'WILL', t.UPDATED = `567` where t.ID = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithKeywordQuote() throws SQLException {
+        String sql = "update table_update_executor_test set `all` = '1234', `updated` = `567` where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithOnUpdateColumn() throws SQLException {
+        String sql = "update table_update_executor_test set updated = 1 where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
+        Assertions.assertNotNull(afterImage);
+    }
+
+    @Test
+    public void testBeforeAndAfterImageWithOnUpdateUpperColumn() throws SQLException {
+        String sql = "update table_update_executor_test set UPDATED = 1 where id = 1";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(beforeImage);
         Assertions.assertNotNull(afterImage);
     }
 }
