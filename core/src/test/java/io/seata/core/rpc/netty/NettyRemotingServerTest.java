@@ -34,9 +34,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * @author laywin
- */
+
 public class NettyRemotingServerTest {
 
 	private NettyRemotingServer nettyRemotingServer;
