@@ -24,7 +24,6 @@ import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.serializer.Serializer;
 import io.seata.serializer.seata.MessageCodecFactory;
 import io.seata.serializer.seata.MessageSeataCodec;
-import io.seata.serializer.seata.protocol.v0.SeataSerializerV0;
 
 import java.nio.ByteBuffer;
 
