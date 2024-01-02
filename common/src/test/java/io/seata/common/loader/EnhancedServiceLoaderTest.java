@@ -201,4 +201,12 @@ public class EnhancedServiceLoaderTest {
         assertThat(classToDefinitionMap.get(EnglishHello.class)).isNull();
     }
 
+    @Test
+    public void testUnload() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> EnhancedServiceLoader.unload(Hello.class, null));
+        Hello load = EnhancedServiceLoader.load(Hello.class, "FrenchHello");
+        Assertions.assertDoesNotThrow(() -> EnhancedServiceLoader.unload(Hello.class, "FrenchHello"));
+    }
+
+
 }

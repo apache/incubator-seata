@@ -27,6 +27,9 @@ public class BranchDO {
     private Integer status;
     private Double test;
     private Date gmtCreate;
+    public static String msg;
+    private final String message = "t";
+    private Byte testByte;
 
     public String getXid() {
         return xid;
@@ -46,6 +49,14 @@ public class BranchDO {
 
     public Date getGmtCreate() {
         return gmtCreate;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Byte getTestByte() {
+        return testByte;
     }
 
     public BranchDO() {
