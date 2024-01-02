@@ -1001,4 +1001,9 @@ public interface ConfigurationKeys {
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
     String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant ROCKET_MQ_MSG_TIMEOUT
+     */
+    String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
 }

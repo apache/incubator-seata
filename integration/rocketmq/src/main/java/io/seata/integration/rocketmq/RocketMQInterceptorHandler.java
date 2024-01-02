@@ -52,12 +52,14 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
 
     public RocketMQInterceptorHandler(TransactionMQProducer producer) {
         this.producer = producer;
-        TransactionCheckListener checkListener = producer.getTransactionCheckListener();
         TransactionListener transactionListener = producer.getTransactionListener();
-        if(transactionListener !=null){
+        TransactionCheckListener checkListener = producer.getTransactionCheckListener();
+        if (transactionListener != null) {
+            LOGGER.warn("TransactionListener will be wrapped by SeataTransactionListener");
             this.producer.setTransactionListener(new SeataTransactionListener(transactionListener));
         }
-        if(checkListener !=null){
+        if (checkListener != null) {
+            LOGGER.warn("TransactionCheckListener will be wrapped by SeataTransactionCheckListener");
             this.producer.setTransactionCheckListener(new SeataTransactionCheckListener(checkListener));
         }
         tccRocketMQ = TCCRocketMQHolder.getTCCRocketMQ();
@@ -155,11 +157,11 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
                     }
 
                     if (RootContext.inGlobalTransaction()) {
-                        if(localTransactionState == LocalTransactionState.UNKNOW){
+                        if (localTransactionState == LocalTransactionState.UNKNOW) {
                             LOGGER.warn("seata global transaction fail cause executeLocalTransactionBranch return UNKNOW," +
                                     "localTransactionState will be mark as ROLLBACK_MESSAGE");
                             localTransactionState = LocalTransactionState.ROLLBACK_MESSAGE;
-                        }else {
+                        } else {
                             tccRocketMQ.prepare(null, msg, sendResult);
                             LOGGER.info("executeLocalTransactionBranch state=COMMIT_MESSAGE, but global transaction not complete,return UNKNOW");
                             localTransactionState = LocalTransactionState.UNKNOW;

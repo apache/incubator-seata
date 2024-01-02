@@ -20,37 +20,29 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.DefaultValues;
 import io.seata.config.ConfigurationFactory;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
-import org.apache.rocketmq.client.producer.TransactionListener;
-import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.client.producer.TransactionCheckListener;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Seata Transaction Listener
+ * Seata TransactionCheckListener
  **/
-public class SeataTransactionListener implements TransactionListener {
+public class SeataTransactionCheckListener implements TransactionCheckListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataTransactionListener.class);
 
     private static final int ROCKET_MQ_MSG_TIMEOUT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.ROCKET_MQ_MSG_TIMEOUT,
             DefaultValues.DEFAULT_ROCKET_MQ_MSG_TIMEOUT);
 
-    private TransactionListener listener;
+    private TransactionCheckListener listener;
 
-
-    public SeataTransactionListener(TransactionListener listener) {
+    public SeataTransactionCheckListener(TransactionCheckListener listener) {
         this.listener = listener;
     }
 
     @Override
-    public final LocalTransactionState executeLocalTransaction(Message msg, Object arg) {
-        return listener.executeLocalTransaction(msg, arg);
-    }
-
-
-    @Override
-    public final LocalTransactionState checkLocalTransaction(MessageExt msg) {
+    public LocalTransactionState checkLocalTransactionState(MessageExt msg) {
         String inGlobalTransaction = msg.getProperty(SeataRocketMQConst.PROP_KEY_IN_GLOBAL_TRANSACTION);
         String sendTime = msg.getProperty(SeataRocketMQConst.PROP_KEY_MSG_SEND_TIME);
         // msg是seata相关的
@@ -63,7 +55,6 @@ public class SeataTransactionListener implements TransactionListener {
                 return LocalTransactionState.UNKNOW;
             }
         }
-        return listener.checkLocalTransaction(msg);
+        return listener.checkLocalTransactionState(msg);
     }
-
 }
