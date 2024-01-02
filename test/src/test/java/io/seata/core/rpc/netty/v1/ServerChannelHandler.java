@@ -20,7 +20,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.slf4j.Logger;
