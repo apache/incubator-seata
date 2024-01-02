@@ -93,7 +93,10 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
             return invocation.proceed();
         }
         if (null == this.tccRocketMQ) {
-            throw new MQClientException("tccRocketMQ is null", null);
+            this.tccRocketMQ = TCCRocketMQHolder.getTCCRocketMQ();
+            if (null == this.tccRocketMQ) {
+                throw new MQClientException("tccRocketMQ is null", null);
+            }
         }
 
         msg.setTopic(NamespaceUtil.wrapNamespace(producer.getNamespace(), msg.getTopic()));

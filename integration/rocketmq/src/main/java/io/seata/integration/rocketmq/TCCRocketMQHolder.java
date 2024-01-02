@@ -16,18 +16,29 @@
  */
 package io.seata.integration.rocketmq;
 
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
 /**
  * TCCRocketMQ Holder
  *
  **/
-public class TCCRocketMQHolder {
-    private static TCCRocketMQ tccRocketMQ;
-
-    public static void setTCCRocketMQ(TCCRocketMQ tccRocketMQ) {
-        TCCRocketMQHolder.tccRocketMQ = tccRocketMQ;
-    }
+public class TCCRocketMQHolder implements ApplicationContextAware {
+    
+    private static ApplicationContext context;
 
     public static TCCRocketMQ getTCCRocketMQ() {
-        return tccRocketMQ;
+        TCCRocketMQ bean = context.getBean(TCCRocketMQ.class);
+        if (AopUtils.isAopProxy(bean)) {
+            return bean;
+        }
+        return null;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        TCCRocketMQHolder.context = applicationContext;
     }
 }
