@@ -39,14 +39,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         Channel channel = ctx.channel();
 
-        RpcMessage rpcMessage = null;
         if (msg instanceof ProtocolRpcMessage) {
-            rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
+            RpcMessage rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
+            channel.writeAndFlush(rpcMessage);
         } else {
             LOGGER.error("rpcMessage type error");
-            return;
         }
-        channel.writeAndFlush(rpcMessage);
     }
 
     @Override
