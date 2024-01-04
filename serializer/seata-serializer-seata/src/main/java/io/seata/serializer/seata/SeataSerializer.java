@@ -60,7 +60,7 @@ public class SeataSerializer implements Serializer {
     }
 
 
-    class SeataSerializerV1 implements Serializer {
+    static class SeataSerializerV1 implements Serializer {
 
         private SeataSerializerV1() {
         }
@@ -101,7 +101,7 @@ public class SeataSerializer implements Serializer {
 
         }
     }
-    class SeataSerializerV0 implements Serializer {
+    static class SeataSerializerV0 implements Serializer {
 
 
         private SeataSerializerV0() {
