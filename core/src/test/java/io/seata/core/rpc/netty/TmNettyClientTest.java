@@ -21,8 +21,16 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkException;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -121,6 +129,23 @@ public class TmNettyClientTest {
     @Test
     public void setApplicationId() throws Exception {
 
+    }
+
+    @BeforeAll
+    public static void beforeAll() {
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+    }
+
+    @Test
+    public void testCheckFailFast() throws Exception {
+        TimeUnit.MILLISECONDS.sleep(1500);
+        TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
+        Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }
 
     /**

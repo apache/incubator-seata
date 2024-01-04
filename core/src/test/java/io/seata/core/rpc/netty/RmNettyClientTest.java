@@ -16,10 +16,24 @@
  */
 package io.seata.core.rpc.netty;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkException;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.model.Resource;
+import io.seata.core.model.ResourceManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,6 +60,33 @@ class RmNettyClientTest {
         newClient.init();
         assertTrue(initialized.get());
         newClient.destroy();
+    }
+
+    @BeforeAll
+    public static void beforeAll() {
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+    }
+
+    @Test
+    public void testCheckFailFast() throws Exception {
+        TimeUnit.MILLISECONDS.sleep(1500);
+        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
+
+        ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        Resource mockResource = Mockito.mock(Resource.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        resourceMap.put("jdbc:xx://localhost/test", mockResource);
+        Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        newClient.setResourceManager(resourceManager);
+
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+
+        Assertions.assertThrows(FrameworkException.class, newClient::init);
     }
     
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
