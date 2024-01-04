@@ -16,10 +16,27 @@
  */
 package io.seata.core.rpc.netty;
 
+import io.seata.common.ConfigurationKeys;
+import io.seata.common.DefaultValues;
+import io.seata.common.exception.FrameworkException;
+import io.seata.config.ConfigurationCache;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.model.Resource;
+import io.seata.core.model.ResourceManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,6 +48,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class RmNettyClientTest {
     
+    Logger logger = LoggerFactory.getLogger(getClass());
+    
+    @BeforeAll
+    public static void beforeAll() {
+        RmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        RmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+    }
+
     @Test
     public void assertGetInstanceAfterDestroy() {
         RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("ap", "group");
@@ -46,6 +77,25 @@ class RmNettyClientTest {
         newClient.init();
         assertTrue(initialized.get());
         newClient.destroy();
+    }
+
+    @Test
+    public void testCheckFailFast() throws Exception {
+        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
+
+        ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        Resource mockResource = Mockito.mock(Resource.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        resourceMap.put("jdbc:xx://localhost/test", mockResource);
+        Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        newClient.setResourceManager(resourceManager);
+        System.setProperty("file.listener.enabled", "true");
+        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
+                event.getOldValue()));
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+        Thread.sleep(2000);
+        Assertions.assertThrows(FrameworkException.class, newClient::init);
     }
     
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {

@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -397,6 +398,33 @@ public class StringUtils {
             }
         }
         return false;
+    }
+
+    public static String join(Iterator iterator, String separator) {
+        if (iterator == null) {
+            return null;
+        }
+        if (!iterator.hasNext()) {
+            return EMPTY;
+        }
+        Object first = iterator.next();
+        if (!iterator.hasNext()) {
+            return first == null ? "" : first.toString();
+        }
+        StringBuilder builder = new StringBuilder(256);
+        if (first != null) {
+            builder.append(first);
+        }
+        while (iterator.hasNext()) {
+            if (separator != null) {
+                builder.append(separator);
+            }
+            Object obj = iterator.next();
+            if (obj != null) {
+                builder.append(obj);
+            }
+        }
+        return builder.toString();
     }
 
 }

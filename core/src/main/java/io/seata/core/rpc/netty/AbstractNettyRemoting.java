@@ -58,6 +58,7 @@ import org.slf4j.MDC;
 public abstract class AbstractNettyRemoting implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemoting.class);
+
     /**
      * The Timer executor.
      */

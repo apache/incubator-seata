@@ -283,7 +283,10 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     private void initConnection() {
-        getClientChannelManager().reconnect(transactionServiceGroup);
+        boolean failFast = ConfigurationFactory.getInstance().getBoolean(
+                ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
+        getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
     }
 
 }
