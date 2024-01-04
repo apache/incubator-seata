@@ -133,17 +133,18 @@ public class TmNettyClientTest {
 
     @BeforeAll
     public static void beforeAll() {
+        TmNettyRemotingClient.getInstance().destroy();
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
     }
 
     @AfterAll
     public static void afterAll() {
+        TmNettyRemotingClient.getInstance().destroy();
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
     public void testCheckFailFast() throws Exception {
-        TimeUnit.MILLISECONDS.sleep(1500);
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }

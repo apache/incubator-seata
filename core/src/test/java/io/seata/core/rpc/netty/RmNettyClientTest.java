@@ -50,7 +50,19 @@ class RmNettyClientTest {
     
     Logger logger = LoggerFactory.getLogger(getClass());
     
-/*    @Test
+    @BeforeAll
+    public static void beforeAll() {
+        RmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        RmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+    }
+
+    @Test
     public void assertGetInstanceAfterDestroy() {
         RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("ap", "group");
         AtomicBoolean initialized = getInitializeStatus(oldClient);
@@ -65,16 +77,6 @@ class RmNettyClientTest {
         newClient.init();
         assertTrue(initialized.get());
         newClient.destroy();
-    }*/
-
-    @BeforeAll
-    public static void beforeAll() {
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-    }
-
-    @AfterAll
-    public static void afterAll() {
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
@@ -92,8 +94,6 @@ class RmNettyClientTest {
             event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
                 event.getOldValue()));
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
-        logger.info("ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST: {}",ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST));
         Assertions.assertThrows(FrameworkException.class, newClient::init);
     }
     
