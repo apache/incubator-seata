@@ -21,14 +21,14 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.druid.postgresql.PostgresqlDeleteRecognizer;
 
 /**
- * The type openGauss delete recognizer.
+ * The type GaussDB delete recognizer.
  * 
  * @author liuqiufeng
  */
 public class GaussDBDeleteRecognizer extends PostgresqlDeleteRecognizer {
     
     /**
-     * Instantiates a new openGauss delete recognizer.
+     * Instantiates a new GaussDB delete recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast

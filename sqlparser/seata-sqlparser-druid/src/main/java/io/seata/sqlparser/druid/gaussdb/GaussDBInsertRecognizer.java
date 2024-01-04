@@ -21,14 +21,14 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.druid.postgresql.PostgresqlInsertRecognizer;
 
 /**
- * The type openGauss insert recognizer.
+ * The type GaussDB insert recognizer.
  * 
  * @author liuqiufeng
  */
 public class GaussDBInsertRecognizer extends PostgresqlInsertRecognizer {
     
     /**
-     * Instantiates a new openGauss insert recognizer.
+     * Instantiates a new GaussDB insert recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast

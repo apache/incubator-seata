@@ -21,14 +21,14 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
 
 /**
- * The type openGauss update recognizer.
+ * The type GaussDB update recognizer.
  * 
  * @author liuqiufeng
  */
 public class GaussDBUpdateRecognizer extends PostgresqlUpdateRecognizer {
     
     /**
-     * Instantiates a new openGauss update recognizer.
+     * Instantiates a new GaussDB update recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast
