@@ -145,7 +145,10 @@ public class TmNettyClientTest {
 
     @Test
     public void testCheckFailFast() throws Exception {
+        TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
+        Thread.sleep(1000);
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }
 
