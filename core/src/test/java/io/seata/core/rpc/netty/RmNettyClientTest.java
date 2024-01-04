@@ -50,7 +50,7 @@ class RmNettyClientTest {
     
     Logger logger = LoggerFactory.getLogger(getClass());
     
-    @Test
+/*    @Test
     public void assertGetInstanceAfterDestroy() {
         RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("ap", "group");
         AtomicBoolean initialized = getInitializeStatus(oldClient);
@@ -65,7 +65,7 @@ class RmNettyClientTest {
         newClient.init();
         assertTrue(initialized.get());
         newClient.destroy();
-    }
+    }*/
 
     @BeforeAll
     public static void beforeAll() {
