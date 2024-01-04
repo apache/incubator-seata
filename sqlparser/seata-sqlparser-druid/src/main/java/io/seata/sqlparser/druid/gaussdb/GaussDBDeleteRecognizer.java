@@ -19,11 +19,11 @@ package io.seata.sqlparser.druid.gaussdb;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.druid.postgresql.PostgresqlDeleteRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type GaussDB delete recognizer.
- * 
- * @author liuqiufeng
+ *
  */
 public class GaussDBDeleteRecognizer extends PostgresqlDeleteRecognizer {
     
@@ -35,5 +35,10 @@ public class GaussDBDeleteRecognizer extends PostgresqlDeleteRecognizer {
      */
     public GaussDBDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL, ast);
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.GAUSSDB;
     }
 }

@@ -20,14 +20,12 @@ package io.seata.sqlparser.druid.gaussdb;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 
+import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
 import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
-/**
- * @author liuqiufeng
- */
 @LoadLevel(name = JdbcConstants.GAUSSDB)
 public class GaussDBOperateRecognizerHolder implements SQLOperateRecognizerHolder {
 
@@ -48,7 +46,8 @@ public class GaussDBOperateRecognizerHolder implements SQLOperateRecognizerHolde
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
+        PGSelectQueryBlock selectQueryBlock = (PGSelectQueryBlock) ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock();
+        if (selectQueryBlock.getForClause() != null && selectQueryBlock.getForClause().getOption().equals(PGSelectQueryBlock.ForClause.Option.UPDATE)) {
             return new GaussDBSelectForUpdateRecognizer(sql, ast);
         }
         return null;

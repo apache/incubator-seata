@@ -19,11 +19,11 @@ package io.seata.rm.datasource.undo.gaussdb;
 
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoUpdateExecutor;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type GaussDB undo update executor.
- * 
- * @author liuqiufeng
+ *
  */
 public class GaussDBUndoUpdateExecutor extends PostgresqlUndoUpdateExecutor {
     
@@ -34,5 +34,10 @@ public class GaussDBUndoUpdateExecutor extends PostgresqlUndoUpdateExecutor {
      */
     public GaussDBUndoUpdateExecutor(SQLUndoLog sqlUndoLog) {
         super(sqlUndoLog);
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.GAUSSDB;
     }
 }

@@ -23,7 +23,6 @@ import io.seata.sqlparser.util.JdbcConstants;
 /**
  * The type Table meta cache.
  *
- * @author liuqiufeng
  */
 @LoadLevel(name = JdbcConstants.GAUSSDB)
 public class GaussDBTableMetaCache extends PostgresqlTableMetaCache {

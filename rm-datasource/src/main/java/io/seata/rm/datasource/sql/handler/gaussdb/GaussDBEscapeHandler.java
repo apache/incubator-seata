@@ -23,8 +23,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type GaussDB escape handler.
- * 
- * @author liuqiufeng
+ *
  */
 @LoadLevel(name = JdbcConstants.GAUSSDB)
 public class GaussDBEscapeHandler extends PostgresqlEscapeHandler {

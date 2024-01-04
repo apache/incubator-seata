@@ -27,8 +27,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type GaussDB insert executor.
- * 
- * @author liuqiufeng
+ *
  */
 @LoadLevel(name = JdbcConstants.GAUSSDB, scope = Scope.PROTOTYPE)
 public class GaussDBInsertExecutor extends PostgresqlInsertExecutor {

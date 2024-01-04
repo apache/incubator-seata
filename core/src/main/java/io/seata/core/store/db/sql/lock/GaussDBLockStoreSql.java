@@ -22,7 +22,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * the database lock store GaussDB sql
  *
- * @author liuqiufeng
  */
 @LoadLevel(name = "gaussdb")
 public class GaussDBLockStoreSql extends PostgresqlLockStoreSql {

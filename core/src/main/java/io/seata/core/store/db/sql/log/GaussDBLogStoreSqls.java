@@ -22,7 +22,6 @@ import io.seata.common.loader.LoadLevel;
 /**
  * Database log store GaussDB sql
  *
- * @author liuqiufeng
  */
 @LoadLevel(name = "gaussdb")
 public class GaussDBLogStoreSqls extends PostgresqlLogStoreSqls {

@@ -19,11 +19,11 @@ package io.seata.sqlparser.druid.gaussdb;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type GaussDB update recognizer.
- * 
- * @author liuqiufeng
+ *
  */
 public class GaussDBUpdateRecognizer extends PostgresqlUpdateRecognizer {
     
@@ -35,5 +35,10 @@ public class GaussDBUpdateRecognizer extends PostgresqlUpdateRecognizer {
      */
     public GaussDBUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL, ast);
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.GAUSSDB;
     }
 }

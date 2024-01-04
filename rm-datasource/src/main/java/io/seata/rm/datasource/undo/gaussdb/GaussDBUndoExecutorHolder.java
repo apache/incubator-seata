@@ -25,8 +25,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * Undo executor holder for GaussDB
- * 
- * @author liuqiufeng
+ *
  */
 @LoadLevel(name = JdbcConstants.GAUSSDB)
 public class GaussDBUndoExecutorHolder implements UndoExecutorHolder {

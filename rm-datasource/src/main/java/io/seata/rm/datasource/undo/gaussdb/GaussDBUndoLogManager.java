@@ -22,8 +22,7 @@ import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * Undo log manager for GaussDB
- * 
- * @author liuqiufeng
+ *
  */
 @LoadLevel(name = JdbcConstants.GAUSSDB)
 public class GaussDBUndoLogManager extends PostgresqlUndoLogManager {

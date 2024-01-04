@@ -33,6 +33,9 @@ class DruidDbTypeAdapter {
         if (JdbcConstants.POLARDBX.equals(dbType)) {
             return JdbcConstants.MYSQL;
         }
+        if (JdbcConstants.GAUSSDB.equals(dbType)) {
+            return JdbcConstants.POSTGRESQL;
+        }
         return dbType;
     }
 }
