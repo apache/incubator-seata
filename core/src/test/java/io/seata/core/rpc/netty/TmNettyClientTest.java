@@ -135,12 +135,6 @@ public class TmNettyClientTest {
 
     }
 
-    @BeforeAll
-    public static void beforeAll() {
-        TmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-    }
-
     @AfterAll
     public static void afterAll() {
         TmNettyRemotingClient.getInstance().destroy();
