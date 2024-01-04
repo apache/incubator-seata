@@ -32,6 +32,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -44,6 +46,8 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class TmNettyClientTest {
+
+    Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
@@ -147,8 +151,12 @@ public class TmNettyClientTest {
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
+        System.setProperty("file.listener.enabled", "true");
+        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
+                event.getOldValue()));
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }
 
