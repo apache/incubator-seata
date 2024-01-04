@@ -42,7 +42,7 @@ public class ProxyUtil {
      * provide user to generate proxy manually.
      * <p>
      * At TM side, It can be used for the target bean with @GlobalTransactional or @GlobalLock to generate proxy which start global transaction.
-     * At RM side, if you use TCC mode， It can be for target bean with @TwoPhaseBusinessAction to generate proxy which register branch source
+     * At RM side, if you use TCC mode, It can be for target bean with @TwoPhaseBusinessAction to generate proxy which register branch source
      *      and branch transaction. If you want to use this API to generate proxy manual like dubbo, you must make sure the target bean is the
      *      business bean with @GlobalTransactional annotation. If you pass the ServiceBean(com.alibaba.dubbo.config.spring.ServiceBean) or
      *      ReferenceBean(com.alibaba.dubbo.config.spring.ReferenceBean), it will don't work.
