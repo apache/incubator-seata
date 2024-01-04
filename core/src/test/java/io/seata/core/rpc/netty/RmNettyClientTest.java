@@ -88,15 +88,12 @@ class RmNettyClientTest {
         Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
         newClient.setResourceManager(resourceManager);
         System.setProperty("file.listener.enabled", "true");
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, new ConfigurationChangeListener() {
-            @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                    event.getOldValue());
-            }
-        });
+        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
+                event.getOldValue()));
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(1500);
+        Thread.sleep(2000);
+        logger.info("ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST: {}",ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST));
         Assertions.assertThrows(FrameworkException.class, newClient::init);
     }
     
