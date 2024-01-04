@@ -150,7 +150,6 @@ public class TmNettyClientTest {
             event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
                 event.getOldValue()));
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }
 
