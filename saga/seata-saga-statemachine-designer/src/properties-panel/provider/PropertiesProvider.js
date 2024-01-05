@@ -33,7 +33,7 @@ function GeneralGroup(element) {
     entries.push(...VersionProps({ element }));
   }
 
-  if (is(element, 'Connection') || is(element, 'StartState')) {
+  if (is(element, 'Connection') || is(element, 'StartState') || is(element, 'Catch')) {
     return null;
   }
 
@@ -51,7 +51,7 @@ function JsonGroup(element) {
     ...StyleProps({ element }),
   ];
 
-  if (is(element, 'Connection') || is(element, 'StartState')) {
+  if (is(element, 'Transition') || is(element, 'Compensation') || is(element, 'StartState') || is(element, 'Catch')) {
     entries.splice(0, 1);
   }
 

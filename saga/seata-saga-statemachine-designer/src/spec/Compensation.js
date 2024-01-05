@@ -14,16 +14,12 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import Transition from './Transition';
 
-export default class ServiceTask extends TaskState {
-  constructor() {
-    super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
-  }
+export default class Compensation extends Transition {
+
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+Compensation.prototype.Type = 'Compensation';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+Compensation.prototype.THUMBNAIL_CLASS = 'bpmn-icon-connection-multi';

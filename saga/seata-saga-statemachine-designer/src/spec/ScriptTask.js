@@ -16,14 +16,14 @@
 
 import TaskState from './TaskState';
 
-export default class ServiceTask extends TaskState {
+export default class ScriptTask extends TaskState {
   constructor() {
     super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
+    this.ScriptType = 'groovy';
+    this.ScriptContent = '';
   }
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+ScriptTask.prototype.Type = 'ScriptTask';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+ScriptTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-script-task';

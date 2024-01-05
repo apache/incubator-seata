@@ -14,16 +14,16 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import State from './State';
 
-export default class ServiceTask extends TaskState {
-  constructor() {
-    super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
-  }
+export default class Succeed extends State {
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+Succeed.prototype.Type = 'Succeed';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+Succeed.prototype.THUMBNAIL_CLASS = 'bpmn-icon-end-event-none';
+
+Succeed.prototype.DEFAULT_SIZE = {
+  width: 36,
+  height: 36,
+};

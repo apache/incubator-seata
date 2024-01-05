@@ -19,9 +19,34 @@ import State from './State';
 export default class TaskState extends State {
   constructor() {
     super();
+    this.IsForCompensation = false;
     this.Input = [{}];
     this.Output = {};
     this.Status = {};
     this.Retry = [];
   }
+
+  importJson(json) {
+    super.importJson(json);
+    delete this.catch;
+  }
+
+  exportJson() {
+    const json = super.exportJson();
+    const { Catch } = json;
+    if (Catch) {
+      json.catch = json.Catch.exportJson();
+      json.Catch = [];
+    }
+
+    if (this.CompensateState) {
+      json.CompensateState = this.CompensateState.Name;
+    }
+    return json;
+  }
 }
+
+TaskState.prototype.DEFAULT_SIZE = {
+  width: 100,
+  height: 80,
+};

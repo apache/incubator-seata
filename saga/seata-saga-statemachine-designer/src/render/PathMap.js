@@ -127,6 +127,48 @@ export default function PathMap() {
       heightElements: [],
       widthElements: [],
     },
+    MARKER_SUB_PROCESS: {
+      d: 'm{mx},{my} m 7,2 l 0,10 m -5,-5 l 10,0',
+      height: 10,
+      width: 10,
+      heightElements: [],
+      widthElements: [],
+    },
+    TASK_TYPE_SCRIPT: {
+      d: 'm {mx},{my} c 9.966553,-6.27276 -8.000926,-7.91932 2.968968,-14.938 l -8.802728,0 '
+        + 'c -10.969894,7.01868 6.997585,8.66524 -2.968967,14.938 z '
+        + 'm -7,-12 l 5,0 '
+        + 'm -4.5,3 l 4.5,0 '
+        + 'm -3,3 l 5,0'
+        + 'm -4,3 l 5,0',
+      height: 15,
+      width: 12.6,
+      heightElements: [6, 14],
+      widthElements: [10.5, 21],
+    },
+    GATEWAY_EXCLUSIVE: {
+      d: 'm {mx},{my} {e.x0},{e.y0} {e.x1},{e.y0} {e.x2},0 {e.x4},{e.y2} '
+        + '{e.x4},{e.y1} {e.x2},0 {e.x1},{e.y3} {e.x0},{e.y3} '
+        + '{e.x3},0 {e.x5},{e.y1} {e.x5},{e.y2} {e.x3},0 z',
+      height: 17.5,
+      width: 17.5,
+      heightElements: [8.5, 6.5312, -6.5312, -8.5],
+      widthElements: [6.5, -6.5, 3, -3, 5, -5],
+    },
+    EVENT_ERROR: {
+      d: 'm {mx},{my} {e.x0},-{e.y0} {e.x1},-{e.y1} {e.x2},{e.y2} {e.x3},-{e.y3} -{e.x4},{e.y4} -{e.x5},-{e.y5} z',
+      height: 36,
+      width: 36,
+      heightElements: [0.023, 8.737, 8.151, 16.564, 10.591, 8.714],
+      widthElements: [0.085, 6.672, 6.97, 4.273, 5.337, 6.636],
+    },
+    EVENT_COMPENSATION: {
+      d: 'm {mx},{my} {e.x0},-{e.y0} 0,{e.y1} z m {e.x1},-{e.y2} {e.x2},-{e.y3} 0,{e.y1} -{e.x2},-{e.y3} z',
+      height: 36,
+      width: 36,
+      heightElements: [6.5, 13, 0.4, 6.1],
+      widthElements: [9, 9.3, 8.7],
+    },
   };
 
   this.getRawPath = function getRawPath(pathId) {

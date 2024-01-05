@@ -17,6 +17,16 @@
 import { assign } from 'min-dash';
 import ServiceTask from '../spec/ServiceTask';
 import StartState from '../spec/StartState';
+import ScriptTask from '../spec/ScriptTask';
+import Choice from '../spec/Choice';
+import Succeed from '../spec/Succeed';
+import Fail from '../spec/Fail';
+import Catch from '../spec/Catch';
+import CompensationTrigger from '../spec/CompensationTrigger';
+import SubStateMachine from '../spec/SubStateMachine';
+
+const SPEC_LIST = [StartState, ServiceTask, ScriptTask, SubStateMachine, Choice, Succeed, Fail,
+  Catch, CompensationTrigger];
 
 /**
  * A palette provider.
@@ -75,7 +85,7 @@ PaletteProvider.prototype.getPaletteEntries = function () {
       separator: true,
     },
   };
-  [StartState, ServiceTask].forEach((Spec) => {
+  SPEC_LIST.forEach((Spec) => {
     const type = Spec.prototype.Type;
     entries[`create-${type}`] = createAction(type, 'state', Spec.prototype.THUMBNAIL_CLASS, `Create ${type}`);
   });

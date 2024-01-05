@@ -14,16 +14,17 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import State from './State';
 
-export default class ServiceTask extends TaskState {
-  constructor() {
-    super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
-  }
+export default class CompensationTrigger extends State {
+
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+CompensationTrigger.prototype.Type = 'CompensationTrigger';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+CompensationTrigger.prototype.THUMBNAIL_CLASS = 'bpmn-icon-intermediate-event-catch-compensation';
+
+CompensationTrigger.prototype.DEFAULT_SIZE = {
+  width: 36,
+  height: 36,
+};

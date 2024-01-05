@@ -14,16 +14,26 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import Transition from './Transition';
 
-export default class ServiceTask extends TaskState {
+export default class ExceptionMatch extends Transition {
   constructor() {
     super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
+    this.Exceptions = [];
+  }
+
+  importJson(json) {
+    super.importJson(json);
+    this.Exceptions = json.Exceptions;
+  }
+
+  exportJson() {
+    const json = super.exportJson();
+    json.style.source = this.style.source.host.businessObject.Name;
+    return json;
   }
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+ExceptionMatch.prototype.Type = 'ExceptionMatch';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+ExceptionMatch.prototype.THUMBNAIL_CLASS = 'bpmn-icon-connection';

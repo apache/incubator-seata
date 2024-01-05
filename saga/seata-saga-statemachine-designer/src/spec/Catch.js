@@ -14,16 +14,17 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import Node from './style/Node';
 
-export default class ServiceTask extends TaskState {
-  constructor() {
-    super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
-  }
+export default class Catch extends Node {
+
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+Catch.prototype.Type = 'Catch';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+Catch.prototype.THUMBNAIL_CLASS = 'bpmn-icon-intermediate-event-catch-error';
+
+Catch.prototype.DEFAULT_SIZE = {
+  width: 36,
+  height: 36,
+};

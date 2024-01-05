@@ -16,14 +16,13 @@
 
 import TaskState from './TaskState';
 
-export default class ServiceTask extends TaskState {
+export default class SubStateMachine extends TaskState {
   constructor() {
     super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
+    this.StateMachineName = '';
   }
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+SubStateMachine.prototype.Type = 'SubStateMachine';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+SubStateMachine.prototype.THUMBNAIL_CLASS = 'bpmn-icon-subprocess-collapsed';

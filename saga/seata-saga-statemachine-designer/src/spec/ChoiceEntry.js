@@ -14,16 +14,22 @@
  *  limitations under the License.
  */
 
-import TaskState from './TaskState';
+import Transition from './Transition';
 
-export default class ServiceTask extends TaskState {
+export default class ChoiceEntry extends Transition {
   constructor() {
     super();
-    this.ServiceName = '';
-    this.ServiceMethod = '';
+    this.Expression = '';
+    this.Default = false;
+  }
+
+  importJson(json) {
+    super.importJson(json);
+    this.Expression = json.Expression;
+    this.Default = json.Default;
   }
 }
 
-ServiceTask.prototype.Type = 'ServiceTask';
+ChoiceEntry.prototype.Type = 'ChoiceEntry';
 
-ServiceTask.prototype.THUMBNAIL_CLASS = 'bpmn-icon-service-task';
+ChoiceEntry.prototype.THUMBNAIL_CLASS = 'bpmn-icon-connection';

@@ -18,6 +18,16 @@ import Transition from '../spec/Transition';
 import StateMachine from '../spec/StateMachine';
 import ServiceTask from '../spec/ServiceTask';
 import StartState from '../spec/StartState';
+import ScriptTask from '../spec/ScriptTask';
+import Choice from '../spec/Choice';
+import ChoiceEntry from '../spec/ChoiceEntry';
+import Succeed from '../spec/Succeed';
+import Fail from '../spec/Fail';
+import Catch from '../spec/Catch';
+import ExceptionMatch from '../spec/ExceptionMatch';
+import CompensationTrigger from '../spec/CompensationTrigger';
+import SubStateMachine from '../spec/SubStateMachine';
+import Compensation from '../spec/Compensation';
 
 export default function SagaFactory() {
   const typeToSpec = new Map();
@@ -25,6 +35,16 @@ export default function SagaFactory() {
   typeToSpec.set('StartState', StartState);
   typeToSpec.set('StateMachine', StateMachine);
   typeToSpec.set('ServiceTask', ServiceTask);
+  typeToSpec.set('ScriptTask', ScriptTask);
+  typeToSpec.set('Choice', Choice);
+  typeToSpec.set('ChoiceEntry', ChoiceEntry);
+  typeToSpec.set('Succeed', Succeed);
+  typeToSpec.set('Fail', Fail);
+  typeToSpec.set('Catch', Catch);
+  typeToSpec.set('ExceptionMatch', ExceptionMatch);
+  typeToSpec.set('CompensationTrigger', CompensationTrigger);
+  typeToSpec.set('SubStateMachine', SubStateMachine);
+  typeToSpec.set('Compensation', Compensation);
   this.typeToSpec = typeToSpec;
 }
 
