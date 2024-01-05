@@ -123,28 +123,28 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             public boolean visit(SQLInSubQueryExpr x) {
                 //just like: ...where id in (select id from t)
                 throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLSubqueryTableSource x) {
                 //just like: select * from (select * from t)
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLReplaceStatement x) {
                 //just like: replace into t (id,dr) values (1,'2'), (2,'3')
                 throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
             public boolean visit(SQLMergeStatement x) {
                 //just like: merge into ... WHEN MATCHED THEN ...
                 throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml.html");
             }
 
             @Override
@@ -152,7 +152,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
                 if (null != x.getQuery()) {
                     //just like: insert into t select * from t1
                     throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                            + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml.html");
                 }
                 return true;
             }

@@ -1,4 +1,4 @@
-#For details about configuration items, see https://seata.io/zh-cn/docs/user/configurations.html
+#For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations.html
 #Transport configuration, for client and server
 transport.type=TCP
 transport.server=NIO

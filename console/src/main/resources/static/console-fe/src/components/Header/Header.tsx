@@ -100,7 +100,7 @@ class Header extends React.Component<PropsType, StateType> {
       sagaStatemachineDesigner,
       languageSwitchButton,
     } = locale;
-    const BASE_URL = `https://seata.io/${language.toLocaleLowerCase()}/`;
+    const BASE_URL = `https://seata.apache.org/${language.toLocaleLowerCase()}/`;
     const NAV_MENU = [
       { id: 1, title: home, link: BASE_URL },
       {
@@ -117,7 +117,7 @@ class Header extends React.Component<PropsType, StateType> {
       <header className="header-container header-container-primary">
         <div className="header-body">
           <a
-            href={`https://seata.io/${language.toLocaleLowerCase()}/`}
+            href={`https://seata.apache.org/${language.toLocaleLowerCase()}/`}
             target="_blank"
             rel="noopener noreferrer"
           >
