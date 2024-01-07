@@ -35,6 +35,10 @@ public class CompressUtilTest {
     final byte[] compressedBytes2 = new byte[]{31, -117, 8, 0, 0, 0, 0, 0, 0, -1,
             99, 100, 98, 6, 0, 29, -128, -68, 85, 3, 0, 0, 0};
 
+    @Test
+    public void testInit() {
+        Assertions.assertNotNull(new CompressUtil());
+    }
 
     @Test
     @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11})

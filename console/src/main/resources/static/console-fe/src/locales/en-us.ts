@@ -26,7 +26,6 @@ const enUs: ILocale = {
   },
   Header: {
     home: 'HOME',
-    cloud: 'CLOUD',
     docs: 'DOCS',
     blog: 'BLOG',
     community: 'COMMUNITY',
