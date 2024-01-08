@@ -100,13 +100,15 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             return TableRecords.empty(getTableMeta());
         }
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
+        PreparedStatement pst = null;
         ResultSet rs = null;
-        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+        try {
+            pst = statementProxy.getConnection().prepareStatement(selectSQL);
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, pst);
         }
     }
 

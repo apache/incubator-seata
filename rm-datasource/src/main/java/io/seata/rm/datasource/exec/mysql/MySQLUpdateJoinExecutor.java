@@ -154,14 +154,16 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
                 continue;
             }
             String selectSQL = buildAfterImageSQL(joinTable, tableItems[i], tableBeforeImage);
+            PreparedStatement pst = null;
             ResultSet rs = null;
-            try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            try {
+                pst = statementProxy.getConnection().prepareStatement(selectSQL);
                 setAfterImageSQLPlaceHolderParams(joinConditionParams,tableBeforeImage.pkRows(), getTableMeta(tableItems[i]).getPrimaryKeyOnlyName(), pst);
                 rs = pst.executeQuery();
                 TableRecords afterImage = TableRecords.buildRecords(getTableMeta(tableItems[i]), rs);
                 afterImagesMap.put(tableItems[i], afterImage);
             } finally {
-                IOUtil.close(rs);
+                IOUtil.close(rs, pst);
             }
         }
         return null;

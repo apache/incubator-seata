@@ -96,12 +96,15 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         int count = 0;
 
 
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement countPs = null;
         ResultSet rs = null;
         ResultSet countRs = null;
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(querySessionSql);
-             PreparedStatement countPs = conn.prepareStatement(sessionCountSql)) {
+        try {
+            conn = dataSource.getConnection();
+            ps = conn.prepareStatement(querySessionSql);
+            countPs = conn.prepareStatement(sessionCountSql);
             PageUtil.setObject(ps, sqlParamList);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -122,7 +125,7 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(rs, countRs);
+            IOUtil.close(rs, countRs, ps, countPs, conn);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
     }

@@ -486,8 +486,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+        try {
+            ps = statementProxy.getConnection().prepareStatement(selectSQL);
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
@@ -499,7 +501,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, ps);
         }
     }
 
@@ -524,9 +526,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         List<String> needColumns =
             getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), insertColumnsUnEscape);
         needColumns.forEach(selectSQLJoin::add);
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
-
+        try {
+            ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString());
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {
                 for (int c = 0; c < pkColumnNameList.size(); c++) {
@@ -539,7 +542,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, ps);
         }
     }
 

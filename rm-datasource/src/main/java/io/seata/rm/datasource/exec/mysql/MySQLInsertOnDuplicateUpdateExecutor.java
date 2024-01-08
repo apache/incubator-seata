@@ -271,9 +271,11 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
         if (CollectionUtils.isEmpty(paramAppenderList)) {
             throw new NotSupportYetException("the SQL statement has no primary key or unique index value, it will not hit any row data.recommend to convert to a normal insert statement");
         }
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection()
-            .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL)) {
+        try {
+            ps = statementProxy.getConnection()
+                    .prepareStatement(primaryKeys.isEmpty() ? selectSQL + " FOR UPDATE" : selectSQL);
             int paramAppenderCount = 0;
             int ts = CollectionUtils.isEmpty(paramAppenderList) ? 0 : paramAppenderList.size();
             for (int i = 0; i < ts; i++) {
@@ -291,7 +293,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, ps);
         }
     }
 
