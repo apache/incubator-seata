@@ -163,7 +163,9 @@ public class SpringFenceHandler implements FenceHandler {
                     }
                     return false;
                 }
-                return updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_COMMITTED, status, args);
+                boolean result = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_COMMITTED, status, args);
+                LOGGER.info("Common fence commit result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                return result;
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -210,7 +212,9 @@ public class SpringFenceHandler implements FenceHandler {
                         return false;
                     }
                 }
-                return updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_ROLLBACKED, status, args);
+                boolean result = updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_ROLLBACKED, status, args);
+                LOGGER.info("Common fence rollback result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                return result;
             } catch (Throwable t) {
                 status.setRollbackOnly();
                 throw new SkipCallbackWrapperException(t);
@@ -237,13 +241,13 @@ public class SpringFenceHandler implements FenceHandler {
     }
 
     /**
-     * Update TCC Fence status and invoke target method
+     * Update Common Fence status and invoke target method
      *
      * @param method                target method
      * @param targetTCCBean         target bean
      * @param xid                   the global transaction id
      * @param branchId              the branch transaction id
-     * @param status                the tcc fence status
+     * @param status                the common fence status
      * @return the boolean
      */
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,

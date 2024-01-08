@@ -16,61 +16,63 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import io.seata.common.util.ReflectionUtil;
-import io.seata.integration.tx.api.interceptor.TxBeanParserUtils;
-import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import io.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
-import io.seata.integration.tx.api.interceptor.parser.InterfaceParser;
-import io.seata.integration.tx.api.remoting.RemotingDesc;
-import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
-import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.common.util.ReflectionUtil;
+import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import io.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
+import io.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
+import io.seata.integration.tx.api.interceptor.parser.InterfaceParser;
+import io.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
+import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  */
 public class TccActionInterceptorParser implements InterfaceParser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorParser.class);
+
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        boolean isTxRemotingBean = TxBeanParserUtils.isTxRemotingBean(target, objectName);
-        if (isTxRemotingBean) {
-            RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(target);
-            if (remotingDesc != null) {
-                if (remotingDesc.isService()) {
-                    DefaultResourceRegisterParser.get().registerResource(target, objectName);
-                }
-                if (remotingDesc.isReference()) {
-                    //if it is a tcc remote reference
-                    Set<String> methodsToProxy = tccProxyTargetMethod(remotingDesc);
-                    if (remotingDesc != null && !methodsToProxy.isEmpty()) {
-                        ProxyInvocationHandler proxyInvocationHandler = new TccActionInterceptorHandler(remotingDesc, methodsToProxy);
-                        return proxyInvocationHandler;
-                    }
-                }
-            }
+        // eliminate the bean without two phase annotation.
+        Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
+        if (methodsToProxy.isEmpty()) {
+            return null;
         }
-        return null;
+        // register resource and enhance with interceptor
+        DefaultResourceRegisterParser.get().registerResource(target, objectName);
+        return new TccActionInterceptorHandler(target, methodsToProxy);
+    }
+
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
+        IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
+        if (DefaultRemotingParser.get().isService(beanClass)) {
+            ifNeedEnhanceBean.setIfNeed(true);
+            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.SERVICE_BEAN);
+        }
+        return ifNeedEnhanceBean;
     }
 
     /**
      * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
      *
-     * @param remotingDesc the remoting desc
+     * @param target the remoting desc
      * @return boolean boolean
      */
-    private Set<String> tccProxyTargetMethod(RemotingDesc remotingDesc) {
-        if (!remotingDesc.isReference() || remotingDesc == null) {
-            return Collections.emptySet();
-        }
+
+    private Set<String> tccProxyTargetMethod(Object target) {
         Set<String> methodsToProxy = new HashSet<>();
         //check if it is TCC bean
-        Class<?> tccServiceClazz = remotingDesc.getServiceClass();
+        Class<?> tccServiceClazz = target.getClass();
         Set<Method> methods = new HashSet<>(Arrays.asList(tccServiceClazz.getMethods()));
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(tccServiceClazz);
         if (interfaceClasses != null) {

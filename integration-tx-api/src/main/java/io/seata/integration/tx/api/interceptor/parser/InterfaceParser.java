@@ -24,5 +24,7 @@ public interface InterfaceParser {
 
     ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception;
 
+    IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass);
+
 
 }

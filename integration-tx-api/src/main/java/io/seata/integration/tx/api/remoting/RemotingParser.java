@@ -55,6 +55,15 @@ public interface RemotingParser {
     boolean isService(Object bean, String beanName) throws FrameworkException;
 
     /**
+     * if it is service bean ?
+     *
+     * @param beanClass the bean class
+     * @return boolean boolean
+     * @throws FrameworkException the framework exception
+     */
+    boolean isService(Class<?> beanClass) throws FrameworkException;
+
+    /**
      * get the remoting bean info
      *
      * @param bean     the bean

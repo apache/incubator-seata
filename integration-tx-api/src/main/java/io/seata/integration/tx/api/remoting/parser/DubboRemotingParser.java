@@ -42,6 +42,12 @@ public class DubboRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
+    public boolean isService(Class<?> beanClass) throws FrameworkException {
+        return "com.alibaba.dubbo.config.spring.ServiceBean".equals(beanClass.getName())
+                || "org.apache.dubbo.config.spring.ServiceBean".equals(beanClass.getName());
+    }
+
+    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         if (!this.isRemoting(bean, beanName)) {
             return null;
