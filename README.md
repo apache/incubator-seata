@@ -108,12 +108,12 @@ Depending on the scenario, choose one of the two dependencies: `io.seata:seata-a
 
 ## Quick Start
 
-[Quick Start](https://seata.apache.org/zh-cn/docs/ops/deploy-guide-beginner.html)
+[Quick Start](https://seata.apache.org/zh-cn/docs/ops/deploy-guide-beginner)
 
 ## Documentation
 
 
-You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.apache.org/zh-cn/docs/overview/what-is-seata.html).
+You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.apache.org/zh-cn/docs/overview/what-is-seata).
 
 ## Reporting bugs
 
