@@ -43,6 +43,12 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
+    public boolean isService(Class<?> beanClass) throws FrameworkException {
+        String beanClassName = beanClass.getName();
+        return "com.alipay.sofa.runtime.spring.factory.ServiceFactoryBean".equals(beanClassName);
+    }
+
+    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         if (!this.isRemoting(bean, beanName)) {
             return null;

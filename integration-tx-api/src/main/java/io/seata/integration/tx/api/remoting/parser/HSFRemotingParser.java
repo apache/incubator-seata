@@ -65,6 +65,12 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
+    public boolean isService(Class<?> beanClass) throws FrameworkException {
+        String beanClassName = beanClass.getName();
+        return isHsf && "com.taobao.hsf.app.spring.util.HSFSpringProviderBean".equals(beanClassName);
+    }
+
+    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         if (!this.isRemoting(bean, beanName)) {
             return null;
