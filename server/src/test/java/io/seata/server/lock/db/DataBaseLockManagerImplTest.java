@@ -68,9 +68,10 @@ public class DataBaseLockManagerImplTest {
 
     private static void prepareTable(BasicDataSource dataSource) {
         Connection conn = null;
+        Statement s = null;
         try {
             conn = dataSource.getConnection();
-            Statement s = conn.createStatement();
+            s = conn.createStatement();
             try {
                 s.execute("drop table lock_table");
             } catch (Exception e) {
@@ -81,7 +82,7 @@ public class DataBaseLockManagerImplTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(s, conn);
         }
     }
 
@@ -157,13 +158,14 @@ public class DataBaseLockManagerImplTest {
         Assertions.assertFalse(lockManager.acquireLock(branchSession3));
 
         String delSql = "delete from lock_table where xid in( 'abc-123:65867978' , 'abc-123:65867978' , 'abc-123:5678789'  )"  ;
-        Connection conn =  null;
+        Connection conn = null;
+        Statement stmt = null;
         try {
             conn = dataSource.getConnection();
-
-            conn.createStatement().execute(delSql);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -253,12 +255,13 @@ public class DataBaseLockManagerImplTest {
 
         String delSql = "delete from lock_table where xid in( 'abc-123:56877898' , 'abc-123:56877898' , 'abc-123:4575614354'  )"  ;
         Connection conn =  null;
+        Statement stmt = null;
         try {
             conn = dataSource.getConnection();
-
-            conn.createStatement().execute(delSql);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(stmt, conn);
         }
     }
 
