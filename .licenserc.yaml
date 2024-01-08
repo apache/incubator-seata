@@ -46,6 +46,7 @@ header:
     - 'README.md'
     - 'LICENSE'
     - 'NOTICE'
+    - 'DISCLAIMER'
     - '**/*.md'
     - '.github/**'
     #SPI、spring.factories、spring-configuration-metadata.json、additional-spring-configuration-metadata.json
