@@ -88,12 +88,15 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         List<GlobalLockVO> list = new ArrayList<>();
         int count = 0;
 
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement countPs = null;
         ResultSet rs = null;
         ResultSet countRs = null;
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(queryLockSql);
-             PreparedStatement countPs = conn.prepareStatement(lockCountSql)) {
+        try {
+            conn = dataSource.getConnection();
+            ps = conn.prepareStatement(queryLockSql);
+            countPs = conn.prepareStatement(lockCountSql);
             PageUtil.setObject(ps, sqlParamList);
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -107,7 +110,7 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            IOUtil.close(rs, countRs);
+            IOUtil.close(rs, countRs, ps, countPs, conn);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
     }
