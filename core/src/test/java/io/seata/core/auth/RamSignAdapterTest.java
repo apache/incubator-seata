@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  */
 public class RamSignAdapterTest {
     @Test
-    public void testGetDateSigningKey() {
+    public void testGetDateSigningKey() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String secret = "mySecret";
         String date = "20220101";
         String signMethod = "HmacSHA256";
@@ -36,14 +36,14 @@ public class RamSignAdapterTest {
         RamSignAdapter adapter = new RamSignAdapter();
         // Use reflection to access the private method
         Method getDateSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getDateSigningKey", String.class, String.class, String.class);
-            getDateSigningKeyMethod.setAccessible(true);
-            byte[] signingKey = (byte[]) getDateSigningKeyMethod.invoke(adapter, secret, date, signMethod);
-            Assertions.assertEquals(32, signingKey.length);
-            Assertions.assertArrayEquals(expectArray, signingKey);
+        getDateSigningKeyMethod.setAccessible(true);
+        byte[] signingKey = (byte[]) getDateSigningKeyMethod.invoke(adapter, secret, date, signMethod);
+        Assertions.assertEquals(32, signingKey.length);
+        Assertions.assertArrayEquals(expectArray, signingKey);
     }
 
     @Test
-    public void testGetRegionSigningKey() throws InvocationTargetException, IllegalAccessException {
+    public void testGetRegionSigningKey() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         String secret = "mySecret";
         String date = "20220101";
         String region = "cn-beijing";
@@ -53,14 +53,14 @@ public class RamSignAdapterTest {
         RamSignAdapter adapter = new RamSignAdapter();
         // Use reflection to access the private method
         Method getRegionSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getRegionSigningKey", String.class, String.class, String.class, String.class);
-            getRegionSigningKeyMethod.setAccessible(true);
-            byte[] signingKey = (byte[]) getRegionSigningKeyMethod.invoke(adapter, secret, date, region, signMethod);
-            Assertions.assertEquals(32, signingKey.length);
-            Assertions.assertArrayEquals(expectArray, signingKey);
+        getRegionSigningKeyMethod.setAccessible(true);
+        byte[] signingKey = (byte[]) getRegionSigningKeyMethod.invoke(adapter, secret, date, region, signMethod);
+        Assertions.assertEquals(32, signingKey.length);
+        Assertions.assertArrayEquals(expectArray, signingKey);
     }
 
     @Test
-    public void testGetProductSigningKey() {
+    public void testGetProductSigningKey() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String secret = "mySecret";
         String date = "20220101";
         String region = "cn-beijing";
@@ -70,10 +70,10 @@ public class RamSignAdapterTest {
 
         RamSignAdapter adapter = new RamSignAdapter();
         Method getProductSigningKeyMethod = RamSignAdapter.class.getDeclaredMethod("getProductSigningKey", String.class, String.class, String.class, String.class, String.class);
-            getProductSigningKeyMethod.setAccessible(true);
-            byte[] signingKey = (byte[]) getProductSigningKeyMethod.invoke(adapter, secret, date, region, productCode, signMethod);
-            Assertions.assertEquals(32, signingKey.length);
-            Assertions.assertArrayEquals(expectArray, signingKey);
+        getProductSigningKeyMethod.setAccessible(true);
+        byte[] signingKey = (byte[]) getProductSigningKeyMethod.invoke(adapter, secret, date, region, productCode, signMethod);
+        Assertions.assertEquals(32, signingKey.length);
+        Assertions.assertArrayEquals(expectArray, signingKey);
     }
 
     @Test
