@@ -14,41 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.mockserver;
+package io.seata.core.rpc.netty.mockserver;
+
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.LocalTCC;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+
+import java.util.Map;
 
 /**
- * The enum Expect transaction result.
+ * The interface Action1.
  *
  */
-public enum ExpectTransactionResult {
+@LocalTCC
+public interface Action1 {
 
-    AllCommitted(0, "all success"),
-    AllRollbacked(1, "all rollback"),
-    PhaseOneTimeoutRollbacked(2, "phase one failed");
+    @TwoPhaseBusinessAction(name = "mock-action", commitMethod = "commitTcc", rollbackMethod = "cancel"
+//            , useTCCFence = true
+    )
+    String insert(@BusinessActionContextParameter Long reqId,
+            @BusinessActionContextParameter(paramName = "params") Map<String, String> params
+    );
 
-    private final int code;
-    private final String desc;
 
-    ExpectTransactionResult(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
+    boolean commitTcc(BusinessActionContext actionContext);
 
-    /**
-     * Gets code.
-     *
-     * @return the code
-     */
-    public int getCode() {
-        return code;
-    }
 
-    public static ExpectTransactionResult covert(int code) {
-        for (ExpectTransactionResult result : ExpectTransactionResult.values()) {
-            if (result.getCode() == code) {
-                return result;
-            }
-        }
-        return null;
-    }
+    boolean cancel(BusinessActionContext actionContext);
 }

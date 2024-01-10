@@ -16,7 +16,8 @@
  */
 package io.seata.mockserver.controller;
 
-import io.seata.mockserver.ExpectTransactionResult;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.ResultCode;
 import io.seata.mockserver.MockCoordinator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +38,9 @@ public class MockHelpController {
         return OK;
     }
 
-    @PostMapping("/expect/status")
-    public String expectTransactionResult(@RequestParam String xid, @RequestParam int code) {
-        MockCoordinator.getInstance().setExpectedResult(xid, ExpectTransactionResult.covert(code));
+    @PostMapping("/expect/result")
+    public String expectResult(@RequestParam String xid, @RequestParam int code) {
+        MockCoordinator.getInstance().setExepectedResult(xid, ResultCode.get(code));
         return OK;
     }
 

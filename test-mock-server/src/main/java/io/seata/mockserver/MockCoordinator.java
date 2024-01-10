@@ -18,6 +18,7 @@ package io.seata.mockserver;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.AbstractMessage;
@@ -69,7 +70,10 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
     private static MockCoordinator coordinator;
 
-    private Map<String, ExpectTransactionResult> expectTransactionResultMap;
+    private static String AllBeginFailXid = "0";
+
+    private Map<String, GlobalStatus> globalStatusMap;
+    private Map<String, ResultCode> expectedResultMap;
     private Map<String, Integer> expectRetryTimesMap;
     private Map<String, List<BranchSession>> branchMap;
 
@@ -82,7 +86,8 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
             synchronized (MockCoordinator.class) {
                 if (coordinator == null) {
                     coordinator = new MockCoordinator();
-                    coordinator.expectTransactionResultMap = new ConcurrentHashMap<>();
+                    coordinator.expectedResultMap = new ConcurrentHashMap<>();
+                    coordinator.globalStatusMap = new ConcurrentHashMap<>();
                     coordinator.expectRetryTimesMap = new ConcurrentHashMap<>();
                     coordinator.branchMap = new ConcurrentHashMap<>();
                 }
@@ -115,53 +120,59 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
     @Override
     protected void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext) throws TransactionException {
+        checkMockActionFail(AllBeginFailXid);
         GlobalSession session = GlobalSession.createGlobalSession(rpcContext.getApplicationId(),
                 rpcContext.getTransactionServiceGroup(), request.getTransactionName(), request.getTimeout());
-        expectTransactionResultMap.putIfAbsent(session.getXid(), ExpectTransactionResult.AllCommitted);
+        globalStatusMap.putIfAbsent(session.getXid(), GlobalStatus.Begin);
         response.setXid(session.getXid());
         response.setResultCode(ResultCode.Success);
     }
 
+
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext) throws TransactionException {
+        checkMockActionFail(request.getXid());
         response.setGlobalStatus(GlobalStatus.Committed);
         response.setResultCode(ResultCode.Success);
+        globalStatusMap.put(request.getXid(), GlobalStatus.Committed);
 
         int retry = expectRetryTimesMap.getOrDefault(request.getXid(), 0);
         List<BranchSession> branchSessions = branchMap.get(request.getXid());
         if (CollectionUtils.isEmpty(branchSessions)) {
-            LOGGER.info("branchSessions is empty,XID=" + request.getXid());
+            LOGGER.warn("[doGlobalCommit]branchSessions is empty,XID=" + request.getXid());
+            return;
         }
         branchSessions.forEach(branch -> {
-            CallRm.branchCommit(remotingServer, branch.getResourceId(), branch.getClientId());
+            CallRm.branchCommit(remotingServer, branch);
             IntStream.range(0, retry).forEach(i ->
-                    CallRm.branchCommit(remotingServer, branch.getResourceId(), branch.getClientId()));
+                    CallRm.branchCommit(remotingServer, branch));
         });
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response, RpcContext rpcContext) throws TransactionException {
+        checkMockActionFail(request.getXid());
         response.setGlobalStatus(GlobalStatus.Rollbacked);
         response.setResultCode(ResultCode.Success);
-
+        globalStatusMap.put(request.getXid(), GlobalStatus.Rollbacked);
 
         int retry = expectRetryTimesMap.getOrDefault(request.getXid(), 0);
         List<BranchSession> branchSessions = branchMap.get(request.getXid());
         if (CollectionUtils.isEmpty(branchSessions)) {
-            LOGGER.info("branchSessions is empty,XID=" + request.getXid());
+            LOGGER.warn("[doGlobalRollback]branchSessions is empty,XID=" + request.getXid());
+            return;
         }
         branchSessions.forEach(branch -> {
-            CallRm.branchRollback(remotingServer, branch.getResourceId(), branch.getClientId());
+            CallRm.branchRollback(remotingServer, branch);
             IntStream.range(0, retry).forEach(i ->
-                    CallRm.branchRollback(remotingServer, branch.getResourceId(), branch.getClientId()));
+                    CallRm.branchRollback(remotingServer, branch));
         });
     }
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response, RpcContext rpcContext) throws TransactionException {
-
+        checkMockActionFail(request.getXid());
         BranchSession branchSession = new BranchSession(request.getBranchType());
-
         String xid = request.getXid();
         branchSession.setXid(xid);
 //        branchSession.setTransactionId(request.getTransactionId());
@@ -197,23 +208,34 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException {
+        checkMockActionFail(request.getXid());
         response.setResultCode(ResultCode.Success);
     }
 
     @Override
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext) throws TransactionException {
+        checkMockActionFail(request.getXid());
+        response.setLockable(true);
         response.setResultCode(ResultCode.Success);
     }
 
     @Override
     protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(GlobalStatus.Committed);
+        checkMockActionFail(request.getXid());
+        GlobalStatus globalStatus = globalStatusMap.get(request.getXid());
+        if (globalStatus == null) {
+            globalStatus = GlobalStatus.UnKnown;
+        }
+        response.setGlobalStatus(globalStatus);
         response.setResultCode(ResultCode.Success);
     }
 
     @Override
     protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(GlobalStatus.Committed);
+        checkMockActionFail(request.getXid());
+        GlobalStatus globalStatus = request.getGlobalStatus();
+        globalStatusMap.put(request.getXid(), globalStatus);
+        response.setGlobalStatus(globalStatus);
         response.setResultCode(ResultCode.Success);
     }
 
@@ -222,11 +244,17 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
     }
 
 
-    public void setExpectedResult(String xid, ExpectTransactionResult expected) {
-        expectTransactionResultMap.put(xid, expected);
+    public void setExepectedResult(String xid, ResultCode expected) {
+        expectedResultMap.put(xid, expected);
     }
 
     public void setExpectedRetry(String xid, int times) {
         expectRetryTimesMap.put(xid, times);
+    }
+
+    private void checkMockActionFail(String xid) throws TransactionException {
+        if (expectedResultMap.get(xid) == ResultCode.Failed) {
+            throw new TransactionException(TransactionExceptionCode.Broken, "mock action expect fail");
+        }
     }
 }
