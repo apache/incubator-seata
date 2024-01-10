@@ -38,8 +38,8 @@ public class MockServer {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockServer.class);
 
-    static ThreadPoolExecutor workingThreads;
-    static MockNettyRemotingServer nettyRemotingServer;
+    private static ThreadPoolExecutor workingThreads;
+    private static MockNettyRemotingServer nettyRemotingServer;
 
     /**
      * The entry point of application.
@@ -52,11 +52,11 @@ public class MockServer {
     }
 
     public static void start() {
-         workingThreads = new ThreadPoolExecutor(50,
+        workingThreads = new ThreadPoolExecutor(50,
                 50, 500, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(20000),
                 new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
-         nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
+        nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
 
         // set registry
         XID.setIpAddress(NetUtil.getLocalIp());
@@ -72,7 +72,7 @@ public class MockServer {
         LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
     }
 
-    public static void close(){
+    public static void close() {
         workingThreads.shutdown();
         nettyRemotingServer.destroy();
     }

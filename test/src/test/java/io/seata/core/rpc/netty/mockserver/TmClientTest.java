@@ -83,7 +83,10 @@ public class TmClientTest {
         Assertions.assertEquals(globalReport, GlobalStatus.Committed);
 
         MockCoordinator.getInstance().setExepectedResult(xid, ResultCode.Failed);
-        GlobalStatus globalReport2 = tm.globalReport(xid, GlobalStatus.Committed);
+//        GlobalStatus globalReport2 = tm.globalReport(xid, GlobalStatus.Committed);
+
+        GlobalStatus rollback2 = tm.rollback(xid);
+        LOGGER.info("globalRollback ok:" + rollback2);
         // TODO expected response fail , but DefaultTransactionManager ignore resultCode
     }
 
