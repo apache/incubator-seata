@@ -28,7 +28,6 @@ public class DefaultAuthSignerTest {
         String data = "testGroup,127.0.0.1,1702564471650";
         String key = "exampleEncryptKey";
         String expectedSign = "6g9nMk6BRLFxl7bf5ZfWaEZvGdho3JBmwvx5rqgSUCE=";
-
         DefaultAuthSigner signer = new DefaultAuthSigner();
         String sign = signer.sign(data, key);
         Assertions.assertEquals(expectedSign, sign);
@@ -38,7 +37,6 @@ public class DefaultAuthSignerTest {
     public void testGetRamSignNull() {
         String data = null;
         String key = "exampleEncryptKey";
-
         DefaultAuthSigner signer = new DefaultAuthSigner();
         String sign = signer.sign(data, key);
         Assertions.assertNull(sign);
