@@ -16,6 +16,10 @@
  */
 package io.seata.serializer.hessian;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.SerializerFactory;
@@ -23,10 +27,6 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  */
@@ -37,12 +37,11 @@ public class HessianSerializer implements Serializer {
     @Override
     public <T> byte[] serialize(T t) {
         byte[] stream = null;
-        SerializerFactory hessian = HessianSerializerFactory.getInstance();
         try {
-            com.caucho.hessian.io.Serializer serializer = hessian.getSerializer(t.getClass());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             Hessian2Output output = new Hessian2Output(baos);
-            serializer.writeObject(t, output);
+            output.setSerializerFactory(HessianSerializerFactory.getInstance());
+            output.writeObject(output);
             output.close();
             stream = baos.toByteArray();
         } catch (IOException e) {
@@ -56,6 +55,7 @@ public class HessianSerializer implements Serializer {
         T obj = null;
         try (ByteArrayInputStream is = new ByteArrayInputStream(bytes)) {
             Hessian2Input input = new Hessian2Input(is);
+            input.setSerializerFactory(HessianSerializerFactory.getInstance());
             obj = (T) input.readObject();
             input.close();
         } catch (IOException e) {

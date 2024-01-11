@@ -89,9 +89,10 @@ public class DataBaseSessionManagerTest {
 
     private static void prepareTable(BasicDataSource dataSource) {
         Connection conn = null;
+        Statement s = null;
         try {
             conn = dataSource.getConnection();
-            Statement s = conn.createStatement();
+            s = conn.createStatement();
             try {
                 s.execute("drop table global_table");
             } catch (Exception e) {
@@ -109,7 +110,7 @@ public class DataBaseSessionManagerTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(s, conn);
         }
     }
 

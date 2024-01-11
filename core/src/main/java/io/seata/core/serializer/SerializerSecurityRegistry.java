@@ -99,7 +99,7 @@ public class SerializerSecurityRegistry {
     }
 
     private static String[] getDenyClassPatternList() {
-        return new String[] {"javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*"};
+        return new String[] {"javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*", "java.lang.Runtime"};
     }
 
     private static Set<Class<?>> getProtocolType() {

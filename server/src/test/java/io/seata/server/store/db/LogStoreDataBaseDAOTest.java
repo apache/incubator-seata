@@ -64,9 +64,10 @@ public class LogStoreDataBaseDAOTest {
 
     private static void prepareTable(BasicDataSource dataSource) {
         Connection conn = null;
+        Statement s = null;
         try {
             conn = dataSource.getConnection();
-            Statement s = conn.createStatement();
+            s = conn.createStatement();
             try {
                 s.execute("drop table global_table");
             } catch (Exception e) {
@@ -86,7 +87,7 @@ public class LogStoreDataBaseDAOTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(s, conn);
         }
     }
 
@@ -123,12 +124,14 @@ public class LogStoreDataBaseDAOTest {
 
         String delSql = "delete from global_table where xid= 'abc-123:978786'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
             //delete
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -165,12 +168,14 @@ public class LogStoreDataBaseDAOTest {
 
         String delSql = "delete from global_table where xid= 'abc-123:978786'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
             //delete
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -236,11 +241,13 @@ public class LogStoreDataBaseDAOTest {
 
         String delSql = "delete from global_table where xid in ('abc-123:1267', 'abc-123:6978', 'abc-123:5657')";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -303,11 +310,13 @@ public class LogStoreDataBaseDAOTest {
 
         String delSql = "delete from global_table where xid in ('abc-123:1267', 'abc-123:6978', 'abc-123:5657')";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -331,19 +340,22 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from global_table where xid= 'abc-123:333'";
         String delSql = "delete from global_table where xid= 'abc-123:333'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else{
+            } else{
                 Assertions.fail();
             }
 
-            conn.createStatement().execute(delSql);
+            stmt.execute(delSql);
 
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(rs, stmt, conn);
         }
     }
 
@@ -366,9 +378,11 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from global_table where xid= 'abc-123:222'";
         String delSql = "delete from global_table where xid= 'abc-123:222'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
             if(rs.next()){
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(1, rs.getInt("status"));
@@ -381,20 +395,20 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setStatus(2);
             Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO));
 
-            rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(2, rs.getInt("status"));
-            }else{
+            } else{
                 Assertions.fail();
             }
             rs.close();
 
             //delete
-            conn.createStatement().execute(delSql);
+            stmt.execute(delSql);
 
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -418,13 +432,15 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from global_table where xid= 'abc-123:222'";
         String delSql = "delete from global_table where xid= 'abc-123:222'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(1, rs.getInt("status"));
-            }else{
+            } else {
                 Assertions.assertTrue(false);
             }
             rs.close();
@@ -433,20 +449,20 @@ public class LogStoreDataBaseDAOTest {
             globalTransactionDO.setStatus(2);
             Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO,1));
 
-            rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(2, rs.getInt("status"));
-            }else{
+            } else{
                 Assertions.assertTrue(false);
             }
             rs.close();
 
             //delete
-            conn.createStatement().execute(delSql);
+            stmt.execute(delSql);
 
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -474,17 +490,19 @@ public class LogStoreDataBaseDAOTest {
 
         String sql = "select * from global_table where xid= 'abc-123:555'";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.fail();
-            }else{
+            } else{
                 Assertions.assertTrue(true);
             }
             rs.close();
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -531,23 +549,25 @@ public class LogStoreDataBaseDAOTest {
         Assertions.assertTrue(CollectionUtils.isNotEmpty(rets));
         Assertions.assertEquals(2, rets.size());
 
-        if(78563453 == rets.get(0).getBranchId() && 345465676 == rets.get(1).getBranchId()){
+        if (78563453 == rets.get(0).getBranchId() && 345465676 == rets.get(1).getBranchId()) {
             Assertions.assertTrue(true);
-        }else if(78563453 == rets.get(1).getBranchId() && 345465676 == rets.get(0).getBranchId()){
+        } else if (78563453 == rets.get(1).getBranchId() && 345465676 == rets.get(0).getBranchId()) {
             Assertions.assertTrue(true);
-        }else {
+        } else {
             Assertions.fail();
         }
 
         String delSql = "delete from branch_table where xid= 'abc-123:6789' ";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
 
-            conn.createStatement().execute(delSql);
+            stmt = conn.createStatement();
+            stmt.execute(delSql);
 
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -573,19 +593,21 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from branch_table where xid= 'abc-123:7777' and branch_id = 1234508";
         String delSql = "delete from branch_table where xid= 'abc-123:7777' and branch_id = 1234508";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
 
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
 
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
 
     }
@@ -614,20 +636,22 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from branch_table where xid= 'abc-123:8888' and branch_id = 343434318";
         String delSql = "delete from branch_table where xid= 'abc-123:8888' and branch_id = 343434318";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
 
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(3, rs.getInt("status"));
-            }else {
+            } else {
                 Assertions.fail();
             }
 
-            conn.createStatement().execute(delSql);
-        }finally {
-            IOUtil.close(conn);
+            stmt.execute(delSql);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -653,13 +677,15 @@ public class LogStoreDataBaseDAOTest {
         String sql = "select * from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
         String delSql = "delete from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
         Connection conn = null;
-        try{
+        Statement stmt = null;
+        try {
             conn = dataSource.getConnection();
 
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
             rs.close();
@@ -667,16 +693,16 @@ public class LogStoreDataBaseDAOTest {
             //delete
             logStoreDataBaseDAO.deleteBranchTransactionDO(branchTransactionDO);
 
-            rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
                 Assertions.fail();
-            }else {
+            } else {
                 Assertions.assertTrue(true);
             }
             rs.close();
 
-        }finally {
-            IOUtil.close(conn);
+        } finally {
+            IOUtil.close(stmt, conn);
         }
     }
 
