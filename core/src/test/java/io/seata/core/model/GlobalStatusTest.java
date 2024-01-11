@@ -63,4 +63,27 @@ public class GlobalStatusTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(NONE));
     }
 
+    @Test
+    public void testIsOnePhaseTimeout() {
+        Assertions.assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Begin));
+        Assertions.assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Rollbacking));
+        Assertions.assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacking));
+        Assertions.assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackRetrying));
+        Assertions.assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacked));
+        Assertions.assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackFailed));
+    }
+
+    @Test
+    public void testIsTwoPhaseSuccess() {
+        Assertions.assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Committed));
+        Assertions.assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Rollbacked));
+        Assertions.assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.TimeoutRollbacked));
+        Assertions.assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Begin));
+    }
+
+    @Test
+    public void testIsTwoPhaseHeuristic() {
+        Assertions.assertTrue(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Finished));
+        Assertions.assertFalse(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Begin));
+    }
 }
