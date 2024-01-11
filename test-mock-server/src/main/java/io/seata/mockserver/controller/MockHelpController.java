@@ -16,7 +16,6 @@
  */
 package io.seata.mockserver.controller;
 
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.mockserver.MockCoordinator;
 import org.springframework.web.bind.annotation.GetMapping;
