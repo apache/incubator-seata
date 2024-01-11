@@ -75,7 +75,7 @@ public class CorePropertiesTest {
 
     @Test
     public void testShutdownProperties() {
-        assertEquals(3L, context.getBean(ShutdownProperties.class).getWait());
+        assertEquals(13L, context.getBean(ShutdownProperties.class).getWait());
     }
 
     @Test

@@ -252,6 +252,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             return new InetSocketAddress(instanceInfo[0], Integer.parseInt(instanceInfo[1]));
         }).collect(Collectors.toList());
         clusterAddressMap.put(cluster, new Pair<>(getResponse.getHeader().getRevision(), instanceList));
+
+        removeOfflineAddressesIfNecessary(cluster, instanceList);
     }
 
     /**

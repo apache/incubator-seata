@@ -304,10 +304,15 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (cluster == null || services == null) {
             return;
         }
-        clusterAddressMap.put(cluster, services.stream()
+
+        List<InetSocketAddress> addresses = services.stream()
                 .map(HealthService::getService)
                 .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+        clusterAddressMap.put(cluster, addresses);
+
+        removeOfflineAddressesIfNecessary(cluster, addresses);
     }
 
     /**

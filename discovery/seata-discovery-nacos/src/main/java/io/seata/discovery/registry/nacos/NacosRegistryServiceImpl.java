@@ -192,6 +192,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                                     .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
                                     .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+                            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
                         }
                     });
                 }
