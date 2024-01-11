@@ -168,6 +168,8 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                     .map(instance -> new InetSocketAddress(instance.getIPAddr(), instance.getPort()))
                     .collect(Collectors.toList());
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
         }
     }
 

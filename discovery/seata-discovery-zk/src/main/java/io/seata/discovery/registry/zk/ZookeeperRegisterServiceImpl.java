@@ -308,6 +308,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             }
         }
         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+        removeOfflineAddressesIfNecessary(clusterName, newAddressList);
     }
 
     private String getClusterName() {
