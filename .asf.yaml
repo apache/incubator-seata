@@ -18,7 +18,7 @@ github:
   description: ":fire: Seata is an easy-to-use, high-performance, open source distributed transaction solution."
   homepage: https://seata.apache.org/
   labels:
-    - distributed transaction
+    - transaction
     - consistency
     - microservice
     - at
