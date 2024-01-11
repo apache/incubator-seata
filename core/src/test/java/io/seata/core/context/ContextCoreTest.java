@@ -18,6 +18,8 @@ package io.seata.core.context;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -63,6 +65,22 @@ public class ContextCoreTest {
         assertThat(load.get(SECOND_KEY)).isEqualTo(SECOND_VALUE);
         assertThat(load.get(NOT_EXIST_KEY)).isNull();
         //clear keys
+        load.remove(FIRST_KEY);
+        load.remove(SECOND_KEY);
+        load.remove(NOT_EXIST_KEY);
+    }
+
+    /**
+     * Test entries.
+     */
+    @Test
+    public void testEntries() {
+        ContextCore load = ContextCoreLoader.load();
+        load.put(FIRST_KEY, FIRST_VALUE);
+        load.put(SECOND_KEY, FIRST_VALUE);
+        Map<String, Object> entries = load.entries();
+        assertThat(entries.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        assertThat(entries.get(SECOND_KEY)).isEqualTo(FIRST_VALUE);
         load.remove(FIRST_KEY);
         load.remove(SECOND_KEY);
         load.remove(NOT_EXIST_KEY);
