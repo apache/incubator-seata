@@ -41,7 +41,7 @@ public class HessianSerializer implements Serializer {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             Hessian2Output output = new Hessian2Output(baos);
             output.setSerializerFactory(HessianSerializerFactory.getInstance());
-            output.writeObject(output);
+            output.writeObject(t);
             output.close();
             stream = baos.toByteArray();
         } catch (IOException e) {
