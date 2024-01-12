@@ -91,7 +91,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static volatile RaftRegistryServiceImpl instance;
 
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    private static final Configuration CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
