@@ -140,7 +140,7 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v8.16.0</nodeVersion>
+                            <nodeVersion>v12.22.12</nodeVersion>
                         </configuration>
                     </execution>
                     <execution>
