@@ -70,8 +70,6 @@ import static io.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * Abstract StateMachineConfig
- *
- * @author wt-better
  */
 public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
@@ -148,20 +146,10 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
             expressionResolver = defaultExpressionResolver;
         }
 
-        // init stateLogStore
-        if (stateLogStore == null) {
-            stateLogStore = initStateLogStore();
-        }
-
         if (stateLogRepository == null) {
             StateLogRepositoryImpl defaultStateLogRepository = new StateLogRepositoryImpl();
             defaultStateLogRepository.setStateLogStore(stateLogStore);
             this.stateLogRepository = defaultStateLogRepository;
-        }
-
-        // init stateLangStore
-        if (stateLangStore == null) {
-            stateLangStore = initStateLogStoreStore();
         }
 
         if (stateMachineRepository == null) {
@@ -284,20 +272,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
             }
         }
     }
-
-    /**
-     * Init StateLogStore by subClass
-     *
-     * @return StateLogStore
-     */
-    public abstract StateLangStore initStateLogStoreStore() throws Exception;
-
-    /**
-     * Init StateLogStore by subClass
-     *
-     * @return StateLogStore
-     */
-    public abstract StateLogStore initStateLogStore() throws Exception;
 
     @Override
     public StateLogRepository getStateLogRepository() {

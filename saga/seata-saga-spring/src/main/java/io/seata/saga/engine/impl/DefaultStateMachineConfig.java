@@ -20,16 +20,15 @@ import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.spel.SpringELExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
 import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
-import io.seata.saga.engine.store.StateLangStore;
-import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.util.ResourceUtil;
-import java.io.IOException;
-import java.io.InputStream;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * State machine configuration base spring. In spring context,some uses will be combined with the spring framework.
@@ -93,15 +92,5 @@ public class DefaultStateMachineConfig extends AbstractStateMachineConfig implem
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
-    }
-
-    @Override
-    public StateLangStore initStateLogStoreStore() throws Exception {
-        return null;
-    }
-
-    @Override
-    public StateLogStore initStateLogStore() throws Exception {
-        return null;
     }
 }

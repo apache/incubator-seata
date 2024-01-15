@@ -16,12 +16,12 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
-import io.seata.common.util.StringUtils;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.expression.Expression;

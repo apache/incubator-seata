@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Exception match evaluator expression
- *
  */
 public class ExceptionMatchExpression implements Expression {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionMatchExpression.class);

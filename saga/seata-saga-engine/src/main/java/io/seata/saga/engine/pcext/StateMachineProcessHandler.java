@@ -30,6 +30,7 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
         List<StateHandlerInterceptor> interceptors = null;
         if (stateHandler instanceof InterceptableStateHandler) {
-            interceptors = ((InterceptableStateHandler)stateHandler).getInterceptors();
+            interceptors = ((InterceptableStateHandler) stateHandler).getInterceptors();
         }
 
         List<StateHandlerInterceptor> executedInterceptors = null;
