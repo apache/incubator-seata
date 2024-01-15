@@ -32,8 +32,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.seata.common.Constants;
-import io.seata.common.exception.ShouldNeverHappenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
