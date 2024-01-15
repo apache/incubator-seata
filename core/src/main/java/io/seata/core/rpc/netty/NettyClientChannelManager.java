@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.core.rpc.netty;
 
@@ -35,8 +36,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.discovery.registry.FileRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -47,8 +46,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Netty client pool manager.
  *
- * @author slievrly
- * @author zhaojun
  */
 class NettyClientChannelManager {
 
@@ -164,10 +161,70 @@ class NettyClientChannelManager {
     /**
      * Reconnect to remote server of current transaction service group.
      *
+     * @param transactionServiceGroup transaction service group
+     */
+    void reconnect(String transactionServiceGroup) {
+        doReconnect(transactionServiceGroup, false);
+    }
+
+    /**
+     * Init reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void initReconnect(String transactionServiceGroup, boolean failFast) {
+        doReconnect(transactionServiceGroup, failFast);
+    }
+
+    /**
+     * reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void doReconnect(String transactionServiceGroup, boolean failFast) {
+        List<String> availList;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            throwFailFastException(failFast, "Failed to get available servers");
+            return;
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            RegistryService registryService = RegistryFactory.getInstance();
+            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
+
+            if (StringUtils.isBlank(clusterName)) {
+                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        transactionServiceGroup);
+                throwFailFastException(failFast, "can not get cluster name in registry config.");
+                return;
+            }
+
+            if (!(registryService instanceof FileRegistryServiceImpl)) {
+                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
+            }
+            throwFailFastException(failFast, "no available service found in cluster.");
+            return;
+        }
+        try {
+            doReconnect(availList, transactionServiceGroup);
+        } catch (Exception e) {
+            if (failFast) {
+                throw e;
+            }
+            LOGGER.error("connect server failed. {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
      * @param availList avail list
      * @param transactionServiceGroup transaction service group
      */
-    void reconnect(List<String> availList, String transactionServiceGroup) {
+    void doReconnect(List<String> availList, String transactionServiceGroup) {
         Set<String> channelAddress = new HashSet<>(availList.size());
         Map<String, Exception> failedMap = new HashMap<>();
         try {
@@ -181,12 +238,17 @@ class NettyClientChannelManager {
             }
             if (failedMap.size() > 0) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(), failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedMap.keySet(),
+                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
+                String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
+                throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
@@ -200,38 +262,6 @@ class NettyClientChannelManager {
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
         }
-    }
-
-    /**
-     * Reconnect to remote server of current transaction service group.
-     *
-     * @param transactionServiceGroup transaction service group
-     */
-    void reconnect(String transactionServiceGroup) {
-        List<String> availList;
-        try {
-            availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
-            return;
-        }
-        if (CollectionUtils.isEmpty(availList)) {
-            RegistryService registryService = RegistryFactory.getInstance();
-            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
-
-            if (StringUtils.isBlank(clusterName)) {
-                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
-                        transactionServiceGroup);
-                return;
-            }
-
-            if (!(registryService instanceof FileRegistryServiceImpl)) {
-                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
-            }
-            return;
-        }
-        reconnect(availList, transactionServiceGroup);
     }
 
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
@@ -254,16 +284,8 @@ class NettyClientChannelManager {
         Channel channelFromPool;
         try {
             NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
-            if (currentPoolKey.getMessage() instanceof RegisterTMRequest) {
-                poolKeyMap.put(serverAddress, currentPoolKey);
-            } else {
-                NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
-                if (previousPoolKey != null && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
-                    RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
-                    ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
-                }
-            }
-            channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            poolKeyMap.put(serverAddress, currentPoolKey);
+            channelFromPool = nettyClientKeyPool.borrowObject(currentPoolKey);
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error("{} register RM failed.", FrameworkErrorCode.RegisterRM.getErrCode(), exx);
@@ -308,5 +330,12 @@ class NettyClientChannelManager {
         }
         return null;
     }
+
+    private void throwFailFastException(boolean failFast, String message) {
+        if (failFast) {
+            throw new FrameworkException(message);
+        }
+    }
+
 }
 

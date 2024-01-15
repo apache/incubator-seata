@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.server.session;
 
@@ -30,6 +31,7 @@ import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.exception.GlobalTransactionException;
@@ -41,7 +43,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.LockStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerManagerFactory;
-import io.seata.server.cluster.raft.RaftServerFactory;
+import io.seata.server.cluster.raft.RaftServerManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -55,7 +57,6 @@ import static io.seata.core.model.GlobalStatus.Committing;
 /**
  * The type Global session.
  *
- * @author sharajava
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
@@ -313,7 +314,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onAddBranch(this, branchSession);
         }
-        if (!RaftServerFactory.getInstance().isRaftMode()) {
+        if (!RaftServerManager.isRaftMode()) {
             add(branchSession);
         }
     }
@@ -349,7 +350,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
 
-        if (!RaftServerFactory.getInstance().isRaftMode()) {
+        if (!RaftServerManager.isRaftMode()) {
             this.remove(branchSession);
         }
 
@@ -612,8 +613,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             applicationDataBytes);
 
         if (size > MAX_GLOBAL_SESSION_SIZE) {
-            throw new RuntimeException("global session size exceeded, size : " + size + " maxBranchSessionSize : " +
-                MAX_GLOBAL_SESSION_SIZE);
+            throw new RuntimeException("global session size exceeded, size : " + size + " byte, maxGlobalSessionSize : " +
+                MAX_GLOBAL_SESSION_SIZE + " byte");
         }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
@@ -653,7 +654,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;

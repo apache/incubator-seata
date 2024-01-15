@@ -1,22 +1,25 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.discovery.registry.zk;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 /**
- * @author Geng Zhang
  */
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;
@@ -103,4 +105,69 @@ public class ZookeeperRegisterServiceImplTest {
         service.unsubscribe("default", listener2);
     }
 
+    @Test
+    public void testLookUp() throws Exception {
+        ZookeeperRegisterServiceImpl zookeeperRegisterService = ZookeeperRegisterServiceImpl.getInstance();
+
+        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
+        client.createPersistent("/registry/zk/cluster");
+        client.createEphemeral("/registry/zk/cluster/127.0.0.1:8091");
+
+        Field field = ZookeeperRegisterServiceImpl.class.getDeclaredField("zkClient");
+        field.setAccessible(true);
+        field.set(zookeeperRegisterService, client);
+
+
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
+
+
+        List<InetSocketAddress> addressList = zookeeperRegisterService.lookup("default_tx_group");
+
+        Assertions.assertEquals(addressList, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+    }
+
+    @Test
+    public void testRemoveOfflineAddressesIfNecessaryNoRemoveCase() {
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+
+        Assertions.assertEquals(1, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+    }
+
+    @Test
+    public void testRemoveOfflineAddressesIfNecessaryRemoveCase() {
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+
+        Assertions.assertEquals(0, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+    }
+
+    @Test
+    public void testAliveLookup() {
+
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
+
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        List<InetSocketAddress> result = service.aliveLookup("default_tx_group");
+
+        Assertions.assertEquals(result, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+    }
+
+
+    @Test
+    public void tesRefreshAliveLookup() {
+
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
+
+        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+
+        service.refreshAliveLookup("default_tx_group",
+                Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+
+        Assertions.assertEquals(service.CURRENT_ADDRESS_MAP.get("cluster"),
+                Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+    }
 }

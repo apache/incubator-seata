@@ -1,23 +1,26 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.DataSourceProxyTest;
+import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.sqlparser.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -29,17 +32,19 @@ import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
- * @author Geng Zhang
  */
 public abstract class BaseH2Test {
     
@@ -58,7 +63,8 @@ public abstract class BaseH2Test {
         dataSource.setUrl("jdbc:h2:./db_store/test_undo");
         dataSource.setUsername("sa");
         dataSource.setPassword("");
-        dataSourceProxy = new DataSourceProxy(dataSource);
+        dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+
         connection = dataSourceProxy.getConnection();
 
         tableMeta = mockTableMeta();

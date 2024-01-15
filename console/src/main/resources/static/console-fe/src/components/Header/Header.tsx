@@ -1,11 +1,12 @@
-/**
- * Copyright 1999-2019 Seata.io Group.
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -91,7 +92,6 @@ class Header extends React.Component<PropsType, StateType> {
     console.log('props:', this.props);
     const {
       home,
-      cloud,
       docs,
       blog,
       community,
@@ -99,27 +99,19 @@ class Header extends React.Component<PropsType, StateType> {
       sagaStatemachineDesigner,
       languageSwitchButton,
     } = locale;
-    const BASE_URL = `https://seata.io/${language.toLocaleLowerCase()}/`;
+    const BASE_URL =
+      language === enUsKey ? 'https://seata.apache.org/' : 'https://seata.apache.org/zh-cn/';
     const NAV_MENU = [
       { id: 1, title: home, link: BASE_URL },
-      {
-        id: 2,
-        title: cloud,
-        link: `https://www.aliyun.com/product/aliware/mse?spm=seata-website.topbar.0.0.0`,
-      },
-      { id: 3, title: docs, link: `${BASE_URL}docs/overview/what-is-seata.html` },
-      { id: 4, title: blog, link: `${BASE_URL}blog/index.html` },
-      { id: 5, title: community, link: `${BASE_URL}community/index.html` },
-      { id: 6, title: download, link: `${BASE_URL}blog/download.html` },
+      { id: 2, title: docs, link: `${BASE_URL}docs/overview/what-is-seata/` },
+      { id: 3, title: blog, link: `${BASE_URL}blog` },
+      { id: 4, title: community, link: `${BASE_URL}community` },
+      { id: 5, title: download, link: `${BASE_URL}unversioned/download/seata-server` },
     ];
     return (
       <header className="header-container header-container-primary">
         <div className="header-body">
-          <a
-            href={`https://seata.io/${language.toLocaleLowerCase()}/`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href={BASE_URL} target="_blank" rel="noopener noreferrer">
             <img
               src="img/seata_logo.png"
               className="logo"

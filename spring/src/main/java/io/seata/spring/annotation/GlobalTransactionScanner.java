@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.spring.annotation;
 
@@ -24,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 
+import com.google.common.collect.ImmutableSet;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationCache;
@@ -41,6 +43,8 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import io.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
+import io.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
+import io.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
 import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
@@ -61,10 +65,13 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -77,7 +84,6 @@ import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 /**
  * The type Global transaction scanner.
  *
- * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
@@ -113,6 +119,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
+
+    private static final Set<String> NEED_ENHANCE_BEAN_NAME_SET = new HashSet<>();
 
 
     /**
@@ -278,6 +286,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         try {
             synchronized (PROXYED_SET) {
                 if (PROXYED_SET.contains(beanName)) {
+                    return bean;
+                }
+                if (!NEED_ENHANCE_BEAN_NAME_SET.contains(beanName)) {
                     return bean;
                 }
                 interceptor = null;
@@ -469,7 +480,70 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (initialized.compareAndSet(false, true)) {
             initClient();
         }
+
+        this.findBusinessBeanNamesNeededEnhancement();
     }
+
+    private void findBusinessBeanNamesNeededEnhancement() {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) applicationContext;
+            ConfigurableListableBeanFactory configurableListableBeanFactory = configurableApplicationContext.getBeanFactory();
+
+            String[] beanNames = applicationContext.getBeanDefinitionNames();
+            for (String contextBeanName : beanNames) {
+                BeanDefinition beanDefinition = configurableListableBeanFactory.getBeanDefinition(contextBeanName);
+                if (StringUtils.isBlank(beanDefinition.getBeanClassName())) {
+                    continue;
+                }
+                if (IGNORE_ENHANCE_CHECK_SET.contains(beanDefinition.getBeanClassName())) {
+                    continue;
+                }
+                try {
+                    // get the class by bean definition class name
+                    Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
+                    // check if it needs enhancement by the class
+                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
+                    if (!ifNeedEnhanceBean.isIfNeed()) {
+                        continue;
+                    }
+                    if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
+                        // the native bean which dubbo, sofa bean service bean referenced
+                        PropertyValue propertyValue = beanDefinition.getPropertyValues().getPropertyValue("ref");
+                        if (propertyValue == null) {
+                            // the native bean which HSF service bean referenced
+                            propertyValue = beanDefinition.getPropertyValues().getPropertyValue("target");
+                        }
+                        if (propertyValue != null) {
+                            RuntimeBeanReference r = (RuntimeBeanReference) propertyValue.getValue();
+                            if (r != null && StringUtils.isNotBlank(r.getBeanName())) {
+                                NEED_ENHANCE_BEAN_NAME_SET.add(r.getBeanName());
+                                continue;
+                            }
+                        }
+                        // the native bean which local tcc service bean referenced
+                        NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
+                    } else if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN)) {
+                        // global transactional bean
+                        NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
+                    }
+                } catch (ClassNotFoundException e) {
+                    LOGGER.warn("check if need enhance bean error, it can be ignore", e);
+                }
+            }
+            LOGGER.info("The needed enhancement business beans are : {}", NEED_ENHANCE_BEAN_NAME_SET);
+        }
+    }
+
+    private static final Set<String> IGNORE_ENHANCE_CHECK_SET = ImmutableSet.of(
+            "io.seata.spring.annotation.GlobalTransactionScanner"
+            , "io.seata.rm.fence.SpringFenceConfig"
+            , "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
+            , "org.springframework.context.annotation.internalAutowiredAnnotationProcessor"
+            , "org.springframework.context.annotation.internalCommonAnnotationProcessor"
+            , "org.springframework.context.event.internalEventListenerProcessor"
+            , "org.springframework.context.event.internalEventListenerFactory"
+    );
+
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

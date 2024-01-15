@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource;
 
@@ -19,25 +20,31 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
+import io.seata.common.ConfigurationKeys;
 import io.seata.common.Constants;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
 import io.seata.sqlparser.util.JdbcConstants;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 
 /**
  * The type Data source proxy.
  *
- * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
@@ -55,7 +62,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String userName;
 
-    private String version;
+    private String kernelVersion;
+
+    private String productVersion;
+
+    /**
+     * POLARDB-X 1.X -> TDDL
+     * POLARDB-X 2.X & MySQL 5.6 -> PXC
+     * POLARDB-X 2.X & MySQL 5.7 -> AliSQL-X
+     */
+    private static final String[] POLARDB_X_PRODUCT_KEYWORD = {"TDDL","AliSQL-X","PXC"};
 
     /**
      * Instantiates a new Data source proxy.
@@ -89,9 +105,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
-                getMySQLAdaptiveType(connection);
+                validMySQLVersion(connection);
+                checkDerivativeProduct();
             }
-            version = selectDbVersion(connection);
+            checkUndoLogTableExist(connection);
+
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }
@@ -107,16 +125,55 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     /**
-     * get mysql adaptive type for PolarDB-X
+     * Define derivative product version for MySQL Kernel
      *
-     * @param connection db connection
      */
-    private void getMySQLAdaptiveType(Connection connection) {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeQuery("show rule");
+    private void checkDerivativeProduct() {
+        if (!JdbcConstants.MYSQL.equals(dbType)) {
+            return;
+        }
+        // check for polardb-x
+        if (isPolardbXProduct()) {
             dbType = JdbcConstants.POLARDBX;
-        } catch (SQLException e) {
-            dbType = JdbcConstants.MYSQL;
+            return;
+        }
+        // check for other products base on mysql kernel
+    }
+
+    private boolean isPolardbXProduct() {
+        if (StringUtils.isBlank(productVersion)) {
+            return false;
+        }
+        for (String keyword : POLARDB_X_PRODUCT_KEYWORD) {
+            if (productVersion.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * check existence of undolog table
+     *
+     * if the table not exist fast fail, or else keep silence
+     *
+     * @param conn db connection
+     */
+    private void checkUndoLogTableExist(Connection conn) {
+        UndoLogManager undoLogManager;
+        try {
+            undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
+        } catch (EnhancedServiceNotFoundException e) {
+            String errMsg = String.format("AT mode don't support the the dbtype: %s", dbType);
+            throw new IllegalStateException(errMsg, e);
+        }
+
+        boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
+        if (!undoLogTableExist) {
+            String undoLogTableName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
+            throw new IllegalStateException(errMsg);
         }
     }
 
@@ -335,27 +392,33 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         return BranchType.AT;
     }
 
-    public String getVersion() {
-        return version;
+    public String getKernelVersion() {
+        return kernelVersion;
     }
 
-    private String selectDbVersion(Connection connection) {
-        if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
-                 ResultSet versionResult = preparedStatement.executeQuery()) {
-                if (versionResult.next()) {
-                    String version = versionResult.getString("VERSION()");
-                    if (version == null) {
-                        return null;
-                    }
-                    int dashIdx = version.indexOf('-');
-                    // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
-                    return dashIdx > 0 ? version.substring(0, dashIdx) : version;
-                }
-            } catch (Exception e) {
-                LOGGER.error("get mysql version fail error: {}", e.getMessage());
-            }
+    private void validMySQLVersion(Connection connection) {
+        if (!JdbcConstants.MYSQL.equals(dbType)) {
+            return;
         }
-        return "";
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+             ResultSet versionResult = preparedStatement.executeQuery()) {
+            if (versionResult.next()) {
+                String version = versionResult.getString("VERSION()");
+                if (StringUtils.isBlank(version)) {
+                    return;
+                }
+                int dashIdx = version.indexOf('-');
+                // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
+                if (dashIdx > 0) {
+                    kernelVersion = version.substring(0, dashIdx);
+                    productVersion = version.substring(dashIdx + 1);
+                } else {
+                    kernelVersion = version;
+                    productVersion = version;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("check mysql version fail error: {}", e.getMessage());
+        }
     }
 }
