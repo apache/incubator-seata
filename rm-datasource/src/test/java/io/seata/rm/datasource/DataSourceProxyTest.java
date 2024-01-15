@@ -142,6 +142,11 @@ public class DataSourceProxyTest {
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:postgresql://mock/postgresql?xxx=1111&currentSchema=schema1,schema2&yyy=1");
             Assertions.assertEquals("jdbc:postgresql://mock/postgresql?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:postgresql://192.168.1.123:30100,192.168.1.124:30100?xxx=1111&currentSchema=schema1,schema2&yyy=1");
+            Assertions.assertEquals("jdbc:postgresql://192.168.1.123:30100|192.168.1.124:30100?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 
