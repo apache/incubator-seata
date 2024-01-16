@@ -352,8 +352,6 @@
                         </ports>
                         <labels>
                             <name>seata-server</name>
-                            <git.commit.message.full>${git.commit.message.full}</git.commit.message.full>
-                            <git.remote.origin.url>${git.remote.origin.url}</git.remote.origin.url>
                             <git.commit.id>${git.commit.id}</git.commit.id>
                             <git.commit.time>${git.commit.time}</git.commit.time>
                             <mvn.build.version>${project.version}</mvn.build.version>
