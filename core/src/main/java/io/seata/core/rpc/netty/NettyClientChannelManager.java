@@ -161,10 +161,70 @@ class NettyClientChannelManager {
     /**
      * Reconnect to remote server of current transaction service group.
      *
+     * @param transactionServiceGroup transaction service group
+     */
+    void reconnect(String transactionServiceGroup) {
+        doReconnect(transactionServiceGroup, false);
+    }
+
+    /**
+     * Init reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void initReconnect(String transactionServiceGroup, boolean failFast) {
+        doReconnect(transactionServiceGroup, failFast);
+    }
+
+    /**
+     * reconnect to remote server of current transaction service group.
+     * @param transactionServiceGroup
+     * @param failFast
+     */
+    void doReconnect(String transactionServiceGroup, boolean failFast) {
+        List<String> availList;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception e) {
+            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            throwFailFastException(failFast, "Failed to get available servers");
+            return;
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            RegistryService registryService = RegistryFactory.getInstance();
+            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
+
+            if (StringUtils.isBlank(clusterName)) {
+                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
+                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
+                        transactionServiceGroup);
+                throwFailFastException(failFast, "can not get cluster name in registry config.");
+                return;
+            }
+
+            if (!(registryService instanceof FileRegistryServiceImpl)) {
+                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
+            }
+            throwFailFastException(failFast, "no available service found in cluster.");
+            return;
+        }
+        try {
+            doReconnect(availList, transactionServiceGroup);
+        } catch (Exception e) {
+            if (failFast) {
+                throw e;
+            }
+            LOGGER.error("connect server failed. {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
      * @param availList avail list
      * @param transactionServiceGroup transaction service group
      */
-    void reconnect(List<String> availList, String transactionServiceGroup) {
+    void doReconnect(List<String> availList, String transactionServiceGroup) {
         Set<String> channelAddress = new HashSet<>(availList.size());
         Map<String, Exception> failedMap = new HashMap<>();
         try {
@@ -178,12 +238,17 @@ class NettyClientChannelManager {
             }
             if (failedMap.size() > 0) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(), failedMap.keySet(), failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
+                    LOGGER.error("{} can not connect to {} cause:{}", FrameworkErrorCode.NetConnect.getErrCode(),
+                            failedMap.keySet(),
+                            failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}", FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
+                String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
+                throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
@@ -197,38 +262,6 @@ class NettyClientChannelManager {
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
         }
-    }
-
-    /**
-     * Reconnect to remote server of current transaction service group.
-     *
-     * @param transactionServiceGroup transaction service group
-     */
-    void reconnect(String transactionServiceGroup) {
-        List<String> availList;
-        try {
-            availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
-            return;
-        }
-        if (CollectionUtils.isEmpty(availList)) {
-            RegistryService registryService = RegistryFactory.getInstance();
-            String clusterName = registryService.getServiceGroup(transactionServiceGroup);
-
-            if (StringUtils.isBlank(clusterName)) {
-                LOGGER.error("can not get cluster name in registry config '{}{}', please make sure registry config correct",
-                        ConfigurationKeys.SERVICE_GROUP_MAPPING_PREFIX,
-                        transactionServiceGroup);
-                return;
-            }
-
-            if (!(registryService instanceof FileRegistryServiceImpl)) {
-                LOGGER.error("no available service found in cluster '{}', please make sure registry config correct and keep your seata server running", clusterName);
-            }
-            return;
-        }
-        reconnect(availList, transactionServiceGroup);
     }
 
     void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
@@ -297,5 +330,12 @@ class NettyClientChannelManager {
         }
         return null;
     }
+
+    private void throwFailFastException(boolean failFast, String message) {
+        if (failFast) {
+            throw new FrameworkException(message);
+        }
+    }
+
 }
 

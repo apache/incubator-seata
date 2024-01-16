@@ -26,6 +26,11 @@ import org.junit.jupiter.api.Test;
 public class ConfigToolsTest {
 
     @Test
+    public void testInit() {
+        Assertions.assertNotNull(new ConfigTools());
+    }
+
+    @Test
     public void test() throws Exception {
         KeyPair keyPair = ConfigTools.getKeyPair();
         String publicKeyStr = ConfigTools.getPublicKey(keyPair);
