@@ -352,6 +352,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } else {
             resourceId = jdbcUrl;
         }
+        if (resourceId.contains(",")) {
+            resourceId = resourceId.replace(",", "|");
+        }
     }
 
     /**
