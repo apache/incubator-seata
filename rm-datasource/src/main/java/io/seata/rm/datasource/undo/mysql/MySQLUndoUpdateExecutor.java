@@ -59,8 +59,11 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL) + " = ?").collect(
-            Collectors.joining(", "));
+            field -> {
+                String addEscape = ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL);
+                return addEscape + " = " + MySQLJsonHelper.convertIfJson(field, beforeImage.getTableMeta());
+            })
+            .collect(Collectors.joining(", "));
 
         List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.MYSQL).stream().map(e -> e.getName())
             .collect(Collectors.toList());

@@ -74,7 +74,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertColumns = fields.stream()
             .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.MYSQL))
             .collect(Collectors.joining(", "));
-        String insertValues = fields.stream().map(field -> "?")
+        String insertValues = fields.stream().map(field -> MySQLJsonHelper.convertIfJson(field, beforeImage.getTableMeta()))
             .collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
