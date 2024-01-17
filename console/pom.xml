@@ -139,6 +139,7 @@
                         <goals>
                             <goal>install-node-and-npm</goal>
                         </goals>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <nodeVersion>v12.22.12</nodeVersion>
                         </configuration>
@@ -148,6 +149,7 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <arguments>install</arguments>
                         </configuration>
@@ -157,6 +159,7 @@
                         <goals>
                             <goal>npx</goal>
                         </goals>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <arguments>browserslist@latest --update-db</arguments>
                         </configuration>
@@ -166,6 +169,7 @@
                         <goals>
                             <goal>npm</goal>
                         </goals>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <arguments>run build</arguments>
                         </configuration>
