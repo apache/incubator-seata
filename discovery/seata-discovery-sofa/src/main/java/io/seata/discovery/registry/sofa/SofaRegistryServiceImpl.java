@@ -17,9 +17,9 @@
 package io.seata.discovery.registry.sofa;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -173,6 +173,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                 } else {
                     List<InetSocketAddress> newAddressList = flatData(instances);
                     CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+
+                    removeOfflineAddressesIfNecessary(clusterName, newAddressList);
                 }
                 respondRegistries.countDown();
             });

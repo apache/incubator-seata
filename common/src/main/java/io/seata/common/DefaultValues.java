@@ -47,7 +47,7 @@ public interface DefaultValues {
     /**
      * Shutdown timeout default 3s
      */
-    int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
+    int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 13;
     int DEFAULT_SELECTOR_THREAD_SIZE = 1;
     int DEFAULT_BOSS_THREAD_SIZE = 1;
 

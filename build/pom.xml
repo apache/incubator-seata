@@ -38,30 +38,30 @@
     </licenses>
 
     <organization>
-        <name>Seata</name>
-        <url>https://github.com/seata</url>
+        <name>Apache</name>
+        <url>https://github.com/apache</url>
     </organization>
 
-    <url>https://seata.io</url>
+    <url>https://seata.apache.org</url>
 
     <developers>
         <developer>
             <id>Seata</id>
             <name>Seata</name>
-            <url>https://seata.io</url>
-            <email>dev-seata@googlegroups.com</email>
+            <url>https://seata.apache.org</url>
+            <email>dev@seata.apache.org</email>
         </developer>
     </developers>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/seata/seata/issues</url>
+        <url>https://github.com/apache/incubator-seata/issues</url>
     </issueManagement>
 
     <scm>
-        <url>git@github.com:seata/seata.git</url>
-        <connection>scm:git@github.com:seata/seata.git</connection>
-        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
+        <url>git@github.com:apache/incubator-seata.git</url>
+        <connection>scm:git@github.com:apache/incubator-seata.git</connection>
+        <developerConnection>scm:git@github.com:apache/incubator-seata.git</developerConnection>
     </scm>
 
     <properties>
