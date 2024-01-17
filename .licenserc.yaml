@@ -52,6 +52,7 @@ header:
     #SPI、spring.factories、spring-configuration-metadata.json、additional-spring-configuration-metadata.json
     - '**/src/test/resources/META-INF/**'
     - '**/src/main/resources/META-INF/**'
+    - '**/src/main/resources/error/**'
     - '**/target/**'
     - '**/*.iml'
     - 'mvnw'
