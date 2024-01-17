@@ -51,7 +51,8 @@ jobs:
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
+    # Temporarily in effect at pr
+#    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
     strategy:
       fail-fast: false
     steps:
@@ -68,6 +69,8 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
+                       apt-get install python2 -y && \
+                       python2 --version && \
                        apt-get install maven -y && \
                        mvn -version && \
                        mvn clean install \
