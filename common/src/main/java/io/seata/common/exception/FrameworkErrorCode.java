@@ -20,6 +20,7 @@ package io.seata.common.exception;
  * The enum Framework error code.
  *
  */
+@Deprecated
 public enum FrameworkErrorCode {
     /**
      * 0001 ~ 0099  Configuration related errors
