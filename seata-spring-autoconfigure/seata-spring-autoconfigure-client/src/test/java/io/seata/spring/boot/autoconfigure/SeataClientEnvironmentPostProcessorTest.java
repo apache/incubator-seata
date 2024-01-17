@@ -23,8 +23,6 @@ import org.springframework.core.Ordered;
 
 /**
  * @description:
- * @author: zhangjiawei
- * @date: 2024/1/2
  */
 public class SeataClientEnvironmentPostProcessorTest {
 
