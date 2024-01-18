@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-mock-server</artifactId>
     <packaging>jar</packaging>
-    <name>seata-mock-server</name>
+    <name>seata-mock-server ${project.version}</name>
     <description>Seata mock server</description>
 
     <build>
