@@ -71,7 +71,7 @@ jobs:
             bash -exc 'apt-get update -y && \
                        apt-get install python2 -y && \
                        python2 --version && \
-                       apt-get install build-essential -y && \
+                       apt-get install make gcc g++ -y && \
                        apt-get install maven -y && \
                        mvn -version && \
                        mvn clean install \
