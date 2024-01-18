@@ -4,10 +4,10 @@
 
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
-[![Build Status](https://github.com/seata/seata/workflows/build/badge.svg?branch=develop)](https://github.com/seata/seata/actions)
-[![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
-[![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
+[![Build Status](https://github.com/apache/incubator-seata/workflows/build/badge.svg?branch=develop)](https://github.com/apache/incubator-seata/actions)
+[![codecov](https://codecov.io/gh/apache/incubator-seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/apache/incubator-seata)
+[![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![maven](https://img.shields.io/maven-central/v/io.apache/incubator-seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
 
 ## What is Seata?
 
@@ -56,7 +56,7 @@ A typical lifecycle of Seata managed distributed transaction:
 
 ![Typical Process](https://cdn.nlark.com/lark/0/2018/png/18862/1545296917881-26fabeb9-71fa-4f3e-8a7a-fc317d3389f4.png) 
 
-For more details about principle and design, please go to [Seata wiki page](https://github.com/seata/seata/wiki). 
+For more details about principle and design, please go to [Seata wiki page](https://github.com/apache/incubator-seata/wiki). 
 
 ### History
 
@@ -108,12 +108,12 @@ Depending on the scenario, choose one of the two dependencies: `io.seata:seata-a
 
 ## Quick Start
 
-[Quick Start](https://seata.io/zh-cn/docs/ops/deploy-guide-beginner.html)
+[Quick Start](https://seata.apache.org/zh-cn/docs/ops/deploy-guide-beginner)
 
 ## Documentation
 
 
-You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.io/zh-cn/docs/overview/what-is-seata.html).
+You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.apache.org/zh-cn/docs/overview/what-is-seata).
 
 ## Reporting bugs
 
@@ -140,26 +140,24 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 ## Seata ecosystem
 
 * [Seata Website](https://github.com/apache/incubator-seata.github.io) - Seata official website
-* [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
 * [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client and server
 * [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata
 * [Seata GoLang Simples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
 * [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with k8s
 * [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata
-* [Awesome Seata](https://github.com/seata/awesome-fescar) - Seata's slides and video address in meetup
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. [[Contributors](https://github.com/seata/seata/graphs/contributors)].
+This project exists thanks to all the people who contribute. [[Contributors](https://github.com/apache/incubator-seata/graphs/contributors)].
 
 ## License
 
-Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/seata/seata/blob/master/LICENSE) file for details.
+Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-seata/blob/master/LICENSE) file for details.
 
 ## Who is using
 
 These are only part of the companies using Seata, for reference only. If you are using Seata, please [add your company 
-here](https://github.com/seata/seata/issues/1246) to tell us your scenario to make Seata better.
+here](https://github.com/apache/incubator-seata/issues/1246) to tell us your scenario to make Seata better.
 
 <div style='vertical-align: middle'>
     <img alt='Alibaba Group' height='40'  src='https://img.alicdn.com/imgextra/i1/O1CN01TleQq128FAP8POtL5_!!6000000007902-2-tps-241-42.png'  /img>

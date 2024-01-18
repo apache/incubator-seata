@@ -278,7 +278,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             }
         }
-        CLUSTER_ADDRESS_MAP.get(notifyCluserName).remove(inetSocketAddress);
+        socketAddresses.remove(inetSocketAddress);
+
+        removeOfflineAddressesIfNecessary(notifyCluserName, socketAddresses);
     }
 
     @Override

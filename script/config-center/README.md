@@ -3,7 +3,7 @@
 
 ## important attributes 
 
-you only need to follow the instructions below and keep the corresponding configuration in 'config.txt' to run. For more configuration information, please visit [seata.io](https://seata.io/)
+you only need to follow the instructions below and keep the corresponding configuration in 'config.txt' to run. For more configuration information, please visit [seata.apache.org](https://seata.apache.org/)
 
 | server                   | client                                                       |
 | ------------------------ | ------------------------------------------------------------ |

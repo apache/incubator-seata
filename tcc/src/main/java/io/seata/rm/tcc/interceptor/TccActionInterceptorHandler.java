@@ -35,7 +35,6 @@ import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
@@ -52,12 +51,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private Set<String> methodsToProxy;
-    private RemotingDesc remotingDesc;
+    private Object targetBean;
 
     private Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
 
-    public TccActionInterceptorHandler(RemotingDesc remotingDesc, Set<String> methodsToProxy) {
-        this.remotingDesc = remotingDesc;
+    public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
+        this.targetBean = targetBean;
         this.methodsToProxy = methodsToProxy;
     }
 
@@ -113,8 +112,8 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
         TwoPhaseBusinessAction result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (businessAction == null && remotingDesc.getServiceClass() != null) {
-                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(remotingDesc.getServiceClass());
+            if (businessAction == null && targetBean.getClass() != null) {
+                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
                 if (interfaceClasses != null) {
                     for (Class<?> interClass : interfaceClasses) {
                         try {

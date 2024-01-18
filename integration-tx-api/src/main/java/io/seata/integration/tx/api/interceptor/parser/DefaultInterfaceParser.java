@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @author leezongjie
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 
@@ -61,6 +62,17 @@ public class DefaultInterfaceParser implements InterfaceParser {
             }
         }
         return null;
+    }
+
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
+        for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
+            IfNeedEnhanceBean ifNeedEnhanceBean = interfaceParser.parseIfNeedEnhancement(beanClass);
+            if (ifNeedEnhanceBean.isIfNeed()) {
+                return ifNeedEnhanceBean;
+            }
+        }
+        return new IfNeedEnhanceBean();
     }
 
 }

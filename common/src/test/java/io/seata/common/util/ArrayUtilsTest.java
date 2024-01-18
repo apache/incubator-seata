@@ -32,6 +32,10 @@ public class ArrayUtilsTest {
         Object obj = new String[]{"1", "2", "3"};
         Object[] array = ArrayUtils.toArray(obj);
         Assertions.assertArrayEquals(new String[]{"1", "2", "3"}, array);
+
+        Object obj1 = new String[]{};
+        Object[] array1 = ArrayUtils.toArray(obj1);
+        Assertions.assertArrayEquals(new String[]{}, array1);
     }
 
     @Test

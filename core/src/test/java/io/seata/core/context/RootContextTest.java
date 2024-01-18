@@ -21,6 +21,8 @@ import io.seata.core.model.BranchType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -55,6 +57,70 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
         assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
         assertThat(RootContext.getXID()).isNull();
+    }
+
+    /**
+     * Test set timeout.
+     */
+    @Test
+    public void testSetTimeout() {
+        RootContext.setTimeout(100);
+        assertThat(RootContext.getTimeout()).isEqualTo(100);
+        RootContext.setTimeout(null);
+        assertThat(RootContext.getTimeout()).isEqualTo(null);
+    }
+
+    /**
+     * Test get timeout.
+     */
+    @Test
+    public void testGetTimeout() {
+        RootContext.setTimeout(100);
+        assertThat(RootContext.getTimeout()).isEqualTo(100);
+        RootContext.setTimeout(null);
+        assertThat(RootContext.getTimeout()).isEqualTo(null);
+    }
+
+    /**
+     * Test bind global lock flag.
+     */
+    @Test
+    public void testBindGlobalLockFlag() {
+        RootContext.bindGlobalLockFlag();
+        assertThat(RootContext.requireGlobalLock()).isEqualTo(true);
+    }
+
+    /**
+     * Test unbind global lock flag.
+     */
+    @Test
+    public void testUnBindGlobalLockFlag() {
+        RootContext.bindGlobalLockFlag();
+        assertThat(RootContext.requireGlobalLock()).isEqualTo(true);
+        RootContext.unbindGlobalLockFlag();
+        assertThat(RootContext.requireGlobalLock()).isEqualTo(false);
+    }
+
+    /**
+     * Test require global lock.
+     */
+    @Test
+    public void testRequireGlobalLock() {
+        RootContext.bindGlobalLockFlag();
+        assertThat(RootContext.requireGlobalLock()).isEqualTo(true);
+        RootContext.unbindGlobalLockFlag();
+        assertThat(RootContext.requireGlobalLock()).isEqualTo(false);
+    }
+
+    /**
+     * Test entries.
+     */
+    @Test
+    public void testEntries() {
+        RootContext.bind(DEFAULT_XID);
+        Map<String, Object> entries = RootContext.entries();
+        assertThat(entries.get(RootContext.KEY_XID)).isEqualTo(DEFAULT_XID);
+        RootContext.unbind();
     }
 
     /**

@@ -455,4 +455,5 @@ public class NettyClientConfig extends NettyBaseConfig {
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }
+
 }
