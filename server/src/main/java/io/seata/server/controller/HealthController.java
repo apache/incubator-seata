@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  */
-@Deprecated
 @Controller
 @RequestMapping
 public class HealthController {
