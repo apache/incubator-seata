@@ -34,8 +34,6 @@ public class HealthController {
     @Autowired
     private ServerRunner serverRunner;
 
-
-    @Deprecated
     @RequestMapping("/health")
     @ResponseBody
     String healthCheck() {
