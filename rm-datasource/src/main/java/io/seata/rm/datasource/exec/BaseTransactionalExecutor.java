@@ -412,6 +412,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * validate that the primary key is free of illegal characters
+     *
+     * @param pkVal primary key value
+     */
+    protected void validPk(String pkVal) {
+        if (pkVal.contains(",")) {
+            throw new IllegalArgumentException(pkVal + " contains illegal character!");
+        }
+    }
+
+    /**
      * build lockKey
      *
      * @param rowsIncludingPK the records
@@ -421,7 +432,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (rowsIncludingPK.size() == 0) {
             return null;
         }
-
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
@@ -434,7 +444,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 if (pkSplitIndex > 0) {
                     sb.append("_");
                 }
-                sb.append(rowMap.get(pkName).getValue());
+                Object pkVal = rowMap.get(pkName).getValue();
+                validPk(String.valueOf(pkVal));
+                sb.append(pkVal);
                 pkSplitIndex++;
             }
             rowSequence++;
@@ -474,8 +486,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+        try {
+            ps = statementProxy.getConnection().prepareStatement(selectSQL);
             if (CollectionUtils.isNotEmpty(paramAppenderList)) {
                 for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
                     List<Object> paramAppender = paramAppenderList.get(i);
@@ -487,7 +501,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, ps);
         }
     }
 
@@ -512,9 +526,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         List<String> needColumns =
             getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), insertColumnsUnEscape);
         needColumns.forEach(selectSQLJoin::add);
+        PreparedStatement ps = null;
         ResultSet rs = null;
-        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString())) {
-
+        try {
+            ps = statementProxy.getConnection().prepareStatement(selectSQLJoin.toString());
             int paramIndex = 1;
             for (int r = 0; r < rowSize; r++) {
                 for (int c = 0; c < pkColumnNameList.size(); c++) {
@@ -527,7 +542,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, ps);
         }
     }
 

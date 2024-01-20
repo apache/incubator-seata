@@ -28,7 +28,7 @@
 FROM openjdk:8u342
 
 # set label
-LABEL maintainer="Seata <seata.io>"
+LABEL maintainer="Seata <seata.apache.org>"
 
 WORKDIR /$BASE_DIR
 
