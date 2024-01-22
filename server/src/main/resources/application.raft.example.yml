@@ -73,6 +73,11 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
     preferred-networks: 30.240.*
+  security:
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    tokenValidityInMilliseconds: 1800000
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/metadata/v1/**,/actuator/health
   server:
     raft:
       group: default
@@ -135,3 +140,13 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
+
+# actuator
+management:
+  endpoints:
+    enabled-by-default: false
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+      show-components: always

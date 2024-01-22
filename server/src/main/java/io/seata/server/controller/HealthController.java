@@ -34,7 +34,6 @@ public class HealthController {
     @Autowired
     private ServerRunner serverRunner;
 
-
     @RequestMapping("/health")
     @ResponseBody
     String healthCheck() {
