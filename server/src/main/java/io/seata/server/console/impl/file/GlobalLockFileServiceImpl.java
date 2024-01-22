@@ -163,11 +163,11 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond()>=Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
+                    (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond() >= Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
 
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond()<=Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
+                    (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond() <= Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
 
         };
     }
