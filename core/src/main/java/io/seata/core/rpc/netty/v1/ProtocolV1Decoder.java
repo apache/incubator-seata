@@ -70,8 +70,6 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
     public ProtocolV1Decoder() {
         // default is 8M
         this(ProtocolConstants.MAX_FRAME_LENGTH);
-        String serializerName = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name());
-        this.serializerType = SerializerType.getByName(serializerName);
     }
 
     public ProtocolV1Decoder(int maxFrameLength) {
@@ -83,6 +81,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
+        String serializerName = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name());
+        this.serializerType = SerializerType.getByName(serializerName);
     }
 
     @Override
