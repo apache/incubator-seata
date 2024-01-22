@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.datasource.exec;
 
@@ -45,7 +46,6 @@ import io.seata.sqlparser.SQLUpdateRecognizer;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
- * @author wangwei-ying
  */
 public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
@@ -127,13 +127,15 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
         }
         TableMeta tmeta = getTableMeta(sqlRecognizers.get(0).getTableName());
         String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
+        PreparedStatement pst = null;
         ResultSet rs = null;
-        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+        try {
+            pst = statementProxy.getConnection().prepareStatement(selectSQL);
             SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
-            IOUtil.close(rs);
+            IOUtil.close(rs, pst);
         }
     }
 

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seata/seata.git"
+    "url": "git+https://github.com/apache/incubator-seata.git"
   },
   "keywords": [
     "seata",
@@ -20,6 +20,13 @@
     "email": "dev@seata.apache.org"
   },
   "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/apache/incubator-seata/issues"
+  },
+  "homepage": "https://seata.apache.org/",
+  "peerDependencies": {
+    "react": "^16.3.0"
+  },
   "dependencies": {
     "@bpmn-io/properties-panel": "^3.8.0",
     "bpmn-font": "^0.12.1",

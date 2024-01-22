@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.rm.tcc.interceptor;
 
@@ -34,7 +35,6 @@ import io.seata.integration.tx.api.interceptor.InvocationWrapper;
 import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
@@ -42,7 +42,6 @@ import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
 /**
- * @author leezongjie
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
@@ -52,12 +51,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private Set<String> methodsToProxy;
-    private RemotingDesc remotingDesc;
+    private Object targetBean;
 
     private Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
 
-    public TccActionInterceptorHandler(RemotingDesc remotingDesc, Set<String> methodsToProxy) {
-        this.remotingDesc = remotingDesc;
+    public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
+        this.targetBean = targetBean;
         this.methodsToProxy = methodsToProxy;
     }
 
@@ -113,8 +112,8 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
         TwoPhaseBusinessAction result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (businessAction == null && remotingDesc.getServiceClass() != null) {
-                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(remotingDesc.getServiceClass());
+            if (businessAction == null && targetBean.getClass() != null) {
+                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
                 if (interfaceClasses != null) {
                     for (Class<?> interClass : interfaceClasses) {
                         try {

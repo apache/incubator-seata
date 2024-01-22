@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.sqlparser.druid.oracle;
 
@@ -42,7 +43,6 @@ import io.seata.sqlparser.struct.Null;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * @author will
  */
 public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
@@ -126,7 +126,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
             public boolean visit(OracleSelectJoin x) {
                 //just like: UPDATE table a INNER JOIN table b ON a.id = b.pid ...
                 throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
@@ -134,14 +134,14 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                 if (x.getTableSource() instanceof OracleSelectSubqueryTableSource) {
                     //just like: "update (select a.id,a.name from a inner join b on a.id = b.id) t set t.name = 'xxx'"
                     throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                 }
                 List<SQLUpdateSetItem> updateSetItems = x.getItems();
                 for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                     if (updateSetItem.getValue() instanceof SQLQueryExpr) {
                         //just like: "update a set a.id = (select id from b where a.pid = b.pid)"
                         throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                            + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                     }
                 }
                 return true;
@@ -151,28 +151,28 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
             public boolean visit(SQLInSubQueryExpr x) {
                 //just like: ...where id in (select id from t)
                 throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(OracleSelectSubqueryTableSource x) {
                 //just like: select * from (select * from t) for update
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(SQLReplaceStatement x) {
                 //just like: replace into t (id,dr) values (1,'2'), (2,'3')
                 throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(SQLMergeStatement x) {
                 //just like: merge into ... WHEN MATCHED THEN ...
                 throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
@@ -180,7 +180,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                 if (null != x.getQuery()) {
                     //just like: insert into t select * from t1
                     throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                            + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
+                            + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                 }
                 return true;
             }

@@ -1,4 +1,4 @@
-#For details about configuration items, see https://seata.io/zh-cn/docs/user/configurations.html
+#For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
 transport.type=TCP
 transport.server=NIO
@@ -131,7 +131,7 @@ server.enableParallelHandleBranch=false
 server.applicationDataLimit=64000
 server.applicationDataLimitCheck=false
 
-server.raft.cluster=127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093
+server.raft.server-addr=127.0.0.1:7091,127.0.0.1:7092,127.0.0.1:7093
 server.raft.snapshotInterval=600
 server.raft.applyBatch=32
 server.raft.maxAppendBufferSize=262144

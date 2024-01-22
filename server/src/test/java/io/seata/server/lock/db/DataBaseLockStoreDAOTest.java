@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.server.lock.db;
 
@@ -35,7 +36,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author zhangsen
  */
 @SpringBootTest
 public class DataBaseLockStoreDAOTest {
@@ -61,20 +61,21 @@ public class DataBaseLockStoreDAOTest {
 
     private static void prepareTable(BasicDataSource dataSource) {
         Connection conn = null;
+        Statement stmt = null;
         try {
             conn = dataSource.getConnection();
-            Statement s = conn.createStatement();
+            stmt = conn.createStatement();
             try {
-                s.execute("drop table lock_table");
+                stmt.execute("drop table lock_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE lock_table ( xid varchar(96) ,  transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32) ,  row_key  varchar(128) primary key not null , status  integer , gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            stmt.execute("CREATE TABLE lock_table ( xid varchar(96) ,  transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32) ,  row_key  varchar(128) primary key not null , status  integer , gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table lock_table success.");
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -98,16 +99,17 @@ public class DataBaseLockStoreDAOTest {
 
         String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
+        ResultSet rs = null;
         try{
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = conn.createStatement().executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(rs, conn);
         }
 
         Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
@@ -135,16 +137,17 @@ public class DataBaseLockStoreDAOTest {
 
         String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
+        ResultSet rs = null;
         try{
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = conn.createStatement().executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(rs, conn);
         }
 
         //lock again
@@ -174,12 +177,13 @@ public class DataBaseLockStoreDAOTest {
 
         String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
+        ResultSet rs = null;
         try{
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = conn.createStatement().executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
             rs.close();
@@ -188,14 +192,13 @@ public class DataBaseLockStoreDAOTest {
             Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
 
             rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.fail();
-            }else {
+            } else {
                 Assertions.assertTrue(true);
             }
-
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(rs, conn);
         }
 
 
@@ -244,16 +247,17 @@ public class DataBaseLockStoreDAOTest {
 
         String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
+        ResultSet rs = null;
         try{
             conn = dataSource.getConnection();
-            ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            rs = conn.createStatement().executeQuery(sql);
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else {
+            } else {
                 Assertions.fail();
             }
         } finally {
-            IOUtil.close(conn);
+            IOUtil.close(rs, conn);
         }
 
         List<LockDO> lockDOs_2 = new ArrayList<>();

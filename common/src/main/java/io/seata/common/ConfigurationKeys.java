@@ -1,24 +1,24 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package io.seata.common;
 
 /**
  * The type Configuration keys.
  *
- * @author slievrly
  */
 public interface ConfigurationKeys {
     /**
@@ -637,6 +637,16 @@ public interface ConfigurationKeys {
      * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
      */
     String ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableTmClientBatchSendRequest";
+
+    /**
+     * The constant ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST
+     */
+    String ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST = TRANSPORT_PREFIX + "enableTmClientChannelCheckFailFast";
+
+    /**
+     * The constant ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST
+     */
+    String ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST = TRANSPORT_PREFIX + "enableRmClientChannelCheckFailFast";
 
     /**
      * The constant ENABLE_RM_CLIENT_BATCH_SEND_REQUEST
