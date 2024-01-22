@@ -16,22 +16,25 @@
  */
 package io.seata.core.rpc.netty.v1;
 
+import java.util.Map;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.seata.core.exception.DecodeException;
-import io.seata.core.serializer.Serializer;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.exception.DecodeException;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * <pre>
@@ -62,6 +65,8 @@ import java.util.Map;
 public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    private SerializerType serializerType;
 
     public ProtocolV1Decoder() {
         // default is 8M
@@ -77,6 +82,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
+        String serializerName = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name());
+        this.serializerType = SerializerType.getByName(serializerName);
     }
 
     @Override
@@ -142,8 +149,13 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 frame.readBytes(bs);
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
-                rpcMessage.setBody(serializer.deserialize(bs));
+                SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
+                if (this.serializerType.equals(protocolType)) {
+                    Serializer serializer = SerializerServiceLoader.load(protocolType,, ProtocolConstants.VERSION_1);
+                    rpcMessage.setBody(serializer.deserialize(bs));
+                } else {
+                    throw new IllegalArgumentException("SerializerType not match");
+                }
             }
         }
 

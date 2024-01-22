@@ -68,6 +68,9 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
+                       apt-get install python2 -y && \
+                       python2 --version && \
+                       apt-get install make gcc g++ -y && \
                        apt-get install maven -y && \
                        mvn -version && \
                        mvn clean install \
