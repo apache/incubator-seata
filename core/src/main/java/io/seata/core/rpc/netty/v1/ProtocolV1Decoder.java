@@ -29,7 +29,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.DecodeException;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.protocol.RpcMessage;
 import io.seata.core.serializer.Serializer;
 import io.seata.core.serializer.SerializerServiceLoader;
 import io.seata.core.serializer.SerializerType;
