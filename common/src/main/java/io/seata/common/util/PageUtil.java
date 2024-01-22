@@ -111,6 +111,7 @@ public class PageUtil {
             case "postgresql":
             case "oceanbase":
             case "dm":
+            case "gaussdb":
                 return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
@@ -144,6 +145,7 @@ public class PageUtil {
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
             case "sqlserver":
+            case "gaussdb":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {
                     return sourceSql.substring(0, lastIndexOfOrderBy).replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");

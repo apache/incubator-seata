@@ -14,28 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser.druid;
 
+package io.seata.sqlparser.druid.gaussdb;
+
+import com.alibaba.druid.sql.ast.SQLStatement;
+import io.seata.sqlparser.druid.postgresql.PostgresqlSelectForUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * A db type adapter for druid parser.
+ * The type GaussDB select for update recognizer.
  *
- **/
-class DruidDbTypeAdapter {
+ */
+public class GaussDBSelectForUpdateRecognizer extends PostgresqlSelectForUpdateRecognizer {
+    
     /**
-     * Get adaptive db type for druid parser.
+     * Instantiates a new GaussDB select for update recognizer.
      *
-     * @param dbType origin db type
-     * @return adaptive db type
+     * @param originalSQL the original sql
+     * @param ast         the ast
      */
-    static String getAdaptiveDbType(String dbType) {
-        if (JdbcConstants.POLARDBX.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        if (JdbcConstants.GAUSSDB.equals(dbType)) {
-            return JdbcConstants.POSTGRESQL;
-        }
-        return dbType;
+    public GaussDBSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
+        super(originalSQL, ast);
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.GAUSSDB;
     }
 }

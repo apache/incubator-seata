@@ -14,28 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser.druid;
 
+package io.seata.rm.datasource.undo.gaussdb;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.UndoExecutorHolder;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * A db type adapter for druid parser.
+ * Undo executor holder for GaussDB
  *
- **/
-class DruidDbTypeAdapter {
-    /**
-     * Get adaptive db type for druid parser.
-     *
-     * @param dbType origin db type
-     * @return adaptive db type
-     */
-    static String getAdaptiveDbType(String dbType) {
-        if (JdbcConstants.POLARDBX.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        if (JdbcConstants.GAUSSDB.equals(dbType)) {
-            return JdbcConstants.POSTGRESQL;
-        }
-        return dbType;
+ */
+@LoadLevel(name = JdbcConstants.GAUSSDB)
+public class GaussDBUndoExecutorHolder implements UndoExecutorHolder {
+
+    @Override
+    public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
+        return new GaussDBUndoInsertExecutor(sqlUndoLog);
+    }
+
+    @Override
+    public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
+        return new GaussDBUndoUpdateExecutor(sqlUndoLog);
+    }
+
+    @Override
+    public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
+        return new GaussDBUndoDeleteExecutor(sqlUndoLog);
     }
 }

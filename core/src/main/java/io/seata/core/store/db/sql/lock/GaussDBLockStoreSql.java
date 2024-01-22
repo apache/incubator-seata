@@ -14,28 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser.druid;
 
-import io.seata.sqlparser.util.JdbcConstants;
+package io.seata.core.store.db.sql.lock;
+
+import io.seata.common.loader.LoadLevel;
 
 /**
- * A db type adapter for druid parser.
+ * the database lock store GaussDB sql
  *
- **/
-class DruidDbTypeAdapter {
-    /**
-     * Get adaptive db type for druid parser.
-     *
-     * @param dbType origin db type
-     * @return adaptive db type
-     */
-    static String getAdaptiveDbType(String dbType) {
-        if (JdbcConstants.POLARDBX.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        if (JdbcConstants.GAUSSDB.equals(dbType)) {
-            return JdbcConstants.POSTGRESQL;
-        }
-        return dbType;
-    }
+ */
+@LoadLevel(name = "gaussdb")
+public class GaussDBLockStoreSql extends PostgresqlLockStoreSql {
 }

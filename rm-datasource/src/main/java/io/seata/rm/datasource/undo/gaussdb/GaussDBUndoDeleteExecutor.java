@@ -14,28 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser.druid;
 
+package io.seata.rm.datasource.undo.gaussdb;
+
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoDeleteExecutor;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
- * A db type adapter for druid parser.
+ * The type GaussDB undo delete executor.
  *
- **/
-class DruidDbTypeAdapter {
+ */
+public class GaussDBUndoDeleteExecutor extends PostgresqlUndoDeleteExecutor {
+    
     /**
-     * Get adaptive db type for druid parser.
+     * Instantiates a new GaussDB undo delete executor.
      *
-     * @param dbType origin db type
-     * @return adaptive db type
+     * @param sqlUndoLog the sql undo log
      */
-    static String getAdaptiveDbType(String dbType) {
-        if (JdbcConstants.POLARDBX.equals(dbType)) {
-            return JdbcConstants.MYSQL;
-        }
-        if (JdbcConstants.GAUSSDB.equals(dbType)) {
-            return JdbcConstants.POSTGRESQL;
-        }
-        return dbType;
+    public GaussDBUndoDeleteExecutor(SQLUndoLog sqlUndoLog) {
+        super(sqlUndoLog);
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.GAUSSDB;
     }
 }

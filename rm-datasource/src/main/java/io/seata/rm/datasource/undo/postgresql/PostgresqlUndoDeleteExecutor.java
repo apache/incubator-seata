@@ -59,12 +59,12 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.POSTGRESQL));
+        fields.addAll(getOrderedPkList(beforeImage, row, getDbType()));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
-                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.POSTGRESQL))
+            .map(field -> ColumnUtils.addEscape(field.getName(), getDbType()))
                 .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?")
                 .collect(Collectors.joining(", "));
@@ -75,5 +75,9 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
     @Override
     protected TableRecords getUndoRows() {
         return sqlUndoLog.getBeforeImage();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 }

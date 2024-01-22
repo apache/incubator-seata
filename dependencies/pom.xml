@@ -108,8 +108,9 @@
         <postgresql.version>42.3.3</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
+        <opengauss.version>5.0.0-og</opengauss.version>
         <!-- db connection pool -->
-        <druid.version>1.2.7</druid.version>
+        <druid.version>1.2.12</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <!-- sql parser -->
@@ -225,6 +226,11 @@
                 <groupId>com.dameng</groupId>
                 <artifactId>DmJdbcDriver18</artifactId>
                 <version>${dm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opengauss</groupId>
+                <artifactId>opengauss-jdbc</artifactId>
+                <version>${opengauss.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mariadb.jdbc</groupId>

@@ -229,7 +229,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initResourceId() {
-        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
+        if (JdbcConstants.POSTGRESQL.equals(dbType) || JdbcConstants.GAUSSDB.equals(dbType)) {
             initPGResourceId();
         } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
             initOracleResourceId();
