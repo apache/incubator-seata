@@ -19,12 +19,6 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process')
 
-const mkdir = dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-};
-
 // copy seata-saga-statemachine-designer to console
 const designerDir = path.join(__dirname, '../../../../../../../saga/seata-saga-statemachine-designer');
 if (!fs.existsSync(path.join(designerDir, "dist"))) {
@@ -34,18 +28,5 @@ if (!fs.existsSync(path.join(designerDir, "dist"))) {
 
 // copy file
 const designerDestDir = path.join(__dirname,'../public/saga-statemachine-designer');
-const designerHtmlFileName = path.join(designerDestDir, 'designer.html');
-const designerBundleFileName = path.join(designerDestDir, 'dist/bundle.js');
-
-mkdir(path.dirname(designerHtmlFileName));
-mkdir(path.dirname(designerBundleFileName));
-
-fs.createReadStream(path.join(designerDir, 'index.html'))
-.pipe(
-  fs.createWriteStream(designerHtmlFileName)
-  );
-
-fs.createReadStream(path.join(designerDir, 'dist/bundle.js'))
-.pipe(
-  fs.createWriteStream(designerBundleFileName)
-  );
+fs.cpSync(path.join(designerDir, 'dist'), designerDestDir, {recursive: true});
+fs.renameSync(path.join(designerDestDir, 'index.html'), path.join(designerDestDir, 'designer.html'));
