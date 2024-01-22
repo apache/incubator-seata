@@ -47,7 +47,6 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RocketMQInterceptorHandler.class);
 
-    private TCCRocketMQ tccRocketMQ;
     private TransactionMQProducer producer;
 
     public RocketMQInterceptorHandler(TransactionMQProducer producer) {
@@ -62,7 +61,6 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
             LOGGER.warn("TransactionCheckListener will be wrapped by SeataTransactionCheckListener");
             this.producer.setTransactionCheckListener(new SeataTransactionCheckListener(checkListener));
         }
-        tccRocketMQ = TCCRocketMQHolder.getTCCRocketMQ();
     }
 
     @Override
@@ -92,12 +90,6 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
             LOGGER.warn("covert arguments error", e);
             return invocation.proceed();
         }
-        if (null == this.tccRocketMQ) {
-            this.tccRocketMQ = TCCRocketMQHolder.getTCCRocketMQ();
-            if (null == this.tccRocketMQ) {
-                throw new MQClientException("tccRocketMQ is null", null);
-            }
-        }
 
         msg.setTopic(NamespaceUtil.wrapNamespace(producer.getNamespace(), msg.getTopic()));
         return doSendMessageInTransaction(msg, tranExecuter, arg, producer);
@@ -122,6 +114,9 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, producer.getProducerGroup());
         try {
+            if (RootContext.inGlobalTransaction()) {
+                tccRocketMQ.prepare();
+            }
             sendResult = producer.send(msg);
         } catch (Exception e) {
             throw new MQClientException("send message Exception", e);
@@ -165,7 +160,7 @@ public class RocketMQInterceptorHandler extends AbstractProxyInvocationHandler {
                                     "localTransactionState will be mark as ROLLBACK_MESSAGE");
                             localTransactionState = LocalTransactionState.ROLLBACK_MESSAGE;
                         } else {
-                            tccRocketMQ.prepare(null, msg, sendResult);
+                            tccRocketMQ.report();
                             LOGGER.info("executeLocalTransactionBranch state=COMMIT_MESSAGE, but global transaction not complete,return UNKNOW");
                             localTransactionState = LocalTransactionState.UNKNOW;
                         }
