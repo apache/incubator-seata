@@ -151,7 +151,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 bs = compressor.decompress(bs);
                 SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
                 if (this.serializerType.equals(protocolType)) {
-                    Serializer serializer = SerializerServiceLoader.load(protocolType,, ProtocolConstants.VERSION_1);
+                    Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
                     throw new IllegalArgumentException("SerializerType not match");
