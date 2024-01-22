@@ -22,12 +22,15 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
 import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.druid.oceanbaseoracle.OceanBaseOracleOperateRecognizerHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * DruidSQLRecognizerFactoryImpl
@@ -38,33 +41,39 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     public List<SQLRecognizer> create(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
         if (CollectionUtils.isEmpty(asts)) {
-            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
+            throw new UnsupportedOperationException("Not supported SQL: " + sql);
         }
         if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
-                || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
-            throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
+            || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement)
+            || asts.stream().allMatch(statement -> statement instanceof OracleMultiInsertStatement))) {
+            throw new UnsupportedOperationException(
+                "Only multiple sql of the same type (UPDATE, DELETE, or INSERT in Oracle) are supported: " + sql);
         }
-        List<SQLRecognizer> recognizers = null;
-        SQLRecognizer recognizer = null;
+        List<SQLRecognizer> recognizers = new ArrayList<>();
         for (SQLStatement ast : asts) {
             SQLOperateRecognizerHolder recognizerHolder =
-                    SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+                SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
             if (ast instanceof SQLInsertStatement) {
-                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
+                recognizers.add(recognizerHolder.getInsertRecognizer(sql, ast));
             } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
+                recognizers.add(recognizerHolder.getUpdateRecognizer(sql, ast));
             } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
+                recognizers.add(recognizerHolder.getDeleteRecognizer(sql, ast));
             } else if (ast instanceof SQLSelectStatement) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-            }
-            if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
-                if (recognizers == null) {
-                    recognizers = new ArrayList<>();
+                recognizers.add(recognizerHolder.getSelectForUpdateRecognizer(sql, ast));
+            } else if (ast instanceof OracleMultiInsertStatement) {
+                if (recognizerHolder instanceof OceanBaseOracleOperateRecognizerHolder) {
+                    recognizers.addAll(((OceanBaseOracleOperateRecognizerHolder) recognizerHolder)
+                        .getMultiInsertStatement(sql, ast));
                 }
-                recognizers.add(recognizer);
             }
         }
-        return recognizers;
+        // filter recognizers that are not supported
+        recognizers = recognizers.stream().filter(this::isSupportedRecognizer).collect(Collectors.toList());
+        return recognizers.isEmpty() ? null : recognizers;
+    }
+
+    private boolean isSupportedRecognizer(SQLRecognizer sqlRecognizer) {
+        return sqlRecognizer != null && sqlRecognizer.isSqlSyntaxSupports();
     }
 }

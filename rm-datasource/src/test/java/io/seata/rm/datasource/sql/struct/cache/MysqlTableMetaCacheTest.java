@@ -91,7 +91,7 @@ public class MysqlTableMetaCacheTest {
 
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setUrl("jdbc:mock:mysql");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
@@ -140,7 +140,7 @@ public class MysqlTableMetaCacheTest {
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
 
         DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setUrl("jdbc:mock:xxx");
+        druidDataSource.setUrl("jdbc:mock:mysql2");
         druidDataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(druidDataSource);

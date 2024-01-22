@@ -102,7 +102,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl);
-            if (JdbcConstants.ORACLE.equals(dbType)) {
+            if (JdbcConstants.ORACLE.equals(dbType) || JdbcConstants.OCEANBASE_ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
                 validMySQLVersion(connection);
@@ -239,6 +239,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initSqlServerResourceId();
         } else if (JdbcConstants.DM.equals(dbType)) {
             initDMResourceId();
+        } else if (JdbcConstants.OCEANBASE_ORACLE.equals(dbType) && userName != null) {
+            initOceanBaseOracleResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -263,6 +265,25 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
         } else {
             resourceId = jdbcUrl + "/" + userName;
+        }
+    }
+
+    private void initOceanBaseOracleResourceId() {
+        String startsWith = "jdbc:oceanbase:loadbalance://";
+        if (jdbcUrl.startsWith(startsWith)) {
+            String url;
+            if (jdbcUrl.contains("?")) {
+                url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
+            } else {
+                url = jdbcUrl;
+            }
+            resourceId = url.replace(",", "|");
+        } else {
+            if (jdbcUrl.contains("?")) {
+                resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
+            } else {
+                resourceId = jdbcUrl + "/" + userName;
+            }
         }
     }
 

@@ -5,3 +5,4 @@ io.seata.rm.datasource.undo.sqlserver.SqlServerUndoLogManager
 io.seata.rm.datasource.undo.mariadb.MariadbUndoLogManager
 io.seata.rm.datasource.undo.polardbx.PolarDBXUndoLogManager
 io.seata.rm.datasource.undo.dm.DmUndoLogManager
+io.seata.rm.datasource.undo.oceanbaseoracle.OceanBaseOracleUndoLogManager

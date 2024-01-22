@@ -18,6 +18,7 @@ package io.seata.sqlparser.druid;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SQLType;
@@ -54,12 +55,14 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.MARIADB));
         Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.POLARDBX));
         Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.POSTGRESQL));
 
         String sql1 = "update a set a.id = (select id from b where a.pid = b.pid)";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql1, JdbcConstants.ORACLE));
         String sql2 = "update (select a.id,a.name from a inner join b on a.id = b.id) t set t.name = 'xxx'";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql2, JdbcConstants.ORACLE));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql2, JdbcConstants.OCEANBASE_ORACLE));
         String sql3 = "update a set id = b.pid from b where a.id = b.id";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.POSTGRESQL));
 
@@ -68,6 +71,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.MARIADB));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.POLARDBX));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.ORACLE));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql4, JdbcConstants.POSTGRESQL));
 
         String sql5 = "insert into a values (1, 2)";
@@ -75,6 +79,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MARIADB));
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POLARDBX));
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POSTGRESQL));
 
         String sql6 = "insert into a (id, name) values (1, 2), (3, 4)";
@@ -82,6 +87,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MARIADB));
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POLARDBX));
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
 
         String sql7 = "insert into a select * from b";
@@ -89,6 +95,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.MARIADB));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.POLARDBX));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.ORACLE));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql7, JdbcConstants.POSTGRESQL));
 
         String sql8 = "delete from t where id = ?";
@@ -96,6 +103,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MARIADB));
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POLARDBX));
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POSTGRESQL));
 
         String sql9 = "delete from t where id in (select id from b)";
@@ -103,6 +111,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.MARIADB));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.POLARDBX));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.ORACLE));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.POSTGRESQL));
 
         String sql10 = "select * from t for update";
@@ -110,6 +119,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MARIADB));
         Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POLARDBX));
         Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.ORACLE));
+        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POSTGRESQL));
 
         String sql11 = "select * from (select * from t) for update";
@@ -117,6 +127,21 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.MARIADB));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.POLARDBX));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.ORACLE));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.OCEANBASE_ORACLE));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql11, JdbcConstants.POSTGRESQL));
+
+        String sql12 = "insert all into t1 values(1) into t2 values(2)";
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql12, JdbcConstants.MYSQL));
+        Assertions.assertTrue(CollectionUtils.isEmpty(recognizerFactory.create(sql12, JdbcConstants.ORACLE)));
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql12, JdbcConstants.POSTGRESQL));
+        Assertions.assertFalse(CollectionUtils.isEmpty(recognizerFactory.create(sql12, JdbcConstants.OCEANBASE_ORACLE)));
+        Assertions.assertEquals(2, recognizerFactory.create(sql12, JdbcConstants.OCEANBASE_ORACLE).size());
+
+        String sql13 = "insert all when col1 > 1 then into t1 values(1) when col2 > 1 then into t2 values(2) select col1, col2 from t3";
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql13, JdbcConstants.MYSQL));
+        Assertions.assertTrue(CollectionUtils.isEmpty(recognizerFactory.create(sql13, JdbcConstants.ORACLE)));
+        Assertions.assertThrows(Exception.class, () -> recognizerFactory.create(sql13, JdbcConstants.POSTGRESQL));
+        Assertions.assertFalse(CollectionUtils.isEmpty(recognizerFactory.create(sql13, JdbcConstants.OCEANBASE_ORACLE)));
+        Assertions.assertEquals(2, recognizerFactory.create(sql13, JdbcConstants.OCEANBASE_ORACLE).size());
     }
 }
