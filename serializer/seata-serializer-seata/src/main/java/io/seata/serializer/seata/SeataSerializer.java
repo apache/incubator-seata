@@ -35,14 +35,11 @@ public class SeataSerializer implements Serializer {
 
     Serializer versionSeataSerializer;
 
-    Serializer seataSerializerV0 = new SeataSerializerV0();
-    Serializer seataSerializerV1 = new SeataSerializerV1();
-
     public SeataSerializer(Byte version) {
         if (version == ProtocolConstants.VERSION_0) {
-            versionSeataSerializer = seataSerializerV0;
+            versionSeataSerializer = SeataSerializerV0.getInstance();
         } else if (version == ProtocolConstants.VERSION_1) {
-            versionSeataSerializer = seataSerializerV1;
+            versionSeataSerializer = SeataSerializerV1.getInstance();
         }
         if (versionSeataSerializer == null) {
             throw new UnsupportedOperationException("version is not supported");
@@ -62,7 +59,18 @@ public class SeataSerializer implements Serializer {
 
     static class SeataSerializerV1 implements Serializer {
 
+        private static SeataSerializerV1 instance;
+
         private SeataSerializerV1() {
+        }
+
+        public static SeataSerializerV1 getInstance() {
+            if (instance == null) {
+                synchronized (SeataSerializerV1.class) {
+                    instance = new SeataSerializerV1();
+                }
+            }
+            return instance;
         }
 
         @Override
@@ -103,8 +111,18 @@ public class SeataSerializer implements Serializer {
     }
     static class SeataSerializerV0 implements Serializer {
 
+        private static SeataSerializerV0 instance;
 
         private SeataSerializerV0() {
+        }
+
+        public static SeataSerializerV0 getInstance() {
+            if (instance == null) {
+                synchronized (SeataSerializerV0.class) {
+                    instance = new SeataSerializerV0();
+                }
+            }
+            return instance;
         }
 
         @Override
