@@ -16,6 +16,8 @@
  */
 package io.seata.server.console.impl.file;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -161,11 +163,12 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart() <= globalSession.getBeginTime())
+                    (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond()>=Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
 
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
+                    (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond()<=Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
+
         };
     }
 

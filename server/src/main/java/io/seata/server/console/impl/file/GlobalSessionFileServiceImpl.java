@@ -16,6 +16,8 @@
  */
 package io.seata.server.console.impl.file;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -89,13 +91,14 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
                 &&
                 // timeStart
-                (isNull(param.getTimeStart()) || param.getTimeStart() <= session.getBeginTime())
+                (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond()>=Instant.ofEpochMilli(session.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
 
                 &&
                 // timeEnd
-                (isNull(param.getTimeEnd()) || param.getTimeEnd() >= session.getBeginTime());
+                (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond()<=Instant.ofEpochMilli(session.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
 
         };
     }
+
 
 }

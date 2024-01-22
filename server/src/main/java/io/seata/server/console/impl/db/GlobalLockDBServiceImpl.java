@@ -21,13 +21,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import io.seata.common.ConfigurationKeys;
+import io.seata.common.Constants;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.DateUtil;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
@@ -134,12 +137,12 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             sqlParamList.add(param.getBranchId());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(" and gmt_create >= ? ");
-            sqlParamList.add(param.getTimeStart());
+            whereConditionBuilder.append(" and FROM_UNIXTIME(begin_time/1000,'%Y-%m-%d %H:%i:%s') >= ? ");
+            sqlParamList.add(DateUtil.formatDate(new Date(param.getTimeStart()), Constants.DEFAULT_DATE_FORMAT));
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(" and gmt_create <= ? ");
-            sqlParamList.add(param.getTimeEnd());
+            whereConditionBuilder.append(" and FROM_UNIXTIME(begin_time/1000,'%Y-%m-%d %H:%i:%s') <= ? ");
+            sqlParamList.add(DateUtil.formatDate(new Date(param.getTimeEnd()), Constants.DEFAULT_DATE_FORMAT));
         }
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");
