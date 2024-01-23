@@ -49,4 +49,9 @@ copyList.forEach(_fileName => {
 const designerDir = path.join(__dirname, '../public/saga-statemachine-designer');
 const designerDestDir = path.join(destDir, 'saga-statemachine-designer');
 
-fs.cpSync(designerDestDir, designerDir, {recursive: true});
+if (!fs.existsSync(designerDestDir)) {
+  fs.mkdirSync(designerDestDir)
+}
+fs.readdirSync(designerDir).forEach(file => {
+  fs.copyFileSync(path.join(designerDir, file), path.join(designerDestDir, file));
+});

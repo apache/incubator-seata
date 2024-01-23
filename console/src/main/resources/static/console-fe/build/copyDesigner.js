@@ -28,5 +28,10 @@ if (!fs.existsSync(path.join(designerDir, "dist"))) {
 
 // copy file
 const designerDestDir = path.join(__dirname,'../public/saga-statemachine-designer');
-fs.cpSync(path.join(designerDir, 'dist'), designerDestDir, {recursive: true});
+if (!fs.existsSync(designerDestDir)) {
+  fs.mkdirSync(designerDestDir)
+}
+fs.readdirSync(path.join(designerDir, 'dist')).forEach(file => {
+  fs.copyFileSync(path.join(designerDir, 'dist', file), path.join(designerDestDir, file));
+});
 fs.renameSync(path.join(designerDestDir, 'index.html'), path.join(designerDestDir, 'designer.html'));
