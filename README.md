@@ -99,7 +99,7 @@ Depending on the scenario, choose one of the two dependencies: `io.seata:seata-a
 <!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
 <!--Notice: `seata-spring-boot-starter` has already included `seata-all` dependency-->
   <dependency>
-    <groupId>org.apache.seata</groupId>
+    <groupId>io.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
   </dependency>
