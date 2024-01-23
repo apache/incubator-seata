@@ -91,7 +91,7 @@ Depending on the scenario, choose one of the two dependencies: `io.seata:seata-a
 <dependencies>
 <!--dependencies for non-SpringBoot application framework-->
   <dependency>
-    <groupId>org.apache.seata</groupId>
+    <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
   </dependency>
