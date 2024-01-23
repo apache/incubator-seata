@@ -2,7 +2,7 @@
   "env": {
     "browser": true
   },
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "extends": "airbnb",
   "rules": {
     "arrow-body-style": 0,
@@ -21,6 +21,10 @@
     "react/no-multi-comp": 0,
     "react/prefer-stateless-function": 0,
     "react/prop-types": 0,
-    "react/sort-comp": 0
+    "react/sort-comp": 0,
+    "react/no-deprecated": 0,
+    "react/react-in-jsx-scope": 0,
+    "react/jsx-no-bind": 0,
+    "no-underscore-dangle": 0
   }
 }
