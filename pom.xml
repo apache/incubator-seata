@@ -59,6 +59,7 @@
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
+        <module>test-mock-server</module>
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
