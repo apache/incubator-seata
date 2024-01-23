@@ -34,7 +34,7 @@ BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 BASEDIR=${BASEDIR//"//"/"/"}
 
 . ${BASEDIR}/bin/seata-setup.sh
-JAVA_OPT="${JAVA_OPT} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml -Dconsole.bootstrap.output=true"
+JAVA_OPT="${JAVA_OPT} -Dspring.config.additional-location=${BASEDIR}/conf/ -Dspring.config.location=${BASEDIR}/conf/application.yml -Dlogging.config=${BASEDIR}/conf/logback-spring.xml -Dproduction.deploy.output=true"
 JAVA_OPT="${JAVA_OPT} -jar ${BASEDIR}/target/seata-server.jar"
 
 CMD_LINE_ARGS=$@
