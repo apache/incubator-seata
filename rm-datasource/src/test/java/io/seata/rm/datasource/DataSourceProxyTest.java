@@ -133,6 +133,7 @@ public class DataSourceProxyTest {
             Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
         }
 
+
         // case: dbType = postgresql
         {
             resourceIdField.set(proxy, null);
@@ -142,6 +143,23 @@ public class DataSourceProxyTest {
             resourceIdField.set(proxy, null);
             jdbcUrlField.set(proxy, "jdbc:postgresql://mock/postgresql?xxx=1111&currentSchema=schema1,schema2&yyy=1");
             Assertions.assertEquals("jdbc:postgresql://mock/postgresql?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:postgresql://192.168.1.123:30100,192.168.1.124:30100?xxx=1111&currentSchema=schema1,schema2&yyy=1");
+            Assertions.assertEquals("jdbc:postgresql://192.168.1.123:30100|192.168.1.124:30100?currentSchema=schema1!schema2", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            jdbcUrlField.set(proxy, jdbcUrl);
+        }
+
+        // case: dbType = dm
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.DM);
+            Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+
+            resourceIdField.set(proxy, null);
+            jdbcUrlField.set(proxy, "jdbc:dm://mock/dm?xxx=1111&schema=schema1");
+            Assertions.assertEquals("jdbc:dm://mock/dm?schema=schema1", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
 

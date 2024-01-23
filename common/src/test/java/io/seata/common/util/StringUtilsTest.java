@@ -390,4 +390,18 @@ public class StringUtilsTest {
         );
         assertThat( StringUtils.checkDataSize("1234567","testdata",6,false)).isEqualTo(Boolean.FALSE);
     }
+
+    @Test
+    public void testHasLowerCase() {
+        Assertions.assertFalse(StringUtils.hasLowerCase(null));
+        Assertions.assertFalse(StringUtils.hasLowerCase("A"));
+        Assertions.assertTrue(StringUtils.hasLowerCase("a"));
+    }
+
+    @Test
+    public void testHasUpperCase() {
+        Assertions.assertFalse(StringUtils.hasUpperCase(null));
+        Assertions.assertFalse(StringUtils.hasUpperCase("a"));
+        Assertions.assertTrue(StringUtils.hasUpperCase("A"));
+    }
 }

@@ -22,6 +22,7 @@ import java.util.Set;
 
 import io.seata.common.ConfigurationKeys;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.ReflectionUtil;
 import io.seata.config.ConfigurationCache;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
@@ -57,6 +58,19 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         }
 
         return null;
+    }
+
+    @Override
+    public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(beanClass);
+        Class<?>[] interfaceClasseArray = interfaceClasses.toArray(new Class<?>[0]);
+
+        IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
+        if (existsAnnotation(beanClass) || existsAnnotation(interfaceClasseArray)) {
+            ifNeedEnhanceBean.setIfNeed(true);
+            ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN);
+        }
+        return ifNeedEnhanceBean;
     }
 
     private boolean existsAnnotation(Class<?>... classes) {
