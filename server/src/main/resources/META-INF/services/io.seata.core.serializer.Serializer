@@ -1,1 +1,1 @@
-io.seata.server.cluster.raft.serializer.JacksonSerializer
+org.apache.seata.server.cluster.raft.serializer.JacksonSerializer

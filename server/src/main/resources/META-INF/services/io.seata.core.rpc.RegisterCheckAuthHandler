@@ -1,1 +1,1 @@
-io.seata.server.auth.DefaultCheckAuthHandler
+org.apache.seata.server.auth.DefaultCheckAuthHandler

@@ -25,11 +25,11 @@ import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.server.ParameterParser;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.coordinator.DefaultCoordinator;
-import io.seata.server.metrics.MetricsManager;
-import io.seata.server.session.SessionHolder;
+import org.apache.seata.server.ParameterParser;
+import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.metrics.MetricsManager;
+import org.apache.seata.server.session.SessionHolder;
 
 /**
  * Abstract Server Test

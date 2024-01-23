@@ -33,7 +33,7 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.server.UUIDGenerator;
+import org.apache.seata.server.UUIDGenerator;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
