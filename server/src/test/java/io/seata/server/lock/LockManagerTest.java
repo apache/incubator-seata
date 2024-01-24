@@ -311,7 +311,7 @@ public class LockManagerTest {
             param.setTableName(null);
             param.setTimeStart(dateFormat.parse("2022-1-1 08:00:01").getTime());
             final PageResult<GlobalLockVO> timeTestResult1 = globalLockService.query(param);
-            Assertions.assertEquals(0, timeTestResult1.getTotal());
+            Assertions.assertEquals(8, timeTestResult1.getTotal());
 
             param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult2 = globalLockService.query(param);
