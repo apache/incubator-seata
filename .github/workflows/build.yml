@@ -33,7 +33,7 @@ jobs:
         if: matrix.java == '8'
         run: |
           ./mvnw -T 4C clean test \
-                 -Dcheckstyle.skip=false -Dpdm.skip=false -Dlicense.skip=false \
+                 -Dcheckstyle.skip=false -Dpmd.skip=false -Dlicense.skip=false \
                  -Dmaven.git-commit-id.skip=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       # step 4.2
