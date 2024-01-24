@@ -50,7 +50,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof ApplicationReadyEvent) {
+        if (event instanceof ApplicationReadyEvent && Boolean.parseBoolean(System.getProperty("production.deploy.output"))) {
             System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
             return;
         }
