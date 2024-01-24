@@ -174,7 +174,7 @@ public interface Constants {
      * The constant REGISTRY_TYPE_SPLIT_CHAR.
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
-
+    
     /**
      * phase two compensation method name
      */
@@ -204,8 +204,4 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
-    /**
-     * The constant DEFAULT_DATE_FORMAT
-     */
-    String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 }
