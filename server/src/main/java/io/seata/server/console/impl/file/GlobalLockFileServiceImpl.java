@@ -163,14 +163,13 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond() >= Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
+                    (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= globalSession.getBeginTime() / 1000)
 
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond() <= Instant.ofEpochMilli(globalSession.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
+                    (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= globalSession.getBeginTime() / 1000);
 
         };
     }
-
 
 }

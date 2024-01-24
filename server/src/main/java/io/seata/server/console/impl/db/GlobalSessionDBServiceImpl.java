@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,16 +28,15 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import io.seata.common.ConfigurationKeys;
-import io.seata.common.Constants;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.DateUtil;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.PageUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.console.result.PageResult;
+import io.seata.core.constants.DBType;
 import io.seata.core.store.db.DataSourceProvider;
 import io.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import io.seata.server.console.param.GlobalSessionParam;
@@ -151,12 +149,12 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             sqlParamList.add(param.getTransactionName());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(" and FROM_UNIXTIME(begin_time/1000,'%Y-%m-%d %H:%i:%s') >= ? ");
-            sqlParamList.add(DateUtil.formatDate(new Date(param.getTimeStart()), Constants.DEFAULT_DATE_FORMAT));
+            whereConditionBuilder.append(PageUtil.getTimeStartSql(this.dbType, "begin_time"));
+            sqlParamList.add(param.getTimeStart() / 1000);
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(" and FROM_UNIXTIME(begin_time/1000,'%Y-%m-%d %H:%i:%s') <= ? ");
-            sqlParamList.add(DateUtil.formatDate(new Date(param.getTimeEnd()), Constants.DEFAULT_DATE_FORMAT));
+            whereConditionBuilder.append(PageUtil.getTimeEndSql(this.dbType, "begin_time"));
+            sqlParamList.add(param.getTimeEnd() / 1000);
         }
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");

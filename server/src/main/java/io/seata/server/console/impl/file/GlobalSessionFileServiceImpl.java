@@ -91,11 +91,11 @@ public class GlobalSessionFileServiceImpl implements GlobalSessionService {
 
                 &&
                 // timeStart
-                (isNull(param.getTimeStart()) || Instant.ofEpochMilli(param.getTimeStart()).atZone(ZoneOffset.systemDefault()).toEpochSecond() >= Instant.ofEpochMilli(session.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond())
+                (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= session.getBeginTime() / 1000)
 
                 &&
                 // timeEnd
-                (isNull(param.getTimeEnd()) || Instant.ofEpochMilli(param.getTimeEnd()).atZone(ZoneOffset.systemDefault()).toEpochSecond() <= Instant.ofEpochMilli(session.getBeginTime()).atZone(ZoneOffset.systemDefault()).toEpochSecond());
+                (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= session.getBeginTime() / 1000);
 
         };
     }
