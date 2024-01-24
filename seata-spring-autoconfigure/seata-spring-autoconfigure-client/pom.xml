@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>seata-spring-autoconfigure</artifactId>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -33,7 +33,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-spring-autoconfigure-core</artifactId>
             <version>${project.version}</version>
         </dependency>
