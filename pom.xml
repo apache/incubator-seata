@@ -342,7 +342,8 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
+                        <id>pmd-check</id>
+                        <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
