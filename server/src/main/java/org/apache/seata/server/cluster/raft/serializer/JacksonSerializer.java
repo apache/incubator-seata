@@ -19,6 +19,7 @@ package org.apache.seata.server.cluster.raft.serializer;
 import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.serializer.Serializer;
 
@@ -53,6 +54,7 @@ public class JacksonSerializer implements Serializer {
 
         byte[] obj;
 
+        @JsonDeserialize(using = CustomDeserializer.class)
         Class<?> clz;
 
         public JsonInfo() {}

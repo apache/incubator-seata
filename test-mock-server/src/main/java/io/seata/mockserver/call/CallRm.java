@@ -27,7 +27,7 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.server.session.BranchSession;
+import org.apache.seata.server.session.BranchSession;
 
 import java.util.concurrent.TimeoutException;
 
