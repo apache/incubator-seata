@@ -1,3 +1,0 @@
-io.seata.server.storage.redis.lock.RedisDistributedLocker
-io.seata.server.storage.db.lock.DataBaseDistributedLocker
-io.seata.server.storage.raft.lock.RaftDistributedLocker

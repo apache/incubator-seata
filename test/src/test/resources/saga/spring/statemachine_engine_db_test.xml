@@ -41,10 +41,10 @@
 		<jdbc:script location="classpath:saga/sql/h2_init.sql" />
 	</jdbc:initialize-database>
 
-	<bean id="stateMachineEngine" class="io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
+	<bean id="stateMachineEngine" class="org.apache.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
 		<property name="stateMachineConfig" ref="dbStateMachineConfig"></property>
 	</bean>
-	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
+	<bean id="dbStateMachineConfig" class="org.apache.seata.saga.engine.config.DbStateMachineConfig">
 		<property name="dataSource" ref="dataSource"></property>
 		<property name="resources" value="saga/statelang/*.json"></property>
 		<property name="enableAsync" value="true"></property>
@@ -69,10 +69,10 @@
 	<bean name="callerRunsPolicy" class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy">
 	</bean>
 
-	<bean class="io.seata.saga.rm.StateMachineEngineHolder">
+	<bean class="org.apache.seata.saga.rm.StateMachineEngineHolder">
 		<property name="stateMachineEngine" ref="stateMachineEngine"/>
 	</bean>
 
 
-	<bean id="demoService" class="io.seata.saga.engine.mock.DemoService"/>
+	<bean id="demoService" class="org.apache.seata.saga.engine.mock.DemoService"/>
 </beans>

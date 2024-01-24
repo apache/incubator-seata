@@ -9,7 +9,7 @@
             "ServiceName": "demoService",
             "ServiceMethod": "complexParameterMethod",
             "Next": "ChoiceState",
-            "ParameterTypes" : ["java.lang.String", "int", "io.seata.saga.engine.mock.DemoService$People", "[Lio.seata.saga.engine.mock.DemoService$People;", "java.util.List", "java.util.Map"],
+            "ParameterTypes" : ["java.lang.String", "int", "org.apache.seata.saga.engine.mock.DemoService$People", "[Lorg.apache.seata.saga.engine.mock.DemoService$People;", "java.util.List", "java.util.Map"],
             "Input": [
                 "$.[people].name",
                 "$.[people].age",
@@ -55,14 +55,14 @@
                 ],
                 [
                     {
-                        "@type": "io.seata.saga.engine.mock.DemoService$People",
+                        "@type": "org.apache.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
                         "age": "$.[people].age"
                     }
                 ],
                 {
                     "lilei": {
-                        "@type": "io.seata.saga.engine.mock.DemoService$People",
+                        "@type": "org.apache.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
                         "age": "$.[people].age"
                     }

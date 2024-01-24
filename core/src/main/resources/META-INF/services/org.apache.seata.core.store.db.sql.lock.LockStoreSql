@@ -1,0 +1,9 @@
+org.apache.seata.core.store.db.sql.lock.MysqlLockStoreSql
+org.apache.seata.core.store.db.sql.lock.OracleLockStoreSql
+org.apache.seata.core.store.db.sql.lock.OceanbaseLockStoreSql
+org.apache.seata.core.store.db.sql.lock.PostgresqlLockStoreSql
+org.apache.seata.core.store.db.sql.lock.H2LockStoreSql
+org.apache.seata.core.store.db.sql.lock.SqlServerLockStoreSql
+org.apache.seata.core.store.db.sql.lock.MariadbLockStoreSql
+org.apache.seata.core.store.db.sql.lock.PolarDBXLockStoreSql
+org.apache.seata.core.store.db.sql.lock.DmLockStoreSql

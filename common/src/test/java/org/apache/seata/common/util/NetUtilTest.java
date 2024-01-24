@@ -1,0 +1,200 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.seata.common.util;
+
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * The type Net util test.
+ *
+ */
+public class NetUtilTest {
+
+    private InetSocketAddress ipv4 = new InetSocketAddress(Inet4Address.getLocalHost().getHostName(), 3902);
+    private InetSocketAddress ipv6 = new InetSocketAddress(Inet6Address.getLocalHost().getHostName(), 3904);
+
+    /**
+     * Instantiates a new Net util test.
+     *
+     * @throws UnknownHostException the unknown host exception
+     */
+    public NetUtilTest() throws UnknownHostException {
+    }
+
+    /**
+     * Test to string address.
+     */
+    @Test
+    public void testToStringAddress() {
+        try {
+            String stringAddress = NetUtil.toStringAddress(InetSocketAddress.createUnresolved("127.0.0.1", 9828));
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    /**
+     * Test to string address 1.
+     */
+    @Test
+    public void testToStringAddress1() {
+        assertThat(NetUtil.toStringAddress((SocketAddress)ipv4))
+            .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+        assertThat(NetUtil.toStringAddress((SocketAddress)ipv6)).isEqualTo(
+            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+    }
+
+    /**
+     * Test to string address 2.
+     */
+    @Test
+    public void testToStringAddress2() {
+        assertThat(NetUtil.toStringAddress(ipv4)).isEqualTo(
+            ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
+        assertThat(NetUtil.toStringAddress(ipv6)).isEqualTo(
+            ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+    }
+
+    /**
+     * Test to ip address.
+     *
+     * @throws UnknownHostException the unknown host exception
+     */
+    @Test
+    public void testToIpAddress() throws UnknownHostException {
+        assertThat(NetUtil.toIpAddress(ipv4)).isEqualTo(ipv4.getAddress().getHostAddress());
+        assertThat(NetUtil.toIpAddress(ipv6)).isEqualTo(ipv6.getAddress().getHostAddress());
+    }
+
+    /**
+     * Test to inet socket address.
+     */
+    @Test
+    public void testToInetSocketAddress() {
+        try {
+            NetUtil.toInetSocketAddress("23939:ks");
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(NumberFormatException.class);
+        }
+    }
+
+    /**
+     * Test to inet socket address 1.
+     */
+    @Test
+    public void testToInetSocketAddress1() {
+        assertThat(NetUtil.toInetSocketAddress("kadfskl").getHostName()).isEqualTo("kadfskl");
+    }
+
+    /**
+     * Test to long.
+     */
+    @Test
+    public void testToLong() {
+        try {
+            NetUtil.toLong("kdskdsfk");
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    /**
+     * Test to long 1.
+     */
+    @Test
+    public void testToLong1() {
+        String[] split = "127.0.0.1".split("\\.");
+        long r = 0;
+        r = r | (Long.parseLong(split[0]) << 40);
+        r = r | (Long.parseLong(split[1]) << 32);
+        r = r | (Long.parseLong(split[2]) << 24);
+        r = r | (Long.parseLong(split[3]) << 16);
+        assertThat(NetUtil.toLong("127.0.0.1")).isEqualTo(r);
+
+    }
+
+    /**
+     * Test get local ip.
+     */
+    @Test
+    public void testGetLocalIp() {
+        assertThat(NetUtil.getLocalIp()).isNotNull();
+    }
+
+    /**
+     * Test get local host.
+     */
+    @Test
+    public void testGetLocalHost() {
+        assertThat(NetUtil.getLocalHost()).isNotNull();
+    }
+
+    /**
+     * Test get local address.
+     */
+    @Test
+    public void testGetLocalAddress() {
+        assertThat(NetUtil.getLocalAddress()).isNotNull();
+    }
+
+    @Test
+    public void testIsValidIp() {
+        String localIp = "127.0.0.1";
+        String someIp = "8.210.212.91";
+        String someHostName = "seata.io";
+        String unknownHost = "knownHost";
+        assertThat(NetUtil.isValidIp(localIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(localIp, false)).isFalse();
+
+        assertThat(NetUtil.isValidIp(someIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someIp, false)).isTrue();
+
+        assertThat(NetUtil.isValidIp(someHostName, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someHostName, false)).isTrue();
+
+        assertThatThrownBy(() -> {
+            NetUtil.isValidIp(unknownHost, false);
+        }).isInstanceOf(RuntimeException.class).hasMessageContaining("UnknownHostException");
+
+    }
+
+    @Test
+    public void testSplitIPPortStr() {
+        String[] ipPort = new String[]{"127.0.0.1","8080"};
+        assertThat(NetUtil.splitIPPortStr("127.0.0.1:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::","8080"};
+        assertThat(NetUtil.splitIPPortStr("[::]:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"2000:0000:0000:0000:0001:2345:6789:abcd","8080"};
+        assertThat(NetUtil.splitIPPortStr("2000:0000:0000:0000:0001:2345:6789:abcd%10:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"2000:0000:0000:0000:0001:2345:6789:abcd","8080"};
+        assertThat(NetUtil.splitIPPortStr("[2000:0000:0000:0000:0001:2345:6789:abcd]:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::FFFF:192.168.1.2","8080"};
+        assertThat(NetUtil.splitIPPortStr("::FFFF:192.168.1.2:8080")).isEqualTo(ipPort);
+        ipPort = new String[]{"::FFFF:192.168.1.2","8080"};
+        assertThat(NetUtil.splitIPPortStr("[::FFFF:192.168.1.2]:8080")).isEqualTo(ipPort);
+    }
+
+}
