@@ -70,6 +70,13 @@ public class MockRegisterProcessor implements RemotingProcessor {
 
 
     public static enum Role {
-        TM, RM
+        /*
+        * TM
+        */
+        TM,
+        /**
+         * RM
+         */
+        RM
     }
 }

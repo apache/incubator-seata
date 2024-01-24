@@ -14,7 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.sync.msg;
+package io.seata.server.cluster.raft.sync.msg;
+
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
+import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
+import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
+
 
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
@@ -22,12 +27,7 @@ import io.seata.core.compressor.CompressorType;
 import io.seata.core.protocol.Version;
 import io.seata.core.serializer.SerializerType;
 
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
-
-/**
- */
+@Deprecated
 public class RaftSyncMessage implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;
