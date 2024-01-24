@@ -16,7 +16,6 @@
  */
 package org.apache.seata.sqlparser;
 
-import org.apache.seata.sqlparser.EscapeSymbol;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.struct.TableMeta;
 

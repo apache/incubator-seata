@@ -18,7 +18,6 @@ package org.apache.seata.sqlparser;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.sqlparser.EscapeHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
