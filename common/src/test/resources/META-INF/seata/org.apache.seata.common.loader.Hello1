@@ -16,4 +16,4 @@
 #
 
 # use Hello interface Implementation class test and verify ClassCastException
-FrenchHello
+org.apache.seata.common.loader.FrenchHello

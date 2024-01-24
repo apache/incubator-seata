@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-JapaneseHello
+org.apache.seata.common.loader.JapaneseHello

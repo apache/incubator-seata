@@ -16,5 +16,5 @@
 #
 
 
-EnglishHello
-LatinHello
+org.apache.seata.common.loader.EnglishHello
+org.apache.seata.common.loader.LatinHello
