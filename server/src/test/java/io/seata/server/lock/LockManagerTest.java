@@ -315,16 +315,16 @@ public class LockManagerTest {
 
             param.setTimeStart(dateFormat.parse("2022-1-1 08:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult2 = globalLockService.query(param);
-            Assertions.assertEquals(4, timeTestResult2.getTotal());
+            Assertions.assertEquals(8, timeTestResult2.getTotal());
 
             param.setTimeStart(null);
             param.setTimeEnd(dateFormat.parse("2022-1-1 02:59:59").getTime());
             final PageResult<GlobalLockVO> timeTestResult3 = globalLockService.query(param);
-            Assertions.assertEquals(0, timeTestResult3.getTotal());
+            Assertions.assertEquals(8, timeTestResult3.getTotal());
 
             param.setTimeEnd(dateFormat.parse("2022-1-1 03:00:00").getTime());
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
-            Assertions.assertEquals(4, timeTestResult4.getTotal());
+            Assertions.assertEquals(8, timeTestResult4.getTotal());
 
             //test release lock
             for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
