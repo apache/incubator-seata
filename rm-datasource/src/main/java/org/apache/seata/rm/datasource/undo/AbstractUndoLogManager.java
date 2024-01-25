@@ -27,10 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.seata.rm.datasource.undo.SQLUndoDirtyException;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.rm.datasource.undo.UndoLogParser;
-import org.apache.seata.rm.datasource.undo.UndoLogParserFactory;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.SizeUtil;
@@ -44,15 +40,15 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.rm.datasource.ConnectionContext;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
+import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_TYPE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static org.apache.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 import static org.apache.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Unretriable;
 

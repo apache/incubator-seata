@@ -16,8 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-import org.apache.seata.rm.datasource.undo.BranchUndoLog;
-
 /**
  * The interface Undo log parser.
  *

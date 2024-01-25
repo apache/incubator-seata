@@ -18,8 +18,6 @@ package org.apache.seata.rm.datasource.undo;
 
 import java.util.List;
 
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-
 /**
  * The type Branch undo log.
  *

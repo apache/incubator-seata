@@ -16,9 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialDatalink;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -27,11 +24,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
 
 import com.alibaba.fastjson.JSON;
 
-import org.apache.seata.rm.datasource.undo.SQLUndoDirtyException;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.common.util.BlobUtils;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -39,22 +40,19 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.model.Result;
 import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
 import org.apache.seata.rm.datasource.sql.serial.SerialArray;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION;
-
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * The type Abstract undo executor.
