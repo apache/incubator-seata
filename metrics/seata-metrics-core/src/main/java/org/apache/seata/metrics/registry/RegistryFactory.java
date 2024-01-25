@@ -18,7 +18,6 @@ package org.apache.seata.metrics.registry;
 
 import java.util.Objects;
 
-import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.StringUtils;
