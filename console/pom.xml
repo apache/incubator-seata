@@ -141,7 +141,7 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <nodeVersion>v14.21.3</nodeVersion>
+                            <nodeVersion>v19.5.0</nodeVersion>
                         </configuration>
                     </execution>
                     <execution>

@@ -33,10 +33,12 @@ module.exports = Object.assign({}, base, {
       target: 'http://127.0.0.1:7091',
       pathRewrite: {'^/' : ''}
     }],
-    disableHostCheck: true,
+    allowedHosts: "all",
     open: true,
     hot: true,
-    overlay: true
+    client: {
+      overlay: true
+    }
   },
   mode: 'development',
   devtool: 'eval-source-map',
