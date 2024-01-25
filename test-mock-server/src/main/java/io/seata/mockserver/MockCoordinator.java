@@ -46,10 +46,10 @@ import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.mockserver.call.CallRm;
-import org.apache.seata.server.AbstractTCInboundHandler;
-import org.apache.seata.server.UUIDGenerator;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
+import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

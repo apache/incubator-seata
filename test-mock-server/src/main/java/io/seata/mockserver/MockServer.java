@@ -19,7 +19,7 @@ package io.seata.mockserver;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
-import org.apache.seata.server.UUIDGenerator;
+import io.seata.server.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
