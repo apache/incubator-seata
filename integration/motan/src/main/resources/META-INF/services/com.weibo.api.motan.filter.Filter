@@ -1,1 +1,1 @@
-io.seata.integration.motan.MotanTransactionFilter
+org.apache.seata.integration.motan.MotanTransactionFilter
