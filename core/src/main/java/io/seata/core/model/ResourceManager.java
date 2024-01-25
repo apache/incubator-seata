@@ -16,7 +16,10 @@
  */
 package io.seata.core.model;
 
+import io.seata.core.exception.TransactionException;
+
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Resource Manager: common behaviors.
@@ -51,4 +54,6 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
      * @return The BranchType of ResourceManager.
      */
     BranchType getBranchType();
+
+    GlobalStatus getGlobalStatus(String xid) throws TransactionException, TimeoutException;
 }

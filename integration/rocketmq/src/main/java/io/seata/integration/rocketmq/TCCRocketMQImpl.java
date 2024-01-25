@@ -16,11 +16,14 @@
  */
 package io.seata.integration.rocketmq;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
+import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.apache.rocketmq.client.exception.MQBrokerException;
-import org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl;
-import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
@@ -31,53 +34,59 @@ import org.slf4j.LoggerFactory;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
+/**
+ * the type TCCRocketMQImpl
+ */
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
 
-    private DefaultMQProducerImpl producerImpl;
+    private String ROCKET_MSG_KEY = "ROCKET_MSG";
+    private String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
 
-    String ROCKET_MSG_KEY = "ROCKET_MSG";
-    String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
+    private SeataMQProducer producer;
 
     @Override
-    public void setDefaultMQProducer(DefaultMQProducer defaultMQProducer) {
-        this.producerImpl = new DefaultMQProducerImpl(defaultMQProducer);
+    public void setProducer(SeataMQProducer producer) {
+        this.producer = producer;
     }
 
     @Override
-    public void prepare(BusinessActionContext context, Message message,SendResult sendResult){
-        LOGGER.info("RocketMQ message send prepare, xid = {}", BusinessActionContextUtil.getContext().getXid());
-        Map<String, Object> params = new HashMap<>(2);
+    public SendResult prepare(Message message, long timeout) throws MQClientException {
+        BusinessActionContext context = BusinessActionContextUtil.getContext();
+        LOGGER.info("RocketMQ message send prepare, xid = {}", context.getXid());
+        Map<String, Object> params = new HashMap<>(8);
+        SendResult sendResult = producer.doSendMessageInTransaction(message, timeout, context.getXid(), context.getBranchId());
         params.put(ROCKET_MSG_KEY, message);
         params.put(ROCKET_SEND_RESULT_KEY, sendResult);
         BusinessActionContextUtil.addContext(params);
+        return sendResult;
     }
 
     @Override
     public boolean commit(BusinessActionContext context)
-            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException {
         Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
-        SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
-        if(message == null || sendResult == null){
-            // todo null?
+        SendResult sendResult = context.getActionContext(ROCKET_SEND_RESULT_KEY, SendResult.class);
+        if (message == null || sendResult == null) {
+            throw new ShouldNeverHappenException("TCCRocketMQ commit but cannot find message and sendResult");
         }
-        producerImpl.endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
+        producer.getDefaultMQProducerImpl().endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }
 
     @Override
     public boolean rollback(BusinessActionContext context)
-            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TransactionException {
         Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
-        SendResult sendResult = context.getActionContext("sendResult", SendResult.class);
-        if(message == null || sendResult == null){
-            // todo null?
+        SendResult sendResult = context.getActionContext(ROCKET_SEND_RESULT_KEY, SendResult.class);
+        if (message == null || sendResult == null) {
+            LOGGER.error("TCCRocketMQ rollback but cannot find message and sendResult");
         }
-        producerImpl.endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
+        producer.getDefaultMQProducerImpl().endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
         LOGGER.info("RocketMQ message send rollback, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }
-
 }
