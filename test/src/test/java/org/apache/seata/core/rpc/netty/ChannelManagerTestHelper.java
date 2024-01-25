@@ -16,10 +16,10 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import java.util.concurrent.ConcurrentMap;
+
 import io.netty.channel.Channel;
 import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
-
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Channel Manager Test Helper

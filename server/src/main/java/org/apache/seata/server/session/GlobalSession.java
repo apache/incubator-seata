@@ -42,14 +42,12 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.UUIDGenerator;
-import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.store.SessionStorable;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import static org.apache.seata.core.model.GlobalStatus.AsyncCommitting;
 import static org.apache.seata.core.model.GlobalStatus.CommitRetrying;

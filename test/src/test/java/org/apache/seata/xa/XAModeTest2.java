@@ -21,15 +21,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.druid.util.JdbcUtils;
+
 import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;

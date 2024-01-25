@@ -16,15 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.core.model.BranchType;
-import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +24,15 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */

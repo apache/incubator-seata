@@ -16,6 +16,9 @@
  */
 package org.apache.seata.saga.engine;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.seata.common.LockAndCallback;
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.saga.engine.mock.DemoService.People;
@@ -27,9 +30,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * State machine async tests

@@ -19,13 +19,10 @@ package org.apache.seata.at;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import org.apache.seata.common.exception.NotSupportYetException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.alibaba.druid.pool.DruidDataSource;
+
+import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -34,9 +31,15 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.DataSourceManager;
 import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.apache.seata.at.DruidDataSourceUtils.ORACLE;
 import static org.apache.seata.at.DruidDataSourceUtils.POSTGRESQL;
 import static org.apache.seata.at.DruidDataSourceUtils.createNewDruidDataSource;

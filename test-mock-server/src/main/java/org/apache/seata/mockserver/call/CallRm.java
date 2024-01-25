@@ -16,6 +16,8 @@
  */
 package org.apache.seata.mockserver.call;
 
+import java.util.concurrent.TimeoutException;
+
 import io.netty.channel.Channel;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -28,8 +30,6 @@ import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.server.session.BranchSession;
-
-import java.util.concurrent.TimeoutException;
 
 /**
  * call rm

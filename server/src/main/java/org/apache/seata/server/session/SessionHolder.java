@@ -24,13 +24,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -38,21 +35,22 @@ import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
-import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static java.io.File.separator;
-import static org.apache.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  * The type Session holder.

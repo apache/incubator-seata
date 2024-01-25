@@ -16,6 +16,9 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -32,9 +35,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.seata.common.thread.NamedThreadFactory;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 /**
  */

@@ -22,6 +22,7 @@ import java.sql.Statement;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.JdbcUtils;
+
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -30,10 +31,10 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.DataSourceManager;
 import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;

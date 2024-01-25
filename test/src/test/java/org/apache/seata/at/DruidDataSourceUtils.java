@@ -16,13 +16,15 @@
  */
 package org.apache.seata.at;
 
+import java.sql.SQLException;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.JdbcUtils;
+
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.sql.SQLException;
 
 public class DruidDataSourceUtils {
 
