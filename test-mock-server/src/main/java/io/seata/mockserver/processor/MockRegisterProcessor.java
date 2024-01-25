@@ -35,13 +35,17 @@ import org.slf4j.LoggerFactory;
 public class MockRegisterProcessor implements RemotingProcessor {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockRegisterProcessor.class);
-    private RemotingServer remotingServer;
-    private Role role;
+
+
+    private final RemotingServer remotingServer;
+    private final Role role;
+
 
     public MockRegisterProcessor(RemotingServer remotingServer, Role role) {
         this.remotingServer = remotingServer;
         this.role = role;
     }
+
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
@@ -69,13 +73,14 @@ public class MockRegisterProcessor implements RemotingProcessor {
     }
 
 
-    public static enum Role {
-        /*
-        * TM
-        */
-        TM,
+    public enum Role {
         /**
-         * RM
+         * The TM
+         */
+        TM,
+
+        /**
+         * The RM
          */
         RM
     }
