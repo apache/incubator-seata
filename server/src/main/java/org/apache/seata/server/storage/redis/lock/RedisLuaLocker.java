@@ -43,7 +43,8 @@ import org.apache.seata.server.storage.redis.LuaParser;
 import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
-
+/**
+ */
 public class RedisLuaLocker extends RedisLocker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisLuaLocker.class);

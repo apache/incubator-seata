@@ -16,7 +16,8 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg;
 
-
+/**
+ */
 public enum RaftSyncMsgType {
 
     /**

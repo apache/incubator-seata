@@ -37,7 +37,8 @@ import org.slf4j.LoggerFactory;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 
-
+/**
+ */
 public class RaftServer implements Disposable, Closeable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

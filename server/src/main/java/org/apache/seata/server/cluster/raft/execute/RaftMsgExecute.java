@@ -18,7 +18,8 @@ package org.apache.seata.server.cluster.raft.execute;
 
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 
-
+/**
+ */
 public interface RaftMsgExecute<T> {
 
     /**

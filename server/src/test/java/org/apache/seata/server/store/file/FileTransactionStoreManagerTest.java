@@ -44,7 +44,8 @@ import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.TransactionStoreManager;
 import org.springframework.context.ApplicationContext;
 
-
+/**
+ */
 @SpringBootTest
 public class FileTransactionStoreManagerTest {
 

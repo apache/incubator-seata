@@ -37,7 +37,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 
-
+/**
+ */
 @SpringBootTest
 public class LogStoreDataBaseDAOTest {
 

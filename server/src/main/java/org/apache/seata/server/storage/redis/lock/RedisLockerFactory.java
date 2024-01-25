@@ -23,7 +23,8 @@ import org.apache.seata.core.lock.Locker;
 
 import static org.apache.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
 
-
+/**
+ */
 public class RedisLockerFactory {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();

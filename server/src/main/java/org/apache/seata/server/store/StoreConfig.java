@@ -26,7 +26,8 @@ import org.apache.seata.server.storage.file.FlushDiskMode;
 import static org.apache.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
 import static org.apache.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
-
+/**
+ */
 public class StoreConfig {
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();

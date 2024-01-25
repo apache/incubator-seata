@@ -30,7 +30,8 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 
-
+/**
+ */
 public class RaftTaskUtil {
 
     public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)

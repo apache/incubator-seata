@@ -48,7 +48,8 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 
 import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
-
+/**
+ */
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
 

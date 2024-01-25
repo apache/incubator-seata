@@ -27,7 +27,8 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 
-
+/**
+ */
 public class RaftSnapshot implements Serializable {
 
     private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();

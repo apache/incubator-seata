@@ -32,7 +32,8 @@ import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
 
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
-
+/**
+ */
 @LoadLevel(name = "raft")
 public class RaftLockManager extends FileLockManager {
 

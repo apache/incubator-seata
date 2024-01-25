@@ -48,7 +48,8 @@ import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
-
+/**
+ */
 @LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class DataBaseDistributedLocker implements DistributedLocker {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseDistributedLocker.class);

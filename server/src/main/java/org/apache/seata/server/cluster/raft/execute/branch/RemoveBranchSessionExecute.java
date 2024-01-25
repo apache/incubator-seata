@@ -24,7 +24,8 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-
+/**
+ */
 public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override

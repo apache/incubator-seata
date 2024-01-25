@@ -27,7 +27,8 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
 
-
+/**
+ */
 public class StoreUtil {
 
     private static String sessionStorePath =

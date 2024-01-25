@@ -35,7 +35,8 @@ import org.apache.seata.server.storage.redis.store.RedisTransactionStoreManagerF
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ */
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
     implements Initialize {

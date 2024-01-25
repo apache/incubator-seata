@@ -37,7 +37,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-
+/**
+ */
 @SpringBootTest
 public class RedisLockManagerTest {
     static LockManager lockManager = null;

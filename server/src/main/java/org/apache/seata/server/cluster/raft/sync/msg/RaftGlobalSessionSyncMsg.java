@@ -19,7 +19,8 @@ package org.apache.seata.server.cluster.raft.sync.msg;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 
-
+/**
+ */
 public class RaftGlobalSessionSyncMsg extends RaftBaseMsg {
 
     private static final long serialVersionUID = -8577994371969898054L;

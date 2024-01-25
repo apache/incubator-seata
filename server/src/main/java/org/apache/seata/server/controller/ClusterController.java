@@ -52,7 +52,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-
+/**
+ */
 @RestController
 @RequestMapping("/metadata/v1")
 public class ClusterController {

@@ -18,7 +18,8 @@ package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
 import org.apache.seata.core.store.BranchTransactionDO;
 
-
+/**
+ */
 public class BranchTransactionDTO extends BranchTransactionDO {
 
     private static final long serialVersionUID = 4550610938263777969L;

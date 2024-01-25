@@ -30,7 +30,8 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;
 
-
+/**
+ */
 @SpringBootTest
 public class RaftSyncMessageSerializerTest {
     @BeforeAll

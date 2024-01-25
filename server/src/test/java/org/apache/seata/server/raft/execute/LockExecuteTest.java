@@ -45,7 +45,8 @@ import org.springframework.context.ApplicationContext;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 
-
+/**
+ */
 @SpringBootTest
 class LockExecuteTest {
 

@@ -19,11 +19,11 @@ package org.apache.seata.server.cluster.raft.serializer;
 import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.serializer.Serializer;
 
-
+/**
+ */
 @LoadLevel(name = "JACKSON")
 public class JacksonSerializer implements Serializer {
 
@@ -53,7 +53,6 @@ public class JacksonSerializer implements Serializer {
 
         byte[] obj;
 
-        @JsonDeserialize(using = CustomDeserializer.class)
         Class<?> clz;
 
         public JsonInfo() {}

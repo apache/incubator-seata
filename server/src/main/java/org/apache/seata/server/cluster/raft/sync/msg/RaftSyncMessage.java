@@ -26,7 +26,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
 import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
 
-
+/**
+ */
 public class RaftSyncMessage implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;

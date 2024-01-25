@@ -24,7 +24,8 @@ import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 
-
+/**
+ */
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(

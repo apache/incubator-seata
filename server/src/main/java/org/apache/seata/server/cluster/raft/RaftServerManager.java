@@ -59,7 +59,8 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICAT
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
 import static java.io.File.separator;
 
-
+/**
+ */
 public class RaftServerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerManager.class);

@@ -22,7 +22,8 @@ import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-
+/**
+ */
 public class MockRedisServer {
 
     static {

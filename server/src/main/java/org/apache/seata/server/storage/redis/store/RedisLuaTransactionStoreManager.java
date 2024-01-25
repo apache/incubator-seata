@@ -47,7 +47,8 @@ import static org.apache.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL
 import static org.apache.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_STATUS;
 import static org.apache.seata.core.constants.RedisKeyConstants.REDIS_KEY_GLOBAL_XID;
 
-
+/**
+ */
 public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisLuaTransactionStoreManager.class);

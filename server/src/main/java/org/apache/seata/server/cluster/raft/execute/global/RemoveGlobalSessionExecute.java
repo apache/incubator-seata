@@ -28,7 +28,8 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-
+/**
+ */
 public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
     
     private static final ThreadPoolExecutor EXECUTOR =

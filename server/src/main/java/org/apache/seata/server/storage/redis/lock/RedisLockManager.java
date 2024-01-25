@@ -24,7 +24,8 @@ import org.apache.seata.server.lock.AbstractLockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 
-
+/**
+ */
 @LoadLevel(name = "redis")
 public class RedisLockManager extends AbstractLockManager implements Initialize {
 

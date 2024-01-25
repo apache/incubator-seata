@@ -37,7 +37,8 @@ import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_K
 import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
-
+/**
+ */
 public class ServerApplicationListener implements GenericApplicationListener {
 
     @Override

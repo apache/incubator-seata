@@ -16,7 +16,8 @@
  */
 package org.apache.seata.server.storage.file;
 
-
+/**
+ */
 public enum FlushDiskMode {
     /**
      * sync flush disk

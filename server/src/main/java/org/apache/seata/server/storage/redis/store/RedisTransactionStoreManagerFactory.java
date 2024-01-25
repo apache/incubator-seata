@@ -22,7 +22,8 @@ import org.apache.seata.config.ConfigurationFactory;
 
 import static org.apache.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
 
-
+/**
+ */
 public class RedisTransactionStoreManagerFactory {
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();

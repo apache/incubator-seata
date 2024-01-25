@@ -26,7 +26,8 @@ import org.apache.seata.core.context.ContextCoreLoader;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-
+/**
+ */
 public class SeataClusterContext {
 
     private static final String GROUP = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);

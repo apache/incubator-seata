@@ -21,7 +21,8 @@ import org.apache.seata.common.util.StringUtils;
 
 import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 
-
+/**
+ */
 public class ContainerHelper {
 
     private static final String C_GROUP_PATH = "/proc/1/cgroup";

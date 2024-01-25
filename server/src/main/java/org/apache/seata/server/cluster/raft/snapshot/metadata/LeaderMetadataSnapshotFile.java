@@ -30,7 +30,8 @@ import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ */
 public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final long serialVersionUID = 78637164618855724L;
 

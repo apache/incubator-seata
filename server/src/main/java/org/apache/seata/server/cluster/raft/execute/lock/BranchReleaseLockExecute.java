@@ -23,7 +23,8 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 
-
+/**
+ */
 public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
 
     @Override

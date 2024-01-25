@@ -38,7 +38,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
 
-
+/**
+ */
 public class JedisPooledFactory {
     /**
      * The constant LOGGER.

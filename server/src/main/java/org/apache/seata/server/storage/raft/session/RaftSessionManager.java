@@ -43,7 +43,8 @@ import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMO
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
-
+/**
+ */
 @LoadLevel(name = "raft", scope = Scope.PROTOTYPE)
 public class RaftSessionManager extends FileSessionManager {
 
