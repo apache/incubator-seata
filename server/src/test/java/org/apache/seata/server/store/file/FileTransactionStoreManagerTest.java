@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import io.seata.common.util.BufferUtils;
+import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -44,8 +44,7 @@ import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.TransactionStoreManager;
 import org.springframework.context.ApplicationContext;
 
-/**
- */
+
 @SpringBootTest
 public class FileTransactionStoreManagerTest {
 

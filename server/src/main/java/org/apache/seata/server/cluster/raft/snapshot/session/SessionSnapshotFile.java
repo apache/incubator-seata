@@ -33,8 +33,7 @@ import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class SessionSnapshotFile implements Serializable,StoreSnapshotFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionSnapshotFile.class);

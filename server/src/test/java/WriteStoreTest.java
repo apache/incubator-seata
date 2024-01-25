@@ -21,9 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;

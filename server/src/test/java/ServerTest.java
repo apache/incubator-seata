@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.seata.common.XID;
-import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.NettyRemotingServer;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 

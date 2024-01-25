@@ -29,15 +29,15 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.session.AbstractSessionManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -50,7 +50,7 @@ import org.apache.seata.server.store.AbstractTransactionStoreManager;
 import org.apache.seata.server.store.SessionStorable;
 import org.apache.seata.server.store.TransactionStoreManager;
 
-import static io.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
 
 
 /**

@@ -28,12 +28,12 @@ import javax.servlet.http.HttpServletRequest;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.metadata.MetadataResponse;
-import io.seata.common.metadata.Node;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.Result;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.console.result.Result;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
@@ -49,11 +49,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.seata.common.ConfigurationKeys.STORE_MODE;
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-/**
- */
+
 @RestController
 @RequestMapping("/metadata/v1")
 public class ClusterController {

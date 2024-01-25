@@ -18,9 +18,8 @@ package org.apache.seata.server.session;
 
 import java.util.stream.Stream;
 
-import io.seata.core.model.BranchType;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.UUIDGenerator;
-import org.apache.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Branch session test.

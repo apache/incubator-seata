@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.env;
 
-import io.seata.common.util.NumberUtils;
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.util.NumberUtils;
+import org.apache.seata.common.util.StringUtils;
 
-import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 
-/**
- */
+
 public class ContainerHelper {
 
     private static final String C_GROUP_PATH = "/proc/1/cgroup";

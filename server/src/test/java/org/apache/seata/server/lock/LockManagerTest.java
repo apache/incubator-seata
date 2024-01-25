@@ -26,15 +26,14 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.console.result.PageResult;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.console.result.PageResult;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.console.vo.GlobalLockVO;
-import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -49,7 +48,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Lock manager test.

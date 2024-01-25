@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import io.seata.common.XID;
-import io.seata.common.exception.RedisException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.BeanUtils;
-import io.seata.common.util.CollectionUtils;
-import io.seata.core.exception.TransactionException;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.exception.RedisException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.BeanUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.vo.GlobalLockVO;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
@@ -48,8 +48,7 @@ import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
 
 import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
-/**
- */
+
 @SpringBootTest
 public class RedisTransactionStoreManagerTest {
 

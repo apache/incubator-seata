@@ -35,32 +35,31 @@ import com.alipay.sofa.jraft.rpc.CliClientService;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.XID;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.FileRegistryServiceImpl;
-import io.seata.discovery.registry.MultiRegistryFactory;
-import io.seata.discovery.registry.RegistryService;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
+import org.apache.seata.discovery.registry.MultiRegistryFactory;
+import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
-import static io.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
 import static java.io.File.separator;
 
-/**
- */
+
 public class RaftServerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerManager.class);
@@ -68,7 +67,7 @@ public class RaftServerManager {
     private static final Map<String/*group*/, RaftServer/*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
     private static final AtomicBoolean INIT = new AtomicBoolean(false);
 
-    private static final io.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
+    private static final org.apache.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
     private static volatile boolean RAFT_MODE;
     private static RpcServer rpcServer;
     

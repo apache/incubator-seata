@@ -19,7 +19,7 @@ package org.apache.seata.server.session.redis;
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.GlobalLockService;
@@ -29,8 +29,7 @@ import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- */
+
 @SpringBootTest
 public class RedisQueryConsolTest {
 

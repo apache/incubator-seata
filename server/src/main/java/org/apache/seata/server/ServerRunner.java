@@ -19,7 +19,7 @@ package org.apache.seata.server;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import io.seata.core.rpc.Disposable;
+import org.apache.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -32,8 +32,7 @@ import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 
-/**
- */
+
 @Component
 public class ServerRunner implements CommandLineRunner, DisposableBean,
     ApplicationListener<ApplicationEvent>, Ordered {

@@ -23,10 +23,9 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.Context;
 import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.spi.LifeCycle;
-import io.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.constants.ConfigurationKeys;
 
-/**
- */
+
 public class SystemPropertyLoggerContextListener extends ContextAwareBase implements LoggerContextListener, LifeCycle {
 
     private boolean started = false;

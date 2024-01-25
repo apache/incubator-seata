@@ -21,9 +21,8 @@ import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- */
-@SpringBootApplication(scanBasePackages = {"io.seata", "org.apache.seata"})
+
+@SpringBootApplication(scanBasePackages = {"org.apache.seata"})
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application

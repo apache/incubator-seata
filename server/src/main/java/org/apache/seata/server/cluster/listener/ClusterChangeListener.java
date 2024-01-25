@@ -16,8 +16,7 @@
  */
 package org.apache.seata.server.cluster.listener;
 
-/**
- */
+
 public interface ClusterChangeListener {
 
     /**

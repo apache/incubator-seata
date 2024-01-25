@@ -19,7 +19,7 @@ package org.apache.seata.server.console.controller;
 import javax.annotation.Resource;
 
 import org.apache.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.springframework.web.bind.annotation.GetMapping;

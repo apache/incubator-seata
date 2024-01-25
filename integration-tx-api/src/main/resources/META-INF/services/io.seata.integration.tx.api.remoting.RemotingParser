@@ -1,3 +1,0 @@
-io.seata.integration.tx.api.remoting.parser.DubboRemotingParser
-io.seata.integration.tx.api.remoting.parser.SofaRpcRemotingParser
-io.seata.integration.tx.api.remoting.parser.HSFRemotingParser

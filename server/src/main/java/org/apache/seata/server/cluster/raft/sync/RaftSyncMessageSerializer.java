@@ -22,16 +22,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Optional;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.compressor.CompressorFactory;
-import io.seata.core.serializer.Serializer;
-import io.seata.core.serializer.SerializerType;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.core.compressor.CompressorFactory;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class RaftSyncMessageSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSyncMessageSerializer.class);

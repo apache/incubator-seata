@@ -16,10 +16,9 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-/**
- */
+
 public class RaftBaseMsg implements java.io.Serializable {
 
     private static final long serialVersionUID = -1439073440621259777L;

@@ -22,17 +22,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.exception.StoreException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.core.exception.BranchTransactionException;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.AbstractLocker;
-import io.seata.core.lock.RowLock;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.exception.BranchTransactionException;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.AbstractLocker;
+import org.apache.seata.core.lock.RowLock;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.session.BranchSession;
 
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
+import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Memory locker.

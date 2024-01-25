@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.io.FileLoader;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.io.FileLoader;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

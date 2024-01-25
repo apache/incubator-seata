@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.raft.execute;
 
-import io.seata.common.util.NetUtil;
-import io.seata.config.ConfigurationCache;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import org.apache.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
@@ -42,11 +42,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 
-/**
- */
+
 @SpringBootTest
 class LockExecuteTest {
 

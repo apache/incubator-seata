@@ -26,13 +26,12 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.compressor.CompressorFactory;
-import io.seata.core.serializer.Serializer;
-import io.seata.core.serializer.SerializerType;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.core.compressor.CompressorFactory;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerType;
 
-/**
- */
+
 public class RaftSnapshotSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSnapshotSerializer.class);

@@ -16,11 +16,11 @@
  */
 package org.apache.seata.server.coordinator;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.protocol.transaction.AbstractTransactionRequest;
-import io.seata.core.protocol.transaction.AbstractTransactionResponse;
-import io.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.core.protocol.transaction.AbstractTransactionRequest;
+import org.apache.seata.core.protocol.transaction.AbstractTransactionResponse;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.store.StoreConfig;

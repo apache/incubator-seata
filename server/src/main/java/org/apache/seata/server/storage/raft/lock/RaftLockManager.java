@@ -18,9 +18,9 @@ package org.apache.seata.server.storage.raft.lock;
 
 import java.util.concurrent.CompletableFuture;
 import com.alipay.sofa.jraft.Closure;
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
@@ -32,8 +32,7 @@ import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
 
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
-/**
- */
+
 @LoadLevel(name = "raft")
 public class RaftLockManager extends FileLockManager {
 

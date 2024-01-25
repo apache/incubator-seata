@@ -20,15 +20,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
-        <version>${revision}</version>
-    </parent>
+    <groupId>io.seata</groupId>
+    <version>${revision}</version>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-compatible</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-compatible ${project.version}</name>
+    <artifactId>seata-all</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-all ${project.version}</name>
     <description>compatible with io.seata API</description>
 
     <dependencies>

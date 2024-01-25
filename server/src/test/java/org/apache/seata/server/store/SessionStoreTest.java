@@ -18,13 +18,13 @@ package org.apache.seata.server.store;
 
 import java.io.File;
 
-import io.seata.common.XID;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.XID;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
@@ -39,9 +39,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Session store test.

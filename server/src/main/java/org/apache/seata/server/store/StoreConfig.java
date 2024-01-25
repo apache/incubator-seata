@@ -16,18 +16,17 @@
  */
 package org.apache.seata.server.store;
 
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.env.ContainerHelper;
 import org.apache.seata.server.storage.file.FlushDiskMode;
 
-import static io.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
-import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
+import static org.apache.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
+import static org.apache.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
-/**
- */
+
 public class StoreConfig {
 
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();

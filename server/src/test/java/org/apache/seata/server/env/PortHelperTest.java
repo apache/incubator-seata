@@ -18,17 +18,15 @@ package org.apache.seata.server.env;
 
 import java.io.IOException;
 
-import org.apache.seata.server.env.PortHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class PortHelperTest {
 
     @Test
     public void testGetPortFromEnvOrStartup() {
-        Assertions.assertEquals(0, PortHelper.getPortFromEnvOrStartup(new String[]{}));
+        Assertions.assertEquals(0,PortHelper.getPortFromEnvOrStartup(new String[]{}));
     }
 
     @Test

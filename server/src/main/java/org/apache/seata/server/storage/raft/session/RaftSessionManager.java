@@ -19,13 +19,13 @@ package org.apache.seata.server.storage.raft.session;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import com.alipay.sofa.jraft.Closure;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
@@ -43,8 +43,7 @@ import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMO
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
-/**
- */
+
 @LoadLevel(name = "raft", scope = Scope.PROTOTYPE)
 public class RaftSessionManager extends FileSessionManager {
 

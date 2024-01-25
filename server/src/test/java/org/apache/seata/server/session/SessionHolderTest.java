@@ -18,10 +18,10 @@ package org.apache.seata.server.session;
 
 import java.io.File;
 import java.io.IOException;
-import io.seata.common.XID;
-import io.seata.core.constants.ConfigurationKeys;
-import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.common.XID;
+import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.store.StoreConfig.SessionMode;
+import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,12 +31,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static io.seata.common.Constants.ASYNC_COMMITTING;
-import static io.seata.common.Constants.RETRY_COMMITTING;
-import static io.seata.common.Constants.RETRY_ROLLBACKING;
-import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
-import static io.seata.common.Constants.UNDOLOG_DELETE;
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
+import static org.apache.seata.common.Constants.RETRY_COMMITTING;
+import static org.apache.seata.common.Constants.RETRY_ROLLBACKING;
+import static org.apache.seata.common.Constants.TX_TIMEOUT_CHECK;
+import static org.apache.seata.common.Constants.UNDOLOG_DELETE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static org.apache.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static java.io.File.separator;
 

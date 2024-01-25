@@ -16,10 +16,9 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
-import io.seata.core.store.GlobalTransactionDO;
+import org.apache.seata.core.store.GlobalTransactionDO;
 
-/**
- */
+
 public class GlobalTransactionDTO extends GlobalTransactionDO {
     private static final long serialVersionUID = 8402806824435215696L;
 

@@ -18,8 +18,8 @@ package org.apache.seata.server.store;
 
 import javax.sql.DataSource;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.store.db.AbstractDataSourceProvider;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.store.db.AbstractDataSourceProvider;
 import com.alibaba.druid.pool.DruidDataSource;
 
 import java.sql.Connection;

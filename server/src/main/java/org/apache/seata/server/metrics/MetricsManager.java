@@ -18,15 +18,15 @@ package org.apache.seata.server.metrics;
 
 import java.util.List;
 
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.metrics.exporter.Exporter;
-import io.seata.metrics.exporter.ExporterFactory;
-import io.seata.metrics.registry.Registry;
-import io.seata.metrics.registry.RegistryFactory;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.metrics.exporter.Exporter;
+import org.apache.seata.metrics.exporter.ExporterFactory;
+import org.apache.seata.metrics.registry.Registry;
+import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.event.EventBusManager;
 
-import static io.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
+import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
 
 /**
  * Metrics manager for init

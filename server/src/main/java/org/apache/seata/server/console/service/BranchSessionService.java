@@ -17,7 +17,7 @@
 package org.apache.seata.server.console.service;
 
 import org.apache.seata.server.console.vo.BranchSessionVO;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 
 /**
  * Branch session service

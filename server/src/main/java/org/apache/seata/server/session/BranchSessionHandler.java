@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.session;
 
-import io.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionException;
 
 /**
  * The Functional Interface Branch session handler

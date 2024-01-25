@@ -19,14 +19,14 @@ package org.apache.seata.server;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import io.seata.common.XID;
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.rpc.netty.NettyRemotingServer;
-import io.seata.core.rpc.netty.NettyServerConfig;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.rpc.netty.NettyRemotingServer;
+import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
@@ -36,9 +36,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
 /**
  * The type Server.

@@ -20,18 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.DefaultValues;
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.CollectionUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.context.RootContext;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.logger.StackTraceLogger;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.rpc.RemotingServer;
+import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.logger.StackTraceLogger;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -42,8 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.ConfigurationKeys.ENABLE_PARALLEL_HANDLE_BRANCH_KEY;
-import static io.seata.common.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
+import static org.apache.seata.common.ConfigurationKeys.ENABLE_PARALLEL_HANDLE_BRANCH_KEY;
+import static org.apache.seata.common.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
 import static org.apache.seata.server.session.BranchSessionHandler.CONTINUE;
 
 /**

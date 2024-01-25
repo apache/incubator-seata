@@ -21,7 +21,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Set;
 
-import io.seata.core.constants.ServerTableColumnsName;
+import org.apache.seata.core.constants.ServerTableColumnsName;
 
 /**
  * GlobalSessionVO

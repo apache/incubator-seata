@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.storage.redis.lock;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.core.store.DistributedLockDO;
-import io.seata.core.store.DistributedLocker;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.core.store.DistributedLockDO;
+import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

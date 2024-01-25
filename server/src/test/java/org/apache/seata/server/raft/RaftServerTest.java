@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.raft;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.XID;
-import io.seata.config.ConfigurationCache;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.XID;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.SessionHolder;

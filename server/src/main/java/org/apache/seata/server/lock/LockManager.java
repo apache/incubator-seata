@@ -18,9 +18,9 @@ package org.apache.seata.server.lock;
 
 import java.util.List;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.RowLock;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.RowLock;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 

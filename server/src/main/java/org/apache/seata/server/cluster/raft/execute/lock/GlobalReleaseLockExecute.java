@@ -22,8 +22,7 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 
-/**
- */
+
 public class GlobalReleaseLockExecute extends AbstractRaftMsgExecute {
 
     @Override

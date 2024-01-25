@@ -20,17 +20,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
-import io.seata.core.protocol.transaction.GlobalCommitRequest;
-import io.seata.core.protocol.transaction.GlobalCommitResponse;
-import io.seata.core.protocol.transaction.GlobalRollbackRequest;
-import io.seata.core.protocol.transaction.GlobalRollbackResponse;
-import io.seata.core.rpc.RpcContext;
-import io.seata.metrics.Measurement;
-import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
+import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
+import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
+import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
+import org.apache.seata.core.rpc.RpcContext;
+import org.apache.seata.metrics.Measurement;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +38,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+
+import static org.apache.seata.server.coordinator.DefaultCoordinatorTest.MockServerMessageSender;
 
 /**
  * Test Metrics
@@ -59,7 +60,7 @@ public class DefaultCoordinatorMetricsTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(null);
-        coordinator.setRemotingServer(new DefaultCoordinatorTest.MockServerMessageSender());
+        coordinator.setRemotingServer(new MockServerMessageSender());
         SessionHolder.init(null);
         try {
             //start a transaction

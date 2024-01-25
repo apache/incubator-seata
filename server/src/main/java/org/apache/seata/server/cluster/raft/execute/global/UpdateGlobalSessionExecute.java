@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.cluster.raft.execute.global;
 
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
@@ -26,8 +26,7 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-/**
- */
+
 public class UpdateGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override

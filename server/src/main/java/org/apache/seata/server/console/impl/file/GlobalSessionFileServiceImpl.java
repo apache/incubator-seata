@@ -23,7 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.seata.server.console.param.GlobalSessionParam;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.session.GlobalSession;
@@ -32,7 +32,7 @@ import org.apache.seata.server.storage.SessionConverter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.util.StringUtils.isBlank;
+import static org.apache.seata.common.util.StringUtils.isBlank;
 import static java.util.Objects.isNull;
 
 /**

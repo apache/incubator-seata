@@ -19,13 +19,13 @@ package org.apache.seata.server.storage.redis.session;
 import java.util.Collection;
 import java.util.List;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.session.AbstractSessionManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -35,8 +35,7 @@ import org.apache.seata.server.storage.redis.store.RedisTransactionStoreManagerF
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 @LoadLevel(name = "redis", scope = Scope.PROTOTYPE)
 public class RedisSessionManager extends AbstractSessionManager
     implements Initialize {

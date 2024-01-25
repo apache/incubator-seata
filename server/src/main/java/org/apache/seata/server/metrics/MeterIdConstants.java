@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.metrics;
 
-import io.seata.metrics.IdConstants;
-import io.seata.metrics.Id;
+import org.apache.seata.metrics.IdConstants;
+import org.apache.seata.metrics.Id;
 
 /**
  * Constants for meter id in tc

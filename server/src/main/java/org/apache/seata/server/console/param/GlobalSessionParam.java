@@ -18,7 +18,7 @@ package org.apache.seata.server.console.param;
 
 import java.io.Serializable;
 
-import io.seata.console.param.BaseParam;
+import org.apache.seata.console.param.BaseParam;
 
 /**
  * Global session param

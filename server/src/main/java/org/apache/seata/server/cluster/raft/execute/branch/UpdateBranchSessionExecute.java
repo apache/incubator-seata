@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.cluster.raft.execute.branch;
 
-import io.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
@@ -25,8 +25,7 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-/**
- */
+
 public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override

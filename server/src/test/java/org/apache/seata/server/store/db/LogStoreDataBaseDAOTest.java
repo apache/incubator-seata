@@ -22,10 +22,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.core.store.BranchTransactionDO;
+import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
@@ -37,8 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 
-/**
- */
+
 @SpringBootTest
 public class LogStoreDataBaseDAOTest {
 

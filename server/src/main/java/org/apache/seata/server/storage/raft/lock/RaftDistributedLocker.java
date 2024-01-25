@@ -16,17 +16,17 @@
  */
 package org.apache.seata.server.storage.raft.lock;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.loader.LoadLevel;
-import io.seata.config.ConfigurationFactory;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
-import io.seata.core.store.DistributedLockDO;
-import io.seata.core.store.DistributedLocker;
+import org.apache.seata.core.store.DistributedLockDO;
+import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * @description raft distributed lock

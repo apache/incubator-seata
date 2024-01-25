@@ -19,13 +19,11 @@ package org.apache.seata.server.session;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.store.StoreConfig;
+import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Global session test.

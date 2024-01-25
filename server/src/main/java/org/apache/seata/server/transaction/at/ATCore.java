@@ -20,20 +20,20 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.seata.common.exception.StoreException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.exception.BranchTransactionException;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
-import io.seata.core.rpc.RemotingServer;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.exception.BranchTransactionException;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 
 
-import static io.seata.common.Constants.AUTO_COMMIT;
-import static io.seata.common.Constants.SKIP_CHECK_LOCK;
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static org.apache.seata.common.Constants.AUTO_COMMIT;
+import static org.apache.seata.common.Constants.SKIP_CHECK_LOCK;
+import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 
 /**
  * The type at core.

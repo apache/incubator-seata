@@ -16,12 +16,11 @@
  */
 package org.apache.seata.server.auth;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
 
-/**
- */
+
 @LoadLevel(name = "defaultCheckAuthHandler", order = 100)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 

@@ -27,27 +27,27 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-import io.seata.common.exception.DataAccessException;
-import io.seata.common.exception.StoreException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.LambdaUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.exception.BranchTransactionException;
-import io.seata.core.model.LockStatus;
-import io.seata.core.store.LockDO;
-import io.seata.core.store.LockStore;
-import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import org.apache.seata.common.exception.DataAccessException;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.LambdaUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.constants.ServerTableColumnsName;
+import org.apache.seata.core.exception.BranchTransactionException;
+import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.core.store.LockDO;
+import org.apache.seata.core.store.LockStore;
+import org.apache.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
+import static org.apache.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
 
 /**
  * The type Data base lock store.

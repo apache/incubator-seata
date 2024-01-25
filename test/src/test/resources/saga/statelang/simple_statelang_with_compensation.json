@@ -21,14 +21,14 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "org.apache.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }
@@ -64,14 +64,14 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "org.apache.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }

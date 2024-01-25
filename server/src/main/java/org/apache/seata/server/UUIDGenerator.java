@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server;
 
-import io.seata.common.util.IdWorker;
+import org.apache.seata.common.util.IdWorker;
 
 /**
  * The type Uuid generator.

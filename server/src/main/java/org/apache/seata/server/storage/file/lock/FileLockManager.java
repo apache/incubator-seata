@@ -18,16 +18,16 @@ package org.apache.seata.server.storage.file.lock;
 
 import java.util.List;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.lock.AbstractLockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 import org.slf4j.MDC;
 
-import static io.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
+import static org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
 /**
  * The type file lock manager.

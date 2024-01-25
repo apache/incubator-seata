@@ -28,17 +28,16 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.rpc.Disposable;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.rpc.Disposable;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 
-/**
- */
+
 public class RaftServer implements Disposable, Closeable {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

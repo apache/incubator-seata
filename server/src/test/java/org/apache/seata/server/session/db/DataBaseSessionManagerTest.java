@@ -23,12 +23,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import io.seata.common.XID;
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Data base session manager test.

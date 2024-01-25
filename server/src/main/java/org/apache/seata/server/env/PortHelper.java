@@ -24,15 +24,14 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.MapUtil;
-import io.seata.common.util.NumberUtils;
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.MapUtil;
+import org.apache.seata.common.util.NumberUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.springframework.util.ResourceUtils;
 import org.yaml.snakeyaml.Yaml;
 
-/**
- */
+
 public class PortHelper {
 
     public static int getPortFromEnvOrStartup(String[] args) {

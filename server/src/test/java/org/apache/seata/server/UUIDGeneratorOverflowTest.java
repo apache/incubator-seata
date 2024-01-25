@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server;
 
-import org.apache.seata.server.UUIDGenerator;
 import org.junit.jupiter.api.Test;
 
 /**

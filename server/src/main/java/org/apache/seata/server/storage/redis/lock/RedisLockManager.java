@@ -16,16 +16,15 @@
  */
 package org.apache.seata.server.storage.redis.lock;
 
-import io.seata.common.executor.Initialize;
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
+import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.lock.AbstractLockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 
-/**
- */
+
 @LoadLevel(name = "redis")
 public class RedisLockManager extends AbstractLockManager implements Initialize {
 

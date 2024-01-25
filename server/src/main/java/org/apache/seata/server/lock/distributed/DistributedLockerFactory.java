@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.lock.distributed;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.loader.EnhancedServiceNotFoundException;
-import io.seata.core.store.DefaultDistributedLocker;
-import io.seata.core.store.DistributedLocker;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
+import org.apache.seata.core.store.DefaultDistributedLocker;
+import org.apache.seata.core.store.DistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

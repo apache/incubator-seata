@@ -18,7 +18,7 @@ package org.apache.seata.server.session.redis;
 
 import java.io.IOException;
 
-import io.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.server.storage.redis.session.RedisSessionManager;
 import org.apache.seata.server.storage.redis.store.RedisLuaTransactionStoreManager;
 

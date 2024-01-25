@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.session;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.GlobalStatus;
 
 /**
  * The interface Session lifecycle.

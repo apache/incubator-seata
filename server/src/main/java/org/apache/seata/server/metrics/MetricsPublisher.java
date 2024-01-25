@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.metrics;
 
-import io.seata.core.event.EventBus;
-import io.seata.core.event.GlobalTransactionEvent;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.event.EventBus;
+import org.apache.seata.core.event.GlobalTransactionEvent;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.event.EventBusManager;
 import org.apache.seata.server.session.GlobalSession;
 

@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.lock.RowLock;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.constants.ServerTableColumnsName;
+import org.apache.seata.core.lock.RowLock;
 
 /**
  * GlobalLockVO

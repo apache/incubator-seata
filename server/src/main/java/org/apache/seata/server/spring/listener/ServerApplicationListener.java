@@ -18,10 +18,10 @@ package org.apache.seata.server.spring.listener;
 
 import java.util.Properties;
 
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.util.StringUtils;
-import io.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
-import io.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
+import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
+import org.apache.seata.spring.boot.autoconfigure.SeataServerEnvironmentPostProcessor;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
@@ -31,14 +31,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
-import static io.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
+import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
-/**
- */
+
 public class ServerApplicationListener implements GenericApplicationListener {
 
     @Override

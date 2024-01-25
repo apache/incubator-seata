@@ -23,8 +23,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.util.IOUtil;
-import io.seata.core.store.LockDO;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.core.store.LockDO;
 import org.apache.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
@@ -35,8 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-/**
- */
+
 @SpringBootTest
 public class DataBaseLockStoreDAOTest {
 

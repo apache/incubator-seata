@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.lock;
 
-import io.seata.core.store.DefaultDistributedLocker;
-import io.seata.core.store.DistributedLocker;
+import org.apache.seata.core.store.DefaultDistributedLocker;
+import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.junit.jupiter.api.AfterEach;

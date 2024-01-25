@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.transaction.xa;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
 
 /**

@@ -18,8 +18,8 @@ package org.apache.seata.server.lock.redis;
 
 import java.io.IOException;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.lock.Locker;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.redis.MockRedisServer;
 import org.apache.seata.server.storage.redis.lock.RedisLockManager;

@@ -23,12 +23,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalLockVO;
-import io.seata.core.lock.RowLock;
+import org.apache.seata.core.lock.RowLock;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
@@ -38,7 +38,7 @@ import org.apache.seata.server.session.SessionHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.util.StringUtils.isBlank;
+import static org.apache.seata.common.util.StringUtils.isBlank;
 import static org.apache.seata.server.console.vo.GlobalLockVO.convert;
 import static java.util.Objects.isNull;
 

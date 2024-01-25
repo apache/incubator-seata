@@ -21,11 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import io.seata.common.metadata.Node;
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.StringUtils;
 
-/**
- */
+
 public class RaftClusterMetadata implements Serializable {
 
     private static final long serialVersionUID = 6208583637662412658L;

@@ -27,16 +27,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.util.CollectionUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.context.RootContext;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.metrics.IdConstants;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.metrics.IdConstants;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
@@ -47,8 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
  * The type Session helper.

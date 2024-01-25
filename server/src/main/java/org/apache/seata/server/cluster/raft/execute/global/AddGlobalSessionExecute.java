@@ -24,8 +24,7 @@ import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.SessionConverter;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-/**
- */
+
 public class AddGlobalSessionExecute extends AbstractRaftMsgExecute {
 
     @Override

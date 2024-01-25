@@ -21,9 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import io.seata.common.util.IOUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.db.lock.DataBaseLocker;
@@ -38,8 +38,7 @@ import org.springframework.context.ApplicationContext;
 
 
 
-/**
- */
+
 @SpringBootTest
 public class DataBaseLockManagerImplTest {
 

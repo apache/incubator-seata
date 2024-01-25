@@ -25,24 +25,24 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.common.exception.StoreException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.PageUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.console.result.PageResult;
-import io.seata.core.store.db.DataSourceProvider;
-import io.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.PageUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.console.result.PageResult;
+import org.apache.seata.core.store.db.DataSourceProvider;
+import org.apache.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import static io.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 
 
 /**

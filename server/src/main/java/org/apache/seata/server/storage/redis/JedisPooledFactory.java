@@ -20,12 +20,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.seata.common.exception.RedisException;
-import io.seata.common.util.ConfigTools;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.common.exception.RedisException;
+import org.apache.seata.common.util.ConfigTools;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
@@ -34,12 +34,11 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.Jedis;
-import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
-import static io.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
-import static io.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MAX_TOTAL;
+import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
 
-/**
- */
+
 public class JedisPooledFactory {
     /**
      * The constant LOGGER.

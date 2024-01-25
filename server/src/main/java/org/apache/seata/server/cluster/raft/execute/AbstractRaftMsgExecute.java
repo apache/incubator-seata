@@ -22,8 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 
-/**
- */
+
 public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());

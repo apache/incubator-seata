@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.store;
 
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 

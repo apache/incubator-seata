@@ -16,10 +16,8 @@
  */
 package org.apache.seata.server.metrics;
 
-import io.seata.metrics.Id;
-import io.seata.metrics.IdConstants;
-import io.seata.metrics.Counter;
-import io.seata.metrics.registry.RegistryFactory;
+import org.apache.seata.metrics.Id;
+import org.apache.seata.metrics.IdConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

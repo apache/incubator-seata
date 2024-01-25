@@ -16,14 +16,13 @@
  */
 package org.apache.seata.server.storage.redis.store;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 
-import static io.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
+import static org.apache.seata.common.Constants.STORE_REDIS_TYPE_PIPELINE;
 
-/**
- */
+
 public class RedisTransactionStoreManagerFactory {
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();

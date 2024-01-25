@@ -20,16 +20,15 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.exception.TransactionException;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.raft.session.RaftSessionManager;
 
-/**
- */
+
 public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
     
     private static final ThreadPoolExecutor EXECUTOR =

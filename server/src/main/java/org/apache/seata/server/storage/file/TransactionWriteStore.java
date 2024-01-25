@@ -18,7 +18,7 @@ package org.apache.seata.server.storage.file;
 
 import java.nio.ByteBuffer;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.store.SessionStorable;

@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.transaction.tcc;
 
-import io.seata.core.model.BranchType;
-import io.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
 
 /**

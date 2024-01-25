@@ -16,8 +16,7 @@
  */
 package org.apache.seata.server.session;
 
-import io.seata.core.model.GlobalStatus;
-import org.apache.seata.server.session.SessionStatusValidator;
+import org.apache.seata.core.model.GlobalStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

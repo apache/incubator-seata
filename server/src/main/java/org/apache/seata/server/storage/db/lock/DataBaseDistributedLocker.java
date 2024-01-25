@@ -26,30 +26,29 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.loader.Scope;
-import io.seata.common.util.IOUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.store.DistributedLockDO;
-import io.seata.core.store.DistributedLocker;
-import io.seata.core.store.db.DataSourceProvider;
-import io.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.constants.ServerTableColumnsName;
+import org.apache.seata.core.store.DistributedLockDO;
+import org.apache.seata.core.store.DistributedLocker;
+import org.apache.seata.core.store.db.DataSourceProvider;
+import org.apache.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
+import static org.apache.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
-/**
- */
+
 @LoadLevel(name = "db", scope = Scope.SINGLETON)
 public class DataBaseDistributedLocker implements DistributedLocker {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseDistributedLocker.class);

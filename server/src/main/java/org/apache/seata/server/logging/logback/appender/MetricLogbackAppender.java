@@ -22,8 +22,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.LogbackException;
-import io.seata.core.event.EventBus;
-import io.seata.core.event.ExceptionEvent;
+import org.apache.seata.core.event.EventBus;
+import org.apache.seata.core.event.ExceptionEvent;
 import org.apache.seata.server.event.EventBusManager;
 
 /**

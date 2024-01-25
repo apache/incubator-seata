@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.coordinator;
 
-import io.seata.core.model.ResourceManagerOutbound;
-import io.seata.core.model.TransactionManager;
+import org.apache.seata.core.model.ResourceManagerOutbound;
+import org.apache.seata.core.model.TransactionManager;
 
 /**
  * receive inbound request from RM or TM.

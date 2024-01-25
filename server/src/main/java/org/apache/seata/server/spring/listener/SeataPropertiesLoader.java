@@ -16,11 +16,11 @@
  */
 package org.apache.seata.server.spring.listener;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.FileConfiguration;
-import io.seata.config.file.FileConfig;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.FileConfiguration;
+import org.apache.seata.config.file.FileConfig;
 import org.apache.seata.server.store.StoreConfig;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -35,13 +35,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
-import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
-import static io.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
-import static io.seata.common.ConfigurationKeys.METRICS_PREFIX;
-import static io.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
-import static io.seata.common.ConfigurationKeys.SERVER_PREFIX;
-import static io.seata.common.ConfigurationKeys.STORE_PREFIX;
-import static io.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
+import static org.apache.seata.common.ConfigurationKeys.METRICS_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {

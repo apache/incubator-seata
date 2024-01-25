@@ -16,12 +16,12 @@
  */
 package org.apache.seata.server.lock.redis;
 
-import io.seata.common.exception.StoreException;
+import org.apache.seata.common.exception.StoreException;
 import java.io.IOException;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.Locker;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.redis.MockRedisServer;
@@ -37,8 +37,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-/**
- */
+
 @SpringBootTest
 public class RedisLockManagerTest {
     static LockManager lockManager = null;

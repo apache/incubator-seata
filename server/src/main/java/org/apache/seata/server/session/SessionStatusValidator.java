@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.session;
 
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.GlobalStatus;
 
 /**
  * The type change status validator.

@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.event;
 
-import io.seata.core.event.EventBus;
-import io.seata.core.event.GuavaEventBus;
+import org.apache.seata.core.event.EventBus;
+import org.apache.seata.core.event.GuavaEventBus;
 
 /**
  * Manager hold the singleton event bus instance.

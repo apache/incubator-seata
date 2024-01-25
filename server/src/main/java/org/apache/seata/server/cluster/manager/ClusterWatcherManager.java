@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
-import io.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterChangeListener;
 import org.apache.seata.server.cluster.watch.Watcher;
@@ -36,8 +36,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- */
+
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
 

@@ -27,25 +27,21 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
-import io.seata.common.XID;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.console.result.PageResult;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.console.result.PageResult;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionCondition;
-import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
 import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.apache.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
+import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,8 +50,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type File based session manager test.

@@ -16,11 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg;
 
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 
-/**
- */
+
 public class RaftClusterMetadataMsg extends RaftBaseMsg {
 
     private static final long serialVersionUID = 6208583637662412658L;

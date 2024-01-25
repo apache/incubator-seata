@@ -22,16 +22,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
-import io.seata.core.exception.GlobalTransactionException;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.core.exception.GlobalTransactionException;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 
-/**
- */
+
 public class RaftTaskUtil {
 
     public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)

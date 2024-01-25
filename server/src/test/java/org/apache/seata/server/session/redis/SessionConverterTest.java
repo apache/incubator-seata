@@ -18,11 +18,11 @@ package org.apache.seata.server.session.redis;
 
 import java.util.Date;
 
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.BranchTransactionDO;
-import io.seata.core.store.GlobalTransactionDO;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.store.BranchTransactionDO;
+import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;

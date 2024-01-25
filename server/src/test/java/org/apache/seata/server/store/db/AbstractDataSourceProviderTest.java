@@ -18,14 +18,13 @@ package org.apache.seata.server.store.db;
 
 import javax.sql.DataSource;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.store.db.DataSourceProvider;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.core.store.db.DataSourceProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- */
+
 @SpringBootTest
 public class AbstractDataSourceProviderTest {
 

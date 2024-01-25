@@ -20,23 +20,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import io.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.CollectionUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import io.seata.common.util.BeanUtils;
+import org.apache.seata.common.util.BeanUtils;
 import org.apache.seata.server.console.param.GlobalLockParam;
-import io.seata.console.result.PageResult;
+import org.apache.seata.console.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import redis.clients.jedis.Jedis;
-import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
-import static io.seata.common.exception.FrameworkErrorCode.ParameterRequired;
-import static io.seata.common.util.StringUtils.isNotBlank;
-import static io.seata.console.result.PageResult.checkPage;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
-import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
-import static io.seata.core.constants.RedisKeyConstants.SPLIT;
+import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+import static org.apache.seata.common.exception.FrameworkErrorCode.ParameterRequired;
+import static org.apache.seata.common.util.StringUtils.isNotBlank;
+import static org.apache.seata.console.result.PageResult.checkPage;
+import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
+import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
+import static org.apache.seata.core.constants.RedisKeyConstants.SPLIT;
 
 /**
  * Global Lock Redis Service Impl

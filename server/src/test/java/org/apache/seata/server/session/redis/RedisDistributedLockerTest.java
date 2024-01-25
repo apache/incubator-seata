@@ -18,8 +18,8 @@ package org.apache.seata.server.session.redis;
 
 import java.io.IOException;
 
-import io.seata.common.XID;
-import io.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import io.seata.core.store.DistributedLockDO;
-import io.seata.core.store.DistributedLocker;
+import org.apache.seata.core.store.DistributedLockDO;
+import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;

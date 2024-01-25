@@ -16,30 +16,30 @@
  */
 package io.seata.server.cluster.raft.sync.msg;
 
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
-import static io.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
 
 
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.compressor.CompressorType;
-import io.seata.core.protocol.Version;
-import io.seata.core.serializer.SerializerType;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.compressor.CompressorType;
+import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.serializer.SerializerType;
 
 @Deprecated
 public class RaftSyncMessage implements java.io.Serializable {
 
     private static final long serialVersionUID = 8225279734319945365L;
-    protected byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();
+    private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();
 
-    protected byte compressor = CompressorType
+    private byte compressor = CompressorType
         .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
         .getCode();
 
-    protected Object body;
+    private Object body;
 
-    protected String version = Version.getCurrent();
+    private String version = Version.getCurrent();
 
     /**
      * Gets body.

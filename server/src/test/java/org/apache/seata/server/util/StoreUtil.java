@@ -20,15 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import io.seata.common.XID;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.common.XID;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
 
-import static io.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
 
-/**
- */
+
 public class StoreUtil {
 
     private static String sessionStorePath =

@@ -16,8 +16,8 @@
  */
 package org.apache.seata.server.coordinator;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.session.GlobalSession;
 
 /**

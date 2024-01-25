@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import io.seata.common.XID;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.CollectionUtils;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -43,10 +43,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 
-import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
-/**
- */
+
 @SpringBootTest
 public class RedisSessionManagerTest {
 

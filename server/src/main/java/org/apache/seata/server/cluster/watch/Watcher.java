@@ -18,8 +18,7 @@ package org.apache.seata.server.cluster.watch;
 
 import static org.apache.seata.server.cluster.watch.Watcher.Protocol.HTTP;
 
-/**
- */
+
 public class Watcher<T> {
 
     private String group;

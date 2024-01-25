@@ -34,12 +34,12 @@ import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import io.seata.common.XID;
-import io.seata.common.holder.ObjectHolder;
-import io.seata.common.metadata.ClusterRole;
-import io.seata.common.metadata.Node;
-import io.seata.common.store.StoreMode;
-import io.seata.common.util.StringUtils;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.metadata.ClusterRole;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.store.StoreMode;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
@@ -67,9 +67,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static io.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static io.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
@@ -80,8 +80,7 @@ import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMO
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
-/**
- */
+
 public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftStateMachine.class);

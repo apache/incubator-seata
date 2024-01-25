@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.raft.execute;
 
-import io.seata.common.util.NetUtil;
-import io.seata.config.ConfigurationCache;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.cluster.raft.execute.global.AddGlobalSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.global.RemoveGlobalSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
@@ -40,8 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 
-/**
- */
+
 @SpringBootTest
 class GlobalSessionExecuteTest {
     @BeforeAll

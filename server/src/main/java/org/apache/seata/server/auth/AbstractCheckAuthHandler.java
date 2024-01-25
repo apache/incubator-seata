@@ -16,16 +16,15 @@
  */
 package org.apache.seata.server.auth;
 
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.rpc.RegisterCheckAuthHandler;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
 
-import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 
-/**
- */
+
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(

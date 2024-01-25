@@ -19,15 +19,14 @@ package org.apache.seata.server.cluster.raft.context;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.seata.common.ConfigurationKeys;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.context.ContextCore;
-import io.seata.core.context.ContextCoreLoader;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.context.ContextCore;
+import org.apache.seata.core.context.ContextCoreLoader;
 
-import static io.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-/**
- */
+
 public class SeataClusterContext {
 
     private static final String GROUP = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);

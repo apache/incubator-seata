@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.lock;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.StoreConfig.LockMode;
 import org.slf4j.Logger;

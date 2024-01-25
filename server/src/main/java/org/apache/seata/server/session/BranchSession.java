@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.util.BufferUtils;
-import io.seata.common.util.CompressUtil;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.LockStatus;
+import org.apache.seata.common.util.BufferUtils;
+import org.apache.seata.common.util.CompressUtil;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.storage.file.lock.FileLocker;
@@ -37,7 +37,7 @@ import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.model.LockStatus.Locked;
+import static org.apache.seata.core.model.LockStatus.Locked;
 
 /**
  * The type Branch session.

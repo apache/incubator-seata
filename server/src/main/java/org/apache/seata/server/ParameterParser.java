@@ -19,13 +19,13 @@ package org.apache.seata.server;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.env.ContainerHelper;
 import org.apache.seata.server.store.StoreConfig;
 
-import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
+import static org.apache.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
 /**
  * The type Parameter parser.

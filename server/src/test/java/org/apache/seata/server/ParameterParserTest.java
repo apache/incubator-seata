@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server;
 
-import org.apache.seata.server.ParameterParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

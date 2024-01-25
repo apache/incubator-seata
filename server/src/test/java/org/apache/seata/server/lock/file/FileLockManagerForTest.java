@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.lock.file;
 
-import io.seata.core.lock.Locker;
+import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.storage.file.lock.FileLockManager;
 import org.apache.seata.server.storage.file.lock.FileLocker;
 import org.apache.seata.server.session.BranchSession;
 
-/**
- */
+
 public class FileLockManagerForTest extends FileLockManager {
 
     @Override
