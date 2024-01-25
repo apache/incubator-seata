@@ -27,7 +27,10 @@
     <packaging>jar</packaging>
     <name>seata-all ${project.version}</name>
     <description>compatible with io.seata API</description>
-
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
