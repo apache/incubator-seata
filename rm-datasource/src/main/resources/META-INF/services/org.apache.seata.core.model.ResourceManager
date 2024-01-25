@@ -1,0 +1,2 @@
+org.apache.seata.rm.datasource.DataSourceManager
+org.apache.seata.rm.datasource.xa.ResourceManagerXA

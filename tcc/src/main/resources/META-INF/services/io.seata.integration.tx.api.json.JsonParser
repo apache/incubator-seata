@@ -1,3 +1,0 @@
-io.seata.rm.tcc.json.FastJsonParser
-io.seata.rm.tcc.json.JacksonJsonParser
-io.seata.rm.tcc.json.GsonJsonParser

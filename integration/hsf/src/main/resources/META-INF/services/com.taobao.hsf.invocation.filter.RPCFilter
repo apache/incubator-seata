@@ -1,1 +1,1 @@
-io.seata.integration.hsf.HsfTransactionFilter
+org.apache.seata.integration.hsf.HsfTransactionFilter

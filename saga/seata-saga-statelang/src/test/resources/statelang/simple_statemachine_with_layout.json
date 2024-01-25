@@ -78,7 +78,7 @@
         "Status": {
           "#root != null": "SU",
           "#root == null": "FA",
-          "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
+          "$Exception{org.apache.seata.saga.engine.exception.EngineExecutionException}": "UN"
         }
       },
       "x": 199.375,
@@ -251,7 +251,7 @@
       "id": "d854a4d0",
       "stateProps": {
         "Exceptions": [
-          "io.seata.common.exception.FrameworkException"
+          "org.apache.seata.common.exception.FrameworkException"
         ]
       },
       "label": "",

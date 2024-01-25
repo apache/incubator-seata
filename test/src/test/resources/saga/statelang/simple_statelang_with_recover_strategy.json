@@ -20,7 +20,7 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },
@@ -63,7 +63,7 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null": "SU",
                 "#root == null": "FA"
             },

@@ -1,0 +1,3 @@
+org.apache.seata.saga.engine.pcext.interceptors.ServiceTaskHandlerInterceptor
+org.apache.seata.saga.engine.pcext.interceptors.ScriptTaskHandlerInterceptor
+org.apache.seata.saga.engine.pcext.interceptors.LoopTaskHandlerInterceptor

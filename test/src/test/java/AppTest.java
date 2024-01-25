@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.seata.common.ApplicationKeeper;
-import io.seata.rm.RMClient;
-import io.seata.tm.TMClient;
-import io.seata.tm.api.TransactionalExecutor;
-import io.seata.tm.api.TransactionalTemplate;
-import io.seata.tm.api.transaction.TransactionInfo;
+import org.apache.seata.common.ApplicationKeeper;
+import org.apache.seata.rm.RMClient;
+import org.apache.seata.tm.TMClient;
+import org.apache.seata.tm.api.TransactionalExecutor;
+import org.apache.seata.tm.api.TransactionalTemplate;
+import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

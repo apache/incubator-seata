@@ -47,7 +47,7 @@
             },
             "Retry": [
                 {
-                    "Exceptions": ["io.seata.saga.engine.mock.DemoException"],
+                    "Exceptions": ["org.apache.seata.saga.engine.mock.DemoException"],
                     "IntervalSeconds": 1.5,
                     "MaxAttempts": 3,
                     "BackoffRate": 1.5
@@ -61,7 +61,7 @@
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "org.apache.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "Fail"
                 }
