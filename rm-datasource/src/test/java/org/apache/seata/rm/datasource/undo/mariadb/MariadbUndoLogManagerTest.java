@@ -28,6 +28,8 @@ import java.util.List;
 
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.undo.UndoLogParser;
+import org.apache.seata.rm.datasource.undo.UndoLogParserFactory;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.BranchUndoLog;
