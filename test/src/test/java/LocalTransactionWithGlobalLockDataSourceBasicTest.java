@@ -14,15 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import io.seata.core.context.RootContext;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.Resource;
-import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.RMClient;
-import io.seata.rm.datasource.DataSourceManager;
-import io.seata.tm.TMClient;
+
+import java.util.Date;
+
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.Resource;
+import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.RMClient;
+import org.apache.seata.rm.datasource.DataSourceManager;
+import org.apache.seata.tm.TMClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,8 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.Date;
 
 /**
  * The type Data source basic test.

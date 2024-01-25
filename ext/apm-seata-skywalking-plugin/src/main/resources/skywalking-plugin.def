@@ -15,6 +15,6 @@
 # limitations under the License.
 #
 
-seata=io.seata.apm.skywalking.plugin.define.AbstractNettyRemotingInstrumentation
-seata=io.seata.apm.skywalking.plugin.define.DefaultCoreInstrumentation
-seata=io.seata.apm.skywalking.plugin.define.RemotingProcessorInstrumentation
+seata=org.apache.seata.apm.skywalking.plugin.define.AbstractNettyRemotingInstrumentation
+seata=org.apache.seata.apm.skywalking.plugin.define.DefaultCoreInstrumentation
+seata=org.apache.seata.apm.skywalking.plugin.define.RemotingProcessorInstrumentation

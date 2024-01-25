@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.tmp.core.context;
+package org.apache.seata.tmp.core.context;
 
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.seata.core.model.BranchType;
+import org.apache.seata.core.model.BranchType;
 
 /**
  * The type Root context.
@@ -34,7 +34,7 @@ public class RootContext {
      * @param defaultBranchType the default branch type
      */
     public static void setDefaultBranchType(BranchType defaultBranchType) {
-        io.seata.core.context.RootContext.setDefaultBranchType(defaultBranchType);
+        org.apache.seata.core.context.RootContext.setDefaultBranchType(defaultBranchType);
     }
 
     /**
@@ -44,7 +44,7 @@ public class RootContext {
      */
     @Nullable
     public static String getXID() {
-        return io.seata.core.context.RootContext.getXID();
+        return org.apache.seata.core.context.RootContext.getXID();
     }
 
     /**
@@ -53,7 +53,7 @@ public class RootContext {
      * @param xid the xid
      */
     public static void bind(@Nonnull String xid) {
-        io.seata.core.context.RootContext.bind(xid);
+        org.apache.seata.core.context.RootContext.bind(xid);
     }
 
     /**
@@ -62,7 +62,7 @@ public class RootContext {
      * @return the timeout
      */
     public static Integer getTimeout() {
-        return io.seata.core.context.RootContext.getTimeout();
+        return org.apache.seata.core.context.RootContext.getTimeout();
     }
 
     /**
@@ -71,14 +71,14 @@ public class RootContext {
      * @param timeout the timeout
      */
     public static void setTimeout(Integer timeout) {
-        io.seata.core.context.RootContext.setTimeout(timeout);
+        org.apache.seata.core.context.RootContext.setTimeout(timeout);
     }
 
     /**
      * Bind global lock flag.
      */
     public static void bindGlobalLockFlag() {
-        io.seata.core.context.RootContext.bindGlobalLockFlag();
+        org.apache.seata.core.context.RootContext.bindGlobalLockFlag();
     }
 
     /**
@@ -88,14 +88,14 @@ public class RootContext {
      */
     @Nullable
     public static String unbind() {
-        return io.seata.core.context.RootContext.unbind();
+        return org.apache.seata.core.context.RootContext.unbind();
     }
 
     /**
      * Unbind global lock flag.
      */
     public static void unbindGlobalLockFlag() {
-        io.seata.core.context.RootContext.unbindGlobalLockFlag();
+        org.apache.seata.core.context.RootContext.unbindGlobalLockFlag();
     }
 
     /**
@@ -104,7 +104,7 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean inGlobalTransaction() {
-        return io.seata.core.context.RootContext.inGlobalTransaction();
+        return org.apache.seata.core.context.RootContext.inGlobalTransaction();
     }
 
     /**
@@ -113,7 +113,7 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean inTccBranch() {
-        return io.seata.core.context.RootContext.inTccBranch();
+        return org.apache.seata.core.context.RootContext.inTccBranch();
     }
 
     /**
@@ -122,7 +122,7 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean inSagaBranch() {
-        return io.seata.core.context.RootContext.inSagaBranch();
+        return org.apache.seata.core.context.RootContext.inSagaBranch();
     }
 
     /**
@@ -132,7 +132,7 @@ public class RootContext {
      */
     @Nullable
     public static BranchType getBranchType() {
-        return io.seata.core.context.RootContext.getBranchType();
+        return org.apache.seata.core.context.RootContext.getBranchType();
     }
 
     /**
@@ -141,7 +141,7 @@ public class RootContext {
      * @param branchType the branch type
      */
     public static void bindBranchType(@Nonnull BranchType branchType) {
-        io.seata.core.context.RootContext.bindBranchType(branchType);
+        org.apache.seata.core.context.RootContext.bindBranchType(branchType);
     }
 
     /**
@@ -151,7 +151,7 @@ public class RootContext {
      */
     @Nullable
     public static BranchType unbindBranchType() {
-        return io.seata.core.context.RootContext.unbindBranchType();
+        return org.apache.seata.core.context.RootContext.unbindBranchType();
     }
 
     /**
@@ -160,14 +160,14 @@ public class RootContext {
      * @return the boolean
      */
     public static boolean requireGlobalLock() {
-        return io.seata.core.context.RootContext.requireGlobalLock();
+        return org.apache.seata.core.context.RootContext.requireGlobalLock();
     }
 
     /**
      * Assert not in global transaction.
      */
     public static void assertNotInGlobalTransaction() {
-        io.seata.core.context.RootContext.assertNotInGlobalTransaction();
+        org.apache.seata.core.context.RootContext.assertNotInGlobalTransaction();
     }
 
     /**
@@ -176,6 +176,6 @@ public class RootContext {
      * @return the map
      */
     public static Map<String, Object> entries() {
-        return io.seata.core.context.RootContext.entries();
+        return org.apache.seata.core.context.RootContext.entries();
     }
 }

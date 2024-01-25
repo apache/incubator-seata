@@ -1,0 +1,4 @@
+org.apache.seata.server.storage.db.lock.DataBaseLockManager
+org.apache.seata.server.storage.file.lock.FileLockManager
+org.apache.seata.server.storage.redis.lock.RedisLockManager
+org.apache.seata.server.storage.raft.lock.RaftLockManager

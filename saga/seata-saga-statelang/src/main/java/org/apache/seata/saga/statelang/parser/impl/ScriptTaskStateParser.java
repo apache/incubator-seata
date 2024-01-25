@@ -1,0 +1,52 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.seata.saga.statelang.parser.impl;
+
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.saga.statelang.domain.ScriptTaskState;
+import org.apache.seata.saga.statelang.domain.impl.ScriptTaskStateImpl;
+import org.apache.seata.saga.statelang.parser.StateParser;
+
+import java.util.Map;
+
+/**
+ * ScriptTaskState parser
+ *
+ */
+public class ScriptTaskStateParser extends AbstractTaskStateParser implements StateParser<ScriptTaskState> {
+
+    @Override
+    public ScriptTaskState parse(Object node) {
+
+        ScriptTaskStateImpl scriptTaskState = new ScriptTaskStateImpl();
+
+        parseTaskAttributes(scriptTaskState, node);
+
+        Map<String, Object> nodeMap = (Map<String, Object>)node;
+        String scriptType = (String) nodeMap.get("ScriptType");
+        if (StringUtils.isNotBlank(scriptType)) {
+            scriptTaskState.setScriptType(scriptType);
+        }
+        scriptTaskState.setScriptContent((String)nodeMap.get("ScriptContent"));
+
+        scriptTaskState.setForCompensation(false);
+        scriptTaskState.setForUpdate(false);
+        scriptTaskState.setPersist(false);
+
+        return scriptTaskState;
+    }
+}

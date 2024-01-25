@@ -114,7 +114,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>io.seata:seata-server</include>
+                <include>org.apache.seata:seata-server</include>
             </includes>
         </moduleSet>
     </moduleSets>

@@ -1,0 +1,2 @@
+org.apache.seata.rm.RMHandlerAT
+org.apache.seata.rm.RMHandlerXA

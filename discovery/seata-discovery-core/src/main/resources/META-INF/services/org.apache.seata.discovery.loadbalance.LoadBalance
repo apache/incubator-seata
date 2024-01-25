@@ -1,0 +1,5 @@
+org.apache.seata.discovery.loadbalance.RoundRobinLoadBalance
+org.apache.seata.discovery.loadbalance.RandomLoadBalance
+org.apache.seata.discovery.loadbalance.ConsistentHashLoadBalance
+org.apache.seata.discovery.loadbalance.LeastActiveLoadBalance
+org.apache.seata.discovery.loadbalance.XIDLoadBalance

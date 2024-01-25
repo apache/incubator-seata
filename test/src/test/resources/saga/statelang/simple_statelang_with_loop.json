@@ -64,7 +64,7 @@
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "org.apache.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTriggerTest"
                 }

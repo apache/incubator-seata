@@ -1,0 +1,2 @@
+org.apache.seata.server.storage.redis.lock.RedisDistributedLocker
+org.apache.seata.server.storage.db.lock.DataBaseDistributedLocker

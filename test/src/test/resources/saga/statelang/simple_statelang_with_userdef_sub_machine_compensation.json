@@ -21,7 +21,7 @@
             "Status": {
                 "#root != null": "SU",
                 "#root == null": "FA",
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN"
             }
         },
         "ChoiceState":{
@@ -55,12 +55,12 @@
             "Status": {
                 "#root != null": "SU",
                 "#root == null": "FA",
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
+                "$Exception{org.apache.seata.saga.engine.mock.DemoException}": "UN"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                        "org.apache.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }

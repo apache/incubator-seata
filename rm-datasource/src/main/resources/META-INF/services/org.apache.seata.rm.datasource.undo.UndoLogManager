@@ -1,0 +1,7 @@
+org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager
+org.apache.seata.rm.datasource.undo.oracle.OracleUndoLogManager
+org.apache.seata.rm.datasource.undo.postgresql.PostgresqlUndoLogManager
+org.apache.seata.rm.datasource.undo.sqlserver.SqlServerUndoLogManager
+org.apache.seata.rm.datasource.undo.mariadb.MariadbUndoLogManager
+org.apache.seata.rm.datasource.undo.polardbx.PolarDBXUndoLogManager
+org.apache.seata.rm.datasource.undo.dm.DmUndoLogManager

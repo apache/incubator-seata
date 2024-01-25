@@ -1,0 +1,3 @@
+org.apache.seata.rm.tcc.json.FastJsonParser
+org.apache.seata.rm.tcc.json.JacksonJsonParser
+org.apache.seata.rm.tcc.json.GsonJsonParser

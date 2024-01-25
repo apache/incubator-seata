@@ -4,97 +4,97 @@
     {
       "name": "seata.transport.heartbeat",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": true
     },
     {
       "name": "seata.transport.enable-client-batch-send-request",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": true
     },
     {
       "name": "seata.transport.enable-tm-client-batch-send-request",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": false
     },
     {
       "name": "seata.transport.enable-rm-client-batch-send-request",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": true
     },
     {
       "name": "seata.transport.enable-tc-server-batch-send-response",
       "type": "java.lang.Boolean",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
       "defaultValue": false
     },
     {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
       "defaultValue": 3
     },
     {
       "name": "seata.transport.thread-factory.boss-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyBoss"
     },
     {
       "name": "seata.transport.thread-factory.worker-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyServerNIOWorker"
     },
     {
       "name": "seata.transport.thread-factory.server-executor-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyServerBizHandler"
     },
     {
       "name": "seata.transport.thread-factory.client-selector-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyClientSelector"
     },
     {
       "name": "seata.transport.thread-factory.client-selector-thread-size",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": 1
     },
     {
       "name": "seata.transport.thread-factory.client-worker-thread-prefix",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "NettyClientWorkerThread"
     },
     {
       "name": "seata.transport.thread-factory.worker-thread-size",
       "type": "java.lang.String",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": "Default"
     },
     {
       "name": "seata.transport.thread-factory.boss-thread-size",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
       "defaultValue": 1
     },
     {
       "name": "seata.log.exception-rate",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.LogProperties",
       "defaultValue": 100
     },
     {
       "name": "seata.client.log.exception-rate",
       "type": "java.lang.Integer",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.LogProperties",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.LogProperties",
       "deprecation": {
         "level": "error",
         "replacement": "seata.log.exception-rate",
@@ -104,17 +104,17 @@
     {
       "name": "seata.transport.rpc-rm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
     },
     {
       "name": "seata.transport.rpc-tm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
     },
     {
       "name": "seata.transport.rpc-tc-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "io.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
     }
   ],
   "hints": [
@@ -124,7 +124,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.config.ConfigType"
+            "target": "org.apache.seata.config.ConfigType"
           }
         }
       ]
@@ -135,7 +135,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.config.processor.ConfigDataType"
+            "target": "org.apache.seata.config.processor.ConfigDataType"
           }
         }
       ]
@@ -146,7 +146,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.discovery.registry.RegistryType"
+            "target": "org.apache.seata.discovery.registry.RegistryType"
           }
         }
       ]
@@ -157,7 +157,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.core.rpc.TransportProtocolType"
+            "target": "org.apache.seata.core.rpc.TransportProtocolType"
           }
         }
       ]
@@ -168,7 +168,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.core.rpc.TransportServerType"
+            "target": "org.apache.seata.core.rpc.TransportServerType"
           }
         }
       ]
@@ -179,7 +179,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.core.serializer.SerializerType"
+            "target": "org.apache.seata.core.serializer.SerializerType"
           }
         }
       ]
@@ -190,7 +190,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.core.compressor.CompressorType"
+            "target": "org.apache.seata.core.compressor.CompressorType"
           }
         }
       ]
@@ -201,7 +201,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "io.seata.core.rpc.netty.NettyBaseConfig$WorkThreadMode"
+            "target": "org.apache.seata.core.rpc.netty.NettyBaseConfig$WorkThreadMode"
           }
         }
       ]
