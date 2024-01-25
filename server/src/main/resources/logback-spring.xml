@@ -94,10 +94,10 @@
     </appender>
 
     <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
         <appender-ref ref="ASYNC_FILE_ALL"/>
         <appender-ref ref="ASYNC_FILE_WARN"/>
         <appender-ref ref="ASYNC_FILE_ERROR"/>
-        <appender-ref ref="ASYNC_CONSOLE"/>
         <!-- logstash-appender: off by default -->
         <!--<appender-ref ref="LOGSTASH"/>-->
 
