@@ -1,8 +1,8 @@
 name: "Publish OSSRH"
 
-on:
-  push:
-    branches: [ develop, 2.x, snapshot, "*.*.*" ]
+on: false
+#  push:
+#    branches: [ develop, 2.x, snapshot, "*.*.*" ]
 
 jobs:
   # job 1
