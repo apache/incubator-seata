@@ -330,6 +330,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -645,7 +650,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.apache.seata:*</include>
-                                    <include>io.seata:seata-all</include>
+                                    <include>io.seata:*</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
