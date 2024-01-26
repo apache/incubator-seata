@@ -158,16 +158,6 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>update caniuse db</id>
-                                <goals>
-                                    <goal>npx</goal>
-                                </goals>
-                                <phase>generate-resources</phase>
-                                <configuration>
-                                    <arguments>browserslist@latest</arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
                                 <id>npm build</id>
                                 <goals>
                                     <goal>npm</goal>
