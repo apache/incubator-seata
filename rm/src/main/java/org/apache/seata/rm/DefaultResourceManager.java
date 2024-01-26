@@ -22,26 +22,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.CollectionUtils;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.Resource;
-import io.seata.core.model.ResourceManager;
-import io.seata.core.protocol.transaction.GlobalStatusRequest;
-import io.seata.core.protocol.transaction.GlobalStatusResponse;
-import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
+import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
+import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 
 /**
  * default resource manager, adapt all resource managers
@@ -167,7 +159,7 @@ public class DefaultResourceManager implements ResourceManager {
     public GlobalStatus getGlobalStatus(String xid) throws TimeoutException {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
-        GlobalStatusResponse response = (GlobalStatusResponse)RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
+        GlobalStatusResponse response = (GlobalStatusResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
         return response.getGlobalStatus();
     }
 
