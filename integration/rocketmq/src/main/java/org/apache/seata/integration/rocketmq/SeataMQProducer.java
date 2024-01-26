@@ -69,8 +69,8 @@ public class SeataMQProducer extends TransactionMQProducer {
             public LocalTransactionState checkLocalTransaction(MessageExt msg) {
                 String xid = msg.getProperty(PROPERTY_SEATA_XID);
                 if (StringUtils.isBlank(xid)) {
-                    LOGGER.error("msg has no xid, msg: {}", msg);
-                    return LocalTransactionState.UNKNOW;
+                    LOGGER.error("msg has no xid, msgTransactionId: {}, msg will be rollback", msg.getTransactionId());
+                    return LocalTransactionState.ROLLBACK_MESSAGE;
                 }
                 List<GlobalStatus> commitStatuses = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
                 List<GlobalStatus> rollbackStatuses = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
@@ -80,9 +80,12 @@ public class SeataMQProducer extends TransactionMQProducer {
                         return LocalTransactionState.COMMIT_MESSAGE;
                     } else if (rollbackStatuses.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
                         return LocalTransactionState.ROLLBACK_MESSAGE;
+                    } else if (GlobalStatus.Finished.equals(globalStatus)) {
+                        LOGGER.error("global transaction finished, msg will be rollback, xid: {}", xid);
+                        return LocalTransactionState.ROLLBACK_MESSAGE;
                     }
                 } catch (TimeoutException e) {
-                    LOGGER.error("getGlobalStatus error, xid: {}", xid, e);
+                    LOGGER.error("getGlobalStatus error, xid: {}, msgTransactionId: {}", xid, msg.getTransactionId(), e);
                 }
                 return LocalTransactionState.UNKNOW;
             }
