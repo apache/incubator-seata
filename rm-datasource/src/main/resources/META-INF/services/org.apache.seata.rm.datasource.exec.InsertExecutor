@@ -1,0 +1,7 @@
+org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor
+org.apache.seata.rm.datasource.exec.oracle.OracleInsertExecutor
+org.apache.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor
+org.apache.seata.rm.datasource.exec.sqlserver.SqlServerInsertExecutor
+org.apache.seata.rm.datasource.exec.mariadb.MariadbInsertExecutor
+org.apache.seata.rm.datasource.exec.polardbx.PolarDBXInsertExecutor
+org.apache.seata.rm.datasource.exec.dm.DmInsertExecutor

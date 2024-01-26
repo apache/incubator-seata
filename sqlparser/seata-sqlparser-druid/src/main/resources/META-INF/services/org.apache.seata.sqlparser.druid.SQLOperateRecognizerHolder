@@ -1,0 +1,7 @@
+org.apache.seata.sqlparser.druid.mysql.MySQLOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.mariadb.MariadbOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.postgresql.PostgresqlOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.sqlserver.SqlServerOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.polardbx.PolarDBXOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.dm.DmOperateRecognizerHolder

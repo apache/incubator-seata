@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>seata-parent</artifactId>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>

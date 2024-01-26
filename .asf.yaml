@@ -18,6 +18,9 @@ github:
   description: ":fire: Seata is an easy-to-use, high-performance, open source distributed transaction solution."
   homepage: https://seata.apache.org/
   labels:
+    - distributed-transaction
+    - consistency
+    - microservice
     - at
     - tcc
     - saga
@@ -33,22 +36,22 @@ github:
       required_status_checks:
         strict: true
       required_pull_request_reviews:
-        dismiss_stale_reviews: true
+        dismiss_stale_reviews: false
         required_approving_review_count: 1
     develop:
       required_status_checks:
         strict: true
       required_pull_request_reviews:
-        dismiss_stale_reviews: true
+        dismiss_stale_reviews: false
         required_approving_review_count: 1
     2.x:
       required_status_checks:
         strict: true
       required_pull_request_reviews:
-        dismiss_stale_reviews: true
+        dismiss_stale_reviews: false
         required_approving_review_count: 1
 notifications:
   commits: notifications@seata.apache.org
-  issues: dev@seata.apache.org
-  pullrequests: dev@seata.apache.org
+  issues: notifications@seata.apache.org
+  pullrequests: notifications@seata.apache.org
   discussions: dev@seata.apache.org
