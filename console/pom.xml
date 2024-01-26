@@ -144,7 +144,7 @@
                                 </goals>
                                 <phase>generate-resources</phase>
                                 <configuration>
-                                    <nodeVersion>v14.21.3</nodeVersion>
+                                    <nodeVersion>v19.5.0</nodeVersion>
                                 </configuration>
                             </execution>
                             <execution>
@@ -155,16 +155,6 @@
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <arguments>install</arguments>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>update caniuse db</id>
-                                <goals>
-                                    <goal>npx</goal>
-                                </goals>
-                                <phase>generate-resources</phase>
-                                <configuration>
-                                    <arguments>browserslist@latest</arguments>
                                 </configuration>
                             </execution>
                             <execution>
