@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.common.exception;
+package org.apache.seata.common.exception;
 
 import java.util.ResourceBundle;
 
