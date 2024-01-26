@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.rocketmq;
+package org.apache.seata.integration.rocketmq;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
-import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextUtil;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;

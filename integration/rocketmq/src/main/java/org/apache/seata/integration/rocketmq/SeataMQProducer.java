@@ -14,17 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.rocketmq;
+package org.apache.seata.integration.rocketmq;
 
-import io.seata.core.context.RootContext;
-import io.seata.core.model.GlobalStatus;
-import io.seata.rm.DefaultResourceManager;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.rocketmq.client.Validators;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.client.producer.TransactionCheckListener;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.common.message.Message;
@@ -37,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -67,11 +68,13 @@ public class SeataMQProducer extends TransactionMQProducer {
             @Override
             public LocalTransactionState checkLocalTransaction(MessageExt msg) {
                 String xid = msg.getProperty(PROPERTY_SEATA_XID);
+                List<GlobalStatus> commitStatuses = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
+                List<GlobalStatus> rollbackStatuses = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
                 try {
                     GlobalStatus globalStatus = DefaultResourceManager.get().getGlobalStatus(xid);
-                    if (globalStatus == GlobalStatus.Committed) {
+                    if (commitStatuses.contains(globalStatus)) {
                         return LocalTransactionState.COMMIT_MESSAGE;
-                    } else if (globalStatus == GlobalStatus.Rollbacked) {
+                    } else if (rollbackStatuses.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
                         return LocalTransactionState.ROLLBACK_MESSAGE;
                     }
                 } catch (TimeoutException e) {
@@ -81,6 +84,7 @@ public class SeataMQProducer extends TransactionMQProducer {
             }
         };
     }
+
 
     public void setTccRocketMQ(TCCRocketMQ tccRocketMQ) {
         this.tccRocketMQ = tccRocketMQ;
@@ -96,8 +100,8 @@ public class SeataMQProducer extends TransactionMQProducer {
             if (tccRocketMQ == null) {
                 throw new RuntimeException("TCCRocketMQ is null");
             }
-            return tccRocketMQ.prepare(msg,timeout);
-        }else {
+            return tccRocketMQ.prepare(msg, timeout);
+        } else {
             return super.send(msg, timeout);
         }
     }
@@ -153,8 +157,6 @@ public class SeataMQProducer extends TransactionMQProducer {
         }
         return new SeataMQProducer(groupName);
     }
-
-
 
 
     @Override

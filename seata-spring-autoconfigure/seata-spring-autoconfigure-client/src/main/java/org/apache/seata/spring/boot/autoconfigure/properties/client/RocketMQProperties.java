@@ -1,5 +1,5 @@
 
-package io.seata.spring.boot.autoconfigure.properties.client;
+package org.apache.seata.spring.boot.autoconfigure.properties.client;
 
 import java.util.HashMap;
 import java.util.Map;

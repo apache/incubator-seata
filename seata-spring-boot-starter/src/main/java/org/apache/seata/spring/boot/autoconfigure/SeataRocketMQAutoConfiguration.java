@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure;
+package org.apache.seata.spring.boot.autoconfigure;
 
 
-import io.seata.integration.rocketmq.SeataMQProducer;
-import io.seata.integration.rocketmq.TCCRocketMQ;
-import io.seata.integration.rocketmq.TCCRocketMQImpl;
-import io.seata.spring.boot.autoconfigure.properties.client.RocketMQProperties;
+import org.apache.seata.integration.rocketmq.SeataMQProducer;
+import org.apache.seata.integration.rocketmq.TCCRocketMQ;
+import org.apache.seata.integration.rocketmq.TCCRocketMQImpl;
+import org.apache.seata.spring.boot.autoconfigure.properties.client.RocketMQProperties;
 import org.apache.rocketmq.client.AccessChannel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;

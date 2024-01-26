@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.rocketmq;
+package org.apache.seata.integration.rocketmq;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.LocalTCC;
-import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.rm.tcc.api.LocalTCC;
+import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeoutException;
