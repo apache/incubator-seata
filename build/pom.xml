@@ -123,6 +123,7 @@
         <!-- Default values of the Maven plugins -->
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
+        <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
@@ -452,7 +453,7 @@
         <profile>
             <id>args-for-client-test</id>
             <properties>
-                <maven.surefire.excludes>io/seata/server/**/*.java,io/seata/console/**/*.java</maven.surefire.excludes>
+                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>

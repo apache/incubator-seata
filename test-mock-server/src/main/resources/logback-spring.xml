@@ -20,14 +20,14 @@
 
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
     <!-- Context listeners -->
-    <contextListener class="io.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
+    <contextListener class="org.apache.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
 
     <!-- The conversion rules are copied from `defaults.xml` in the `spring-boot-xxx.jar` -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
     <!-- The custom conversion rules -->
-    <conversionRule conversionWord="wEx2" converterClass="io.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx2" converterClass="org.apache.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="7091"/>
