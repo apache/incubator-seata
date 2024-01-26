@@ -64,11 +64,11 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
 
     @Override
     public boolean commit(BusinessActionContext context)
-            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException, TransactionException {
         Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
         SendResult sendResult = context.getActionContext(ROCKET_SEND_RESULT_KEY, SendResult.class);
         if (message == null || sendResult == null) {
-            throw new ShouldNeverHappenException("TCCRocketMQ commit but cannot find message and sendResult");
+            throw new TransactionException("TCCRocketMQ commit but cannot find message and sendResult");
         }
         producer.getDefaultMQProducerImpl().endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
