@@ -20,7 +20,11 @@ const base = require('./webpack.base.conf');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// error:0308010C:digital envelope routines::unsupported
+const crypto = require("crypto");
+const ori_createHash = crypto.createHash;
+crypto.createHash = algorithm => ori_createHash(algorithm == "md4" ? "sha256" : algorithm);
 
 module.exports = Object.assign({}, base, {
   optimization: {
@@ -34,8 +38,8 @@ module.exports = Object.assign({}, base, {
     ],
   },
   plugins: [
-    new CleanWebpackPlugin(path.resolve(__dirname, '../dist'), {
-      root: path.resolve(__dirname, '../'),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [path.resolve(__dirname, '../dist')]
     }),
     ...base.plugins,
     new MiniCssExtractPlugin({
