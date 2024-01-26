@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.plugin.jackson.parser.oracle;
+package org.apache.seata.plugin.jackson.parser.oracle;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -26,8 +26,8 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
-import io.seata.common.loader.LoadLevel;
-import io.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

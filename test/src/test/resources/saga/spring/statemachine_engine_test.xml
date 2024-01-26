@@ -18,17 +18,14 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:context="http://www.springframework.org/schema/context"
-	   xsi:schemaLocation="
-	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-	<bean id="stateMachineEngine" class="io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
+	<bean id="stateMachineEngine" class="org.apache.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
 		<property name="stateMachineConfig" ref="defaultStateMachineConfig"></property>
 	</bean>
-	<bean id="defaultStateMachineConfig" class="io.seata.saga.engine.impl.DefaultStateMachineConfig">
+	<bean id="defaultStateMachineConfig" class="org.apache.seata.saga.engine.impl.DefaultStateMachineConfig">
 		<property name="resources" value="saga/statelang/*.json"></property>
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor" />
@@ -46,5 +43,5 @@
 	</bean>
 
 
-	<bean id="demoService" class="io.seata.saga.engine.mock.DemoService"/>
+	<bean id="demoService" class="org.apache.seata.saga.engine.mock.DemoService"/>
 </beans>
