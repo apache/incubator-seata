@@ -16,6 +16,7 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.rm.DefaultResourceManager;
@@ -34,7 +35,6 @@ import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +68,10 @@ public class SeataMQProducer extends TransactionMQProducer {
             @Override
             public LocalTransactionState checkLocalTransaction(MessageExt msg) {
                 String xid = msg.getProperty(PROPERTY_SEATA_XID);
+                if (StringUtils.isBlank(xid)) {
+                    LOGGER.error("msg has no xid, msg: {}", msg);
+                    return LocalTransactionState.UNKNOW;
+                }
                 List<GlobalStatus> commitStatuses = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
                 List<GlobalStatus> rollbackStatuses = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
                 try {
