@@ -177,7 +177,7 @@ public class PageUtil {
      * @return java.lang.String
      */
     public static String getTimeStartSql(String dbType, String timeColumnName) {
-        switch (dbType) {
+        switch (dbType.toLowerCase()) {
             case "mysql":
             case "oracle":
             case "postgresql":
@@ -196,7 +196,7 @@ public class PageUtil {
      * @return java.lang.String
      */
     public static String getTimeEndSql(String dbType, String timeColumnName) {
-        switch (dbType) {
+        switch (dbType.toLowerCase()) {
             case "mysql":
             case "oracle":
             case "postgresql":
