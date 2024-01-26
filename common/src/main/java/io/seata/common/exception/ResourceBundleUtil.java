@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.common.exception;
+package org.apache.seata.common.exception;
 
 import java.text.MessageFormat;
 import java.util.HashSet;
@@ -22,8 +22,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import org.apache.commons.lang.StringUtils;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 
 public class ResourceBundleUtil {
 
