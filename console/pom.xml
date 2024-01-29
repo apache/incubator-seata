@@ -165,6 +165,9 @@
                                 <phase>generate-resources</phase>
                                 <configuration>
                                     <arguments>run build</arguments>
+                                    <environmentVariables>
+                                        <VERSION>${project.version}</VERSION>
+                                    </environmentVariables>
                                 </configuration>
                             </execution>
                         </executions>

@@ -44,6 +44,7 @@ export type AppPropsType = StateToPropsType & DispathToPropsType & RouteComponen
 
 export type AppStateType = {
   loading: object;
+  version: string;
 };
 
 class App extends React.Component<AppPropsType, AppStateType> {
@@ -54,6 +55,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
 
   state: AppStateType = {
     loading: {},
+    version: '',
   };
 
   constructor(props: AppPropsType) {
@@ -64,7 +66,14 @@ class App extends React.Component<AppPropsType, AppStateType> {
     console.log('this.props: ', this.props, history);
     const language: string = getCurrentLanguage();
     this.props.changeLanguage(language);
+    this.getVersion();
   }
+
+  getVersion = () => {
+    fetch('version.json').then(response =>
+      response.json().then(json => this.setState({ ...this.state, version: json.version }))
+    );
+  };
 
   get menu() {
     const { locale }: AppPropsType = this.props;
@@ -101,7 +110,30 @@ class App extends React.Component<AppPropsType, AppStateType> {
           <Route path="/login" component={Login} />
           <Layout
             nav={({ location }: any) => (
-              <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
+              <>
+                <div
+                  style={{
+                    height: 'calc(100% - 100px)',
+                    minHeight: '300px',
+                  }}
+                >
+                  <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
+                </div>
+                <div
+                  style={{
+                    backgroundColor: '#c2ccd0',
+                    height: '100px',
+                    textAlign: 'center',
+                    paddingTop: '20px',
+                    paddingBottom: '20px',
+                  }}
+                >
+                  <span>Apache Seata (Incubating)</span>
+                  <br />
+                  <br />
+                  <span>Version:{this.state.version}</span>
+                </div>
+              </>
             )}
           >
             <Route path={'/'} exact render={() => <Redirect to="/transaction/list" />} />
