@@ -17,7 +17,6 @@
 package org.apache.seata.core.model;
 
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Resource Manager: common behaviors.
@@ -52,6 +51,4 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
      * @return The BranchType of ResourceManager.
      */
     BranchType getBranchType();
-
-    GlobalStatus getGlobalStatus(String xid) throws TimeoutException;
 }

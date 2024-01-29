@@ -155,7 +155,6 @@ public class DefaultResourceManager implements ResourceManager {
         throw new FrameworkException("DefaultResourceManager isn't a real ResourceManager");
     }
 
-    @Override
     public GlobalStatus getGlobalStatus(String xid) throws TimeoutException {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
