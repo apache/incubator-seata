@@ -91,13 +91,16 @@ module.exports = {
       template: './public/index.html',
       minify: !isDev,
     }),
-    new CopyWebpackPlugin([
-      {
-        from: resolve('public'),
-        to: './',
-        ignore: ['index.html'],
-      },
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: resolve('public'),
+          to: './',
+          globOptions:{
+            ignore: ['**/index.html'],
+          }
+        },
+      ]}),
     new VersionPlugin()
   ],
 };

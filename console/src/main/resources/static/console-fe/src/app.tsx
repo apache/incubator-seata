@@ -143,7 +143,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
                 <Iframe title={'Seata'} src={'./saga-statemachine-designer/designer.html'} />
               )}
             />
-            {router.map(item => (
+            {router.map((item) => (
               <Route key={item.path} {...item} />
             ))}
           </Layout>
@@ -168,10 +168,7 @@ const mapStateToProps = (state: GlobalStateModel, ownProps: OwnProps): StateToPr
 });
 
 const mapDispatchToProps = (dispatch: Dispatch): DispathToPropsType => ({
-  changeLanguage: lang => changeLanguage(lang)(dispatch),
+  changeLanguage: (lang) => changeLanguage(lang)(dispatch),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App as any);
+export default connect(mapStateToProps, mapDispatchToProps)(App as any);

@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.plugin.jackson.parser.oracle;
+package org.apache.seata.plugin.jackson.parser.oracle;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
