@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.rocketmq;
 
-import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
