@@ -121,7 +121,6 @@ class App extends React.Component<AppPropsType, AppStateType> {
                 </div>
                 <div
                   style={{
-                    // backgroundColor: 'var(--console-menu-bg,#f7f7f7)',
                     backgroundColor: '#c2ccd0',
                     height: '100px',
                     textAlign: 'center',
@@ -130,6 +129,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
                   }}
                 >
                   <span>Apache Seata (Incubating)</span>
+                  <br />
                   <br />
                   <span>Version:{this.state.version}</span>
                 </div>
