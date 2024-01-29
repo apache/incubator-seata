@@ -40,8 +40,8 @@ import java.util.concurrent.TimeoutException;
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
 
-    private String ROCKET_MSG_KEY = "ROCKET_MSG";
-    private String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
+    private static final String ROCKET_MSG_KEY = "ROCKET_MSG";
+    private static final String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
 
     private SeataMQProducer producer;
 
