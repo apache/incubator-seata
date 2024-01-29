@@ -14,9 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.navbar{
-    overflow-y: auto;
-    .next-menu{
-        height: 100%;
+
+const fs = require('fs')
+const path = require('path')
+
+class VersionPlugin{
+  apply(compiler){
+    if(process.env.VERSION){
+      fs.writeFileSync(path.join(__dirname,'../public/version.json'),JSON.stringify({"version":process.env.VERSION}))
     }
+  }
 }
+
+module.exports = VersionPlugin;

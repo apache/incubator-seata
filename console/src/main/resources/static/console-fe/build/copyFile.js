@@ -28,7 +28,7 @@ const mkdir = dir => {
     }
   };
 
-const copyList = ['js/main.js', 'css/main.css'];
+const copyList = ['js/main.js', 'css/main.css', 'version.json'];
 
 copyList.forEach(_fileName => {
     const srcFileName = path.join(srcDir, _fileName);
