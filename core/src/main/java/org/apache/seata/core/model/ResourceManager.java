@@ -16,8 +16,6 @@
  */
 package org.apache.seata.core.model;
 
-import io.seata.core.exception.TransactionException;
-
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -55,5 +53,5 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
      */
     BranchType getBranchType();
 
-    GlobalStatus getGlobalStatus(String xid) throws TransactionException, TimeoutException;
+    GlobalStatus getGlobalStatus(String xid) throws TimeoutException;
 }

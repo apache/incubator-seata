@@ -16,6 +16,7 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.GlobalStatus;
@@ -132,24 +133,16 @@ public class SeataMQProducer extends TransactionMQProducer {
             throw new MQClientException("send message Exception", e);
         }
 
-        switch (sendResult.getSendStatus()) {
-            case SEND_OK: {
-                if (sendResult.getTransactionId() != null) {
-                    msg.putUserProperty("__transactionId__", sendResult.getTransactionId());
-                }
-                String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
-                if (null != transactionId && !"".equals(transactionId)) {
-                    msg.setTransactionId(transactionId);
-                }
-            }
-            break;
-            case FLUSH_DISK_TIMEOUT:
-            case FLUSH_SLAVE_TIMEOUT:
-            case SLAVE_NOT_AVAILABLE:
-            default:
-                throw new RuntimeException("Message send fail.");
+        if (SendStatus.SEND_OK != sendResult.getSendStatus()) {
+            throw new RuntimeException("Message send fail.status=" + sendResult.getSendStatus());
         }
-
+        if (sendResult.getTransactionId() != null) {
+            msg.putUserProperty("__transactionId__", sendResult.getTransactionId());
+        }
+        String transactionId = msg.getProperty(MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
+        if (null != transactionId && !"".equals(transactionId)) {
+            msg.setTransactionId(transactionId);
+        }
         return sendResult;
     }
 
