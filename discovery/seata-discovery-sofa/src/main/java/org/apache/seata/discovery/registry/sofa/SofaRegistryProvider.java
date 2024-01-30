@@ -21,8 +21,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.discovery.registry.RegistryProvider;
 import org.apache.seata.discovery.registry.RegistryService;
 
-/**
- */
+
 @LoadLevel(name = "Sofa", order = 1)
 public class SofaRegistryProvider implements RegistryProvider {
     @Override

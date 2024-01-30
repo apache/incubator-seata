@@ -34,8 +34,7 @@ import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
 
     JacksonUndoLogParser parser = (JacksonUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, JacksonUndoLogParser.NAME);

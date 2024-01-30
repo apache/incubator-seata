@@ -36,8 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public abstract class BaseUndoLogParserTest extends BaseH2Test {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

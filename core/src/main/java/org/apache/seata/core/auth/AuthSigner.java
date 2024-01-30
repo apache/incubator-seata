@@ -16,8 +16,7 @@
  */
 package org.apache.seata.core.auth;
 
-/**
- */
+
 public interface AuthSigner {
     
     String sign(String data, String key);

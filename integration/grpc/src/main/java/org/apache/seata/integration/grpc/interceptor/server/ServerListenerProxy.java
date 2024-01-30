@@ -26,8 +26,7 @@ import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);
 

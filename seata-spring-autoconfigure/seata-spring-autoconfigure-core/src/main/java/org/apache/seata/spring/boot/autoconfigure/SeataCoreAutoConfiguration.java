@@ -26,8 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
-/**
- */
+
 @ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = "org.apache.seata.spring.boot.autoconfigure.properties")
 @Configuration(proxyBeanMethods = false)

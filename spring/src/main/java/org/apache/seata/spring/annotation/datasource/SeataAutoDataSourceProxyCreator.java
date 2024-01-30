@@ -32,8 +32,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 
-/**
- */
+
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoDataSourceProxyCreator.class);

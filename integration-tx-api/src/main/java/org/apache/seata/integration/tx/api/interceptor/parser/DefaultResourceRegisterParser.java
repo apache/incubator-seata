@@ -22,8 +22,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- */
+
 public class DefaultResourceRegisterParser {
 
     protected static List<RegisterResourceParser> allRegisterResourceParsers = new ArrayList<>();

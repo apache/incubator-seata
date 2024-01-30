@@ -18,8 +18,7 @@ package org.apache.seata.config;
 
 import org.apache.seata.common.loader.LoadLevel;
 
-/**
- */
+
 @LoadLevel(name = "forTest")
 public class CustomConfigurationProviderForTest implements ConfigurationProvider {
     @Override

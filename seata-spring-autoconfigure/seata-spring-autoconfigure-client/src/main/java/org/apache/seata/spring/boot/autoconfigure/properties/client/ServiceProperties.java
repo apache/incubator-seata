@@ -30,8 +30,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = SERVICE_PREFIX)
 public class ServiceProperties implements InitializingBean {

@@ -32,8 +32,7 @@ import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class PlainExecutorTest {
 
     private PlainExecutor plainExecutor;

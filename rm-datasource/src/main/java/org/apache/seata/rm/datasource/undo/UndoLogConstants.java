@@ -21,8 +21,7 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 
-/**
- */
+
 public interface UndoLogConstants {
 
     String SERIALIZER_KEY = "serializer";

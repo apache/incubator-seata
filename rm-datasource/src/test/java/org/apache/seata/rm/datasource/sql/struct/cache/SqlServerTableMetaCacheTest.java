@@ -37,8 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.mock;
 
-/**
- */
+
 public class SqlServerTableMetaCacheTest {
     private static Object[][] columnMetas =
             new Object[][]{

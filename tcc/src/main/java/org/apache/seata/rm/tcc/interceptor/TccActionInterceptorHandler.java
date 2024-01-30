@@ -41,8 +41,7 @@ import org.slf4j.MDC;
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
-/**
- */
+
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,

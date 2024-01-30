@@ -23,8 +23,7 @@ import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class PostgresqlEscapeHandlerTest {
 
     @Test

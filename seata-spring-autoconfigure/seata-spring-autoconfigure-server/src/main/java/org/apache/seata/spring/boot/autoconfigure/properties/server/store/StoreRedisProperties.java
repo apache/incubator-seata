@@ -26,8 +26,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = STORE_REDIS_PREFIX)
 public class StoreRedisProperties {

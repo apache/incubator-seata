@@ -27,8 +27,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser;
 
-/**
- */
+
 class UndoLogParserProviderTest {
 
     @Test

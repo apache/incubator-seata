@@ -21,8 +21,7 @@ import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class CustomConfigurationTest {
     @Test
     public void testCustomConfigLoad() throws Exception {

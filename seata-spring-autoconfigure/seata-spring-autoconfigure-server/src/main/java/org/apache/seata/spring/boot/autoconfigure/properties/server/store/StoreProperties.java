@@ -23,8 +23,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = STORE_PREFIX)
 public class StoreProperties {

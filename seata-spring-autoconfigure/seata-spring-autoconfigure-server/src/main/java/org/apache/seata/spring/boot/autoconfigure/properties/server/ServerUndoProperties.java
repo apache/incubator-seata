@@ -23,8 +23,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERI
 import static org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = SERVER_UNDO_PREFIX)
 public class ServerUndoProperties {

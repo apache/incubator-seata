@@ -30,8 +30,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class DmDeleteRecognizerTest {
 
     private static final String DB_TYPE = "dm";

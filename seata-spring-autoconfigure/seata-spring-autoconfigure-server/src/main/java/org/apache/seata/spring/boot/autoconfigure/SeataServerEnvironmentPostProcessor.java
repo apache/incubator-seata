@@ -50,8 +50,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_SESSION_PREFIX;
 
-/**
- */
+
 public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final AtomicBoolean INIT = new AtomicBoolean(false);

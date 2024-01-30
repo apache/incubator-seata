@@ -30,8 +30,7 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalReportResponse;
 
-/**
- */
+
 public class GlobalReportResponseConvertor implements PbConvertor<GlobalReportResponse, GlobalReportResponseProto> {
     @Override
     public GlobalReportResponseProto convert2Proto(GlobalReportResponse globalStatusResponse) {

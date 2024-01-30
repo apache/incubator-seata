@@ -19,8 +19,7 @@ package org.apache.seata.integration.brpc.server;
 import com.baidu.brpc.protocol.BrpcMeta;
 import org.apache.seata.integration.brpc.dto.Echo;
 
-/**
- */
+
 public interface EchoService {
 
 

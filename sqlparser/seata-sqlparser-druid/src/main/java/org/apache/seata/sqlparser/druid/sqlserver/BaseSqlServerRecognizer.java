@@ -37,8 +37,7 @@ import org.apache.seata.sqlparser.druid.BaseRecognizer;
 import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
     /**
      * Instantiates a new sqlserver base recognizer.

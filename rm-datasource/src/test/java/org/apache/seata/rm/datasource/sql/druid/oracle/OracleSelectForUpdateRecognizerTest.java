@@ -30,8 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- */
+
 public class OracleSelectForUpdateRecognizerTest {
 
     private static final String DB_TYPE = "oracle";

@@ -20,8 +20,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.discovery.registry.RegistryProvider;
 import org.apache.seata.discovery.registry.RegistryService;
 
-/**
- */
+
 @LoadLevel(name = "Etcd3", order = 1)
 public class EtcdRegistryProvider implements RegistryProvider {
     @Override

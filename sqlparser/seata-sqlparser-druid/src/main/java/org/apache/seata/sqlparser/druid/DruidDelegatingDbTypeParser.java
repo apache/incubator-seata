@@ -22,8 +22,7 @@ import org.apache.seata.sqlparser.util.DbTypeParser;
 
 import java.lang.reflect.Constructor;
 
-/**
- */
+
 @LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
 public class DruidDelegatingDbTypeParser implements DbTypeParser {
     private DbTypeParser dbTypeParserImpl;

@@ -27,8 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class LowerCaseLinkHashMapTest {
 
     private static final Map<String, Object> lowerCaseLinkHashMap = new LowerCaseLinkHashMap<>();

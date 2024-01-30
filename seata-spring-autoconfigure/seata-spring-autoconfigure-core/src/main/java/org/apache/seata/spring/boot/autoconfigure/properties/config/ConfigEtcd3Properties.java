@@ -22,8 +22,7 @@ import org.springframework.stereotype.Component;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
 
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = CONFIG_ETCD3_PREFIX)
 public class ConfigEtcd3Properties {

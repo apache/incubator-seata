@@ -48,8 +48,7 @@ import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- */
+
 public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
 
     @BeforeEach

@@ -18,8 +18,7 @@ package org.apache.seata.integration.tx.api.event;
 
 import org.apache.seata.core.event.Event;
 
-/**
- */
+
 public class DegradeCheckEvent implements Event {
     private boolean requestSuccess;
 

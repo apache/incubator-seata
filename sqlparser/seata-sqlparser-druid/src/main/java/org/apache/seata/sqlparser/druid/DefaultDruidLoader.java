@@ -25,8 +25,7 @@ import java.security.CodeSource;
 
 import static org.apache.seata.common.DefaultValues.DRUID_LOCATION;
 
-/**
- */
+
 class DefaultDruidLoader implements DruidLoader {
 
     private final static DefaultDruidLoader DRUID_LOADER = new DefaultDruidLoader(DRUID_LOCATION);

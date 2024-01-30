@@ -52,8 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-/**
- */
+
 public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecutor<T, S> {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     private static final String DOT = ".";

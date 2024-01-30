@@ -31,8 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- */
+
 public class MySQLUndoDeleteExecutorTest extends BaseExecutorTest {
 
     private static MySQLUndoDeleteExecutor executor;

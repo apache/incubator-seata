@@ -22,8 +22,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = REGISTRY_RAFT_PREFIX)
 public class RegistryRaftProperties {

@@ -21,8 +21,7 @@ import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class EscapeHandlerFactoryTest {
 
     @Test

@@ -16,8 +16,7 @@
  */
 package org.apache.seata.tm.api.transaction;
 
-/**
- */
+
 public interface TransactionHook {
 
     /**

@@ -44,8 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- */
+
 public class HttpClientUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientUtil.class);

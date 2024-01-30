@@ -27,8 +27,7 @@ import org.slf4j.Logger;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 
-/**
- */
+
 public final class StackTraceLogger {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();

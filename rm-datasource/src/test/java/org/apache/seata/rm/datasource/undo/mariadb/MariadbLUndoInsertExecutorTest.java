@@ -32,8 +32,7 @@ import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 
-/**
- */
+
 public class MariadbLUndoInsertExecutorTest extends BaseExecutorTest {
 
     private static MariadbUndoInsertExecutor executor;

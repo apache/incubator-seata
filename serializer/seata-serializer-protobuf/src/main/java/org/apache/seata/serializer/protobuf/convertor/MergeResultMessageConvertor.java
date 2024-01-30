@@ -31,8 +31,7 @@ import org.apache.seata.serializer.protobuf.generated.MergedResultMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
-/**
- */
+
 public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessage, MergedResultMessageProto> {
     @Override
     public MergedResultMessageProto convert2Proto(MergeResultMessage mergeResultMessage) {

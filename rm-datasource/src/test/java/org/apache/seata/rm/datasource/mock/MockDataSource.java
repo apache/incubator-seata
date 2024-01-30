@@ -23,8 +23,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-/**
- */
+
 public class MockDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {

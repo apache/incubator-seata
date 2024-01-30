@@ -38,7 +38,6 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
@@ -67,8 +66,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
-import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
@@ -118,7 +117,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             return null;
         });
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
-        if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
+        if (StoreConfig.StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
             EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
@@ -291,7 +290,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     public RaftClusterMetadata createNewRaftClusterMetadata() {
         RaftClusterMetadata metadata = new RaftClusterMetadata(this.currentTerm.get());
         Node leader = metadata.createNode(XID.getIpAddress(), XID.getPort(),
-            Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+            Integer.parseInt(((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                 .getProperty("server.port", String.valueOf(8088))),
             group, Collections.emptyMap());
         leader.setRole(ClusterRole.LEADER);

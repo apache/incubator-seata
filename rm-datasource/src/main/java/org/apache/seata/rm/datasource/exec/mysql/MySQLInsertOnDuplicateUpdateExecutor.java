@@ -57,8 +57,7 @@ import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
 public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor implements Defaultable {
 

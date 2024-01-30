@@ -18,8 +18,6 @@ package org.apache.seata.common;
 
 import java.time.Duration;
 
-/**
- */
 public interface DefaultValues {
     int DEFAULT_CLIENT_LOCK_RETRY_INTERVAL = 10;
     int DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES = 10;

@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-/**
- */
+
 public class GzipUtil {
 
     private GzipUtil() {

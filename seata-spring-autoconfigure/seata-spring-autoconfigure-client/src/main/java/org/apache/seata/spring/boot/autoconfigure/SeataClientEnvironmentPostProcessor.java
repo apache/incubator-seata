@@ -48,8 +48,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_FE
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 
-/**
- */
+
 public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     @Override

@@ -16,8 +16,7 @@
  */
 package org.apache.seata.tm.api;
 
-/**
- */
+
 public class FailureHandlerHolder {
 
     private static FailureHandler FAILURE_HANDLER_HOLDER = new DefaultFailureHandlerImpl();

@@ -25,8 +25,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.ResultCode;
 
-/**
- */
+
 public class RegisterTMResponseConvertor implements PbConvertor<RegisterTMResponse, RegisterTMResponseProto> {
     @Override
     public RegisterTMResponseProto convert2Proto(RegisterTMResponse registerTMResponse) {

@@ -19,8 +19,7 @@ package org.apache.seata.discovery.registry.zk;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class ZookeeperRegistryProviderTest {
 
     @Test

@@ -24,8 +24,7 @@ import org.apache.seata.core.context.RootContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class MotanTransactionFilterTest {
 
     private static final String SERVICE_GROUP = "motan";

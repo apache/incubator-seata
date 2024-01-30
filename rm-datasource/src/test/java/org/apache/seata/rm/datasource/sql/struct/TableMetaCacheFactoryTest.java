@@ -27,8 +27,7 @@ import org.apache.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class TableMetaCacheFactoryTest {
 
     private static final String NOT_EXIST_SQL_TYPE = "not_exist_sql_type";

@@ -20,8 +20,7 @@ import java.util.HashMap;
 
 import org.apache.seata.config.ConfigurationKeys;
 
-/**
- */
+
 public interface StarterConstants {
     String SEATA_PREFIX = "seata";
     String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";

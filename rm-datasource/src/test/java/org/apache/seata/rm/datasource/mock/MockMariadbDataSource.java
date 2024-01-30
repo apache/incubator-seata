@@ -19,8 +19,7 @@ package org.apache.seata.rm.datasource.mock;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- */
+
 public class MockMariadbDataSource extends MockDataSource {
     @Override
     public Connection getConnection() throws SQLException {

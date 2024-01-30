@@ -20,8 +20,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationProvider;
 
-/**
- */
+
 @LoadLevel(name = "Nacos", order = 1)
 public class NacosConfigurationProvider implements ConfigurationProvider {
     @Override

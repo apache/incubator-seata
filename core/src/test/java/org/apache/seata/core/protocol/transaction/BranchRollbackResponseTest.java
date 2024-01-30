@@ -21,8 +21,7 @@ import org.apache.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class BranchRollbackResponseTest {
     @Test
     public void toStringTest() {
