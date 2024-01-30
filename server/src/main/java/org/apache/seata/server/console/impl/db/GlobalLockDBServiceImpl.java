@@ -134,12 +134,12 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             sqlParamList.add(param.getBranchId());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(" and gmt_create >= ? ");
-            sqlParamList.add(param.getTimeStart());
+            whereConditionBuilder.append(PageUtil.getTimeStartSql(this.dbType, "gmt_create"));
+            sqlParamList.add(param.getTimeStart() / 1000);
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(" and gmt_create <= ? ");
-            sqlParamList.add(param.getTimeEnd());
+            whereConditionBuilder.append(PageUtil.getTimeEndSql(this.dbType, "gmt_create"));
+            sqlParamList.add(param.getTimeEnd() / 1000);
         }
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");
