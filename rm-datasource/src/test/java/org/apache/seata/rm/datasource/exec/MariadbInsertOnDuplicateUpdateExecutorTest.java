@@ -44,8 +44,7 @@ import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 
     protected MariadbInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;

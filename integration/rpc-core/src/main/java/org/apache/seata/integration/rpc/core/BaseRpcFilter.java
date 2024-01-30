@@ -22,8 +22,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 
-/**
- */
+
 public interface BaseRpcFilter<T> {
     String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_BRANCH_TYPE};
 

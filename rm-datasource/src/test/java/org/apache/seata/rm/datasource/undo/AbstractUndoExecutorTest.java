@@ -31,8 +31,7 @@ import org.mockito.Mockito;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- */
+
 public class AbstractUndoExecutorTest extends BaseH2Test {
 
     @Test

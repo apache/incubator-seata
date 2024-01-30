@@ -22,8 +22,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- */
+
 public class LogStoreSqlsFactory {
 
     private static Map<String, LogStoreSqls> LOG_STORE_SQLS_MAP = new ConcurrentHashMap<>();

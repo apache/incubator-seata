@@ -24,8 +24,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-/**
- */
+
 public class KryoInnerSerializer implements AutoCloseable {
 
     private final Kryo kryo;

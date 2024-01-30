@@ -21,8 +21,7 @@ import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
 import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
-/**
- */
+
 public class DeleteSpecificationSqlListener extends MySqlParserBaseListener {
 
     private MySqlContext sqlQueryContext;

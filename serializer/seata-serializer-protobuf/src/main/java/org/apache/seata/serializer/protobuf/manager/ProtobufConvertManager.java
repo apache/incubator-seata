@@ -108,8 +108,7 @@ import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- */
+
 public class ProtobufConvertManager {
 
     private Map<String, PbConvertor> convertorMap = new ConcurrentHashMap<>();

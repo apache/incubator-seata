@@ -29,8 +29,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEO
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = TRANSPORT_PREFIX)
 public class TransportProperties {

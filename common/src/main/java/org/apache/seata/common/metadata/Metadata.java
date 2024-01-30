@@ -27,8 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.util.StringUtils;
 
-/**
- */
+
 public class Metadata {
 
     private final Map<String/*vgroup*/, Map<String/*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();

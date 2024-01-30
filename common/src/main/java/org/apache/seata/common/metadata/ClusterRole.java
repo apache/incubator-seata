@@ -16,8 +16,7 @@
  */
 package org.apache.seata.common.metadata;
 
-/**
- */
+
 public enum ClusterRole {
 
     /**

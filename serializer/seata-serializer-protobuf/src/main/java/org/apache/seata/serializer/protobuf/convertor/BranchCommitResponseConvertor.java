@@ -30,8 +30,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 
-/**
- */
+
 public class BranchCommitResponseConvertor implements PbConvertor<BranchCommitResponse, BranchCommitResponseProto> {
     @Override
     public BranchCommitResponseProto convert2Proto(BranchCommitResponse branchCommitResponse) {

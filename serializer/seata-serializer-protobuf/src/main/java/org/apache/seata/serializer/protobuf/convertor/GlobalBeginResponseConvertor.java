@@ -27,8 +27,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
 
-/**
- */
+
 public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResponse, GlobalBeginResponseProto> {
     @Override
     public GlobalBeginResponseProto convert2Proto(GlobalBeginResponse globalBeginResponse) {

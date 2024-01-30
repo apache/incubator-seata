@@ -23,8 +23,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_LOAD_BALANCE;
 import static org.apache.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX_KEBAB_STYLE;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = LOAD_BALANCE_PREFIX_KEBAB_STYLE)
 public class LoadBalanceProperties {

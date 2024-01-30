@@ -19,8 +19,7 @@ package org.apache.seata.compressor.deflater;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.compressor.Compressor;
 
-/**
- */
+
 @LoadLevel(name = "DEFLATER")
 public class DeflaterCompressor implements Compressor {
 

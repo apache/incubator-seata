@@ -19,8 +19,7 @@ package org.apache.seata.integration.http;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- */
+
 public class ServletMapping {
 
     public static List<ServletMapping> servletMappingList = new ArrayList<>();

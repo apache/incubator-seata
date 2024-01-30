@@ -24,8 +24,7 @@ import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
-/**
- */
+
 public class UndoLogDeleteRequestConvertor implements PbConvertor<UndoLogDeleteRequest, UndoLogDeleteRequestProto> {
     @Override
     public UndoLogDeleteRequestProto convert2Proto(UndoLogDeleteRequest undoLogDeleteRequest) {

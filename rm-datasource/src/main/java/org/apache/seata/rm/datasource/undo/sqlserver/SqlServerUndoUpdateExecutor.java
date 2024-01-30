@@ -29,8 +29,7 @@ import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
     /**
      * Instantiates a new SqlServer update undo executor.

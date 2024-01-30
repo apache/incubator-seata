@@ -25,8 +25,7 @@ import org.apache.seata.sqlparser.SqlParserType;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-/**
- */
+
 @LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_DRUID)
 public class DruidDelegatingSQLRecognizerFactory implements SQLRecognizerFactory {
     private volatile SQLRecognizerFactory recognizerFactoryImpl;

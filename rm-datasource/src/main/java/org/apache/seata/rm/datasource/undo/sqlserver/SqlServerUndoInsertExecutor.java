@@ -31,8 +31,7 @@ import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class SqlServerUndoInsertExecutor extends BaseSqlServerUndoExecutor {
     /**
      * Instantiates a new sqlserver undo insert executor.

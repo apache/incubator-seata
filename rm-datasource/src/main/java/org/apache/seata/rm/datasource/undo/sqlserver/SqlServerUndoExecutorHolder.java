@@ -22,8 +22,7 @@ import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoExecutorHolder;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 @LoadLevel(name = JdbcConstants.SQLSERVER)
 public class SqlServerUndoExecutorHolder implements UndoExecutorHolder {
     @Override

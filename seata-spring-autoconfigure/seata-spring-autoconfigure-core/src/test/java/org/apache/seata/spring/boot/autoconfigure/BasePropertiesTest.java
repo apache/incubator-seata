@@ -32,8 +32,7 @@ import java.util.Properties;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
-/**
- */
+
 public class BasePropertiesTest {
     protected static AnnotationConfigApplicationContext applicationContex;
     protected static final String STR_TEST_AAA = "aaa";

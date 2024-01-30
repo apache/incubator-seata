@@ -19,8 +19,7 @@ package org.apache.seata.serializer.protobuf.convertor;
 import org.apache.seata.serializer.protobuf.generated.HeartbeatMessageProto;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 
-/**
- */
+
 public class HeartbeatMessageConvertor implements PbConvertor<HeartbeatMessage, HeartbeatMessageProto> {
     @Override
     public HeartbeatMessageProto convert2Proto(HeartbeatMessage heartbeatMessage) {

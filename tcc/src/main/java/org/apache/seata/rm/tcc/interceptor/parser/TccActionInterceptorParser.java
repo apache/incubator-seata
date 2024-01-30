@@ -34,8 +34,7 @@ import org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class TccActionInterceptorParser implements InterfaceParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorParser.class);

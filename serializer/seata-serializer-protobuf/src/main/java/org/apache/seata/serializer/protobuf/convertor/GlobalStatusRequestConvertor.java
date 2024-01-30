@@ -23,8 +23,7 @@ import org.apache.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
 
-/**
- */
+
 public class GlobalStatusRequestConvertor implements PbConvertor<GlobalStatusRequest, GlobalStatusRequestProto> {
     @Override
     public GlobalStatusRequestProto convert2Proto(GlobalStatusRequest globalStatusRequest) {
