@@ -41,6 +41,7 @@
         <module>config</module>
         <module>console</module>
         <module>core</module>
+        <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
