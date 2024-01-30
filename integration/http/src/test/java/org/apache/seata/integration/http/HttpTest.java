@@ -37,8 +37,7 @@ import org.junit.jupiter.api.Test;
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
 
-/**
- */
+
 class HttpTest {
 
     private static final String host = "http://127.0.0.1:8081";

@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = REGISTRY_SOFA_PREFIX)
 public class RegistrySofaProperties {

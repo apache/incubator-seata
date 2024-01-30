@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = CONFIG_APOLLO_PREFIX)
 public class ConfigApolloProperties {

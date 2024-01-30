@@ -27,8 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-/**
- */
+
 public class TableMetaTest {
 
     private final String COLUMN_ID="id";

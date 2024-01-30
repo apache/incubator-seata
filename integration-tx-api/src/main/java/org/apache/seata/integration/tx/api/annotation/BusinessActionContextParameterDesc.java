@@ -21,8 +21,7 @@ import java.lang.annotation.Annotation;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 
-/**
- */
+
 public class BusinessActionContextParameterDesc {
     private String paramName;
     private int index;

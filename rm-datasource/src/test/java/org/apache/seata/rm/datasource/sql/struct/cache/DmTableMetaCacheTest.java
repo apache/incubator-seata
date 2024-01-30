@@ -30,8 +30,7 @@ import java.sql.Types;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class DmTableMetaCacheTest {
 
     private static Object[][] columnMetas =

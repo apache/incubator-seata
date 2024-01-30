@@ -38,8 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
+
 public class TransactionTemplateTest {
 
     private static final String DEFAULT_XID = "123456789";

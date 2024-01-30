@@ -31,8 +31,7 @@ import org.apache.seata.spring.annotation.GlobalLock;
 import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.api.FailureHandlerHolder;
 
-/**
- */
+
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
     private final Set<String> methodsToProxy = new HashSet<>();

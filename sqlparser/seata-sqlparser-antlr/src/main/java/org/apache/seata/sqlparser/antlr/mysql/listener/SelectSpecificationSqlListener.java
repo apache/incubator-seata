@@ -23,8 +23,7 @@ import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
 import java.util.List;
 
-/**
- */
+
 public class SelectSpecificationSqlListener extends MySqlParserBaseListener {
 
     private MySqlContext sqlQueryContext;

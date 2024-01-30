@@ -26,12 +26,12 @@ import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
-import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import org.apache.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
@@ -82,16 +82,56 @@ public class RaftSyncMessageTest {
     }
 
     @Test
+    public void testMsgSerializeCompatible() throws IOException {
+        io.seata.server.cluster.raft.sync.msg.RaftSyncMessage raftSyncMessage = new io.seata.server.cluster.raft.sync.msg.RaftSyncMessage();
+        RaftGlobalSessionSyncMsg raftSessionSyncMsg = new RaftGlobalSessionSyncMsg();
+        RaftBranchSessionSyncMsg raftBranchSessionMsg = new RaftBranchSessionSyncMsg();
+        raftBranchSessionMsg.setBranchSession(new BranchTransactionDTO("123:123", 1234));
+        raftSessionSyncMsg.setGlobalSession(new GlobalTransactionDTO("123:123"));
+        raftSyncMessage.setBody(raftSessionSyncMsg);
+        byte[] msg = RaftSyncMessageSerializer.encode(raftSyncMessage);
+        RaftSyncMessage raftSyncMessage1 = RaftSyncMessageSerializer.decode(msg);
+        RaftSyncMessage raftSyncMessage2 = new RaftSyncMessage();
+        raftSyncMessage2.setBody(raftBranchSessionMsg);
+        byte[] msg2 = RaftSyncMessageSerializer.encode(raftSyncMessage2);
+        RaftSyncMessage raftSyncMessageByBranch = RaftSyncMessageSerializer.decode(msg2);
+        Assertions.assertEquals("123:123", ((RaftBranchSessionSyncMsg) raftSyncMessageByBranch.getBody()).getBranchSession().getXid());
+        Assertions.assertEquals("123:123", ((RaftGlobalSessionSyncMsg) raftSyncMessage1.getBody()).getGlobalSession().getXid());
+        Assertions.assertEquals(1234, ((RaftBranchSessionSyncMsg) raftSyncMessageByBranch.getBody()).getBranchSession().getBranchId());
+    }
+
+    @Test
     public void testSnapshotSerialize() throws IOException, TransactionException {
         Map<String, GlobalSession> sessionMap = new HashMap<>();
         GlobalSession globalSession = GlobalSession.createGlobalSession("123", "123", "123", 11111);
         sessionMap.put(globalSession.getXid(), globalSession);
         globalSession
-            .addBranch(SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, "!23", null, "123", "123"));
+                .addBranch(SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, "!23", null, "123", "123"));
         RaftSessionSnapshot sessionSnapshot = new RaftSessionSnapshot();
         sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(sessionSnapshot);
+        byte[] msg = RaftSnapshotSerializer.encode(raftSnapshot);
+        RaftSnapshot raftSnapshot1 = RaftSnapshotSerializer.decode(msg);
+        RaftSessionSnapshot sessionSnapshot2 = (RaftSessionSnapshot)raftSnapshot1.getBody();
+        Map<String, GlobalSession> map = sessionSnapshot2.convert2GlobalSession();
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertNotNull(map.get(globalSession.getXid()));
+        Assertions.assertEquals(1, map.get(globalSession.getXid()).getBranchSessions().size());
+    }
+
+    @Test
+    public void testSnapshotCompatible() throws IOException, TransactionException {
+        Map<String, GlobalSession> sessionMap = new HashMap<>();
+        GlobalSession globalSession = GlobalSession.createGlobalSession("123", "123", "123", 11111);
+        sessionMap.put(globalSession.getXid(), globalSession);
+        globalSession
+                .addBranch(SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, "!23", null, "123", "123"));
+        RaftSessionSnapshot sessionSnapshot = new RaftSessionSnapshot();
+        sessionMap.forEach((xid, session) -> sessionSnapshot.convert2GlobalSessionByte(session));
+        io.seata.server.cluster.raft.snapshot.RaftSnapshot raftSnapshot = new   io.seata.server.cluster.raft.snapshot.RaftSnapshot();
+        raftSnapshot.setBody(sessionSnapshot);
+        raftSnapshot.setType(io.seata.server.cluster.raft.snapshot.RaftSnapshot.SnapshotType.session);
         byte[] msg = RaftSnapshotSerializer.encode(raftSnapshot);
         RaftSnapshot raftSnapshot1 = RaftSnapshotSerializer.decode(msg);
         RaftSessionSnapshot sessionSnapshot2 = (RaftSessionSnapshot)raftSnapshot1.getBody();

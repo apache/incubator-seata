@@ -29,8 +29,7 @@ import org.apache.seata.sqlparser.struct.NotPlaceholderExpr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class OracleInsertRecognizerTest {
 
     private static final String DB_TYPE = "oracle";

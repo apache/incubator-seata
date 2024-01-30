@@ -25,8 +25,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = UNDO_PREFIX)
 public class UndoProperties {

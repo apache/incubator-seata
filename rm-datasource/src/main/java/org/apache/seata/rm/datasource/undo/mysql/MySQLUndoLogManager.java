@@ -30,8 +30,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 

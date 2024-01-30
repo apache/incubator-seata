@@ -30,8 +30,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
 
-/**
- */
+
 public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitResponse, GlobalCommitResponseProto> {
     @Override
     public GlobalCommitResponseProto convert2Proto(GlobalCommitResponse globalCommitResponse) {

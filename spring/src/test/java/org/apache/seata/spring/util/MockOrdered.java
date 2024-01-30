@@ -18,8 +18,7 @@ package org.apache.seata.spring.util;
 
 import org.springframework.core.Ordered;
 
-/**
- */
+
 public class MockOrdered implements Ordered {
 
     private Integer order;

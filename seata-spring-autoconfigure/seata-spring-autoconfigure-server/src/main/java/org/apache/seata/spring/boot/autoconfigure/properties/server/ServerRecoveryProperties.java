@@ -25,8 +25,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PE
 import static org.apache.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = SERVER_RECOVERY_PREFIX)
 public class ServerRecoveryProperties {

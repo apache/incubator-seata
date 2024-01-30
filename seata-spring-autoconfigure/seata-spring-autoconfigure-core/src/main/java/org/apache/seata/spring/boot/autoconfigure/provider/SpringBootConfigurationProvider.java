@@ -47,8 +47,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SPECIA
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_SERVICE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
-/**
- */
+
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBootConfigurationProvider.class);

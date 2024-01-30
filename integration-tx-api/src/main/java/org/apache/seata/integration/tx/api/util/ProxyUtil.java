@@ -27,8 +27,7 @@ import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 
-/**
- */
+
 public class ProxyUtil {
 
     private static final Map<Object, Object> PROXYED_SET = new HashMap<>();

@@ -18,8 +18,7 @@ package org.apache.seata.integration.tx.api.json;
 
 import java.io.IOException;
 
-/**
- */
+
 public interface JsonParser {
 
     String toJSONString(Object object) throws IOException;

@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-/**
- */
+
 public class BufferUtilsTest {
 
     @Test

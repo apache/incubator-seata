@@ -22,8 +22,7 @@ import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-/**
- */
+
 public class DefaultInvocationHandler implements InvocationHandler {
 
     private ProxyInvocationHandler proxyInvocationHandler;

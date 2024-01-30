@@ -32,8 +32,7 @@ import java.util.Map;
 
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
 
-/**
- */
+
 public class MockWebServer {
 
     private Map<String, String> urlServletMap = new HashMap<>();

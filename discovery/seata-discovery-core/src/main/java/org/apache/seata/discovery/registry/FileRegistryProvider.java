@@ -18,8 +18,7 @@ package org.apache.seata.discovery.registry;
 
 import org.apache.seata.common.loader.LoadLevel;
 
-/**
- */
+
 @LoadLevel(name = "File", order = 1)
 public class FileRegistryProvider implements RegistryProvider {
 

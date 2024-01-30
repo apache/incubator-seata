@@ -31,8 +31,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- */
+
 @LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1, scope = Scope.PROTOTYPE)
 public class YamlFileConfig implements FileConfig {
 

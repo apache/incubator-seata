@@ -44,8 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
 
-/**
- */
+
 class SeataAutoDataSourceProxyTest {
 
     private static final String PRIMARY_NAME = "primaryDataSource";

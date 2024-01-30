@@ -18,8 +18,7 @@ package org.apache.seata.config.file;
 
 import java.util.Map;
 
-/**
- */
+
 public interface FileConfig {
     /**
      * @param path path expression

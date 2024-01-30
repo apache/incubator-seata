@@ -22,8 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.SocketAddress;
 
-/**
- */
+
 public class ChannelUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelUtil.class);

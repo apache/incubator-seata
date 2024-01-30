@@ -18,8 +18,7 @@ package org.apache.seata.apm.skywalking.plugin.common;
 
 import org.apache.skywalking.apm.agent.core.boot.PluginConfig;
 
-/**
- */
+
 public class SeataPluginConfig {
     public static class Plugin {
         @PluginConfig(root = SeataPluginConfig.class)

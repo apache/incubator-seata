@@ -20,8 +20,7 @@ import org.apache.seata.common.util.StringUtils;
 
 import java.io.Serializable;
 
-/**
- */
+
 public class RollbackRule implements Serializable {
 
 

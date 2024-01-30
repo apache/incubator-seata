@@ -27,8 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-/**
- */
+
 public class DruidIsolationTest {
     private final static String TEST_SQL = "insert into t_table_1 values(?, ?)";
 

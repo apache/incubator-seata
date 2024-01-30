@@ -30,8 +30,7 @@ import org.apache.seata.serializer.protobuf.generated.MergedWarpMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
-/**
- */
+
 public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage, MergedWarpMessageProto> {
 
     @Override

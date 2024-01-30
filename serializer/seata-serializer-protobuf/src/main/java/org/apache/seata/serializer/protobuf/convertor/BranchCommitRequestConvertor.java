@@ -25,8 +25,7 @@ import org.apache.seata.serializer.protobuf.generated.BranchTypeProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 
-/**
- */
+
 public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitRequest, BranchCommitRequestProto> {
     @Override
     public BranchCommitRequestProto convert2Proto(BranchCommitRequest branchCommitRequest) {

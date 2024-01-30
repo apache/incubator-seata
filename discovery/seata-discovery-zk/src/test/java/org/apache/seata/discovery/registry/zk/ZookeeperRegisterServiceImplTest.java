@@ -35,8 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-/**
- */
+
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;
 

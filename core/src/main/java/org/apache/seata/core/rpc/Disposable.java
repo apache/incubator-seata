@@ -16,9 +16,7 @@
  */
 package org.apache.seata.core.rpc;
 
-/**
- *
- */
+
 public interface Disposable {
 
     void destroy();

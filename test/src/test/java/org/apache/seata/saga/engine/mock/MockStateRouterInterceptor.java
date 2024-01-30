@@ -25,9 +25,7 @@ import org.apache.seata.saga.statelang.domain.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
+
 public class MockStateRouterInterceptor implements StateRouterInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockStateRouterInterceptor.class);

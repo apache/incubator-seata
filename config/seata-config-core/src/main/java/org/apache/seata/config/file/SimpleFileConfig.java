@@ -28,8 +28,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- */
+
 @LoadLevel(name = FileConfigFactory.DEFAULT_TYPE,scope = Scope.PROTOTYPE)
 public class SimpleFileConfig implements FileConfig {
 

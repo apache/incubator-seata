@@ -23,8 +23,7 @@ import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.sqlparser.SQLRecognizer;
 
-/**
- */
+
 public class MariadbUpdateJoinExecutor<T, S extends Statement> extends MySQLUpdateJoinExecutor<T, S> {
 
     /**

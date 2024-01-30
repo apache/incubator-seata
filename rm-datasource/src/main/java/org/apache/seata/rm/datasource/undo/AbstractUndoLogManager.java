@@ -52,8 +52,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG
 import static org.apache.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 import static org.apache.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Unretriable;
 
-/**
- */
+
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUndoLogManager.class);

@@ -28,8 +28,6 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.matcher.ElementMatchers;
 
-/**
- */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_PREFIX = "get";

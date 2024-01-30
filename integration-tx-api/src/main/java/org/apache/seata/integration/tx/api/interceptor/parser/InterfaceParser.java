@@ -18,8 +18,7 @@ package org.apache.seata.integration.tx.api.interceptor.parser;
 
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 
-/**
- */
+
 public interface InterfaceParser {
 
     ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception;

@@ -24,8 +24,7 @@ import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExe
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 @LoadLevel(name = JdbcConstants.MARIADB, scope = Scope.PROTOTYPE)
 public class MariadbInsertOnDuplicateUpdateExecutor extends MySQLInsertOnDuplicateUpdateExecutor {
 

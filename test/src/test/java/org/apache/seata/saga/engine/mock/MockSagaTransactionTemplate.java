@@ -25,9 +25,7 @@ import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor.ExecutionException;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 
-/**
- *
- */
+
 public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
 
     @Override

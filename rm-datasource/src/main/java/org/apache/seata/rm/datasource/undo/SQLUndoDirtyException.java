@@ -19,8 +19,7 @@ package org.apache.seata.rm.datasource.undo;
 import java.io.Serializable;
 import java.sql.SQLException;
 
-/**
- */
+
 class SQLUndoDirtyException extends SQLException implements Serializable {
 
     private static final long serialVersionUID = -5168905669539637570L;

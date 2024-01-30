@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- */
+
 public class AlibabaDubboTransactionPropagationFilterTest {
 
     private static final String DEFAULT_XID = "1234567890";

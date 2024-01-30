@@ -22,8 +22,7 @@ import java.util.Set;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.util.CollectionUtils;
 
-/**
- */
+
 public final class TransactionInfo implements Serializable {
 
     private int timeOut;

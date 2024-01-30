@@ -19,8 +19,7 @@ package org.apache.seata.common.loader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class ExtensionDefinitionTest {
 
     @Test

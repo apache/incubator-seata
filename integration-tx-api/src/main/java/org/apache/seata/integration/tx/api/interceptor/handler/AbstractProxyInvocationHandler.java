@@ -19,8 +19,7 @@ package org.apache.seata.integration.tx.api.interceptor.handler;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 
-/**
- */
+
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;

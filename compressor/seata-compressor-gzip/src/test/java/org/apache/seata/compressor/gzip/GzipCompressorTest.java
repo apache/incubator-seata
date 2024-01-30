@@ -19,8 +19,7 @@ package org.apache.seata.compressor.gzip;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class GzipCompressorTest {
 
     @Test

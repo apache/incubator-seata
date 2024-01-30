@@ -35,8 +35,7 @@ import org.apache.seata.rm.tcc.TccParam;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";

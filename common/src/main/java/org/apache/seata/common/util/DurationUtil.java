@@ -20,8 +20,7 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Pattern;
 
-/**
- */
+
 public class DurationUtil {
 
     public static final Duration DEFAULT_DURATION = Duration.ofMillis(-1);

@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-/**
- */
+
 public class DeflaterUtil {
 
     private DeflaterUtil() {

@@ -26,8 +26,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- */
+
 public class MockHttpExecuter extends AbstractHttpExecutor {
 
     DefaultHttpExecutor httpExecutor = DefaultHttpExecutor.getInstance();

@@ -24,8 +24,7 @@ import org.apache.seata.rm.datasource.SqlGenerateUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class SqlGenerateUtilsTest {
 
 

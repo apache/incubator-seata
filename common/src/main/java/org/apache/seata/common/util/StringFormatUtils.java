@@ -16,8 +16,7 @@
  */
 package org.apache.seata.common.util;
 
-/**
- */
+
 public class StringFormatUtils {
     private static final char MINUS = '-';
     private static final char UNDERLINE = '_';

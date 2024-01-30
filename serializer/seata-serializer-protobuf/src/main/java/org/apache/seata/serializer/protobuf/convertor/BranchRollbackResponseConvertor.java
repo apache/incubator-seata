@@ -30,8 +30,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 
-/**
- */
+
 public class BranchRollbackResponseConvertor
     implements PbConvertor<BranchRollbackResponse, BranchRollbackResponseProto> {
     @Override

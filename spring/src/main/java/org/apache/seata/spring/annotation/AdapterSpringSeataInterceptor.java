@@ -27,8 +27,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
-/**
- */
+
 public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor, Ordered {
 
     private ProxyInvocationHandler proxyInvocationHandler;

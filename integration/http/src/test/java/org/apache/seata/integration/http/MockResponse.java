@@ -20,8 +20,7 @@ package org.apache.seata.integration.http;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- */
+
 public class MockResponse {
 
     private OutputStream outputStream;

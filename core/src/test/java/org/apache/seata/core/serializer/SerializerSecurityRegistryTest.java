@@ -24,8 +24,7 @@ import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class SerializerSecurityRegistryTest {
     @Test
     public void getAllowClassType() {

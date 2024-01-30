@@ -39,8 +39,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
 
-/**
- */
+
 public abstract class BaseH2Test {
     
     static BasicDataSource dataSource = null;

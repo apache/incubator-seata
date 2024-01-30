@@ -23,8 +23,6 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-/**
- */
 public class FileConfigFactory {
 
     public static final String DEFAULT_TYPE = "CONF";

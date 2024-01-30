@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-/**
- */
+
 class SimpleFileConfigTest {
 
     @Test

@@ -16,9 +16,7 @@
  */
 package org.apache.seata.saga.engine.mock;
 
-/**
- *
- */
+
 public class DemoException extends RuntimeException {
 
     public DemoException() {

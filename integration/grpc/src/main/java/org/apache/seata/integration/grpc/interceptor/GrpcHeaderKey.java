@@ -19,8 +19,7 @@ package org.apache.seata.integration.grpc.interceptor;
 import io.grpc.Metadata;
 import org.apache.seata.core.context.RootContext;
 
-/**
- */
+
 public interface GrpcHeaderKey {
 
     Metadata.Key<String> XID_HEADER_KEY = Metadata.Key.of(RootContext.KEY_XID, Metadata.ASCII_STRING_MARSHALLER);

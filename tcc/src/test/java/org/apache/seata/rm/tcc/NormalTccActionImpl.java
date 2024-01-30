@@ -21,8 +21,7 @@ import java.util.List;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 
-/**
- */
+
 public class NormalTccActionImpl implements NormalTccAction {
 
     @Override

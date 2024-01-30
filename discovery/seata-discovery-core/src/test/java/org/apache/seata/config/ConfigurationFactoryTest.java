@@ -21,8 +21,7 @@ import org.apache.seata.discovery.loadbalance.LoadBalanceFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class ConfigurationFactoryTest {
 
     @Test

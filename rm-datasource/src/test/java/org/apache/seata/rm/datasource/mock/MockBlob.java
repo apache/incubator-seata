@@ -21,8 +21,7 @@ import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-/**
- */
+
 public class MockBlob implements Blob {
 
     public MockBlob() {

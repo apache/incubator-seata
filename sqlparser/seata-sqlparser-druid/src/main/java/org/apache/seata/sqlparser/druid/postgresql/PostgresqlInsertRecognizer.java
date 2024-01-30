@@ -43,8 +43,7 @@ import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
 
-/**
- */
+
 public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer implements SQLInsertRecognizer {
 
     private final PGInsertStatement ast;

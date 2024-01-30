@@ -49,8 +49,7 @@ import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.discovery.registry.RegistryHeartBeats;
 import org.apache.seata.discovery.registry.RegistryService;
 
-/**
- */
+
 public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener> {
 
     private static volatile ConsulRegistryServiceImpl instance;

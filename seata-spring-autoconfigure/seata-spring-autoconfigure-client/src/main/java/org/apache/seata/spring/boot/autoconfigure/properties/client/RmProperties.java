@@ -35,8 +35,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PH
 import static org.apache.seata.common.DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = CLIENT_RM_PREFIX)
 public class RmProperties {

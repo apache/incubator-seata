@@ -59,8 +59,7 @@ import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class MariadbUndoLogManagerTest {
 
     List<String> returnValueColumnLabels = Lists.newArrayList("log_status");

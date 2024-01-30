@@ -22,8 +22,7 @@ import org.apache.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 
-/**
- */
+
 public class GlobalBeginRequestConvertor implements PbConvertor<GlobalBeginRequest, GlobalBeginRequestProto> {
 
     @Override

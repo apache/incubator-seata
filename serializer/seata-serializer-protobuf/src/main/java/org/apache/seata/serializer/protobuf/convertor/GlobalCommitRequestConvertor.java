@@ -23,8 +23,7 @@ import org.apache.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 
-/**
- */
+
 public class GlobalCommitRequestConvertor implements PbConvertor<GlobalCommitRequest, GlobalCommitRequestProto> {
     @Override
     public GlobalCommitRequestProto convert2Proto(GlobalCommitRequest globalCommitRequest) {
