@@ -73,7 +73,6 @@
         <module>ext/apm-seata-skywalking-plugin</module>
         <module>integration-tx-api</module>
         <!--<module>seata-plugin</module>-->
-        <module>compatible</module>
     </modules>
 
     <!--test-->
