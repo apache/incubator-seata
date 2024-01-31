@@ -31,5 +31,5 @@
     <suppress checks=".*"
               files="[\\/]antlr[\\/]mysql[\\/]antlr[\\/]"/>
     <suppress checks=".*"
-              files="io[\\/]seata[\\/]integration[\\/]grpc[\\/]interceptor[\\/]"/>
+              files="org[\\/]apache[\\/]seata[\\/]integration[\\/]grpc[\\/]interceptor[\\/]"/>
 </suppressions>

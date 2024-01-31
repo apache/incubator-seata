@@ -16,19 +16,20 @@
  */
 package io.seata.server.cluster.raft.snapshot;
 
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
+
+
 import java.io.Serializable;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.compressor.CompressorType;
-import io.seata.core.protocol.Version;
-import io.seata.core.serializer.SerializerType;
 
-import static io.seata.common.ConfigurationKeys.SERVER_RAFT_COMPRESSOR;
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_COMPRESSOR;
-import static io.seata.common.DefaultValues.DEFAULT_RAFT_SERIALIZATION;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.compressor.CompressorType;
+import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.serializer.SerializerType;
 
-/**
- */
+@Deprecated
 public class RaftSnapshot implements Serializable {
 
     private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();

@@ -1,0 +1,9 @@
+org.apache.seata.core.store.db.sql.log.MysqlLogStoreSqls
+org.apache.seata.core.store.db.sql.log.OracleLogStoreSqls
+org.apache.seata.core.store.db.sql.log.PostgresqlLogStoreSqls
+org.apache.seata.core.store.db.sql.log.OceanbaseLogStoreSqls
+org.apache.seata.core.store.db.sql.log.H2LogStoreSqls
+org.apache.seata.core.store.db.sql.log.SqlServerLogStoreSqls
+org.apache.seata.core.store.db.sql.log.MariadbLogStoreSqls
+org.apache.seata.core.store.db.sql.log.PolarDBXLogStoreSqls
+org.apache.seata.core.store.db.sql.log.DmLogStoreSqls
