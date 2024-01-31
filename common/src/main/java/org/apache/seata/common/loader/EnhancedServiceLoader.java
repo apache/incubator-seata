@@ -43,8 +43,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class EnhancedServiceLoader {
-    private static final String APACHE_SEATA_PACKAGE_NAME="org.apache.seata";
-    private static final String IO_SEATA_PACKAGE_NAME="io.seata";
+    private static final String APACHE_SEATA_PACKAGE_NAME = "org.apache.seata";
+    private static final String IO_SEATA_PACKAGE_NAME = "io.seata";
 
     /**
      * Class->InnerEnhancedServiceLoader map
