@@ -16,7 +16,6 @@
  */
 package io.seata.config;
 
-import org.apache.seata.config.Configuration;
 
 /**
  * the interface ext configuration provider

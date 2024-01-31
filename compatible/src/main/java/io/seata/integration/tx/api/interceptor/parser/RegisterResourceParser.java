@@ -16,6 +16,6 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 @Deprecated
-public interface RegisterResourceParser extends org.apache.seata.integration.tx.api.interceptor.parser.RegisterResourceParser{
+public interface RegisterResourceParser extends org.apache.seata.integration.tx.api.interceptor.parser.RegisterResourceParser {
 
 }
