@@ -66,14 +66,14 @@ header:
     - 'distribution/LICENSE-BIN'
     - 'distribution/NOTICE-BIN'
     - 'test/src/test/resources/**'
-    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/io/seata/protocol/transcation/*.proto'
+    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/org/apache/seata/protocol/transcation/*.proto'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
     - '**/src/test/resources/statelang/**'
     - 'console/src/main/resources/static/console-fe/**'
-    - '**/io/seata/sqlparser/antlr/**/*.g4'
-    - '**/io/seata/sqlparser/antlr/mysql/parser/*'
+    - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
+    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
     - '**/integration/**/*.proto'
     - 'console/src/main/resources/static/**'
     - 'ext/apm-seata-skywalking-plugin/config/agent.config'
@@ -88,7 +88,7 @@ dependency:
     - saga/seata-saga-statemachine-designer/package.json
     - console/src/main/resources/static/console-fe/package.json
   excludes:
-    - name: io.seata:*
+    - name: org.apache.seata:*
       recursive: false
     # exclude manually confirmed license
     # BSD-3-Clause https://www.npmjs.com/package/universal-canvas-context

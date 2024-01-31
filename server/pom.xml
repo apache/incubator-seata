@@ -418,7 +418,7 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <version>${spring-boot.version}</version>
                         <configuration>
-                            <mainClass>io.seata.server.ServerApplication</mainClass>
+                            <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
                             <attach>false</attach>
                             <includes>
