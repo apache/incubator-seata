@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -23,32 +23,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.seata.common.DefaultValues;
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.thread.RejectedPolicies;
-import io.seata.common.util.NetUtil;
-import io.seata.config.ConfigurationCache;
-import io.seata.config.ConfigurationChangeEvent;
-import io.seata.config.ConfigurationChangeListener;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.auth.AuthSigner;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.MessageType;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
-import io.seata.core.rpc.processor.client.ClientOnResponseProcessor;
+import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.RejectedPolicies;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.auth.AuthSigner;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.protocol.AbstractMessage;
+import org.apache.seata.core.protocol.MessageType;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
+import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static io.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
-import static io.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
-import static io.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.core.constants.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static org.apache.seata.core.constants.ConfigurationKeys.SEATA_ACCESS_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.SEATA_SECRET_KEY;
 
 /**
  * The rm netty client.
@@ -190,7 +190,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
-            if (io.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
+            if (org.apache.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
                 initConnection();
             }
         }

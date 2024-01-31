@@ -14,16 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.auth;
+package org.apache.seata.core.auth;
 
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
+
+
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+
 
 public class JwtAuthManager {
     private String accessToken;

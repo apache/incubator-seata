@@ -14,19 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.server.auth;
+package org.apache.seata.server.auth;
 
-import io.seata.common.exception.RetryableException;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.rpc.RegisterCheckAuthHandler;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
 
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
-import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 
 /**
  */

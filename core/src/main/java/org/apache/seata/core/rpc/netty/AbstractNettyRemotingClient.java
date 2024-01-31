@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
@@ -39,36 +39,36 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.common.util.StringUtils;
-import io.seata.core.auth.JwtAuthManager;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MergeMessage;
-import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.core.protocol.MessageFuture;
-import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
-import io.seata.core.protocol.transaction.BranchRegisterRequest;
-import io.seata.core.protocol.transaction.BranchReportRequest;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import io.seata.core.rpc.RemotingClient;
-import io.seata.core.rpc.TransactionMessageHandler;
-import io.seata.core.rpc.processor.Pair;
-import io.seata.core.rpc.processor.RemotingProcessor;
-import io.seata.discovery.loadbalance.LoadBalanceFactory;
-import io.seata.discovery.registry.RegistryFactory;
+import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.AbstractMessage;
+import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.MergeMessage;
+import org.apache.seata.core.protocol.MergedWarpMessage;
+import org.apache.seata.core.protocol.MessageFuture;
+import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
+import org.apache.seata.core.protocol.transaction.BranchReportRequest;
+import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.core.rpc.RemotingClient;
+import org.apache.seata.core.rpc.TransactionMessageHandler;
+import org.apache.seata.core.rpc.processor.Pair;
+import org.apache.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.seata.discovery.loadbalance.LoadBalanceFactory;
+import org.apache.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static io.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
-import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The netty remoting client.
@@ -95,7 +95,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
-     * Send via asynchronous thread {@link io.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
+     * Send via asynchronous thread {@link org.apache.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();

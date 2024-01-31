@@ -53,6 +53,6 @@ seata:
     username: seata
     password: seata
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 30000
+    tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json

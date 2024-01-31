@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.server.auth;
+package org.apache.seata.server.auth;
 
 
 import io.jsonwebtoken.Claims;
@@ -23,14 +23,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.seata.common.exception.RetryableException;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.auth.JwtAuthManager;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +122,6 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
         if (null == extraData) {
             return false;
         }
-        System.err.println(extraData);
         HashMap<String, String> authData = JwtAuthManager.convertToHashMap(extraData);
         // 1.check username/password
         String username = authData.get("username");

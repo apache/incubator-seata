@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc;
+package org.apache.seata.core.rpc;
 
-import io.seata.common.exception.RetryableException;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
 
 /**
  * The interface Register check auth handler.

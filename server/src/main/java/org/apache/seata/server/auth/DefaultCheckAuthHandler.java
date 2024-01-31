@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.server.auth;
+package org.apache.seata.server.auth;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -14,21 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.processor.server;
+package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.seata.common.exception.RetryableException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.Version;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.ChannelManager;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.core.rpc.RegisterCheckAuthHandler;
-import io.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ChannelManager;
+import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
+import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

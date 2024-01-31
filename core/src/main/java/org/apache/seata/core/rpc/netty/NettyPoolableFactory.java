@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.util.NetUtil;
-import io.seata.core.auth.JwtAuthManager;
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
