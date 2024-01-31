@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class EnhancedServiceLoader {
+    private static final String APACHE_SEATA_PACKAGE_NAME="org.apache.seata";
+    private static final String IO_SEATA_PACKAGE_NAME="io.seata";
 
     /**
      * Class->InnerEnhancedServiceLoader map
@@ -50,6 +52,16 @@ public class EnhancedServiceLoader {
     private static final ConcurrentMap<Class<?>, InnerEnhancedServiceLoader<?>> SERVICE_LOADERS =
             new ConcurrentHashMap<>();
 
+    private static <S> Class<S> getCompatibleService(Class<S> originService) {
+        String apacheSeataName = originService.getName();
+        String ioSeataName = apacheSeataName.replace(APACHE_SEATA_PACKAGE_NAME, IO_SEATA_PACKAGE_NAME);
+        try {
+            Class clasz = Class.forName(ioSeataName);
+            return clasz;
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
     /**
      * Specify classLoader to load the service provider
      *
@@ -60,6 +72,16 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, ClassLoader loader) throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(loader);
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(loader);
     }
 
@@ -72,6 +94,16 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(findClassLoader());
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(findClassLoader());
     }
 
@@ -85,6 +117,16 @@ public class EnhancedServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, findClassLoader());
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
     }
 
@@ -100,6 +142,16 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
             throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, loader);
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, loader);
     }
 
@@ -115,6 +167,16 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName, Object[] args)
             throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, args, findClassLoader());
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args, findClassLoader());
     }
 
@@ -131,6 +193,16 @@ public class EnhancedServiceLoader {
      */
     public static <S> S load(Class<S> service, String activateName, Class<?>[] argsType, Object[] args)
             throws EnhancedServiceNotFoundException {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, argsType, args, findClassLoader());
+                if (s != null) {
+                    return s;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args, findClassLoader());
     }
 
@@ -142,6 +214,16 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service) {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                List<S> sList = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(findClassLoader());
+                if (CollectionUtils.isNotEmpty(sList)) {
+                    return sList;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(findClassLoader());
     }
 
@@ -155,6 +237,16 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service, Class<?>[] argsType, Object[] args) {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                List<S> sList = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(argsType, args, findClassLoader());
+                if (CollectionUtils.isNotEmpty(sList)) {
+                    return sList;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+            }
+        }
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args, findClassLoader());
     }
 
@@ -172,6 +264,16 @@ public class EnhancedServiceLoader {
      * @param service the service
      */
     public static <S> void unload(Class<S> service) {
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                InnerEnhancedServiceLoader<S> s = InnerEnhancedServiceLoader.removeServiceLoader(compatibleService);
+                if (s != null) {
+                    return;
+                }
+            } catch (Exception ignore) {
+            }
+        }
         InnerEnhancedServiceLoader.removeServiceLoader(service);
     }
 
@@ -183,11 +285,23 @@ public class EnhancedServiceLoader {
      * @param activateName the activate name
      */
     public static <S> void unload(Class<S> service, String activateName) {
-
         if (activateName == null) {
             throw new IllegalArgumentException("activateName is null");
         }
+        Class<S> compatibleService = getCompatibleService(service);
+        if (compatibleService != null) {
+            try {
+                InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(compatibleService);
+                doUnload(serviceLoader, activateName);
+                return;
+            } catch (Exception ignore) {
+            }
+        }
         InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
+        doUnload(serviceLoader, activateName);
+    }
+
+    private static <S> void doUnload(InnerEnhancedServiceLoader<S> serviceLoader, String activateName) {
         ConcurrentMap<Class<?>, ExtensionDefinition<S>> classToDefinitionMap = serviceLoader.classToDefinitionMap;
         List<ExtensionDefinition<S>> extensionDefinitions = new ArrayList<>();
         for (Map.Entry<Class<?>, ExtensionDefinition<S>> entry : classToDefinitionMap.entrySet()) {
@@ -207,7 +321,6 @@ public class EnhancedServiceLoader {
 
             }
         }
-
     }
 
 
@@ -258,6 +371,8 @@ public class EnhancedServiceLoader {
         private InnerEnhancedServiceLoader(Class<S> type) {
             this.type = type;
         }
+
+
 
         /**
          * Get the ServiceLoader for the specified Class
