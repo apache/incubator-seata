@@ -20,5 +20,6 @@ package io.seata.discovery.registry;
 /**
  * the interface registry provider
  */
+@Deprecated
 public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider {
 }

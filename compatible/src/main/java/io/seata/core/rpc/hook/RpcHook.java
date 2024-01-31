@@ -20,5 +20,6 @@ package io.seata.core.rpc.hook;
 /**
  * The type RpcHook
  */
+@Deprecated
 public interface RpcHook extends org.apache.seata.core.rpc.hook.RpcHook {
 }

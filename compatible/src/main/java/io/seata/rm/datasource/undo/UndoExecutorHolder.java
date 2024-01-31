@@ -21,5 +21,6 @@ package io.seata.rm.datasource.undo;
  * The Type UndoExecutorHolder
  *
  */
+@Deprecated
 public interface UndoExecutorHolder extends org.apache.seata.rm.datasource.undo.UndoExecutorHolder {
 }

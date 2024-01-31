@@ -17,10 +17,11 @@
 package io.seata.core.rpc;
 
 /**
- * 
+ *
  *
  * The interface Register check auth handler.
  *
  */
+@Deprecated
 public interface RegisterCheckAuthHandler extends org.apache.seata.core.rpc.RegisterCheckAuthHandler {
 }

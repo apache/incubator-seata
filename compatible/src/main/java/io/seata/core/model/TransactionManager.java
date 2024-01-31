@@ -17,12 +17,13 @@
 package io.seata.core.model;
 
 /**
- * 
+ *
  *
  * Transaction Manager.
  *
  * Define a global transaction and control it.
  *
  */
+@Deprecated
 public interface TransactionManager extends org.apache.seata.core.model.TransactionManager {
 }

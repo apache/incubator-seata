@@ -17,6 +17,6 @@
 package io.seata.integration.tx.api.json;
 
 
-
+@Deprecated
 public interface JsonParser extends org.apache.seata.integration.tx.api.json.JsonParser {
 }

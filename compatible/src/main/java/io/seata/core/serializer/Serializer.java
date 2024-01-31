@@ -20,5 +20,6 @@ package io.seata.core.serializer;
  * The interface Codec.
  *
  */
+@Deprecated
 public interface Serializer extends org.apache.seata.core.serializer.Serializer {
 }

@@ -20,5 +20,6 @@ package io.seata.rm;
  * The Abstract RM event handler
  *
  */
+@Deprecated
 public abstract class AbstractRMHandler extends org.apache.seata.rm.AbstractRMHandler {
 }

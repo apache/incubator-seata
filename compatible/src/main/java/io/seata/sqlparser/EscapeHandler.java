@@ -21,5 +21,6 @@ package io.seata.sqlparser;
  * The interface Keyword checker.
  *
  */
+@Deprecated
 public interface EscapeHandler extends org.apache.seata.sqlparser.EscapeHandler {
 }

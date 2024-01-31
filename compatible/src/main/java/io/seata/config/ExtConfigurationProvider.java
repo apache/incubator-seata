@@ -21,7 +21,8 @@ import org.apache.seata.config.Configuration;
 /**
  * the interface ext configuration provider
  *
- * 
+ *
  */
+@Deprecated
 public interface ExtConfigurationProvider extends org.apache.seata.config.ExtConfigurationProvider {
 }

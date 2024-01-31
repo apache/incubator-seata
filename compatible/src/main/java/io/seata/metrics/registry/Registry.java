@@ -21,5 +21,6 @@ package io.seata.metrics.registry;
  * Registry interface for metrics
  *
  */
+@Deprecated
 public interface Registry extends org.apache.seata.metrics.registry.Registry {
 }

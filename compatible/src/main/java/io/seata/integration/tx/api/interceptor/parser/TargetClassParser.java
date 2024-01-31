@@ -15,6 +15,6 @@
  * limitations under the License.
  */
 package io.seata.integration.tx.api.interceptor.parser;
-
+@Deprecated
 public interface TargetClassParser extends org.apache.seata.integration.tx.api.interceptor.parser.TargetClassParser {
 }

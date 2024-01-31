@@ -26,6 +26,7 @@ import org.apache.seata.core.model.BranchType;
 /**
  * The type Root context.
  */
+@Deprecated
 public class RootContext {
 
     /**

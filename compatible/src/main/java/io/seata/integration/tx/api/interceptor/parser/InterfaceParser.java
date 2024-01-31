@@ -16,6 +16,6 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 
-
+@Deprecated
 public interface InterfaceParser extends org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser {
 }

@@ -21,6 +21,7 @@ package io.seata.sqlparser.struct;
  * The type Table meta cache.
  *
  */
+@Deprecated
 public interface TableMetaCache extends org.apache.seata.sqlparser.struct.TableMetaCache {
 
 }
