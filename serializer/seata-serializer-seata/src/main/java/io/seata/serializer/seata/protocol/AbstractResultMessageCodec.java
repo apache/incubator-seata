@@ -25,7 +25,6 @@ import io.seata.core.protocol.ResultCode;
 
 /**
  * The type Abstract result message codec.
- *
  */
 public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
@@ -36,12 +35,13 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
         ResultCode resultCode = abstractResultMessage.getResultCode();
         String resultMsg = abstractResultMessage.getMsg();
-
-        out.writeByte(resultCode.ordinal());
-        if (resultCode == ResultCode.Failed) {
+        if (null != resultCode) {
+            out.writeByte(resultCode.ordinal());
+        }
+        if (resultCode != ResultCode.Success) {
             if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
                 if (resultMsg.length() > Short.MAX_VALUE) {
@@ -50,21 +50,21 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
                     msg = resultMsg;
                 }
                 byte[] bs = msg.getBytes(UTF8);
-                out.writeShort((short)bs.length);
+                out.writeShort((short) bs.length);
                 out.writeBytes(bs);
             } else {
-                out.writeShort((short)0);
+                out.writeShort((short) 0);
             }
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
 
         ResultCode resultCode = ResultCode.get(in.get());
         abstractResultMessage.setResultCode(resultCode);
-        if (resultCode == ResultCode.Failed) {
+        if (resultCode != ResultCode.Success) {
             short len = in.getShort();
             if (len > 0) {
                 byte[] msg = new byte[len];

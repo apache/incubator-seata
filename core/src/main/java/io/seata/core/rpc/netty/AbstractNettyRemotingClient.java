@@ -18,6 +18,7 @@ package io.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -29,6 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -43,6 +45,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
+import io.seata.core.auth.JwtAuthManager;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
@@ -63,11 +66,12 @@ import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static io.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The netty remoting client.
- *
  */
 public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 
@@ -100,10 +104,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+    protected JwtAuthManager jwtAuthManager = JwtAuthManager.getInstance();
     protected volatile boolean enableClientBatchSendRequest;
 
     @Override
     public void init() {
+        jwtAuthManager.init();
         timerExecutor.scheduleAtFixedRate(() -> {
             try {
                 clientChannelManager.reconnect(getTransactionServiceGroup());
@@ -172,7 +178,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             } catch (Exception exx) {
                 LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), serverAddress, rpcMessage.getBody());
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException)exx;
+                    throw (TimeoutException) exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
@@ -293,6 +299,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }
         return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
+    }
+
+    protected String getAuthData() {
+        return JwtAuthManager.refreshAuthData(null);
+    }
+
+    protected void refreshAuthToken(String extraData) {
+        if (StringUtils.isBlank(extraData)) {
+            return;
+        }
+        HashMap<String, String> authData = JwtAuthManager.convertToHashMap(extraData);
+        String newToken = authData.get("newToken");
+        if (StringUtils.isNotBlank(newToken)) {
+            jwtAuthManager.refreshToken(newToken);
+        }
     }
 
     private String getThreadPrefix() {

@@ -23,7 +23,6 @@ import io.seata.core.protocol.AbstractIdentifyResponse;
 
 /**
  * The type Abstract identify response.
- *
  */
 public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessageCodec {
 
@@ -34,25 +33,38 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
+        super.encode(t,out);
+        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
         boolean identified = abstractIdentifyResponse.isIdentified();
         String version = abstractIdentifyResponse.getVersion();
+        String extraData = abstractIdentifyResponse.getExtraData();
 
-        out.writeByte(identified ? (byte)1 : (byte)0);
+        out.writeByte(identified ? (byte) 1 : (byte) 0);
         if (version != null) {
             byte[] bs = version.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
+        }
+
+        if (extraData != null) {
+            byte[] bs = extraData.getBytes(UTF8);
+            out.writeShort((short) bs.length);
+            if (bs.length > 0) {
+                out.writeBytes(bs);
+            }
+        } else {
+            out.writeShort((short) 0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
+        super.decode(t,in);
+        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
 
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
@@ -65,6 +77,20 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
         byte[] bs = new byte[len];
         in.get(bs);
         abstractIdentifyResponse.setVersion(new String(bs, UTF8));
+
+        //ExtraData len
+        if (in.remaining() < 2) {
+            return;
+        }
+        len = in.getShort();
+
+        if (in.remaining() >= len) {
+            bs = new byte[len];
+            in.get(bs);
+            abstractIdentifyResponse.setExtraData(new String(bs, UTF8));
+        } else {
+            //maybe null
+        }
     }
 
 }

@@ -17,13 +17,18 @@
 package io.seata.server.auth;
 
 import io.seata.common.loader.LoadLevel;
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
-@LoadLevel(name = "defaultCheckAuthHandler", order = 100)
+@LoadLevel(name = "defaultCheckAuthHandler", order = 1)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCheckAuthHandler.class);
 
     @Override
     public boolean doRegTransactionManagerCheck(RegisterTMRequest request) {
@@ -33,5 +38,16 @@ public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public boolean doRegResourceManagerCheck(RegisterRMRequest request) {
         return true;
+    }
+
+    @Override
+    public boolean needRefreshToken(AbstractIdentifyRequest abstractIdentifyRequest) {
+        return false;
+    }
+
+    @Override
+    public String refreshToken(AbstractIdentifyRequest abstractIdentifyRequest) {
+        LOGGER.error("This method is not supported.");
+        return null;
     }
 }

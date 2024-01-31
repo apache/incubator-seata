@@ -174,6 +174,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                                      AbstractMessage requestMessage) {
         RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
         RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+        refreshAuthToken(registerRMResponse.getExtraData());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
@@ -236,7 +237,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
-        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
+        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup,getAuthData());
         message.setResourceIds(resourceId);
         try {
             super.sendAsyncRequest(channel, message);
@@ -289,10 +290,14 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
-            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
+            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getExtraData());
             message.setResourceIds(resourceIds);
             return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
         };
+    }
+
+    private String getExtraData(){
+        return getAuthData();
     }
 
     @Override

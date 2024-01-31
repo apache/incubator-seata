@@ -16,6 +16,8 @@
  */
 package io.seata.core.rpc;
 
+import io.seata.common.exception.RetryableException;
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 
@@ -31,7 +33,7 @@ public interface RegisterCheckAuthHandler {
      * @param request the request
      * @return the boolean
      */
-    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
+    boolean regTransactionManagerCheckAuth(RegisterTMRequest request) throws RetryableException;
 
     /**
      * Reg resource manager check auth boolean.
@@ -39,5 +41,11 @@ public interface RegisterCheckAuthHandler {
      * @param request the request
      * @return the boolean
      */
-    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
+    boolean regResourceManagerCheckAuth(RegisterRMRequest request) throws RetryableException;
+
+    /**
+     *  Refresh token
+     * @return the String
+     */
+    String refreshAuthToken(AbstractIdentifyRequest abstractIdentifyRequest) ;
 }

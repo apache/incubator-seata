@@ -216,6 +216,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                                      AbstractMessage requestMessage) {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest) requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
+        refreshAuthToken(registerTMResponse.getExtraData());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
@@ -279,6 +280,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
         sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
         sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(EXTRA_DATA_SPLIT_CHAR);
+        String authExtraData = getAuthData();
+        sb.append(authExtraData);
         return sb.toString();
     }
 

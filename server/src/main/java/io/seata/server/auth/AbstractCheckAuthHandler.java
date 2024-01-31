@@ -16,38 +16,55 @@
  */
 package io.seata.server.auth;
 
+import io.seata.common.exception.RetryableException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.rpc.RegisterCheckAuthHandler;
 
+import static io.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static io.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 import static io.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
 
 /**
  */
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
+    private static final String NEW_TOKEN = "newToken";
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
-    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) throws RetryableException {
         if (!ENABLE_CHECK_AUTH) {
             return true;
         }
         return doRegTransactionManagerCheck(request);
     }
 
-    public abstract boolean doRegTransactionManagerCheck(RegisterTMRequest request);
+    public abstract boolean doRegTransactionManagerCheck(RegisterTMRequest request) throws RetryableException;
 
     @Override
-    public boolean regResourceManagerCheckAuth(RegisterRMRequest request) {
+    public boolean regResourceManagerCheckAuth(RegisterRMRequest request) throws RetryableException {
         if (!ENABLE_CHECK_AUTH) {
             return true;
         }
         return doRegResourceManagerCheck(request);
     }
 
-    public abstract boolean doRegResourceManagerCheck(RegisterRMRequest request);
+    public abstract boolean doRegResourceManagerCheck(RegisterRMRequest request) throws RetryableException;
+
+    @Override
+    public String refreshAuthToken(AbstractIdentifyRequest abstractIdentifyRequest)  {
+        if (needRefreshToken(abstractIdentifyRequest)) {
+            return NEW_TOKEN + EXTRA_DATA_KV_CHAR + refreshToken(abstractIdentifyRequest) + EXTRA_DATA_SPLIT_CHAR;
+        }
+        return null;
+    }
+
+    public abstract boolean needRefreshToken(AbstractIdentifyRequest abstractIdentifyRequest);
+
+    public abstract String refreshToken(AbstractIdentifyRequest abstractIdentifyRequest);
 }
