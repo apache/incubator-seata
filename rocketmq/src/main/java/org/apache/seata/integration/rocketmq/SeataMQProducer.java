@@ -48,8 +48,8 @@ public class SeataMQProducer extends TransactionMQProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducer.class);
 
-    public static String PROPERTY_SEATA_XID = "__SEATA_XID";
-    public static String PROPERTY_SEATA_BRANCHID = "__SEATA_BRANCHID";
+    public static String PROPERTY_SEATA_XID = RootContext.KEY_XID;
+    public static String PROPERTY_SEATA_BRANCHID = "TX_BRANCHID";
     private TransactionListener transactionListener;
 
     private TCCRocketMQ tccRocketMQ;
