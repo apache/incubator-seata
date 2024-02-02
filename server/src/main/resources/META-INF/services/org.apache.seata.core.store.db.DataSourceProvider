@@ -1,0 +1,3 @@
+org.apache.seata.server.store.DbcpDataSourceProvider
+org.apache.seata.server.store.DruidDataSourceProvider
+org.apache.seata.server.store.HikariDataSourceProvider

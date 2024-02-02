@@ -1,0 +1,3 @@
+org.apache.seata.spring.annotation.scannercheckers.PackageScannerChecker
+org.apache.seata.spring.annotation.scannercheckers.ConfigBeansScannerChecker
+org.apache.seata.spring.annotation.scannercheckers.ScopeBeansScannerChecker

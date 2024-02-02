@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -78,7 +78,7 @@
                 <artifactId>easyj-maven-plugin</artifactId>
                 <configuration>
                     <mainPaths>
-                        <path>io/seata/core/protocol/VersionInfo.java.template</path>
+                        <path>org/apache/seata/core/protocol/VersionInfo.java.template</path>
                     </mainPaths>
                 </configuration>
                 <executions>
