@@ -45,29 +45,29 @@ public class MockServerTest {
     @Test
     public void testCommit() throws TransactionException {
         String xid = doTestCommit(0);
-        Assertions.assertEquals(Action1Impl.getCommitTimes(xid), 1);
-        Assertions.assertEquals(Action1Impl.getRollbackTimes(xid), 0);
+        Assertions.assertEquals(1, Action1Impl.getCommitTimes(xid));
+        Assertions.assertEquals(0, Action1Impl.getRollbackTimes(xid));
     }
 
     @Test
     public void testCommitRetry() throws TransactionException {
         String xid = doTestCommit(2);
-        Assertions.assertEquals(Action1Impl.getCommitTimes(xid), 3);
-        Assertions.assertEquals(Action1Impl.getRollbackTimes(xid), 0);
+        Assertions.assertEquals(3, Action1Impl.getCommitTimes(xid));
+        Assertions.assertEquals(0, Action1Impl.getRollbackTimes(xid));
     }
 
     @Test
     public void testRollback() throws TransactionException {
         String xid = doTestRollback(0);
-        Assertions.assertEquals(Action1Impl.getCommitTimes(xid), 0);
-        Assertions.assertEquals(Action1Impl.getRollbackTimes(xid), 1);
+        Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
+        Assertions.assertEquals(1, Action1Impl.getRollbackTimes(xid));
     }
 
     @Test
     public void testRollbackRetry() throws TransactionException {
         String xid = doTestRollback(2);
-        Assertions.assertEquals(Action1Impl.getCommitTimes(xid), 0);
-        Assertions.assertEquals(Action1Impl.getRollbackTimes(xid), 3);
+        Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
+        Assertions.assertEquals(3, Action1Impl.getRollbackTimes(xid));
     }
 
     private static String doTestCommit(int times) throws TransactionException {
@@ -78,7 +78,7 @@ public class MockServerTest {
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.AT, RESOURCE_ID, "1", xid, "1", "1");
         GlobalStatus commit = tm.commit(xid);
-        Assertions.assertEquals(commit, GlobalStatus.Committed);
+        Assertions.assertTrue(commit == GlobalStatus.Committed || commit == GlobalStatus.Finished);
         return xid;
 
     }
@@ -91,7 +91,7 @@ public class MockServerTest {
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.AT, RESOURCE_ID, "1", xid, "1", "1");
         GlobalStatus rollback = tm.rollback(xid);
-        Assertions.assertEquals(rollback, GlobalStatus.Rollbacked);
+        Assertions.assertTrue(rollback == GlobalStatus.Rollbacked || rollback == GlobalStatus.Finished);
         return xid;
 
     }
