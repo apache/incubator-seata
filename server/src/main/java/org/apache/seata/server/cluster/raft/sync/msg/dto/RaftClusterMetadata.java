@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.Version;
 
 /**
  */
@@ -45,11 +46,13 @@ public class RaftClusterMetadata implements Serializable {
         this.term = term;
     }
 
-    public Node createNode(String host, int txPort, int controlPort, String group, Map<String, Object> metadata) {
+    public Node createNode(String host, int txPort,int internalPort, int controlPort, String group, Map<String, Object> metadata) {
         Node node = new Node();
         node.setTransaction(node.createEndpoint(host, txPort, "seata"));
         node.setControl(node.createEndpoint(host, controlPort, "http"));
         node.setGroup(group);
+        node.setVersion(Version.getCurrent());
+        node.setInternal(node.createEndpoint(host, internalPort, "raft"));
         Optional.ofNullable(metadata).ifPresent(node::setMetadata);
         return node;
     }

@@ -222,9 +222,11 @@ public class RaftServerManager {
     private static class SingletonHandler {
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
         private static final CliClientService CLI_CLIENT_SERVICE = new CliClientServiceImpl();
+
         static {
             CLI_CLIENT_SERVICE.init(new CliOptions());
         }
+
     }
 
 }

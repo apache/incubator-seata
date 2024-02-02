@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import com.alipay.sofa.jraft.Closure;
@@ -32,6 +34,10 @@ import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
+import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.rpc.CliClientService;
+import com.alipay.sofa.jraft.rpc.InvokeCallback;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import org.apache.seata.common.XID;
@@ -40,6 +46,7 @@ import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.cluster.raft.processor.request.PutNodeInfoRequest;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
@@ -104,6 +111,8 @@ public class RaftStateMachine extends StateMachineAdapter {
      * current term
      */
     private final AtomicLong currentTerm = new AtomicLong(-1);
+
+    private final AtomicBoolean init = new AtomicBoolean(false);
 
     public boolean isLeader() {
         return this.leaderTerm.get() > 0;
@@ -288,8 +297,9 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     public RaftClusterMetadata createNewRaftClusterMetadata() {
+      RaftServer raftServer =  RaftServerManager.getRaftServer(group);
         RaftClusterMetadata metadata = new RaftClusterMetadata(this.currentTerm.get());
-        Node leader = metadata.createNode(XID.getIpAddress(), XID.getPort(),
+        Node leader = metadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
             Integer.parseInt(((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                 .getProperty("server.port", String.valueOf(8088))),
             group, Collections.emptyMap());
@@ -298,19 +308,20 @@ public class RaftStateMachine extends StateMachineAdapter {
         Configuration configuration = RouteTable.getInstance().getConfiguration(this.group);
         List<Node> learners = configuration.getLearners().stream().map(learner -> {
             int nettyPort = learner.getPort() - SERVICE_OFFSET_SPRING_BOOT;
-            Node learnerNode = metadata.createNode(learner.getIp(), nettyPort, nettyPort - SERVICE_OFFSET_SPRING_BOOT,
-                this.group, Collections.emptyMap());
+            Node learnerNode = metadata.createNode(learner.getIp(), nettyPort, learner.getPort(),
+                nettyPort - SERVICE_OFFSET_SPRING_BOOT, this.group, Collections.emptyMap());
             learnerNode.setRole(ClusterRole.LEARNER);
             return learnerNode;
         }).collect(Collectors.toList());
         metadata.setLearner(learners);
         List<Node> followers = configuration.getPeers().stream().map(follower -> {
             int nettyPort = follower.getPort() - SERVICE_OFFSET_SPRING_BOOT;
-            Node followerNode = metadata.createNode(follower.getIp(), nettyPort, nettyPort - SERVICE_OFFSET_SPRING_BOOT,
-                this.group, Collections.emptyMap());
+            Node followerNode = metadata.createNode(follower.getIp(), nettyPort, follower.getPort(),
+                nettyPort - SERVICE_OFFSET_SPRING_BOOT, this.group, Collections.emptyMap());
             followerNode.setRole(ClusterRole.FOLLOWER);
             return followerNode;
         }).collect(Collectors.toList());
+        followers.remove(leader);
         metadata.setFollowers(followers);
         return metadata;
     }
@@ -320,6 +331,42 @@ public class RaftStateMachine extends StateMachineAdapter {
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
         LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
+        if (!init.get()) {
+            Node leader = raftClusterMetadata.getLeader();
+            if (leader.getInternal() != null && init.compareAndSet(false, true)) {
+                RaftServer raftServer = RaftServerManager.getRaftServer(group);
+                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
+                    raftServer.getServerId().getPort(),
+                    Integer.parseInt(
+                        ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                            .getProperty("server.port", String.valueOf(8088))),
+                    group, Collections.emptyMap());
+                PutNodeInfoRequest putNodeInfoRequest = new PutNodeInfoRequest(node);
+                CliClientServiceImpl cliClientService =
+                    (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
+                try {
+                    if (!RouteTable.getInstance().refreshLeader(cliClientService, group, 1000).isOk()) {
+                        throw new IllegalStateException("Refresh leader failed");
+                    }
+                    PeerId peerId = RouteTable.getInstance().selectLeader(group);
+                    cliClientService.getRpcClient().invokeAsync(peerId.getEndpoint(), putNodeInfoRequest,
+                        new InvokeCallback() {
+                            @Override
+                            public void complete(Object result, Throwable err) {
+                                if (err == null) {
+                                    LOGGER.info("sync node info to leader: {}, result: {}", peerId, result);
+                                } else {
+                                    LOGGER.error("sync node info to leader: {}, error: {}", peerId, err.getMessage(),
+                                        err);
+                                }
+                            }
+
+                        }, 30000);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
 }
