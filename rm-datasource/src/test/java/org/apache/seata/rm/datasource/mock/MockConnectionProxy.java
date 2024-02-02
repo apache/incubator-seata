@@ -22,8 +22,7 @@ import java.sql.SQLException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 
-/**
- */
+
 public class MockConnectionProxy extends ConnectionProxy {
     /**
      * Instantiates a new Connection proxy.

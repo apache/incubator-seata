@@ -24,8 +24,7 @@ import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbUndoLogManager extends MySQLUndoLogManager {
 

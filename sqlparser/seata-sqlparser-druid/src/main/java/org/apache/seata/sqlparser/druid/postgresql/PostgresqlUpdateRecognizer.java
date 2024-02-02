@@ -36,8 +36,7 @@ import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.SQLUpdateRecognizer;
 
-/**
- */
+
 public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer implements SQLUpdateRecognizer {
 
     private PGUpdateStatement ast;

@@ -22,8 +22,7 @@ import org.apache.seata.sqlparser.util.DbTypeParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class DruidDbTypeParserTest {
     @Test
     public void testDruidDbTypeParserLoading() {

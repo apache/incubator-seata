@@ -34,8 +34,7 @@ import org.apache.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class PostgresqlUpdateRecognizerTest {
 
     private static final String DB_TYPE = "postgresql";

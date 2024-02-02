@@ -20,8 +20,7 @@ import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHa
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class GlobalTransactionalInterceptorParserTest {
 
     @Test

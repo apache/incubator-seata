@@ -40,8 +40,7 @@ import org.apache.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class UpdateJoinExecutorTest {
     @Test
     public void testUpdateJoinUndoLog() throws SQLException {

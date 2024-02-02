@@ -29,8 +29,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE
 import static org.apache.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX_KEBAB_STYLE;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = THREAD_FACTORY_PREFIX_KEBAB_STYLE)
 public class ThreadFactoryProperties {

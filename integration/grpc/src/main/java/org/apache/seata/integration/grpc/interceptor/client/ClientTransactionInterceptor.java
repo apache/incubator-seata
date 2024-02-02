@@ -27,8 +27,7 @@ import io.grpc.MethodDescriptor;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
-/**
- */
+
 public class ClientTransactionInterceptor implements ClientInterceptor {
 
     @Override

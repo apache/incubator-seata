@@ -21,8 +21,7 @@ import org.apache.seata.rm.tcc.NormalTccActionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class TccActionInterceptorParserTest {
 
     @Test

@@ -22,8 +22,7 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
-/**
- */
+
 public class MockInvoker implements Invoker<Object> {
 
     private Runnable runnable;

@@ -27,8 +27,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import org.apache.seata.core.protocol.transaction.BranchReportResponse;
 
-/**
- */
+
 public class BranchReportResponseConvertor implements PbConvertor<BranchReportResponse, BranchReportResponseProto> {
     @Override
     public BranchReportResponseProto convert2Proto(BranchReportResponse branchReportResponse) {

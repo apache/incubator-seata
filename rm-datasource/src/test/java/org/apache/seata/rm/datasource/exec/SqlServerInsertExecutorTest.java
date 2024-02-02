@@ -45,8 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
+
 public class SqlServerInsertExecutorTest {
     private static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";

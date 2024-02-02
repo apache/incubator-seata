@@ -16,8 +16,7 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
-/**
- */
+
 public interface RegisterResourceParser {
 
     void registerResource(Object target, String beanName);

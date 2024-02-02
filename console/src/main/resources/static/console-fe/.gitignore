@@ -16,3 +16,4 @@ test/reports
 test/screenshots/*
 /public/saga-statemachine-designer/
 /node
+/public/version.json

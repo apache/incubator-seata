@@ -28,8 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-/**
- */
+
 @LoadLevel(name = "HESSIAN")
 public class HessianSerializer implements Serializer {
     private static final Logger LOGGER = LoggerFactory.getLogger(HessianSerializer.class);

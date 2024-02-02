@@ -21,8 +21,7 @@ import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.tm.api.transaction.Propagation;
 
-/**
- */
+
 public class AspectTransactional {
     
     /**

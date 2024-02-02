@@ -30,8 +30,7 @@ import org.springframework.aop.framework.ProxyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- */
+
 public class MethodDescTest {
 
     private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner(

@@ -28,8 +28,7 @@ import org.apache.seata.common.Constants;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.integration.tx.api.json.JsonParser;
 
-/**
- */
+
 @LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {
 

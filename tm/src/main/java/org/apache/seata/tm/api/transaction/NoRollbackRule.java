@@ -17,8 +17,7 @@
 package org.apache.seata.tm.api.transaction;
 
 
-/**
- */
+
 public class NoRollbackRule extends RollbackRule {
 
     public static final NoRollbackRule DEFAULT_NO_ROLLBACK_RULE = new NoRollbackRule(Throwable.class);

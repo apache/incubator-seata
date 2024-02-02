@@ -31,8 +31,7 @@ import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class MockResultSet extends ResultSetBase {
 
     private List<ColumnMeta> columnMetas;

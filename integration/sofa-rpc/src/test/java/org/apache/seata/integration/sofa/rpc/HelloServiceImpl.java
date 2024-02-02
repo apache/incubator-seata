@@ -19,8 +19,7 @@ package org.apache.seata.integration.sofa.rpc;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 
-/**
- */
+
 public class HelloServiceImpl implements HelloService {
 
     private String result;

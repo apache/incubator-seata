@@ -16,8 +16,7 @@
  */
 package org.apache.seata.core.compressor;
 
-/**
- */
+
 public enum CompressorType {
 
     /**

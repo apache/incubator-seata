@@ -25,8 +25,7 @@ import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 
-/**
- */
+
 public class MockClob implements Clob {
 
     @Override

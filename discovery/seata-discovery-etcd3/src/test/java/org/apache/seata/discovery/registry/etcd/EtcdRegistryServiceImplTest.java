@@ -40,8 +40,7 @@ import static io.netty.util.CharsetUtil.UTF_8;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- */
+
 @Disabled
 public class EtcdRegistryServiceImplTest {
     private static final String REGISTRY_KEY_PREFIX = "registry-seata-";

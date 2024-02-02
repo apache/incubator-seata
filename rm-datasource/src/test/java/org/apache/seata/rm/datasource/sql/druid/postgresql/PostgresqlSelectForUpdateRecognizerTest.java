@@ -26,8 +26,7 @@ import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class PostgresqlSelectForUpdateRecognizerTest {
 
     private static final String DB_TYPE = "postgresql";

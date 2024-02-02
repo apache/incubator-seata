@@ -24,9 +24,7 @@ import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionRole;
 import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
 
-/**
- *
- */
+
 public class MockGlobalTransaction implements GlobalTransaction {
 
     private String xid;
