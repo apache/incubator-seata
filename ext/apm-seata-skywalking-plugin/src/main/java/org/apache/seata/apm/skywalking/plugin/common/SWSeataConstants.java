@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- */
+
 public class SWSeataConstants {
 
     private static final Set<String> TRANSACTION_MANAGER_OPERATION_NAME_MAPPING = new HashSet<>();

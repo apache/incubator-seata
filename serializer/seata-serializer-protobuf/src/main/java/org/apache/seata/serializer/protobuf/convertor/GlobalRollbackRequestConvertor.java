@@ -23,8 +23,7 @@ import org.apache.seata.serializer.protobuf.generated.GlobalRollbackRequestProto
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
 
-/**
- */
+
 public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbackRequest, GlobalRollbackRequestProto> {
     @Override
     public GlobalRollbackRequestProto convert2Proto(GlobalRollbackRequest globalRollbackRequest) {

@@ -23,8 +23,7 @@ import java.util.List;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 
-/**
- */
+
 public class MockResultSetMetaData implements ResultSetMetaData {
 
     private List<ColumnMeta> columns;

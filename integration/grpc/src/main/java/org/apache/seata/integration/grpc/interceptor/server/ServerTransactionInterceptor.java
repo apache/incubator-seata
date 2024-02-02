@@ -27,8 +27,7 @@ import io.grpc.ServerInterceptor;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
-/**
- */
+
 public class ServerTransactionInterceptor implements ServerInterceptor {
 
     @Override

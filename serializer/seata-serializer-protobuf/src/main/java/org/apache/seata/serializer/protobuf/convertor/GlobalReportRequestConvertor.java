@@ -25,8 +25,7 @@ import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.transaction.GlobalReportRequest;
 
-/**
- */
+
 public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportRequest, GlobalReportRequestProto> {
     @Override
     public GlobalReportRequestProto convert2Proto(GlobalReportRequest globalReportRequest) {

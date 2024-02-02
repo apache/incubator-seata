@@ -18,8 +18,7 @@ package org.apache.seata.core.store.db.sql.distributed.lock;
 
 import org.apache.seata.core.constants.ServerTableColumnsName;
 
-/**
- */
+
 public class BaseDistributedLockSql implements DistributedLockSql {
     protected static final String DISTRIBUTED_LOCK_TABLE_PLACE_HOLD = " #distributed_lock_table# ";
 

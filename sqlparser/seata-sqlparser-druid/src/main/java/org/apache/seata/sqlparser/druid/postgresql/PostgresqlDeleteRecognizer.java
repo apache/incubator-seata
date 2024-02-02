@@ -30,8 +30,7 @@ import org.apache.seata.sqlparser.SQLType;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- */
+
 public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer implements SQLDeleteRecognizer {
 
     private final PGDeleteStatement ast;

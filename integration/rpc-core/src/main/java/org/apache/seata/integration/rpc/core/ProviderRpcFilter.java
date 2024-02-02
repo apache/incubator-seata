@@ -23,8 +23,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 
-/**
- */
+
 public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
 
     String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_XID.toLowerCase(),

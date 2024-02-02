@@ -25,8 +25,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class GlobalTransactionContextTest {
     private static final String DEFAULT_XID = "1234567890";
 

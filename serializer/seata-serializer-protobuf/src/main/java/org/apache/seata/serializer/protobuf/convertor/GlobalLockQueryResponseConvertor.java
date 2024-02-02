@@ -27,8 +27,7 @@ import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryResponse;
 
-/**
- */
+
 public class GlobalLockQueryResponseConvertor
     implements PbConvertor<GlobalLockQueryResponse, GlobalLockQueryResponseProto> {
     @Override

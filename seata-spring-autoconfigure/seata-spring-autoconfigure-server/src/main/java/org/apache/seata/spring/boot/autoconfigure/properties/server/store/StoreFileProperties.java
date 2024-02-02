@@ -22,8 +22,7 @@ import org.springframework.stereotype.Component;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = STORE_FILE_PREFIX)
 public class StoreFileProperties {

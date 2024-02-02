@@ -22,8 +22,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-/**
- */
+
 public class ProtobufInnerSerializer {
 
     private static final ProtobufHelper PROTOBUF_HELPER = new ProtobufHelper();

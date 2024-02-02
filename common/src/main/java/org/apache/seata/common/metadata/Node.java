@@ -19,8 +19,7 @@ package org.apache.seata.common.metadata;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- */
+
 public class Node {
 
     Map<String, Object> metadata = new HashMap<>();

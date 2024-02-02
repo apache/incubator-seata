@@ -26,8 +26,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 
-/**
- */
+
 public class BranchReportRequestConvertor implements PbConvertor<BranchReportRequest, BranchReportRequestProto> {
     @Override
     public BranchReportRequestProto convert2Proto(BranchReportRequest branchReportRequest) {

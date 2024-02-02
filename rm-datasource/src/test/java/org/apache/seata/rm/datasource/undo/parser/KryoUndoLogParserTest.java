@@ -20,8 +20,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 
-/**
- */
+
 public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
 
     KryoUndoLogParser parser = (KryoUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, KryoUndoLogParser.NAME);

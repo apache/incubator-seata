@@ -68,8 +68,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDO
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
-/**
- */
+
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     private static final AtomicBoolean INIT = new AtomicBoolean(false);
