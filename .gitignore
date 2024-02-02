@@ -53,8 +53,3 @@ Thumbs.db
 
 #h2
 *.db
-/console/src/main/resources/static/css/
-/console/src/main/resources/static/img/
-/console/src/main/resources/static/js/
-/console/src/main/resources/static/saga-statemachine-designer/
-/console/src/main/resources/static/index.html

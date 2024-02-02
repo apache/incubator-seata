@@ -1,0 +1,7 @@
+org.apache.seata.rm.datasource.undo.mysql.MySQLUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.oracle.OracleUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.postgresql.PostgresqlUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.sqlserver.SqlServerUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.mariadb.MariadbUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.polardbx.PolarDBXUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.dm.DmUndoExecutorHolder

@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -352,8 +352,14 @@
                         </ports>
                         <labels>
                             <name>seata-server</name>
+                            <git.commit.message.full>${git.commit.message.full}</git.commit.message.full>
+                            <git.remote.origin.url>${git.remote.origin.url}</git.remote.origin.url>
                             <git.commit.id>${git.commit.id}</git.commit.id>
                             <git.commit.time>${git.commit.time}</git.commit.time>
+                            <git.branch>${git.branch}</git.branch>
+                            <git.build.time>${git.build.time}</git.build.time>
+                            <git.build.version>${git.build.version}</git.build.version>
+                            <git.dirty>${git.dirty}</git.dirty>
                             <mvn.build.version>${project.version}</mvn.build.version>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
@@ -412,7 +418,7 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <version>${spring-boot.version}</version>
                         <configuration>
-                            <mainClass>io.seata.server.ServerApplication</mainClass>
+                            <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
                             <attach>false</attach>
                             <includes>

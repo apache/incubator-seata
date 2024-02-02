@@ -1,0 +1,2 @@
+org.apache.seata.saga.statelang.parser.impl.FastjsonParser
+org.apache.seata.saga.statelang.parser.impl.JacksonJsonParser

@@ -1,0 +1,2 @@
+org.apache.seata.config.processor.ProcessorProperties
+org.apache.seata.config.processor.ProcessorYaml
