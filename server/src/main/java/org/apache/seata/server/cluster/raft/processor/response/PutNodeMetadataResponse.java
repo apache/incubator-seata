@@ -14,24 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.processor.request;
+package org.apache.seata.server.cluster.raft.processor.response;
 
 import java.io.Serializable;
-import org.apache.seata.common.metadata.Node;
 
-public class PutNodeInfoRequest implements Serializable {
+public class PutNodeMetadataResponse implements Serializable {
 
-	private Node node;
+	private boolean success;
 
-	public PutNodeInfoRequest(Node node) {
-		this.node = node;
+	public PutNodeMetadataResponse(boolean success) {
+		this.success = success;
 	}
 
-	public Node getNode() {
-		return node;
+	public boolean isSuccess() {
+		return success;
 	}
 
-	public void setNode(Node node) {
-		this.node = node;
+	public void setSuccess(boolean success) {
+		this.success = success;
 	}
+
+    @Override
+    public String toString() {
+        return "PutNodeMetadataResponse{" + "success=" + success + '}';
+    }
+
 }

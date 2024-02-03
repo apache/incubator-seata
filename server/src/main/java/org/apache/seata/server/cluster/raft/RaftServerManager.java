@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -39,9 +40,12 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
+import org.apache.seata.server.cluster.raft.processor.PutNodeInfoRequestProcessor;
+import org.apache.seata.server.cluster.raft.serializer.JacksonBoltSerializer;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +152,7 @@ public class RaftServerManager {
             }
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         });
+        rpcServer.registerProcessor(new PutNodeInfoRequestProcessor());
         if (rpcServer != null && !rpcServer.init(null)) {
             throw new RuntimeException("start raft node fail!");
         }
@@ -225,6 +230,7 @@ public class RaftServerManager {
 
         static {
             CLI_CLIENT_SERVICE.init(new CliOptions());
+            SerializerManager.addSerializer(SerializerType.JACKSON.getCode(), new JacksonBoltSerializer());
         }
 
     }

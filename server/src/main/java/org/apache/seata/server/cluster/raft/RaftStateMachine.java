@@ -23,10 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+import com.alipay.sofa.jraft.rpc.InvokeContext;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.RouteTable;
@@ -35,8 +34,6 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.core.StateMachineAdapter;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.entity.PeerId;
-import com.alipay.sofa.jraft.rpc.CliClientService;
-import com.alipay.sofa.jraft.rpc.InvokeCallback;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
@@ -45,8 +42,9 @@ import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
-import org.apache.seata.server.cluster.raft.processor.request.PutNodeInfoRequest;
+import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.session.SessionSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
@@ -75,7 +73,6 @@ import org.springframework.core.env.Environment;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static org.apache.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
@@ -100,7 +97,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private static final Map<RaftSyncMsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
-    private volatile RaftClusterMetadata raftClusterMetadata;
+    private volatile RaftClusterMetadata raftClusterMetadata = new RaftClusterMetadata();
 
     /**
      * Leader term
@@ -249,7 +246,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         RouteTable.getInstance().updateConfiguration(group, conf);
     }
     
-    private void syncMetadata() {
+    public void syncMetadata() {
         if (isLeader()) {
             SeataClusterContext.bindGroup(group);
             try {
@@ -297,33 +294,17 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     public RaftClusterMetadata createNewRaftClusterMetadata() {
-      RaftServer raftServer =  RaftServerManager.getRaftServer(group);
-        RaftClusterMetadata metadata = new RaftClusterMetadata(this.currentTerm.get());
-        Node leader = metadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
-            Integer.parseInt(((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                .getProperty("server.port", String.valueOf(8088))),
-            group, Collections.emptyMap());
+        RaftServer raftServer = RaftServerManager.getRaftServer(group);
+        raftClusterMetadata.setTerm(this.currentTerm.get());
+        Node leader =
+            raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
+                Integer
+                    .parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                        .getProperty("server.port", String.valueOf(8088))),
+                group, Collections.emptyMap());
         leader.setRole(ClusterRole.LEADER);
-        metadata.setLeader(leader);
-        Configuration configuration = RouteTable.getInstance().getConfiguration(this.group);
-        List<Node> learners = configuration.getLearners().stream().map(learner -> {
-            int nettyPort = learner.getPort() - SERVICE_OFFSET_SPRING_BOOT;
-            Node learnerNode = metadata.createNode(learner.getIp(), nettyPort, learner.getPort(),
-                nettyPort - SERVICE_OFFSET_SPRING_BOOT, this.group, Collections.emptyMap());
-            learnerNode.setRole(ClusterRole.LEARNER);
-            return learnerNode;
-        }).collect(Collectors.toList());
-        metadata.setLearner(learners);
-        List<Node> followers = configuration.getPeers().stream().map(follower -> {
-            int nettyPort = follower.getPort() - SERVICE_OFFSET_SPRING_BOOT;
-            Node followerNode = metadata.createNode(follower.getIp(), nettyPort, follower.getPort(),
-                nettyPort - SERVICE_OFFSET_SPRING_BOOT, this.group, Collections.emptyMap());
-            followerNode.setRole(ClusterRole.FOLLOWER);
-            return followerNode;
-        }).collect(Collectors.toList());
-        followers.remove(leader);
-        metadata.setFollowers(followers);
-        return metadata;
+        raftClusterMetadata.setLeader(leader);
+        return raftClusterMetadata;
     }
 
     public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
@@ -341,7 +322,9 @@ public class RaftStateMachine extends StateMachineAdapter {
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                             .getProperty("server.port", String.valueOf(8088))),
                     group, Collections.emptyMap());
-                PutNodeInfoRequest putNodeInfoRequest = new PutNodeInfoRequest(node);
+                InvokeContext invokeContext = new InvokeContext();
+                PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
+                invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER, SerializerType.JACKSON.getCode());
                 CliClientServiceImpl cliClientService =
                     (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
                 try {
@@ -349,19 +332,15 @@ public class RaftStateMachine extends StateMachineAdapter {
                         throw new IllegalStateException("Refresh leader failed");
                     }
                     PeerId peerId = RouteTable.getInstance().selectLeader(group);
-                    cliClientService.getRpcClient().invokeAsync(peerId.getEndpoint(), putNodeInfoRequest,
-                        new InvokeCallback() {
-                            @Override
-                            public void complete(Object result, Throwable err) {
+                    cliClientService.getRpcClient().invokeAsync(peerId.getEndpoint(), putNodeInfoRequest,invokeContext,
+                            (result, err) -> {
                                 if (err == null) {
                                     LOGGER.info("sync node info to leader: {}, result: {}", peerId, result);
                                 } else {
                                     LOGGER.error("sync node info to leader: {}, error: {}", peerId, err.getMessage(),
                                         err);
                                 }
-                            }
-
-                        }, 30000);
+                            }, 30000);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

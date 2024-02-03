@@ -17,47 +17,57 @@
 package org.apache.seata.server.cluster.raft.processor;
 
 import java.util.List;
-import com.alipay.remoting.AsyncContext;
-import com.alipay.remoting.BizContext;
-import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
+import com.alipay.sofa.jraft.rpc.RpcContext;
+import com.alipay.sofa.jraft.rpc.RpcProcessor;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.RaftStateMachine;
-import org.apache.seata.server.cluster.raft.processor.request.PutNodeInfoRequest;
+import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
+import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataResponse;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
-import org.apache.zookeeper.server.quorum.Follower;
 
-public class PutNodeInfoRequestProcessor extends AsyncUserProcessor<PutNodeInfoRequest> {
+public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadataRequest> {
 
-	public PutNodeInfoRequestProcessor() {
-		super();
-	}
+    public PutNodeInfoRequestProcessor() {
+        super();
+    }
 
-	@Override
-    public void handleRequest(BizContext bizCtx, AsyncContext asyncCtx, PutNodeInfoRequest request) {
-		Node node = request.getNode();
-		if(RaftServerManager.isLeader(node.getGroup())){
-			RaftServer raftServer = RaftServerManager.getRaftServer(node.getGroup());
+    @Override
+    public void handleRequest(RpcContext rpcCtx, PutNodeMetadataRequest request) {
+        Node node = request.getNode();
+		String group = node.getGroup();
+        if (RaftServerManager.isLeader(group)) {
+			RaftServer raftServer = RaftServerManager.getRaftServer(group);
 			RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();
-			RaftClusterMetadata raftClusterMetadata = raftStateMachine.getRaftLeaderMetadata();
-			List<Node> followers = raftClusterMetadata.getFollowers();
-			followers.forEach(follower -> {
-				if(follower.getInternal()!=null){
-					if(follower.getInternal().getHost().equals(node.getInternal().getHost())){
-						follower.setTransaction(node.getTransaction());
-						follower.setControl(node.getControl());
-						follower.setGroup(node.getGroup());
-						follower.setMetadata(node.getMetadata());
-					}
-				}
-			});
-		}
-	}
+            try {
+                RaftClusterMetadata raftClusterMetadata = raftStateMachine.getRaftLeaderMetadata();
+                List<Node> followers = raftClusterMetadata.getFollowers();
+                for (Node follower : followers) {
+                    if (follower.getInternal() != null) {
+						// change old follower node metadata
+                        if (follower.getInternal().getHost().equals(node.getInternal().getHost())) {
+                            follower.setTransaction(node.getTransaction());
+                            follower.setControl(node.getControl());
+                            follower.setGroup(group);
+                            follower.setMetadata(node.getMetadata());
+							follower.setVersion(node.getVersion());
+                            return;
+                        }
+                    }
+                }
+				// add new follower node metadata
+                followers.add(node);
+            } finally {
+                rpcCtx.sendResponse(new PutNodeMetadataResponse(true));
+				raftStateMachine.syncMetadata();
+            }
+        }
+    }
 
     @Override
     public String interest() {
-        return null;
+        return PutNodeInfoRequestProcessor.class.getName();
     }
 
 }

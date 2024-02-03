@@ -17,6 +17,7 @@
 package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,9 +34,9 @@ public class RaftClusterMetadata implements Serializable {
 
     private Node leader;
 
-    private List<Node> followers;
+    private List<Node> followers = new ArrayList<>();
 
-    private List<Node> learner;
+    private List<Node> learner = new ArrayList<>();
 
     private long term;
 
