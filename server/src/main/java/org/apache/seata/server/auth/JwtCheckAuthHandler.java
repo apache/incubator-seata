@@ -39,7 +39,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
-@LoadLevel(name = "jwtCheckAuthHandler", order = 2)
+@LoadLevel(name = "jwtCheckAuthHandler", order = 1)
 public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtCheckAuthHandler.class);
 

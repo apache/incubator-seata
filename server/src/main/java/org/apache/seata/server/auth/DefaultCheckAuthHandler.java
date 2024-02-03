@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-@LoadLevel(name = "defaultCheckAuthHandler", order = 1)
+@LoadLevel(name = "defaultCheckAuthHandler", order = 2)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCheckAuthHandler.class);
