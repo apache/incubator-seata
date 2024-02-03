@@ -1,2 +1,0 @@
-io.seata.server.auth.JwtCheckAuthHandler
-io.seata.server.auth.DefaultCheckAuthHandler
