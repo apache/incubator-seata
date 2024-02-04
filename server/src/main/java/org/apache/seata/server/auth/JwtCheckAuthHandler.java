@@ -23,6 +23,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.RetryableException;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.StringUtils;
@@ -45,6 +46,10 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
     private static final String AUTHORITIES_KEY = "auth";
 
     private static final String TOKEN = "token";
+
+    private static final String PRO_USERNAME = "username";
+
+    private static final String PRO_PASSWORD = "password";
 
     private JwtAuthManager authManager = JwtAuthManager.getInstance();
 
@@ -77,8 +82,8 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
             // 2.if token will be expired, need refresh token.
             try {
                 String accessToken = authDataMap.get(TOKEN);
-                String secretKey = ConfigurationFactory.getInstance().getConfig("security.secretKey");
-                String tokenValidWindow = ConfigurationFactory.getInstance().getConfig("security.tokenValidityInMilliseconds");
+                String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_SECRET_KEY);
+                String tokenValidWindow = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_TOKEN_VALID_TIME);
                 Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
                 Claims claims = claimsJws.getBody();
                 Date expiration = claims.getExpiration();
@@ -95,8 +100,8 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public String refreshToken(AbstractIdentifyRequest abstractIdentifyRequest) {
         String subject;
-        String secretKey = ConfigurationFactory.getInstance().getConfig("security.secretKey");
-        String expirationMillis = ConfigurationFactory.getInstance().getConfig("security.tokenValidityInMilliseconds");
+        String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_SECRET_KEY);
+        String expirationMillis = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_TOKEN_VALID_TIME);
         if (authManager.getUsername() != null) {
             subject = authManager.getUsername();
         } else {
@@ -123,11 +128,11 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
         }
         HashMap<String, String> authData = JwtAuthManager.convertToHashMap(extraData);
         // 1.check username/password
-        String username = authData.get("username");
-        String password = authData.get("password");
+        String username = authData.get(PRO_USERNAME);
+        String password = authData.get(PRO_PASSWORD);
         if (null != username && null != password
-            && StringUtils.equals(username, ConfigurationFactory.getInstance().getConfig("security.username"))
-            && StringUtils.equals(password, ConfigurationFactory.getInstance().getConfig("security.password"))) {
+            && StringUtils.equals(username, ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_USERNME))
+            && StringUtils.equals(password, ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_PASSWORD))) {
             authManager.setUsername(username);
             authManager.setPassword(password);
             return true;
@@ -135,7 +140,7 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
             // 2.check token
             try {
                 String accessToken = authData.get(TOKEN);
-                String secretKey = ConfigurationFactory.getInstance().getConfig("security.secretKey");
+                String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_SECRET_KEY);
                 Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
                 authManager.setAccessToken(accessToken);
                 return true;

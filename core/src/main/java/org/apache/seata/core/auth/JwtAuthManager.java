@@ -17,6 +17,7 @@
 package org.apache.seata.core.auth;
 
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 
@@ -53,8 +54,8 @@ public class JwtAuthManager {
     }
 
     public void init() {
-        username = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("security." + PRO_USERNAME);
-        password = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("security." + PRO_PASSWORD);
+        username = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.SECURITY_USERNME);
+        password = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.SECURITY_PASSWORD);
     }
 
     public String getToken() {
