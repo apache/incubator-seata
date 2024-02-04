@@ -126,20 +126,20 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
         if (null == extraData) {
             return false;
         }
-        HashMap<String, String> authData = StringUtils.string2Map(extraData);
+        HashMap<String, String> extraDataMap = StringUtils.string2Map(extraData);
         // 1.check username/password
-        String username = authData.get(PRO_USERNAME);
-        String password = authData.get(PRO_PASSWORD);
+        String username = extraDataMap.get(PRO_USERNAME);
+        String password = extraDataMap.get(PRO_PASSWORD);
         if (null != username && null != password
             && StringUtils.equals(username, ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_USERNME))
             && StringUtils.equals(password, ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_PASSWORD))) {
             authManager.setUsername(username);
             authManager.setPassword(password);
             return true;
-        } else if (authData.get(TOKEN) != null) {
+        } else if (extraDataMap.get(TOKEN) != null) {
             // 2.check token
             try {
-                String accessToken = authData.get(TOKEN);
+                String accessToken = extraDataMap.get(TOKEN);
                 String secretKey = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SECURITY_SECRET_KEY);
                 Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
                 authManager.setAccessToken(accessToken);

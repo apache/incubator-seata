@@ -75,6 +75,7 @@ import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableSe
 public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
+    private static final String PRO_NEW_TOKEN = "newToken";
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
@@ -308,8 +309,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         if (StringUtils.isBlank(extraData)) {
             return;
         }
-        HashMap<String, String> authData = StringUtils.string2Map(extraData);
-        String newToken = authData.get("newToken");
+        HashMap<String, String> extraDataMap = StringUtils.string2Map(extraData);
+        String newToken = extraDataMap.get(PRO_NEW_TOKEN);
         if (StringUtils.isNotBlank(newToken)) {
             jwtAuthManager.refreshToken(newToken);
         }
