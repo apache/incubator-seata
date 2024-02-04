@@ -30,9 +30,7 @@ import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceReg
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.RMClient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +46,7 @@ public class RmClientTest {
 
     @Test
     public void testRm() throws TransactionException {
-        MockServerTest.startMockServer();
+        MockServer.start();
         String resourceId = "mock-action";
         String xid = "1111";
 

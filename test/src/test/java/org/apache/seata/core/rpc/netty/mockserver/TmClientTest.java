@@ -43,7 +43,7 @@ public class TmClientTest {
 
     @Test
     public void testTm() throws Exception {
-        MockServerTest.startMockServer();
+        MockServer.start();
         TransactionManager tm = getTm();
 
         //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2

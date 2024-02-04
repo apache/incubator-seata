@@ -36,18 +36,12 @@ public class MockServerTest {
 
     @BeforeAll
     public static void before() {
-        startMockServer();
+        MockServer.start();
     }
 
-    public static void startMockServer() {
-        if (!inited) {
-            synchronized (MockServerTest.class) {
-                if (!inited) {
-                    MockServer.start();
-                    inited = true;
-                }
-            }
-        }
+//    @AfterAll
+    public static void after() {
+        MockServer.close();
     }
 
     @Test

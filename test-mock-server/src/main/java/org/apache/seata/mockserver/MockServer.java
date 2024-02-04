@@ -41,6 +41,8 @@ public class MockServer {
     private static ThreadPoolExecutor workingThreads;
     private static MockNettyRemotingServer nettyRemotingServer;
 
+    private static volatile boolean inited = false;
+
     /**
      * The entry point of application.
      *
@@ -52,24 +54,33 @@ public class MockServer {
     }
 
     public static void start() {
-        workingThreads = new ThreadPoolExecutor(50,
-                50, 500, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(20000),
-                new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
-        nettyRemotingServer = new MockNettyRemotingServer(workingThreads, 8099);
+        if (!inited) {
+            synchronized (MockServer.class) {
+                if (!inited) {
+                    inited = true;
+                    workingThreads = new ThreadPoolExecutor(50,
+                            50, 500, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<>(20000),
+                            new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
+                    nettyRemotingServer = new MockNettyRemotingServer(workingThreads, 8099);
 
-        // set registry
-        XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(8099);
-        // init snowflake for transactionId, branchId
-        UUIDGenerator.init(1L);
+                    // set registry
+                    XID.setIpAddress(NetUtil.getLocalIp());
+                    XID.setPort(8099);
+                    // init snowflake for transactionId, branchId
+                    UUIDGenerator.init(1L);
 
-        MockCoordinator coordinator = MockCoordinator.getInstance();
-        coordinator.setRemotingServer(nettyRemotingServer);
-        nettyRemotingServer.setHandler(coordinator);
-        nettyRemotingServer.init();
+                    MockCoordinator coordinator = MockCoordinator.getInstance();
+                    coordinator.setRemotingServer(nettyRemotingServer);
+                    nettyRemotingServer.setHandler(coordinator);
+                    nettyRemotingServer.init();
 
-        LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                }
+            }
+        }
+
+
     }
 
     public static void close() {
