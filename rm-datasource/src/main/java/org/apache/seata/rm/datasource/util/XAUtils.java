@@ -72,7 +72,7 @@ public class XAUtils {
                     default:
                         throw new SQLException("xa not support dbType: " + dbType);
                 }
-            } catch (XAException xae) {
+            } catch (Exception xae) {
                 throw new SQLException("create xaConnection error", xae);
             }
         }
@@ -100,7 +100,7 @@ public class XAUtils {
 
     }
 
-    private static Constructor<XAConnection> getConstructorByDBType(Class xaConnectionClass, String dbType) {
+    private static Constructor<XAConnection> getConstructorByDBType(Class xaConnectionClass, String dbType) throws SQLException {
         try {
             switch (dbType) {
                 case JdbcConstants.ORACLE:
@@ -113,7 +113,7 @@ public class XAUtils {
                     throw new SQLException("xa reflect not support dbType: " + dbType);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SQLException(e);
         }
     }
 
@@ -142,7 +142,7 @@ public class XAUtils {
                     throw new SQLException("xa reflect not support dbType: " + dbType);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SQLException(e);
         }
     }
 }
