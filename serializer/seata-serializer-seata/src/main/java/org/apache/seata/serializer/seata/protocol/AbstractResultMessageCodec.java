@@ -40,6 +40,8 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
         String resultMsg = abstractResultMessage.getMsg();
         if (null != resultCode) {
             out.writeByte(resultCode.ordinal());
+        } else{
+            out.writeByte(ResultCode.values().length);
         }
         if (resultCode != ResultCode.Success) {
             if (StringUtils.isNotEmpty(resultMsg)) {
@@ -61,9 +63,11 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
     @Override
     public <T> void decode(T t, ByteBuffer in) {
         AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
-
-        ResultCode resultCode = ResultCode.get(in.get());
-        abstractResultMessage.setResultCode(resultCode);
+        ResultCode resultCode = null;
+        if(in.get()<ResultCode.values().length){
+            resultCode = ResultCode.get(in.get());
+            abstractResultMessage.setResultCode(resultCode);
+        }
         if (resultCode != ResultCode.Success) {
             short len = in.getShort();
             if (len > 0) {

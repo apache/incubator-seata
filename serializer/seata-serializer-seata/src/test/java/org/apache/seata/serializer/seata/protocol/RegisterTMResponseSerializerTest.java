@@ -57,4 +57,15 @@ public class RegisterTMResponseSerializerTest {
 //        Assert.assertEquals(registerTMResponse2.getMsg(), registerTMResponse.getMsg());
 //        Assert.assertEquals(registerTMResponse2.getByCode(), registerTMResponse.getByCode());
     }
+
+    @Test
+    public void test_codec1() {
+        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
+        registerTMResponse.setIdentified(true);
+        registerTMResponse.setVersion("2.1.0-SNAPSHOT");
+        byte[] bytes = seataSerializer.serialize(registerTMResponse);
+        RegisterTMResponse registerTMResponse2 = seataSerializer.deserialize(bytes);
+        assertThat(registerTMResponse2.isIdentified()).isEqualTo(registerTMResponse.isIdentified());
+        assertThat(registerTMResponse2.getVersion()).isEqualTo(registerTMResponse.getVersion());
+    }
 }
