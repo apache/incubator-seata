@@ -1,1 +1,1 @@
-io.seata.spring.boot.autoconfigure.SeataSpringFenceAutoConfiguration
+org.apache.seata.spring.boot.autoconfigure.SeataSpringFenceAutoConfiguration

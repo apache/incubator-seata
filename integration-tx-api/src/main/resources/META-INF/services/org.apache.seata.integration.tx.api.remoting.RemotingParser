@@ -1,0 +1,3 @@
+org.apache.seata.integration.tx.api.remoting.parser.DubboRemotingParser
+org.apache.seata.integration.tx.api.remoting.parser.SofaRpcRemotingParser
+org.apache.seata.integration.tx.api.remoting.parser.HSFRemotingParser

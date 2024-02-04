@@ -27,7 +27,7 @@
         <destination>${LOGSTASH_DESTINATION}</destination>
 
         <!--<encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">-->
-        <encoder charset="UTF-8" class="io.seata.server.logging.logback.appender.EnhancedLogstashEncoder">
+        <encoder charset="UTF-8" class="org.apache.seata.server.logging.logback.appender.EnhancedLogstashEncoder">
             <!-- the global custom fields -->
             <customFields>
                 {
