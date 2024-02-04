@@ -32,9 +32,22 @@ public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
 
+    private static volatile boolean inited = false;
+
     @BeforeAll
     public static void before() {
-        MockServer.start();
+        startMockServer();
+    }
+
+    public static void startMockServer() {
+        if (!inited) {
+            synchronized (MockServerTest.class) {
+                if (!inited) {
+                    MockServer.start();
+                    inited = true;
+                }
+            }
+        }
     }
 
     @Test

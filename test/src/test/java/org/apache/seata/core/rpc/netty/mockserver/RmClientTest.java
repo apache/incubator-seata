@@ -45,15 +45,10 @@ public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
 
-    @BeforeAll
-    public static void before() {
-        MockServer.start();
-    }
-
-
 
     @Test
     public void testRm() throws TransactionException {
+        MockServerTest.startMockServer();
         String resourceId = "mock-action";
         String xid = "1111";
 

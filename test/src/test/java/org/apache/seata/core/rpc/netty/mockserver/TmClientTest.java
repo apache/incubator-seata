@@ -40,15 +40,10 @@ public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
 
-    @BeforeAll
-    public static void before() {
-        MockServer.start();
-    }
-
 
     @Test
     public void testTm() throws Exception {
-
+        MockServerTest.startMockServer();
         TransactionManager tm = getTm();
 
         //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
