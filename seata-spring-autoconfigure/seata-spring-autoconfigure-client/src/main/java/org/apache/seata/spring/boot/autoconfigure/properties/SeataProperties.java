@@ -74,6 +74,16 @@ public class SeataProperties {
      */
     private String secretKey;
 
+    /**
+     * the username
+     */
+    private String username;
+
+    /**
+     * the password
+     */
+    private String password;
+
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
 
@@ -178,6 +188,24 @@ public class SeataProperties {
 
     public SeataProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
+        return this;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public SeataProperties setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public SeataProperties setPassword(String password) {
+        this.password = password;
         return this;
     }
 }

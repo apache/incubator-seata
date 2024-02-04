@@ -27,6 +27,9 @@ seata:
   scan-packages: firstPackage,secondPackage
   excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
+  security:
+    username:
+    password:
   client:
     rm:
       async-commit-buffer-limit: 10000
