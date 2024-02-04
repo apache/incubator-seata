@@ -16,4 +16,4 @@
  */
 package io.seata.integration.http;
 
-public class SeataWebMvcConfigurer extends org.apache.seata.integration.http.SeataWebMvcConfigurer {}
+public class JakartaTransactionPropagationInterceptor extends org.apache.seata.integration.http.JakartaTransactionPropagationInterceptor{}

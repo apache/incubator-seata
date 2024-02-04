@@ -16,30 +16,7 @@
  */
 package io.seata.integration.http;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-public class TransactionPropagationInterceptor extends org.apache.seata.integration.http.TransactionPropagationInterceptor {
-
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        return super.preHandle(request, response, handler);
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
-        throws Exception {
-        super.afterCompletion(request, response, handler, ex);
-    }
-
-    @Override
-    protected boolean bindXid(String rpcXid) {
-        return super.bindXid(rpcXid);
-    }
-
-    @Override
-    protected void cleanXid(String rpcXid) {
-        super.cleanXid(rpcXid);
-    }
+public class TransactionPropagationInterceptor
+    extends org.apache.seata.integration.http.TransactionPropagationInterceptor {
 
 }
