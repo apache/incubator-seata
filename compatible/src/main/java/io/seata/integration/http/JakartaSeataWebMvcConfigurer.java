@@ -15,4 +15,5 @@
  * limitations under the License.
  */
 package io.seata.integration.http;
+
 public class JakartaSeataWebMvcConfigurer extends org.apache.seata.integration.http.JakartaSeataWebMvcConfigurer{}
