@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-build</artifactId>
         <version>${revision}</version>
         <relativePath>./build/pom.xml</relativePath>
@@ -41,6 +41,7 @@
         <module>config</module>
         <module>console</module>
         <module>core</module>
+        <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
@@ -59,6 +60,7 @@
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
+        <module>test-mock-server</module>
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
@@ -115,7 +117,7 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.seata</groupId>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
@@ -341,7 +343,8 @@
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
+                        <id>pmd-check</id>
+                        <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
