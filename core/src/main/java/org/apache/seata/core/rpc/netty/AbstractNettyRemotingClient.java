@@ -66,8 +66,7 @@ import org.apache.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
+
 import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**

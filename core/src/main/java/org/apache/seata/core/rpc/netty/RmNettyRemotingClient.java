@@ -55,7 +55,6 @@ import static org.apache.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
 /**
  * The Rm netty client.
- *
  */
 
 public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
@@ -78,11 +77,11 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
             // Found one or more resources that were registered before initialization
             if (resourceManager != null
-                    && !resourceManager.getManagedResources().isEmpty()
-                    && StringUtils.isNotBlank(transactionServiceGroup)) {
+                && !resourceManager.getManagedResources().isEmpty()
+                && StringUtils.isNotBlank(transactionServiceGroup)) {
                 boolean failFast = ConfigurationFactory.getInstance().getBoolean(
-                        ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-                        DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
+                    ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                    DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
                 getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
             }
         }
@@ -93,7 +92,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
         // set enableClientBatchSendRequest
         this.enableClientBatchSendRequest = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
-                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST,DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST));
+            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST));
         ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST, new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
@@ -172,8 +171,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
-        RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
-        RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest) requestMessage;
+        RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
         refreshAuthToken(registerRMResponse.getExtraData());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
@@ -191,8 +190,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public void onRegisterMsgFail(String serverAddress, Channel channel, Object response,
                                   AbstractMessage requestMessage) {
-        RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
-        RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest) requestMessage;
+        RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
         String errMsg = String.format(
             "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerRMRequest.getVersion(), registerRMResponse.getVersion(), registerRMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
@@ -219,8 +218,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
         if (getClientChannelManager().getChannels().isEmpty()) {
             boolean failFast = ConfigurationFactory.getInstance().getBoolean(
-                    ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-                    DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
+                ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
             getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
             return;
         }
@@ -237,7 +236,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
-        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup,getAuthData());
+        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getAuthData());
         message.setResourceIds(resourceId);
         try {
             super.sendAsyncRequest(channel, message);
@@ -296,7 +295,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         };
     }
 
-    private String getExtraData(){
+    private String getExtraData() {
         return getAuthData();
     }
 

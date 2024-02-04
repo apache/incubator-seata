@@ -40,10 +40,10 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
         String resultMsg = abstractResultMessage.getMsg();
         if (null != resultCode) {
             out.writeByte(resultCode.ordinal());
-        } else{
+        } else {
             out.writeByte(ResultCode.values().length);
         }
-        if (resultCode != ResultCode.Success) {
+        if (resultCode == ResultCode.Failed || resultCode == ResultCode.Retry) {
             if (StringUtils.isNotEmpty(resultMsg)) {
                 String msg;
                 if (resultMsg.length() > Short.MAX_VALUE) {
@@ -64,11 +64,12 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
     public <T> void decode(T t, ByteBuffer in) {
         AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
         ResultCode resultCode = null;
-        if(in.get()<ResultCode.values().length){
-            resultCode = ResultCode.get(in.get());
+        byte resultCodeOrdinal = in.get();
+        if (resultCodeOrdinal < ResultCode.values().length) {
+            resultCode = ResultCode.get(resultCodeOrdinal);
             abstractResultMessage.setResultCode(resultCode);
         }
-        if (resultCode != ResultCode.Success) {
+        if (resultCode == ResultCode.Failed || resultCode == ResultCode.Retry) {
             short len = in.getShort();
             if (len > 0) {
                 byte[] msg = new byte[len];

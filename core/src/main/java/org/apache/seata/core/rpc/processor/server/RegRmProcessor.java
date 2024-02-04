@@ -84,7 +84,7 @@ public class RegRmProcessor implements RemotingProcessor {
             isSuccess = false;
             errorInfo = exx.getMessage();
             LOGGER.error("RM register fail, error message:{}", errorInfo);
-            if(exx instanceof RetryableException){
+            if (exx instanceof RetryableException) {
                 resultCode = ResultCode.Retry;
             }
         }

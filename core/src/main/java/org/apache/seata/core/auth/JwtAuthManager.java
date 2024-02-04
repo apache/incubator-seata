@@ -17,7 +17,6 @@
 package org.apache.seata.core.auth;
 
 
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 
@@ -117,14 +116,15 @@ public class JwtAuthManager {
         }
         return resultString.toString();
     }
+
     public static String refreshAuthData(String extraData) {
-        HashMap<String,String> extraDataMap = convertToHashMap(extraData);
+        HashMap<String, String> extraDataMap = convertToHashMap(extraData);
         extraDataMap.remove(PRO_TOKEN);
-        if(null != getInstance().getToken()){
-            extraDataMap.put(PRO_TOKEN,getInstance().getToken());
-        }else if(null!= getInstance().getUsername() && null != getInstance().getPassword()){
-            extraDataMap.put(PRO_USERNAME,getInstance().getUsername());
-            extraDataMap.put(PRO_PASSWORD,getInstance().getPassword());
+        if (null != getInstance().getToken()) {
+            extraDataMap.put(PRO_TOKEN, getInstance().getToken());
+        } else if (null != getInstance().getUsername() && null != getInstance().getPassword()) {
+            extraDataMap.put(PRO_USERNAME, getInstance().getUsername());
+            extraDataMap.put(PRO_PASSWORD, getInstance().getPassword());
         }
         return convertToString(extraDataMap);
     }
