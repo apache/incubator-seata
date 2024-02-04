@@ -54,5 +54,11 @@
             <artifactId>seata-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.27.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
