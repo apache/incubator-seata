@@ -111,12 +111,17 @@ public class ResourceBundleUtil {
                         "Duplicate placeholders exist '" + placeholder + "' in bundle.");
                 }
                 placeholder = parseStringValue(placeholder, visitedPlaceholders);
-                String propVal = resolvePlaceholder(placeholder);
-                if (propVal != null) {
-                    propVal = parseStringValue(propVal, visitedPlaceholders);
-                    buf.replace(startIndex, endIndex + DEFAULT_PLACEHOLDER_SUFFIX.length(), propVal);
-                    startIndex = buf.indexOf(DEFAULT_PLACEHOLDER_PREFIX, startIndex + propVal.length());
-                } else {
+                try {
+                    String propVal = resolvePlaceholder(placeholder);
+                    if (propVal != null) {
+                        propVal = parseStringValue(propVal, visitedPlaceholders);
+                        buf.replace(startIndex, endIndex + DEFAULT_PLACEHOLDER_SUFFIX.length(), propVal);
+                        startIndex = buf.indexOf(DEFAULT_PLACEHOLDER_PREFIX, startIndex + propVal.length());
+                    } else {
+                        throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
+                            "Could not resolve placeholder '" + placeholder + "'");
+                    }
+                } catch (Exception ex) {
                     throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
                         "Could not resolve placeholder '" + placeholder + "'");
                 }
