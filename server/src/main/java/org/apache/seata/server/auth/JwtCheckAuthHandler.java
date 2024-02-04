@@ -74,7 +74,7 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
             return false;
         }
 
-        HashMap<String, String> authDataMap = JwtAuthManager.convertToHashMap(abstractIdentifyRequest.getExtraData());
+        HashMap<String, String> authDataMap = StringUtils.string2Map(abstractIdentifyRequest.getExtraData());
         // 1.if use username/password for authentication, need refresh token.
         if (!authDataMap.containsKey(TOKEN)) {
             return true;
@@ -126,7 +126,7 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
         if (null == extraData) {
             return false;
         }
-        HashMap<String, String> authData = JwtAuthManager.convertToHashMap(extraData);
+        HashMap<String, String> authData = StringUtils.string2Map(extraData);
         // 1.check username/password
         String username = authData.get(PRO_USERNAME);
         String password = authData.get(PRO_PASSWORD);

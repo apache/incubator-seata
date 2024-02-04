@@ -236,7 +236,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
-        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getAuthData());
+        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getExtraData());
         message.setResourceIds(resourceId);
         try {
             super.sendAsyncRequest(channel, message);

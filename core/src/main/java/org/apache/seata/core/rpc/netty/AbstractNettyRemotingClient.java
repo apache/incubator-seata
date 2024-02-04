@@ -308,7 +308,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         if (StringUtils.isBlank(extraData)) {
             return;
         }
-        HashMap<String, String> authData = JwtAuthManager.convertToHashMap(extraData);
+        HashMap<String, String> authData = StringUtils.string2Map(extraData);
         String newToken = authData.get("newToken");
         if (StringUtils.isNotBlank(newToken)) {
             jwtAuthManager.refreshToken(newToken);

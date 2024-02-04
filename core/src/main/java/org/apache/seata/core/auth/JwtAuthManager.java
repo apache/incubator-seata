@@ -86,40 +86,8 @@ public class JwtAuthManager {
         accessToken = token;
     }
 
-    public static HashMap<String, String> convertToHashMap(String inputString) {
-        HashMap<String, String> resultMap = new HashMap<>();
-        if (StringUtils.isBlank(inputString)) {
-            return resultMap;
-        }
-        String[] keyValuePairs = inputString.split(EXTRA_DATA_SPLIT_CHAR);
-        for (String pair : keyValuePairs) {
-            String[] keyValue = pair.trim().split(EXTRA_DATA_KV_CHAR);
-            if (keyValue.length == 2) {
-                resultMap.put(keyValue[0].trim(), keyValue[1].trim());
-            }
-        }
-        return resultMap;
-    }
-
-    public static String convertToString(HashMap<String, String> inputMap) {
-        if (inputMap == null || inputMap.isEmpty()) {
-            return "";
-        }
-        StringBuilder resultString = new StringBuilder();
-        for (Map.Entry<String, String> entry : inputMap.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            String pair = key + EXTRA_DATA_KV_CHAR + value + EXTRA_DATA_SPLIT_CHAR;
-            resultString.append(pair);
-        }
-        if (resultString.length() > 0) {
-            resultString.deleteCharAt(resultString.length() - 1);
-        }
-        return resultString.toString();
-    }
-
     public static String refreshAuthData(String extraData) {
-        HashMap<String, String> extraDataMap = convertToHashMap(extraData);
+        HashMap<String, String> extraDataMap = StringUtils.string2Map(extraData);
         extraDataMap.remove(PRO_TOKEN);
         if (null != getInstance().getToken()) {
             extraDataMap.put(PRO_TOKEN, getInstance().getToken());
@@ -127,7 +95,7 @@ public class JwtAuthManager {
             extraDataMap.put(PRO_USERNAME, getInstance().getUsername());
             extraDataMap.put(PRO_PASSWORD, getInstance().getPassword());
         }
-        return convertToString(extraDataMap);
+        return StringUtils.map2String(extraDataMap);
     }
 
 
