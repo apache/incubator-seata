@@ -92,8 +92,9 @@ public class RegTmProcessor implements RemotingProcessor {
             }
         }
         RegisterTMResponse response = new RegisterTMResponse(isSuccess);
-        if (checkAuthHandler.refreshAuthToken(message) != null) {
-            response.setExtraData(checkAuthHandler.refreshAuthToken(message));
+        String newToken = checkAuthHandler.refreshAuthToken(message);
+        if (StringUtils.isNotBlank(newToken)) {
+            response.setExtraData(newToken);
         }
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
