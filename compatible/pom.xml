@@ -49,5 +49,10 @@
             <version>2.1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-grpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
