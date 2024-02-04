@@ -56,11 +56,11 @@ public class MockServer {
                 50, 500, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(20000),
                 new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
-        nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
+        nettyRemotingServer = new MockNettyRemotingServer(workingThreads, 8099);
 
         // set registry
         XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(8092);
+        XID.setPort(8099);
         // init snowflake for transactionId, branchId
         UUIDGenerator.init(1L);
 

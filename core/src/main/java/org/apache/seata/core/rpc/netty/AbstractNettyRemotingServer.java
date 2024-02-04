@@ -268,4 +268,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
 
     }
+
+    protected void setListenPort(int listenPort){
+        this.serverBootstrap.setListenPort(listenPort);
+    }
 }

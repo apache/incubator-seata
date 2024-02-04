@@ -98,7 +98,7 @@ public class CallRm {
         request.setXid(branchSession.getXid());
         request.setBranchId(branchSession.getBranchId());
         request.setResourceId(branchSession.getResourceId());
-        request.setApplicationData("{\"k\":\"v\"}");
+        request.setApplicationData("{\"actionContext\":{\"mock\":\"mock\"}}");
         request.setBranchType(BranchType.TCC);
         // todo AT SAGA
     }
