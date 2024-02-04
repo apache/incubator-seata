@@ -22,10 +22,6 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 
 import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
-import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 
 
 public class JwtAuthManager {
