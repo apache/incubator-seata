@@ -221,7 +221,7 @@ public class DefaultCore implements Core {
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
-                            LOGGER.info("Commit branch transaction successfully, xid = {} branchId = {} branchType = {}", globalSession.getXid(), branchSession.getBranchId(), branchSession.getBranchType());
+                            LOGGER.info("Commit branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_CommitFailed_Unretryable:
                             //not at branch

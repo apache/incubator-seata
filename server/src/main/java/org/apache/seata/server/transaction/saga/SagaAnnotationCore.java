@@ -26,8 +26,6 @@ import org.apache.seata.server.session.GlobalSession;
 
 /**
  * The type SAGA_ANNOTATION core.
- *
- * @author leezongjie
  */
 public class SagaAnnotationCore extends AbstractCore {
 

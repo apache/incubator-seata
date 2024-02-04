@@ -29,7 +29,6 @@ import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceReg
 import org.apache.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
 import org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser;
 import org.apache.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
-import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
