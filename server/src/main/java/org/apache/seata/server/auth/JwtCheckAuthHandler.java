@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 
 @LoadLevel(name = "jwtCheckAuthHandler", order = 1)
 public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
@@ -62,7 +61,7 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
     @Override
     public boolean needRefreshToken(AbstractIdentifyRequest abstractIdentifyRequest) {
         try {
-            if(!checkAuthData(abstractIdentifyRequest.getExtraData())){
+            if (!checkAuthData(abstractIdentifyRequest.getExtraData())) {
                 return false;
             }
         } catch (RetryableException e) {
@@ -86,7 +85,7 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
                 if (System.currentTimeMillis() > expiration.getTime() - Long.parseLong(tokenValidWindow) / 3) {
                     return true;
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("jwt token authentication failed: " + e);
             }
         }
@@ -140,11 +139,10 @@ public class JwtCheckAuthHandler extends AbstractCheckAuthHandler {
                 Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken);
                 authManager.setAccessToken(accessToken);
                 return true;
-            } catch (ExpiredJwtException e){
+            } catch (ExpiredJwtException e) {
                 LOGGER.warn("jwt token has been expired: " + e);
                 throw new RetryableException();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("jwt token authentication failed: " + e);
             }
         }

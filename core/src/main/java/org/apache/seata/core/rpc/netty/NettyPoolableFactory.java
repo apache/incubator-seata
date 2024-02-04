@@ -111,13 +111,13 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
                 return false;
             }
             RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
-            return registerTMResponse.getResultCode().equals(ResultCode.Retry);
+            return ResultCode.Retry.equals(registerTMResponse.getResultCode());
         } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
             RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
-            return registerRMResponse.getResultCode().equals(ResultCode.Retry);
+            return ResultCode.Retry.equals(registerRMResponse.getResultCode());
         }
         return false;
     }
