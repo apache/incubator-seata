@@ -27,8 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
+import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
