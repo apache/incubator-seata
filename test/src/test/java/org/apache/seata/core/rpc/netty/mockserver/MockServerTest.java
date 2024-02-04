@@ -37,11 +37,6 @@ public class MockServerTest {
         MockServer.start();
     }
 
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-    }
-
     @Test
     public void testCommit() throws TransactionException {
         String xid = doTestCommit(0);

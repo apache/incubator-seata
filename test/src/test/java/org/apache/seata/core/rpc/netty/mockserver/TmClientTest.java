@@ -45,10 +45,6 @@ public class TmClientTest {
         MockServer.start();
     }
 
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-    }
 
     @Test
     public void testTm() throws Exception {

@@ -50,10 +50,7 @@ public class RmClientTest {
         MockServer.start();
     }
 
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-    }
+
 
     @Test
     public void testRm() throws TransactionException {
