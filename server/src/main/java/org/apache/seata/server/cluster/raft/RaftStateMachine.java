@@ -314,7 +314,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         if (!init.get() && !isLeader()) {
             CompletableFuture.runAsync(() -> {
                 Node leader = raftClusterMetadata.getLeader();
-                if (leader.getInternal() != null && init.compareAndSet(false, true)) {
+                if (leader != null && leader.getInternal() != null && init.compareAndSet(false, true)) {
                     RaftServer raftServer = RaftServerManager.getRaftServer(group);
                     Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
                         raftServer.getServerId().getPort(), Integer.parseInt(
