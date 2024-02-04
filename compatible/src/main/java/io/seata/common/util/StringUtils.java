@@ -19,10 +19,6 @@ package io.seata.common.util;
 
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type String utils.
@@ -31,24 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 @Deprecated
 public class StringUtils {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(org.apache.seata.common.util.StringUtils.class);
-    private static final Pattern CAMEL_PATTERN = Pattern.compile("[A-Z]");
-    private static final Pattern LINE_PATTERN = Pattern.compile("-(\\w)");
-
-    private StringUtils() {
-    }
-
-    /**
-     * empty string
-     */
-    public static final String EMPTY = "";
-
-    /**
-     * Space string
-     */
-    public static final String SPACE = " ";
-
     /**
      * Is empty boolean.
      *

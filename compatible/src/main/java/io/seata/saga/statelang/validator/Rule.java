@@ -16,11 +16,6 @@
  */
 package io.seata.saga.statelang.validator;
 
-
-/**
- * Factorial class to get all rules.
- *
- */
 @Deprecated
-public class RuleFactory extends org.apache.seata.saga.statelang.validator.RuleFactory {
+public interface Rule extends org.apache.seata.saga.statelang.validator.Rule {
 }
