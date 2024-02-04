@@ -14,11 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty.v1;
+package org.apache.seata.core.rpc.netty.v1;
 
-import io.seata.common.util.StringUtils;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.netty.ProtocolRpcMessage;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 
 import java.util.HashMap;
 import java.util.Map;
