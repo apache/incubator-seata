@@ -33,7 +33,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.caucho</groupId>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>hessian</artifactId>
         </dependency>
         <dependency>

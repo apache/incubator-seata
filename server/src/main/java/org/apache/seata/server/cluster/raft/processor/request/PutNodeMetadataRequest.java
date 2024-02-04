@@ -23,6 +23,9 @@ public class PutNodeMetadataRequest implements Serializable {
 
 	private Node node;
 
+	public PutNodeMetadataRequest() {
+	}
+
 	public PutNodeMetadataRequest(Node node) {
 		this.node = node;
 	}

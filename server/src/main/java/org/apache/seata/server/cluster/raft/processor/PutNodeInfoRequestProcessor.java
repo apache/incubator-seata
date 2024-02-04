@@ -44,14 +44,16 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
                 RaftClusterMetadata raftClusterMetadata = raftStateMachine.getRaftLeaderMetadata();
                 List<Node> followers = raftClusterMetadata.getFollowers();
                 for (Node follower : followers) {
-                    if (follower.getInternal() != null) {
+                    Node.Endpoint endpoint = follower.getInternal();
+                    if (endpoint != null) {
 						// change old follower node metadata
-                        if (follower.getInternal().getHost().equals(node.getInternal().getHost())) {
+                        if (endpoint.getHost().equals(node.getInternal().getHost())
+                            && endpoint.getPort() == node.getInternal().getPort()) {
                             follower.setTransaction(node.getTransaction());
                             follower.setControl(node.getControl());
                             follower.setGroup(group);
                             follower.setMetadata(node.getMetadata());
-							follower.setVersion(node.getVersion());
+                            follower.setVersion(node.getVersion());
                             return;
                         }
                     }
@@ -67,7 +69,7 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
 
     @Override
     public String interest() {
-        return PutNodeInfoRequestProcessor.class.getName();
+        return PutNodeMetadataRequest.class.getName();
     }
 
 }

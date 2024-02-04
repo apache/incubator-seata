@@ -204,7 +204,6 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.leaderTerm.set(term);
         LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
         this.currentTerm.set(term);
-        SeataClusterContext.bindGroup(group);
         syncMetadata();
         if (!leader && RaftServerManager.isRaftMode()) {
             CompletableFuture.runAsync(() -> {
@@ -312,39 +311,41 @@ public class RaftStateMachine extends StateMachineAdapter {
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
         LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
-        if (!init.get()) {
-            Node leader = raftClusterMetadata.getLeader();
-            if (leader.getInternal() != null && init.compareAndSet(false, true)) {
-                RaftServer raftServer = RaftServerManager.getRaftServer(group);
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
-                    raftServer.getServerId().getPort(),
-                    Integer.parseInt(
-                        ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                            .getProperty("server.port", String.valueOf(8088))),
-                    group, Collections.emptyMap());
-                InvokeContext invokeContext = new InvokeContext();
-                PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
-                invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER, SerializerType.JACKSON.getCode());
-                CliClientServiceImpl cliClientService =
-                    (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
-                try {
-                    if (!RouteTable.getInstance().refreshLeader(cliClientService, group, 1000).isOk()) {
-                        throw new IllegalStateException("Refresh leader failed");
+        if (!init.get() && !isLeader()) {
+            CompletableFuture.runAsync(() -> {
+                Node leader = raftClusterMetadata.getLeader();
+                if (leader.getInternal() != null && init.compareAndSet(false, true)) {
+                    RaftServer raftServer = RaftServerManager.getRaftServer(group);
+                    Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
+                        raftServer.getServerId().getPort(), Integer.parseInt(
+                            ((Environment)ObjectHolder.INSTANCE.getObject(
+                                OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT)).getProperty("server.port",
+                                String.valueOf(8088))), group, Collections.emptyMap());
+                    InvokeContext invokeContext = new InvokeContext();
+                    PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
+                    invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
+                        SerializerType.JACKSON.getCode());
+                    CliClientServiceImpl cliClientService =
+                        (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
+                    try {
+                        // The previous leader may be an old snapshot or log playback, which is not accurate, and you need to get the leader again
+                        RouteTable.getInstance().refreshLeader(cliClientService, group, 1000);
+                        PeerId leaderPeerId = RouteTable.getInstance().selectLeader(group);
+                        cliClientService.getRpcClient()
+                            .invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest, invokeContext,
+                                (result, err) -> {
+                                    if (err == null) {
+                                        LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
+                                    } else {
+                                        LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId,
+                                            err.getMessage(), err);
+                                    }
+                                }, 300000);
+                    } catch (Exception e) {
+                        LOGGER.error(e.getMessage(), e);
                     }
-                    PeerId peerId = RouteTable.getInstance().selectLeader(group);
-                    cliClientService.getRpcClient().invokeAsync(peerId.getEndpoint(), putNodeInfoRequest,invokeContext,
-                            (result, err) -> {
-                                if (err == null) {
-                                    LOGGER.info("sync node info to leader: {}, result: {}", peerId, result);
-                                } else {
-                                    LOGGER.error("sync node info to leader: {}, error: {}", peerId, err.getMessage(),
-                                        err);
-                                }
-                            }, 30000);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
                 }
-            }
+            });
         }
     }
 
