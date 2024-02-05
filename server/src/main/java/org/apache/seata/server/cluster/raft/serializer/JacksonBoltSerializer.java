@@ -25,12 +25,20 @@ public class JacksonBoltSerializer implements Serializer {
 
     @Override
     public byte[] serialize(Object obj) throws CodecException {
-        return seataSerializer.serialize(obj);
+        try {
+            return seataSerializer.serialize(obj);
+        } catch (Exception e) {
+            throw new CodecException("Failed to serialize data", e);
+        }
     }
 
     @Override
     public <T> T deserialize(byte[] data, String classOfT) throws CodecException {
-        return seataSerializer.deserialize(data);
+        try {
+            return seataSerializer.deserialize(data);
+        } catch (Exception e) {
+            throw new CodecException("Failed to deserialize data", e);
+        }
     }
 
 }
