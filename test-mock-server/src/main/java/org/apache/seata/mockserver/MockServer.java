@@ -47,6 +47,8 @@ public class MockServer {
 
     private static volatile boolean inited = false;
 
+    public static final int DEFAULT_PORT = 8099;
+
     /**
      * The entry point of application.
      *
@@ -56,7 +58,7 @@ public class MockServer {
         SpringApplication.run(MockServer.class, args);
 
         ParameterParser parameterParser = new ParameterParser(args);
-        int port = parameterParser.getPort() > 0 ? parameterParser.getPort() : 8099;
+        int port = parameterParser.getPort() > 0 ? parameterParser.getPort() : DEFAULT_PORT;
         start(port);
     }
 
