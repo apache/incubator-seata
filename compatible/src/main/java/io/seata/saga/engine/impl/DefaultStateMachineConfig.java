@@ -17,22 +17,31 @@
 package io.seata.saga.engine.impl;
 
 import io.seata.saga.engine.StateMachineConfig;
-import org.apache.seata.saga.engine.expression.ExpressionFactoryManager;
+import io.seata.saga.engine.expression.ExpressionFactoryManager;
+import io.seata.saga.engine.repo.StateLogRepository;
+import io.seata.saga.engine.repo.StateMachineRepository;
+import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
+import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.apache.seata.saga.engine.expression.ExpressionResolver;
 import org.apache.seata.saga.engine.invoker.ServiceInvokerManager;
-import org.apache.seata.saga.engine.repo.StateLogRepository;
-import org.apache.seata.saga.engine.repo.StateMachineRepository;
 import org.apache.seata.saga.engine.sequence.SeqGenerator;
 import org.apache.seata.saga.engine.store.StateLangStore;
 import org.apache.seata.saga.engine.store.StateLogStore;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
+import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.io.Resource;
 
 import javax.script.ScriptEngineManager;
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * Default state machine configuration
@@ -42,7 +51,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     private final org.apache.seata.saga.engine.impl.DefaultStateMachineConfig actual;
 
-    public DefaultStateMachineConfig(org.apache.seata.saga.engine.impl.DefaultStateMachineConfig actual) {
+    private ExpressionFactoryManager expressionFactoryManager;
+
+    private ExpressionResolver expressionResolver;
+
+    public DefaultStateMachineConfig() {
+        this.actual = new org.apache.seata.saga.engine.impl.DefaultStateMachineConfig();
+    }
+
+    private DefaultStateMachineConfig(org.apache.seata.saga.engine.impl.DefaultStateMachineConfig actual) {
         this.actual = actual;
     }
 
@@ -71,11 +88,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     @Override
     public ExpressionFactoryManager getExpressionFactoryManager() {
-        return actual.getExpressionFactoryManager();
+        if (expressionFactoryManager == null) {
+            expressionFactoryManager = ExpressionFactoryManager.wrap(actual.getExpressionFactoryManager());
+        }
+        return expressionFactoryManager;
     }
 
     public void setExpressionFactoryManager(ExpressionFactoryManager expressionFactoryManager) {
-        actual.setExpressionFactoryManager(expressionFactoryManager);
+        this.expressionFactoryManager = expressionFactoryManager;
+        this.expressionResolver.setExpressionFactoryManager(expressionFactoryManager.unwrap());
     }
 
     @Override
@@ -98,7 +119,37 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     @Override
     public StateMachineRepository getStateMachineRepository() {
-        return actual.getStateMachineRepository();
+        org.apache.seata.saga.engine.repo.StateMachineRepository repository = actual.getStateMachineRepository();
+        if (repository instanceof StateMachineRepository) {
+            return (StateMachineRepository) repository;
+        }
+
+        return new StateMachineRepository() {
+            @Override
+            public StateMachine getStateMachineById(String stateMachineId) {
+                return repository.getStateMachineById(stateMachineId);
+            }
+
+            @Override
+            public StateMachine getStateMachine(String stateMachineName, String tenantId) {
+                return repository.getStateMachine(stateMachineName, tenantId);
+            }
+
+            @Override
+            public StateMachine getStateMachine(String stateMachineName, String tenantId, String version) {
+                return repository.getStateMachine(stateMachineName, tenantId, version);
+            }
+
+            @Override
+            public StateMachine registryStateMachine(StateMachine stateMachine) {
+                return repository.registryStateMachine(stateMachine);
+            }
+
+            @Override
+            public void registryByResources(Resource[] resources, String tenantId) throws IOException {
+                repository.registryByResources(resources, tenantId);
+            }
+        };
     }
 
     public void setStateMachineRepository(StateMachineRepository stateMachineRepository) {
@@ -168,10 +219,41 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     @Override
     public StateLogRepository getStateLogRepository() {
-        return actual.getStateLogRepository();
+        org.apache.seata.saga.engine.repo.StateLogRepository repository = actual.getStateLogRepository();
+        if (repository instanceof StateLogRepository) {
+            return (StateLogRepository) repository;
+        }
+        return new StateLogRepository() {
+            @Override
+            public StateMachineInstance getStateMachineInstance(String stateMachineInstanceId) {
+                return StateMachineInstanceImpl.wrap(repository.getStateMachineInstance(stateMachineInstanceId));
+            }
+
+            @Override
+            public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
+                return StateMachineInstanceImpl.wrap(repository.getStateMachineInstanceByBusinessKey(businessKey, tenantId));
+            }
+
+            @Override
+            public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
+                return repository.queryStateMachineInstanceByParentId(parentId).stream()
+                        .map(StateMachineInstanceImpl::wrap).collect(Collectors.toList());
+            }
+
+            @Override
+            public StateInstance getStateInstance(String stateInstanceId, String machineInstId) {
+                return StateInstanceImpl.wrap(repository.getStateInstance(stateInstanceId, machineInstId));
+            }
+
+            @Override
+            public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
+                return repository.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId).stream()
+                        .map(StateInstanceImpl::wrap).collect(Collectors.toList());
+            }
+        };
     }
 
-    public void setStateLogRepository(StateLogRepository stateLogRepository) {
+    public void setStateLogRepository(org.apache.seata.saga.engine.repo.StateLogRepository stateLogRepository) {
         actual.setStateLogRepository(stateLogRepository);
     }
 
