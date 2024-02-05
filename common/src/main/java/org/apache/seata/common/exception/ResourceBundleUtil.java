@@ -30,7 +30,7 @@ public class ResourceBundleUtil {
     private static final Locale LOCALE = new Locale("en", "US");
     private static final ResourceBundleUtil INSTANCE = new ResourceBundleUtil("error/ErrorCode", LOCALE);
     private ResourceBundle localBundle;
-    private RemoteResourceBundle remoteBundle;
+    private AbstractRemoteResourceBundle remoteBundle;
 
     public static final String DEFAULT_PLACEHOLDER_PREFIX = "${";
     public static final String DEFAULT_PLACEHOLDER_SUFFIX = "}";
@@ -43,7 +43,7 @@ public class ResourceBundleUtil {
 
         this.localBundle = ResourceBundle.getBundle(bundleName, local);
         try {
-            this.remoteBundle = EnhancedServiceLoader.load(RemoteResourceBundle.class);
+            this.remoteBundle = EnhancedServiceLoader.load(AbstractRemoteResourceBundle.class);
         } catch (Throwable e) {
             //ignore
         }

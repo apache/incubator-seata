@@ -16,6 +16,9 @@
  */
 package org.apache.seata.common.exception;
 
+/**
+ * The enum Error code.
+ */
 public enum ErrorCode {
 
     /**
@@ -34,25 +37,65 @@ public enum ErrorCode {
         this.type = type;
     }
 
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
     public int getCode() {
         return code;
     }
 
+    /**
+     * Gets type.
+     *
+     * @return the type
+     */
     public String getType() {
         return type.name();
     }
 
+    /**
+     * Gets message.
+     *
+     * @param params the params
+     * @return the message
+     */
     public String getMessage(String... params) {
         return ResourceBundleUtil.getInstance().getMessage(this.name(), this.getCode(), this.getType(), params);
     }
 
+    /**
+     * The enum Error type.
+     */
     enum ErrorType {
+        /**
+         * Config error type.
+         */
         Config,
+        /**
+         * Network error type.
+         */
         Network,
+        /**
+         * Tm error type.
+         */
         TM,
+        /**
+         * Rm error type.
+         */
         RM,
+        /**
+         * Tc error type.
+         */
         TC,
+        /**
+         * Datasource error type.
+         */
         Datasource,
+        /**
+         * Other error type.
+         */
         Other;
     }
 
