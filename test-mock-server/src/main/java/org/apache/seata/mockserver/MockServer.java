@@ -27,7 +27,6 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.UUIDGenerator;
 import org.slf4j.Logger;
