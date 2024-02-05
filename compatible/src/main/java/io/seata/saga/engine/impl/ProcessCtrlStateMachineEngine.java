@@ -132,6 +132,10 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 actual.getStateMachineConfig());
     }
 
+    public void setStateMachineConfig(StateMachineConfig stateMachineConfig) {
+        actual.setStateMachineConfig(((DefaultStateMachineConfig) stateMachineConfig).unwrap());
+    }
+
     @Override
     public StateMachineInstance reloadStateMachineInstance(String instId) {
         return StateMachineInstanceImpl.wrap(actual.reloadStateMachineInstance(instId));
