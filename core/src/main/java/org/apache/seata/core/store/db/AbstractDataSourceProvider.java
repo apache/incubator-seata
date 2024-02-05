@@ -80,7 +80,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
         return this.dataSource;
     }
 
-    public DataSource generate(){
+    public DataSource generate() {
         validate();
         return doGenerate();
     }
