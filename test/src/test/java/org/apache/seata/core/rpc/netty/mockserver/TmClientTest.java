@@ -17,6 +17,8 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.protocol.ResultCode;
@@ -42,12 +44,14 @@ public class TmClientTest {
 
     @BeforeAll
     public static void before() {
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.SERVER_PORT));
         MockServer.start(ProtocolTestConstants.SERVER_PORT);
     }
 
     @AfterAll
     public static void after() {
         MockServer.close();
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }
     @Test
     public void testTm() throws Exception {

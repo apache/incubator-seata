@@ -16,23 +16,20 @@
  */
 package org.apache.seata.mockserver;
 
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.config.ConfigurationCache;
-import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Mock Server.
@@ -67,8 +64,6 @@ public class MockServer {
             synchronized (MockServer.class) {
                 if (!inited) {
                     inited = true;
-                    System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
-                    ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port)));
                     workingThreads = new ThreadPoolExecutor(50,
                             50, 500, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
@@ -99,8 +94,6 @@ public class MockServer {
             synchronized (MockServer.class) {
                 if (inited) {
                     inited = false;
-                    System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-                    ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, null));
                     workingThreads.shutdown();
                     nettyRemotingServer.destroy();
                 }

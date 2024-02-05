@@ -16,6 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -37,12 +39,14 @@ public class MockServerTest {
 
     @BeforeAll
     public static void before() {
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.SERVER_PORT));
         MockServer.start(ProtocolTestConstants.SERVER_PORT);
     }
 
     @AfterAll
     public static void after() {
         MockServer.close();
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }
 
     @Test
