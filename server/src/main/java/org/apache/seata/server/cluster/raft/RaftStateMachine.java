@@ -18,13 +18,18 @@ package org.apache.seata.server.cluster.raft;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import com.alipay.sofa.jraft.rpc.InvokeContext;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
@@ -41,6 +46,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
@@ -98,6 +104,8 @@ public class RaftStateMachine extends StateMachineAdapter {
     private static final Map<RaftSyncMsgType, RaftMsgExecute<?>> EXECUTES = new HashMap<>();
 
     private volatile RaftClusterMetadata raftClusterMetadata = new RaftClusterMetadata();
+
+    private Lock lock = new ReentrantLock();
 
     /**
      * Leader term
@@ -241,16 +249,22 @@ public class RaftStateMachine extends StateMachineAdapter {
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
-        syncMetadata();
         RouteTable.getInstance().updateConfiguration(group, conf);
+        lock.lock();
+        try {
+            changeOrInitRaftClusterMetadata(true);
+            syncMetadata();
+        } finally {
+            lock.unlock();
+        }
     }
-    
+
     public void syncMetadata() {
         if (isLeader()) {
             SeataClusterContext.bindGroup(group);
             try {
                 RaftClusterMetadataMsg raftClusterMetadataMsg =
-                    new RaftClusterMetadataMsg(createNewRaftClusterMetadata());
+                    new RaftClusterMetadataMsg(changeOrInitRaftClusterMetadata());
                 RaftTaskUtil.createTask(status -> refreshClusterMetadata(raftClusterMetadataMsg),
                     raftClusterMetadataMsg, null);
             } catch (Exception e) {
@@ -292,18 +306,47 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.raftClusterMetadata = raftClusterMetadata;
     }
 
-    public RaftClusterMetadata createNewRaftClusterMetadata() {
-        RaftServer raftServer = RaftServerManager.getRaftServer(group);
+    private RaftClusterMetadata changeOrInitRaftClusterMetadata() {
+        return changeOrInitRaftClusterMetadata(false);
+    }
+
+    public RaftClusterMetadata changeOrInitRaftClusterMetadata(boolean change) {
         raftClusterMetadata.setTerm(this.currentTerm.get());
-        Node leader =
-            raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
-                Integer
-                    .parseInt(((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                        .getProperty("server.port", String.valueOf(8088))),
-                group, Collections.emptyMap());
-        leader.setRole(ClusterRole.LEADER);
-        raftClusterMetadata.setLeader(leader);
+        if (raftClusterMetadata.getLeader() == null) {
+            RaftServer raftServer = RaftServerManager.getRaftServer(group);
+            Node leader =
+                raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
+                    Integer.parseInt(
+                        ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                            .getProperty("server.port", String.valueOf(8088))),
+                    group, Collections.emptyMap());
+            leader.setRole(ClusterRole.LEADER);
+            raftClusterMetadata.setLeader(leader);
+        }
+        if (change) {
+            Configuration configuration = RouteTable.getInstance().getConfiguration(group);
+            List<Node> followers = raftClusterMetadata.getFollowers();
+            List<Node> learner = raftClusterMetadata.getLearner();
+            List<PeerId> followerPeers = configuration.getPeers();
+            LinkedHashSet<PeerId> learnerPeers = configuration.getLearners();
+            if (CollectionUtils.isNotEmpty(followerPeers)) {
+                raftClusterMetadata.setFollowers(
+                    followers.stream().filter(node -> contains(node, followerPeers)).collect(Collectors.toList()));
+            }
+            if (CollectionUtils.isNotEmpty(learnerPeers)) {
+                raftClusterMetadata.setLearner(
+                    learner.stream().filter(node -> contains(node, learnerPeers)).collect(Collectors.toList()));
+            }
+        }
         return raftClusterMetadata;
+    }
+
+    private boolean contains(Node node, Collection<PeerId> list) {
+        if (node.getInternal() == null) {
+            return true;
+        }
+        PeerId nodePeer = new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
+        return list.contains(nodePeer);
     }
 
     public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
@@ -346,6 +389,33 @@ public class RaftStateMachine extends StateMachineAdapter {
                     }
                 }
             });
+        }
+    }
+
+    public void changeNodeMetadata(Node node) {
+        lock.lock();
+        try {
+            List<Node> followers = raftClusterMetadata.getFollowers();
+            for (Node follower : followers) {
+                Node.Endpoint endpoint = follower.getInternal();
+                if (endpoint != null) {
+                    // change old follower node metadata
+                    if (endpoint.getHost().equals(node.getInternal().getHost())
+                        && endpoint.getPort() == node.getInternal().getPort()) {
+                        follower.setTransaction(node.getTransaction());
+                        follower.setControl(node.getControl());
+                        follower.setGroup(group);
+                        follower.setMetadata(node.getMetadata());
+                        follower.setVersion(node.getVersion());
+                        return;
+                    }
+                }
+            }
+            // add new follower node metadata
+            followers.add(node);
+            syncMetadata();
+        } finally {
+            lock.unlock();
         }
     }
 

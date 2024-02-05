@@ -36,34 +36,12 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
     @Override
     public void handleRequest(RpcContext rpcCtx, PutNodeMetadataRequest request) {
         Node node = request.getNode();
-		String group = node.getGroup();
+        String group = node.getGroup();
         if (RaftServerManager.isLeader(group)) {
-			RaftServer raftServer = RaftServerManager.getRaftServer(group);
-			RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();
-            try {
-                RaftClusterMetadata raftClusterMetadata = raftStateMachine.getRaftLeaderMetadata();
-                List<Node> followers = raftClusterMetadata.getFollowers();
-                for (Node follower : followers) {
-                    Node.Endpoint endpoint = follower.getInternal();
-                    if (endpoint != null) {
-						// change old follower node metadata
-                        if (endpoint.getHost().equals(node.getInternal().getHost())
-                            && endpoint.getPort() == node.getInternal().getPort()) {
-                            follower.setTransaction(node.getTransaction());
-                            follower.setControl(node.getControl());
-                            follower.setGroup(group);
-                            follower.setMetadata(node.getMetadata());
-                            follower.setVersion(node.getVersion());
-                            return;
-                        }
-                    }
-                }
-				// add new follower node metadata
-                followers.add(node);
-            } finally {
-                rpcCtx.sendResponse(new PutNodeMetadataResponse(true));
-				raftStateMachine.syncMetadata();
-            }
+            RaftServer raftServer = RaftServerManager.getRaftServer(group);
+            RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();
+            raftStateMachine.changeNodeMetadata(node);
+            rpcCtx.sendResponse(new PutNodeMetadataResponse(true));
         }
     }
 
