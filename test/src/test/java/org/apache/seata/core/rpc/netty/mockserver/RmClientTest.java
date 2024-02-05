@@ -16,8 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
-import java.util.concurrent.ConcurrentMap;
-
 import io.netty.channel.Channel;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
@@ -30,10 +28,14 @@ import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceReg
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.RMClient;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * rm client test
@@ -43,10 +45,17 @@ public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
 
+    @BeforeAll
+    public static void before() {
+        MockServer.start(ProtocolTestConstants.SERVER_PORT);
+    }
 
+    @AfterAll
+    public static void after() {
+        MockServer.close();
+    }
     @Test
     public void testRm() throws TransactionException {
-        MockServer.start();
         String resourceId = "mock-action";
         String xid = "1111";
 

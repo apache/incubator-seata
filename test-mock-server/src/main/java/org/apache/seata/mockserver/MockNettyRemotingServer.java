@@ -55,9 +55,8 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
      *
      * @param messageExecutor the message executor
      */
-    public MockNettyRemotingServer(ThreadPoolExecutor messageExecutor,int port) {
+    public MockNettyRemotingServer(ThreadPoolExecutor messageExecutor) {
         super(messageExecutor, new NettyServerConfig());
-        setListenPort(port);
     }
 
     @Override

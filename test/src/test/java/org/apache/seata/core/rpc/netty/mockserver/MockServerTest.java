@@ -23,9 +23,9 @@ import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MockServerTest {
@@ -34,13 +34,13 @@ public class MockServerTest {
 
     private static volatile boolean inited = false;
 
-    @BeforeAll
-    public static void before() {
-        MockServer.start();
+    @BeforeEach
+    public void before() {
+        MockServer.start(ProtocolTestConstants.SERVER_PORT);
     }
 
-//    @AfterAll
-    public static void after() {
+    @AfterEach
+    public void after() {
         MockServer.close();
     }
 
@@ -80,7 +80,7 @@ public class MockServerTest {
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.AT, RESOURCE_ID, "1", xid, "1", "1");
         GlobalStatus commit = tm.commit(xid);
-        Assertions.assertTrue(commit == GlobalStatus.Committed || commit == GlobalStatus.Finished);
+        Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
 
     }
@@ -93,7 +93,7 @@ public class MockServerTest {
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.AT, RESOURCE_ID, "1", xid, "1", "1");
         GlobalStatus rollback = tm.rollback(xid);
-        Assertions.assertTrue(rollback == GlobalStatus.Rollbacked || rollback == GlobalStatus.Finished);
+        Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
         return xid;
 
     }

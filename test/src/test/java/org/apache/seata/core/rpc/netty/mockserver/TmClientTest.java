@@ -40,10 +40,17 @@ public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
 
+    @BeforeAll
+    public static void before() {
+        MockServer.start(ProtocolTestConstants.SERVER_PORT);
+    }
 
+    @AfterAll
+    public static void after() {
+        MockServer.close();
+    }
     @Test
     public void testTm() throws Exception {
-        MockServer.start();
         TransactionManager tm = getTm();
 
         //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
@@ -77,6 +84,7 @@ public class TmClientTest {
         GlobalStatus rollback2 = tm.rollback(xid);
         LOGGER.info("globalRollback ok:" + rollback2);
         // TODO expected response fail , but DefaultTransactionManager ignore resultCode
+        MockServer.close();
     }
 
     @NotNull

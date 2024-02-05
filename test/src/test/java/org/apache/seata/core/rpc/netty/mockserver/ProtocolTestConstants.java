@@ -23,6 +23,6 @@ package org.apache.seata.core.rpc.netty.mockserver;
 public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "my_app_test";
     public static final String SERVICE_GROUP = "mock_tx_group";
-    public static final String SERVER_PORT = "8099";
+    public static final int SERVER_PORT = 8099;
     public static final String SERVER_ADDRESS = "0.0.0.0:" + SERVER_PORT;
 }

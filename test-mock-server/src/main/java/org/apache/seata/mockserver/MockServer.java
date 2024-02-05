@@ -21,9 +21,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,23 +55,28 @@ public class MockServer {
      */
     public static void main(String[] args) {
         SpringApplication.run(MockServer.class, args);
-        start();
+
+        ParameterParser parameterParser = new ParameterParser(args);
+        int port = parameterParser.getPort() > 0 ? parameterParser.getPort() : 8099;
+        start(port);
     }
 
-    public static void start() {
+    public static void start(int port) {
         if (!inited) {
             synchronized (MockServer.class) {
                 if (!inited) {
                     inited = true;
+                    System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
+                    ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port)));
                     workingThreads = new ThreadPoolExecutor(50,
                             50, 500, TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
                             new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
-                    nettyRemotingServer = new MockNettyRemotingServer(workingThreads, 8099);
+                    nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
 
                     // set registry
                     XID.setIpAddress(NetUtil.getLocalIp());
-                    XID.setPort(8099);
+                    XID.setPort(port);
                     // init snowflake for transactionId, branchId
                     UUIDGenerator.init(1L);
 
@@ -84,7 +94,16 @@ public class MockServer {
     }
 
     public static void close() {
-        workingThreads.shutdown();
-        nettyRemotingServer.destroy();
+        if (inited) {
+            synchronized (MockServer.class) {
+                if (inited) {
+                    inited = false;
+                    System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+                    ConfigurationCache.getInstance().onChangeEvent(new ConfigurationChangeEvent(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, null));
+                    workingThreads.shutdown();
+                    nettyRemotingServer.destroy();
+                }
+            }
+        }
     }
 }
