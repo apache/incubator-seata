@@ -22,8 +22,7 @@ import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 
-/**
- */
+
 public class RegisterTMRequestConvertor implements PbConvertor<RegisterTMRequest, RegisterTMRequestProto> {
     @Override
     public RegisterTMRequestProto convert2Proto(RegisterTMRequest registerTMRequest) {

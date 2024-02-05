@@ -44,8 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
+
 public class PostgresqlInsertExecutorTest {
 
     private static final String ID_COLUMN = "id";

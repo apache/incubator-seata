@@ -27,8 +27,7 @@ import org.apache.seata.config.ConfigurationProvider;
 
 import java.util.stream.Stream;
 
-/**
- */
+
 @LoadLevel(name = "Custom")
 public class CustomConfigurationProvider implements ConfigurationProvider {
     @Override

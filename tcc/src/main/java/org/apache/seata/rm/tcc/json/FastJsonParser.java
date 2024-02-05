@@ -22,8 +22,7 @@ import org.apache.seata.common.Constants;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.integration.tx.api.json.JsonParser;
 
-/**
- */
+
 @LoadLevel(name = Constants.FASTJSON_JSON_PARSER_NAME)
 public class FastJsonParser implements JsonParser {
 

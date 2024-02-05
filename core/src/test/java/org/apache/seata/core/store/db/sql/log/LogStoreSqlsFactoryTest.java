@@ -19,8 +19,7 @@ package org.apache.seata.core.store.db.sql.log;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class LogStoreSqlsFactoryTest {
 
     private static LogStoreSqls mysqlLog = LogStoreSqlsFactory.getLogStoreSqls("mysql");

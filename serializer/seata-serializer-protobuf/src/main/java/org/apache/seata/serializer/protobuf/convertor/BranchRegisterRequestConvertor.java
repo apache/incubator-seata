@@ -24,8 +24,7 @@ import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 
-/**
- */
+
 public class BranchRegisterRequestConvertor implements PbConvertor<BranchRegisterRequest, BranchRegisterRequestProto> {
     @Override
     public BranchRegisterRequestProto convert2Proto(BranchRegisterRequest branchRegisterRequest) {

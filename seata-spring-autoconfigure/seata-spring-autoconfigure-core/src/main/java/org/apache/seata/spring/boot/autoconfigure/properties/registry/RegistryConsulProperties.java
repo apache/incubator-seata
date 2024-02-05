@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSUL_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = REGISTRY_CONSUL_PREFIX)
 public class RegistryConsulProperties {

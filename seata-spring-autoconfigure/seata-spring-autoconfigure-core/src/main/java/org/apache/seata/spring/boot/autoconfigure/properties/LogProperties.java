@@ -22,8 +22,7 @@ import org.springframework.stereotype.Component;
 import static org.apache.seata.common.DefaultValues.DEFAULT_LOG_EXCEPTION_RATE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = LOG_PREFIX)
 public class LogProperties {

@@ -40,8 +40,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- */
+
 public class MockHttpServletRequest implements HttpServletRequest {
 
     private final MockRequest myRequest;

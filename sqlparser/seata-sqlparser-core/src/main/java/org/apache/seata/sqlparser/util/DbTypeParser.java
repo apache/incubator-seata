@@ -16,8 +16,7 @@
  */
 package org.apache.seata.sqlparser.util;
 
-/**
- */
+
 public interface DbTypeParser {
     String parseFromJdbcUrl(String jdbcUrl);
 }

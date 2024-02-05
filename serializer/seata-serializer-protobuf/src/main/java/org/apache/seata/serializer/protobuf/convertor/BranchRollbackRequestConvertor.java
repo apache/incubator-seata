@@ -25,8 +25,7 @@ import org.apache.seata.serializer.protobuf.generated.BranchTypeProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
 
-/**
- */
+
 public class BranchRollbackRequestConvertor implements PbConvertor<BranchRollbackRequest, BranchRollbackRequestProto> {
     @Override
     public BranchRollbackRequestProto convert2Proto(BranchRollbackRequest branchRollbackRequest) {

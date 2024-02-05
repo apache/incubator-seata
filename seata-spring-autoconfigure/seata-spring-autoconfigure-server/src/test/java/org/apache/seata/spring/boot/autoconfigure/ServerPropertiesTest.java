@@ -36,8 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-/**
- */
+
 public class ServerPropertiesTest {
     private static AnnotationConfigApplicationContext context;
 

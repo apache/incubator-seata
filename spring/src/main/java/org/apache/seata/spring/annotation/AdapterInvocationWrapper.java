@@ -21,8 +21,7 @@ import java.lang.reflect.Method;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.aopalliance.intercept.MethodInvocation;
 
-/**
- */
+
 public class AdapterInvocationWrapper implements InvocationWrapper {
 
     private MethodInvocation invocation;

@@ -39,8 +39,7 @@ import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
 
     FastjsonUndoLogParser parser = (FastjsonUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, FastjsonUndoLogParser.NAME);

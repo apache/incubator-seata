@@ -49,8 +49,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-/**
- */
+
 public class MySQLInsertOnDuplicateUpdateExecutorTest {
 
     protected static final String ID_COLUMN = "id";

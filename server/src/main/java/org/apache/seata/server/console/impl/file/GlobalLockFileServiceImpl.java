@@ -161,13 +161,13 @@ public class GlobalLockFileServiceImpl implements GlobalLockService {
 
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart() <= globalSession.getBeginTime())
+                    (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= globalSession.getBeginTime() / 1000)
 
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd() >= globalSession.getBeginTime());
+                    (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= globalSession.getBeginTime() / 1000);
+
         };
     }
-
 
 }

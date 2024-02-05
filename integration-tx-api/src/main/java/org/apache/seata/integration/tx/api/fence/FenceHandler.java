@@ -21,8 +21,7 @@ import org.apache.seata.common.executor.Callback;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-/**
- */
+
 public interface FenceHandler {
 
     Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback);

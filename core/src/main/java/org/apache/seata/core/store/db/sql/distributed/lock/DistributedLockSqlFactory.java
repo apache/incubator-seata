@@ -16,8 +16,7 @@
  */
 package org.apache.seata.core.store.db.sql.distributed.lock;
 
-/**
- */
+
 public class DistributedLockSqlFactory {
     private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
 

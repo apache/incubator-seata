@@ -16,8 +16,7 @@
  */
 package org.apache.seata.config.exception;
 
-/**
- */
+
 public class ConfigNotFoundException extends RuntimeException {
 
     public ConfigNotFoundException() {

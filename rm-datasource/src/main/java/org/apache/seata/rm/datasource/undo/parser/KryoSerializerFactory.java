@@ -34,8 +34,7 @@ import de.javakaffee.kryoserializers.JdkProxySerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- */
+
 public class KryoSerializerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KryoSerializerFactory.class);

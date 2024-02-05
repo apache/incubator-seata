@@ -20,8 +20,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class TransactionExceptionCodeTest {
     private static final int BEGIN_CODE = 1;
     private static final int NONE = 99;
