@@ -16,7 +16,17 @@
  */
 package org.apache.seata.rm.xa;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+
 import com.alibaba.druid.pool.DruidDataSource;
+
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import org.apache.seata.core.context.RootContext;
@@ -26,22 +36,12 @@ import org.apache.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mariadb.jdbc.MariaDbConnection;
 import org.mockito.Mockito;
-
-import javax.sql.DataSource;
-import javax.sql.PooledConnection;
-import javax.sql.XAConnection;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Driver;
-import java.sql.SQLException;
 
 import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Tests for DataSourceProxyXA
- *
  */
 public class DataSourceProxyXATest {
 
@@ -91,10 +91,11 @@ public class DataSourceProxyXATest {
     }
 
     @Test
-    public void testGetMariaXaConnection() throws SQLException {
+    public void testGetMariaXaConnection() throws SQLException, ClassNotFoundException {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
-        MariaDbConnection connection = Mockito.mock(MariaDbConnection.class);
+        Class clazz = Class.forName("org.mariadb.jdbc.MariaDbConnection");
+        Connection connection = (Connection)(Mockito.mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mariadb:xxx");
@@ -120,12 +121,12 @@ public class DataSourceProxyXATest {
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertTrue(connectionInXA instanceof MariaDbConnection);
+        Assertions.assertEquals("org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
         tearDown();
     }
 
     @AfterAll
-    public static void tearDown(){
+    public static void tearDown() {
         RootContext.unbind();
     }
 }
