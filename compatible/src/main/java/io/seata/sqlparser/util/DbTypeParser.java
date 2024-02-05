@@ -16,6 +16,6 @@
  */
 package io.seata.sqlparser.util;
 
-@Deprecated
+
 public interface DbTypeParser extends org.apache.seata.sqlparser.util.DbTypeParser {
 }

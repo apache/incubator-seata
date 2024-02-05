@@ -20,8 +20,7 @@ package io.seata.config;
 /**
  * the interface ext configuration provider
  *
- *
+ * 
  */
-@Deprecated
 public interface ExtConfigurationProvider extends org.apache.seata.config.ExtConfigurationProvider {
 }

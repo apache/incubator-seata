@@ -21,7 +21,6 @@ package io.seata.core.model;
  * Resource Manager: common behaviors.
  *
  */
-@Deprecated
 public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
 
 }

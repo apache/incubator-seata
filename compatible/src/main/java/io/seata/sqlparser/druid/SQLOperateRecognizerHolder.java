@@ -21,7 +21,6 @@ package io.seata.sqlparser.druid;
  * The interface SQLOperateRecognizerHolder
  *
  */
-@Deprecated
 public interface SQLOperateRecognizerHolder extends org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder {
 
 }

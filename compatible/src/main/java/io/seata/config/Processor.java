@@ -18,10 +18,9 @@ package io.seata.config;
 
 /**
  * The processing configuration.
- *
+ * 
  *
  *
  */
-@Deprecated
 public interface Processor extends org.apache.seata.config.processor.Processor {
 }

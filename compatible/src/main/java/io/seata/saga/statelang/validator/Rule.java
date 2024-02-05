@@ -16,6 +16,5 @@
  */
 package io.seata.saga.statelang.validator;
 
-@Deprecated
 public interface Rule extends org.apache.seata.saga.statelang.validator.Rule {
 }

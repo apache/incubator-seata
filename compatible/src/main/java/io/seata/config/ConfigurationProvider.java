@@ -18,8 +18,7 @@ package io.seata.config;
 
 /**
  * the interface configuration provider
- *
+ * 
  */
-@Deprecated
 public interface ConfigurationProvider extends org.apache.seata.config.ConfigurationProvider {
 }

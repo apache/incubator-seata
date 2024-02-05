@@ -25,7 +25,6 @@ import java.util.Map;
 /**
  * The type Root context.
  */
-@Deprecated
 public class RootContext {
 
     private static org.apache.seata.core.model.BranchType convertApacheSeata(BranchType branchType) {

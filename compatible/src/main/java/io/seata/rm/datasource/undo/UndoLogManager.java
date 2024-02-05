@@ -21,6 +21,5 @@ package io.seata.rm.datasource.undo;
  * The type Undo log manager.
  *
  */
-@Deprecated
 public interface UndoLogManager extends org.apache.seata.rm.datasource.undo.UndoLogManager {
 }

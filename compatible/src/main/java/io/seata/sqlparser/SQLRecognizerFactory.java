@@ -16,6 +16,6 @@
  */
 package io.seata.sqlparser;
 
-@Deprecated
+
 public interface SQLRecognizerFactory extends org.apache.seata.sqlparser.SQLRecognizerFactory {
 }

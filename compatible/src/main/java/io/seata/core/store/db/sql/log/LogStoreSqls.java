@@ -16,6 +16,5 @@
  */
 package io.seata.core.store.db.sql.log;
 
-@Deprecated
 public interface LogStoreSqls extends org.apache.seata.core.store.db.sql.log.LogStoreSqls {
 }

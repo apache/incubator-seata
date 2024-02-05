@@ -21,6 +21,5 @@ package io.seata.metrics.exporter;
  * Exporter interface for metrics
  *
  */
-@Deprecated
 public interface Exporter extends org.apache.seata.metrics.exporter.Exporter {
 }

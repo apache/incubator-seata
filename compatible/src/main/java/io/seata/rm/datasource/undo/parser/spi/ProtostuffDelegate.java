@@ -22,6 +22,5 @@ package io.seata.rm.datasource.undo.parser.spi;
  *
  * @param <T> the type parameter
  */
-@Deprecated
 public interface ProtostuffDelegate<T> extends org.apache.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate<T> {
 }

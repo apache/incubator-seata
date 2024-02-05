@@ -18,11 +18,10 @@ package io.seata.core.context;
 
 
 /**
- *
+ * 
  *
  * The interface Context core.
  *
  */
-@Deprecated
 public interface ContextCore extends org.apache.seata.core.context.ContextCore {
 }

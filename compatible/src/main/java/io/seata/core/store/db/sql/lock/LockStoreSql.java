@@ -21,7 +21,6 @@ package io.seata.core.store.db.sql.lock;
  *
  * @since 1.2.0
  */
-@Deprecated
 public interface LockStoreSql extends org.apache.seata.core.store.db.sql.lock.LockStoreSql {
 
 }
