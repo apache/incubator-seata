@@ -381,4 +381,13 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         return SeataInterceptorPosition.BeforeTransaction;
     }
 
+    @Override
+    public int order() {
+        return 1;
+    }
+
+    @Override
+    public String type() {
+        return "GlobalTransactional";
+    }
 }

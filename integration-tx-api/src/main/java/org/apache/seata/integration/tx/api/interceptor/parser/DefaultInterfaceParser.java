@@ -16,12 +16,15 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author leezongjie
@@ -53,15 +56,46 @@ public class DefaultInterfaceParser implements InterfaceParser {
         }
     }
 
+    /**
+     * 创建拦截器链，支持天添加多个拦截器，按顺序组织，拦截顺序同解析顺序，{@link InterfaceParser}的加载解析顺序可以通过@LoadLevel控制。
+     * 不允许加载多个同类型的拦截器，如tcc和saga的二阶段注解不能同时存在，通过{@link ProxyInvocationHandler#type()}指定类型。
+     *
+     * @param target
+     * @param objectName
+     * @return
+     * @throws Exception
+     */
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
+
+        List<ProxyInvocationHandler> invocationHandlerList = new ArrayList<>();
+        Set<String> invocationHandlerRepeatCheck = new HashSet<>();
+
         for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
             ProxyInvocationHandler proxyInvocationHandler = interfaceParser.parserInterfaceToProxy(target, objectName);
             if (proxyInvocationHandler != null) {
-                return proxyInvocationHandler;
+                if (!invocationHandlerRepeatCheck.add(proxyInvocationHandler.type())) {
+                    throw new RuntimeException("there is already an annotation of type " + proxyInvocationHandler.type() + " for class: " + target.getClass().getName());
+                }
+                invocationHandlerList.add(proxyInvocationHandler);
             }
         }
-        return null;
+
+        Collections.sort(invocationHandlerList, Comparator.comparingInt(ProxyInvocationHandler::order));
+
+        ProxyInvocationHandler result = null;
+        ProxyInvocationHandler last = null;
+        for (ProxyInvocationHandler proxyInvocationHandler : invocationHandlerList) {
+            if (result == null) {
+                result = proxyInvocationHandler;
+            }
+            if (last != null) {
+                last.setNextProxyInvocationHandler(proxyInvocationHandler);
+            }
+            last = proxyInvocationHandler;
+        }
+
+        return result;
     }
 
     @Override

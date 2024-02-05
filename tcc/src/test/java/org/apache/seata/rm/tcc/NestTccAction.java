@@ -24,7 +24,7 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
  * The interface Tcc action.
  */
 @LocalTCC
-public interface TccAction {
+public interface NestTccAction {
 
     /**
      * Prepare boolean.
@@ -32,8 +32,11 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest")
-    boolean prepare(BusinessActionContext actionContext);
+    @TwoPhaseBusinessAction(name = "tccNestActionForTest")
+    boolean prepare(BusinessActionContext actionContext, int count);
+
+    @TwoPhaseBusinessAction(name = "tccNestActionForTest")
+    boolean prepareNestRequiredNew(BusinessActionContext actionContext, int count);
 
     /**
      * Commit boolean.
