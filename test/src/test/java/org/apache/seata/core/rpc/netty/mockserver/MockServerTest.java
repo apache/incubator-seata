@@ -23,24 +23,22 @@ import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
 
-    private static volatile boolean inited = false;
-
-    @BeforeEach
-    public void before() {
+    @BeforeAll
+    public static void before() {
         MockServer.start(ProtocolTestConstants.SERVER_PORT);
     }
 
-    @AfterEach
-    public void after() {
+    @AfterAll
+    public static void after() {
         MockServer.close();
     }
 
