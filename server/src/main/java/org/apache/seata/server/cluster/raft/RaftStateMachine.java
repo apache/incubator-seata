@@ -383,7 +383,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                                         LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId,
                                             err.getMessage(), err);
                                     }
-                                }, 300000);
+                                }, 30000);
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
                     }
