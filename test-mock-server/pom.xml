@@ -40,7 +40,7 @@
         </plugins>
     </build>
 
-        <dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-server</artifactId>
