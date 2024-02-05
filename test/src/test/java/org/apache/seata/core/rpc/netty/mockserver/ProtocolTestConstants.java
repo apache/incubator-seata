@@ -20,7 +20,6 @@ import org.apache.seata.mockserver.MockServer;
 
 /**
  * Mock Constants
- *
  **/
 public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "my_app_test";

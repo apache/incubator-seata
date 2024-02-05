@@ -28,6 +28,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/**
+ * the type MockServerTest
+ */
 public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
