@@ -25,7 +25,6 @@ import java.util.Iterator;
  *
  * Compatible for dubbo dubbo-filter-seata
  */
-@Deprecated
 public class StringUtils {
     /**
      * Is empty boolean.
