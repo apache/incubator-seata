@@ -52,11 +52,11 @@ public class SeataMQProducer extends TransactionMQProducer {
     public static String PROPERTY_SEATA_BRANCHID = "TX_BRANCHID";
     private TransactionListener transactionListener;
 
-    public SeataMQProducer(final String producerGroup) {
+    SeataMQProducer(final String producerGroup) {
         this(null, producerGroup, null);
     }
 
-    public SeataMQProducer(final String namespace, final String producerGroup, RPCHook rpcHook) {
+    SeataMQProducer(final String namespace, final String producerGroup, RPCHook rpcHook) {
         super(namespace, producerGroup, rpcHook);
         this.transactionListener = new TransactionListener() {
             @Override

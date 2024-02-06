@@ -16,7 +16,9 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,12 +32,18 @@ public class SeataMQProducerFactory {
     private static Map<String, SeataMQProducer> PRODUCER_MAP = new ConcurrentHashMap<>();
     private volatile static String SINGLE_PRODUCER_ID;
 
-    public SeataMQProducer create(String groupName, String producerId) {
+    public static SeataMQProducer create(String producerId, String nameServer, String producerGroup) {
+        return create(producerId, nameServer, null, producerGroup, null);
+    }
+
+    public static SeataMQProducer create(String producerId, String nameServer, String namespace,
+                                         String groupName, RPCHook rpcHook) {
         if (SINGLE_PRODUCER_ID == null) {
             synchronized (SeataMQProducerFactory.class) {
                 if (SINGLE_PRODUCER_ID == null) {
                     SINGLE_PRODUCER_ID = producerId;
-                    SeataMQProducer producer = new SeataMQProducer(groupName);
+                    SeataMQProducer producer = new SeataMQProducer(namespace, groupName, rpcHook);
+                    producer.setNamesrvAddr(nameServer);
                     tccRocketMQ.setProducer(producer);
                     PRODUCER_MAP.put(producerId, producer);
                 }
@@ -48,7 +56,7 @@ public class SeataMQProducerFactory {
         return getProducer();
     }
 
-    public SeataMQProducer getProducer() {
+    public static SeataMQProducer getProducer() {
         return PRODUCER_MAP.get(SINGLE_PRODUCER_ID);
     }
 
