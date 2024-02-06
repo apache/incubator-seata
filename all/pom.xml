@@ -330,12 +330,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--seata-compatible-->
-        <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-compatible</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <!-- spring  -->
         <dependency>
