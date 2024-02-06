@@ -49,8 +49,8 @@ public class RmClientTest {
 
     @BeforeAll
     public static void before() {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.SERVER_PORT));
-        MockServer.start(ProtocolTestConstants.SERVER_PORT);
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
+        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
     @AfterAll

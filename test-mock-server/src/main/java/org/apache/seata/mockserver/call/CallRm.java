@@ -45,7 +45,6 @@ public class CallRm {
     public static BranchStatus branchCommit(RemotingServer remotingServer, BranchSession branchSession) {
         BranchCommitRequest request = new BranchCommitRequest();
         setReq(request, branchSession);
-
         try {
             BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
                     branchSession.getResourceId(), branchSession.getClientId(), request, false);
@@ -99,7 +98,6 @@ public class CallRm {
         request.setBranchId(branchSession.getBranchId());
         request.setResourceId(branchSession.getResourceId());
         request.setApplicationData("{\"actionContext\":{\"mock\":\"mock\"}}");
-        request.setBranchType(BranchType.TCC);
-        // todo AT SAGA
+        request.setBranchType(branchSession.getBranchType());
     }
 }

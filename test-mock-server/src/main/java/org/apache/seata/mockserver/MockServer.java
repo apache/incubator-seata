@@ -44,7 +44,7 @@ public class MockServer {
 
     private static volatile boolean inited = false;
 
-    public static final int DEFAULT_PORT = 8099;
+    public static final int DEFAULT_PORT = 8091;
 
     /**
      * The entry point of application.

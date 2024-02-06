@@ -16,7 +16,7 @@
 #
 server:
   port: 7091
-  servicePort: 8099
+  servicePort: 8091
 
 spring:
   application:
