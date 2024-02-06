@@ -169,4 +169,42 @@ public class PageUtil {
             }
         }
     }
+
+    /**
+     * get sql for time start
+     * @param dbType
+     * @param timeColumnName
+     * @return java.lang.String
+     */
+    public static String getTimeStartSql(String dbType, String timeColumnName) {
+        switch (dbType.toLowerCase()) {
+            case "mysql":
+            case "oracle":
+            case "postgresql":
+            case "sqlserver":
+            case "dm":
+                return " and FLOOR(" + timeColumnName + "/1000) >= ? ";
+            default:
+                throw new IllegalArgumentException("The DB type :" + dbType + " is not supported yet");
+        }
+    }
+
+    /**
+     * get sql for time end
+     * @param dbType
+     * @param timeColumnName
+     * @return java.lang.String
+     */
+    public static String getTimeEndSql(String dbType, String timeColumnName) {
+        switch (dbType.toLowerCase()) {
+            case "mysql":
+            case "oracle":
+            case "postgresql":
+            case "sqlserver":
+            case "dm":
+                return " and FLOOR(" + timeColumnName + "/1000) <= ? ";
+            default:
+                throw new IllegalArgumentException("The DB type :" + dbType + " is not supported yet");
+        }
+    }
 }

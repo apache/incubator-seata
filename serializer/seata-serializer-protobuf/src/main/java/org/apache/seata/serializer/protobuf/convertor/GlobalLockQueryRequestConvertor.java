@@ -25,8 +25,7 @@ import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryRequest;
 
-/**
- */
+
 public class GlobalLockQueryRequestConvertor
     implements PbConvertor<GlobalLockQueryRequest, GlobalLockQueryRequestProto> {
     @Override

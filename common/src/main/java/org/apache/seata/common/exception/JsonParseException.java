@@ -16,8 +16,7 @@
  */
 package org.apache.seata.common.exception;
 
-/**
- */
+
 public class JsonParseException extends RuntimeException {
 
     public JsonParseException(String message) {

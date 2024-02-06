@@ -24,8 +24,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- */
+
 public class TransactionInfoTest {
 
     private static final String IO_EXCEPTION_SHORT_NAME = "IOException";

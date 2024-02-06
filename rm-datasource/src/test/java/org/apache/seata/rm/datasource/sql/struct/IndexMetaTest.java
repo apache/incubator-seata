@@ -23,8 +23,7 @@ import org.apache.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class IndexMetaTest {
 
     @Test

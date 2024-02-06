@@ -18,8 +18,7 @@ package org.apache.seata.core.rpc.hook;
 
 import org.apache.seata.core.protocol.RpcMessage;
 
-/**
- */
+
 public interface RpcHook {
 
     void doBeforeRequest(String remoteAddr, RpcMessage request);

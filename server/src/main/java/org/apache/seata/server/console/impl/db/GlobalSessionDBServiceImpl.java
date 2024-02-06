@@ -21,7 +21,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -149,12 +148,12 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             sqlParamList.add(param.getTransactionName());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(" and gmt_create >= ? ");
-            sqlParamList.add(new Date(param.getTimeStart()));
+            whereConditionBuilder.append(PageUtil.getTimeStartSql(this.dbType, "begin_time"));
+            sqlParamList.add(param.getTimeStart() / 1000);
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(" and gmt_create <= ? ");
-            sqlParamList.add(new Date(param.getTimeEnd()));
+            whereConditionBuilder.append(PageUtil.getTimeEndSql(this.dbType, "begin_time"));
+            sqlParamList.add(param.getTimeEnd() / 1000);
         }
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");

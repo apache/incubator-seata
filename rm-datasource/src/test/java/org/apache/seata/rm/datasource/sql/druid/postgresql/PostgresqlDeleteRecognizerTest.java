@@ -31,8 +31,7 @@ import org.apache.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 public class PostgresqlDeleteRecognizerTest {
 
     private static final String DB_TYPE = "postgresql";

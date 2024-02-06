@@ -30,8 +30,7 @@ import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-/**
- */
+
 public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**

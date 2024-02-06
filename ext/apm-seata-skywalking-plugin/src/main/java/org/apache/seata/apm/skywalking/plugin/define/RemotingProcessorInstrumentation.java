@@ -26,8 +26,7 @@ import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.match.MultiClassNameMatch.byMultiClassMatch;
 
-/**
- */
+
 public class RemotingProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     private static final String INTERCEPTOR_CLASS = "org.apache.seata.apm.skywalking.plugin.RemotingProcessorProcessInterceptor";

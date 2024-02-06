@@ -24,8 +24,7 @@ import org.apache.seata.spring.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
-/**
- */
+
 public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
 
     public ApplicationContext applicationContext;

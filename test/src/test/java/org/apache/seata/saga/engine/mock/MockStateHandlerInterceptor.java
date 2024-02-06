@@ -23,9 +23,7 @@ import org.apache.seata.saga.proctrl.ProcessContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
+
 public class MockStateHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockStateHandlerInterceptor.class);

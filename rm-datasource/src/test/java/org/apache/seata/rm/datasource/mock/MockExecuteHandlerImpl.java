@@ -32,8 +32,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
-/**
- */
+
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 
     /**

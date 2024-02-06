@@ -30,8 +30,7 @@ import org.springframework.context.annotation.Import;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-/**
- */
+
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
 public class ConsulPropertiesTest extends BasePropertiesTest {

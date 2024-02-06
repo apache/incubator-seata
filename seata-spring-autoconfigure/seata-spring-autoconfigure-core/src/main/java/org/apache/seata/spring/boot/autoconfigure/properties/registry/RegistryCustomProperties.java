@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = REGISTRY_CUSTOM_PREFIX)
 public class RegistryCustomProperties {

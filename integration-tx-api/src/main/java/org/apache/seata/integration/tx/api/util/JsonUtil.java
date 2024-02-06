@@ -24,8 +24,7 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.integration.tx.api.json.JsonParserFactory;
 
-/**
- */
+
 public class JsonUtil {
 
     private static final String CONFIG_JSON_PARSER_NAME =

@@ -20,8 +20,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 
-/**
- */
+
 class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
 
     ProtostuffUndoLogParser parser = (ProtostuffUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, ProtostuffUndoLogParser.NAME);

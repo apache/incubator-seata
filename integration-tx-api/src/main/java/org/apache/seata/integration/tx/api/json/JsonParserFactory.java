@@ -24,8 +24,7 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 
-/**
- */
+
 public class JsonParserFactory {
 
     private static final Map<String, JsonParserWrap> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();

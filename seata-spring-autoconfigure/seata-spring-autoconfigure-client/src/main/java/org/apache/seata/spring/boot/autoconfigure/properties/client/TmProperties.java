@@ -28,8 +28,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_CO
 import static org.apache.seata.common.DefaultValues.TM_INTERCEPTOR_ORDER;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 
-/**
- */
+
 @Component
 @ConfigurationProperties(prefix = CLIENT_TM_PREFIX)
 public class TmProperties {

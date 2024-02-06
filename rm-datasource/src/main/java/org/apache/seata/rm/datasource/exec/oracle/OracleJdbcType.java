@@ -16,8 +16,7 @@
  */
 package org.apache.seata.rm.datasource.exec.oracle;
 
-/**
- */
+
 public class OracleJdbcType {
 
     public static final int TIMESTAMP_WITH_TIME_ZONE = -101;

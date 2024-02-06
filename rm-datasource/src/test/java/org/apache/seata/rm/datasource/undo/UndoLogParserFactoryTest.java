@@ -21,8 +21,7 @@ import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-/**
- */
+
 class UndoLogParserFactoryTest {
 
     @Test

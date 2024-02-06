@@ -24,8 +24,7 @@ import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.exec.LockConflictException;
 
-/**
- */
+
 public class MockLockConflictConnectionProxy extends ConnectionProxy {
     /**
      * Instantiates a new Connection proxy.

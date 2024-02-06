@@ -25,8 +25,7 @@ import org.apache.seata.sqlparser.SqlParserType;
 
 import java.util.List;
 
-/**
- */
+
 public class SQLVisitorFactory {
     /**
      * SQLRecognizerFactory.

@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- */
+
 public class ProxyUtilsGlobalTransactionalTest {
 
     private final String DEFAULT_XID = "default_xid";
