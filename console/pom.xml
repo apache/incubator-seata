@@ -35,6 +35,7 @@
         <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
         <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
+        <tomcat-embed.version>9.0.83</tomcat-embed.version>
     </properties>
 
     <dependencyManagement>
@@ -80,6 +81,11 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml-for-server.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -97,6 +103,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomcat.embed</groupId>
+                    <artifactId>tomcat-embed-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -123,6 +135,10 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
         </dependency>
     </dependencies>
     <profiles>
