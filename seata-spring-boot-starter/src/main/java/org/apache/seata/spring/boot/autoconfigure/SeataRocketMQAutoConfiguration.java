@@ -46,7 +46,7 @@ public class SeataRocketMQAutoConfiguration {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         SeataMQProducerFactory.setTccRocketMQ(tccRocketMQ);
     }
 }
