@@ -83,7 +83,7 @@ public class MockServerTest {
 
         String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
-        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "1", "1");
+        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
@@ -96,7 +96,7 @@ public class MockServerTest {
 
         String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
-        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "1", "1");
+        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
         return xid;
