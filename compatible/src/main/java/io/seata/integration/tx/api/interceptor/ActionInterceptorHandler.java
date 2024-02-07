@@ -59,7 +59,7 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
 
                     // load param by the config of annotation, and then put into the context
                     ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
-                }else if(parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter){
+                } else if (parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter) {
                     // get annotation
                     org.apache.seata.rm.tcc.api.BusinessActionContextParameter annotation = (org.apache.seata.rm.tcc.api.BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {

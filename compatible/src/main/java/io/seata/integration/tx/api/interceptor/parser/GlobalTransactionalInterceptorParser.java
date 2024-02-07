@@ -22,7 +22,7 @@ import org.apache.seata.common.util.CollectionUtils;
 
 import java.lang.reflect.Method;
 
-public class GlobalTransactionalInterceptorParser extends org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser{
+public class GlobalTransactionalInterceptorParser extends org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser {
 
     @Override
     protected boolean existsAnnotation(Class<?>... classes) {

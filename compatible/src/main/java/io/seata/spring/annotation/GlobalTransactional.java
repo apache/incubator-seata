@@ -20,7 +20,11 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.tm.api.transaction.Propagation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 @Retention(RetentionPolicy.RUNTIME)
