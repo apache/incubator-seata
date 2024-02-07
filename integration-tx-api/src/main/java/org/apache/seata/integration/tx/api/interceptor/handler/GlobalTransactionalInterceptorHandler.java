@@ -75,15 +75,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptorHandler.class);
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
+    protected final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
 
     private Set<String> methodsToProxy;
 
-    private volatile boolean disable;
-    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
-    private static volatile Integer degradeNum = 0;
+    protected volatile boolean disable;
+    protected static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
+    protected static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
-    private static int degradeCheckAllowTimes;
+    protected static int degradeCheckAllowTimes;
     protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
 
@@ -172,7 +172,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
 
-    private Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
+    protected Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -189,7 +189,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         });
     }
 
-    Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
+   protected Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
                                    final AspectTransactional aspectTransactional) throws Throwable {
         boolean succeed = true;
         try {

@@ -34,7 +34,7 @@ import org.apache.seata.tm.api.FailureHandlerHolder;
 
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
-    private final Set<String> methodsToProxy = new HashSet<>();
+    protected final Set<String> methodsToProxy = new HashSet<>();
 
     /**
      * @param target
@@ -72,7 +72,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         return ifNeedEnhanceBean;
     }
 
-    private boolean existsAnnotation(Class<?>... classes) {
+    protected boolean existsAnnotation(Class<?>... classes) {
         boolean result = false;
         if (CollectionUtils.isNotEmpty(classes)) {
             for (Class<?> clazz : classes) {
