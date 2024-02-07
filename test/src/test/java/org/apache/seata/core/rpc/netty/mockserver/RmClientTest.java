@@ -44,7 +44,6 @@ import java.util.concurrent.ConcurrentMap;
  **/
 public class RmClientTest {
 
-
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
 
     @BeforeAll

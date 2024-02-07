@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
-
     @BeforeAll
     public static void before() {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
