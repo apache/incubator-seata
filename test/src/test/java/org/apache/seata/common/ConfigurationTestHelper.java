@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 public class ConfigurationTestHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationTestHelper.class);
-
-
     private static final long PUT_CONFIG_TIMEOUT = 30000L;
     private static final long PUT_CONFIG_CHECK_GAP = 500L;
 

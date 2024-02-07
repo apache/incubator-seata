@@ -45,7 +45,6 @@ import java.util.concurrent.ConcurrentMap;
 public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
-
     @BeforeAll
     public static void before() {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
