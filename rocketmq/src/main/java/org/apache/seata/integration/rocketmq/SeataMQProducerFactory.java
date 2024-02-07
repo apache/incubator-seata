@@ -16,52 +16,69 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 /**
  * SeataMQProducer Factory
  **/
-public class SeataMQProducerFactory {
+public class SeataMQProducerFactory implements ApplicationContextAware, InitializingBean {
 
+    public static final String ROCKET_TCC_NAME = "tccRocketMQ";
     private static TCCRocketMQ tccRocketMQ;
 
-    private static Map<String, SeataMQProducer> PRODUCER_MAP = new ConcurrentHashMap<>();
-    private volatile static String SINGLE_PRODUCER_ID;
+    /**
+     * Default Producer, it can be replaced to Map after multi-resource is supported
+     */
+    private static SeataMQProducer defaultProducer;
+    private ApplicationContext applicationContext;
 
-    public static SeataMQProducer create(String producerId, String nameServer, String producerGroup) {
-        return create(producerId, nameServer, null, producerGroup, null);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        tccRocketMQ = (TCCRocketMQ) applicationContext.getBean(ROCKET_TCC_NAME);
+        tccRocketMQ.setProducer(defaultProducer);
     }
 
-    public static SeataMQProducer create(String producerId, String nameServer, String namespace,
-                                         String groupName, RPCHook rpcHook) {
-        if (SINGLE_PRODUCER_ID == null) {
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+    public static SeataMQProducer createSingle(String nameServer, String producerGroup) throws MQClientException {
+        return createSingle(nameServer, null, producerGroup, null);
+    }
+
+    public static SeataMQProducer createSingle(String nameServer, String namespace,
+                                               String groupName, RPCHook rpcHook) throws MQClientException {
+        if (defaultProducer == null) {
             synchronized (SeataMQProducerFactory.class) {
-                if (SINGLE_PRODUCER_ID == null) {
-                    SINGLE_PRODUCER_ID = producerId;
-                    SeataMQProducer producer = new SeataMQProducer(namespace, groupName, rpcHook);
-                    producer.setNamesrvAddr(nameServer);
-                    tccRocketMQ.setProducer(producer);
-                    PRODUCER_MAP.put(producerId, producer);
+                if (defaultProducer == null) {
+                    defaultProducer = new SeataMQProducer(namespace, groupName, rpcHook);
+                    defaultProducer.setNamesrvAddr(nameServer);
+                    if (tccRocketMQ != null) {
+                        tccRocketMQ.setProducer(defaultProducer);
+                    }
+                    defaultProducer.start();
                 }
             }
         }
-
-        if (!SINGLE_PRODUCER_ID.equals(producerId)) {
-            throw new NotSupportYetException("only one producer is allowed");
+        if (!ObjectUtils.equals(nameServer, defaultProducer.getNamesrvAddr())
+                || !ObjectUtils.equals(namespace, defaultProducer.getNamespace())
+                || !ObjectUtils.equals(groupName, defaultProducer.getProducerGroup())
+        ) {
+            throw new NotSupportYetException("only one seata producer is permitted");
         }
-        return getProducer();
+        return defaultProducer;
     }
 
     public static SeataMQProducer getProducer() {
-        return PRODUCER_MAP.get(SINGLE_PRODUCER_ID);
-    }
-
-    public static void setTccRocketMQ(TCCRocketMQ tccRocket) {
-        tccRocketMQ = tccRocket;
+        return defaultProducer;
     }
 
     public static TCCRocketMQ getTccRocketMQ() {

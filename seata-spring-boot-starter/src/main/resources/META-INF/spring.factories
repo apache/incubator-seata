@@ -3,4 +3,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.apache.seata.spring.boot.autoconfigure.SeataAutoConfiguration,\
 org.apache.seata.spring.boot.autoconfigure.SeataDataSourceAutoConfiguration,\
 org.apache.seata.spring.boot.autoconfigure.SeataHttpAutoConfiguration,\
-org.apache.seata.spring.boot.autoconfigure.SeataSagaAutoConfiguration
+org.apache.seata.spring.boot.autoconfigure.SeataSagaAutoConfiguration,\
+org.apache.seata.spring.boot.autoconfigure.SeataRocketMQAutoConfiguration

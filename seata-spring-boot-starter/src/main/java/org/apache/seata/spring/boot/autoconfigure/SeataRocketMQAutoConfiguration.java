@@ -17,36 +17,33 @@
 package org.apache.seata.spring.boot.autoconfigure;
 
 import org.apache.seata.integration.rocketmq.SeataMQProducerFactory;
-import org.apache.seata.integration.rocketmq.TCCRocketMQ;
-import org.apache.seata.integration.rocketmq.TCCRocketMQImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.seata.integration.rocketmq.TccRocketDefinitionRegistry;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.PostConstruct;
 
 /**
  * SeataRocketMQAutoConfiguration
  */
 @ConditionalOnClass(name = "org.apache.rocketmq.client.producer.DefaultMQProducer")
-@ConditionalOnExpression("${seata.enabled:true} && ${seata.rocketmq-enabled:false}")
+@ConditionalOnExpression("${seata.enabled:true}")
 @Configuration(proxyBeanMethods = false)
+@AutoConfigureAfter(SeataAutoConfiguration.class)
 public class SeataRocketMQAutoConfiguration {
 
-    @Autowired
-    TCCRocketMQ tccRocketMQ;
-
+//    @Bean(name = SeataMQProducerFactory.ROCKET_TCC_NAME)
+//    public TCCRocketMQ tccRocketMQ() {
+//        return new TCCRocketMQImpl();
+//    }
     @Bean
-    @ConditionalOnMissingBean
-    public TCCRocketMQ tccRocketMQ() {
-        return new TCCRocketMQImpl();
+    public TccRocketDefinitionRegistry tccRocketDefinitionRegistry() {
+        return new TccRocketDefinitionRegistry();
     }
 
-    @PostConstruct
-    public void init() {
-        SeataMQProducerFactory.setTccRocketMQ(tccRocketMQ);
+    @Bean
+    public SeataMQProducerFactory seataMQProducerFactory() {
+        return new SeataMQProducerFactory();
     }
 }

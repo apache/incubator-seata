@@ -122,7 +122,7 @@ public class SeataMQProducer extends TransactionMQProducer {
         MessageAccessor.putProperty(msg, PROPERTY_SEATA_XID, xid);
         MessageAccessor.putProperty(msg, PROPERTY_SEATA_BRANCHID, String.valueOf(branchId));
         try {
-            sendResult = this.send(msg, timeout);
+            sendResult = super.send(msg, timeout);
         } catch (Exception e) {
             throw new MQClientException("send message Exception", e);
         }
@@ -139,18 +139,6 @@ public class SeataMQProducer extends TransactionMQProducer {
         }
         return sendResult;
     }
-
-
-//    public static SeataMQProducer create(String groupName, String ak, String sk, boolean isEnableMsgTrace, String customizedTraceTopic) {
-//        boolean isEnableAcl = !StringUtils.isEmpty(ak) && !StringUtils.isEmpty(sk);
-//        if (isEnableAcl) {
-//            LOGGER.warn("ACL is not supported yet in SeataMQProducer");
-//        }
-//        if (isEnableMsgTrace) {
-//            LOGGER.warn("MessageTrace is not supported yet in SeataMQProducer");
-//        }
-//        return new SeataMQProducer(groupName);
-//    }
 
 
     @Override

@@ -51,7 +51,7 @@ public interface TCCRocketMQ {
      * @param timeout  the timeout
      * @return SendResult
      */
-    @TwoPhaseBusinessAction(name = "tccRocketMQ")
+    @TwoPhaseBusinessAction(name = SeataMQProducerFactory.ROCKET_TCC_NAME)
     SendResult prepare(Message message, long timeout) throws MQClientException;
 
     /**
