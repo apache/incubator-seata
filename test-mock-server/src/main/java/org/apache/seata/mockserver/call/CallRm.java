@@ -97,7 +97,7 @@ public class CallRm {
         request.setXid(branchSession.getXid());
         request.setBranchId(branchSession.getBranchId());
         request.setResourceId(branchSession.getResourceId());
-        request.setApplicationData("{\"actionContext\":{\"mock\":\"mock\"}}");
+        request.setApplicationData(branchSession.getApplicationData());
         request.setBranchType(branchSession.getBranchType());
     }
 }

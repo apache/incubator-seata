@@ -209,6 +209,15 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException {
         checkMockActionFail(request.getXid());
+        String xid = request.getXid();
+        branchMap.compute(xid, (key, val) -> {
+            if (val != null) {
+                val.stream().filter(branch -> branch.getBranchId() == request.getBranchId()).forEach(branch -> {
+                    branch.setApplicationData(request.getApplicationData());
+                });
+            }
+            return val;
+        });
         response.setResultCode(ResultCode.Success);
     }
 
