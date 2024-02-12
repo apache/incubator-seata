@@ -17,6 +17,7 @@
 package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
@@ -62,7 +63,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.begin();
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -71,7 +72,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.begin(timeout);
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -80,7 +81,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.begin(timeout, name);
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -89,7 +90,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.commit();
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -98,7 +99,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.rollback();
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -107,7 +108,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             return new SuspendedResourcesHolder(this.instance.suspend().getXid());
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -116,7 +117,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             return new SuspendedResourcesHolder(this.instance.suspend(clean).getXid());
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -125,7 +126,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.resume(suspendedResourcesHolder);
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -134,7 +135,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             return convertIoSeataGlobalStatus(this.instance.getStatus());
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
@@ -148,7 +149,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         try {
             this.instance.globalReport(convertApacheSeataGlobalStatus(globalStatus));
         } catch (org.apache.seata.core.exception.TransactionException e) {
-            throw new TransactionException(e.getCode(), e.getMessage(), e.getCause());
+            throw new TransactionException(TransactionExceptionCode.valueOf(e.getCode().name()), e.getMessage(), e.getCause());
         }
     }
 
