@@ -70,7 +70,7 @@
             <artifactId>spring-webmvc</artifactId>
             <version>5.3.20</version>
         <dependency>
-            <groupId>org.springframework</groupId>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
