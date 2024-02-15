@@ -34,7 +34,6 @@
     <properties>
         <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
         <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
-        <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -67,18 +66,9 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>org.yaml</groupId>
-                        <artifactId>snakeyaml</artifactId>
-                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml-for-server.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -93,7 +83,16 @@
                     <artifactId>log4j-to-slf4j</artifactId>
                     <groupId>org.apache.logging.log4j</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>snakeyaml</artifactId>
+                    <groupId>org.yaml</groupId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -248,6 +247,7 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
+            <version>${kafka-clients.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
