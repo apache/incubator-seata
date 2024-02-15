@@ -14,49 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.tcc.interceptor;
+package io.seata.rm.tcc.interceptor;
 
+import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.common.Constants;
-import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.ReflectionUtil;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
-import org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
-import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
-import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
-
-public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
-
-    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
-            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
-
-    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
-
-    private Set<String> methodsToProxy;
-    protected Object targetBean;
-
-    protected Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
+public class TccActionInterceptorHandler extends org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler {
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
-        this.targetBean = targetBean;
-        this.methodsToProxy = methodsToProxy;
+        super(targetBean, methodsToProxy);
     }
 
     @Override
@@ -83,7 +65,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                 businessActionParam.setActionName(businessAction.name());
                 businessActionParam.setDelayReport(businessAction.isDelayReport());
                 businessActionParam.setUseCommonFence(businessAction.useTCCFence());
-                businessActionParam.setBranchType(BranchType.TCC);
+                businessActionParam.setBranchType(org.apache.seata.core.model.BranchType.TCC);
                 Map<String, Object> businessActionContextMap = new HashMap<>(4);
                 //the phase two method name
                 businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
@@ -100,7 +82,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                     RootContext.unbindBranchType();
                 }
                 //MDC remove branchId
-                MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
+                MDC.remove(org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID);
             }
         }
 
@@ -109,7 +91,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     }
 
     private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
-        TwoPhaseBusinessAction result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
+        TwoPhaseBusinessAction result = convertIoSeata(parseAnnotationCache.computeIfAbsent(methodKey, method -> {
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             if (businessAction == null && targetBean.getClass() != null) {
                 Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
@@ -129,16 +111,103 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                     }
                 }
             }
-            return businessAction;
-        });
+            return convertApacheSeata(businessAction);
+        }));
         return result;
     }
 
-    /**
-     * init common fence clean task if enable useTccFence
-     *
-     * @param twoPhaseBusinessAction the twoPhaseBusinessAction
-     */
+    private org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction convertApacheSeata(TwoPhaseBusinessAction twoPhaseBusinessAction) {
+        org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction result = new org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction.class;
+            }
+
+            @Override
+            public String name() {
+                return twoPhaseBusinessAction.name();
+            }
+
+            @Override
+            public String commitMethod() {
+                return twoPhaseBusinessAction.commitMethod();
+            }
+
+            @Override
+            public String rollbackMethod() {
+                return twoPhaseBusinessAction.rollbackMethod();
+            }
+
+            @Override
+            public boolean isDelayReport() {
+                return twoPhaseBusinessAction.isDelayReport();
+            }
+
+            @Override
+            public boolean useTCCFence() {
+                return twoPhaseBusinessAction.useTCCFence();
+            }
+
+            @Override
+            public Class<?>[] commitArgsClasses() {
+                return twoPhaseBusinessAction.commitArgsClasses();
+            }
+
+            @Override
+            public Class<?>[] rollbackArgsClasses() {
+                return twoPhaseBusinessAction.rollbackArgsClasses();
+            }
+        };
+        return result;
+    }
+
+    private TwoPhaseBusinessAction convertIoSeata(org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction twoPhaseBusinessAction) {
+        TwoPhaseBusinessAction result = new TwoPhaseBusinessAction() {
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return TwoPhaseBusinessAction.class;
+            }
+
+            @Override
+            public String name() {
+                return twoPhaseBusinessAction.name();
+            }
+
+            @Override
+            public String commitMethod() {
+                return twoPhaseBusinessAction.commitMethod();
+            }
+
+            @Override
+            public String rollbackMethod() {
+                return twoPhaseBusinessAction.rollbackMethod();
+            }
+
+            @Override
+            public boolean isDelayReport() {
+                return twoPhaseBusinessAction.isDelayReport();
+            }
+
+            @Override
+            public boolean useTCCFence() {
+                return twoPhaseBusinessAction.useTCCFence();
+            }
+
+            @Override
+            public Class<?>[] commitArgsClasses() {
+                return twoPhaseBusinessAction.commitArgsClasses();
+            }
+
+            @Override
+            public Class<?>[] rollbackArgsClasses() {
+                return twoPhaseBusinessAction.rollbackArgsClasses();
+            }
+        };
+        return result;
+    }
+
+
     private void initCommonFenceCleanTask(TwoPhaseBusinessAction twoPhaseBusinessAction) {
         CommonFenceConfig commonFenceConfig = (CommonFenceConfig) ObjectHolder.INSTANCE.getObject(BEAN_NAME_SPRING_FENCE_CONFIG);
         if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
@@ -150,21 +219,6 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                 commonFenceConfig.init();
             }
         }
-    }
-
-    @Override
-    public Set<String> getMethodsToProxy() {
-        return methodsToProxy;
-    }
-
-    @Override
-    public int getOrder() {
-        return ORDER_NUM;
-    }
-
-    @Override
-    public SeataInterceptorPosition getPosition() {
-        return SeataInterceptorPosition.Any;
     }
 
 }
