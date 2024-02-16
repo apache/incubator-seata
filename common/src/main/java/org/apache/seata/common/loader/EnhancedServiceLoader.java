@@ -16,6 +16,14 @@
  */
 package org.apache.seata.common.loader;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,19 +38,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-import org.apache.seata.common.Constants;
-import org.apache.seata.common.executor.Initialize;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * The type Enhanced service loader.
  *
  */
 public class EnhancedServiceLoader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
     private static final String APACHE_SEATA_PACKAGE_NAME = "org.apache.seata";
     private static final String IO_SEATA_PACKAGE_NAME = "io.seata";
 
@@ -75,12 +76,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(loader);
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(loader);
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(loader);
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(loader);
     }
@@ -97,12 +97,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(findClassLoader());
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(findClassLoader());
     }
@@ -120,12 +119,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, findClassLoader());
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, findClassLoader());
     }
@@ -145,12 +143,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, loader);
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, loader);
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, loader);
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, loader);
     }
@@ -170,12 +167,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, args, findClassLoader());
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args, findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, args, findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, args, findClassLoader());
     }
@@ -196,12 +192,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                S s = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, argsType, args, findClassLoader());
-                if (s != null) {
-                    return s;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args, findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).load(activateName, argsType, args, findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).load(activateName, argsType, args, findClassLoader());
     }
@@ -217,12 +212,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                List<S> sList = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(findClassLoader());
-                if (CollectionUtils.isNotEmpty(sList)) {
-                    return sList;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(findClassLoader());
     }
@@ -240,12 +234,11 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                List<S> sList = InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(argsType, args, findClassLoader());
-                if (CollectionUtils.isNotEmpty(sList)) {
-                    return sList;
-                }
+                return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args, findClassLoader());
             } catch (EnhancedServiceNotFoundException ignore) {
+                LOGGER.warn("Can't load SPI for :{} from org.apache.seata package,will try to load SPI from io.seata package", service.getName());
             }
+            return InnerEnhancedServiceLoader.getServiceLoader(compatibleService).loadAll(argsType, args, findClassLoader());
         }
         return InnerEnhancedServiceLoader.getServiceLoader(service).loadAll(argsType, args, findClassLoader());
     }
@@ -267,14 +260,14 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
-                InnerEnhancedServiceLoader<S> s = InnerEnhancedServiceLoader.removeServiceLoader(compatibleService);
-                if (s != null) {
-                    return;
-                }
+                InnerEnhancedServiceLoader.removeServiceLoader(service);
             } catch (Exception ignore) {
+                LOGGER.warn("Can't unload SPI for :{} from org.apache.seata package,will try to unload SPI from io.seata package", service.getName());
+                InnerEnhancedServiceLoader.removeServiceLoader(compatibleService);
             }
+        } else {
+            InnerEnhancedServiceLoader.removeServiceLoader(service);
         }
-        InnerEnhancedServiceLoader.removeServiceLoader(service);
     }
 
     /**
@@ -291,14 +284,17 @@ public class EnhancedServiceLoader {
         Class<S> compatibleService = getCompatibleService(service);
         if (compatibleService != null) {
             try {
+                InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
+                doUnload(serviceLoader, activateName);
+            } catch (Exception ignore) {
+                LOGGER.warn("Can't unload SPI for :{} from org.apache.seata package,will try to unload SPI from io.seata package", service.getName());
                 InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(compatibleService);
                 doUnload(serviceLoader, activateName);
-                return;
-            } catch (Exception ignore) {
             }
+        } else {
+            InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
+            doUnload(serviceLoader, activateName);
         }
-        InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
-        doUnload(serviceLoader, activateName);
     }
 
     private static <S> void doUnload(InnerEnhancedServiceLoader<S> serviceLoader, String activateName) {
