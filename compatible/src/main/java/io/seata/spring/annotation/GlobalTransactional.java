@@ -16,9 +16,9 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.common.LockStrategyMode;
+import io.seata.tm.api.transaction.Propagation;
 import org.apache.seata.common.DefaultValues;
-import org.apache.seata.common.LockStrategyMode;
-import org.apache.seata.tm.api.transaction.Propagation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

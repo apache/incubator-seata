@@ -18,12 +18,12 @@ package io.seata.integration.tx.api.interceptor.handler;
 
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
+import io.seata.tm.api.FailureHandler;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.util.ClassUtils;
 import org.apache.seata.rm.GlobalLockExecutor;
-import org.apache.seata.tm.api.FailureHandler;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -59,10 +59,10 @@ public class GlobalTransactionalInterceptorHandler extends org.apache.seata.inte
                                 globalTransactionalAnnotation.rollbackForClassName(),
                                 globalTransactionalAnnotation.noRollbackFor(),
                                 globalTransactionalAnnotation.noRollbackForClassName(),
-                                globalTransactionalAnnotation.propagation(),
+                                org.apache.seata.tm.api.transaction.Propagation.valueOf(globalTransactionalAnnotation.propagation().name()),
                                 globalTransactionalAnnotation.lockRetryInterval(),
                                 globalTransactionalAnnotation.lockRetryTimes(),
-                                globalTransactionalAnnotation.lockStrategyMode());
+                                org.apache.seata.common.LockStrategyMode.valueOf(globalTransactionalAnnotation.lockStrategyMode().name()));
                     } else {
                         transactional = this.aspectTransactional;
                     }

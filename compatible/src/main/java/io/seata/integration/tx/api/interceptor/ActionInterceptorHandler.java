@@ -44,7 +44,7 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                if (parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter) {
                     // get annotation
                     BusinessActionContextParameter annotation = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
@@ -59,21 +59,6 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
 
                     // load param by the config of annotation, and then put into the context
                     ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
-                } else if (parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter) {
-                    // get annotation
-                    org.apache.seata.rm.tcc.api.BusinessActionContextParameter annotation = (org.apache.seata.rm.tcc.api.BusinessActionContextParameter) parameterAnnotations[i][j];
-                    if (arguments[i] == null) {
-                        throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
-                    }
-
-                    // get param
-                    Object paramObject = arguments[i];
-                    if (paramObject == null) {
-                        continue;
-                    }
-
-                    // load param by the config of annotation, and then put into the context
-                    org.apache.seata.integration.tx.api.interceptor.ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
                 }
             }
         }
