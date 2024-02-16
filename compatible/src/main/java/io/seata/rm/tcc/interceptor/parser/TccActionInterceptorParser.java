@@ -17,10 +17,10 @@
 package io.seata.rm.tcc.interceptor.parser;
 
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
-import org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
