@@ -16,16 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
-import org.apache.seata.tm.api.GlobalTransaction;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
@@ -51,6 +41,7 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.FailureHandler;
 import org.apache.seata.tm.api.FailureHandlerHolder;
+import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor;
 import org.apache.seata.tm.api.TransactionalTemplate;
 import org.apache.seata.tm.api.transaction.NoRollbackRule;
@@ -58,6 +49,15 @@ import org.apache.seata.tm.api.transaction.RollbackRule;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static org.apache.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
@@ -75,15 +75,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptorHandler.class);
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
+    protected final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
 
     private Set<String> methodsToProxy;
 
-    private volatile boolean disable;
-    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
-    private static volatile Integer degradeNum = 0;
+    protected volatile boolean disable;
+    protected static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
+    protected static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
-    private static int degradeCheckAllowTimes;
+    protected static int degradeCheckAllowTimes;
     protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
 
@@ -172,7 +172,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
 
-    private Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
+    protected Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -189,8 +189,8 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         });
     }
 
-    Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
-                                   final AspectTransactional aspectTransactional) throws Throwable {
+    protected Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
+                                             final AspectTransactional aspectTransactional) throws Throwable {
         boolean succeed = true;
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
