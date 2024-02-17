@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.tcc.api;
+package io.seata.tm.api;
 
-public class BusinessActionContext extends org.apache.seata.rm.tcc.api.BusinessActionContext {
+public interface FailureHandler extends org.apache.seata.tm.api.FailureHandler {
 }

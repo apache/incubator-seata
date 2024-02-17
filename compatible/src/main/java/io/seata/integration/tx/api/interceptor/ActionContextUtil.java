@@ -192,6 +192,5 @@ public final class ActionContextUtil {
     @SuppressWarnings("unchecked")
     public static <T> T convertActionContext(String key, @Nullable Object value, @Nonnull Class<T> targetClazz) {
         return org.apache.seata.integration.tx.api.interceptor.ActionContextUtil.convertActionContext(key, value, targetClazz);
-
     }
 }

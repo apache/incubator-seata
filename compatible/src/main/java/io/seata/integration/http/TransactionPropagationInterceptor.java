@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.tcc.api;
+package io.seata.integration.http;
 
-public class BusinessActionContext extends org.apache.seata.rm.tcc.api.BusinessActionContext {
+public class TransactionPropagationInterceptor
+    extends org.apache.seata.integration.http.TransactionPropagationInterceptor {
+
 }

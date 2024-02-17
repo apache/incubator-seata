@@ -14,7 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.tcc.api;
+package io.seata.common;
 
-public class BusinessActionContext extends org.apache.seata.rm.tcc.api.BusinessActionContext {
+public enum LockStrategyMode {
+    /**
+     * Optimistic lock mode is recommended when resources are not reused in the current global transaction.
+     */
+    OPTIMISTIC,
+    /**
+     * Pessimistic lock mode is recommended when there may be repeated use of the same resource in a global transaction.
+     */
+    PESSIMISTIC
 }
