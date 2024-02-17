@@ -31,7 +31,7 @@ import java.sql.Connection;
 public class DruidDataSourceProvider extends AbstractDataSourceProvider {
 
     @Override
-    public DataSource generate() {
+    public DataSource doGenerate() {
         DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
         ds.setDriverClassLoader(getDriverClassLoader());

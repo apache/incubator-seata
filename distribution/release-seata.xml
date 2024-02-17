@@ -108,6 +108,11 @@
             <source>../server/src/main/resources/logback-spring.xml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
+
+        <file>
+            <source>NOTICE.md</source>
+            <outputDirectory>lib/jdbc/</outputDirectory>
+        </file>
     </files>
 
     <moduleSets>
