@@ -375,4 +375,34 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             Assertions.assertTrue(updateColumn.contains("`"));
         }
     }
+
+    @Test
+    public void testGetWhereColumns() {
+        String sql = "UPDATE t1 SET name1 = 'name1', name2 = 'name2' WHERE t1.id between ? and ? or name1= ? and name2= ?";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
+        Assertions.assertEquals("id", whereColumns.get(0));
+        Assertions.assertEquals("name1", whereColumns.get(1));
+        Assertions.assertEquals("name2", whereColumns.get(2));
+        sql = "UPDATE t1 SET name1 = 'name1', name2 = 'name2' WHERE id between ? and ?";
+
+        statement = getSQLStatement(sql);
+
+        mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        whereColumns = mySQLUpdateRecognizer.getWhereColumns();
+        Assertions.assertEquals("id", whereColumns.get(0));
+
+        sql = "UPDATE t1 SET name1 = 'name1', name2 = 'name2' WHERE id in(?,? ) and createTime between ? and ?";
+
+        statement = getSQLStatement(sql);
+
+        mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
+        whereColumns = mySQLUpdateRecognizer.getWhereColumns();
+        Assertions.assertEquals("id", whereColumns.get(0));
+        Assertions.assertEquals("createTime", whereColumns.get(1));
+    }
+
 }

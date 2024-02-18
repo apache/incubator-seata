@@ -173,6 +173,13 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
         return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
+
+    @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return super.getWhereColumns(where);
+    }
+
     @Override
     protected SQLStatement getAst() {
         return this.ast;
