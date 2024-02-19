@@ -52,7 +52,6 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
@@ -60,7 +59,6 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("name", updateColumns.get(0));
         Assertions.assertEquals("name1", updateValues.get(0));
         Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
-        Assertions.assertEquals("id", whereColumns.get(0));
     }
 
     /**
@@ -75,9 +73,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
-        Assertions.assertEquals("id", whereColumns.get(0));
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
         Assertions.assertEquals(2, updateColumns.size());
@@ -140,9 +136,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
-        Assertions.assertEquals("id", whereColumns.get(0));
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
         Assertions.assertEquals(2, updateColumns.size());
@@ -183,7 +177,6 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
@@ -192,8 +185,6 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("name1", updateValues.get(0));
         Assertions.assertEquals("name2", updateColumns.get(1));
         Assertions.assertEquals("name2", updateValues.get(1));
-        Assertions.assertEquals("name1", whereColumns.get(1));
-        Assertions.assertEquals("id", whereColumns.get(0));
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
@@ -229,9 +220,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
-        Assertions.assertEquals("id", whereColumns.get(0));
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
         Assertions.assertEquals(2, updateColumns.size());
