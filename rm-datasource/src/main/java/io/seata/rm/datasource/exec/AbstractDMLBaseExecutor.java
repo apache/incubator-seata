@@ -99,6 +99,16 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         try {
             TableRecords beforeImage = beforeImage();
             T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+            int updateCount = statementProxy.getUpdateCount();
+            if (updateCount > 0) {
+                if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+                    if (updateCount > beforeImage.size()) {
+                        String errorMsg =
+                            "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
+                        throw new ShouldNeverHappenException(errorMsg);
+                    }
+                }
+            }
             TableRecords afterImage = afterImage(beforeImage);
             prepareUndoLog(beforeImage, afterImage);
             return result;

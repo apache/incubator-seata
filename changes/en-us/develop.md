@@ -12,6 +12,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6026](https://github.com/seata/seata/pull/6026)] fix incorrect metric report
 - [[#4410](https://github.com/seata/seata/pull/4410)] support jdk9+ compile code
 - [[#6104](https://github.com/seata/seata/pull/6104)] fix dubbo 3.x consumer can't generate TCC proxy in tcc mode.
+- [[#4748](https://github.com/seata/seata/pull/4748)] fix the problem that the number of mirrors before and after may be inconsistent
+
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql

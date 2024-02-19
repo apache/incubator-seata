@@ -174,6 +174,12 @@ public class DmUpdateRecognizer extends BaseDmRecognizer implements SQLUpdateRec
     }
 
     @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return super.getWhereColumns(where);
+    }
+
+    @Override
     protected SQLStatement getAst() {
         return this.ast;
     }
