@@ -32,7 +32,7 @@ import java.util.Properties;
 public class HikariDataSourceProvider extends AbstractDataSourceProvider {
 
     @Override
-    public DataSource generate() {
+    public DataSource doGenerate() {
         Properties properties = new Properties();
         properties.setProperty("dataSource.cachePrepStmts", "true");
         properties.setProperty("dataSource.prepStmtCacheSize", "250");

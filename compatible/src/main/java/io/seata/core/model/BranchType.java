@@ -18,6 +18,7 @@ package io.seata.core.model;
 
 /**
  * The enum Branch type.
+ * Compatible for dubbo dubbo-filter-seata
  *
  */
 public enum BranchType {
