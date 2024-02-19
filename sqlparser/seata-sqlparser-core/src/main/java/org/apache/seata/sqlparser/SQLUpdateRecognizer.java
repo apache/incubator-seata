@@ -57,10 +57,10 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
     List<String> getUpdateColumnsUnEscape();
 
     /**
-     * Gets update where columns.
+     * Gets where columns.
      *
-     * @return the update where columns
+     * @return the where columns
      */
-	List<String> getWhereColumns();
+    List<String> getWhereColumns();
 
 }
