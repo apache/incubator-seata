@@ -42,10 +42,7 @@ public class ServiceProperties implements InitializingBean {
      * group list
      */
     private Map<String, String> grouplist = new HashMap<>();
-    /**
-     * degrade current not support
-     */
-    private boolean enableDegrade = false;
+
     /**
      * disable globalTransaction
      */
@@ -65,15 +62,6 @@ public class ServiceProperties implements InitializingBean {
 
     public void setGrouplist(Map<String, String> grouplist) {
         this.grouplist = grouplist;
-    }
-
-    public boolean isEnableDegrade() {
-        return enableDegrade;
-    }
-
-    public ServiceProperties setEnableDegrade(boolean enableDegrade) {
-        this.enableDegrade = enableDegrade;
-        return this;
     }
 
     public boolean isDisableGlobalTransaction() {

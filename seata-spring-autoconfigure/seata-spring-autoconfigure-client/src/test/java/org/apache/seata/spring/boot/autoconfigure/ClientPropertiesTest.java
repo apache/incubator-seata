@@ -87,7 +87,6 @@ public class ClientPropertiesTest {
         Map<String, String> grouplist = serviceProperties.getGrouplist();
         assertEquals("default", vgroupMapping.get(DEFAULT_TX_GROUP));
         assertEquals("127.0.0.1:8091", grouplist.get("default"));
-        assertFalse(serviceProperties.isEnableDegrade());
         assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
