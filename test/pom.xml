@@ -49,6 +49,8 @@
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+<!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
