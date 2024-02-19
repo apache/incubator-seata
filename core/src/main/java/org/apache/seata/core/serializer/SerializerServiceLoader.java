@@ -16,15 +16,26 @@
  */
 package org.apache.seata.core.serializer;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Service Loader for the interface {@link Serializer}
  *
  */
 public final class SerializerServiceLoader {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private SerializerServiceLoader() {
     }
@@ -49,5 +60,22 @@ public final class SerializerServiceLoader {
             }
         }
         return EnhancedServiceLoader.load(Serializer.class, type.name());
+    }
+
+    public static Set<SerializerType> getSupportedSerializers() {
+        Set<SerializerType> supportedSerializers = new HashSet<>();
+        String serializerNames = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name());
+        String[] serializerNameArray = serializerNames.split(",");
+        for (String serializerName : serializerNameArray) {
+            try {
+                SerializerType serializerType = SerializerType.getByName(serializerName);
+                if (serializerType != null) {
+                    supportedSerializers.add(serializerType);
+                }
+            } catch (IllegalArgumentException ignore) {
+                LOGGER.warn("Invalid serializer name: " + serializerName);
+            }
+        }
+        return supportedSerializers;
     }
 }
