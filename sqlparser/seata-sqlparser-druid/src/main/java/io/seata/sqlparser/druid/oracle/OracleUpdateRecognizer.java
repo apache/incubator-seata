@@ -123,7 +123,7 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     @Override
     public List<String> getWhereColumns() {
         SQLExpr where = ast.getWhere();
-        return super.getWhereColumns(where);
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
     }
 
     @Override
