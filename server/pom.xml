@@ -336,7 +336,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <image>docker.io/seataio/seata-server</image>
+                        <image>docker.io/apache/seata-server</image>
                         <tags>${image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
