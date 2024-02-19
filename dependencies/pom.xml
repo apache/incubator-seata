@@ -119,6 +119,10 @@
         <kotlin.version>1.4.32</kotlin.version>
         <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 
+        <!-- # for web -->
+        <spring-webmvc.version>5.3.26</spring-webmvc.version>
+        <tomcat-embed.version>9.0.83</tomcat-embed.version>
+
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
@@ -156,6 +160,10 @@
                     <exclusion>
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-core</artifactId>
                     </exclusion>
                 </exclusions>
                 <type>pom</type>
@@ -772,6 +780,17 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
                 <version>${janino-version}</version>
+            </dependency>
+
+            <!-- web -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring-webmvc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
             </dependency>
         </dependencies>
     </dependencyManagement>
