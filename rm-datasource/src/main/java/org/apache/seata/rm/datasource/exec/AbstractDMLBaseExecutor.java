@@ -105,7 +105,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
                     if (updateCount > beforeImage.size()) {
                         String errorMsg =
                             "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
-                            throw new ShouldNeverHappenException(errorMsg);
+                        throw new ShouldNeverHappenException(errorMsg);
                     }
                 }
             }
