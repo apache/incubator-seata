@@ -378,7 +378,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
     @Test
     public void testGetWhereColumns() {
-        String sql = "UPDATE t1 SET name1 = 'name1', name2 = 'name2' WHERE t1.id between ? and ? or name1= ? and name2= ?";
+        String sql = "UPDATE t1 SET name1 = 'name1', name2 = 'name2' WHERE t1.id between ? and ? or `name1`= ? and name2= ?";
 
         SQLStatement statement = getSQLStatement(sql);
 

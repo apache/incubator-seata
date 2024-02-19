@@ -205,7 +205,7 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     @Override
     public List<String> getWhereColumns() {
         SQLExpr where = ast.getWhere();
-        return super.getWhereColumns(where);
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
     }
 
     @Override
