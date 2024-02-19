@@ -30,6 +30,7 @@ import io.seata.saga.rm.SagaResource;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
+import io.seata.tm.api.GlobalTransactionRole;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -56,14 +57,16 @@ public class DefaultSagaTransactionalTemplate
 
     private String applicationId;
     private String txServiceGroup;
+    private String accessKey;
+    private String secretKey;
     private ApplicationContext applicationContext;
 
     @Override
     public void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
         try {
-            triggerBeforeCommit();
+            triggerBeforeCommit(tx);
             tx.commit();
-            triggerAfterCommit();
+            triggerAfterCommit(tx);
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
@@ -73,9 +76,9 @@ public class DefaultSagaTransactionalTemplate
     @Override
     public void rollbackTransaction(GlobalTransaction tx, Throwable ex)
         throws TransactionException, TransactionalExecutor.ExecutionException {
-        triggerBeforeRollback();
+        triggerBeforeRollback(tx);
         tx.rollback();
-        triggerAfterRollback();
+        triggerAfterRollback(tx);
         // Successfully rolled back
     }
 
@@ -83,9 +86,9 @@ public class DefaultSagaTransactionalTemplate
     public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         try {
-            triggerBeforeBegin();
+            triggerBeforeBegin(tx);
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
-            triggerAfterBegin();
+            triggerAfterBegin(tx);
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
@@ -103,7 +106,7 @@ public class DefaultSagaTransactionalTemplate
         throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
-            triggerAfterCompletion();
+            triggerAfterCompletion(tx);
         } catch (TransactionException txe) {
 
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
@@ -123,73 +126,87 @@ public class DefaultSagaTransactionalTemplate
         DefaultResourceManager.get().branchReport(BranchType.SAGA, xid, branchId, status, applicationData);
     }
 
-    protected void triggerBeforeBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeBegin();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+    protected void triggerBeforeBegin(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    protected void triggerAfterBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterBegin();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
+    protected void triggerAfterBegin(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterBegin();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
+                }
             }
         }
     }
 
-    protected void triggerBeforeRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeRollback();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
+    protected void triggerBeforeRollback(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
+                }
             }
         }
     }
 
-    protected void triggerAfterRollback() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterRollback();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+    protected void triggerAfterRollback(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterRollback();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    protected void triggerBeforeCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.beforeCommit();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+    protected void triggerBeforeCommit(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.beforeCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
-    protected void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCommit();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+    protected void triggerAfterCommit(GlobalTransaction tx) {
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCommit();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
 
     @Override
-    public void triggerAfterCompletion() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            try {
-                hook.afterCompletion();
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+    public void triggerAfterCompletion(GlobalTransaction tx) {
+        if (tx == null || tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            for (TransactionHook hook : getCurrentHooks()) {
+                try {
+                    hook.afterCompletion();
+                } catch (Exception e) {
+                    LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
+                }
             }
         }
     }
@@ -214,7 +231,7 @@ public class DefaultSagaTransactionalTemplate
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
-        TMClient.init(applicationId, txServiceGroup);
+        TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
@@ -246,7 +263,7 @@ public class DefaultSagaTransactionalTemplate
             ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
+        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
@@ -278,5 +295,21 @@ public class DefaultSagaTransactionalTemplate
 
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 }

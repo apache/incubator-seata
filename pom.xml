@@ -47,11 +47,14 @@
         <module>integration/motan</module>
         <module>integration/grpc</module>
         <module>integration/http</module>
+        <module>integration/http-jakarta</module>
         <module>integration/hsf</module>
         <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>spring</module>
+        <module>spring-aot</module>
+        <module>spring-framework-fake-for-java8</module>
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
@@ -154,17 +157,37 @@
             <id>image</id>
             <properties>
                 <image.publish.skip>false</image.publish.skip>
-                <image.tags>latest</image.tags>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
-                <mysql.jdbc.version>5.1.35</mysql.jdbc.version>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
             </properties>
         </profile>
-        <!-- profile: release-image -->
+        <!-- profile: release-image-based-on-java8 -->
         <profile>
-            <id>release-image</id>
+            <id>release-image-based-on-java8</id>
             <properties>
                 <image.tags>${project.version},latest</image.tags>
+            </properties>
+        </profile>
+        <!-- profile: release-image-based-on-java8-slim -->
+        <profile>
+            <id>release-image-based-on-java8-slim</id>
+            <properties>
+                <image.tags>${project.version}-slim</image.tags>
+            </properties>
+        </profile>
+        <!-- profile: release-image-based-on-java17 -->
+        <profile>
+            <id>release-image-based-on-java17</id>
+            <properties>
+                <image.tags>${project.version}.jre17</image.tags>
+            </properties>
+        </profile>
+        <!-- profile: release-image-based-on-java17-slim -->
+        <profile>
+            <id>release-image-based-on-java17-slim</id>
+            <properties>
+                <image.tags>${project.version}.jre17-slim</image.tags>
             </properties>
         </profile>
         <!-- profile: arrch64 -->
@@ -252,6 +275,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>${maven-source-plugin.version}</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.java.template</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -332,6 +360,7 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <argLine>${maven.surefire.argLine}</argLine>
+                    <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
         </plugins>

@@ -31,4 +31,6 @@
               files="[\\/]antlr[\\/]mysql[\\/]antlr[\\/]"/>
     <suppress checks=".*"
               files="io[\\/]seata[\\/]integration[\\/]grpc[\\/]interceptor[\\/]"/>
+    <suppress checks=".*"
+              files="[\\/]org[\\/]springframework[\\/]"/>
 </suppressions>

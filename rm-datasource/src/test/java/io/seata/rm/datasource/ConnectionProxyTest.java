@@ -15,10 +15,12 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.LockStrategyMode;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchType;
-import io.seata.core.model.ResourceManager;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockWaitTimeoutException;
 import io.seata.rm.datasource.mock.MockConnection;
@@ -29,7 +31,7 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
+import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.mockito.Mockito;
 
@@ -41,7 +43,7 @@ import java.lang.reflect.Modifier;
  *
  * @author ggndnn
  */
-@DisabledOnJre(JRE.JAVA_17) // `ReflectionUtil.modifyStaticFinalField` does not supported java17
+@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
 public class ConnectionProxyTest {
     private DataSourceProxy dataSourceProxy;
 
@@ -50,6 +52,8 @@ public class ConnectionProxyTest {
     private final static String TEST_XID = "testXid";
 
     private final static String lockKey = "order:123";
+
+    private final static String DB_TYPE = "mysql";
 
     private Field branchRollbackFlagField;
 
@@ -66,7 +70,9 @@ public class ConnectionProxyTest {
         dataSourceProxy = Mockito.mock(DataSourceProxy.class);
         Mockito.when(dataSourceProxy.getResourceId())
                 .thenReturn(TEST_RESOURCE_ID);
-        ResourceManager rm = Mockito.mock(ResourceManager.class);
+        Mockito.when(dataSourceProxy.getDbType()).thenReturn(DB_TYPE);
+        DefaultResourceManager rm = Mockito.mock(DefaultResourceManager.class);
+
         Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, "{\"autoCommit\":false}", lockKey))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
@@ -78,6 +84,11 @@ public class ConnectionProxyTest {
     public void testLockRetryPolicyRollbackOnConflict() throws Exception {
         boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
         branchRollbackFlagField.set(null, true);
+        GlobalLockConfig preGlobalLockConfig = new GlobalLockConfig();
+        preGlobalLockConfig.setLockRetryTimes(0);
+        preGlobalLockConfig.setLockRetryInterval(10);
+        preGlobalLockConfig.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
+        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null));
         connectionProxy.bind(TEST_XID);
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
@@ -95,6 +106,11 @@ public class ConnectionProxyTest {
     public void testLockRetryPolicyNotRollbackOnConflict() throws Exception {
         boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
         branchRollbackFlagField.set(null, false);
+        GlobalLockConfig preGlobalLockConfig = new GlobalLockConfig();
+        preGlobalLockConfig.setLockRetryTimes(30);
+        preGlobalLockConfig.setLockRetryInterval(10);
+        preGlobalLockConfig.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
+        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, null);
         connectionProxy.bind(TEST_XID);
         connectionProxy.appendUndoLog(new SQLUndoLog());

@@ -231,7 +231,7 @@ public class LogStoreDataBaseDAOTest {
         }else if("abc-123:5657".equals(globalTransactionDOs.get(1).getXid()) && "abc-123:1267".equals(globalTransactionDOs.get(0).getXid())){
             Assertions.assertTrue(true);
         }else {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
 
         String delSql = "delete from global_table where xid in ('abc-123:1267', 'abc-123:6978', 'abc-123:5657')";
@@ -298,7 +298,7 @@ public class LogStoreDataBaseDAOTest {
         if("abc-123:1267".equals(globalTransactionDOs.get(0).getXid())){
             Assertions.assertTrue(true);
         }else {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
 
         String delSql = "delete from global_table where xid in ('abc-123:1267', 'abc-123:6978', 'abc-123:5657')";
@@ -337,7 +337,7 @@ public class LogStoreDataBaseDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -373,7 +373,7 @@ public class LogStoreDataBaseDAOTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(1, rs.getInt("status"));
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
             rs.close();
 
@@ -386,7 +386,7 @@ public class LogStoreDataBaseDAOTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(2, rs.getInt("status"));
             }else{
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
             rs.close();
 
@@ -426,7 +426,7 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }else{
                 Assertions.assertTrue(true);
             }
@@ -484,7 +484,7 @@ public class LogStoreDataBaseDAOTest {
         }else if(78563453 == rets.get(1).getBranchId() && 345465676 == rets.get(0).getBranchId()){
             Assertions.assertTrue(true);
         }else {
-            Assertions.assertTrue(false);
+            Assertions.fail();
         }
 
         String delSql = "delete from branch_table where xid= 'abc-123:6789' ";
@@ -528,7 +528,7 @@ public class LogStoreDataBaseDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -570,7 +570,7 @@ public class LogStoreDataBaseDAOTest {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(3, rs.getInt("status"));
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
@@ -608,7 +608,7 @@ public class LogStoreDataBaseDAOTest {
             if(rs.next()){
                 Assertions.assertTrue(true);
             }else {
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }
             rs.close();
 
@@ -617,7 +617,7 @@ public class LogStoreDataBaseDAOTest {
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assertions.assertTrue(false);
+                Assertions.fail();
             }else {
                 Assertions.assertTrue(true);
             }

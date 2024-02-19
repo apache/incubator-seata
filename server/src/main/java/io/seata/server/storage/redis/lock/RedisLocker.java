@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.exceptions.JedisNoScriptException;
 
 import static io.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static io.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
@@ -84,6 +85,8 @@ public class RedisLocker extends AbstractLocker {
 
     private static String ACQUIRE_LOCK_SHA;
 
+    private static String ACQUIRE_LOCK_LUA_BY_FILE;
+
     private static final String WHITE_SPACE = " ";
 
     private static final String ANNOTATION_LUA = "--";
@@ -111,6 +114,7 @@ public class RedisLocker extends AbstractLocker {
                     LOGGER.info("redis locker use pipeline mode");
                     return;
                 }
+                ACQUIRE_LOCK_LUA_BY_FILE = acquireLockLuaByFile.toString();
                 try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
                     ACQUIRE_LOCK_SHA = jedis.scriptLoad(acquireLockLuaByFile.toString());
                     LOGGER.info("redis locker use lua mode");
@@ -268,7 +272,14 @@ public class RedisLocker extends AbstractLocker {
         args.add(lockKeysString.toString());
         // reset args index 2
         args.set(1, String.valueOf(args.size()));
-        String xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        String xIdOwnLock;
+        try {
+            xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        } catch (JedisNoScriptException e) {
+            LOGGER.warn("try to reload the lua script and execute,jedis ex: " + e.getMessage());
+            jedis.scriptLoad(ACQUIRE_LOCK_LUA_BY_FILE);
+            xIdOwnLock = (String) jedis.evalsha(ACQUIRE_LOCK_SHA, keys, args);
+        }
         if (xIdOwnLock.equals(needLockXid)) {
             return true;
         } else {

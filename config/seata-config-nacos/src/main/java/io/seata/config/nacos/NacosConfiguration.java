@@ -27,7 +27,6 @@ import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
@@ -46,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * The type Nacos configuration.
  *
  * @author slievrly
+ * @author xingfudeshi@gmail.com
  */
 public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
@@ -64,6 +64,7 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String ACCESS_KEY = "accessKey";
     private static final String SECRET_KEY = "secretKey";
     private static final String USE_PARSE_RULE = "false";
+    private static final String CONTEXT_PATH = "contextPath";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -244,6 +245,10 @@ public class NacosConfiguration extends AbstractConfiguration {
                 }
             }
         }
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        if (StringUtils.isNotBlank(contextPath)) {
+            properties.setProperty(CONTEXT_PATH, contextPath);
+        }
         return properties;
     }
 
@@ -304,6 +309,10 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
 
         return sb.toString();
+    }
+
+    private static String getNacosContextPathKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
     }
 
     private static void initSeataConfig() {

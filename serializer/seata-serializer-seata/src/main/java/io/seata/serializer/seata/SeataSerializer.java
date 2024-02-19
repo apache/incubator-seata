@@ -15,13 +15,14 @@
  */
 package io.seata.serializer.seata;
 
+import java.nio.ByteBuffer;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.BufferUtils;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.serializer.Serializer;
-
-import java.nio.ByteBuffer;
 
 /**
  * The Seata codec.
@@ -33,7 +34,7 @@ public class SeataSerializer implements Serializer {
 
     @Override
     public <T> byte[] serialize(T t) {
-        if (t == null || !(t instanceof AbstractMessage)) {
+        if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
         AbstractMessage abstractMessage = (AbstractMessage)t;
@@ -53,7 +54,7 @@ public class SeataSerializer implements Serializer {
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);
 
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] content = new byte[byteBuffer.limit()];
         byteBuffer.get(content);
         return content;

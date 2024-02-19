@@ -29,6 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import io.seata.common.Constants;
 import io.seata.common.DefaultValues;
 import io.seata.common.XID;
+import io.seata.common.util.BufferUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -45,6 +46,7 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import static io.seata.core.model.GlobalStatus.AsyncCommitting;
 import static io.seata.core.model.GlobalStatus.CommitRetrying;
@@ -233,7 +235,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
-        if (isSuccessEnd()) {
+        if (GlobalStatus.isTwoPhaseSuccess(status)) {
             // Clean locks first
             clean();
             for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
@@ -244,14 +246,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 lifecycleListener.onFailEnd(this);
             }
         }
-    }
-
-    public boolean isSuccessEnd() {
-        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
-            || status == GlobalStatus.TimeoutRollbacked) {
-            return true;
-        }
-        return false;
     }
 
     public void clean() throws TransactionException {
@@ -312,7 +306,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     @Override
-    public void removeBranch(BranchSession branchSession) throws TransactionException {
+    public void unlockBranch(BranchSession branchSession) throws TransactionException {
         // do not unlock if global status in (Committing, CommitRetrying, AsyncCommitting),
         // because it's already unlocked in 'DefaultCore.commit()'
         if (status != Committing && status != CommitRetrying && status != AsyncCommitting) {
@@ -320,10 +314,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 throw new TransactionException("Unlock branch lock failed, xid = " + this.xid + ", branchId = " + branchSession.getBranchId());
             }
         }
+    }
+
+    @Override
+    public void removeBranch(BranchSession branchSession) throws TransactionException {
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onRemoveBranch(this, branchSession);
         }
         remove(branchSession);
+    }
+
+    @Override
+    public void removeAndUnlockBranch(BranchSession branchSession) throws TransactionException {
+        unlockBranch(branchSession);
+        removeBranch(branchSession);
     }
 
     /**
@@ -582,7 +586,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
-        byteBuffer.clear();
+        BufferUtils.clear(byteBuffer);
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
@@ -619,7 +623,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         byteBuffer.putLong(beginTime);
         byteBuffer.put((byte)status.getCode());
-        byteBuffer.flip();
+        BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;

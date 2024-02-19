@@ -29,14 +29,12 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.common.DefaultValues;
-import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.rm.datasource.SqlGenerateUtils;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLUpdateRecognizer;
-import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Update executor.
@@ -90,10 +88,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
-        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoin.add(needUpdateColumn);
-        }
+        List<String> needUpdateColumns = getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
+        needUpdateColumns.forEach(selectSQLJoin::add);
         return selectSQLJoin.toString();
     }
 
@@ -122,41 +118,14 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
-        StringBuilder prefix = new StringBuilder("SELECT ");
+        String prefix = "SELECT ";
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + whereSql;
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix, suffix);
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-        List<String> needUpdateColumns = getNeedUpdateColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsIsSimplified());
-        for (String needUpdateColumn : needUpdateColumns) {
-            selectSQLJoiner.add(needUpdateColumn);
-        }
+        List<String> needUpdateColumns = getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
+        needUpdateColumns.forEach(selectSQLJoiner::add);
         return selectSQLJoiner.toString();
     }
 
-    protected List<String> getNeedUpdateColumns(String table, String tableAlias, List<String> originUpdateColumns) {
-        List<String> needUpdateColumns = new ArrayList<>();
-        TableMeta tableMeta = getTableMeta(table);
-        if (ONLY_CARE_UPDATE_COLUMNS) {
-            if (!containsPK(table, originUpdateColumns)) {
-                List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
-                if (CollectionUtils.isNotEmpty(pkNameList)) {
-                    needUpdateColumns.add(getColumnNamesWithTablePrefix(table,tableAlias,pkNameList));
-                }
-            }
-            needUpdateColumns.addAll(originUpdateColumns);
-
-            // The on update xxx columns will be auto update by db, so it's also the actually updated columns
-            List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
-            onUpdateColumns.removeAll(originUpdateColumns);
-            for (String onUpdateColumn : onUpdateColumns) {
-                needUpdateColumns.add(ColumnUtils.addEscape(onUpdateColumn, getDbType()));
-            }
-        } else {
-            for (String columnName : tableMeta.getAllColumns().keySet()) {
-                needUpdateColumns.add(ColumnUtils.addEscape(columnName, getDbType()));
-            }
-        }
-        return needUpdateColumns;
-    }
 }

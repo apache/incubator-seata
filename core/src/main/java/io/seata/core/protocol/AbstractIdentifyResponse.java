@@ -82,25 +82,16 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         this.identified = identified;
     }
 
-
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("version=");
-        result.append(version);
-        result.append(",");
-        result.append("extraData=");
-        result.append(extraData);
-        result.append(",");
-        result.append("identified=");
-        result.append(identified);
-        result.append(",");
-        result.append("resultCode=");
-        result.append(getResultCode());
-        result.append(",");
-        result.append("msg=");
-        result.append(getMsg());
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("version='").append(version).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append(", identified=").append(identified);
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

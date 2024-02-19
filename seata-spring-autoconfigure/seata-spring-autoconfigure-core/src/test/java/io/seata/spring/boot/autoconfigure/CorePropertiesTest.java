@@ -35,6 +35,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -105,11 +106,11 @@ public class CorePropertiesTest {
     @Test
     public void testRegistryNacosProperties() {
         assertEquals("localhost:8848", context.getBean(RegistryNacosProperties.class).getServerAddr());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getNamespace());
+        assertNull(context.getBean(RegistryNacosProperties.class).getNamespace());
         assertEquals("SEATA_GROUP", context.getBean(RegistryNacosProperties.class).getGroup());
         assertEquals("default", context.getBean(RegistryNacosProperties.class).getCluster());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getUsername());
-        assertEquals("", context.getBean(RegistryNacosProperties.class).getPassword());
+        assertNull(context.getBean(RegistryNacosProperties.class).getUsername());
+        assertNull(context.getBean(RegistryNacosProperties.class).getPassword());
         assertEquals("seata-server", context.getBean(RegistryNacosProperties.class).getApplication());
     }
 
@@ -123,7 +124,7 @@ public class CorePropertiesTest {
     public void testRegistryRedisProperties() {
         assertEquals("localhost:6379", context.getBean(RegistryRedisProperties.class).getServerAddr());
         assertEquals(0, context.getBean(RegistryRedisProperties.class).getDb());
-        assertEquals("", context.getBean(RegistryRedisProperties.class).getPassword());
+        assertNull(context.getBean(RegistryRedisProperties.class).getPassword());
         assertEquals("default", context.getBean(RegistryRedisProperties.class).getCluster());
         assertEquals(0, context.getBean(RegistryRedisProperties.class).getTimeout());
     }
@@ -149,7 +150,7 @@ public class CorePropertiesTest {
 
     @Test
     public void testRegistryCustomProperties() {
-        assertEquals("", context.getBean(RegistryCustomProperties.class).getName());
+        assertNull(context.getBean(RegistryCustomProperties.class).getName());
     }
 
 

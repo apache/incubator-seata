@@ -24,14 +24,18 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.LockStrategyMode;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.context.GlobalLockConfigHolder;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalLockConfig;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import static io.seata.common.Constants.AUTO_COMMIT;
@@ -274,14 +278,23 @@ public class ConnectionContext {
      * @return the application data
      */
     public String getApplicationData() throws TransactionException {
+        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
+        // lock retry times > 1 & skip first check lock / before image is empty
+        Optional.ofNullable(globalLockConfig).ifPresent(lockConfig -> {
+            if ((lockConfig.getLockRetryTimes() == -1 || lockConfig.getLockRetryTimes() > 1)
+                && (lockConfig.getLockStrategyMode() == LockStrategyMode.OPTIMISTIC || allBeforeImageEmpty())) {
+                if (!applicationData.containsKey(SKIP_CHECK_LOCK)) {
+                    this.applicationData.put(SKIP_CHECK_LOCK, true);
+                } else {
+                    this.applicationData.put(SKIP_CHECK_LOCK, false);
+                }
+            }
+        });
+
         boolean autoCommit = this.isAutoCommitChanged();
         // when transaction are enabled, it must be false
         if (!autoCommit) {
             this.applicationData.put(AUTO_COMMIT, autoCommit);
-        }
-
-        if (allBeforeImageEmpty()) {
-            this.applicationData.put(SKIP_CHECK_LOCK, true);
         }
 
         if (!this.applicationData.isEmpty()) {

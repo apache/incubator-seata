@@ -1,6 +1,6 @@
 {
   "name": "seata-saga-statemachine-designer",
-  "version": "0.0.2",
+  "version": "2.0.0",
   "description": "A visual graph designer for Seata Saga StateMachine based on GGEdior 2.0.4",
   "keywords": [
     "react",
@@ -31,15 +31,11 @@
   },
   "authors": [
     {
-      "name": "陈龙",
-      "email": "long_187@126.com"
-    },
-    {
-      "name": "高力",
-      "email": "3071730@qq.com"
+      "name": "Seata Community",
+      "email": "dev-seata@googlegroups.com"
     }
   ],
-  "license": "Apache License, Version 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/seata/seata/issues"
   },
@@ -51,12 +47,13 @@
     "@antv/g6": "^2.2.6",
     "codemirror": "^5.65.8",
     "core-js": "^3.6.5",
+    "decode-uri-component": "^0.2.2",
     "lodash": "^4.17.21",
     "react-codemirror": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.10.4",
+    "@babel/core": "^7.22.20",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-transform-modules-commonjs": "^7.10.4",
     "@babel/plugin-transform-runtime": "^7.10.4",

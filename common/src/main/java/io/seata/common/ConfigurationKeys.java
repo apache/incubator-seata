@@ -29,6 +29,7 @@ public interface ConfigurationKeys {
      * The constant FILE_ROOT_REGISTRY.
      */
     String FILE_ROOT_REGISTRY = "registry";
+
     /**
      * The constant FILE_ROOT_CONFIG.
      */
@@ -37,6 +38,22 @@ public interface ConfigurationKeys {
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
     String FILE_CONFIG_SPLIT_CHAR = ".";
+
+    /**
+     * The constant FILE_ROOT_PREFIX_REGISTRY.
+     */
+    String FILE_ROOT_PREFIX_REGISTRY = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant FILE_ROOT_PREFIX_CONFIG.
+     */
+    String FILE_ROOT_PREFIX_CONFIG = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant SEATA_FILE_PREFIX_ROOT_CONFIG
+     */
+    String SEATA_FILE_PREFIX_ROOT_CONFIG = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR;
+
     /**
      * The constant FILE_ROOT_TYPE.
      */
@@ -722,6 +739,11 @@ public interface ConfigurationKeys {
     String STORE_REDIS_SENTINEL_HOST = STORE_REDIS_SENTINEL_PREFIX + "sentinelHosts";
 
     /**
+     * STORE_REDIS_SENTINEL_PASSWORD.
+     */
+    String STORE_REDIS_SENTINEL_PASSWORD = STORE_REDIS_SENTINEL_PREFIX + "sentinelPassword";
+
+    /**
      * The constant CLIENT_DEGRADE_CHECK_PERIOD.
      */
     String CLIENT_DEGRADE_CHECK_PERIOD = CLIENT_TM_PREFIX + "degradeCheckPeriod";
@@ -741,14 +763,24 @@ public interface ConfigurationKeys {
     String TM_INTERCEPTOR_ORDER = CLIENT_TM_PREFIX + "interceptorOrder";
 
     /**
+     * The constant ACCESS_KEY.
+     */
+    String ACCESS_KEY = "accesskey";
+
+    /**
+     * The constant SECRET_KEY.
+     */
+    String SECRET_KEY = "secretkey";
+
+    /**
      * The constant SEATA_ACCESS_KEY.
      */
-    String SEATA_ACCESS_KEY = SEATA_PREFIX + "accesskey";
+    String SEATA_ACCESS_KEY = SEATA_PREFIX + ACCESS_KEY;
 
     /**
      * The constant SEATA_SECRET_KEY.
      */
-    String SEATA_SECRET_KEY = SEATA_PREFIX + "secretkey";
+    String SEATA_SECRET_KEY = SEATA_PREFIX + SECRET_KEY;
 
     /**
      * The constant EXTRA_DATA_SPLIT_CHAR.

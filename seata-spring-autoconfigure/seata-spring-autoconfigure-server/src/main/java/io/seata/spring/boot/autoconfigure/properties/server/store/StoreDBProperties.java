@@ -18,6 +18,9 @@ package io.seata.spring.boot.autoconfigure.properties.server.store;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
+import static io.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
+import static io.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 
 /**
@@ -32,14 +35,14 @@ public class StoreDBProperties {
     private String url = "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true";
     private String user = "mysql";
     private String password = "mysql";
-    private Integer minConn = 5;
-    private Integer maxConn = 100;
+    private Integer minConn = DEFAULT_DB_MIN_CONN;
+    private Integer maxConn = DEFAULT_DB_MAX_CONN;
     private String globalTable = "global_table";
     private String branchTable = "branch_table";
     private String lockTable = "lock_table";
     private String distributedLockTable = "distributed_lock";
-    private Integer queryLimit = 100;
-    private Integer maxWait = 5000;
+    private Integer queryLimit = DEFAULT_QUERY_LIMIT;
+    private Long maxWait = 5000L;
 
     public String getDatasource() {
         return datasource;
@@ -157,11 +160,11 @@ public class StoreDBProperties {
         return this;
     }
 
-    public Integer getMaxWait() {
+    public Long getMaxWait() {
         return maxWait;
     }
 
-    public StoreDBProperties setMaxWait(Integer maxWait) {
+    public StoreDBProperties setMaxWait(Long maxWait) {
         this.maxWait = maxWait;
         return this;
     }

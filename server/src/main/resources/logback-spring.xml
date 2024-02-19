@@ -28,20 +28,37 @@
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="7091"/>
+    <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-server"/>
 
+    <if condition='property("LOG_BASH_DIR").equals("")'>
+        <then>
+            <!-- console-appender -->
+            <include resource="logback/console-appender.xml"/>
 
-    <!-- console-appender -->
-    <include resource="logback/console-appender.xml"/>
+            <!-- file-appender -->
+            <include resource="logback/file-appender.xml"/>
 
-    <!-- file-appender -->
-    <include resource="logback/file-appender.xml"/>
+            <!-- logstash-appender: off by default -->
+            <!--<include resource="logback/logstash-appender.xml"/>-->
 
-    <!-- logstash-appender: off by default -->
-    <!--<include resource="logback/logstash-appender.xml"/>-->
+            <!-- kafka-appender: off by default -->
+            <!--<include resource="logback/kafka-appender.xml"/>-->
+        </then>
+        <else>
+            <!-- console-appender -->
+            <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
 
-    <!-- kafka-appender: off by default -->
-    <!--<include resource="logback/kafka-appender.xml"/>-->
+            <!-- file-appender -->
+            <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
+
+            <!-- logstash-appender: off by default -->
+            <!--<include resource="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>-->
+
+            <!-- kafka-appender: off by default -->
+            <!--<include resource="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>-->
+        </else>
+    </if>
 
     <root level="INFO">
         <!-- console-appender -->
@@ -58,4 +75,6 @@
         <!-- kafka-appender: off by default -->
         <!--<appender-ref ref="KAFKA"/>-->
     </root>
+    <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
+    <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
 </configuration>

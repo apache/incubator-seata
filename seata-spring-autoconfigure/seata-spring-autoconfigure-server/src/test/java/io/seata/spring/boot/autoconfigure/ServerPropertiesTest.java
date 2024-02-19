@@ -23,6 +23,7 @@ import io.seata.spring.boot.autoconfigure.properties.server.store.StoreDBPropert
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties.Sentinel;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -95,7 +96,7 @@ public class ServerPropertiesTest {
 
     @Test
     public void testStoreRedisPropertiesSentinel() {
-        assertEquals(context.getBean(StoreRedisProperties.Sentinel.class).getSentinelHosts(), "");
+        assertNull(context.getBean(Sentinel.class).getSentinelHosts());
     }
 
     @AfterAll

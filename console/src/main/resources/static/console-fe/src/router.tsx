@@ -21,6 +21,6 @@ import GlobalLockInfo from './pages/GlobalLockInfo';
 export default [
   // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
   // { path: '/Overview', component: Overview },
-  { path: '/TransactionInfo', component: TransactionInfo },
-  { path: '/GlobalLockInfo', component: GlobalLockInfo },
+  { path: '/transaction/list', component: TransactionInfo },
+  { path: '/globallock/list', component: GlobalLockInfo },
 ];

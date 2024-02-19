@@ -31,6 +31,7 @@ import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exception.TableMetaException;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
@@ -95,21 +96,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Exception the exception
      */
     protected T executeAutoCommitFalse(Object[] args) throws Exception {
-        TableRecords beforeImage = beforeImage();
-        T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-        if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
-            ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-            String errorMsg =
-                "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
-            if (connectionProxy.getContext().isAutoCommitChanged()) {
-                throw new TxRetryException(errorMsg);
-            } else {
-                throw new ShouldNeverHappenException(errorMsg);
-            }
+        try {
+            TableRecords beforeImage = beforeImage();
+            T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+            TableRecords afterImage = afterImage(beforeImage);
+            prepareUndoLog(beforeImage, afterImage);
+            return result;
+        } catch (TableMetaException e) {
+            LOGGER.error("table meta will be refreshed later, due to TableMetaException, table:{}, column:{}",
+                e.getTableName(), e.getColumnName());
+            statementProxy.getConnectionProxy().getDataSourceProxy().tableMetaRefreshEvent();
+            throw e;
         }
-        TableRecords afterImage = afterImage(beforeImage);
-        prepareUndoLog(beforeImage, afterImage);
-        return result;
     }
 
     private boolean isMultiPk() {
