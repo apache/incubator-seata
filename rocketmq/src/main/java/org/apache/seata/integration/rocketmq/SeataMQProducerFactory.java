@@ -20,6 +20,7 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.core.model.BranchType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +32,7 @@ import org.springframework.context.ApplicationContextAware;
 public class SeataMQProducerFactory implements ApplicationContextAware, InitializingBean {
 
     public static final String ROCKET_TCC_NAME = "tccRocketMQ";
+    public static final BranchType ROCKET_BRANCH_TYPE = BranchType.TCC;
     private static TCCRocketMQ tccRocketMQ;
 
     /**

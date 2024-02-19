@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -31,9 +30,6 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
-import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
-import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
-import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 
 /**
  * default resource manager, adapt all resource managers
@@ -155,11 +151,9 @@ public class DefaultResourceManager implements ResourceManager {
         throw new FrameworkException("DefaultResourceManager isn't a real ResourceManager");
     }
 
-    public GlobalStatus getGlobalStatus(String xid) throws TimeoutException {
-        GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
-        queryGlobalStatus.setXid(xid);
-        GlobalStatusResponse response = (GlobalStatusResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
-        return response.getGlobalStatus();
+    @Override
+    public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+        return getResourceManager(branchType).getGlobalStatus(branchType, xid);
     }
 
     private static class SingletonHolder {

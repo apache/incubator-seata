@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Seata MQ Producer
@@ -73,18 +72,14 @@ public class SeataMQProducer extends TransactionMQProducer {
                 }
                 List<GlobalStatus> commitStatuses = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
                 List<GlobalStatus> rollbackStatuses = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
-                try {
-                    GlobalStatus globalStatus = DefaultResourceManager.get().getGlobalStatus(xid);
-                    if (commitStatuses.contains(globalStatus)) {
-                        return LocalTransactionState.COMMIT_MESSAGE;
-                    } else if (rollbackStatuses.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
-                        return LocalTransactionState.ROLLBACK_MESSAGE;
-                    } else if (GlobalStatus.Finished.equals(globalStatus)) {
-                        LOGGER.error("global transaction finished, msg will be rollback, xid: {}", xid);
-                        return LocalTransactionState.ROLLBACK_MESSAGE;
-                    }
-                } catch (TimeoutException e) {
-                    LOGGER.error("getGlobalStatus error, xid: {}, msgTransactionId: {}", xid, msg.getTransactionId(), e);
+                GlobalStatus globalStatus = DefaultResourceManager.get().getGlobalStatus(SeataMQProducerFactory.ROCKET_BRANCH_TYPE, xid);
+                if (commitStatuses.contains(globalStatus)) {
+                    return LocalTransactionState.COMMIT_MESSAGE;
+                } else if (rollbackStatuses.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
+                    return LocalTransactionState.ROLLBACK_MESSAGE;
+                } else if (GlobalStatus.Finished.equals(globalStatus)) {
+                    LOGGER.error("global transaction finished, msg will be rollback, xid: {}", xid);
+                    return LocalTransactionState.ROLLBACK_MESSAGE;
                 }
                 return LocalTransactionState.UNKNOW;
             }
