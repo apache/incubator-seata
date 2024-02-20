@@ -25,6 +25,8 @@ import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
+import org.apache.seata.rm.tcc.api.LocalTCC;
+import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * the type TCCRocketMQImpl
  */
+@LocalTCC
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
 
@@ -50,6 +53,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     }
 
     @Override
+    @TwoPhaseBusinessAction(name = SeataMQProducerFactory.ROCKET_TCC_NAME)
     public SendResult prepare(Message message, long timeout) throws MQClientException {
         BusinessActionContext context = BusinessActionContextUtil.getContext();
         LOGGER.info("RocketMQ message send prepare, xid = {}", context.getXid());

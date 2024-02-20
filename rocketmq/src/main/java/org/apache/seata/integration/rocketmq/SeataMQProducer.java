@@ -51,6 +51,8 @@ public class SeataMQProducer extends TransactionMQProducer {
     public static String PROPERTY_SEATA_BRANCHID = RootContext.KEY_BRANCHID;
     private TransactionListener transactionListener;
 
+    private TCCRocketMQ tccRocketMQ;
+
     SeataMQProducer(final String producerGroup) {
         this(null, producerGroup, null);
     }
@@ -94,10 +96,10 @@ public class SeataMQProducer extends TransactionMQProducer {
     @Override
     public SendResult send(Message msg, long timeout) throws MQClientException, MQBrokerException, RemotingException, InterruptedException {
         if (RootContext.inGlobalTransaction()) {
-            if (SeataMQProducerFactory.getTccRocketMQ() == null) {
+            if (tccRocketMQ == null) {
                 throw new RuntimeException("TCCRocketMQ is not initialized");
             }
-            return SeataMQProducerFactory.getTccRocketMQ().prepare(msg, timeout);
+            return tccRocketMQ.prepare(msg, timeout);
         } else {
             return super.send(msg, timeout);
         }
@@ -139,5 +141,9 @@ public class SeataMQProducer extends TransactionMQProducer {
     @Override
     public TransactionListener getTransactionListener() {
         return transactionListener;
+    }
+
+    public void setTccRocketMQ(TCCRocketMQ tccRocketMQ){
+        this.tccRocketMQ = tccRocketMQ;
     }
 }

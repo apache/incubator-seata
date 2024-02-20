@@ -33,7 +33,6 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 /**
  * The interface Tcc rocket mq.
  */
-@LocalTCC
 public interface TCCRocketMQ {
 
 
@@ -51,7 +50,6 @@ public interface TCCRocketMQ {
      * @param timeout  the timeout
      * @return SendResult
      */
-    @TwoPhaseBusinessAction(name = SeataMQProducerFactory.ROCKET_TCC_NAME)
     SendResult prepare(Message message, long timeout) throws MQClientException;
 
     /**

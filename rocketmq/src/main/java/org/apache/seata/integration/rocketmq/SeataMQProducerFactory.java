@@ -21,36 +21,21 @@ import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.core.model.BranchType;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.apache.seata.integration.tx.api.util.ProxyUtil;
 
 /**
  * SeataMQProducer Factory
  **/
-public class SeataMQProducerFactory implements ApplicationContextAware, InitializingBean {
+public class SeataMQProducerFactory{
 
     public static final String ROCKET_TCC_NAME = "tccRocketMQ";
     public static final BranchType ROCKET_BRANCH_TYPE = BranchType.TCC;
-    private static TCCRocketMQ tccRocketMQ;
 
     /**
      * Default Producer, it can be replaced to Map after multi-resource is supported
      */
     private static SeataMQProducer defaultProducer;
-    private ApplicationContext applicationContext;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        tccRocketMQ = (TCCRocketMQ) applicationContext.getBean(ROCKET_TCC_NAME);
-        tccRocketMQ.setProducer(defaultProducer);
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 
     public static SeataMQProducer createSingle(String nameServer, String producerGroup) throws MQClientException {
         return createSingle(nameServer, null, producerGroup, null);
@@ -63,9 +48,9 @@ public class SeataMQProducerFactory implements ApplicationContextAware, Initiali
                 if (defaultProducer == null) {
                     defaultProducer = new SeataMQProducer(namespace, groupName, rpcHook);
                     defaultProducer.setNamesrvAddr(nameServer);
-                    if (tccRocketMQ != null) {
-                        tccRocketMQ.setProducer(defaultProducer);
-                    }
+                    TCCRocketMQ tccRocketMQProxy = ProxyUtil.createProxy(new TCCRocketMQImpl());
+                    tccRocketMQProxy.setProducer(defaultProducer);
+                    defaultProducer.setTccRocketMQ(tccRocketMQProxy);
                     defaultProducer.start();
                 }
             }
@@ -83,7 +68,4 @@ public class SeataMQProducerFactory implements ApplicationContextAware, Initiali
         return defaultProducer;
     }
 
-    public static TCCRocketMQ getTccRocketMQ() {
-        return tccRocketMQ;
-    }
 }
