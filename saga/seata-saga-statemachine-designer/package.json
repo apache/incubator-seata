@@ -28,7 +28,7 @@
     "react": "^16.3.0"
   },
   "dependencies": {
-    "@bpmn-io/properties-panel": "^3.8.0",
+    "@bpmn-io/properties-panel": "^3.17.0",
     "bpmn-font": "^0.12.1",
     "diagram-js": "^12.3.0",
     "diagram-js-grid": "^0.2.0",
