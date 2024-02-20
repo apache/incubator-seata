@@ -152,11 +152,6 @@ public interface ConfigurationKeys {
     String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
 
     /**
-     * The constant ENABLE_DEGRADE_POSTFIX.
-     */
-    String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
-
-    /**
      * The constant CLIENT_PREFIX.
      */
     String CLIENT_PREFIX = "client.";

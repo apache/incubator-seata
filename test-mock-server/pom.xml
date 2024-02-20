@@ -41,6 +41,7 @@
     </build>
 
     <dependencies>
+        <!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-server</artifactId>
