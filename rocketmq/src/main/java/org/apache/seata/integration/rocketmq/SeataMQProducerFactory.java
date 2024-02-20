@@ -26,7 +26,7 @@ import org.apache.seata.integration.tx.api.util.ProxyUtil;
 /**
  * SeataMQProducer Factory
  **/
-public class SeataMQProducerFactory{
+public class SeataMQProducerFactory {
 
     public static final String ROCKET_TCC_NAME = "tccRocketMQ";
     public static final BranchType ROCKET_BRANCH_TYPE = BranchType.TCC;

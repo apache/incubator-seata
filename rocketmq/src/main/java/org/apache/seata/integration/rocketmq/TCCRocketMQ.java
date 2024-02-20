@@ -18,8 +18,6 @@ package org.apache.seata.integration.rocketmq;
 
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
-import org.apache.seata.rm.tcc.api.LocalTCC;
-import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeoutException;

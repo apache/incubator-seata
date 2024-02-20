@@ -144,7 +144,7 @@ public class SeataMQProducer extends TransactionMQProducer {
         return transactionListener;
     }
 
-    public void setTccRocketMQ(TCCRocketMQ tccRocketMQ){
+    public void setTccRocketMQ(TCCRocketMQ tccRocketMQ) {
         this.tccRocketMQ = tccRocketMQ;
     }
 }
