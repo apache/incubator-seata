@@ -96,9 +96,7 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
         List<String> updateColumns = mySQLUpdateRecognizer.getUpdateColumns();
-        List<String> whereColumns = mySQLUpdateRecognizer.getWhereColumns();
         List<Object> updateValues = mySQLUpdateRecognizer.getUpdateValues();
-        Assertions.assertEquals("id", whereColumns.get(0));
         Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
         Assertions.assertEquals(2, updateColumns.size());

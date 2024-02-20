@@ -41,7 +41,6 @@ import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.SQLUpdateRecognizer;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.sqlparser.util.ColumnUtils;
 
 /**
  * The type My sql update recognizer.
