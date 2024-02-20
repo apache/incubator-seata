@@ -48,7 +48,7 @@ public class SeataMQProducer extends TransactionMQProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducer.class);
 
     public static String PROPERTY_SEATA_XID = RootContext.KEY_XID;
-    public static String PROPERTY_SEATA_BRANCHID = "TX_BRANCHID";
+    public static String PROPERTY_SEATA_BRANCHID = RootContext.KEY_BRANCHID;
     private TransactionListener transactionListener;
 
     SeataMQProducer(final String producerGroup) {
@@ -86,7 +86,7 @@ public class SeataMQProducer extends TransactionMQProducer {
         };
     }
 
-
+    @Override
     public SendResult send(Message msg) throws MQClientException, MQBrokerException, RemotingException, InterruptedException {
         return send(msg, this.defaultMQProducerImpl.getDefaultMQProducer().getSendMsgTimeout());
     }
