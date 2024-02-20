@@ -45,19 +45,8 @@ import java.util.concurrent.ConcurrentMap;
 public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
-    @BeforeAll
-    public static void before() {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-    }
 
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-    }
-    @Test
-    public void testRm() throws TransactionException {
+    public static void testRm() throws TransactionException {
         String resourceId = "mock-action";
         String xid = "1111";
 

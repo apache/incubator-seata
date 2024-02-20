@@ -41,19 +41,8 @@ import org.slf4j.LoggerFactory;
 public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
-    @BeforeAll
-    public static void before() {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-    }
 
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-    }
-    @Test
-    public void testTm() throws Exception {
+    public static void testTm() throws Exception {
         TransactionManager tm = getTm();
 
         //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
@@ -87,7 +76,6 @@ public class TmClientTest {
         GlobalStatus rollback2 = tm.rollback(xid);
         LOGGER.info("globalRollback ok:" + rollback2);
         // TODO expected response fail , but DefaultTransactionManager ignore resultCode
-        MockServer.close();
     }
 
     @NotNull
