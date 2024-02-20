@@ -47,6 +47,9 @@ public class SeataMQProducer extends TransactionMQProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducer.class);
 
+    private static final List<GlobalStatus> COMMIT_STATUSES = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
+    private static final List<GlobalStatus> ROLLBACK_STATUSES = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
+
     public static String PROPERTY_SEATA_XID = RootContext.KEY_XID;
     public static String PROPERTY_SEATA_BRANCHID = RootContext.KEY_BRANCHID;
     private TransactionListener transactionListener;
@@ -72,12 +75,10 @@ public class SeataMQProducer extends TransactionMQProducer {
                     LOGGER.error("msg has no xid, msgTransactionId: {}, msg will be rollback", msg.getTransactionId());
                     return LocalTransactionState.ROLLBACK_MESSAGE;
                 }
-                List<GlobalStatus> commitStatuses = Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
-                List<GlobalStatus> rollbackStatuses = Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
                 GlobalStatus globalStatus = DefaultResourceManager.get().getGlobalStatus(SeataMQProducerFactory.ROCKET_BRANCH_TYPE, xid);
-                if (commitStatuses.contains(globalStatus)) {
+                if (COMMIT_STATUSES.contains(globalStatus)) {
                     return LocalTransactionState.COMMIT_MESSAGE;
-                } else if (rollbackStatuses.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
+                } else if (ROLLBACK_STATUSES.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
                     return LocalTransactionState.ROLLBACK_MESSAGE;
                 } else if (GlobalStatus.Finished.equals(globalStatus)) {
                     LOGGER.error("global transaction finished, msg will be rollback, xid: {}", xid);
