@@ -32,25 +32,20 @@ public class GlobalTransactionalInterceptorParser extends org.apache.seata.integ
                 if (clazz == null) {
                     continue;
                 }
-                GlobalTransactional trxAnnoOld = clazz.getAnnotation(GlobalTransactional.class);
-                org.apache.seata.spring.annotation.GlobalTransactional trxAnnoNew = clazz.getAnnotation(org.apache.seata.spring.annotation.GlobalTransactional.class);
-
-                if (trxAnnoOld != null || trxAnnoNew != null) {
+                GlobalTransactional trxAnno = clazz.getAnnotation(GlobalTransactional.class);
+                if (trxAnno != null) {
                     return true;
                 }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
-                    trxAnnoOld = method.getAnnotation(GlobalTransactional.class);
-                    trxAnnoNew = method.getAnnotation(org.apache.seata.spring.annotation.GlobalTransactional.class);
-                    if (trxAnnoOld != null || trxAnnoNew != null) {
+                    trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    if (trxAnno != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
                     }
 
-                    GlobalLock lockAnnoOld = method.getAnnotation(GlobalLock.class);
-                    org.apache.seata.spring.annotation.GlobalLock lockAnnoNew = method.getAnnotation(org.apache.seata.spring.annotation.GlobalLock.class);
-
-                    if (lockAnnoOld != null || lockAnnoNew != null) {
+                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                    if (lockAnno != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
                     }
