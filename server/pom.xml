@@ -394,10 +394,6 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>target/lib/jdbc</from>
-                                <into>/seata-server/libs/jdbc</into>
-                            </path>
-                            <path>
                                 <from>src/main/resources/docker</from>
                                 <includes>seata-server-entrypoint.sh</includes>
                             </path>
