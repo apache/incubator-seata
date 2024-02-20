@@ -35,8 +35,8 @@ jobs:
       - name: "Publish images to DockerHub based on java8"
         if: matrix.java == 8
         env:
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           if [ "${{ github.ref_name }}" == "develop" ] || [ "${{ github.ref_name }}" == "snapshot"  || [ "${{ github.ref_name }}" == "2.x" ]; then
             ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage                                    -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
@@ -48,8 +48,8 @@ jobs:
       - name: "Publish images to DockerHub based on java17"
         if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
         env:
-          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2       -Pimage,release-image-based-on-java17      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2-slim  -Pimage,release-image-based-on-java17-slim -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
