@@ -41,6 +41,13 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
     List<Object> getUpdateValues();
 
     /**
+     * Gets update where columns.
+     *
+     * @return the update where columns
+     */
+    List<String> getWhereColumns();
+
+    /*
      * Gets update join item table name
      * @param tableName the update join item table source name
      * @return the update join item table alias name
@@ -55,4 +62,5 @@ public interface SQLUpdateRecognizer extends WhereRecognizer {
      * @return (`a`, `b`, `c`)  ->  (a, b, c)
      */
     List<String> getUpdateColumnsUnEscape();
+
 }

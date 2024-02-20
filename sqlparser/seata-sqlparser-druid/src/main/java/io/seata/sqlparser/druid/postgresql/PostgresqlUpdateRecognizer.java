@@ -119,6 +119,12 @@ public class PostgresqlUpdateRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
+    }
+
+    @Override
     public String getTableAlias() {
         return ast.getTableSource().getAlias();
     }

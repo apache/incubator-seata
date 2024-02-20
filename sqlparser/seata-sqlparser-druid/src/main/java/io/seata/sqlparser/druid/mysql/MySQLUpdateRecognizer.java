@@ -118,6 +118,12 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
+    }
+
+    @Override
     public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());

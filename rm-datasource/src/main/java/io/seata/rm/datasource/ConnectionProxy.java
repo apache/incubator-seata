@@ -29,6 +29,7 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
+import io.seata.rm.datasource.exec.TxRetryException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
@@ -354,14 +355,17 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             while (true) {
                 try {
                     return callable.call();
-                } catch (LockConflictException lockConflict) {
-                    onException(lockConflict);
-                    // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
-                    if (connection.getContext().isAutoCommitChanged()
-                        && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
-                        lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
+                } catch (TxRetryException txRetryException) {
+                    onException(txRetryException);
+                    if (txRetryException instanceof LockConflictException) {
+                        LockConflictException lockConflict = (LockConflictException)txRetryException;
+                        // AbstractDMLBaseExecutor#executeAutoCommitTrue the local lock is released
+                        if (connection.getContext().isAutoCommitChanged()
+                            && lockConflict.getCode() == TransactionExceptionCode.LockKeyConflictFailFast) {
+                            lockConflict.setCode(TransactionExceptionCode.LockKeyConflict);
+                        }
                     }
-                    lockRetryController.sleep(lockConflict);
+                    lockRetryController.sleep(txRetryException);
                 } catch (Exception e) {
                     onException(e);
                     throw e;

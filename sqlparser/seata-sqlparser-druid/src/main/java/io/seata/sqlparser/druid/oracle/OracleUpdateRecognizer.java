@@ -121,6 +121,12 @@ public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLU
     }
 
     @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
+    }
+
+    @Override
     public String getLimitCondition() {
         //oracle does not support limit or rownum yet
         return null;

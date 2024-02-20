@@ -15,6 +15,7 @@
  */
 package io.seata.sqlparser.antlr.mysql;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.sqlparser.util.ColumnUtils;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLType;
@@ -28,6 +29,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,8 +54,27 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     }
 
     @Override
-    public List<String> getUpdateColumns() {
+    public List<String> getWhereColumns() {
+        List<MySqlContext.SQL> sqls = sqlContext.getUpdateForWhereColumnNames();
+        if (CollectionUtils.isNotEmpty(sqls)) {
+            List<String> list = new ArrayList<>(sqls.size());
+            for (MySqlContext.SQL sql : sqls) {
+                String column = sql.getUpdateWhereColumnName();
+                int index = column.indexOf(".");
+                if (index > 0) {
+                    // table.column -> column name
+                    column = column.substring(index + 1);
+                }
+                list.add(column);
+            }
+            return list;
+        }
+        return Collections.emptyList();
+    }
 
+
+    @Override
+    public List<String> getUpdateColumns() {
         List<MySqlContext.SQL> updateFoColumnNames = sqlContext.getUpdateFoColumnNames();
         List<String> sqlList = new ArrayList<>();
         for (MySqlContext.SQL sql : updateFoColumnNames) {

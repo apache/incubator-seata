@@ -95,18 +95,25 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        TableMeta tmeta = getTableMeta();
         if (beforeImage == null || beforeImage.size() == 0) {
             return TableRecords.empty(getTableMeta());
         }
-        String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
-        ResultSet rs = null;
-        try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
-            SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
-            rs = pst.executeQuery();
-            return TableRecords.buildRecords(tmeta, rs);
-        } finally {
-            IOUtil.close(rs);
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
+        List<String> whereColumns = recognizer.getWhereColumns();
+        TableMeta tmeta = getTableMeta();
+        boolean contain = tmeta.containsPK(whereColumns);
+        if (contain) {
+            String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
+            ResultSet rs = null;
+            try (PreparedStatement pst = statementProxy.getConnection().prepareStatement(selectSQL)) {
+                SqlGenerateUtils.setParamForPk(beforeImage.pkRows(), getTableMeta().getPrimaryKeyOnlyName(), pst);
+                rs = pst.executeQuery();
+                return TableRecords.buildRecords(tmeta, rs);
+            } finally {
+                IOUtil.close(rs);
+            }
+        } else {
+            return beforeImage();
         }
     }
 

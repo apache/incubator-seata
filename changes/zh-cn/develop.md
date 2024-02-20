@@ -12,6 +12,7 @@
 - [[#6026](https://github.com/seata/seata/pull/6026)] 修复异常的打点
 - [[#4410](https://github.com/seata/seata/pull/4410)] 修复jdk9+版本编译后，引入后ByteBuffer#flip NoSuchMethodError的问题
 - [[#6104](https://github.com/seata/seata/pull/6104)] 修复在TCC模式下, dubbo 3.x版本消费者端不能生成TCC代理的问题
+- [[#4748](https://github.com/seata/seata/pull/4748)] 修复在读已提交隔离级别下，前镜像与后镜像涉及数据行不一致的问题
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑

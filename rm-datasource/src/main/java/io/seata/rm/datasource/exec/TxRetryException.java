@@ -15,32 +15,17 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.core.exception.TransactionExceptionCode;
+import java.sql.SQLException;
 
 /**
- * The type Lock conflict exception.
- *
- * @author sharajava
+ * @author jianbin.chen
  */
-public class LockConflictException extends TxRetryException {
+public class TxRetryException extends SQLException {
 
-    TransactionExceptionCode code;
-
-    public LockConflictException(String message) {
-        super(message);
+    public TxRetryException(String reason) {
+        super(reason);
     }
 
-    public LockConflictException(String message, TransactionExceptionCode code) {
-        super(message);
-        this.code = code;
-    }
-
-    public TransactionExceptionCode getCode() {
-        return code;
-    }
-
-    public void setCode(TransactionExceptionCode code) {
-        this.code = code;
-    }
+    public TxRetryException() {}
 
 }

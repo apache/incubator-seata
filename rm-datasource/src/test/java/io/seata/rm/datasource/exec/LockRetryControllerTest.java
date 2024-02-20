@@ -59,7 +59,7 @@ public class LockRetryControllerTest {
         LockRetryController controller = new LockRetryController();
         assertThrows(LockWaitTimeoutException.class, () -> {
             for (int times = 0; times <= config.getLockRetryTimes(); times++) {
-                controller.sleep(new RuntimeException("test"));
+                controller.sleep(new LockConflictException("test"));
             }
         }, "should throw LockWaitTimeoutException when retry exceeded");
     }
