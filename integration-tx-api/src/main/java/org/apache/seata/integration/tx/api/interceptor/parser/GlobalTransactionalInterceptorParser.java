@@ -51,12 +51,16 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
 
         if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
-            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
+            ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler();
             ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
         }
 
         return null;
+    }
+
+    protected ProxyInvocationHandler createProxyInvocationHandler(){
+        return new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
     }
 
     @Override

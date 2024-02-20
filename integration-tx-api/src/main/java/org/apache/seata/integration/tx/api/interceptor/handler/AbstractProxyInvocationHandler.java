@@ -16,13 +16,24 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Optional;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.model.GlobalLockConfig;
+import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 
 
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
+
+    protected abstract AspectTransactional getAspectTransactional(Method method, Class<?> targetClass);
+
+
+    protected abstract GlobalLockConfig getGlobalLockConfig(Method method, Class<?> targetClass);
+
 
     protected int order = Integer.MAX_VALUE;
 
@@ -32,6 +43,11 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
             return invocation.proceed();
         }
         return doInvoke(invocation);
+    }
+
+    protected <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
     @Override
