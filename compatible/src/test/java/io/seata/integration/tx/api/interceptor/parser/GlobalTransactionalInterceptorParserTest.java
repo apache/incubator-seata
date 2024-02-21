@@ -17,7 +17,11 @@
 package io.seata.integration.tx.api.interceptor.parser;
 
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
+import io.seata.tm.api.DefaultFailureHandlerImpl;
+import io.seata.tm.api.FailureHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import org.apache.seata.integration.tx.api.util.ProxyUtil;
+import org.apache.seata.tm.api.FailureHandlerHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +35,9 @@ public class GlobalTransactionalInterceptorParserTest {
 
         GlobalTransactionalInterceptorParser
 	        globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
+        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+
+        FailureHandlerHolder.setFailureHandler(failureHandler);
 
         //when
         ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
@@ -40,6 +47,8 @@ public class GlobalTransactionalInterceptorParserTest {
 
         Assertions.assertEquals(proxyInvocationHandler.getClass(), GlobalTransactionalInterceptorHandler.class);
 
+        Business  businessProxy = ProxyUtil.createProxy(business);
+        Assertions.assertNotEquals(businessProxy, business);
 
     }
 }
