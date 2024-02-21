@@ -29,12 +29,6 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
 
-    protected abstract AspectTransactional getAspectTransactional(Method method, Class<?> targetClass);
-
-
-    protected abstract GlobalLockConfig getGlobalLockConfig(Method method, Class<?> targetClass);
-
-
     protected int order = Integer.MAX_VALUE;
 
     @Override
@@ -45,7 +39,7 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
         return doInvoke(invocation);
     }
 
-    protected <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+    public  <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
         return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
             .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }

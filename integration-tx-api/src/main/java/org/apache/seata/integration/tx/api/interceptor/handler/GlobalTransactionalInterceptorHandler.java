@@ -273,7 +273,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         }
     }
 
-    @Override
     public GlobalLockConfig getGlobalLockConfig(Method method, Class<?> targetClass) {
         final GlobalLock globalLockAnno = getAnnotation(method, targetClass, GlobalLock.class);
         if (globalLockAnno != null) {
@@ -286,7 +285,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         }
     }
 
-    @Override
     public AspectTransactional getAspectTransactional(Method method, Class<?> targetClass) {
         final GlobalTransactional globalTransactionalAnnotation =
             getAnnotation(method, targetClass, GlobalTransactional.class);

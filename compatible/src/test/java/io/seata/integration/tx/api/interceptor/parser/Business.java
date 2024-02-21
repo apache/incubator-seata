@@ -14,29 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
+package io.seata.integration.tx.api.interceptor.parser;
 
-import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-
-public class GlobalTransactionalInterceptorParserTest {
-
-    @Test
-    void parserInterfaceToProxy() throws Exception {
-
-        //given
-        BusinessImpl business = new BusinessImpl();
-
-        GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
-
-        //when
-        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
-
-        //then
-        Assertions.assertNotNull(proxyInvocationHandler);
-
-
-    }
+/**
+ * The interface Business.
+ */
+public interface Business {
+    /**
+     * Do biz string.
+     *
+     * @param msg the msg
+     * @return the string
+     */
+    String doBiz(String msg);
 }

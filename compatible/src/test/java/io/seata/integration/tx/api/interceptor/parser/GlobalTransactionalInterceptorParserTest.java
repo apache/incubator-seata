@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
+package io.seata.integration.tx.api.interceptor.parser;
 
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 
 public class GlobalTransactionalInterceptorParserTest {
 
@@ -29,13 +29,16 @@ public class GlobalTransactionalInterceptorParserTest {
         //given
         BusinessImpl business = new BusinessImpl();
 
-        GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
+        GlobalTransactionalInterceptorParser
+	        globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
 
         //when
         ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
+
+        Assertions.assertEquals(proxyInvocationHandler.getClass(), GlobalTransactionalInterceptorHandler.class);
 
 
     }
