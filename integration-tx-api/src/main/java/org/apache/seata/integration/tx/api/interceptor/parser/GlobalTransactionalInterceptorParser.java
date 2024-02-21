@@ -59,7 +59,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         return null;
     }
 
-    protected ProxyInvocationHandler createProxyInvocationHandler(){
+    protected ProxyInvocationHandler createProxyInvocationHandler() {
         return new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
     }
 

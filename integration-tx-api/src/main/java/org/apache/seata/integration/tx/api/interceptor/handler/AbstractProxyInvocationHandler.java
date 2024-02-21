@@ -20,8 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.core.model.GlobalLockConfig;
-import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 
 
