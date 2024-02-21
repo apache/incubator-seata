@@ -19,28 +19,18 @@ import java.io.PrintWriter;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.datasource.SeataDataSourceProxy;
-import io.seata.rm.datasource.xa.Holdable;
-import io.seata.rm.datasource.xa.Holder;
 
 /**
  * Base class of those DataSources working as Seata Resource.
  *
  * @author sharajava
  */
-public abstract class BaseDataSourceResource<T extends Holdable> implements SeataDataSourceProxy, Resource, Holder<T> {
+public abstract class BaseDataSourceResource implements SeataDataSourceProxy, Resource {
 
     protected DataSource dataSource;
 
@@ -53,13 +43,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     protected String dbType;
 
     protected Driver driver;
-
-    private boolean shouldBeHeld = false;
-
-    private Map<String, T> keeper = new ConcurrentHashMap<>();
-
-    private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-            CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     /**
      * Gets target data source.
@@ -105,15 +88,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     public void setDbType(String dbType) {
         this.dbType = dbType;
     }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
-        this.driver = driver;
-    }
-
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
@@ -170,60 +144,13 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
         return dataSource.getParentLogger();
     }
 
-    @Override
-    public T hold(String key, T value) {
-        if (value.isHeld()) {
-            T x = keeper.get(key);
-            if (x != value) {
-                throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x +
-                    "] but[" + value + "] is also kept with the same key[" + key + "]");
-            }
-            return value;
-        }
-        T x = keeper.put(key, value);
-        value.setHeld(true);
-        return x;
+    public Driver getDriver() {
+        return driver;
     }
 
-    @Override
-    public T release(String key, T value) {
-        T x = keeper.remove(key);
-        if (x != value) {
-            throw new ShouldNeverHappenException("something wrong with keeper, released[" + x +
-                "] but[" + value + "] is wanted with key[" + key + "]");
-        }
-        value.setHeld(false);
-        return x;
+    public void setDriver(Driver driver) {
+        this.driver = driver;
     }
 
-    @Override
-    public T lookup(String key) {
-        return keeper.get(key);
-    }
 
-    public static void setBranchStatus(String xaBranchXid, BranchStatus branchStatus) {
-        BRANCH_STATUS_CACHE.put(xaBranchXid, branchStatus);
-    }
-
-    public static BranchStatus getBranchStatus(String xaBranchXid) {
-        return BRANCH_STATUS_CACHE.getIfPresent(xaBranchXid);
-    }
-
-    public static void remove(String xaBranchXid) {
-        if (StringUtils.isNotBlank(xaBranchXid)) {
-            BRANCH_STATUS_CACHE.invalidate(xaBranchXid);
-        }
-    }
-
-    public Map<String, T> getKeeper() {
-        return keeper;
-    }
-
-    public boolean isShouldBeHeld() {
-        return shouldBeHeld;
-    }
-
-    public void setShouldBeHeld(boolean shouldBeHeld) {
-        this.shouldBeHeld = shouldBeHeld;
-    }
 }

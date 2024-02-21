@@ -159,7 +159,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <!-- the 3rd part -->
             <dependency>
                 <groupId>io.netty</groupId>

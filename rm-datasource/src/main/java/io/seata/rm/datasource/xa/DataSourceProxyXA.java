@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 
 import io.seata.core.constants.DBType;
 import io.seata.core.context.RootContext;
@@ -63,15 +64,15 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                     long currentVersion = Version.convertVersion(versionResult.getString("VERSION()"));
                     long version = Version.convertVersion("8.0.29");
                     if (currentVersion < version) {
-                        setShouldBeHeld(true);
+                        setShouldBeHold(true);
                     }
                 }
             } catch (Exception e) {
-                setShouldBeHeld(true);
+                setShouldBeHold(true);
                 LOGGER.info("get mysql version fail error: {}", e.getMessage());
             }
         } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
-            setShouldBeHeld(true);
+            setShouldBeHold(true);
         }
         Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
             if (resourceManager instanceof ResourceManagerXA) {
@@ -107,12 +108,27 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         return getConnectionProxyXA(connection);
     }
 
+    @Override
+    public XADataSource getXADataSource() throws SQLException {
+        return this;
+    }
+
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
         XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
+    }
+
+    @Override
+    public XAConnection getXAConnection() throws SQLException {
+        return XAUtils.createXAConnection(dataSource.getConnection(), this);
+    }
+
+    @Override
+    public XAConnection getXAConnection(String user, String password) throws SQLException {
+        return XAUtils.createXAConnection(dataSource.getConnection(user, password), this);
     }
 
 }

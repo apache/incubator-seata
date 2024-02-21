@@ -18,14 +18,14 @@ package io.seata.rm.datasource.xa;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.PooledConnection;
-import io.seata.rm.BaseDataSourceResource;
+import javax.sql.XADataSource;
 
 /**
  * Abstract DataSource proxy for XA mode.
  *
  * @author sharajava
  */
-public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<ConnectionProxyXA> {
+public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResourceXA<ConnectionProxyXA> {
 
     protected static final String DEFAULT_RESOURCE_GROUP_ID = "DEFAULT_XA";
 
@@ -49,6 +49,8 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
 
     protected abstract Connection getConnectionProxyXA() throws SQLException;
 
+    public abstract XADataSource getXADataSource() throws SQLException;
+
     /**
      * Force close the physical connection kept for XA branch of given XAXid.
      * @param xaXid the given XAXid
@@ -65,7 +67,6 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
             // Force close the physical connection
             physicalConn.close();
         }
-
-
     }
+
 }

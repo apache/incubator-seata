@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.xa;
 
 import io.seata.core.context.RootContext;
-import io.seata.rm.BaseDataSourceResource;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
@@ -54,11 +53,11 @@ public abstract class AbstractConnectionProxyXA implements Connection {
 
     protected XAResource xaResource;
 
-    protected BaseDataSourceResource resource;
+    protected BaseDataSourceResourceXA<ConnectionProxyXA> resource;
 
     protected String xid;
 
-    public AbstractConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResource resource, String xid) {
+    public AbstractConnectionProxyXA(Connection originalConnection, XAConnection xaConnection, BaseDataSourceResourceXA<ConnectionProxyXA> resource, String xid) {
         this.originalConnection = originalConnection;
         this.xaConnection = xaConnection;
         this.resource = resource;
