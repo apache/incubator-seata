@@ -31,6 +31,7 @@ import static org.apache.seata.integration.tx.api.interceptor.ActionContextUtil.
 /**
  * Extracting TCC Context from Method
  */
+@Deprecated
 public final class ActionContextUtil {
 
     private ActionContextUtil() {

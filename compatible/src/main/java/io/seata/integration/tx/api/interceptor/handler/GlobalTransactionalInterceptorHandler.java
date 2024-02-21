@@ -28,6 +28,7 @@ import java.util.Set;
 /**
  * The type Global transactional interceptor handler.
  */
+@Deprecated
 public class GlobalTransactionalInterceptorHandler extends org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler {
 
     public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy) {

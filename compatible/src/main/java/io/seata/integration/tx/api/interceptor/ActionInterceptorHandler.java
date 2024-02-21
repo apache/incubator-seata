@@ -27,6 +27,7 @@ import java.util.Map;
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  */
+@Deprecated
 public class ActionInterceptorHandler extends org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler {
 
 
