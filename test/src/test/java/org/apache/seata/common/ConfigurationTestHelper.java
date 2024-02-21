@@ -49,11 +49,15 @@ public class ConfigurationTestHelper {
         ConfigurationFactory.getInstance().putConfig(dataId, content);
 
         try {
-            countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
+            boolean await = countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
+            if(await){
+                LOGGER.info("putConfig ok, dataId={}", dataId);
+            }else {
+                LOGGER.error("putConfig fail, dataId={}", dataId);
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        LOGGER.info("putConfig ok, dataId={}", dataId);
     }
 }
