@@ -87,8 +87,9 @@
         </file>
 
         <file>
-            <source>../server/target/seata-server.jar</source>
+            <source>../server/target/seata-server-exec.jar</source>
             <outputDirectory>target/</outputDirectory>
+            <destName>seata-server.jar</destName>
         </file>
 
         <file>
