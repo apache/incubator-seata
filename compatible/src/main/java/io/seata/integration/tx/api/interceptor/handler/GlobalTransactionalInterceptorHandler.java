@@ -16,11 +16,11 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
+import io.seata.tm.api.FailureHandler;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.spring.annotation.GlobalLock;
 import org.apache.seata.spring.annotation.GlobalTransactional;
-import org.apache.seata.tm.api.FailureHandler;
 
 import java.lang.reflect.Method;
 import java.util.Set;

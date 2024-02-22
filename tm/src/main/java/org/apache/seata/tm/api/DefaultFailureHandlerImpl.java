@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * The type Default failure handler.
  *
  */
-public class DefaultFailureHandlerImpl implements FailureHandler {
+public class DefaultFailureHandlerImpl implements FailureHandler<GlobalTransaction> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
 

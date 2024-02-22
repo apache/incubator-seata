@@ -75,7 +75,7 @@ class DefaultFailureHandlerImplTest {
         RootContext.bind(DEFAULT_XID);
         DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
-        failureHandler.onBeginFailure(tx.getInstance(), new MyRuntimeException("").getCause());
+        failureHandler.onBeginFailure(tx, new MyRuntimeException("").getCause());
     }
 
     @Test
@@ -84,7 +84,7 @@ class DefaultFailureHandlerImplTest {
         RootContext.bind(DEFAULT_XID);
         DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
-        failureHandler.onCommitFailure(tx.getInstance(), new MyRuntimeException("").getCause());
+        failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
@@ -111,7 +111,7 @@ class DefaultFailureHandlerImplTest {
         DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
 
-        failureHandler.onRollbackFailure(tx.getInstance(), new MyRuntimeException("").getCause());
+        failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
