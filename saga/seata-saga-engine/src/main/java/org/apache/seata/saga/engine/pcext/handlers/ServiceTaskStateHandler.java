@@ -16,13 +16,9 @@
  */
 package org.apache.seata.saga.engine.pcext.handlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -43,8 +39,11 @@ import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ServiceTaskState Handler
@@ -93,10 +92,6 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptableState
                 if (serviceInvoker == null) {
                     throw new EngineExecutionException("No such ServiceInvoker[" + state.getServiceType() + "]",
                             FrameworkErrorCode.ObjectNotExists);
-                }
-                if (serviceInvoker instanceof ApplicationContextAware) {
-                    ((ApplicationContextAware) serviceInvoker).setApplicationContext(
-                            stateMachineConfig.getApplicationContext());
                 }
 
                 result = serviceInvoker.invoke(state, input.toArray());

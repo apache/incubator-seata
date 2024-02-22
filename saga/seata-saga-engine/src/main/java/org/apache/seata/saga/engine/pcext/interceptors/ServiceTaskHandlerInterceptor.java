@@ -16,20 +16,16 @@
  */
 package org.apache.seata.saga.engine.pcext.interceptors;
 
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
+import org.apache.seata.saga.engine.expression.ELExpression;
 import org.apache.seata.saga.engine.expression.Expression;
 import org.apache.seata.saga.engine.expression.ExpressionResolver;
 import org.apache.seata.saga.engine.expression.exception.ExceptionMatchExpression;
-import org.apache.seata.saga.engine.expression.spel.SpringELExpression;
 import org.apache.seata.saga.engine.pcext.InterceptableStateHandler;
 import org.apache.seata.saga.engine.pcext.StateHandlerInterceptor;
 import org.apache.seata.saga.engine.pcext.StateInstruction;
@@ -48,9 +44,14 @@ import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.apache.seata.saga.statelang.domain.impl.StateInstanceImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
+
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
@@ -121,8 +122,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
-        Object isForCompensation = state.isForCompensation();
-        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
+        boolean isForCompensation = state.isForCompensation();
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !isForCompensation) {
             stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
             StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(stateMachineInstance,
                 stateInstance.getName());
@@ -150,7 +151,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceMethod(state.getServiceMethod());
         stateInstance.setServiceType(state.getServiceType());
 
-        if (isForCompensation != null && (Boolean)isForCompensation) {
+        if (isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());
             if (stateToBeCompensated != null) {
@@ -339,7 +340,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                     Class<? extends Expression> expressionClass = evaluator.getClass();
                     if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
                         elContext = context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-                    } else if (expressionClass.isAssignableFrom(SpringELExpression.class)) {
+                    } else if (expressionClass.isAssignableFrom(ELExpression.class)) {
                         elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
                     } else {
                         elContext = context.getVariables();
