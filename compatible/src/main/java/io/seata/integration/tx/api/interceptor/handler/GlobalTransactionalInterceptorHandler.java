@@ -16,7 +16,6 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
-import io.seata.tm.api.FailureHandler;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.spring.annotation.GlobalLock;
@@ -31,11 +30,11 @@ import java.util.Set;
 @Deprecated
 public class GlobalTransactionalInterceptorHandler extends org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler {
 
-    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy) {
+    public GlobalTransactionalInterceptorHandler(org.apache.seata.tm.api.FailureHandler failureHandler, Set<String> methodsToProxy) {
         super(failureHandler, methodsToProxy);
     }
 
-    public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy,
+    public GlobalTransactionalInterceptorHandler(org.apache.seata.tm.api.FailureHandler failureHandler, Set<String> methodsToProxy,
         AspectTransactional aspectTransactional) {
         super(failureHandler, methodsToProxy, aspectTransactional);
     }
