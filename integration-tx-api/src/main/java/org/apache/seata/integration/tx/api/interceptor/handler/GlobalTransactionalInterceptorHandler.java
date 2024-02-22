@@ -142,10 +142,10 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         Class<?> targetClass = invocation.getTarget().getClass();
         Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
-            final AspectTransactional globalTransactionalAnnotation = getAspectTransactional(specificMethod, targetClass);
-            final GlobalLockConfig globalLockAnnotation = getGlobalLockConfig(specificMethod, targetClass);
             boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
+                final AspectTransactional globalTransactionalAnnotation = getAspectTransactional(specificMethod, targetClass);
+                final GlobalLockConfig globalLockAnnotation = getGlobalLockConfig(specificMethod, targetClass);
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
                     AspectTransactional transactional;
                     if (globalTransactionalAnnotation != null) {
