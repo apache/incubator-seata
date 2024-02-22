@@ -436,11 +436,12 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>${spring-boot.version}</version>
+                        <version>${spring-boot-for-server.version}</version>
                         <configuration>
                             <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
                             <attach>false</attach>
+                            <classifier>exec</classifier>
                             <includes>
                                 <include>
                                     <groupId>null</groupId>
