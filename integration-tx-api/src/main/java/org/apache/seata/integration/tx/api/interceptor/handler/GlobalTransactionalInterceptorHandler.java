@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
-import org.apache.seata.tm.api.GlobalTransaction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
@@ -51,6 +50,7 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.FailureHandler;
 import org.apache.seata.tm.api.FailureHandlerHolder;
+import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor;
 import org.apache.seata.tm.api.TransactionalTemplate;
 import org.apache.seata.tm.api.transaction.NoRollbackRule;
@@ -381,10 +381,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         return SeataInterceptorPosition.BeforeTransaction;
     }
 
-    @Override
-    public int order() {
-        return 1;
-    }
 
     @Override
     public String type() {

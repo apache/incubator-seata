@@ -165,6 +165,11 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     }
 
     @Override
+    public int order() {
+        return 1;
+    }
+
+    @Override
     public String type() {
         return "twoPhaseAnnotation";
     }

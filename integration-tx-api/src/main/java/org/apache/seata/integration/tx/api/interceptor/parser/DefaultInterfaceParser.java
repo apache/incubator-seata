@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
@@ -57,7 +58,8 @@ public class DefaultInterfaceParser implements InterfaceParser {
     }
 
     /**
-     * 创建拦截器链，支持天添加多个拦截器，按顺序组织，拦截顺序同解析顺序，{@link InterfaceParser}的加载解析顺序可以通过@LoadLevel控制。
+     * 创建拦截器链，支持添加多个拦截器。
+     * 可以通过{@link ProxyInvocationHandler#order()}指定切面的进入顺序。
      * 不允许加载多个同类型的拦截器，如tcc和saga的二阶段注解不能同时存在，通过{@link ProxyInvocationHandler#type()}指定类型。
      *
      * @param target
@@ -67,7 +69,6 @@ public class DefaultInterfaceParser implements InterfaceParser {
      */
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
-
         List<ProxyInvocationHandler> invocationHandlerList = new ArrayList<>();
         Set<String> invocationHandlerRepeatCheck = new HashSet<>();
 
