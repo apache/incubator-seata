@@ -152,10 +152,12 @@ public class RaftServerManager {
             }
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         });
-        rpcServer.registerProcessor(new PutNodeInfoRequestProcessor());
-        SerializerManager.addSerializer(SerializerType.JACKSON.getCode(), new JacksonBoltSerializer());
-        if (rpcServer != null && !rpcServer.init(null)) {
-            throw new RuntimeException("start raft node fail!");
+        if (rpcServer != null) {
+            rpcServer.registerProcessor(new PutNodeInfoRequestProcessor());
+            SerializerManager.addSerializer(SerializerType.JACKSON.getCode(), new JacksonBoltSerializer());
+            if (!rpcServer.init(null)) {
+                throw new RuntimeException("start raft node fail!");
+            }
         }
     }
 

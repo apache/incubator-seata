@@ -21,20 +21,19 @@ import org.apache.seata.common.metadata.Node;
 
 public class PutNodeMetadataRequest implements Serializable {
 
-	private Node node;
+    private Node node;
 
-	public PutNodeMetadataRequest() {
-	}
+    public PutNodeMetadataRequest() {}
 
-	public PutNodeMetadataRequest(Node node) {
-		this.node = node;
-	}
+    public PutNodeMetadataRequest(Node node) {
+        this.node = node;
+    }
 
-	public Node getNode() {
-		return node;
-	}
+    public Node getNode() {
+        return node;
+    }
 
-	public void setNode(Node node) {
-		this.node = node;
-	}
+    public void setNode(Node node) {
+        this.node = node;
+    }
 }
