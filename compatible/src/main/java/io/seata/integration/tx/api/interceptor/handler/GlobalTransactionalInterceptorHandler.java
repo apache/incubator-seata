@@ -16,12 +16,15 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
+import io.seata.spring.annotation.GlobalLock;
+import io.seata.spring.annotation.GlobalTransactional;
+import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
-import org.apache.seata.spring.annotation.GlobalLock;
-import org.apache.seata.spring.annotation.GlobalTransactional;
+import org.apache.seata.tm.api.transaction.Propagation;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -60,8 +63,33 @@ public class GlobalTransactionalInterceptorHandler extends org.apache.seata.inte
             globalTransactionalAnnotation.timeoutMills(), globalTransactionalAnnotation.name(),
             globalTransactionalAnnotation.rollbackFor(), globalTransactionalAnnotation.rollbackForClassName(),
             globalTransactionalAnnotation.noRollbackFor(), globalTransactionalAnnotation.noRollbackForClassName(),
-            globalTransactionalAnnotation.propagation(), globalTransactionalAnnotation.lockRetryInterval(),
-            globalTransactionalAnnotation.lockRetryTimes(), globalTransactionalAnnotation.lockStrategyMode()) : null;
+            propagation2ApacheSeataPropagation(globalTransactionalAnnotation.propagation()),
+            globalTransactionalAnnotation.lockRetryInterval(), globalTransactionalAnnotation.lockRetryTimes(),
+            lockStrategyMode2ApacheSeataLockStrategyMode(globalTransactionalAnnotation.lockStrategyMode())) : null;
+    }
+
+    private Propagation propagation2ApacheSeataPropagation(io.seata.tm.api.transaction.Propagation propagation){
+        switch (propagation) {
+            case NEVER:
+                return Propagation.NEVER;
+            case REQUIRES_NEW:
+                return Propagation.REQUIRES_NEW;
+            case NOT_SUPPORTED:
+                return Propagation.NOT_SUPPORTED;
+            case SUPPORTS:
+                return Propagation.SUPPORTS;
+            case MANDATORY:
+                return Propagation.MANDATORY;
+            default:
+                return Propagation.REQUIRED;
+        }
+    }
+
+    private LockStrategyMode lockStrategyMode2ApacheSeataLockStrategyMode(io.seata.common.LockStrategyMode lockStrategyMode){
+	    if (Objects.requireNonNull(lockStrategyMode) == io.seata.common.LockStrategyMode.OPTIMISTIC) {
+		    return LockStrategyMode.OPTIMISTIC;
+	    }
+	    return LockStrategyMode.PESSIMISTIC;
     }
 
 }

@@ -163,7 +163,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
 
-    private Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLockConfig globalLockAnno) throws Throwable {
+    private Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLockConfig globalLockConfig) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -172,7 +172,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
             @Override
             public GlobalLockConfig getGlobalLockConfig() {
-                return globalLockAnno;
+                return globalLockConfig;
             }
         });
     }
