@@ -19,5 +19,6 @@ package org.apache.seata.saga.engine.expression;
 /**
  * ELExpression
  */
-public interface ELExpression extends Expression{
+public interface ELExpression extends Expression {
+
 }
