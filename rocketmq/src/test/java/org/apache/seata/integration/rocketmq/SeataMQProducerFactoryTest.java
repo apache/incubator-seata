@@ -28,7 +28,9 @@ public class SeataMQProducerFactoryTest {
     @Test
     public void testCreateSingle() throws Exception {
         SeataMQProducerFactory.createSingle("127.0.0.1:9876", "test");
-
         Assertions.assertThrows(NotSupportYetException.class, () -> SeataMQProducerFactory.createSingle("127.0.0.1:9876", "test"));
+
+        SeataMQProducer producer = SeataMQProducerFactory.getProducer();
+        Assertions.assertNotNull(producer);
     }
 }
