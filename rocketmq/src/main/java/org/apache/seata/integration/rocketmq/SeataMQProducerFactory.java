@@ -52,16 +52,11 @@ public class SeataMQProducerFactory {
                     tccRocketMQProxy.setProducer(defaultProducer);
                     defaultProducer.setTccRocketMQ(tccRocketMQProxy);
                     defaultProducer.start();
+                    return defaultProducer;
                 }
             }
         }
-        if (!ObjectUtils.equals(nameServer, defaultProducer.getNamesrvAddr())
-                || !ObjectUtils.equals(namespace, defaultProducer.getNamespace())
-                || !ObjectUtils.equals(groupName, defaultProducer.getProducerGroup())
-        ) {
-            throw new NotSupportYetException("only one seata producer is permitted");
-        }
-        return defaultProducer;
+        throw new NotSupportYetException("only one seata producer is permitted");
     }
 
     public static SeataMQProducer getProducer() {
