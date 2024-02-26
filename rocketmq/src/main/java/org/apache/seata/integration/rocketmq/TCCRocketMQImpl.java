@@ -16,6 +16,7 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
@@ -46,10 +47,12 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
 
     private SeataMQProducer producer;
+    private DefaultMQProducerImpl producerImpl;
 
     @Override
     public void setProducer(SeataMQProducer producer) {
         this.producer = producer;
+        this.producerImpl = producer.getDefaultMQProducerImpl();
     }
 
     @Override
@@ -73,7 +76,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
         if (message == null || sendResult == null) {
             throw new TransactionException("TCCRocketMQ commit but cannot find message and sendResult");
         }
-        producer.getDefaultMQProducerImpl().endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
+        this.producerImpl.endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }
@@ -86,7 +89,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
         if (message == null || sendResult == null) {
             LOGGER.error("TCCRocketMQ rollback but cannot find message and sendResult");
         }
-        producer.getDefaultMQProducerImpl().endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
+        this.producerImpl.endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
         LOGGER.info("RocketMQ message send rollback, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
     }

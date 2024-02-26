@@ -91,7 +91,7 @@ public class SeataMQProducer extends TransactionMQProducer {
 
     @Override
     public SendResult send(Message msg) throws MQClientException, MQBrokerException, RemotingException, InterruptedException {
-        return send(msg, this.defaultMQProducerImpl.getDefaultMQProducer().getSendMsgTimeout());
+        return send(msg, this.getSendMsgTimeout());
     }
 
     @Override
@@ -112,11 +112,11 @@ public class SeataMQProducer extends TransactionMQProducer {
             MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_DELAY_TIME_LEVEL);
         }
 
-        Validators.checkMessage(msg, this.defaultMQProducerImpl.getDefaultMQProducer());
+        Validators.checkMessage(msg, this);
 
         SendResult sendResult = null;
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
-        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, this.defaultMQProducerImpl.getDefaultMQProducer().getProducerGroup());
+        MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, this.getProducerGroup());
         MessageAccessor.putProperty(msg, PROPERTY_SEATA_XID, xid);
         MessageAccessor.putProperty(msg, PROPERTY_SEATA_BRANCHID, String.valueOf(branchId));
         try {
