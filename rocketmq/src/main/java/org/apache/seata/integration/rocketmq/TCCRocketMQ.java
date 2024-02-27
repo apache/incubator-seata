@@ -33,7 +33,6 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  */
 public interface TCCRocketMQ {
 
-
     /**
      * set SeataMQProducer
      *
