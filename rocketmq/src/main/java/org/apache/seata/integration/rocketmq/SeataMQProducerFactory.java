@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.rocketmq;
 
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
