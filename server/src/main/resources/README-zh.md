@@ -1,6 +1,6 @@
 # 脚本说明
 
-## [client](https://github.com/seata/seata/tree/develop/script/client) 
+## [client](https://github.com/apache/incubator-seata/tree/develop/script/client) 
 
 > 存放用于客户端的配置和SQL
 
@@ -9,7 +9,7 @@
 - saga: SAGA 模式下所需表的建表语句
 - spring: SpringBoot 应用支持的配置文件
 
-## [server](https://github.com/seata/seata/tree/develop/script/server)
+## [server](https://github.com/apache/incubator-seata/tree/develop/script/server)
 
 > 存放server侧所需SQL和部署脚本
 
@@ -18,7 +18,7 @@
 - helm: server 侧通过 Helm 部署的脚本
 - kubernetes: server 侧通过 Kubernetes 部署的脚本
 
-## [config-center](https://github.com/seata/seata/tree/develop/script/config-center)
+## [config-center](https://github.com/apache/incubator-seata/tree/develop/script/config-center)
 
 > 用于存放各种配置中心的初始化脚本，执行时都会读取 `config.txt`配置文件，并写入配置中心
 

@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -36,12 +36,12 @@
             <id>release-seata</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.seata</groupId>
+                    <groupId>org.apache.seata</groupId>
                     <artifactId>seata-server</artifactId>
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>io.seata</groupId>
+                    <groupId>org.apache.seata</groupId>
                     <artifactId>apm-seata-skywalking-plugin</artifactId>
                     <version>${project.version}</version>
                 </dependency>

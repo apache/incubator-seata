@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-serializer</artifactId>
         <version>${revision}</version>
     </parent>
@@ -55,7 +55,7 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <configuration>
-                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/</protoSourceRoot>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
                     </protocArtifact>

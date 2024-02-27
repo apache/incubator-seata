@@ -1,4 +1,4 @@
-#For details about configuration items, see https://seata.io/zh-cn/docs/user/configurations.html
+#For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
 transport.type=TCP
 transport.server=NIO
@@ -26,7 +26,6 @@ transport.compressor=none
 service.vgroupMapping.default_tx_group=default
 #If you use a registry, you can ignore it
 service.default.grouplist=127.0.0.1:8091
-service.enableDegrade=false
 service.disableGlobalTransaction=false
 
 client.metadataMaxAgeMs=30000

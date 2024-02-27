@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -49,13 +49,15 @@
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+<!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>io.seata</groupId>
+                    <groupId>org.apache.seata</groupId>
                     <artifactId>seata-spring-autoconfigure-core</artifactId>
                 </exclusion>
             </exclusions>
@@ -68,6 +70,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-saga-engine-store</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-mock-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

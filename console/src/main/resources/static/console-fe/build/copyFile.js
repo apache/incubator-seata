@@ -28,7 +28,7 @@ const mkdir = dir => {
     }
   };
 
-const copyList = ['js/main.js', 'css/main.css'];
+const copyList = ['js/main.js', 'css/main.css', 'version.json'];
 
 copyList.forEach(_fileName => {
     const srcFileName = path.join(srcDir, _fileName);
@@ -48,18 +48,10 @@ copyList.forEach(_fileName => {
 // copy seata-saga-statemachine-designer from console-fe/public to console resource folder
 const designerDir = path.join(__dirname, '../public/saga-statemachine-designer');
 const designerDestDir = path.join(destDir, 'saga-statemachine-designer');
-const designerHtmlFileName = path.join(designerDestDir, 'designer.html');
-const designerBundleFileName = path.join(designerDestDir, 'dist/bundle.js');
 
-mkdir(path.dirname(designerHtmlFileName));
-mkdir(path.dirname(designerBundleFileName));
-
-fs.createReadStream(path.join(designerDir, 'designer.html'))
-.pipe(
-  fs.createWriteStream(designerHtmlFileName)
-  );
-
-fs.createReadStream(path.join(designerDir, 'dist/bundle.js'))
-.pipe(
-  fs.createWriteStream(designerBundleFileName)
-  );
+if (!fs.existsSync(designerDestDir)) {
+  fs.mkdirSync(designerDestDir)
+}
+fs.readdirSync(designerDir).forEach(file => {
+  fs.copyFileSync(path.join(designerDir, file), path.join(designerDestDir, file));
+});

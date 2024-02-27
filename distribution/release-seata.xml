@@ -87,8 +87,9 @@
         </file>
 
         <file>
-            <source>../server/target/seata-server.jar</source>
+            <source>../server/target/seata-server-exec.jar</source>
             <outputDirectory>target/</outputDirectory>
+            <destName>seata-server.jar</destName>
         </file>
 
         <file>
@@ -108,13 +109,18 @@
             <source>../server/src/main/resources/logback-spring.xml</source>
             <outputDirectory>conf/</outputDirectory>
         </file>
+
+        <file>
+            <source>NOTICE.md</source>
+            <outputDirectory>lib/jdbc/</outputDirectory>
+        </file>
     </files>
 
     <moduleSets>
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>io.seata:seata-server</include>
+                <include>org.apache.seata:seata-server</include>
             </includes>
         </moduleSet>
     </moduleSets>

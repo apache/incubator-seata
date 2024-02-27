@@ -1,0 +1,3 @@
+org.apache.seata.saga.statelang.validator.impl.StateNameExistsRule
+org.apache.seata.saga.statelang.validator.impl.FiniteTerminationRule
+org.apache.seata.saga.statelang.validator.impl.NoRecursiveSubStateMachineRule
