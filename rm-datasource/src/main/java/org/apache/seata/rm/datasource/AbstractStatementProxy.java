@@ -16,6 +16,8 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
@@ -24,7 +26,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Abstract statement proxy.

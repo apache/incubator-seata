@@ -191,7 +191,7 @@ public class DataSourceProxyTest {
         // case: dbType = db2
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, io.seata.sqlparser.util.JdbcConstants.DB2);
+            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.DB2);
             Assertions.assertEquals("jdbc:mock:xxx", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
         }
     }
