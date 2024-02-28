@@ -32,7 +32,6 @@ import java.nio.ByteBuffer;
  */
 @LoadLevel(name = "SEATA", scope = Scope.PROTOTYPE)
 public class SeataSerializer implements Serializer {
-
     Serializer versionSeataSerializer;
 
     public SeataSerializer(Byte version) {
@@ -106,7 +105,6 @@ public class SeataSerializer implements Serializer {
         @Override
         public <T> T deserialize(byte[] bytes) {
             return deserializeByVersion(bytes, ProtocolConstants.VERSION_1);
-
         }
     }
     static class SeataSerializerV0 implements Serializer {
