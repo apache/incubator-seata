@@ -51,6 +51,8 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
         " FROM " + UNDO_LOG_TABLE_NAME +
         " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? " +
         " ORDER BY " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC )";
+    
+    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT TOP 1 1 FROM " + UNDO_LOG_TABLE_NAME;
 
     @Override
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser, Connection conn) throws SQLException {
@@ -102,5 +104,10 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
     protected String buildSelectUndoSql() {
         return "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WITH(UPDLOCK) WHERE "
                 + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
+    }
+    
+    @Override
+    protected String getCheckUndoLogTableExistSql() {
+        return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
     }
 }
