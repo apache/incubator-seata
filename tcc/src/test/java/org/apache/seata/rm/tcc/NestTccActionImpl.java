@@ -16,20 +16,29 @@
  */
 package org.apache.seata.rm.tcc;
 
+
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.spring.annotation.GlobalTransactional;
+import org.apache.seata.tm.api.transaction.Propagation;
 
-/**
- * The type Tcc action.
- *
- */
-public class TccActionImpl implements TccAction {
 
+public class NestTccActionImpl implements NestTccAction {
+
+    private TccAction tccAction;
     private boolean isCommit;
 
-
     @Override
-    public boolean prepare(BusinessActionContext actionContext) {
-        return true;
+    @GlobalTransactional()
+    public boolean prepare(BusinessActionContext actionContext, int count) {
+        tccAction.prepare(actionContext);
+        return count > 1;
+    }
+
+    @GlobalTransactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public boolean prepareNestRequiredNew(BusinessActionContext actionContext, int count) {
+        tccAction.prepare(actionContext);
+        return count > 1;
     }
 
     @Override
@@ -39,21 +48,13 @@ public class TccActionImpl implements TccAction {
     }
 
     @Override
-    public boolean commitWithArg(BusinessActionContext actionContext, TccParam param, Integer a) {
-        return false;
-    }
-
-
-    @Override
     public boolean rollback(BusinessActionContext actionContext) {
         return true;
     }
 
-    @Override
-    public boolean rollbackWithArg(BusinessActionContext actionContext, TccParam param) {
-        return false;
+    public void setTccAction(TccAction tccAction) {
+        this.tccAction = tccAction;
     }
-
 
     public boolean isCommit() {
         return isCommit;
