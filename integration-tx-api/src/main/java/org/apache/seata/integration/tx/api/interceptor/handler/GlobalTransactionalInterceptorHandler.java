@@ -16,6 +16,15 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -32,6 +41,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.event.DegradeCheckEvent;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.util.ClassUtils;
@@ -50,15 +60,6 @@ import org.apache.seata.tm.api.transaction.RollbackRule;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static org.apache.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
@@ -410,4 +411,9 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         return SeataInterceptorPosition.BeforeTransaction;
     }
 
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.GlobalTransactional.name();
+    }
 }
