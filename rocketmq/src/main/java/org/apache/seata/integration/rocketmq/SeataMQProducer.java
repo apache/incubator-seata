@@ -111,7 +111,6 @@ public class SeataMQProducer extends TransactionMQProducer {
         if (msg.getDelayTimeLevel() != 0) {
             MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_DELAY_TIME_LEVEL);
         }
-
         Validators.checkMessage(msg, this);
 
         SendResult sendResult = null;

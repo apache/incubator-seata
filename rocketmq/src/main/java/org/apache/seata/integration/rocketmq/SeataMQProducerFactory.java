@@ -35,7 +35,6 @@ public class SeataMQProducerFactory {
      */
     private static SeataMQProducer defaultProducer;
 
-
     public static SeataMQProducer createSingle(String nameServer, String producerGroup) throws MQClientException {
         return createSingle(nameServer, null, producerGroup, null);
     }
@@ -61,5 +60,4 @@ public class SeataMQProducerFactory {
     public static SeataMQProducer getProducer() {
         return defaultProducer;
     }
-
 }
