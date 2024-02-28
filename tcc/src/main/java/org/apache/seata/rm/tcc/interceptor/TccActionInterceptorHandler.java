@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -31,16 +30,15 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
-
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
-
 
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
@@ -167,4 +165,13 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return SeataInterceptorPosition.Any;
     }
 
+    @Override
+    public int order() {
+        return 1;
+    }
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.TwoPhaseAnnotation.name();
+    }
 }

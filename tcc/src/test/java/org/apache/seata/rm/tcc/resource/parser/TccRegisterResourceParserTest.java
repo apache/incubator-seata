@@ -16,12 +16,13 @@
  */
 package org.apache.seata.rm.tcc.resource.parser;
 
+import java.lang.reflect.Method;
+
+import org.apache.seata.rm.tcc.TccAction;
 import org.apache.seata.rm.tcc.TccParam;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Method;
 
 
 class TccRegisterResourceParserTest {
@@ -30,14 +31,13 @@ class TccRegisterResourceParserTest {
 
     @Test
     public void testGetTwoPhaseArgs() throws Exception {
-        Class<?> tccActionImpl = Class.forName("org.apache.seata.rm.tcc.TccActionImpl");
         Class<?>[] argsCommitClasses = new Class[]{BusinessActionContext.class, TccParam.class, Integer.class};
-        Method commitMethod = tccActionImpl.getMethod("commit", argsCommitClasses);
+        Method commitMethod = TccAction.class.getMethod("commitWithArg", argsCommitClasses);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             tccRegisterResourceParser.getTwoPhaseArgs(commitMethod, argsCommitClasses);
         });
         Class<?>[] argsRollbackClasses = new Class[]{BusinessActionContext.class, TccParam.class};
-        Method rollbackMethod = tccActionImpl.getMethod("rollback", argsRollbackClasses);
+        Method rollbackMethod = TccAction.class.getMethod("rollbackWithArg", argsRollbackClasses);
         String[] keys = tccRegisterResourceParser.getTwoPhaseArgs(rollbackMethod, argsRollbackClasses);
         Assertions.assertNull(keys[0]);
         Assertions.assertEquals("tccParam", keys[1]);
