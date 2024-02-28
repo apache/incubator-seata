@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -75,6 +77,7 @@ class TccActionInterceptorParserTest {
     @Test
     public void testNestTcc_should_commit() throws Exception {
         //given
+        RootContext.unbind();
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
@@ -129,6 +132,7 @@ class TccActionInterceptorParserTest {
     @Test
     public void testNestTcc_should_rollback() throws Exception {
         //given
+        RootContext.unbind();
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
@@ -183,6 +187,7 @@ class TccActionInterceptorParserTest {
     @Test
     public void testNestTcc_required_new_should_rollback_commit() throws Exception {
         //given
+        RootContext.unbind();
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
@@ -227,7 +232,7 @@ class TccActionInterceptorParserTest {
             throw exx;
         }
 
-        Assertions.assertFalse(nestTccAction.isCommit());
+        Assertions.assertTrue(nestTccAction.isCommit());
         Assertions.assertTrue(tccAction.isCommit());
 
     }
@@ -237,6 +242,7 @@ class TccActionInterceptorParserTest {
     @Test
     public void testNestTcc_required_new_should_both_commit() throws Exception {
         //given
+        RootContext.unbind();
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 

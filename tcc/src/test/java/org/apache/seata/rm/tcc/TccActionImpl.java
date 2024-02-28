@@ -39,9 +39,21 @@ public class TccActionImpl implements TccAction {
     }
 
     @Override
+    public boolean commitWithArg(BusinessActionContext actionContext, TccParam param, Integer a) {
+        return false;
+    }
+
+
+    @Override
     public boolean rollback(BusinessActionContext actionContext) {
         return true;
     }
+
+    @Override
+    public boolean rollbackWithArg(BusinessActionContext actionContext, TccParam param) {
+        return false;
+    }
+
 
     public boolean isCommit() {
         return isCommit;

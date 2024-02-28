@@ -17,6 +17,7 @@
 package org.apache.seata.rm.tcc;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.LocalTCC;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
@@ -44,10 +45,21 @@ public interface TccAction {
     boolean commit(BusinessActionContext actionContext);
 
     /**
+     * Commit boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean commitWithArg(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
+
+    /**
      * Rollback boolean.
      *
      * @param actionContext the action context
      * @return the boolean
      */
     boolean rollback(BusinessActionContext actionContext);
+
+    boolean rollbackWithArg(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
+
 }
