@@ -58,9 +58,9 @@ public class DefaultInterfaceParser implements InterfaceParser {
     }
 
     /**
-     * 创建拦截器链，支持添加多个拦截器。
-     * 可以通过{@link ProxyInvocationHandler#order()}指定切面的进入顺序。
-     * 不允许加载多个同类型的拦截器，如tcc和saga的二阶段注解不能同时存在，通过{@link ProxyInvocationHandler#type()}指定类型。
+     * Create an interceptor chain that supports adding multiple interceptors.Create an interceptor chain that supports adding multiple interceptors.
+     * The entry order of the facets can be specified through {@link ProxyInvocationHandler # order()}.
+     * It is not allowed to load multiple interceptors of the same type, such as two-stage annotations for TCC and Saga that cannot exist simultaneously. The type can be specified through {@link ProxyInvocationHandler # type()}.It is not allowed to load multiple interceptors of the same type, such as two-stage annotations for TCC and Saga that cannot exist simultaneously. The type can be specified through {@link ProxyInvocationHandler # type()}.
      *
      * @param target
      * @param objectName
