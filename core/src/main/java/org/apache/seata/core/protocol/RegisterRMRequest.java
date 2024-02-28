@@ -41,6 +41,17 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         super(applicationId, transactionServiceGroup);
     }
 
+    /**
+     * Instantiates a new Register rm request.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param extraData               the extra data
+     */
+    public RegisterRMRequest(String applicationId, String transactionServiceGroup, String extraData) {
+        super(applicationId, transactionServiceGroup, extraData);
+    }
+
     private String resourceIds;
 
     /**

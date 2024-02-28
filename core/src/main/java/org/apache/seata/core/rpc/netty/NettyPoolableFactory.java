@@ -21,15 +21,19 @@ import java.net.InetSocketAddress;
 import io.netty.channel.Channel;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The type Netty key poolable factory.
- *
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 
@@ -64,6 +68,19 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         }
         try {
             response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
+            if (isRegisterExpired(response, key.getTransactionRole())) {
+                // relogin to get token
+                JwtAuthManager.getInstance().refreshToken(null);
+                AbstractIdentifyRequest request;
+                if (key.getTransactionRole().equals(NettyPoolKey.TransactionRole.TMROLE)) {
+                    request = (RegisterTMRequest) key.getMessage();
+                } else {
+                    request = (RegisterRMRequest) key.getMessage();
+                }
+                String identifyExtraData = JwtAuthManager.refreshAuthData(request.getExtraData());
+                request.setExtraData(identifyExtraData);
+                response = rpcRemotingClient.sendSyncRequest(tmpChannel, request);
+            }
             if (!isRegisterSuccess(response, key.getTransactionRole())) {
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             } else {
@@ -85,6 +102,26 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         return channelToServer;
     }
 
+    private boolean isRegisterExpired(Object response, NettyPoolKey.TransactionRole transactionRole) {
+        if (response == null) {
+            return false;
+        }
+        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
+            if (!(response instanceof RegisterTMResponse)) {
+                return false;
+            }
+            RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
+            return ResultCode.Retry.equals(registerTMResponse.getResultCode());
+        } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
+            if (!(response instanceof RegisterRMResponse)) {
+                return false;
+            }
+            RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
+            return ResultCode.Retry.equals(registerRMResponse.getResultCode());
+        }
+        return false;
+    }
+
     private boolean isRegisterSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
         if (response == null) {
             return false;
@@ -93,13 +130,13 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
-            RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
+            RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
             return registerTMResponse.isIdentified();
         } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
-            RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+            RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
             return registerRMResponse.isIdentified();
         }
         return false;

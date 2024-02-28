@@ -18,6 +18,7 @@ package org.apache.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -29,6 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -43,6 +45,7 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.auth.JwtAuthManager;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergeMessage;
@@ -63,15 +66,16 @@ import org.apache.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The netty remoting client.
- *
  */
 public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
+    private static final String PRO_NEW_TOKEN = "newToken";
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
@@ -91,7 +95,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
-     * Send via asynchronous thread {@link AbstractNettyRemotingClient.MergedSendRunnable}
+     * Send via asynchronous thread {@link org.apache.seata.core.rpc.netty.AbstractNettyRemotingClient.MergedSendRunnable}
      * {@link AbstractNettyRemotingClient#isEnableClientBatchSendRequest()}
      */
     protected final ConcurrentHashMap<String/*serverAddress*/, BlockingQueue<RpcMessage>> basketMap = new ConcurrentHashMap<>();
@@ -100,10 +104,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final NettyPoolKey.TransactionRole transactionRole;
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
+    protected JwtAuthManager jwtAuthManager = JwtAuthManager.getInstance();
     protected volatile boolean enableClientBatchSendRequest;
 
     @Override
     public void init() {
+        jwtAuthManager.init();
         timerExecutor.scheduleAtFixedRate(() -> {
             try {
                 clientChannelManager.reconnect(getTransactionServiceGroup());
@@ -172,7 +178,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             } catch (Exception exx) {
                 LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), serverAddress, rpcMessage.getBody());
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException)exx;
+                    throw (TimeoutException) exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
@@ -293,6 +299,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }
         return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
+    }
+
+    protected String getAuthData() {
+        return JwtAuthManager.refreshAuthData(null);
+    }
+
+    protected void refreshAuthToken(String extraData) {
+        if (StringUtils.isBlank(extraData)) {
+            return;
+        }
+        HashMap<String, String> extraDataMap = StringUtils.string2Map(extraData);
+        String newToken = extraDataMap.get(PRO_NEW_TOKEN);
+        if (StringUtils.isNotBlank(newToken)) {
+            jwtAuthManager.refreshToken(newToken);
+        }
     }
 
     private String getThreadPrefix() {

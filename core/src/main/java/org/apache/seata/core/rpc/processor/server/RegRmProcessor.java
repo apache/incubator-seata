@@ -17,12 +17,14 @@
 package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.seata.common.exception.RetryableException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
@@ -62,15 +64,18 @@ public class RegRmProcessor implements RemotingProcessor {
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
+        ResultCode resultCode = ResultCode.Failed;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
+                resultCode = ResultCode.Success;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             } else {
+                errorInfo = "RM checkAuth failed!Please check your username/password.";
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
@@ -79,11 +84,19 @@ public class RegRmProcessor implements RemotingProcessor {
             isSuccess = false;
             errorInfo = exx.getMessage();
             LOGGER.error("RM register fail, error message:{}", errorInfo);
+            if (exx instanceof RetryableException) {
+                resultCode = ResultCode.Retry;
+            }
         }
         RegisterRMResponse response = new RegisterRMResponse(isSuccess);
+        String newToken = checkAuthHandler.refreshAuthToken(message);
+        if (StringUtils.isNotBlank(newToken)) {
+            response.setExtraData(newToken);
+        }
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
+        response.setResultCode(resultCode);
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),

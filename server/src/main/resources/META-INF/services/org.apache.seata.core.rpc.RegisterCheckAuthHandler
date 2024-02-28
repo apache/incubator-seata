@@ -1,1 +1,2 @@
+org.apache.seata.server.auth.JwtCheckAuthHandler
 org.apache.seata.server.auth.DefaultCheckAuthHandler

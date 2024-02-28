@@ -17,12 +17,14 @@
 package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.seata.common.exception.RetryableException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
-import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
@@ -63,30 +65,41 @@ public class RegTmProcessor implements RemotingProcessor {
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
+        ResultCode resultCode = ResultCode.Failed;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
+                resultCode = ResultCode.Success;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("TM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
                         ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             } else {
+                errorInfo = "TM checkAuth failed!Please check your username/password.";
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("TM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
-                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                        ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
             isSuccess = false;
             errorInfo = exx.getMessage();
             LOGGER.error("TM register fail, error message:{}", errorInfo);
+            if (exx instanceof RetryableException) {
+                resultCode = ResultCode.Retry;
+            }
         }
         RegisterTMResponse response = new RegisterTMResponse(isSuccess);
+        String newToken = checkAuthHandler.refreshAuthToken(message);
+        if (StringUtils.isNotBlank(newToken)) {
+            response.setExtraData(newToken);
+        }
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
+        response.setResultCode(resultCode);
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
