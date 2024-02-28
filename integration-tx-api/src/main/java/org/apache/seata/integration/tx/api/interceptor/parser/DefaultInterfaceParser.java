@@ -84,11 +84,11 @@ public class DefaultInterfaceParser implements InterfaceParser {
 
         Collections.sort(invocationHandlerList, Comparator.comparingInt(ProxyInvocationHandler::order));
 
-        ProxyInvocationHandler result = null;
+        ProxyInvocationHandler first = null;
         ProxyInvocationHandler last = null;
         for (ProxyInvocationHandler proxyInvocationHandler : invocationHandlerList) {
-            if (result == null) {
-                result = proxyInvocationHandler;
+            if (first == null) {
+                first = proxyInvocationHandler;
             }
             if (last != null) {
                 last.setNextProxyInvocationHandler(proxyInvocationHandler);
@@ -96,7 +96,7 @@ public class DefaultInterfaceParser implements InterfaceParser {
             last = proxyInvocationHandler;
         }
 
-        return result;
+        return first;
     }
 
     @Override

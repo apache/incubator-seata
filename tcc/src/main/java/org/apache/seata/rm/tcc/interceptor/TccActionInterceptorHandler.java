@@ -30,6 +30,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
@@ -171,6 +172,6 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
 
     @Override
     public String type() {
-        return "twoPhaseAnnotation";
+        return InvocationHandlerType.TwoPhaseAnnotation.name();
     }
 }
