@@ -38,10 +38,8 @@ import org.apache.seata.tm.api.transaction.TransactionHook;
 import org.apache.seata.tm.api.transaction.TransactionHookManager;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.apache.seata.common.util.StringUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;

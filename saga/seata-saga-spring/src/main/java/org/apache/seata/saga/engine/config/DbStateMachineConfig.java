@@ -16,6 +16,11 @@
  */
 package org.apache.seata.saga.engine.config;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -25,23 +30,16 @@ import org.apache.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import org.apache.seata.saga.engine.store.db.DbStateLangStore;
 import org.apache.seata.saga.engine.tm.DefaultSagaTransactionalTemplate;
 import org.apache.seata.saga.engine.tm.SagaTransactionalTemplate;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
-
 
 /**
  * DbStateMachineConfig

@@ -16,17 +16,17 @@
  */
 package org.apache.seata.saga.statelang.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Map;
+
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.apache.seata.saga.statelang.parser.utils.IOUtils;
 import org.apache.seata.saga.statelang.validator.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * StateParser tests
