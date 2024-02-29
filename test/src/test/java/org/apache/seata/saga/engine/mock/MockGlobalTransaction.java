@@ -19,7 +19,7 @@ package org.apache.seata.saga.engine.mock;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
+import org.apache.seata.saga.engine.sequence.UUIDSeqGenerator;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionRole;
 import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
@@ -31,7 +31,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     private GlobalStatus status;
     private long createTime;
 
-    private static SpringJvmUUIDSeqGenerator uuidSeqGenerator = new SpringJvmUUIDSeqGenerator();
+    private static UUIDSeqGenerator uuidSeqGenerator = new UUIDSeqGenerator();
 
     public MockGlobalTransaction() {}
 

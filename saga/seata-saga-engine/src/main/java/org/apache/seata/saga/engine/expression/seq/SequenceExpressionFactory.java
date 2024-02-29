@@ -16,14 +16,13 @@
  */
 package org.apache.seata.saga.engine.expression.seq;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.expression.Expression;
 import org.apache.seata.saga.engine.expression.ExpressionFactory;
 import org.apache.seata.saga.engine.sequence.SeqGenerator;
-import org.springframework.util.StringUtils;
 
 /**
  * Sequence expression factory
- *
  */
 public class SequenceExpressionFactory implements ExpressionFactory {
 

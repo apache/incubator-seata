@@ -34,12 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-saga-engine</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-saga-engine-store</artifactId>
+            <artifactId>seata-saga-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -80,11 +75,6 @@
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-integration-tx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

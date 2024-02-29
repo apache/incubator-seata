@@ -19,8 +19,8 @@ package org.apache.seata.saga.engine.invoker;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
-import org.springframework.util.StringUtils;
 
 /**
  * Service Invoker Manager
@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  */
 public class ServiceInvokerManager {
 
-    private Map<String, ServiceInvoker> serviceInvokerMap = new ConcurrentHashMap<>();
+    private final Map<String, ServiceInvoker> serviceInvokerMap = new ConcurrentHashMap<>();
 
     public ServiceInvoker getServiceInvoker(String serviceType) {
         if (StringUtils.isEmpty(serviceType)) {

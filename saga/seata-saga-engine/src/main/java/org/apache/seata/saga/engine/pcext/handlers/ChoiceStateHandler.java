@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.expression.Expression;
@@ -34,7 +35,6 @@ import org.apache.seata.saga.statelang.domain.ChoiceState;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
-import org.springframework.util.StringUtils;
 
 /**
  * ChoiceState Handler
