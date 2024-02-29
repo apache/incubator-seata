@@ -14,28 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.handler;
+package org.apache.seata.integration.tx.api.interceptor;
 
-import java.util.Set;
+/**
+ * The  InvocationHandlerType enum
+ */
+public enum InvocationHandlerType {
 
-import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
-import org.apache.seata.integration.tx.api.interceptor.SeataInterceptor;
-import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+    GlobalTransactional, TwoPhaseAnnotation
 
-
-public interface ProxyInvocationHandler extends SeataInterceptor {
-
-    Set<String> getMethodsToProxy();
-
-    Object invoke(InvocationWrapper invocation) throws Throwable;
-
-    SeataInterceptorPosition getPosition();
-
-    String type();
-
-    default int order() {
-        return 0;
-    }
-
-    void setNextProxyInvocationHandler(ProxyInvocationHandler next);
 }
