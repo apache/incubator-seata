@@ -17,28 +17,26 @@
 package org.apache.seata.saga.statelang.parser;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
-import org.apache.seata.saga.statelang.validator.ValidationException;
 import org.apache.seata.saga.statelang.parser.utils.IOUtils;
+import org.apache.seata.saga.statelang.validator.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * StateParser tests
- *
  */
 public class StateParserTests {
 
     @Test
     public void testParser() throws IOException {
-
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(null).parse(json);
         stateMachine.setGmtCreate(new Date());
         Assertions.assertNotNull(stateMachine);
@@ -53,14 +51,13 @@ public class StateParserTests {
         System.out.println(fastjsonOutputJson);
 
         Assertions.assertEquals("simpleTestStateMachine", stateMachine.getName());
-        Assertions.assertTrue(stateMachine.getStates().size() > 0);
+        Assertions.assertFalse(stateMachine.getStates().isEmpty());
     }
 
     @Test
     public void testDesignerJsonTransformer() throws IOException {
-
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_layout.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_layout.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
@@ -79,8 +76,8 @@ public class StateParserTests {
 
     @Test
     public void singleInfiniteLoopTest() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_single_infinite_loop.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_single_infinite_loop.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -90,8 +87,8 @@ public class StateParserTests {
 
     @Test
     public void testMultipleInfiniteLoop() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_multiple_infinite_loop.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_multiple_infinite_loop.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -101,8 +98,8 @@ public class StateParserTests {
 
     @Test
     public void testNonExistedName() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_non_existed_name.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_non_existed_name.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
@@ -112,11 +109,20 @@ public class StateParserTests {
 
     @Test
     public void testRecursiveSubStateMachine() throws IOException {
-        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_recursive_sub_machine.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_recursive_sub_machine.json");
+        String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
             StateMachineParserFactory.getStateMachineParser(null).parse(json);
         });
         Assertions.assertTrue(e.getMessage().endsWith("call itself"));
+    }
+
+    private InputStream getInputStreamByPath(String path) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = Thread.currentThread().getClass().getClassLoader();
+        }
+
+        return classLoader.getResourceAsStream(path);
     }
 }

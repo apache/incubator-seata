@@ -26,7 +26,6 @@ import org.apache.seata.saga.engine.store.StateLangStore;
 import org.apache.seata.saga.engine.store.StateLogStore;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
-import org.springframework.context.ApplicationContext;
 
 import javax.script.ScriptEngineManager;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -120,13 +119,6 @@ public interface StateMachineConfig {
      * @return the get async process ctrl event publisher
      */
     ProcessCtrlEventPublisher getAsyncProcessCtrlEventPublisher();
-
-    /**
-     * Gets get application context.
-     *
-     * @return the get application context
-     */
-    ApplicationContext getApplicationContext();
 
     /**
      * Gets get thread pool executor.

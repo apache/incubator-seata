@@ -33,22 +33,17 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-engine</artifactId>
+            <artifactId>seata-saga-statelang</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-rm</artifactId>
+            <artifactId>seata-saga-processctrl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-tm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-serializer-all</artifactId>
+            <artifactId>seata-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
