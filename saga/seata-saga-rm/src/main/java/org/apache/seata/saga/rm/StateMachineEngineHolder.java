@@ -19,6 +19,7 @@ package org.apache.seata.saga.rm;
 import org.apache.seata.saga.engine.StateMachineEngine;
 
 /**
+ * StateMachineEngineHolder
  */
 public class StateMachineEngineHolder {
 
@@ -28,7 +29,7 @@ public class StateMachineEngineHolder {
         return stateMachineEngine;
     }
 
-    public void setStateMachineEngine(StateMachineEngine smEngine) {
+    public static void setStateMachineEngine(StateMachineEngine smEngine) {
         stateMachineEngine = smEngine;
     }
 }
