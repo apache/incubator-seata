@@ -55,13 +55,23 @@ public class SeataMQProducerSendTest {
     }
 
     @Test
-    public void testSend() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
+    public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = TmClientTest.getTm();
 
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle("10.213.3.25:9876", "test");
-        producer.send(new Message("Topic--AA", "testMessage".getBytes(StandardCharsets.UTF_8)));
+        SeataMQProducer producer = SeataMQProducerFactory.createSingle("yourIp:9876", "test");
+        producer.send(new Message("yourTopic", "testMessage".getBytes(StandardCharsets.UTF_8)));
 
         tm.commit(RootContext.getXID());
+    }
+
+    @Test
+    public void testSendRollback() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
+        TransactionManager tm = TmClientTest.getTm();
+
+        SeataMQProducer producer = SeataMQProducerFactory.createSingle("yourIp:9876", "test");
+        producer.send(new Message("yourTopic", "testMessage".getBytes(StandardCharsets.UTF_8)));
+
+        tm.rollback(RootContext.getXID());
     }
 
 
