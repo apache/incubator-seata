@@ -16,6 +16,15 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.tm.api.GlobalTransaction;
 import java.lang.reflect.Method;
@@ -40,6 +49,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.event.DegradeCheckEvent;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.util.ClassUtils;
@@ -415,4 +425,9 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         return SeataInterceptorPosition.BeforeTransaction;
     }
 
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.GlobalTransactional.name();
+    }
 }
