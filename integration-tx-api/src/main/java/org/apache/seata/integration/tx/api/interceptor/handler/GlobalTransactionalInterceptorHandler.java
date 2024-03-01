@@ -26,14 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.eventbus.Subscribe;
-import org.apache.seata.tm.api.GlobalTransaction;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
