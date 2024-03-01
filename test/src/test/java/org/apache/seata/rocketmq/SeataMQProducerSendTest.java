@@ -40,7 +40,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * seata mq producer test
  **/
-@Tag("excludeFromCI")
+@Tag("excludeCI")
 public class SeataMQProducerSendTest {
 
     @BeforeAll
