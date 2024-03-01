@@ -141,6 +141,11 @@
             <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-rocketmq</artifactId>
+        </dependency>
     </dependencies>
 
 
