@@ -18,6 +18,7 @@ package org.apache.seata.integration.tx.api.interceptor.handler;
 
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
+import org.apache.seata.integration.tx.api.interceptor.NestInterceptorHandlerWrapper;
 
 
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
@@ -26,10 +27,15 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     protected int order = Integer.MAX_VALUE;
 
+    protected ProxyInvocationHandler nextInvocationHandlerChain;
+
     @Override
     public Object invoke(InvocationWrapper invocation) throws Throwable {
         if (CollectionUtils.isNotEmpty(getMethodsToProxy()) && !getMethodsToProxy().contains(invocation.getMethod().getName())) {
             return invocation.proceed();
+        }
+        if (nextInvocationHandlerChain != null) {
+            invocation = new NestInterceptorHandlerWrapper(nextInvocationHandlerChain, invocation);
         }
         return doInvoke(invocation);
     }
@@ -44,4 +50,8 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
         return this.order;
     }
 
+    @Override
+    public void setNextProxyInvocationHandler(ProxyInvocationHandler next) {
+        this.nextInvocationHandlerChain = next;
+    }
 }

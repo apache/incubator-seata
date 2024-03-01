@@ -16,11 +16,11 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.impl.CompensateSubStateMachineStateImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
-import org.springframework.util.StringUtils;
 
 /**
  * CompensateSubStateMachineState Parser
