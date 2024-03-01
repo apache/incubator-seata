@@ -16,6 +16,12 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -26,12 +32,6 @@ import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import org.slf4j.MDC;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
@@ -91,7 +91,7 @@ public class TccActionInterceptorHandler extends org.apache.seata.rm.tcc.interce
     }
 
     private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
-        TwoPhaseBusinessAction result = convertIoSeata(parseAnnotationCache.computeIfAbsent(methodKey, method -> {
+        TwoPhaseBusinessAction result = convertIoSeata((org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction )parseAnnotationCache.computeIfAbsent(methodKey, method -> {
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             if (businessAction == null && targetBean.getClass() != null) {
                 Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
