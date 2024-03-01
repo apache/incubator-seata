@@ -46,9 +46,6 @@ public class TccActionInterceptorParser implements InterfaceParser {
             return null;
         }
         // register resource and enhance with interceptor
-
-        //TODO jie 这里老应用直接升级，会造成TM RM都去注册分支资源
-
         DefaultResourceRegisterParser.get().registerResource(target, objectName);
         ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler(target, methodsToProxy);
         return proxyInvocationHandler;
