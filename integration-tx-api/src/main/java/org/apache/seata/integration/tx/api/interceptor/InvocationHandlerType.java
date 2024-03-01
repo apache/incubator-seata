@@ -21,6 +21,14 @@ package org.apache.seata.integration.tx.api.interceptor;
  */
 public enum InvocationHandlerType {
 
-    GlobalTransactional, TwoPhaseAnnotation
+    /**
+     * GlobalTransactional InvocationHandler
+     */
+    GlobalTransactional,
+
+    /**
+     * TwoPhase InvocationHandler
+     */
+    TwoPhaseAnnotation
 
 }
