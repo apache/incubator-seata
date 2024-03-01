@@ -253,7 +253,7 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
     }
 
     private void checkMockActionFail(String xid) throws TransactionException {
-        if (expectedResultMap.get(xid) == ResultCode.Failed) {
+        if (ResultCode.Failed == expectedResultMap.get(xid)) {
             throw new TransactionException(TransactionExceptionCode.Broken, "mock action expect fail");
         }
     }

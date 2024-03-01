@@ -24,6 +24,10 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
+import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
+import org.apache.seata.core.rpc.netty.mockserver.TmClientTest;
+import org.apache.seata.integration.rocketmq.SeataMQProducer;
+import org.apache.seata.integration.rocketmq.SeataMQProducerFactory;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.tm.DefaultTransactionManager;
 import org.junit.jupiter.api.AfterAll;
@@ -50,22 +54,20 @@ public class SeataMQProducerSendTest {
         MockServer.close();
     }
 
-
-
-
     @Test
     public void testSend() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
-        TransactionManager tm = getTmAndBegin();
+        TransactionManager tm = TmClientTest.getTm();
 
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle("127.0.0.1:9876", "test");
-        producer.send(new Message("testTopic", "testMessage".getBytes(StandardCharsets.UTF_8)));
+        SeataMQProducer producer = SeataMQProducerFactory.createSingle("10.213.3.25:9876", "test");
+        producer.send(new Message("Topic--AA", "testMessage".getBytes(StandardCharsets.UTF_8)));
+
         tm.commit(RootContext.getXID());
     }
 
 
     private static TransactionManager getTmAndBegin() throws TransactionException {
-        String app = "app01";
-        String group = "default";
+        String app = ProtocolTestConstants.APPLICATION_ID;
+        String group = ProtocolTestConstants.SERVICE_GROUP;
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(app, group);
         tmNettyRemotingClient.init();
         TransactionManager tm = new DefaultTransactionManager();
