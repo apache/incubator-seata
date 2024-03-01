@@ -16,10 +16,8 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
