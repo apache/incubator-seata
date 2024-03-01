@@ -41,7 +41,7 @@
         <hsf.version>1.8.3</hsf.version>
         <bytebuddy.version>1.12.17</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
-        <sofa.rpc.version>5.5.3</sofa.rpc.version>
+        <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
@@ -77,7 +77,7 @@
         <snakeyaml.version>2.0</snakeyaml.version>
         <netty.version>4.1.94.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
-        <sofa.bolt.version>1.6.7</sofa.bolt.version>
+        <sofa.bolt.version>1.6.6</sofa.bolt.version>
 
         <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
