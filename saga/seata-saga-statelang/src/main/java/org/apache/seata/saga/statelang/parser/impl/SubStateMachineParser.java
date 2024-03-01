@@ -18,11 +18,11 @@ package org.apache.seata.saga.statelang.parser.impl;
 
 import java.util.Map;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.SubStateMachine;
 import org.apache.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
-import org.springframework.util.StringUtils;
 
 /**
  * SubStateMachineParser

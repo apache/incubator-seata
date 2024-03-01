@@ -32,6 +32,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
@@ -48,12 +49,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
-    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private Set<String> methodsToProxy;
-    private Object targetBean;
+    protected Object targetBean;
 
-    private Map<Method, Annotation> parseAnnotationCache = new ConcurrentHashMap<>();
+    protected Map<Method, Annotation> parseAnnotationCache = new ConcurrentHashMap<>();
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         this.targetBean = targetBean;
@@ -155,6 +156,16 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     @Override
     public SeataInterceptorPosition getPosition() {
         return SeataInterceptorPosition.Any;
+    }
+
+    @Override
+    public int order() {
+        return 1;
+    }
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.TwoPhaseAnnotation.name();
     }
 
     protected TwoPhaseBusinessActionParam createTwoPhaseBusinessActionParam(Annotation annotation) {

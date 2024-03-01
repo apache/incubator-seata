@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
+            <artifactId>seata-saga-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-integration-tx-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -83,11 +88,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-integration-tx-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version>
@@ -110,6 +110,11 @@
             <artifactId>grpc-stub</artifactId>
             <version>1.27.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-tcc</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
