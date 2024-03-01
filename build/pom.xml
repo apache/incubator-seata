@@ -132,7 +132,7 @@
         <maven.test.skip>false</maven.test.skip>
         <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
-        <maven.surefire.excludes></maven.surefire.excludes>
+        <maven.surefire.excludes>includeFromCI</maven.surefire.excludes>
         <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
         <gpg.arg1/>
         <gpg.arg2/>
