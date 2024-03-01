@@ -34,6 +34,16 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
+            <artifactId>seata-saga-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-saga-engine-store</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-saga-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -100,6 +110,11 @@
             <artifactId>grpc-stub</artifactId>
             <version>1.27.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-tcc</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
