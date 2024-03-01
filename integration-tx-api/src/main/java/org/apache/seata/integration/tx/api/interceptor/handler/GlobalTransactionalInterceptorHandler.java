@@ -60,6 +60,7 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.FailureHandler;
 import org.apache.seata.tm.api.FailureHandlerHolder;
+import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor;
 import org.apache.seata.tm.api.TransactionalTemplate;
 import org.apache.seata.tm.api.transaction.NoRollbackRule;
