@@ -18,16 +18,18 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.exception.ErrorCode;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.protocol.AbstractMessage;
@@ -207,13 +209,12 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
         // Resource registration cannot be performed until the RM client is initialized
         if (StringUtils.isBlank(transactionServiceGroup)) {
-            return;
+            throw new SeataRuntimeException(ErrorCode.ERR_RM_RESOURCE_REGISTER,"The transactionServiceGroup required not blank");
         }
 
         // ResourceId can not be null or empty
         if (StringUtils.isBlank(resourceId)) {
-            LOGGER.warn("The resourceId must not be null or empty when registering the RM client.");
-            return;
+            throw new SeataRuntimeException(ErrorCode.ERR_RM_RESOURCE_REGISTER,"The resourceId required not blank");
         }
 
         if (getClientChannelManager().getChannels().isEmpty()) {
