@@ -17,6 +17,8 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.protocol.ResultCode;
@@ -40,19 +42,7 @@ public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
 
-    @BeforeAll
-    public static void before() {
-        MockServer.start();
-    }
-
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-    }
-
-    @Test
-    public void testTm() throws Exception {
-
+    public static void testTm() throws Exception {
         TransactionManager tm = getTm();
 
         //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
