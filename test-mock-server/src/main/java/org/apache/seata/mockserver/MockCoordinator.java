@@ -147,6 +147,8 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
             IntStream.range(0, retry).forEach(i ->
                     CallRm.branchCommit(remotingServer, branch));
         });
+        branchMap.remove(request.getXid());
+        globalStatusMap.remove(request.getXid());
     }
 
     @Override
@@ -167,6 +169,8 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
             IntStream.range(0, retry).forEach(i ->
                     CallRm.branchRollback(remotingServer, branch));
         });
+        branchMap.remove(request.getXid());
+        globalStatusMap.remove(request.getXid());
     }
 
     @Override
@@ -192,23 +196,20 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
 
         response.setBranchId(branchSession.getBranchId());
         response.setResultCode(ResultCode.Success);
-
-//        Thread thread = new Thread(() -> {
-//            try {
-//                Thread.sleep(1000);
-//                if (ProtocolConstants.VERSION_0 != Version.calcProtocolVersion(rpcContext.getVersion())) {
-//                    CallRm.deleteUndoLog(remotingServer, resourceId, clientId);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-//        thread.start();
     }
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException {
         checkMockActionFail(request.getXid());
+        String xid = request.getXid();
+        branchMap.compute(xid, (key, val) -> {
+            if (val != null) {
+                val.stream().filter(branch -> branch.getBranchId() == request.getBranchId()).forEach(branch -> {
+                    branch.setApplicationData(request.getApplicationData());
+                });
+            }
+            return val;
+        });
         response.setResultCode(ResultCode.Success);
     }
 
@@ -224,7 +225,7 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
         checkMockActionFail(request.getXid());
         GlobalStatus globalStatus = globalStatusMap.get(request.getXid());
         if (globalStatus == null) {
-            globalStatus = GlobalStatus.UnKnown;
+            globalStatus = GlobalStatus.Finished;
         }
         response.setGlobalStatus(globalStatus);
         response.setResultCode(ResultCode.Success);

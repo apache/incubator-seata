@@ -45,7 +45,6 @@ public class CallRm {
     public static BranchStatus branchCommit(RemotingServer remotingServer, BranchSession branchSession) {
         BranchCommitRequest request = new BranchCommitRequest();
         setReq(request, branchSession);
-
         try {
             BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
                     branchSession.getResourceId(), branchSession.getClientId(), request, false);
@@ -98,8 +97,7 @@ public class CallRm {
         request.setXid(branchSession.getXid());
         request.setBranchId(branchSession.getBranchId());
         request.setResourceId(branchSession.getResourceId());
-        request.setApplicationData("{\"k\":\"v\"}");
-        request.setBranchType(BranchType.TCC);
-        // todo AT SAGA
+        request.setApplicationData(branchSession.getApplicationData());
+        request.setBranchType(branchSession.getBranchType());
     }
 }

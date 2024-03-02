@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,10 @@ public class MockServer {
     private static ThreadPoolExecutor workingThreads;
     private static MockNettyRemotingServer nettyRemotingServer;
 
+    private static volatile boolean inited = false;
+
+    public static final int DEFAULT_PORT = 8091;
+
     /**
      * The entry point of application.
      *
@@ -48,32 +53,51 @@ public class MockServer {
      */
     public static void main(String[] args) {
         SpringApplication.run(MockServer.class, args);
-        start();
+
+        ParameterParser parameterParser = new ParameterParser(args);
+        int port = parameterParser.getPort() > 0 ? parameterParser.getPort() : DEFAULT_PORT;
+        start(port);
     }
 
-    public static void start() {
-        workingThreads = new ThreadPoolExecutor(50,
-                50, 500, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(20000),
-                new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
-        nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
+    public static void start(int port) {
+        if (!inited) {
+            synchronized (MockServer.class) {
+                if (!inited) {
+                    inited = true;
+                    workingThreads = new ThreadPoolExecutor(50,
+                            50, 500, TimeUnit.SECONDS,
+                            new LinkedBlockingQueue<>(20000),
+                            new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
+                    nettyRemotingServer = new MockNettyRemotingServer(workingThreads);
 
-        // set registry
-        XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(8092);
-        // init snowflake for transactionId, branchId
-        UUIDGenerator.init(1L);
+                    // set registry
+                    XID.setIpAddress(NetUtil.getLocalIp());
+                    XID.setPort(port);
+                    // init snowflake for transactionId, branchId
+                    UUIDGenerator.init(1L);
 
-        MockCoordinator coordinator = MockCoordinator.getInstance();
-        coordinator.setRemotingServer(nettyRemotingServer);
-        nettyRemotingServer.setHandler(coordinator);
-        nettyRemotingServer.init();
+                    MockCoordinator coordinator = MockCoordinator.getInstance();
+                    coordinator.setRemotingServer(nettyRemotingServer);
+                    nettyRemotingServer.setHandler(coordinator);
+                    nettyRemotingServer.init();
 
-        LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                }
+            }
+        }
+
+
     }
 
     public static void close() {
-        workingThreads.shutdown();
-        nettyRemotingServer.destroy();
+        if (inited) {
+            synchronized (MockServer.class) {
+                if (inited) {
+                    inited = false;
+                    workingThreads.shutdown();
+                    nettyRemotingServer.destroy();
+                }
+            }
+        }
     }
 }

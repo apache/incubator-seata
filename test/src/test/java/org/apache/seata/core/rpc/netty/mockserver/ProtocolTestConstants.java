@@ -18,10 +18,10 @@ package org.apache.seata.core.rpc.netty.mockserver;
 
 /**
  * Mock Constants
- *
  **/
 public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "my_app_test";
-    public static final String SERVICE_GROUP = "default_tx_group";
-    public static final String SERVER_ADDRESS = "0.0.0.0:8091";
+    public static final String SERVICE_GROUP = "mock_tx_group";
+    public static final int MOCK_SERVER_PORT = 8099;
+    public static final String MOCK_SERVER_ADDRESS = "0.0.0.0:" + MOCK_SERVER_PORT;
 }

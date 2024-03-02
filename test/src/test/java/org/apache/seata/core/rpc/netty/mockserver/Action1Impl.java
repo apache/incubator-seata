@@ -41,7 +41,7 @@ public class Action1Impl implements Action1 {
     @Override
     public boolean commitTcc(BusinessActionContext actionContext) {
         String xid = actionContext.getXid();
-        System.out.println("commitTcc:" + xid);
+        System.out.println("commitTcc:" + xid + "," + actionContext.getActionContext());
         commitMap.compute(xid, (k, v) -> v == null ? 1 : v + 1);
         return true;
     }
@@ -49,9 +49,8 @@ public class Action1Impl implements Action1 {
     @Override
     public boolean cancel(BusinessActionContext actionContext) {
         String xid = actionContext.getXid();
-        System.out.println("commitTcc:" + xid);
+        System.out.println("cancelTcc:" + xid + "," + actionContext.getActionContext());
         rollbackMap.compute(xid, (k, v) -> v == null ? 1 : v + 1);
-        System.out.println("cancel");
         return true;
     }
 
