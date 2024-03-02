@@ -31,6 +31,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.config.CommonFenceConfig;
 import org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
@@ -38,21 +39,21 @@ import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvo
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
 
+
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
-
 
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
-    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private Set<String> methodsToProxy;
-    private Object targetBean;
+    protected Object targetBean;
 
-    private Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
+    protected Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         this.targetBean = targetBean;
@@ -167,4 +168,13 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return SeataInterceptorPosition.Any;
     }
 
+    @Override
+    public int order() {
+        return 1;
+    }
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.TwoPhaseAnnotation.name();
+    }
 }

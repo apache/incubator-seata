@@ -16,9 +16,9 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
-import java.util.concurrent.ConcurrentMap;
-
 import io.netty.channel.Channel;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -37,26 +37,16 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * rm client test
  **/
 public class RmClientTest {
 
-
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
 
-    @BeforeAll
-    public static void before() {
-        MockServer.start();
-    }
-
-    @AfterAll
-    public static void after() {
-        MockServer.close();
-    }
-
-    @Test
-    public void testRm() throws TransactionException {
+    public static void testRm() throws TransactionException {
         String resourceId = "mock-action";
         String xid = "1111";
 
