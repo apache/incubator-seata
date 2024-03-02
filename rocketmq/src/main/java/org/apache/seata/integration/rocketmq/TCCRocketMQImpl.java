@@ -42,7 +42,7 @@ import java.util.concurrent.TimeoutException;
 @LocalTCC
 public class TCCRocketMQImpl implements TCCRocketMQ {
     private static final Logger LOGGER = LoggerFactory.getLogger(TCCRocketMQImpl.class);
-    private static final String ROCKET_MSG_KEY = "ROCKET_MSG";
+    private static final String ROCKET_MSG_TRANSACTION_ID_KEY = "ROCKET_MSG_TRANSACTION_ID";
     private static final String ROCKET_SEND_RESULT_KEY = "ROCKET_SEND_RESULT";
 
     private SeataMQProducer producer;
@@ -61,7 +61,7 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
         LOGGER.info("RocketMQ message send prepare, xid = {}", context.getXid());
         Map<String, Object> params = new HashMap<>(8);
         SendResult sendResult = producer.doSendMessageInTransaction(message, timeout, context.getXid(), context.getBranchId());
-        params.put(ROCKET_MSG_KEY, message);
+        params.put(ROCKET_MSG_TRANSACTION_ID_KEY, message.getTransactionId());
         params.put(ROCKET_SEND_RESULT_KEY, sendResult);
         BusinessActionContextUtil.addContext(params);
         return sendResult;
@@ -70,11 +70,13 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     @Override
     public boolean commit(BusinessActionContext context)
             throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException, TransactionException {
-        Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
+        String transactionId = context.getActionContext(ROCKET_MSG_TRANSACTION_ID_KEY, String.class);
         SendResult sendResult = context.getActionContext(ROCKET_SEND_RESULT_KEY, SendResult.class);
-        if (message == null || sendResult == null) {
+        if (transactionId == null || sendResult == null) {
             throw new TransactionException("TCCRocketMQ commit but cannot find message and sendResult");
         }
+        Message message = new Message();
+        message.setTransactionId(transactionId);
         this.producerImpl.endTransaction(message, sendResult, LocalTransactionState.COMMIT_MESSAGE, null);
         LOGGER.info("RocketMQ message send commit, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;
@@ -83,11 +85,13 @@ public class TCCRocketMQImpl implements TCCRocketMQ {
     @Override
     public boolean rollback(BusinessActionContext context)
             throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TransactionException {
-        Message message = context.getActionContext(ROCKET_MSG_KEY, Message.class);
+        String transactionId = context.getActionContext(ROCKET_MSG_TRANSACTION_ID_KEY, String.class);
         SendResult sendResult = context.getActionContext(ROCKET_SEND_RESULT_KEY, SendResult.class);
-        if (message == null || sendResult == null) {
+        if (transactionId == null || sendResult == null) {
             LOGGER.error("TCCRocketMQ rollback but cannot find message and sendResult");
         }
+        Message message = new Message();
+        message.setTransactionId(transactionId);
         this.producerImpl.endTransaction(message, sendResult, LocalTransactionState.ROLLBACK_MESSAGE, null);
         LOGGER.info("RocketMQ message send rollback, xid = {}, branchId = {}", context.getXid(), context.getBranchId());
         return true;

@@ -16,22 +16,27 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
+import org.apache.rocketmq.client.consumer.MQPushConsumer;
+import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
+import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.TransactionManager;
-import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
 import org.apache.seata.core.rpc.netty.mockserver.TmClientTest;
 import org.apache.seata.mockserver.MockServer;
-import org.apache.seata.tm.DefaultTransactionManager;
+import org.apache.seata.rm.RMClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
@@ -41,9 +46,16 @@ import java.nio.charset.StandardCharsets;
 @Tag("excludeCI")
 public class SeataMQProducerSendTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
+
+
+    public static String TOPIC = "yourTopic";
+    public static String NAME_SERVER = "yourIp:9876";
+
     @BeforeAll
-    public static void before() {
+    public static void before() throws MQClientException {
         MockServer.start();
+        startConsume();
         // should start mq server here
     }
 
@@ -52,34 +64,50 @@ public class SeataMQProducerSendTest {
         MockServer.close();
     }
 
-    @Test
+//    @Test
     public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
-        TransactionManager tm = TmClientTest.getTm();
+        TransactionManager tm = getTmAndBegin();
 
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle("yourIp:9876", "test");
-        producer.send(new Message("yourTopic", "testMessage".getBytes(StandardCharsets.UTF_8)));
+        SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
+        producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
+        Thread.sleep(2000);
         tm.commit(RootContext.getXID());
+        LOGGER.info("commit ok");
+        Thread.sleep(2000);
     }
 
-    @Test
+//    @Test
     public void testSendRollback() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
-        TransactionManager tm = TmClientTest.getTm();
+        TransactionManager tm = getTmAndBegin();
 
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle("yourIp:9876", "test");
-        producer.send(new Message("yourTopic", "testMessage".getBytes(StandardCharsets.UTF_8)));
+        SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
+        producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
+        Thread.sleep(2000);
         tm.rollback(RootContext.getXID());
+        LOGGER.info("rollback ok");
+        Thread.sleep(2000);
+    }
+
+
+    private static MQPushConsumer startConsume() throws MQClientException {
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("yourGroup");
+        consumer.setNamesrvAddr(NAME_SERVER);
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+        consumer.subscribe(TOPIC,"*");
+        consumer.registerMessageListener((MessageListenerConcurrently) (msg, context) -> {
+            System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msg);
+            return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+        });
+        return consumer;
     }
 
 
     private static TransactionManager getTmAndBegin() throws TransactionException {
-        String app = ProtocolTestConstants.APPLICATION_ID;
-        String group = ProtocolTestConstants.SERVICE_GROUP;
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(app, group);
-        tmNettyRemotingClient.init();
-        TransactionManager tm = new DefaultTransactionManager();
-        String xid = tm.begin(app, group, "test", 60000);
+        TransactionManager tm = TmClientTest.getTm();
+        RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
+        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "testRocket", 60000);
         RootContext.bind(xid);
         return tm;
     }
