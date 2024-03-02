@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * seata mq producer test
@@ -58,7 +60,6 @@ public class SeataMQProducerSendTest {
     @BeforeAll
     public static void before() throws MQClientException {
         MockServer.start();
-        startConsume();
         // should start mq server here
     }
 
@@ -71,36 +72,44 @@ public class SeataMQProducerSendTest {
     public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        MQPushConsumer consumer = startConsume(countDownLatch);
         SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
-        Thread.sleep(2000);
         tm.commit(RootContext.getXID());
-        LOGGER.info("commit ok");
-        Thread.sleep(2000);
+        LOGGER.info("global commit");
+        boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
+        LOGGER.info("await:{}", await);
+        consumer.shutdown();
     }
 
 //    @Test
     public void testSendRollback() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        MQPushConsumer consumer = startConsume(countDownLatch);
         SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
         Thread.sleep(2000);
         tm.rollback(RootContext.getXID());
-        LOGGER.info("rollback ok");
-        Thread.sleep(2000);
+        LOGGER.info("global rollback");
+        boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
+        LOGGER.info("await:{}", await);
+        consumer.shutdown();
     }
 
 
-    private static MQPushConsumer startConsume() throws MQClientException {
+    private static MQPushConsumer startConsume(CountDownLatch countDownLatch) throws MQClientException {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("yourGroup");
         consumer.setNamesrvAddr(NAME_SERVER);
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
         consumer.subscribe(TOPIC,"*");
         consumer.registerMessageListener((MessageListenerConcurrently) (msg, context) -> {
-            System.out.printf("%s Receive New Messages: %s %n", Thread.currentThread().getName(), msg);
+            LOGGER.info("%s Receive New Messages: {} {}", Thread.currentThread().getName(), msg);
+            countDownLatch.countDown();
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
         return consumer;
