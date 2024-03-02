@@ -49,8 +49,11 @@ public class SeataMQProducerSendTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
 
 
-    public static String TOPIC = "yourTopic";
-    public static String NAME_SERVER = "yourIp:9876";
+    public static String TOPIC = "Topic--AA";
+    public static String NAME_SERVER = "10.213.3.25:9876";
+
+//    public static String TOPIC = "yourTopic";
+//    public static String NAME_SERVER = "yourIp:9876";
 
     @BeforeAll
     public static void before() throws MQClientException {
