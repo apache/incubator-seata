@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * The type Default failure handler.
  *
  */
-public class DefaultFailureHandlerImpl implements ApacheSeataFailureHandler {
+public class DefaultFailureHandlerImpl implements TMFailureHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
 

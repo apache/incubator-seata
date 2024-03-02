@@ -16,10 +16,5 @@
  */
 package org.apache.seata.tm.api;
 
-/**
- * Callback on failure.
- *
- */
-public interface ApacheSeataFailureHandler extends FailureHandler<GlobalTransaction> {
-
+public interface BaseTransaction {
 }
