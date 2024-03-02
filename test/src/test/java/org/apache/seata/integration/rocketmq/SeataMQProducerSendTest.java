@@ -77,6 +77,7 @@ public class SeataMQProducerSendTest {
         SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
+        Thread.sleep(2000);
         tm.commit(RootContext.getXID());
         LOGGER.info("global commit");
         boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
