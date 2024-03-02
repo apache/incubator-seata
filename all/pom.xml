@@ -330,6 +330,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-saga-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- spring  -->
         <dependency>
             <groupId>org.springframework</groupId>

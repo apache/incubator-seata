@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.tcc.interceptor.parser;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,13 +41,14 @@ public class TccActionInterceptorParser implements InterfaceParser {
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
         // eliminate the bean without two phase annotation.
-        Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
+        Set<String> methodsToProxy = this.parseProxyTargetMethod(target);
         if (methodsToProxy.isEmpty()) {
             return null;
         }
         // register resource and enhance with interceptor
         DefaultResourceRegisterParser.get().registerResource(target, objectName);
-        return new TccActionInterceptorHandler(target, methodsToProxy);
+        ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler(target, methodsToProxy);
+        return proxyInvocationHandler;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
      * @return boolean boolean
      */
 
-    private Set<String> tccProxyTargetMethod(Object target) {
+    protected Set<String> parseProxyTargetMethod(Object target) {
         Set<String> methodsToProxy = new HashSet<>();
         //check if it is TCC bean
         Class<?> tccServiceClazz = target.getClass();
@@ -78,10 +80,9 @@ public class TccActionInterceptorParser implements InterfaceParser {
             }
         }
 
-        TwoPhaseBusinessAction twoPhaseBusinessAction;
+        Class<? extends Annotation> twoPhaseBusinessAction = getAnnotationClass();
         for (Method method : methods) {
-            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (twoPhaseBusinessAction != null) {
+            if (method.isAnnotationPresent(twoPhaseBusinessAction)) {
                 methodsToProxy.add(method.getName());
             }
         }
@@ -91,5 +92,14 @@ public class TccActionInterceptorParser implements InterfaceParser {
         }
         // sofa:reference /  dubbo:reference, AOP
         return methodsToProxy;
+    }
+
+    protected ProxyInvocationHandler createProxyInvocationHandler(Object target, Set<String> methodsToProxy) {
+        ProxyInvocationHandler proxyInvocationHandler = new TccActionInterceptorHandler(target, methodsToProxy);
+        return proxyInvocationHandler;
+    }
+
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return TwoPhaseBusinessAction.class;
     }
 }

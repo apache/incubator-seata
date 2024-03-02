@@ -43,7 +43,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     /**
      * TCC resource cache
      */
-    private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<>();
+    private Map<String, Resource> resourceCache = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new Tcc resource manager.
@@ -53,20 +53,19 @@ public class TCCResourceManager extends AbstractResourceManager {
     }
 
     /**
-     * registry TCC resource
+     * registry resource
      *
      * @param resource The resource to be managed.
      */
     @Override
     public void registerResource(Resource resource) {
-        TCCResource tccResource = (TCCResource)resource;
-        tccResourceCache.put(tccResource.getResourceId(), tccResource);
-        super.registerResource(tccResource);
+        resourceCache.put(resource.getResourceId(), resource);
+        super.registerResource(resource);
     }
 
     @Override
     public Map<String, Resource> getManagedResources() {
-        return tccResourceCache;
+        return resourceCache;
     }
 
     /**
@@ -83,7 +82,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
-        TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
+        TCCResource tccResource = (TCCResource)resourceCache.get(resourceId);
         if (tccResource == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
@@ -142,27 +141,27 @@ public class TCCResourceManager extends AbstractResourceManager {
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
                                        String applicationData) throws TransactionException {
-        TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
-        if (tccResource == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
+        Resource resource = resourceCache.get(resourceId);
+        if (resource == null) {
+            throw new ShouldNeverHappenException(String.format("%s resource is not exist, resourceId: %s", getBranchType(), resourceId));
         }
-        Object targetTCCBean = tccResource.getTargetBean();
-        Method rollbackMethod = tccResource.getRollbackMethod();
+        Object targetTCCBean = getTargetBean(resource);
+        Method rollbackMethod = getRollbackMethod(resource);
         if (targetTCCBean == null || rollbackMethod == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
+            throw new ShouldNeverHappenException(String.format("%s resource is not available, resourceId: %s", getBranchType(), resourceId));
         }
         try {
             //BusinessActionContext
             BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
-            Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
+            Object[] args = this.getTwoPhaseRollbackArgs(resource, businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
                     result = DefaultCommonFenceHandler.get().rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
-                            args, tccResource.getActionName());
+                            args, resolveActionName(resource));
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -178,10 +177,10 @@ public class TCCResourceManager extends AbstractResourceManager {
                     result = true;
                 }
             }
-            LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", result, xid, branchId, resourceId);
+            LOGGER.info("{} resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", getBranchType(), result, xid, branchId, resourceId);
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
-            String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
+            String msg = String.format("rollback %s resource error, resourceId: %s, xid: %s.", getBranchType(), resourceId, xid);
             LOGGER.error(msg, t);
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
@@ -201,14 +200,28 @@ public class TCCResourceManager extends AbstractResourceManager {
 
     /**
      * get phase two rollback method's args
-     * @param tccResource tccResource
+     * @param resource resource
      * @param businessActionContext businessActionContext
      * @return args
      */
-    private Object[] getTwoPhaseRollbackArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
-        String[] keys = tccResource.getPhaseTwoRollbackKeys();
-        Class<?>[] argsRollbackClasses = tccResource.getRollbackArgsClasses();
+    protected Object[] getTwoPhaseRollbackArgs(Resource resource, BusinessActionContext businessActionContext) {
+        String[] keys = ((TCCResource) resource).getPhaseTwoRollbackKeys();
+        Class<?>[] argsRollbackClasses = ((TCCResource) resource).getRollbackArgsClasses();
         return BusinessActionContextUtil.getTwoPhaseMethodParams(keys, argsRollbackClasses, businessActionContext);
+    }
+
+    protected Object getTargetBean(Resource resource) {
+        Object targetTCCBean = ((TCCResource) resource).getTargetBean();
+        return targetTCCBean;
+    }
+
+    protected Method getRollbackMethod(Resource resource) {
+        Method rollbackMethod = ((TCCResource) resource).getRollbackMethod();
+        return rollbackMethod;
+    }
+
+    protected String resolveActionName(Resource resource) {
+        return ((TCCResource) resource).getActionName();
     }
 
     @Override
