@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rocketmq;
+package org.apache.seata.integration.rocketmq;
 
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -26,8 +26,6 @@ import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
 import org.apache.seata.core.rpc.netty.mockserver.TmClientTest;
-import org.apache.seata.integration.rocketmq.SeataMQProducer;
-import org.apache.seata.integration.rocketmq.SeataMQProducerFactory;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.tm.DefaultTransactionManager;
 import org.junit.jupiter.api.AfterAll;
