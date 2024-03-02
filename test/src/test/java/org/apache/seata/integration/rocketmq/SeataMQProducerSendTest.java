@@ -113,6 +113,7 @@ public class SeataMQProducerSendTest {
             countDownLatch.countDown();
             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
         });
+        consumer.start();
         return consumer;
     }
 
