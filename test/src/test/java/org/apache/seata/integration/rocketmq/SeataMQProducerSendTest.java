@@ -33,8 +33,10 @@ import org.apache.seata.core.rpc.netty.mockserver.TmClientTest;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.RMClient;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * seata mq producer test
  **/
-@Tag("excludeCI")
 public class SeataMQProducerSendTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
@@ -53,9 +54,6 @@ public class SeataMQProducerSendTest {
 
     public static String TOPIC = "Topic--AA";
     public static String NAME_SERVER = "10.213.3.25:9876";
-
-//    public static String TOPIC = "yourTopic";
-//    public static String NAME_SERVER = "yourIp:9876";
 
     @BeforeAll
     public static void before() throws MQClientException {
@@ -68,7 +66,8 @@ public class SeataMQProducerSendTest {
         MockServer.close();
     }
 
-//    @Test
+    @Test
+    @Disabled
     public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
@@ -77,16 +76,18 @@ public class SeataMQProducerSendTest {
         SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
-        Thread.sleep(2000);
         tm.commit(RootContext.getXID());
         LOGGER.info("global commit");
-        boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
+        boolean await = countDownLatch.await(2, TimeUnit.SECONDS);
         LOGGER.info("await:{}", await);
+        producer.shutdown();
         consumer.shutdown();
     }
 
-//    @Test
-    public void testSendRollback() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
+    @Test
+    @Disabled
+    public void testSendRollback()
+        throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -94,12 +95,17 @@ public class SeataMQProducerSendTest {
         SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
-        Thread.sleep(2000);
         tm.rollback(RootContext.getXID());
         LOGGER.info("global rollback");
-        boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
-        LOGGER.info("await:{}", await);
-        consumer.shutdown();
+        try {
+            boolean await = countDownLatch.await(2, TimeUnit.SECONDS);
+            LOGGER.info("await:{}", await);
+        } catch (Exception e) {
+            Assertions.assertEquals(e.getClass(), InterruptedException.class);
+        } finally {
+            producer.shutdown();
+            consumer.shutdown();
+        }
     }
 
 
