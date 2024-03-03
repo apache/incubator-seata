@@ -54,13 +54,16 @@ public class SeataMQProducerSendTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
 
 
-    public static String TOPIC = "seata-test";
-    public static String NAME_SERVER = "127.0.0.1:9876";
+    private static final String TOPIC = "seata-test";
+    private static final String NAME_SERVER = "127.0.0.1:9876";
+
+    private static SeataMQProducer producer;
 
     @BeforeAll
     public static void before() throws MQClientException {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
+        producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         // should start mq server here
     }
 
@@ -68,6 +71,7 @@ public class SeataMQProducerSendTest {
     public static void after() {
         MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        producer.shutdown();
     }
 
     @Test
@@ -77,14 +81,12 @@ public class SeataMQProducerSendTest {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
         MQPushConsumer consumer = startConsume(countDownLatch);
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
         tm.commit(RootContext.getXID());
         LOGGER.info("global commit");
         boolean await = countDownLatch.await(2, TimeUnit.SECONDS);
         LOGGER.info("await:{}", await);
-        producer.shutdown();
         consumer.shutdown();
     }
 
@@ -96,7 +98,7 @@ public class SeataMQProducerSendTest {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
         MQPushConsumer consumer = startConsume(countDownLatch);
-        SeataMQProducer producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
+
         producer.send(new Message(TOPIC, "testMessage".getBytes(StandardCharsets.UTF_8)));
 
         tm.rollback(RootContext.getXID());
@@ -107,7 +109,6 @@ public class SeataMQProducerSendTest {
         } catch (Exception e) {
             Assertions.assertEquals(e.getClass(), InterruptedException.class);
         } finally {
-            producer.shutdown();
             consumer.shutdown();
         }
     }
