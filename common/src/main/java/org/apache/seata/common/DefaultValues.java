@@ -312,4 +312,6 @@ public interface DefaultValues {
      * Default druid location in classpath
      */
     String DRUID_LOCATION = "lib/sqlparser/druid.jar";
+
+    int DEFAULT_ROCKET_MQ_MSG_TIMEOUT = 60 * 1000;
 }
