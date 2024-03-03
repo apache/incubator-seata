@@ -193,6 +193,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
+                <artifactId>seata-rocketmq</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-rm</artifactId>
                 <version>${project.version}</version>
             </dependency>

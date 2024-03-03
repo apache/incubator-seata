@@ -51,4 +51,13 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
      * @return The BranchType of ResourceManager.
      */
     BranchType getBranchType();
+
+    /**
+     * Get the GlobalStatus.
+     *
+     * @param branchType The BranchType of ResourceManager.
+     * @param xid The xid of transaction.
+     * @return The GlobalStatus of transaction.
+     */
+    GlobalStatus getGlobalStatus(BranchType branchType, String xid);
 }

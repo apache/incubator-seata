@@ -24,53 +24,26 @@
         <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-spring-boot-starter</artifactId>
+    <artifactId>seata-rocketmq</artifactId>
     <packaging>jar</packaging>
-    <name>seata-spring-boot-starter ${project.version}</name>
-    <description>spring-boot-starter for Seata built with Maven</description>
+    <name>seata-rocketmq ${project.version}</name>
+    <description>rocketmq integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-spring-autoconfigure-client</artifactId>
+            <artifactId>seata-tcc</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <!--seata-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-all</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--spring-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
-            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+
 
 </project>
