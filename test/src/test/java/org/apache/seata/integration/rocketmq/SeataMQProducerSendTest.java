@@ -54,7 +54,7 @@ public class SeataMQProducerSendTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
 
 
-    public static String TOPIC = "Topic--AA";
+    public static String TOPIC = "seata-test";
     public static String NAME_SERVER = "127.0.0.1:9876";
 
     @BeforeAll
