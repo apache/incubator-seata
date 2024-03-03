@@ -88,7 +88,7 @@ public class SeataSagaAutoConfiguration {
     public StateMachineEngine stateMachineEngine(StateMachineConfig config) {
         ProcessCtrlStateMachineEngine engine = new ProcessCtrlStateMachineEngine();
         engine.setStateMachineConfig(config);
-        new StateMachineEngineHolder().setStateMachineEngine(engine);
+        StateMachineEngineHolder.setStateMachineEngine(engine);
         return engine;
     }
 

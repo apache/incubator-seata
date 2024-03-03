@@ -17,9 +17,6 @@
 package org.apache.seata.rm.tcc;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
-import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
-
-import java.util.List;
 
 /**
  * The type Tcc action.
@@ -27,23 +24,38 @@ import java.util.List;
  */
 public class TccActionImpl implements TccAction {
 
+    private boolean isCommit;
+
+
     @Override
-    public boolean prepare(BusinessActionContext actionContext,
-                           int a,
-                           List b,
-                           TccParam TccParam  ) {
+    public boolean prepare(BusinessActionContext actionContext) {
         return true;
     }
 
     @Override
-    public boolean commit(BusinessActionContext actionContext,
-                          @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a) {
+    public boolean commit(BusinessActionContext actionContext) {
+        isCommit = true;
         return true;
     }
 
     @Override
-    public boolean rollback(BusinessActionContext actionContext,
-                            @BusinessActionContextParameter("tccParam") TccParam param) {
+    public boolean commitWithArg(BusinessActionContext actionContext, TccParam param, Integer a) {
+        return false;
+    }
+
+
+    @Override
+    public boolean rollback(BusinessActionContext actionContext) {
         return true;
+    }
+
+    @Override
+    public boolean rollbackWithArg(BusinessActionContext actionContext, TccParam param) {
+        return false;
+    }
+
+
+    public boolean isCommit() {
+        return isCommit;
     }
 }
