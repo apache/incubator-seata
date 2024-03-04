@@ -329,13 +329,14 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     private void syncCurrentNodeInfo(PeerId leaderPeerId) {
-        if(init.compareAndSet(false,true)) {
+        if (init.compareAndSet(false, true)) {
             try {
                 RaftServer raftServer = RaftServerManager.getRaftServer(group);
                 PeerId cureentPeerId = raftServer.getServerId();
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
-                    cureentPeerId.getPort(), Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(
-                        OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT)).getProperty("server.port", String.valueOf(8088))),
+                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), cureentPeerId.getPort(),
+                    Integer.parseInt(
+                        ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                            .getProperty("server.port", String.valueOf(8088))),
                     group, Collections.emptyMap());
                 InvokeContext invokeContext = new InvokeContext();
                 PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
@@ -348,8 +349,8 @@ public class RaftStateMachine extends StateMachineAdapter {
                     (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
                 // The previous leader may be an old snapshot or log playback, which is not accurate, and you
                 // need to get the leader again
-                cliClientService.getRpcClient()
-                    .invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest, invokeContext, (result, err) -> {
+                cliClientService.getRpcClient().invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest,
+                    invokeContext, (result, err) -> {
                         if (err == null) {
                             LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
                         } else {
