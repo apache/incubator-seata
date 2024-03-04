@@ -1,6 +1,6 @@
 # Script Description
 
-## [client](https://github.com/seata/seata/tree/develop/script/client) 
+## [client](https://github.com/apache/incubator-seata/tree/develop/script/client) 
 
 > Store configuration and SQL for client side
 
@@ -9,7 +9,7 @@
 - saga: Script of create table in SAGA mode
 - spring: Configuration for Spring Boot 
 
-## [server](https://github.com/seata/seata/tree/develop/script/server)
+## [server](https://github.com/apache/incubator-seata/tree/develop/script/server)
 
 > Store SQL and deploy script for server side
 
@@ -18,7 +18,7 @@
 - helm: Script for deploy server by Helm
 - kubernetes: Script for deploy server by Kubernetes
 
-## [config-center](https://github.com/seata/seata/tree/develop/script/config-center)
+## [config-center](https://github.com/apache/incubator-seata/tree/develop/script/config-center)
 
 > Store initialize script for configuration center, will use `config.txt` as configuration when initial
 

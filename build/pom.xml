@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.seata</groupId>
+    <groupId>org.apache.seata</groupId>
     <artifactId>seata-build</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
@@ -38,30 +38,30 @@
     </licenses>
 
     <organization>
-        <name>Seata</name>
-        <url>https://github.com/seata</url>
+        <name>Apache</name>
+        <url>https://github.com/apache</url>
     </organization>
 
-    <url>https://seata.io</url>
+    <url>https://seata.apache.org</url>
 
     <developers>
         <developer>
             <id>Seata</id>
             <name>Seata</name>
-            <url>https://seata.io</url>
-            <email>dev-seata@googlegroups.com</email>
+            <url>https://seata.apache.org</url>
+            <email>dev@seata.apache.org</email>
         </developer>
     </developers>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/seata/seata/issues</url>
+        <url>https://github.com/apache/incubator-seata/issues</url>
     </issueManagement>
 
     <scm>
-        <url>git@github.com:seata/seata.git</url>
-        <connection>scm:git@github.com:seata/seata.git</connection>
-        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
+        <url>git@github.com:apache/incubator-seata.git</url>
+        <connection>scm:git@github.com:apache/incubator-seata.git</connection>
+        <developerConnection>scm:git@github.com:apache/incubator-seata.git</developerConnection>
     </scm>
 
     <properties>
@@ -76,8 +76,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.5.13</spring-boot.version>
-        <spring-framework.version>5.3.20</spring-framework.version>
+        <spring-boot.version>2.5.15</spring-boot.version>
+        <spring-framework.version>5.3.27</spring-framework.version>
+
+        <!--  server side dependency-->
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+        <kafka-clients.version>3.6.1</kafka-clients.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -111,6 +116,7 @@
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
         <jib-maven-plugin.version>3.2.0</jib-maven-plugin.version>
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
+        <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
         <!-- Deploy && GPG -->
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
@@ -122,6 +128,7 @@
         <!-- Default values of the Maven plugins -->
         <checkstyle.skip>true</checkstyle.skip>
         <license.skip>true</license.skip>
+        <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
@@ -223,12 +230,19 @@
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
                         <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
                         <includeOnlyProperties>
+                            <includeOnlyProperty>git.commit.message.full</includeOnlyProperty>
+                            <includeOnlyProperty>git.remote.origin.url</includeOnlyProperty>
                             <includeOnlyProperty>git.branch</includeOnlyProperty>
                             <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
                             <includeOnlyProperty>^git.commit.(id|time)$</includeOnlyProperty>
                             <includeOnlyProperty>git.dirty</includeOnlyProperty>
                         </includeOnlyProperties>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>${frontend-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -444,7 +458,7 @@
         <profile>
             <id>args-for-client-test</id>
             <properties>
-                <maven.surefire.excludes>io/seata/server/**/*.java,io/seata/console/**/*.java</maven.surefire.excludes>
+                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>

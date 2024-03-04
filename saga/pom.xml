@@ -21,7 +21,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -36,8 +36,8 @@
         <module>seata-saga-statelang</module>
         <module>seata-saga-engine</module>
         <module>seata-saga-rm</module>
-        <module>seata-saga-tm</module>
         <module>seata-saga-engine-store</module>
+        <module>seata-saga-spring</module>
     </modules>
 
     <dependencies>

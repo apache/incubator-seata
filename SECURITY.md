@@ -1,6 +1,7 @@
 # Security Policy
 
-## Reporting a security issue
+This is a project of the [Apache Software Foundation](https://apache.org) and follows the ASF [vulnerability handling process](https://apache.org/security/#vulnerability-handling).
 
-If you think the bug you found is likely to make Seata-based applications vulnerable to an attack, please do not use 
-our public issue tracker but report it to [ASRC(Alibaba Security Response Center)](https://security.alibaba.com/).
+## Reporting a Vulnerability
+
+To report a new vulnerability you have discovered please follow the [ASF vulnerability reporting process](https://apache.org/security/#reporting-a-vulnerability).

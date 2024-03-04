@@ -22,7 +22,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>seata-saga</artifactId>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -33,22 +33,17 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-engine</artifactId>
+            <artifactId>seata-saga-statelang</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-rm</artifactId>
+            <artifactId>seata-saga-processctrl</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-tm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-serializer-all</artifactId>
+            <artifactId>seata-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

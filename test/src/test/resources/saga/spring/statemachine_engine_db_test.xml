@@ -18,12 +18,10 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:context="http://www.springframework.org/schema/context"
-	   xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	   xsi:schemaLocation="
-	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
 	<bean id="dataSource" class="org.h2.jdbcx.JdbcConnectionPool" destroy-method="dispose">
@@ -41,18 +39,18 @@
 		<jdbc:script location="classpath:saga/sql/h2_init.sql" />
 	</jdbc:initialize-database>
 
-	<bean id="stateMachineEngine" class="io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
-		<property name="stateMachineConfig" ref="dbStateMachineConfig"></property>
+	<bean id="stateMachineEngine" class="org.apache.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
+		<property name="stateMachineConfig" ref="dbStateMachineConfig"/>
 	</bean>
-	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
-		<property name="dataSource" ref="dataSource"></property>
-		<property name="resources" value="saga/statelang/*.json"></property>
-		<property name="enableAsync" value="true"></property>
-		<property name="threadPoolExecutor" ref="threadExecutor"></property>
-		<property name="applicationId" value="test_saga"></property>
-		<property name="txServiceGroup" value="default_tx_group"></property>
-		<property name="sagaBranchRegisterEnable" value="false"></property>
-		<property name="sagaJsonParser" value="jackson"></property>
+	<bean id="dbStateMachineConfig" class="org.apache.seata.saga.engine.config.DbStateMachineConfig">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="resources" value="saga/statelang/*.json"/>
+		<property name="enableAsync" value="true"/>
+		<property name="threadPoolExecutor" ref="threadExecutor"/>
+		<property name="applicationId" value="test_saga"/>
+		<property name="txServiceGroup" value="default_tx_group"/>
+		<property name="sagaBranchRegisterEnable" value="false"/>
+		<property name="sagaJsonParser" value="jackson"/>
 		<property name="sagaRetryPersistModeUpdate" value="false" />
 		<property name="sagaCompensatePersistModeUpdate" value="false" />
 	</bean>
@@ -69,10 +67,6 @@
 	<bean name="callerRunsPolicy" class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy">
 	</bean>
 
-	<bean class="io.seata.saga.rm.StateMachineEngineHolder">
-		<property name="stateMachineEngine" ref="stateMachineEngine"/>
-	</bean>
 
-
-	<bean id="demoService" class="io.seata.saga.engine.mock.DemoService"/>
+	<bean id="demoService" class="org.apache.seata.saga.engine.mock.DemoService"/>
 </beans>
