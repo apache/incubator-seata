@@ -70,7 +70,6 @@ seata:
       default_tx_group: default
     grouplist:
       default: 127.0.0.1:8091
-    enable-degrade: false
     disable-global-transaction: false
   transport:
     shutdown:

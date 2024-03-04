@@ -48,6 +48,8 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
+    public static final String KEY_BRANCHID = "TX_BRANCHID";
+
     /**
      * The constant HIDDEN_KEY_XID for sofa-rpc integration.
      */

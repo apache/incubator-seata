@@ -76,8 +76,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.5.13</spring-boot.version>
-        <spring-framework.version>5.3.20</spring-framework.version>
+        <spring-boot.version>2.5.15</spring-boot.version>
+        <spring-framework.version>5.3.27</spring-framework.version>
+
+        <!--  server side dependency-->
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+        <kafka-clients.version>3.6.1</kafka-clients.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>

@@ -152,11 +152,6 @@ public interface ConfigurationKeys {
     String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
 
     /**
-     * The constant ENABLE_DEGRADE_POSTFIX.
-     */
-    String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
-
-    /**
      * The constant CLIENT_PREFIX.
      */
     String CLIENT_PREFIX = "client.";
@@ -1011,4 +1006,9 @@ public interface ConfigurationKeys {
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
     String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant ROCKET_MQ_MSG_TIMEOUT
+     */
+    String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
 }

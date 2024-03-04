@@ -25,6 +25,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
@@ -90,6 +91,13 @@ public class ProxyUtilsTccTest {
         public BranchType getBranchType() {
             return null;
         }
+
+        @Override
+        public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+            return null;
+        }
+
+
     };
 
 
