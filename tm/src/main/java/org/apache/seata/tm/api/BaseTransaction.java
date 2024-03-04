@@ -14,8 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.tx.api.interceptor.parser;
+package org.apache.seata.tm.api;
 
-
-public interface InterfaceParser extends org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser {
+public interface BaseTransaction {
 }

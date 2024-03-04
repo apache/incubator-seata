@@ -19,15 +19,15 @@ package org.apache.seata.tm.api;
 
 public class FailureHandlerHolder {
 
-    private static FailureHandler FAILURE_HANDLER_HOLDER = new DefaultFailureHandlerImpl();
+    private static FailureHandler<?> FAILURE_HANDLER_HOLDER = new DefaultFailureHandlerImpl();
 
-    public static void setFailureHandler(FailureHandler failureHandler) {
+    public static void setFailureHandler(FailureHandler<?> failureHandler) {
         if (failureHandler != null) {
             FAILURE_HANDLER_HOLDER = failureHandler;
         }
     }
 
-    public static FailureHandler getFailureHandler() {
+    public static FailureHandler<?> getFailureHandler() {
         return FAILURE_HANDLER_HOLDER;
     }
 

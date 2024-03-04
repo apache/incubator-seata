@@ -1,1 +1,2 @@
 io.seata.rm.tcc.interceptor.parser.TccActionInterceptorParser
+io.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser

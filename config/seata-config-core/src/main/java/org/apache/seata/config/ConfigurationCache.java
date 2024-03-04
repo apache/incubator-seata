@@ -16,6 +16,7 @@
  */
 package org.apache.seata.config;
 
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,10 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.implementation.InvocationHandlerAdapter;
-import net.bytebuddy.matcher.ElementMatchers;
 
+/**
+ * @author funkye
+ */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String METHOD_PREFIX = "get";
@@ -99,8 +100,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
-        return new ByteBuddy().subclass(Configuration.class).method(ElementMatchers.any())
-            .intercept(InvocationHandlerAdapter.of((proxy, method, args) -> {
+        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
+            , (proxy, method, args) -> {
                 String methodName = method.getName();
                 if (methodName.startsWith(METHOD_PREFIX) && !methodName.equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
                     String rawDataId = (String)args[0];
@@ -124,8 +125,8 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     return wrapper == null ? null : wrapper.convertData(type);
                 }
                 return method.invoke(originalConfiguration, args);
-            })).make().load(originalConfiguration.getClass().getClassLoader()).getLoaded().getDeclaredConstructor()
-            .newInstance();
+            }
+        );
     }
 
     private static class ConfigurationCacheInstance {
