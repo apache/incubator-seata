@@ -27,6 +27,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 
@@ -148,6 +149,11 @@ public class DefaultResourceManager implements ResourceManager {
     @Override
     public BranchType getBranchType() {
         throw new FrameworkException("DefaultResourceManager isn't a real ResourceManager");
+    }
+
+    @Override
+    public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+        return getResourceManager(branchType).getGlobalStatus(branchType, xid);
     }
 
     private static class SingletonHolder {

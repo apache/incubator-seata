@@ -57,6 +57,7 @@
         <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
+        <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>

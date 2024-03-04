@@ -14,8 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.tx.api.interceptor.parser;
+package org.apache.seata.tm.api;
 
-public interface RegisterResourceParser extends org.apache.seata.integration.tx.api.interceptor.parser.RegisterResourceParser {
+/**
+ * Callback on failure.
+ *
+ */
+public interface TMFailureHandler extends FailureHandler<GlobalTransaction> {
 
 }

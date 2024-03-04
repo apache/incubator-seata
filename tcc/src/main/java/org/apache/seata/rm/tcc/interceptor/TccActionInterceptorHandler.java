@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -37,6 +38,8 @@ import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionPar
 import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.MDC;
+
+
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
@@ -45,12 +48,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
-    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+    protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     private Set<String> methodsToProxy;
-    private Object targetBean;
+    protected Object targetBean;
 
-    private Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
+    protected Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         this.targetBean = targetBean;

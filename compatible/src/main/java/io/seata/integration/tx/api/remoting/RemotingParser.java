@@ -21,5 +21,6 @@ package io.seata.integration.tx.api.remoting;
  * extract remoting bean info
  *
  */
+@Deprecated
 public interface RemotingParser extends org.apache.seata.integration.tx.api.remoting.RemotingParser {
 }
