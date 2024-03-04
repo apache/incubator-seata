@@ -16,6 +16,9 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Optional;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.NestInterceptorHandlerWrapper;
@@ -38,6 +41,11 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
             invocation = new NestInterceptorHandlerWrapper(nextInvocationHandlerChain, invocation);
         }
         return doInvoke(invocation);
+    }
+
+    public  <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
+            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
     }
 
     @Override

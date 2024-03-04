@@ -14,15 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
+package io.seata.integration.tx.api.interceptor.parser;
 
-import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-
-
-public interface InterfaceParser {
-
-    ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception;
-
-    IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass);
-
+/**
+ * The interface Business.
+ */
+public interface Business {
+    /**
+     * Do biz string.
+     *
+     * @param msg the msg
+     * @return the string
+     */
+    String doBiz(String msg);
 }
