@@ -23,8 +23,17 @@ import org.apache.seata.core.protocol.RpcMessage;
  * The protocol RPC message.
  */
 public interface ProtocolRpcMessage {
+
+    /**
+     * The protocol message to rpc message.
+     * @return
+     */
     RpcMessage protocolMsg2RpcMsg();
 
+    /**
+     * The rpc message to protocol message.
+     * @param rpcMessage
+     */
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
 
     static String getVersion(Object body) {
