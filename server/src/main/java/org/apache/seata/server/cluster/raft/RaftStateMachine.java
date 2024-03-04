@@ -244,19 +244,13 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
+        CompletableFuture.runAsync(()-> syncCurrentNodeInfo(ctx.getLeaderId()));
     }
 
     @Override
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
-        lock.lock();
-        try {
-            changeOrInitRaftClusterMetadata(true);
-            syncMetadata();
-        } finally {
-            lock.unlock();
-        }
     }
 
     public void syncMetadata() {
@@ -306,14 +300,14 @@ public class RaftStateMachine extends StateMachineAdapter {
         this.raftClusterMetadata = raftClusterMetadata;
     }
 
-    private RaftClusterMetadata changeOrInitRaftClusterMetadata() {
-        return changeOrInitRaftClusterMetadata(false);
-    }
-
-    public RaftClusterMetadata changeOrInitRaftClusterMetadata(boolean change) {
+    public RaftClusterMetadata changeOrInitRaftClusterMetadata() {
         raftClusterMetadata.setTerm(this.currentTerm.get());
-        if (raftClusterMetadata.getLeader() == null) {
-            RaftServer raftServer = RaftServerManager.getRaftServer(group);
+        Node leaderNode = raftClusterMetadata.getLeader();
+        RaftServer raftServer = RaftServerManager.getRaftServer(group);
+        PeerId cureentPeerId = raftServer.getServerId();
+        // After the re-election, the leader information may be different from the latest leader, and you need to replace the leader information
+        if (leaderNode == null || (leaderNode.getInternal() != null
+            && !cureentPeerId.equals(new PeerId(leaderNode.getInternal().getHost(), leaderNode.getInternal().getPort())))) {
             Node leader =
                 raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
                     Integer.parseInt(
@@ -323,80 +317,59 @@ public class RaftStateMachine extends StateMachineAdapter {
             leader.setRole(ClusterRole.LEADER);
             raftClusterMetadata.setLeader(leader);
         }
-        if (change) {
-            Configuration configuration = RouteTable.getInstance().getConfiguration(group);
-            List<Node> followers = raftClusterMetadata.getFollowers();
-            List<Node> learner = raftClusterMetadata.getLearner();
-            List<PeerId> followerPeers = configuration.getPeers();
-            LinkedHashSet<PeerId> learnerPeers = configuration.getLearners();
-            if (CollectionUtils.isNotEmpty(followerPeers)) {
-                raftClusterMetadata.setFollowers(
-                    followers.stream().filter(node -> contains(node, followerPeers)).collect(Collectors.toList()));
-            }
-            if (CollectionUtils.isNotEmpty(learnerPeers)) {
-                raftClusterMetadata.setLearner(
-                    learner.stream().filter(node -> contains(node, learnerPeers)).collect(Collectors.toList()));
-            }
-        }
         return raftClusterMetadata;
     }
 
-    private boolean contains(Node node, Collection<PeerId> list) {
-        if (node.getInternal() == null) {
-            return true;
-        }
-        PeerId nodePeer = new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
-        return list.contains(nodePeer);
-    }
-
     public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
+        // Directly receive messages from the leader and update the cluster metadata
         raftClusterMetadata = ((RaftClusterMetadataMsg)syncMsg).getRaftClusterMetadata();
         ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
             .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
         LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
-        if (!init.get() && !isLeader()) {
-            CompletableFuture.runAsync(() -> {
-                Node leader = raftClusterMetadata.getLeader();
-                if (leader != null && leader.getInternal() != null && init.compareAndSet(false, true)) {
-                    RaftServer raftServer = RaftServerManager.getRaftServer(group);
-                    Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
-                        raftServer.getServerId().getPort(), Integer.parseInt(
-                            ((Environment)ObjectHolder.INSTANCE.getObject(
-                                OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT)).getProperty("server.port",
-                                String.valueOf(8088))), group, Collections.emptyMap());
-                    InvokeContext invokeContext = new InvokeContext();
-                    PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
-                    invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                        SerializerType.JACKSON.getCode());
-                    CliClientServiceImpl cliClientService =
-                        (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
-                    try {
-                        // The previous leader may be an old snapshot or log playback, which is not accurate, and you need to get the leader again
-                        RouteTable.getInstance().refreshLeader(cliClientService, group, 1000);
-                        PeerId leaderPeerId = RouteTable.getInstance().selectLeader(group);
-                        cliClientService.getRpcClient()
-                            .invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest, invokeContext,
-                                (result, err) -> {
-                                    if (err == null) {
-                                        LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
-                                    } else {
-                                        LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId,
-                                            err.getMessage(), err);
-                                    }
-                                }, 30000);
-                    } catch (Exception e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                }
-            });
+    }
+
+    private void syncCurrentNodeInfo(PeerId leaderPeerId) {
+        if(init.compareAndSet(false,true)) {
+            try {
+                RaftServer raftServer = RaftServerManager.getRaftServer(group);
+                PeerId cureentPeerId = raftServer.getServerId();
+                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(),
+                    cureentPeerId.getPort(), Integer.parseInt(((Environment)ObjectHolder.INSTANCE.getObject(
+                        OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT)).getProperty("server.port", String.valueOf(8088))),
+                    group, Collections.emptyMap());
+                InvokeContext invokeContext = new InvokeContext();
+                PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
+                Configuration configuration = RouteTable.getInstance().getConfiguration(group);
+                node.setRole(
+                    configuration.getPeers().contains(cureentPeerId) ? ClusterRole.FOLLOWER : ClusterRole.LEARNER);
+                invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
+                    SerializerType.JACKSON.getCode());
+                CliClientServiceImpl cliClientService =
+                    (CliClientServiceImpl)RaftServerManager.getCliClientServiceInstance();
+                // The previous leader may be an old snapshot or log playback, which is not accurate, and you
+                // need to get the leader again
+                cliClientService.getRpcClient()
+                    .invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest, invokeContext, (result, err) -> {
+                        if (err == null) {
+                            LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
+                        } else {
+                            LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId, err.getMessage(),
+                                err);
+                        }
+                    }, 30000);
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 
     public void changeNodeMetadata(Node node) {
         lock.lock();
         try {
-            List<Node> followers = raftClusterMetadata.getFollowers();
-            for (Node follower : followers) {
+            List<Node> list = node.getRole() == ClusterRole.FOLLOWER ? raftClusterMetadata.getFollowers()
+                : raftClusterMetadata.getLearner();
+            // If the node currently exists, modify it
+            for (Node follower : list) {
                 Node.Endpoint endpoint = follower.getInternal();
                 if (endpoint != null) {
                     // change old follower node metadata
@@ -407,12 +380,13 @@ public class RaftStateMachine extends StateMachineAdapter {
                         follower.setGroup(group);
                         follower.setMetadata(node.getMetadata());
                         follower.setVersion(node.getVersion());
+                        follower.setRole(node.getRole());
                         return;
                     }
                 }
             }
-            // add new follower node metadata
-            followers.add(node);
+            // add new node node metadata
+            list.add(node);
             syncMetadata();
         } finally {
             lock.unlock();
