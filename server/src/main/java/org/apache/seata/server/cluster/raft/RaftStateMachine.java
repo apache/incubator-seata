@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -251,6 +252,33 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
+        if (isLeader()) {
+            lock.lock();
+            try {
+                List<PeerId> newFollowers = conf.getPeers();
+                Set<PeerId> newLearners = conf.getLearners();
+                List<Node> currentFollowers = raftClusterMetadata.getFollowers();
+                if (CollectionUtils.isNotEmpty(newFollowers)) {
+                    raftClusterMetadata.setFollowers(currentFollowers.stream()
+                        .filter(node -> contains(node, newFollowers)).collect(Collectors.toList()));
+                }
+                if (CollectionUtils.isNotEmpty(newLearners)) {
+                    raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
+                        .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
+                }
+                syncMetadata();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    private boolean contains(Node node, Collection<PeerId> list) {
+        if (node.getInternal() == null) {
+            return true;
+        }
+        PeerId nodePeer = new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
+        return list.contains(nodePeer);
     }
 
     public void syncMetadata() {
