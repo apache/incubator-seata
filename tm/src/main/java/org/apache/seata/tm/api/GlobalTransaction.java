@@ -24,7 +24,7 @@ import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
  * Global transaction.
  *
  */
-public interface GlobalTransaction {
+public interface GlobalTransaction extends BaseTransaction {
 
     /**
      * Begin a new global transaction with default timeout and name.

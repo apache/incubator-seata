@@ -16,5 +16,20 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 
-public interface TargetClassParser extends org.apache.seata.integration.tx.api.interceptor.parser.TargetClassParser {
+import io.seata.spring.annotation.GlobalTransactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * The type Business.
+ */
+@GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+public class BusinessImpl implements Business {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
+
+    @Override
+    public String doBiz(String msg) {
+        LOGGER.info("Business doBiz");
+        return "hello " + msg;
+    }
 }

@@ -16,12 +16,16 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 
+import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import org.apache.seata.tm.api.FailureHandlerHolder;
 
 import java.lang.reflect.Method;
 
+@Deprecated
 public class GlobalTransactionalInterceptorParser extends org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser {
 
     @Override
@@ -33,24 +37,21 @@ public class GlobalTransactionalInterceptorParser extends org.apache.seata.integ
                     continue;
                 }
                 GlobalTransactional trxAnnoOld = clazz.getAnnotation(GlobalTransactional.class);
-                org.apache.seata.spring.annotation.GlobalTransactional trxAnnoNew = clazz.getAnnotation(org.apache.seata.spring.annotation.GlobalTransactional.class);
 
-                if (trxAnnoOld != null || trxAnnoNew != null) {
+                if (trxAnnoOld != null) {
                     return true;
                 }
                 Method[] methods = clazz.getMethods();
                 for (Method method : methods) {
                     trxAnnoOld = method.getAnnotation(GlobalTransactional.class);
-                    trxAnnoNew = method.getAnnotation(org.apache.seata.spring.annotation.GlobalTransactional.class);
-                    if (trxAnnoOld != null || trxAnnoNew != null) {
+                    if (trxAnnoOld != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
                     }
 
                     GlobalLock lockAnnoOld = method.getAnnotation(GlobalLock.class);
-                    org.apache.seata.spring.annotation.GlobalLock lockAnnoNew = method.getAnnotation(org.apache.seata.spring.annotation.GlobalLock.class);
 
-                    if (lockAnnoOld != null || lockAnnoNew != null) {
+                    if (lockAnnoOld != null) {
                         methodsToProxy.add(method.getName());
                         result = true;
                     }
@@ -59,4 +60,10 @@ public class GlobalTransactionalInterceptorParser extends org.apache.seata.integ
         }
         return result;
     }
+
+    @Override
+    public ProxyInvocationHandler createProxyInvocationHandler(){
+        return new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
+    }
+
 }

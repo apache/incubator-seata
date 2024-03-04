@@ -32,6 +32,7 @@ import java.util.Map;
 /**
  * Extracting TCC Context from Method
  */
+@Deprecated
 public final class ActionContextUtil {
 
     private ActionContextUtil() {
