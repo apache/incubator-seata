@@ -14,15 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
-
-import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+package io.seata.tm.api.transaction;
 
 
-public interface InterfaceParser {
+public class MyRuntimeException extends RuntimeException {
 
-    ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception;
-
-    IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass);
-
+    public MyRuntimeException(String msg) {
+        super(msg);
+    }
 }

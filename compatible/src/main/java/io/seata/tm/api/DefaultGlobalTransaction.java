@@ -167,4 +167,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     public long getCreateTime() {
         return this.instance.getCreateTime();
     }
+
+    public org.apache.seata.tm.api.DefaultGlobalTransaction getInstance() {
+        return instance;
+    }
 }
