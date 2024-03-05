@@ -48,6 +48,10 @@ class TccActionInterceptorParserTest {
 
     private static TccAction tccActionProxy;
 
+    private static NestTccActionImpl nestTccAction;
+
+    private static NestTccAction nestTccActionProxy;
+
     @BeforeAll
     public static void init() throws IOException {
         System.setProperty("config.type", "file");
@@ -57,11 +61,14 @@ class TccActionInterceptorParserTest {
 
         tccAction = new TccActionImpl();
         tccActionProxy =  ProxyUtil.createProxy(tccAction);
+
+        nestTccAction = new NestTccActionImpl();
+        nestTccAction.setTccAction(tccActionProxy);
+        nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
     }
 
     @Test
     void parserInterfaceToProxy() {
-
         //given
         TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
         NormalTccActionImpl tccAction = new NormalTccActionImpl();
@@ -71,7 +78,6 @@ class TccActionInterceptorParserTest {
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
-
     }
 
 
@@ -86,21 +92,14 @@ class TccActionInterceptorParserTest {
 
         Assertions.assertNotNull(tccActionProxy);
 
-        NestTccActionImpl nestTccAction = new NestTccActionImpl();
-        nestTccAction.setTccAction(tccActionProxy);
-
         //when
         ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(nestTccAction, nestTccAction.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
 
-
-        //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
         //then
         Assertions.assertNotNull(nestTccActionProxy);
-
 
         // transaction commit test
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -139,18 +138,12 @@ class TccActionInterceptorParserTest {
 
         Assertions.assertNotNull(tccActionProxy);
 
-        NestTccActionImpl nestTccAction = new NestTccActionImpl();
-        nestTccAction.setTccAction(tccActionProxy);
-
         //when
         ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(nestTccAction, nestTccAction.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
 
-
-        //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
         //then
         Assertions.assertNotNull(nestTccActionProxy);
 
@@ -192,20 +185,14 @@ class TccActionInterceptorParserTest {
 
         Assertions.assertNotNull(tccActionProxy);
 
-        NestTccActionImpl nestTccAction = new NestTccActionImpl();
-        nestTccAction.setTccAction(tccActionProxy);
-
         //when
         ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(nestTccAction, nestTccAction.getClass().getName());
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
 
-        //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
         //then
         Assertions.assertNotNull(nestTccActionProxy);
-
 
         // transaction commit test
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -243,12 +230,7 @@ class TccActionInterceptorParserTest {
 
         TransactionManagerHolder.set(transactionManager);
 
-        TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
-
-        NestTccActionImpl nestTccAction = new NestTccActionImpl();
-        nestTccAction.setTccAction(tccActionProxy);
 
         //when
         ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(nestTccAction, nestTccAction.getClass().getName());
@@ -256,11 +238,8 @@ class TccActionInterceptorParserTest {
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
 
-        //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
         //then
         Assertions.assertNotNull(nestTccActionProxy);
-
 
         // transaction commit test
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
