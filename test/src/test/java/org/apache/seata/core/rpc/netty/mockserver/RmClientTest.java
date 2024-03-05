@@ -78,6 +78,7 @@ public class RmClientTest {
     public static DefaultResourceManager getRm(String resourceId) {
         RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
         DefaultResourceManager rm = DefaultResourceManager.get();
+        rm.getManagedResources().clear();
 
         //register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
         Action1 target = new Action1Impl();
