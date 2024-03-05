@@ -24,10 +24,15 @@ public class Node {
 
     Map<String, Object> metadata = new HashMap<>();
     private Endpoint control;
+
     private Endpoint transaction;
+
+    private Endpoint internal;
 
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;
+
+    private String version;
 
     public Node() {}
 
@@ -73,6 +78,22 @@ public class Node {
 
     public void setTransaction(Endpoint transaction) {
         this.transaction = transaction;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public Endpoint getInternal() {
+        return internal;
+    }
+
+    public void setInternal(Endpoint internal) {
+        this.internal = internal;
     }
 
     public static class Endpoint {
