@@ -35,7 +35,7 @@ public interface NestTccAction {
     @TwoPhaseBusinessAction(name = "tccNestActionForTest")
     boolean prepare(BusinessActionContext actionContext, int count);
 
-    @TwoPhaseBusinessAction(name = "tccNestActionForTest")
+    @TwoPhaseBusinessAction(name = "tccNestActionRequiredNewForTest")
     boolean prepareNestRequiredNew(BusinessActionContext actionContext, int count);
 
     /**

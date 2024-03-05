@@ -43,6 +43,7 @@ import org.apache.seata.rm.tcc.TccActionImpl;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,11 @@ class TccActionInterceptorParserTest {
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
+    }
+
+    @AfterEach
+    public void clearTccResource(){
+        resourceManager.getManagedResources().clear();
     }
 
     @Test
