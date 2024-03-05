@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -245,7 +244,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onStartFollowing(final LeaderChangeContext ctx) {
         LOGGER.info("groupId: {}, onStartFollowing: {}.", group, ctx);
         this.currentTerm.set(ctx.getTerm());
-        CompletableFuture.runAsync(()-> syncCurrentNodeInfo(ctx.getLeaderId()));
+        CompletableFuture.runAsync(() -> syncCurrentNodeInfo(ctx.getLeaderId()));
     }
 
     @Override
