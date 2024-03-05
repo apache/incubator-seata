@@ -98,6 +98,10 @@ public class RaftServer implements Disposable, Closeable {
         return raftStateMachine;
     }
 
+    public PeerId getServerId() {
+        return serverId;
+    }
+
     @Override
     public void close() {
         destroy();
