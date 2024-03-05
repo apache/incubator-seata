@@ -103,6 +103,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private StateMachineInstance startInternal(String stateMachineName, String tenantId, String businessKey,
                                                Map<String, Object> startParams, boolean async, AsyncCallback callback)
             throws EngineExecutionException {
+        StateMachineInstance instance = null;
+        ProcessContext processContext = null;
         try {
             if (async && !stateMachineConfig.isEnableAsync()) {
                 throw new EngineExecutionException(
@@ -114,7 +116,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 tenantId = stateMachineConfig.getDefaultTenantId();
             }
 
-            StateMachineInstance instance = createMachineInstance(stateMachineName, tenantId, businessKey, startParams);
+            instance = createMachineInstance(stateMachineName, tenantId, businessKey, startParams);
 
             ProcessContextBuilder contextBuilder = ProcessContextBuilder.create().withProcessType(ProcessType.STATE_LANG)
                 .withOperationName(DomainConstants.OPERATION_NAME_START).withAsyncCallback(callback).withInstruction(
@@ -134,7 +136,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
             contextBuilder.withIsAsyncExecution(async);
 
-            ProcessContext processContext = contextBuilder.build();
+            processContext = contextBuilder.build();
 
             if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
                 stateMachineConfig.getStateLogStore().recordStateMachineStarted(instance, processContext);
@@ -158,8 +160,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
             return instance;
         } finally {
-            if (stateMachineConfig.getStateLogStore() != null) {
-                stateMachineConfig.getStateLogStore().clearUp();
+            if (stateMachineConfig.getStateLogStore() != null && instance != null && processContext != null) {
+                stateMachineConfig.getStateLogStore().clearUp(processContext);
             }
         }
     }

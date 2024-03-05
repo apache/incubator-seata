@@ -117,7 +117,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             } catch (StoreException e) {
                 LOGGER.error("Record statemachine start error: {}, StateMachine: {}, XID: {}, Reason: {}",
                     e.getErrcode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
-                this.clearUp();
+                this.clearUp(context);
                 throw e;
             }
         }
@@ -236,7 +236,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 RootContext.unbind();
                 RootContext.unbindBranchType();
                 sagaTransactionalTemplate.triggerAfterCompletion(globalTransaction);
-                sagaTransactionalTemplate.cleanUp();
+                sagaTransactionalTemplate.cleanUp(globalTransaction);
             }
         }
     }
@@ -729,11 +729,24 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     }
 
     @Override
-    public void clearUp() {
+    public void clearUp(ProcessContext context) {
         RootContext.unbind();
         RootContext.unbindBranchType();
         if (sagaTransactionalTemplate != null) {
-            sagaTransactionalTemplate.cleanUp();
+            GlobalTransaction globalTransaction;
+            StateMachineInstance machineInstance =  (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            if (machineInstance != null) {
+                try {
+                    globalTransaction = getGlobalTransaction(machineInstance, context);
+                    sagaTransactionalTemplate.cleanUp(globalTransaction);
+                } catch (ExecutionException e) {
+                    LOGGER.error("Report transaction finish to server error: {}, StateMachine: {}, XID: {}, Reason: {}",
+                            e.getCode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
+                } catch (TransactionException e) {
+                    LOGGER.error("Report transaction finish to server error: {}, StateMachine: {}, XID: {}, Reason: {}",
+                            e.getCode(), machineInstance.getStateMachine().getName(), machineInstance.getId(), e.getMessage(), e);
+                }
+            }
         }
     }
 
