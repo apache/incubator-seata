@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty.v0;
+package org.apache.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
-import io.seata.core.protocol.MessageTypeAware;
+import org.apache.seata.core.protocol.MessageTypeAware;
 
 /**
  * The interface Message codec.

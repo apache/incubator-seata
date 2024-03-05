@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty;
 
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.seata.core.protocol.ProtocolConstants;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.Version;
-import io.seata.core.rpc.netty.v0.ProtocolEncoderV0;
-import io.seata.core.rpc.netty.v1.ProtocolEncoderV1;
+import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.rpc.netty.v0.ProtocolEncoderV0;
+import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

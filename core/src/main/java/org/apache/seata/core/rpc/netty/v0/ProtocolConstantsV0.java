@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty.v0;
+package org.apache.seata.core.rpc.netty.v0;
 
 /**
  * protocol v0 constants
