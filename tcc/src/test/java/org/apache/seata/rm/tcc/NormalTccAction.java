@@ -39,7 +39,7 @@ public interface NormalTccAction {
      * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    @TwoPhaseBusinessAction(name = "normalTccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
     String prepare(BusinessActionContext actionContext,
                     @BusinessActionContextParameter("a") int a,
                     @BusinessActionContextParameter(paramName = "b", index = 0) List b,
