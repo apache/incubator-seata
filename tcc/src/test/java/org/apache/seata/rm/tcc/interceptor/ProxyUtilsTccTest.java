@@ -128,7 +128,7 @@ public class ProxyUtilsTccTest {
         //then
         Assertions.assertEquals("a", result);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("tccActionForTest", branchReference.get());
+        Assertions.assertEquals("normalTccActionForTest", branchReference.get());
     }
 
     @Test
