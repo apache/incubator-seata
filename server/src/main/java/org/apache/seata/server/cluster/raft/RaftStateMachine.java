@@ -340,7 +340,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                            .getProperty("server.port", String.valueOf(8088))),
+                            .getProperty("server.port", String.valueOf(7091))),
                     group, Collections.emptyMap());
             leader.setRole(ClusterRole.LEADER);
             raftClusterMetadata.setLeader(leader);
@@ -364,7 +364,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), cureentPeerId.getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                            .getProperty("server.port", String.valueOf(8088))),
+                            .getProperty("server.port", String.valueOf(7091))),
                     group, Collections.emptyMap());
                 InvokeContext invokeContext = new InvokeContext();
                 PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
