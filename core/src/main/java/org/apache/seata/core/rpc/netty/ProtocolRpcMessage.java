@@ -14,17 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty;
 
-import io.seata.core.protocol.AbstractIdentifyRequest;
-import io.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+import org.apache.seata.core.protocol.RpcMessage;
 
 /**
  * The protocol RPC message.
  */
 public interface ProtocolRpcMessage {
+
+    /**
+     * The protocol message to rpc message.
+     * @return
+     */
     RpcMessage protocolMsg2RpcMsg();
 
+    /**
+     * The rpc message to protocol message.
+     * @param rpcMessage
+     */
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
 
     static String getVersion(Object body) {
