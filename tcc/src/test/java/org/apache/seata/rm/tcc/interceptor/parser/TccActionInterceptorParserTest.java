@@ -33,13 +33,7 @@ import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHa
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.tcc.BranchSessionMock;
-import org.apache.seata.rm.tcc.NestTccAction;
-import org.apache.seata.rm.tcc.NestTccActionImpl;
-import org.apache.seata.rm.tcc.NormalTccActionImpl;
-import org.apache.seata.rm.tcc.TCCResourceManager;
-import org.apache.seata.rm.tcc.TccAction;
-import org.apache.seata.rm.tcc.TccActionImpl;
+import org.apache.seata.rm.tcc.*;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
@@ -50,12 +44,19 @@ import org.junit.jupiter.api.Test;
 
 class TccActionInterceptorParserTest {
 
+    private static TccActionImpl tccAction;
+
+    private static TccAction tccActionProxy;
+
     @BeforeAll
     public static void init() throws IOException {
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
+
+        tccAction = new TccActionImpl();
+        tccActionProxy =  ProxyUtil.createProxy(tccAction);
     }
 
     @Test
@@ -83,8 +84,6 @@ class TccActionInterceptorParserTest {
 
         TransactionManagerHolder.set(transactionManager);
 
-        TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -138,8 +137,6 @@ class TccActionInterceptorParserTest {
 
         TransactionManagerHolder.set(transactionManager);
 
-        TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -193,8 +190,6 @@ class TccActionInterceptorParserTest {
 
         TransactionManagerHolder.set(transactionManager);
 
-        TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();

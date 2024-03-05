@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.tcc.interceptor;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +31,20 @@ import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.tcc.NormalTccAction;
 import org.apache.seata.rm.tcc.NormalTccActionImpl;
 import org.apache.seata.rm.tcc.TccParam;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
 public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
+
+    private static NormalTccActionImpl tccAction;
+
+    private static NormalTccActionImpl tccActionProxy;
 
     AtomicReference<String> branchReference = new AtomicReference<String>();
 
@@ -100,12 +105,16 @@ public class ProxyUtilsTccTest {
 
     };
 
+    @BeforeAll
+    public static void init() throws IOException {
+        tccAction = new NormalTccActionImpl();
+        tccActionProxy = ProxyUtil.createProxy(tccAction);
+    }
+
 
     @Test
     public void testTcc() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -125,8 +134,6 @@ public class ProxyUtilsTccTest {
     @Test
     public void testTccThrowRawException() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -141,11 +148,7 @@ public class ProxyUtilsTccTest {
 
     @Test
     public void testTccImplementOtherMethod(){
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccActionImpl tccActionProxy = ProxyUtil.createProxy(tccAction);
-
         Assertions.assertTrue(tccActionProxy.otherMethod());
-
     }
 
 
