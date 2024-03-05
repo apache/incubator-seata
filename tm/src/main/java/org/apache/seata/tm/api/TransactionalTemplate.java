@@ -18,6 +18,8 @@ package org.apache.seata.tm.api;
 
 import java.util.List;
 
+import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
 import org.apache.seata.core.exception.TmTransactionException;
@@ -140,7 +142,7 @@ public class TransactionalTemplate {
                 //5. clear
                 resumeGlobalLockConfig(previousConfig);
                 triggerAfterCompletion(tx);
-                cleanUp();
+                cleanUp(tx);
             }
         } finally {
             // If the transaction is suspended, resume it.
@@ -385,8 +387,14 @@ public class TransactionalTemplate {
         }
     }
 
-    private void cleanUp() {
-        TransactionHookManager.clear();
+    private void cleanUp(GlobalTransaction tx) {
+        if (tx == null) {
+            throw new FrameworkException("Global transaction does not exist. Unable to proceed without a valid global transaction context.",
+                    FrameworkErrorCode.ObjectNotExists);
+        }
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            TransactionHookManager.clear();
+        }
     }
 
     private List<TransactionHook> getCurrentHooks() {

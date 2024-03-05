@@ -18,6 +18,7 @@ package org.apache.seata.saga.engine.tm;
 
 import java.util.List;
 
+import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -27,6 +28,7 @@ import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.RMClient;
+import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.rm.SagaResource;
 import org.apache.seata.tm.TMClient;
 import org.apache.seata.tm.api.GlobalTransaction;
@@ -273,8 +275,14 @@ public class DefaultSagaTransactionalTemplate
     }
 
     @Override
-    public void cleanUp() {
-        TransactionHookManager.clear();
+    public void cleanUp(GlobalTransaction tx) {
+        if (tx == null) {
+            throw new EngineExecutionException("Global transaction does not exist. Unable to proceed without a valid global transaction context.",
+                    FrameworkErrorCode.ObjectNotExists);
+        }
+        if (tx.getGlobalTransactionRole() == GlobalTransactionRole.Launcher) {
+            TransactionHookManager.clear();
+        }
     }
 
     protected List<TransactionHook> getCurrentHooks() {
