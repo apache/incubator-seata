@@ -41,6 +41,9 @@ public interface ProtocolConstants {
      */
     byte VERSION_1 = 1;
 
+    /**
+     * Protocol version
+     */
     byte VERSION_CURRENT = VERSION_1;
 
     /**

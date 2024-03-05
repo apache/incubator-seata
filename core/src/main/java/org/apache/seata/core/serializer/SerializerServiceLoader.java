@@ -20,15 +20,18 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.common.util.ReflectionUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Service Loader for the interface {@link Serializer}
- *
  */
 public final class SerializerServiceLoader {
 
     private SerializerServiceLoader() {
     }
 
+    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
 
@@ -39,7 +42,7 @@ public final class SerializerServiceLoader {
      * @return the service of {@link Serializer}
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static Serializer load(SerializerType type) throws EnhancedServiceNotFoundException {
+    public static Serializer load(SerializerType type, byte version) throws EnhancedServiceNotFoundException {
         if (type == SerializerType.PROTOBUF) {
             try {
                 ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
@@ -48,6 +51,24 @@ public final class SerializerServiceLoader {
                         "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency ", e);
             }
         }
-        return EnhancedServiceLoader.load(Serializer.class, type.name());
+
+        String key = serialzerKey(type, version);
+        Serializer serializer = SERIALIZER_MAP.get(key);
+        if (serializer == null) {
+            if (type == SerializerType.SEATA) {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
+            } else {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+            }
+            SERIALIZER_MAP.put(key, serializer);
+        }
+        return serializer;
+    }
+
+    private static String serialzerKey(SerializerType type, byte version) {
+        if (type == SerializerType.SEATA) {
+            return type.name() + version;
+        }
+        return type.name();
     }
 }
