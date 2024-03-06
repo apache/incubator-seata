@@ -22,25 +22,26 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-integration</artifactId>
+        <artifactId>seata-dependencies-client</artifactId>
         <version>${revision}</version>
+        <relativePath>../dependencies-client/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <artifactId>seata-integration</artifactId>
+    <name>seata-integration ${project.version}</name>
+    <description>integration top parent for Seata built with Maven</description>
 
-    <artifactId>seata-dubbo-alibaba</artifactId>
-    <name>seata-dubbo-alibaba ${project.version}</name>
-    <description>alibaba dubbo integration for Seata built with Maven</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>brpc</module>
+        <module>dubbo</module>
+        <module>dubbo-alibaba</module>
+        <module>grpc</module>
+        <module>hsf</module>
+        <module>http</module>
+        <module>http-jakarta</module>
+        <module>motan</module>
+        <module>rpc-core</module>
+        <module>sofa-rpc</module>
+    </modules>
 </project>

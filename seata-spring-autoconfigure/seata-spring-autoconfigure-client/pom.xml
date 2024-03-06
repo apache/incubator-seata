@@ -21,9 +21,10 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>seata-spring-autoconfigure</artifactId>
         <groupId>org.apache.seata</groupId>
+        <artifactId>seata-dependencies-client</artifactId>
         <version>${revision}</version>
+        <relativePath>../../dependencies-client/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -36,6 +37,25 @@
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-spring-autoconfigure-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!--seata-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-all</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j</artifactId>
+                    <groupId>log4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 </project>

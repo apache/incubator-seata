@@ -22,40 +22,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-dependencies</artifactId>
         <version>${revision}</version>
+        <relativePath>../dependencies/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-spring-autoconfigure</artifactId>
+
+    <artifactId>seata-dependencies-client</artifactId>
     <packaging>pom</packaging>
-    <name>seata-spring-autoconfigure ${project.version}</name>
-    <description>spring-autoconfigure top parent for Seata built with Maven</description>
 
-    <modules>
-        <module>seata-spring-autoconfigure-core</module>
-        <module>seata-spring-autoconfigure-client</module>
-        <module>seata-spring-autoconfigure-server</module>
-    </modules>
+    <name>Seata dependencies-client ${project.version}</name>
+    <description>dependencies for Seata client built with Maven</description>
 
-    <dependencies>
-        <!--seata-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-all</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
+    <properties>
+    </properties>
 
-        <!--spring-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
+    <dependencyManagement>
+    </dependencyManagement>
 </project>

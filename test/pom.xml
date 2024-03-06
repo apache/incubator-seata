@@ -22,8 +22,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-dependencies-client</artifactId>
         <version>${revision}</version>
+        <relativePath>../dependencies-client/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-test</artifactId>
@@ -50,7 +51,7 @@
             <version>${project.version}</version>
         </dependency>
 
-<!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
+        <!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
@@ -58,7 +59,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.seata</groupId>
-                    <artifactId>seata-spring-autoconfigure-core</artifactId>
+                    <artifactId>seata-spring-autoconfigure-server</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
