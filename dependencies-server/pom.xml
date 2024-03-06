@@ -44,7 +44,6 @@
 
         <!-- jraft -->
         <jraft.version>1.3.14</jraft.version>
-        <sofa.bolt.version>1.6.7</sofa.bolt.version>
 
         <!-- jjwt -->
         <jjwt.version>0.10.5</jjwt.version>
@@ -70,11 +69,6 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>jraft-core</artifactId>
                 <version>${jraft.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alipay.sofa</groupId>
-                <artifactId>bolt</artifactId>
-                <version>${sofa.bolt.version}</version>
             </dependency>
 
             <!-- jjwt -->
