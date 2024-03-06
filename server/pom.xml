@@ -105,7 +105,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- for database -->
+        <!-- Database Connection Pooling -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
@@ -118,20 +118,21 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
+        <!-- Database Driver -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
+        <!-- if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.version} -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.mariadb.jdbc</groupId>-->
-<!--            <artifactId>mariadb-java-client</artifactId>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
+        <!--<dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>provided</scope>
+        </dependency>-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -252,12 +253,12 @@
                                 <artifactItem>
                                     <groupId>mysql</groupId>
                                     <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql.jdbc.version}</version>
+                                    <version>${mysql5.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>mysql</groupId>
                                     <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql8.jdbc.version}</version>
+                                    <version>${mysql8.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>

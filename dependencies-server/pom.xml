@@ -35,13 +35,25 @@
     <description>dependencies for Seata server and console built with Maven</description>
 
     <properties>
+        <!-- spring-boot version for server -->
         <spring-boot.version>2.7.18</spring-boot.version>
 
-        <!-- mysql -->
-        <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-        <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+        <!-- MySQL drivers -->
+        <mysql5.version>${mysql.version}</mysql5.version>
+        <mysql8.version>8.0.27</mysql8.version>
 
-        <!-- kafka for logback/kafka-appender.xml -->
+        <!-- jraft -->
+        <jraft.version>1.3.14</jraft.version>
+        <sofa.bolt.version>1.6.7</sofa.bolt.version>
+
+        <!-- jjwt -->
+        <jjwt.version>0.10.5</jjwt.version>
+
+        <!-- prometheus -->
+        <prometheus.client.version>0.6.0</prometheus.client.version>
+
+        <!-- for logback appenders -->
+        <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
         <kafka-clients.version>3.6.1</kafka-clients.version>
 
@@ -53,8 +65,49 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- # logback appenders -->
-            <!-- ## for kafka-appender -->
+            <!-- jraft -->
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>jraft-core</artifactId>
+                <version>${jraft.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>bolt</artifactId>
+                <version>${sofa.bolt.version}</version>
+            </dependency>
+
+            <!-- jjwt -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_httpserver</artifactId>
+                <version>${prometheus.client.version}</version>
+            </dependency>
+
+            <!-- # for logback appenders -->
+            <!-- ## for logback logstash-appender -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
+            </dependency>
+            <!-- ## for logback kafka-appender -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
@@ -64,12 +117,6 @@
                 <groupId>com.github.danielwegener</groupId>
                 <artifactId>logback-kafka-appender</artifactId>
                 <version>${kafka-appender.version}</version>
-            </dependency>
-            <!-- ## for logstash-appender -->
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>${logstash-logback-encoder.version}</version>
             </dependency>
 
             <dependency>
