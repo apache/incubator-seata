@@ -885,44 +885,6 @@
                 </plugins>
             </build>
         </profile>
-        <!-- profile: image -->
-        <profile>
-            <id>image</id>
-            <properties>
-                <image.publish.skip>false</image.publish.skip>
-                <dependencies.copy.skip>false</dependencies.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java8 -->
-        <profile>
-            <id>release-image-based-on-java8</id>
-            <properties>
-                <image.tags>${project.version},latest</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java8-slim -->
-        <profile>
-            <id>release-image-based-on-java8-slim</id>
-            <properties>
-                <image.tags>${project.version}-slim</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java17 -->
-        <profile>
-            <id>release-image-based-on-java17</id>
-            <properties>
-                <image.tags>${project.version}.jre17</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java17-slim -->
-        <profile>
-            <id>release-image-based-on-java17-slim</id>
-            <properties>
-                <image.tags>${project.version}.jre17-slim</image.tags>
-            </properties>
-        </profile>
         <!-- profile: arrch64 -->
         <profile>
             <id>arrch64</id>
