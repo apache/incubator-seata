@@ -76,7 +76,7 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     }
 
     @Override
-    public void cleanUp() {
+    public void cleanUp(GlobalTransaction tx) {
 
     }
 }
