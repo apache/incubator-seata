@@ -22,15 +22,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-dependencies-client</artifactId>
+        <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
-        <relativePath>../dependencies-client/pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>seata-all</artifactId>
     <name>Seata All-in-one ${project.version}</name>
     <description>Seata is an easy-to-use, high-performance, java based, open source distributed transaction solution.</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-dependencies-client</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- seata projects -->
