@@ -35,8 +35,18 @@
     <description>dependencies for Seata client built with Maven</description>
 
     <properties>
+        <!-- rocketmq -->
+        <rocketmq-version>5.0.0</rocketmq-version>
     </properties>
 
     <dependencyManagement>
+        <dependencies>
+            <!-- rocketmq -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq-version}</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 </project>

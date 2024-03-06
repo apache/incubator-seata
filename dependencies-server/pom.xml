@@ -35,9 +35,56 @@
     <description>dependencies for Seata server and console built with Maven</description>
 
     <properties>
+        <spring-boot.version>2.7.18</spring-boot.version>
+
+        <!-- mysql -->
+        <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
+        <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+
+        <!-- kafka for logback/kafka-appender.xml -->
+        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
+        <kafka-clients.version>3.6.1</kafka-clients.version>
+
+        <jcommander.version>1.82</jcommander.version>
+
+        <!-- # for test -->
+        <janino-version>3.1.7</janino-version>
     </properties>
 
     <dependencyManagement>
+        <dependencies>
+            <!-- # logback appenders -->
+            <!-- ## for kafka-appender -->
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.danielwegener</groupId>
+                <artifactId>logback-kafka-appender</artifactId>
+                <version>${kafka-appender.version}</version>
+            </dependency>
+            <!-- ## for logstash-appender -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.beust</groupId>
+                <artifactId>jcommander</artifactId>
+                <version>${jcommander.version}</version>
+            </dependency>
+
+            <!-- # for test -->
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>janino</artifactId>
+                <version>${janino-version}</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <profiles>
@@ -47,8 +94,6 @@
             <properties>
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java8 -->

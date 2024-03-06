@@ -97,7 +97,7 @@
                     <artifactId>spring-expression</artifactId>
                 </exclusion>
             </exclusions>
-            <version>5.3.26</version>
+            <version>5.3.27</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
