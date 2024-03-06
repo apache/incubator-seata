@@ -74,6 +74,7 @@
         <testcontainers.version>1.11.2</testcontainers.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>6.3.0</sofa.registry.version>
+        <sofa.hessian.version>4.0.4</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
         <eureka-clients.version>1.10.18</eureka-clients.version>
         <curator-test.version>5.1.0</curator-test.version>
@@ -371,6 +372,11 @@
                         <artifactId>hessian</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${sofa.hessian.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
