@@ -17,9 +17,11 @@
 package org.apache.seata.saga.engine.db;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
@@ -46,12 +48,16 @@ public abstract class AbstractServerTest {
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     protected static void startSeataServer() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean started = new AtomicBoolean(false);
+
+        // start seata-server
         (new Thread(() -> {
             LOGGER.info("Starting Seata Server...");
 
             try {
                 File file = new File("sessionStore/root.data");
-                if (file.exists()) {
+                if(file.exists()){
                     file.delete();
                 }
 
@@ -81,17 +87,34 @@ public abstract class AbstractServerTest {
 
                 nettyServer.init();
 
+                started.set(true);
                 LOGGER.info("Seata Server started");
             } catch (Exception e) {
                 LOGGER.error("Start Seata Server error: {}", e.getMessage(), e);
+            } finally {
+                latch.countDown();
             }
         })).start();
-        Thread.sleep(5000);
+
+        // wait until seata-server started
+        try {
+            LOGGER.info("Waiting for Seata Server to start...");
+
+            latch.await();
+
+            if (started.get()) {
+                LOGGER.info("Seata Server started successfully");
+            } else {
+                LOGGER.error("Seata Server failed to start");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Wait seata-server start, but failed: {}", e.getMessage(), e);
+        }
     }
 
     protected static void stopSeataServer() throws InterruptedException {
-        if (nettyServer != null) {
-			LOGGER.info("Stopping Seata Server...");
+        if(nettyServer != null){
+            LOGGER.info("Stopping Seata Server...");
 
             try {
                 nettyServer.destroy();
@@ -100,7 +123,7 @@ public abstract class AbstractServerTest {
                 LOGGER.error("Stop Seata Server error: {}", e.getMessage(), e);
             }
 
-			Thread.sleep(5000);
+            Thread.sleep(5000);
         }
     }
 
