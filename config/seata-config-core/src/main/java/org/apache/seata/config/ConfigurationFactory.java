@@ -139,7 +139,6 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        ConfigType configType = getConfigType();
         Configuration extConfiguration = null;
         Configuration configuration = ORIGIN_FILE_INSTANCE;
         if (configuration != null) {
@@ -155,6 +154,7 @@ public final class ConfigurationFactory {
                 LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
             }
         } else {
+            ConfigType configType = getConfigType();
             configuration = EnhancedServiceLoader
                     .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
         }

@@ -33,27 +33,29 @@ public class ConfigurationTestHelper {
     private static final long PUT_CONFIG_TIMEOUT = 60000L;
 
     public static void removeConfig(String dataId) {
-        putConfig(dataId, null);
+        //ConfigurationCache.removeConfigListener(dataId);
+        String content = System.clearProperty(dataId);
+        ConfigurationFactory.getInstance().removeConfig(dataId);
+        LOGGER.info("removeConfig, dataId={}, content={}", dataId, content);
     }
 
     public static void putConfig(String dataId, String content) {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        ConfigurationCache.addConfigListener(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, event -> countDownLatch.countDown());
         if (content == null) {
-            System.clearProperty(dataId);
-            ConfigurationFactory.getInstance().removeConfig(dataId);
+            removeConfig(dataId);
             return;
         }
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        ConfigurationCache.addConfigListener(dataId, event -> countDownLatch.countDown());
         System.setProperty(dataId, content);
         ConfigurationFactory.getInstance().putConfig(dataId, content);
 
         try {
             boolean await = countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
-            if(await){
-                LOGGER.info("putConfig ok, dataId={}", dataId);
-            }else {
-                LOGGER.error("putConfig fail, dataId={}", dataId);
+            if (await) {
+                LOGGER.info("putConfig ok, dataId={}, content={}", dataId, content);
+            } else {
+                LOGGER.error("putConfig fail, dataId={}, content={}", dataId, content);
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
