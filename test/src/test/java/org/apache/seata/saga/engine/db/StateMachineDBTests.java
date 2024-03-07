@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.LockAndCallback;
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -65,7 +67,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
         startSeataServer();
 
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
@@ -75,6 +77,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @AfterAll
     public static void destory() throws InterruptedException {
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         stopSeataServer();
     }
 
