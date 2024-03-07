@@ -89,13 +89,16 @@ public abstract class AbstractServerTest {
         Thread.sleep(5000);
     }
 
-    protected static final void stopSeataServer() throws InterruptedException {
+    protected static void stopSeataServer() throws InterruptedException {
         if (nettyServer != null) {
 			LOGGER.info("Stopping Seata Server...");
 
-			nettyServer.destroy();
-
-			LOGGER.info("Seata Server stopped");
+            try {
+                nettyServer.destroy();
+                LOGGER.info("Seata Server stopped");
+            } catch (Exception e) {
+                LOGGER.error("Stop Seata Server error: {}", e.getMessage(), e);
+            }
 
 			Thread.sleep(5000);
         }
