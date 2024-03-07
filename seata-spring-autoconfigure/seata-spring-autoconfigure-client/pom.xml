@@ -39,7 +39,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!--seata-->
+        <!-- seata -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>

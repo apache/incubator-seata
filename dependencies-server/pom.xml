@@ -36,7 +36,7 @@
 
     <properties>
         <!-- spring-boot version for server -->
-        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
 
         <!-- MySQL drivers -->
         <mysql5.version>${mysql.version}</mysql5.version>
@@ -50,6 +50,8 @@
 
         <!-- prometheus -->
         <prometheus.client.version>0.6.0</prometheus.client.version>
+        <!-- skywalking -->
+        <skywalking.version>8.6.0</skywalking.version>
 
         <!-- for logback appenders -->
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
@@ -88,10 +90,18 @@
                 <version>${jjwt.version}</version>
             </dependency>
 
+            <!-- prometheus -->
             <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
                 <version>${prometheus.client.version}</version>
+            </dependency>
+
+            <!-- skywalking -->
+            <dependency>
+                <groupId>org.apache.skywalking</groupId>
+                <artifactId>apm-agent-core</artifactId>
+                <version>${skywalking.version}</version>
             </dependency>
 
             <!-- # for logback appenders -->
@@ -134,6 +144,24 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>commons-compiler-jdk</artifactId>
                 <version>${janino.version}</version>
+            </dependency>
+
+            <!-- junit5 -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- spring-boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-for-server.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

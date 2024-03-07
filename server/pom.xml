@@ -27,8 +27,10 @@
         <relativePath>../dependencies-server/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
     <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
+
     <name>seata-server ${project.version}</name>
     <description>server for Seata built with Maven</description>
 
@@ -356,7 +358,7 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>${spring-boot.version}</version>
+                        <version>${spring-boot-for-server.version}</version>
                         <configuration>
                             <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
