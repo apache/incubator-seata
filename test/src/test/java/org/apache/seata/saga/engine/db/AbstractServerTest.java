@@ -30,6 +30,8 @@ import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract Server Test
@@ -37,16 +39,19 @@ import org.apache.seata.server.session.SessionHolder;
  */
 public abstract class AbstractServerTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServerTest.class);
 
     private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     protected static void startSeataServer() throws InterruptedException {
-        (new Thread(new Runnable() {
-            public void run() {
+        (new Thread(() -> {
+            LOGGER.info("Starting Seata Server...");
+
+            try {
                 File file = new File("sessionStore/root.data");
-                if(file.exists()){
+                if (file.exists()) {
                     file.delete();
                 }
 
@@ -75,15 +80,24 @@ public abstract class AbstractServerTest {
                 XID.setPort(nettyServer.getListenPort());
 
                 nettyServer.init();
+
+                LOGGER.info("Seata Server started");
+            } catch (Exception e) {
+                LOGGER.error("Start Seata Server error: {}", e.getMessage(), e);
             }
         })).start();
         Thread.sleep(5000);
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if(nettyServer != null){
-            nettyServer.destroy();
-            Thread.sleep(5000);
+        if (nettyServer != null) {
+			LOGGER.info("Stopping Seata Server...");
+
+			nettyServer.destroy();
+
+			LOGGER.info("Seata Server stopped");
+
+			Thread.sleep(5000);
         }
     }
 

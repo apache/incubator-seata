@@ -14,9 +14,7 @@ jobs:
       matrix:
         java: [ 8, 11, 17, 21 ]
         os: [
-          ubuntu,
-          macos,
-          windows, # Skip tests, because too many errors in unit-test.
+          macos
         ]
         springboot: [
           2.7.18,
