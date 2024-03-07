@@ -111,6 +111,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         if (listenPort <= 0) {
             throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
         }
+
+        LOGGER.info("set listen port: {}", listenPort);
         this.listenPort = listenPort;
     }
 
@@ -121,12 +123,14 @@ public class NettyServerBootstrap implements RemotingBootstrap {
      */
     public int getListenPort() {
         if (listenPort != 0) {
+            LOGGER.info("get current listen port: {}", listenPort);
             return listenPort;
         }
         String strPort = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         int port = 0;
         try {
             port = Integer.parseInt(strPort);
+            LOGGER.info("get listen port from configuration: {}", port);
         } catch (NumberFormatException exx) {
             LOGGER.error("server service port set error:{}", exx.getMessage());
         }
@@ -168,14 +172,14 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
         try {
             this.serverBootstrap.bind(port).sync();
-            LOGGER.info("Server started, service listen port: {}", getListenPort());
+            LOGGER.info("Server started, service listen port: {}", port);
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }
             initialized.set(true);
         } catch (SocketException se) {
-            throw new RuntimeException("Server start failed, the listen port: " + getListenPort(), se);
+            throw new RuntimeException("Server start failed, the listen port: " + port, se);
         } catch (Exception exx) {
             throw new RuntimeException("Server start failed", exx);
         }
@@ -189,7 +193,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             }
             if (initialized.get()) {
                 InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
-                for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+                for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                     registryService.unregister(address);
                     registryService.close();
                 }
