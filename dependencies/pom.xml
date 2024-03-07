@@ -109,11 +109,9 @@
 
         <!-- for test -->
         <mockito.version>4.11.0</mockito.version>
-        <assertj-core.version>3.12.2</assertj-core.version>
+        <assertj.version>3.12.2</assertj.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <junit-platform.version>1.8.2</junit-platform.version>
-        <jetty-version>9.4.38.v20210224</jetty-version>
-        <janino-version>3.1.7</janino-version>
+        <jetty.version>9.4.38.v20210224</jetty.version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
 
         <!-- spring-boot -->
@@ -462,13 +460,10 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-security</artifactId>
-                <version>${jetty-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty-version}</version>
+                <artifactId>jetty-bom</artifactId>
+                <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -511,11 +506,18 @@
                 <artifactId>mockito-inline</artifactId>
                 <version>${mockito.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-bom</artifactId>
+                <version>${mockito.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- ## assertj -->
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>${assertj-core.version}</version>
+                <version>${assertj.version}</version>
             </dependency>
             <!-- ## junit:5 -->
             <dependency>

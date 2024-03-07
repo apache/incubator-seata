@@ -58,8 +58,8 @@
 
         <jcommander.version>1.82</jcommander.version>
 
-        <!-- # for test -->
-        <janino-version>3.1.7</janino-version>
+        <!-- janino -->
+        <janino.version>3.1.9</janino.version>
     </properties>
 
     <dependencyManagement>
@@ -119,11 +119,16 @@
                 <version>${jcommander.version}</version>
             </dependency>
 
-            <!-- # for test -->
+            <!-- janino -->
             <dependency>
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
-                <version>${janino-version}</version>
+                <version>${janino.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.janino</groupId>
+                <artifactId>commons-compiler</artifactId>
+                <version>${janino.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
