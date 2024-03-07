@@ -21,11 +21,8 @@ import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.LocalTCC;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
-import java.util.List;
-
 /**
  * The interface Tcc action.
- *
  */
 @LocalTCC
 public interface TccAction {
@@ -34,16 +31,10 @@ public interface TccAction {
      * Prepare boolean.
      *
      * @param actionContext the action context
-     * @param a             the a
-     * @param b             the b
-     * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class, Integer.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
-    boolean prepare(BusinessActionContext actionContext,
-                    @BusinessActionContextParameter("a") int a,
-                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                    @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
+    @TwoPhaseBusinessAction(name = "tccActionForTest")
+    boolean prepare(BusinessActionContext actionContext);
 
     /**
      * Commit boolean.
@@ -51,8 +42,15 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean commit(BusinessActionContext actionContext,
-                   @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
+    boolean commit(BusinessActionContext actionContext);
+
+    /**
+     * Commit boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean commitWithArg(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param, @Param("a") Integer a);
 
     /**
      * Rollback boolean.
@@ -60,5 +58,8 @@ public interface TccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
+    boolean rollback(BusinessActionContext actionContext);
+
+    boolean rollbackWithArg(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
+
 }

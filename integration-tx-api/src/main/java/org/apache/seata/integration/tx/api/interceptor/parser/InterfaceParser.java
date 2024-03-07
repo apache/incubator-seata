@@ -25,5 +25,4 @@ public interface InterfaceParser {
 
     IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass);
 
-
 }

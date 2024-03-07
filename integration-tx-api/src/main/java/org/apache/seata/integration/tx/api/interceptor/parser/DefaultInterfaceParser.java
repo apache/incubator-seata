@@ -16,12 +16,16 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author leezongjie
@@ -53,15 +57,46 @@ public class DefaultInterfaceParser implements InterfaceParser {
         }
     }
 
+    /**
+     * Create an interceptor chain that supports adding multiple interceptors.Create an interceptor chain that supports adding multiple interceptors.
+     * The entry order of the facets can be specified through {@link ProxyInvocationHandler # order()}.
+     * It is not allowed to load multiple interceptors of the same type, such as two-stage annotations for TCC and Saga that cannot exist simultaneously. The type can be specified through {@link ProxyInvocationHandler # type()}.It is not allowed to load multiple interceptors of the same type, such as two-stage annotations for TCC and Saga that cannot exist simultaneously. The type can be specified through {@link ProxyInvocationHandler # type()}.
+     *
+     * @param target
+     * @param objectName
+     * @return
+     * @throws Exception
+     */
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
+        List<ProxyInvocationHandler> invocationHandlerList = new ArrayList<>();
+        Set<String> invocationHandlerRepeatCheck = new HashSet<>();
+
         for (InterfaceParser interfaceParser : ALL_INTERFACE_PARSERS) {
             ProxyInvocationHandler proxyInvocationHandler = interfaceParser.parserInterfaceToProxy(target, objectName);
             if (proxyInvocationHandler != null) {
-                return proxyInvocationHandler;
+                if (!invocationHandlerRepeatCheck.add(proxyInvocationHandler.type())) {
+                    throw new RuntimeException("there is already an annotation of type " + proxyInvocationHandler.type() + " for class: " + target.getClass().getName());
+                }
+                invocationHandlerList.add(proxyInvocationHandler);
             }
         }
-        return null;
+
+        Collections.sort(invocationHandlerList, Comparator.comparingInt(ProxyInvocationHandler::order));
+
+        ProxyInvocationHandler first = null;
+        ProxyInvocationHandler last = null;
+        for (ProxyInvocationHandler proxyInvocationHandler : invocationHandlerList) {
+            if (first == null) {
+                first = proxyInvocationHandler;
+            }
+            if (last != null) {
+                last.setNextProxyInvocationHandler(proxyInvocationHandler);
+            }
+            last = proxyInvocationHandler;
+        }
+
+        return first;
     }
 
     @Override

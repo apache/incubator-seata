@@ -19,7 +19,6 @@ package org.apache.seata.integration.tx.api.interceptor.parser;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.ReflectionUtil;
@@ -31,10 +30,9 @@ import org.apache.seata.spring.annotation.GlobalLock;
 import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.api.FailureHandlerHolder;
 
-
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
 
-    private final Set<String> methodsToProxy = new HashSet<>();
+    protected final Set<String> methodsToProxy = new HashSet<>();
 
     /**
      * @param target
@@ -51,12 +49,16 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
 
         if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
-            ProxyInvocationHandler proxyInvocationHandler = new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
+            ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler();
             ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (ConfigurationChangeListener) proxyInvocationHandler);
             return proxyInvocationHandler;
         }
 
         return null;
+    }
+
+    protected ProxyInvocationHandler createProxyInvocationHandler() {
+        return new GlobalTransactionalInterceptorHandler(FailureHandlerHolder.getFailureHandler(), methodsToProxy);
     }
 
     @Override
@@ -72,7 +74,7 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
         return ifNeedEnhanceBean;
     }
 
-    private boolean existsAnnotation(Class<?>... classes) {
+    protected boolean existsAnnotation(Class<?>... classes) {
         boolean result = false;
         if (CollectionUtils.isNotEmpty(classes)) {
             for (Class<?> clazz : classes) {
