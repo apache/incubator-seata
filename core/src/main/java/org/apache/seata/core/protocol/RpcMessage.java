@@ -35,7 +35,7 @@ public class RpcMessage implements Serializable {
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
-    private String version;
+    private String sdkVersion;
 
     /**
      * Gets id.
@@ -171,12 +171,12 @@ public class RpcMessage implements Serializable {
         this.messageType = messageType;
     }
 
-    public String getVersion() {
-        return version;
+    public String getSdkVersion() {
+        return sdkVersion;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setSdkVersion(String sdkVersion) {
+        this.sdkVersion = sdkVersion;
     }
 
     @Override

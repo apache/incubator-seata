@@ -179,7 +179,7 @@ public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
         rpcMessage.setCompressor(this.compressor);
         rpcMessage.setHeadMap(this.headMap);
         rpcMessage.setBody(this.body);
-        rpcMessage.setVersion(ProtocolRpcMessage.getVersion(this.body));
+        rpcMessage.setSdkVersion(ProtocolRpcMessage.getSdkVersion(this.body));
         return rpcMessage;
     }
 
@@ -187,7 +187,7 @@ public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
     @Override
     public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
         this.body = rpcMessage.getBody();
-        ProtocolRpcMessage.setVersion(this.body, rpcMessage.getVersion());
+        ProtocolRpcMessage.setSdkVersion(this.body, rpcMessage.getSdkVersion());
         this.headMap = rpcMessage.getHeadMap();
         this.id = rpcMessage.getId();
         this.messageType = rpcMessage.getMessageType();
