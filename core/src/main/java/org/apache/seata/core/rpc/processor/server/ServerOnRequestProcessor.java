@@ -101,17 +101,17 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final String BATCH_RESPONSE_THREAD_PREFIX = "rpcBatchResponse";
     private static final boolean PARALLEL_REQUEST_HANDLE =
-            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_PARALLEL_REQUEST_HANDLE_KEY, true);
+        ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.ENABLE_PARALLEL_REQUEST_HANDLE_KEY, true);
 
     public ServerOnRequestProcessor(RemotingServer remotingServer, TransactionMessageHandler transactionMessageHandler) {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         if (NettyServerConfig.isEnableTcServerBatchSendResponse()) {
             batchResponseExecutorService = new ThreadPoolExecutor(MAX_BATCH_RESPONSE_THREAD,
-                    MAX_BATCH_RESPONSE_THREAD,
-                    KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
+                MAX_BATCH_RESPONSE_THREAD,
+                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
             batchResponseExecutorService.submit(new BatchResponseRunnable());
         }
     }
@@ -153,15 +153,15 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         // the batch send request message
         if (message instanceof MergedWarpMessage) {
             if (NettyServerConfig.isEnableTcServerBatchSendResponse() && StringUtils.isNotBlank(rpcContext.getVersion())
-                    && Version.isAboveOrEqualVersion150(rpcContext.getVersion())) {
-                List<AbstractMessage> msgs = ((MergedWarpMessage) message).msgs;
-                List<Integer> msgIds = ((MergedWarpMessage) message).msgIds;
+                && Version.isAboveOrEqualVersion150(rpcContext.getVersion())) {
+                List<AbstractMessage> msgs = ((MergedWarpMessage)message).msgs;
+                List<Integer> msgIds = ((MergedWarpMessage)message).msgIds;
                 for (int i = 0; i < msgs.size(); i++) {
                     AbstractMessage msg = msgs.get(i);
                     int msgId = msgIds.get(i);
                     if (PARALLEL_REQUEST_HANDLE) {
                         CompletableFuture.runAsync(
-                                () -> handleRequestsByMergedWarpMessageBy150(msg, msgId, rpcMessage, ctx, rpcContext));
+                            () -> handleRequestsByMergedWarpMessageBy150(msg, msgId, rpcMessage, ctx, rpcContext));
                     } else {
                         handleRequestsByMergedWarpMessageBy150(msg, msgId, rpcMessage, ctx, rpcContext);
                     }
@@ -169,17 +169,17 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             } else {
                 List<AbstractResultMessage> results = new ArrayList<>();
                 List<CompletableFuture<AbstractResultMessage>> completableFutures = null;
-                for (int i = 0; i < ((MergedWarpMessage) message).msgs.size(); i++) {
+                for (int i = 0; i < ((MergedWarpMessage)message).msgs.size(); i++) {
                     if (PARALLEL_REQUEST_HANDLE) {
                         if (completableFutures == null) {
                             completableFutures = new ArrayList<>();
                         }
                         int finalI = i;
                         completableFutures.add(CompletableFuture.supplyAsync(() -> handleRequestsByMergedWarpMessage(
-                                ((MergedWarpMessage) message).msgs.get(finalI), rpcContext)));
+                            ((MergedWarpMessage)message).msgs.get(finalI), rpcContext)));
                     } else {
                         results.add(i,
-                                handleRequestsByMergedWarpMessage(((MergedWarpMessage) message).msgs.get(i), rpcContext));
+                            handleRequestsByMergedWarpMessage(((MergedWarpMessage)message).msgs.get(i), rpcContext));
                     }
                 }
                 if (CollectionUtils.isNotEmpty(completableFutures)) {
@@ -200,14 +200,14 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             final AbstractMessage msg = (AbstractMessage) message;
             if (LOGGER.isInfoEnabled()) {
                 String receiveMsgLog = String.format("receive msg[single]: %s, clientIp: %s, vgroup: %s", message,
-                        NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
                 BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
             }
             AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), result);
             if (LOGGER.isInfoEnabled()) {
                 String resultMsgLog = String.format("result msg[single]: %s, clientIp: %s, vgroup: %s", result,
-                        NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
                 BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
             }
         }
@@ -229,7 +229,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                           AbstractResultMessage resultMessage, int msgId, Channel channel) {
         if (!msgQueue.offer(new QueueItem(resultMessage, msgId, rpcMessage))) {
             LOGGER.error("put message into basketMap offer failed, channel:{},rpcMessage:{},resultMessage:{}",
-                    channel, rpcMessage, resultMessage);
+                channel, rpcMessage, resultMessage);
         }
     }
 
@@ -261,8 +261,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                     while (!msgQueue.isEmpty()) {
                         QueueItem item = msgQueue.poll();
                         BatchResultMessage batchResultMessage = CollectionUtils.computeIfAbsent(batchResultMessageMap,
-                                new ClientRequestRpcInfo(item.getRpcMessage()),
-                                key -> new BatchResultMessage());
+                            new ClientRequestRpcInfo(item.getRpcMessage()),
+                            key -> new BatchResultMessage());
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
@@ -278,19 +278,18 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     /**
      * handle rpc request message
-     *
      * @param rpcContext rpcContext
      */
     private AbstractResultMessage handleRequestsByMergedWarpMessage(AbstractMessage subMessage, RpcContext rpcContext) {
         if (LOGGER.isInfoEnabled()) {
             String receiveMsgLog = String.format("receive msg[merged]: %s, clientIp: %s, vgroup: %s", subMessage,
-                    NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
             BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
         }
         AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(subMessage, rpcContext);
         if (LOGGER.isInfoEnabled()) {
             String resultMsgLog = String.format("result msg[merged]: %s, clientIp: %s, vgroup: %s", resultMessage,
-                    NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                NetUtil.toIpAddress(rpcContext.getChannel().remoteAddress()), rpcContext.getTransactionServiceGroup());
             BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
         }
         return resultMessage;
@@ -298,18 +297,17 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     /**
      * handle rpc request message
-     *
-     * @param msg        msg
-     * @param msgId      msgId
+     * @param msg msg
+     * @param msgId msgId
      * @param rpcMessage rpcMessage
-     * @param ctx        ctx
+     * @param ctx ctx
      * @param rpcContext rpcContext
      */
     private void handleRequestsByMergedWarpMessageBy150(AbstractMessage msg, int msgId, RpcMessage rpcMessage,
-                                                        ChannelHandlerContext ctx, RpcContext rpcContext) {
+        ChannelHandlerContext ctx, RpcContext rpcContext) {
         if (LOGGER.isInfoEnabled()) {
             String receiveMsgLog = String.format("receive msg[merged]: %s, clientIp: %s, vgroup: %s", msg,
-                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
             BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
         }
         AbstractResultMessage resultMessage = transactionMessageHandler.onRequest(msg, rpcContext);
@@ -318,7 +316,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         notifyBatchRespondingThread();
         if (LOGGER.isInfoEnabled()) {
             String resultMsgLog = String.format("result msg[merged]: %s, clientIp: %s, vgroup: %s", resultMessage,
-                    NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
             BatchLogHandler.INSTANCE.writeLog(resultMsgLog);
         }
     }
@@ -327,7 +325,6 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
      * build RpcMessage
      *
      * @param clientRequestRpcInfo For saving client request rpc info
-     * @param version              version
      * @return rpcMessage
      */
     private RpcMessage buildRpcMessage(ClientRequestRpcInfo clientRequestRpcInfo, String version) {
@@ -418,7 +415,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
             }
             ClientRequestRpcInfo that = (ClientRequestRpcInfo) o;
             return rpcMessageId == that.rpcMessageId && codec == that.codec
-                    && compressor == that.compressor && headMap.equals(that.headMap);
+                && compressor == that.compressor && headMap.equals(that.headMap);
         }
 
         @Override
