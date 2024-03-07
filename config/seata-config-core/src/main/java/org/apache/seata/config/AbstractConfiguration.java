@@ -20,12 +20,16 @@ import java.time.Duration;
 
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract configuration.
  *
  */
 public abstract class AbstractConfiguration implements Configuration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfiguration.class);
 
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
@@ -136,9 +140,13 @@ public abstract class AbstractConfiguration implements Configuration {
     public String getConfig(String dataId, String content, long timeoutMills) {
         String value = getConfigFromSys(dataId);
         if (value != null) {
+            LOGGER.info("Get config from system property, {}={}, type={}", dataId, value, getTypeName());
             return value;
         }
-        return getLatestConfig(dataId, content, timeoutMills);
+
+        value = getLatestConfig(dataId, content, timeoutMills);
+        LOGGER.info("Get config {}={}, type={}", dataId, value, getTypeName());
+        return value;
     }
 
     @Override
