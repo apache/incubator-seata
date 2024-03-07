@@ -67,6 +67,7 @@
             <version>${project.version}</version>
         </dependency>
 
+
         <!-- The actual spring-related dependencies that take effect are from the seata-dependencies-client module, not the seata-server module -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -74,7 +75,7 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.apache.seata</groupId>
+                    <groupId>${project.groupId}</groupId>
                     <artifactId>seata-spring-autoconfigure-server</artifactId>
                 </exclusion>
             </exclusions>
@@ -84,6 +85,7 @@
             <artifactId>seata-mock-server</artifactId>
             <version>${project.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.h2database</groupId>

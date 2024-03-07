@@ -27,8 +27,10 @@
         <relativePath>../dependencies-server/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+
     <artifactId>seata-console</artifactId>
     <packaging>jar</packaging>
+
     <name>seata-console ${project.version}</name>
     <description>console for Seata built with Maven</description>
 
@@ -55,6 +57,10 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
+        <!--<dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+        </dependency>-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -70,6 +76,7 @@
             <scope>runtime</scope>
         </dependency>
     </dependencies>
+
     <profiles>
         <profile>
             <id>release-frontend</id>
@@ -142,6 +149,7 @@
             </build>
         </profile>
     </profiles>
+
     <build>
         <resources>
             <resource>
