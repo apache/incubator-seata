@@ -144,7 +144,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        int port = getListenPort();
+        int port = XID.getPort();
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(NettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
@@ -173,7 +173,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         try {
             this.serverBootstrap.bind(port).sync();
             LOGGER.info("Server started, service listen port: {}", port);
-            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), port);
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }
@@ -188,11 +188,12 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     @Override
     public void shutdown() {
         try {
+            int port = XID.getPort();
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
+                LOGGER.info("Shutting server down, the listen port: {}", port);
             }
             if (initialized.get()) {
-                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), port);
                 for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                     registryService.unregister(address);
                     registryService.close();
