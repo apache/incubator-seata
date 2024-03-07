@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -125,6 +126,8 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private final AtomicBoolean initSync = new AtomicBoolean(false);
 
+    private ScheduledFuture<?> scheduledFuture;
+    
     public boolean isLeader() {
         return this.leaderTerm.get() > 0;
     }
@@ -147,7 +150,8 @@ public class RaftStateMachine extends StateMachineAdapter {
             EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
             EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
             EXECUTES.put(RELEASE_BRANCH_SESSION_LOCK, new BranchReleaseLockExecute());
-            RESYNC_METADATA_POOL.scheduleAtFixedRate(() -> syncCurrentNodeInfo(group), 10, 10, TimeUnit.SECONDS);
+            this.scheduledFuture =
+                RESYNC_METADATA_POOL.scheduleAtFixedRate(() -> syncCurrentNodeInfo(group), 10, 10, TimeUnit.SECONDS);
         }
     }
 
@@ -405,6 +409,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                         if (err == null) {
                             PutNodeMetadataResponse putNodeMetadataResponse = (PutNodeMetadataResponse)result;
                             if (putNodeMetadataResponse.isSuccess()) {
+                                scheduledFuture.cancel(true);
                                 LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
                             } else {
                                 initSync.compareAndSet(true, false);
