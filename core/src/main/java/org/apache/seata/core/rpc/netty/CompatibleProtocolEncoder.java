@@ -58,10 +58,12 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
         try {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
-                byte version = Version.calcProtocolVersion(rpcMessage.getVersion());
-                ProtocolEncoder encoder = protocolEncoderMap.get(version);
+                String sdkVersion = rpcMessage.getSdkVersion();
+                //todo null?
+                byte protocolVersion = Version.calcProtocolVersion(sdkVersion);
+                ProtocolEncoder encoder = protocolEncoderMap.get(protocolVersion);
                 if (encoder == null) {
-                    throw new UnsupportedOperationException("Unsupported version: " + version);
+                    throw new UnsupportedOperationException("Unsupported protocolVersion: " + protocolVersion);
                 }
 
                 encoder.encode(rpcMessage, out);

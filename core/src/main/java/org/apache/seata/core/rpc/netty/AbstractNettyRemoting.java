@@ -243,7 +243,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.setVersion(version);
+        rpcMessage.setSdkVersion(version);
         return rpcMessage;
     }
 
@@ -258,7 +258,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
         rpcMsg.setCompressor(rpcMessage.getCompressor());
         rpcMsg.setBody(msg);
         rpcMsg.setId(rpcMessage.getId());
-        rpcMsg.setVersion(version);
+        rpcMsg.setSdkVersion(version);
         return rpcMsg;
     }
 

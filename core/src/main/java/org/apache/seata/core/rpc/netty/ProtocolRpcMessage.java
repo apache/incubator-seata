@@ -36,7 +36,7 @@ public interface ProtocolRpcMessage {
      */
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
 
-    static String getVersion(Object body) {
+    static String getSdkVersion(Object body) {
         if (body instanceof AbstractIdentifyRequest) {
             return ((AbstractIdentifyRequest) body).getVersion();
         } else {
@@ -44,7 +44,7 @@ public interface ProtocolRpcMessage {
         }
     }
 
-    static void setVersion(Object body, String version) {
+    static void setSdkVersion(Object body, String version) {
         if (body instanceof AbstractIdentifyRequest) {
             ((AbstractIdentifyRequest) body).setVersion(version);
         }

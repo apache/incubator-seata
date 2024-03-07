@@ -126,6 +126,7 @@ public class ProtocolV1Client {
         rpcMessage.setBody(body);
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
 
+
         if (channel != null) {
             DefaultPromise promise = new DefaultPromise(defaultEventExecutor);
             futureMap.put(msgId, promise);
