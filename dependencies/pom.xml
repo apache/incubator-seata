@@ -53,6 +53,8 @@
         <!-- zookeeper -->
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
+        <!-- byte-buddy -->
+        <bytebuddy.version>1.12.17</bytebuddy.version>
 
         <!-- for compressor -->
         <ant.version>1.10.12</ant.version>
@@ -209,6 +211,18 @@
                         <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <!-- byte-buddy -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${bytebuddy.version}</version>
             </dependency>
 
             <!-- Database Connection Pooling -->

@@ -39,7 +39,6 @@
         <antlr4.version>4.8</antlr4.version>
 
         <protostuff.version>1.5.9</protostuff.version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
 
         <!-- for integration -->
         <brpc.version>2.5.9</brpc.version>
@@ -83,13 +82,6 @@
                 <groupId>io.protostuff</groupId>
                 <artifactId>protostuff-runtime</artifactId>
                 <version>${protostuff.version}</version>
-            </dependency>
-
-            <!-- apache-commons -->
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy</artifactId>
-                <version>${bytebuddy.version}</version>
             </dependency>
 
             <!-- #  for integration -->
