@@ -21,6 +21,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.AbstractIdentifyRequest;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
@@ -59,7 +60,7 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
         try {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
-                String sdkVersion = rpcMessage.getSdkVersion();
+                String sdkVersion = rpcMessage.getOtherSideVersion();
                 if(StringUtils.isBlank(sdkVersion)){
                     sdkVersion = Version.getCurrent();
                 }
