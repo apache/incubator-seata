@@ -32,10 +32,10 @@ public interface NestTccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccNestActionForTest")
+    @TwoPhaseBusinessAction(name = "tccNestActionForCompatibleTest")
     boolean prepare(BusinessActionContext actionContext, int count);
 
-    @TwoPhaseBusinessAction(name = "tccNestActionForTest")
+    @TwoPhaseBusinessAction(name = "tccNestActionForCompatibleTest")
     boolean prepareNestRequiredNew(BusinessActionContext actionContext, int count);
 
     /**

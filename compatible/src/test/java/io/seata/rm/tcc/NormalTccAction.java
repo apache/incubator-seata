@@ -39,7 +39,7 @@ public interface NormalTccAction {
      * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    @TwoPhaseBusinessAction(name = "tccActionForCompatibleTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
     String prepare(BusinessActionContext actionContext,
                     @BusinessActionContextParameter("a") int a,
                     @BusinessActionContextParameter(paramName = "b", index = 0) List b,
@@ -63,7 +63,7 @@ public interface NormalTccAction {
     boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 
 
-    @TwoPhaseBusinessAction(name = "tccActionForTestWithException", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    @TwoPhaseBusinessAction(name = "tccActionForCompatibleTestWithException", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
     String prepareWithException(BusinessActionContext actionContext,
                    @BusinessActionContextParameter("a") int a,
                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,
