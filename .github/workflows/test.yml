@@ -110,9 +110,9 @@ jobs:
       fail-fast: false
       matrix:
         springboot: [
-          #2.7.18, # The maven-compiler-plugin will throw an error for an unknown reason.
-          #2.6.15, # The maven-compiler-plugin will throw an error for an unknown reason.
-          #2.5.15, # The maven-compiler-plugin will throw an error for an unknown reason.
+          2.7.18,
+          2.6.15,
+          2.5.15,
           2.4.13,
           2.3.12.RELEASE,
           2.2.13.RELEASE,
