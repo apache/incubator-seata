@@ -27,7 +27,6 @@ import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.exception.DecodeException;
-import org.apache.seata.core.protocol.AbstractIdentifyRequest;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.serializer.Serializer;
