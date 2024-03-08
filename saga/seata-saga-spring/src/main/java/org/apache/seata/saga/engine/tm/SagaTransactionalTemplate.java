@@ -50,5 +50,5 @@ public interface SagaTransactionalTemplate {
 
     void triggerAfterCompletion(GlobalTransaction tx);
 
-    void cleanUp();
+    void cleanUp(GlobalTransaction tx);
 }
