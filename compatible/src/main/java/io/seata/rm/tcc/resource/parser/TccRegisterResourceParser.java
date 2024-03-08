@@ -29,7 +29,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-@Deprecated
 public class TccRegisterResourceParser extends org.apache.seata.rm.tcc.resource.parser.TccRegisterResourceParser {
 
     protected void executeRegisterResource(Object target, Set<Method> methods, Class<?> targetServiceClass) throws NoSuchMethodException {

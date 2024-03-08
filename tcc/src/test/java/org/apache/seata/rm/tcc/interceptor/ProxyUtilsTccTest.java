@@ -32,8 +32,11 @@ import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.NormalTccAction;
 import org.apache.seata.rm.tcc.NormalTccActionImpl;
+import org.apache.seata.rm.tcc.TCCResourceManager;
 import org.apache.seata.rm.tcc.TccParam;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
@@ -41,64 +44,67 @@ public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
 
-    AtomicReference<String> branchReference = new AtomicReference<String>();
+    private static final AtomicReference<String> branchReference = new AtomicReference<>();
+
+    @BeforeAll
+    public static void beforeTest() {
+        DefaultResourceManager.get();
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, new ResourceManager() {
+
+            @Override
+            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+                branchReference.set(resourceId);
+                return System.currentTimeMillis();
+            }
+
+            @Override
+            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+
+            }
+
+            @Override
+            public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+                return false;
+            }
+
+            @Override
+            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+                return null;
+            }
+
+            @Override
+            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+                return null;
+            }
+
+            @Override
+            public void registerResource(Resource resource) {
+
+            }
+
+            @Override
+            public void unregisterResource(Resource resource) {
+
+            }
+
+            @Override
+            public Map<String, Resource> getManagedResources() {
+                return null;
+            }
+
+            @Override
+            public BranchType getBranchType() {
+                return null;
+            }
+
+            @Override
+            public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+                return null;
+            }
 
 
-    ResourceManager resourceManager = new ResourceManager() {
-
-        @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-            branchReference.set(resourceId);
-            return System.currentTimeMillis();
-        }
-
-        @Override
-        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-
-        }
-
-        @Override
-        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
-            return false;
-        }
-
-        @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
-            return null;
-        }
-
-        @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
-            return null;
-        }
-
-        @Override
-        public void registerResource(Resource resource) {
-
-        }
-
-        @Override
-        public void unregisterResource(Resource resource) {
-
-        }
-
-        @Override
-        public Map<String, Resource> getManagedResources() {
-            return null;
-        }
-
-        @Override
-        public BranchType getBranchType() {
-            return null;
-        }
-
-        @Override
-        public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
-            return null;
-        }
-
-
-    };
+        });
+    }
 
 
     @Test
@@ -110,8 +116,6 @@ public class ProxyUtilsTccTest {
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
         List<String> listB = Arrays.asList("b");
-
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
         //when
         String result = tccActionProxy.prepare(null, 0, listB, tccParam);
@@ -132,8 +136,6 @@ public class ProxyUtilsTccTest {
         TccParam tccParam = new TccParam(1, "abc@163.com");
         List<String> listB = Arrays.asList("b");
 
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
         //when
         //then
         Assertions.assertThrows(IllegalArgumentException.class, () -> tccActionProxy.prepareWithException(null, 0, listB, tccParam));
@@ -146,6 +148,11 @@ public class ProxyUtilsTccTest {
 
         Assertions.assertTrue(tccActionProxy.otherMethod());
 
+    }
+
+    @AfterAll
+    public static void recover() {
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, new TCCResourceManager());
     }
 
 
