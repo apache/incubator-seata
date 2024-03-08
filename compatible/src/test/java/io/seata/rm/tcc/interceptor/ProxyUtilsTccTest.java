@@ -33,8 +33,6 @@ import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.tcc.TCCResourceManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,12 +145,6 @@ public class ProxyUtilsTccTest {
         NormalTccActionImpl tccActionProxy = ProxyUtil.createProxy(tccAction);
 
         Assertions.assertTrue(tccActionProxy.otherMethod());
-    }
-
-
-    @AfterEach
-    public void recover() {
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, new TCCResourceManager());
     }
 
 }
