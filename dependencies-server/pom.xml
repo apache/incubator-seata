@@ -35,8 +35,10 @@
     <description>dependencies for Seata server and console built with Maven</description>
 
     <properties>
-        <!-- spring-boot version for server -->
+        <!-- `spring-boot` version for server -->
         <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
+        <!-- Overwrite the `spring-boot-dependencies` version inherited from parent `seata-dependencies` -->
+        <spring-boot.version>${spring-boot-for-server.version}</spring-boot.version>
 
         <!-- MySQL drivers -->
         <mysql5.version>${mysql.version}</mysql5.version>
@@ -144,24 +146,6 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>commons-compiler-jdk</artifactId>
                 <version>${janino.version}</version>
-            </dependency>
-
-            <!-- junit5 -->
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- spring-boot -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-for-server.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
