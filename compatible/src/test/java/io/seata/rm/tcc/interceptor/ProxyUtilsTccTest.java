@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.seata.core.context.RootContext;
+import io.seata.rm.tcc.NormalTccAction;
+import io.seata.rm.tcc.NormalTccActionImpl;
+import io.seata.rm.tcc.TccParam;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -30,25 +34,19 @@ import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.TCCResourceManager;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import io.seata.core.context.RootContext;
-import io.seata.rm.tcc.NormalTccAction;
-import io.seata.rm.tcc.NormalTccActionImpl;
-import io.seata.rm.tcc.TccParam;
 
 public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
 
-    private static final AtomicReference<String> branchReference = new AtomicReference<>();
+    private final AtomicReference<String> branchReference = new AtomicReference<>();
 
-
-    @BeforeAll
-    public static void beforeTest() {
+    @BeforeEach
+    public void beforeTest() {
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, new ResourceManager() {
 
@@ -152,8 +150,8 @@ public class ProxyUtilsTccTest {
     }
 
 
-    @AfterAll
-    public static void recover() {
+    @AfterEach
+    public void recover() {
         DefaultResourceManager.mockResourceManager(BranchType.TCC, new TCCResourceManager());
     }
 

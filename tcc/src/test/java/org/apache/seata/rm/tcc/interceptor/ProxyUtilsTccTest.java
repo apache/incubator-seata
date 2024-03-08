@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.tcc.interceptor;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,26 +33,22 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.NormalTccActionImpl;
 import org.apache.seata.rm.tcc.TCCResourceManager;
 import org.apache.seata.rm.tcc.TccParam;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 
 public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
 
 
-    private static final AtomicReference<String> branchReference = new AtomicReference<>();
-  
-    private static NormalTccActionImpl tccAction;
+    private final AtomicReference<String> branchReference = new AtomicReference<>();
 
-    private static NormalTccActionImpl tccActionProxy;
+    private NormalTccActionImpl tccActionProxy;
 
-
-    @BeforeAll
-    public static void beforeTest() {
+    @BeforeEach
+    public void beforeTest() {
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.TCC, new ResourceManager() {
 
@@ -110,11 +105,8 @@ public class ProxyUtilsTccTest {
 
 
         });
-    }
 
-    @BeforeAll
-    public static void init() throws IOException {
-        tccAction = new NormalTccActionImpl();
+        NormalTccActionImpl tccAction = new NormalTccActionImpl();
         tccActionProxy = ProxyUtil.createProxy(tccAction);
     }
 
@@ -154,8 +146,8 @@ public class ProxyUtilsTccTest {
         Assertions.assertTrue(tccActionProxy.otherMethod());
     }
 
-    @AfterAll
-    public static void recover() {
+    @AfterEach
+    public void recover() {
         DefaultResourceManager.mockResourceManager(BranchType.TCC, new TCCResourceManager());
     }
 
