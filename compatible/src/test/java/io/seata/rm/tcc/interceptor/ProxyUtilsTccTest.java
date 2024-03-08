@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.seata.rm.tcc.NormalTccActionImpl;
 import io.seata.rm.tcc.TccParam;
-import org.apache.seata.core.context.RootContext;
+import io.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
