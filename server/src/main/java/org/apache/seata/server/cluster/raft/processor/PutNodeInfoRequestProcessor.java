@@ -40,6 +40,8 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
             RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();
             raftStateMachine.changeNodeMetadata(node);
             rpcCtx.sendResponse(new PutNodeMetadataResponse(true));
+        } else {
+            rpcCtx.sendResponse(new PutNodeMetadataResponse(false));
         }
     }
 
