@@ -113,5 +113,5 @@ public interface StateLogStore {
     /**
      * clear the LocalThread
      */
-    void clearUp();
+    void clearUp(ProcessContext context);
 }
