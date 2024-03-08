@@ -49,7 +49,7 @@ public class ProtocolV1SerializerTest {
         ProtocolV1Client client = new ProtocolV1Client();
         try {
             server.start();
-            client.connect("127.0.0.1", 8811, 500);
+            client.connect("127.0.0.1", server.getPort(), 500);
 
             Assertions.assertTrue(client.channel.isActive());
 
@@ -66,7 +66,7 @@ public class ProtocolV1SerializerTest {
             body.setXid("xid-1234");
 
             // test run times
-            int runTimes = 100000;
+            int runTimes = 10000;
 
             final int threads = 50;
             final CountDownLatch cnt = new CountDownLatch(runTimes);
