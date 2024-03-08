@@ -46,7 +46,7 @@ jobs:
       # step 5
       - name: "Codecov"
         if: matrix.java == '8'
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v4.1.0
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
