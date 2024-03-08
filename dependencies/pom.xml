@@ -113,7 +113,11 @@
 
         <!-- spring-boot -->
         <spring-boot.version>2.5.15</spring-boot.version>
-        <!-- The module `dependencies-server` will overwrite it, and avoid conflicts with variables in workflow. -->
+        <!--
+          The purpose of adding this variable:
+            1. Avoid conflicts with variable `-Dspring-boot.version=xxx` in `.github/workflows`.
+            2. The module `dependencies-server` will overwrite it.
+        -->
         <spring-boot-dependencies.version>${spring-boot.version}</spring-boot-dependencies.version>
     </properties>
 

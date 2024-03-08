@@ -37,7 +37,7 @@
     <properties>
         <!-- `spring-boot` version for server -->
         <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
-        <!-- Overwrite the `spring-boot-dependencies` version inherited from parent `seata-dependencies` -->
+        <!-- Overwrite the `spring-boot-dependencies` version inherited from parent module `seata-dependencies`. -->
         <spring-boot-dependencies.version>${spring-boot-for-server.version}</spring-boot-dependencies.version>
 
         <!-- MySQL drivers -->
