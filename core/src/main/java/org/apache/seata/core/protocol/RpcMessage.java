@@ -35,7 +35,6 @@ public class RpcMessage implements Serializable {
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
-
     /**
      * Gets id.
      *
