@@ -169,13 +169,6 @@ public class RpcMessage implements Serializable {
         this.messageType = messageType;
     }
 
-    public String getSdkVersion() {
-        if (body instanceof AbstractIdentifyRequest) {
-            return ((AbstractIdentifyRequest) body).getVersion();
-        }
-        return "";
-    }
-
     @Override
     public String toString() {
         return StringUtils.toString(this);
