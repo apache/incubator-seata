@@ -113,6 +113,8 @@
 
         <!-- spring-boot -->
         <spring-boot.version>2.5.15</spring-boot.version>
+        <!-- The module `dependencies-server` will overwrite it, and avoid conflicts with variables in workflow. -->
+        <spring-boot-dependencies.version>${spring-boot.version}</spring-boot-dependencies.version>
     </properties>
 
     <dependencyManagement>
@@ -517,7 +519,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
+                <version>${spring-boot-dependencies.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
