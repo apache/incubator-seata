@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
@@ -130,7 +131,7 @@ public class DataSourceProxyTest {
         // case: dbType = oracle
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.ORACLE);
+            dbTypeField.set(proxy, JdbcConstants.ORACLE);
             Assertions.assertEquals("jdbc:mock:xxx/username", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
         }
 
@@ -138,7 +139,7 @@ public class DataSourceProxyTest {
         // case: dbType = postgresql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.POSTGRESQL);
+            dbTypeField.set(proxy, JdbcConstants.POSTGRESQL);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
@@ -155,7 +156,7 @@ public class DataSourceProxyTest {
         // case: dbType = dm
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.DM);
+            dbTypeField.set(proxy, JdbcConstants.DM);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
@@ -167,7 +168,7 @@ public class DataSourceProxyTest {
         // case: dbType = mysql
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.MYSQL);
+            dbTypeField.set(proxy, JdbcConstants.MYSQL);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
@@ -179,7 +180,7 @@ public class DataSourceProxyTest {
         // case: dbType = sqlserver
         {
             resourceIdField.set(proxy, null);
-            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.SQLSERVER);
+            dbTypeField.set(proxy, JdbcConstants.SQLSERVER);
             Assertions.assertEquals(jdbcUrl, proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
 
             resourceIdField.set(proxy, null);
