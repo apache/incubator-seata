@@ -38,6 +38,7 @@
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
 
+        <!-- protostuff -->
         <protostuff.version>1.5.9</protostuff.version>
 
         <!-- for integration -->
