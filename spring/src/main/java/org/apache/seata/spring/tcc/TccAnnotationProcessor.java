@@ -37,8 +37,9 @@ import java.util.Set;
 
 /**
  * An annotation adapter for TCC
- *
+ * Deprecated: Tcc advice move to rm side
  */
+@Deprecated
 public class TccAnnotationProcessor implements BeanPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(TccAnnotationProcessor.class);
 

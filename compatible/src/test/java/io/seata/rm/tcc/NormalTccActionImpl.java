@@ -14,13 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.rm.tcc;
 
-/**
- * 
- *
- * The interface Register check auth handler.
- *
- */
-public interface RegisterCheckAuthHandler extends org.apache.seata.core.rpc.RegisterCheckAuthHandler {
+
+import java.util.List;
+
+import io.seata.rm.tcc.api.BusinessActionContext;
+
+
+public class NormalTccActionImpl implements NormalTccAction {
+
+    @Override
+    public String prepare(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
+        return "a";
+    }
+
+    @Override
+    public boolean commit(BusinessActionContext actionContext, TccParam param) {
+        return false;
+    }
+
+    @Override
+    public boolean rollback(BusinessActionContext actionContext, TccParam param) {
+        return false;
+    }
+
+    public boolean otherMethod() {
+        return true;
+    }
+
+    @Override
+    public String prepareWithException(BusinessActionContext actionContext, int a, List b, TccParam tccParam) {
+        throw new IllegalArgumentException();
+    }
+
 }
