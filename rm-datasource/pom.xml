@@ -85,7 +85,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
