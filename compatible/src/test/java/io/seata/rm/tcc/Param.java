@@ -14,13 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.rm.tcc;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Resource Manager: common behaviors.
+ * customized annotation
  *
  */
-public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
+public @interface Param {
+    String value() default "";
 }
