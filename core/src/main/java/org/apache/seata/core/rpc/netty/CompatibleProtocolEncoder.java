@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
@@ -59,7 +60,9 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
                 String sdkVersion = rpcMessage.getSdkVersion();
-                //todo null?
+                if(StringUtils.isBlank(sdkVersion)){
+                    sdkVersion = Version.getCurrent();
+                }
                 byte protocolVersion = Version.calcProtocolVersion(sdkVersion);
                 ProtocolEncoder encoder = protocolEncoderMap.get(protocolVersion);
                 if (encoder == null) {
