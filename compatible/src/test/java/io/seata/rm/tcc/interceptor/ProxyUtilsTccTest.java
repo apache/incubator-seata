@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.seata.rm.tcc.NormalTccAction;
 import io.seata.rm.tcc.NormalTccActionImpl;
 import io.seata.rm.tcc.TccParam;
 import org.apache.seata.core.context.RootContext;
@@ -40,10 +39,10 @@ public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
 
-    AtomicReference<String> branchReference = new AtomicReference<String>();
+    private final AtomicReference<String> branchReference = new AtomicReference<String>();
 
 
-    ResourceManager resourceManager = new ResourceManager() {
+    private final ResourceManager resourceManager = new ResourceManager() {
 
         @Override
         public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
@@ -99,11 +98,12 @@ public class ProxyUtilsTccTest {
 
     };
 
+    private final NormalTccActionImpl tccActionProxy= ProxyUtil.createProxy(new NormalTccActionImpl());
+
+
     @Test
     public void testTcc() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -122,8 +122,6 @@ public class ProxyUtilsTccTest {
     @Test
     public void testTccThrowRawException() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -138,9 +136,6 @@ public class ProxyUtilsTccTest {
 
     @Test
     public void testTccImplementOtherMethod(){
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccActionImpl tccActionProxy = ProxyUtil.createProxy(tccAction);
-
         Assertions.assertTrue(tccActionProxy.otherMethod());
     }
 
