@@ -14,90 +14,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.datasource;
+package io.seata.rm.datasource.mock;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
+
 import javax.sql.DataSource;
-import org.apache.seata.core.model.BranchType;
-import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 
-/**
- * The type Data source proxy.
- *
- */
-public class DataSourceProxy implements SeataDataSourceProxy {
-    private final org.apache.seata.rm.datasource.DataSourceProxy dataSourceProxy;
-
-    public DataSourceProxy(DataSource targetDataSource) {
-        this.dataSourceProxy = new org.apache.seata.rm.datasource.DataSourceProxy(targetDataSource);
-    }
-
-    public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
-        this.dataSourceProxy = new org.apache.seata.rm.datasource.DataSourceProxy(targetDataSource, resourceGroupId);
-    }
-
-    @Override
-    public DataSource getTargetDataSource() {
-        return dataSourceProxy.getTargetDataSource();
-    }
-
-    @Override
-    public BranchType getBranchType() {
-        return dataSourceProxy.getBranchType();
-    }
-
+public class MockDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
-        return dataSourceProxy.getConnection();
+        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return dataSourceProxy.getConnection(username, password);
+        return null;
     }
 
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        return dataSourceProxy.unwrap(iface);
+        return null;
     }
 
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return dataSourceProxy.isWrapperFor(iface);
+        return false;
     }
 
     @Override
     public PrintWriter getLogWriter() throws SQLException {
-        return dataSourceProxy.getLogWriter();
+        return null;
     }
 
     @Override
     public void setLogWriter(PrintWriter out) throws SQLException {
-        dataSourceProxy.setLogWriter(out);
+
     }
 
     @Override
     public void setLoginTimeout(int seconds) throws SQLException {
-        dataSourceProxy.setLoginTimeout(seconds);
+
     }
 
     @Override
     public int getLoginTimeout() throws SQLException {
-        return dataSourceProxy.getLoginTimeout();
+        return 0;
     }
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return dataSourceProxy.getParentLogger();
+        return null;
     }
-
-    public String getResourceId() {
-        return dataSourceProxy.getResourceId();
-    }
-
-
 }
