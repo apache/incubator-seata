@@ -178,14 +178,12 @@ public class ProtocolRpcMessageV0 implements ProtocolRpcMessage {
         }
         rpcMessage.setBody(this.body);
         rpcMessage.setId((int) this.id);
-        rpcMessage.setSdkVersion(ProtocolRpcMessage.getSdkVersion(this.body));
         return rpcMessage;
     }
 
     @Override
     public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
         this.body = rpcMessage.getBody();
-        ProtocolRpcMessage.setSdkVersion(this.body, rpcMessage.getSdkVersion());
         this.id = rpcMessage.getId();
         this.isRequest = isRequest(rpcMessage.getMessageType());
         this.isHeartbeat = isHeartbeat(rpcMessage.getMessageType());

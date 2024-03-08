@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import org.apache.seata.core.protocol.AbstractIdentifyRequest;
 import org.apache.seata.core.protocol.RpcMessage;
 
 /**
@@ -35,18 +34,4 @@ public interface ProtocolRpcMessage {
      * @param rpcMessage
      */
     void rpcMsg2ProtocolMsg(RpcMessage rpcMessage);
-
-    static String getSdkVersion(Object body) {
-        if (body instanceof AbstractIdentifyRequest) {
-            return ((AbstractIdentifyRequest) body).getVersion();
-        } else {
-            return null;
-        }
-    }
-
-    static void setSdkVersion(Object body, String version) {
-        if (body instanceof AbstractIdentifyRequest) {
-            ((AbstractIdentifyRequest) body).setVersion(version);
-        }
-    }
 }
