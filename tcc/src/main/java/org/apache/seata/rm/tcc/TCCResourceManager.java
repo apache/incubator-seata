@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.core.exception.TransactionException;
@@ -59,16 +60,35 @@ public class TCCResourceManager extends AbstractResourceManager {
      */
     @Override
     public void registerResource(Resource resource) {
-        TCCResource tccResource = (TCCResource)resource;
-        tccResourceCache.put(tccResource.getResourceId(), tccResource);
-        super.registerResource(tccResource);
+        String resourceId = resource.getResourceId();
+        TCCResource newResource = (TCCResource) resource;
+        TCCResource oldResource = getTCCResource(resourceId);
+
+        if (oldResource != null) {
+            Object newResourceBean = newResource.getTargetBean();
+            Object oldResourceBean = oldResource.getTargetBean();
+            if (newResourceBean != oldResourceBean) {
+                throw new RepeatRegistrationException(String.format("Same TCC resource name <%s> between method1 <%s> of class1 <%s> and method2 <%s> of class2 <%s>, should be unique",
+                        resourceId,
+                        newResource.getPrepareMethod().getName(),
+                        newResourceBean.getClass().getName(),
+                        oldResource.getPrepareMethod().getName(),
+                        oldResourceBean.getClass().getName()));
+            }
+        }
+
+        tccResourceCache.put(resourceId, newResource);
+        super.registerResource(newResource);
+    }
+
+    public TCCResource getTCCResource(String resourceId) {
+        return (TCCResource) tccResourceCache.get(resourceId);
     }
 
     @Override
     public Map<String, Resource> getManagedResources() {
         return tccResourceCache;
     }
-
     /**
      * TCC branch commit
      *
@@ -83,7 +103,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
-        TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
+        TCCResource tccResource = getTCCResource(resourceId);
         if (tccResource == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
@@ -142,7 +162,7 @@ public class TCCResourceManager extends AbstractResourceManager {
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
                                        String applicationData) throws TransactionException {
-        TCCResource tccResource = (TCCResource)tccResourceCache.get(resourceId);
+        TCCResource tccResource = getTCCResource(resourceId);
         if (tccResource == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }

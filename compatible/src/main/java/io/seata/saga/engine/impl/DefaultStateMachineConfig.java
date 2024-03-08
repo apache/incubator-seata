@@ -35,10 +35,10 @@ import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.Resource;
 
 import javax.script.ScriptEngineManager;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
@@ -146,8 +146,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             }
 
             @Override
-            public void registryByResources(Resource[] resources, String tenantId) throws IOException {
-                repository.registryByResources(resources, tenantId);
+            public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException{
+                repository.registryByResources(resourceAsStreamArray, tenantId);
             }
         };
     }
@@ -189,7 +189,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setAsyncProcessCtrlEventPublisher(asyncProcessCtrlEventPublisher);
     }
 
-    @Override
     public ApplicationContext getApplicationContext() {
         return actual.getApplicationContext();
     }

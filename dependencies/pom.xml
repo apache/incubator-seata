@@ -41,7 +41,7 @@
         <hsf.version>1.8.3</hsf.version>
         <bytebuddy.version>1.12.17</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
-        <sofa.rpc.version>5.5.3</sofa.rpc.version>
+        <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
@@ -73,8 +73,11 @@
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
+        <netty.version>4.1.86.Final</netty.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
         <netty.version>4.1.94.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
+        <sofa.bolt.version>1.6.7</sofa.bolt.version>
 
         <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
@@ -114,6 +117,8 @@
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
+        <!-- rocketmq -->
+        <rocketmq-version>5.0.0</rocketmq-version>
 
         <!-- # for kotlin -->
         <kotlin.version>1.4.32</kotlin.version>
@@ -185,6 +190,11 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${sofa.hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>bolt</artifactId>
+                <version>${sofa.bolt.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -780,6 +790,11 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
                 <version>${janino-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq-version}</version>
             </dependency>
 
             <!-- web -->

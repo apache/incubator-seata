@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 
-class GlobalTransactionalInterceptorParserTest {
+public class GlobalTransactionalInterceptorParserTest {
 
     @Test
     void parserInterfaceToProxy() throws Exception {

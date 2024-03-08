@@ -268,6 +268,16 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>jraft-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alipay.sofa</groupId>
+                    <artifactId>bolt</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>bolt</artifactId>
         </dependency>
         <dependency>
             <groupId>org.codehaus.janino</groupId>
@@ -394,7 +404,7 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>target/lib/jdbc</from>
+                                <from>src/main/resources/jdbc</from>
                                 <into>/seata-server/libs/jdbc</into>
                             </path>
                             <path>
@@ -436,11 +446,12 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>${spring-boot.version}</version>
+                        <version>${spring-boot-for-server.version}</version>
                         <configuration>
                             <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                             <layout>ZIP</layout>
                             <attach>false</attach>
+                            <classifier>exec</classifier>
                             <includes>
                                 <include>
                                     <groupId>null</groupId>

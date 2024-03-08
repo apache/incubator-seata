@@ -20,7 +20,7 @@ package org.apache.seata.tm.api;
  * Callback on failure.
  *
  */
-public interface FailureHandler {
+public interface FailureHandler<T extends BaseTransaction> {
 
     /**
      * On begin failure.
@@ -28,7 +28,7 @@ public interface FailureHandler {
      * @param tx    the tx
      * @param cause the cause
      */
-    void onBeginFailure(GlobalTransaction tx, Throwable cause);
+    void onBeginFailure(T tx, Throwable cause);
 
     /**
      * On commit failure.
@@ -36,7 +36,7 @@ public interface FailureHandler {
      * @param tx    the tx
      * @param cause the cause
      */
-    void onCommitFailure(GlobalTransaction tx, Throwable cause);
+    void onCommitFailure(T tx, Throwable cause);
 
     /**
      * On rollback failure.
@@ -44,7 +44,7 @@ public interface FailureHandler {
      * @param tx                the tx
      * @param originalException the originalException
      */
-    void onRollbackFailure(GlobalTransaction tx, Throwable originalException);
+    void onRollbackFailure(T tx, Throwable originalException);
 
     /**
      * On rollback retrying
@@ -52,6 +52,6 @@ public interface FailureHandler {
      * @param tx                the tx
      * @param originalException the originalException
      */
-    void onRollbacking(GlobalTransaction tx, Throwable originalException);
+    void onRollbacking(T tx, Throwable originalException);
 
 }

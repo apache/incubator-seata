@@ -17,6 +17,7 @@
 package org.apache.seata.saga.engine.pcext;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.proctrl.Instruction;
@@ -24,7 +25,6 @@ import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
-import org.springframework.util.StringUtils;
 
 /**
  * State Instruction

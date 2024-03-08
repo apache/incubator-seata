@@ -21,20 +21,24 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.tcc.api.ParamType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
-
-import static org.apache.seata.integration.tx.api.interceptor.ActionContextUtil.getByIndex;
 
 /**
  * Extracting TCC Context from Method
  */
+@Deprecated
 public final class ActionContextUtil {
 
     private ActionContextUtil() {
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActionContextUtil.class);
 
     /**
      * Extracting context data from parameters
@@ -86,6 +90,29 @@ public final class ActionContextUtil {
         }
     }
 
+    @Nullable
+    private static Object getByIndex(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Object paramValue, int index) {
+        if (paramValue instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<Object> list = (List<Object>) paramValue;
+            if (list.isEmpty()) {
+                return null;
+            }
+            if (list.size() <= index) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
+                            " whose size is '{}', so pass this {}", index, paramType.getCode(), paramName, list.size(), paramType.getCode());
+                }
+                return null;
+            }
+            paramValue = list.get(index);
+        } else {
+            LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                    paramType.getCode(), paramName, BusinessActionContextParameter.class.getSimpleName());
+        }
+
+        return paramValue;
+    }
 
     public static String getParamNameFromAnnotation(@Nonnull BusinessActionContextParameter annotation) {
         String paramName = annotation.paramName();
