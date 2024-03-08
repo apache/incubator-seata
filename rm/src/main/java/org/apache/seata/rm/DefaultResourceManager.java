@@ -71,7 +71,7 @@ public class DefaultResourceManager implements ResourceManager {
         List<ResourceManager> allResourceManagers = EnhancedServiceLoader.loadAll(ResourceManager.class);
         if (CollectionUtils.isNotEmpty(allResourceManagers)) {
             for (ResourceManager rm : allResourceManagers) {
-                resourceManagers.putIfAbsent(rm.getBranchType(), rm);
+                resourceManagers.put(rm.getBranchType(), rm);
             }
         }
     }
