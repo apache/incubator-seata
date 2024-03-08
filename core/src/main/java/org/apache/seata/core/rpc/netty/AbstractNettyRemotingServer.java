@@ -69,20 +69,16 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcContext.getVersion());
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
-
-
 
     @Override
     public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcContext.getVersion());
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -91,8 +87,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY, rpcContext.getVersion());
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         super.sendAsync(channel, rpcMessage);
     }
 
@@ -103,10 +98,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             clientChannel = ChannelManager.getSameClientChannel(channel);
         }
         if (clientChannel != null) {
-            RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
             RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
-                : ProtocolConstants.MSGTYPE_RESPONSE, rpcContext.getVersion());
+                : ProtocolConstants.MSGTYPE_RESPONSE);
             super.sendAsync(clientChannel, rpcMsg);
         } else {
             throw new RuntimeException("channel is error.");

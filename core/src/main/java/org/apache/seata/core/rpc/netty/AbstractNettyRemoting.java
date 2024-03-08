@@ -47,7 +47,6 @@ import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.core.rpc.hook.RpcHook;
 import org.apache.seata.core.rpc.processor.Pair;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
-import org.apache.seata.core.protocol.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -233,32 +232,22 @@ public abstract class AbstractNettyRemoting implements Disposable {
     }
 
     protected RpcMessage buildRequestMessage(Object msg, byte messageType) {
-        return buildRequestMessage(msg, messageType, Version.getCurrent());
-    }
-
-    protected RpcMessage buildRequestMessage(Object msg, byte messageType, String version) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(getNextMessageId());
         rpcMessage.setMessageType(messageType);
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.setSdkVersion(version);
         return rpcMessage;
     }
 
     protected RpcMessage buildResponseMessage(RpcMessage rpcMessage, Object msg, byte messageType) {
-        return buildResponseMessage(rpcMessage, msg, messageType, Version.getCurrent());
-    }
-
-    protected RpcMessage buildResponseMessage(RpcMessage rpcMessage, Object msg, byte messageType, String version) {
         RpcMessage rpcMsg = new RpcMessage();
         rpcMsg.setMessageType(messageType);
         rpcMsg.setCodec(rpcMessage.getCodec()); // same with request
         rpcMsg.setCompressor(rpcMessage.getCompressor());
         rpcMsg.setBody(msg);
         rpcMsg.setId(rpcMessage.getId());
-        rpcMsg.setSdkVersion(version);
         return rpcMsg;
     }
 

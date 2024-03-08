@@ -266,10 +266,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
                         batchResultMessage.getResultMessages().add(item.getResultMessage());
                         batchResultMessage.getMsgIds().add(item.getMsgId());
                     }
-                    RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
                     batchResultMessageMap.forEach((clientRequestRpcInfo, batchResultMessage) ->
-                            remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo, rpcContext.getVersion()),
-                                    channel, batchResultMessage));
+                        remotingServer.sendAsyncResponse(buildRpcMessage(clientRequestRpcInfo),
+                            channel, batchResultMessage));
                 });
                 isResponding = false;
             }
@@ -327,13 +326,12 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
      * @param clientRequestRpcInfo For saving client request rpc info
      * @return rpcMessage
      */
-    private RpcMessage buildRpcMessage(ClientRequestRpcInfo clientRequestRpcInfo, String version) {
+    private RpcMessage buildRpcMessage(ClientRequestRpcInfo clientRequestRpcInfo) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(clientRequestRpcInfo.getRpcMessageId());
         rpcMessage.setCodec(clientRequestRpcInfo.getCodec());
         rpcMessage.setCompressor(clientRequestRpcInfo.getCompressor());
         rpcMessage.setHeadMap(clientRequestRpcInfo.getHeadMap());
-        rpcMessage.setSdkVersion(version);
         return rpcMessage;
     }
 
