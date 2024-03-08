@@ -14,7 +14,7 @@ jobs:
         shell: bash
       # step 2 checkout
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
       # step 3 https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
       - uses: actions/setup-node@v3
         with:

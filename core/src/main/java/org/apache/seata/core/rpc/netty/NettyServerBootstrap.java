@@ -112,7 +112,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
         }
 
-        LOGGER.info("set listen port: {}", listenPort);
+        LOGGER.debug("set listen port: {}", listenPort);
         this.listenPort = listenPort;
     }
 
@@ -123,16 +123,18 @@ public class NettyServerBootstrap implements RemotingBootstrap {
      */
     public int getListenPort() {
         if (listenPort != 0) {
-            LOGGER.info("get current listen port: {}", listenPort);
+            LOGGER.debug("get current listen port: {}", listenPort);
             return listenPort;
         }
         String strPort = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         int port = 0;
         try {
             port = Integer.parseInt(strPort);
-            LOGGER.info("get listen port from configuration: {}", port);
+            LOGGER.debug("get listen port from configuration: {}", port);
         } catch (NumberFormatException exx) {
             LOGGER.error("server service port set error:{}", exx.getMessage());
+            port = XID.getPort();
+            LOGGER.debug("get listen port from XID: {}", port);
         }
         if (port <= 0) {
             LOGGER.error("listen port: {} is invalid, will use default port:{}", port, SERVICE_DEFAULT_PORT);
@@ -144,7 +146,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        int port = XID.getPort();
+        int port = getListenPort();
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(NettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
@@ -188,7 +190,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     @Override
     public void shutdown() {
         try {
-            int port = XID.getPort();
+            int port = this.getListenPort();
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Shutting server down, the listen port: {}", port);
             }

@@ -50,6 +50,7 @@ public abstract class AbstractServerTest {
     protected static void startSeataServer() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean started = new AtomicBoolean(false);
+		StringBuilder errorMsg = new StringBuilder();
 
         // start seata-server
         (new Thread(() -> {
@@ -90,6 +91,7 @@ public abstract class AbstractServerTest {
                 started.set(true);
                 LOGGER.info("Seata Server started");
             } catch (Exception e) {
+				errorMsg.append(e.getMessage());
                 LOGGER.error("Start Seata Server error: {}", e.getMessage(), e);
             } finally {
                 latch.countDown();
@@ -97,18 +99,18 @@ public abstract class AbstractServerTest {
         })).start();
 
         // wait until seata-server started
+        LOGGER.info("Waiting for Seata Server to start...");
         try {
-            LOGGER.info("Waiting for Seata Server to start...");
-
             latch.await();
-
-            if (started.get()) {
-                LOGGER.info("Seata Server started successfully");
-            } else {
-                LOGGER.error("Seata Server failed to start");
-            }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             LOGGER.error("Wait seata-server start, but failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Wait seata-server start, but failed: " + e.getMessage());
+        }
+
+        if (started.get()) {
+            LOGGER.info("Seata Server started successfully");
+        } else {
+            throw new RuntimeException("Seata Server failed to start: " + errorMsg);
         }
     }
 

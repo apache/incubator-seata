@@ -138,14 +138,14 @@ public abstract class AbstractConfiguration implements Configuration {
 
     @Override
     public String getConfig(String dataId, String content, long timeoutMills) {
-        String value = getConfigFromSys(dataId);
+        String value = this.getConfigFromSys(dataId);
         if (value != null) {
-            LOGGER.info("Get config from system property, {}={}, type={}", dataId, value, getTypeName());
+            LOGGER.debug("Get config from system property, {}={}, configType={}", dataId, value, getTypeName());
             return value;
         }
 
-        value = getLatestConfig(dataId, content, timeoutMills);
-        LOGGER.info("Get config {}={}, type={}", dataId, value, getTypeName());
+        value = this.getLatestConfig(dataId, content, timeoutMills);
+        LOGGER.debug("Get config {}={}, configType={}", dataId, value, getTypeName());
         return value;
     }
 

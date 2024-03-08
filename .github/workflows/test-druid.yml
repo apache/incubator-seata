@@ -2,7 +2,7 @@ name: "test-druid"
 
 on:
   push:
-    branches: [ "*.*.*" ]
+    branches: [ test*, "*.*.*" ]
 
 jobs:
   test-druid:

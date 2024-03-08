@@ -77,8 +77,8 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @AfterAll
     public static void destory() throws InterruptedException {
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         stopSeataServer();
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance) {

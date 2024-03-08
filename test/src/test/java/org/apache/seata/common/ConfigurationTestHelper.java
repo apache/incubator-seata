@@ -52,9 +52,9 @@ public class ConfigurationTestHelper {
 
         try {
             boolean await = countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
-            if (await) {
+            if(await){
                 LOGGER.info("putConfig ok, dataId={}, content={}", dataId, content);
-            } else {
+            }else {
                 LOGGER.error("putConfig fail, dataId={}, content={}", dataId, content);
             }
         } catch (InterruptedException e) {
