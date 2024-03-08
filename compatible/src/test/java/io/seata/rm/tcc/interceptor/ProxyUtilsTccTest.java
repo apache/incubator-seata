@@ -16,6 +16,7 @@
  */
 package io.seata.rm.tcc.interceptor;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class ProxyUtilsTccTest {
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
-        List<String> listB = Collections.singletonList("b");
+        List<String> listB = Arrays.asList("b");
 
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
@@ -130,7 +131,7 @@ public class ProxyUtilsTccTest {
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
-        List<String> listB = Collections.singletonList("b");
+        List<String> listB = Arrays.asList("b");
 
         DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
 
