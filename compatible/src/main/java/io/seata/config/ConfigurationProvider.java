@@ -18,7 +18,13 @@ package io.seata.config;
 
 /**
  * the interface configuration provider
- * 
+ * Notes: used for io.seata SPI interface
  */
-public interface ConfigurationProvider extends org.apache.seata.config.ConfigurationProvider {
+public interface ConfigurationProvider {
+    /**
+     * provide a AbstractConfiguration implementation instance
+     *
+     * @return Configuration
+     */
+    Configuration provide();
 }

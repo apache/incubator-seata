@@ -27,6 +27,18 @@ import java.util.Map;
  */
 public class RootContext {
 
+    /**
+     * The constant KEY_XID.
+     * used for apache dubbo
+     */
+    public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant KEY_BRANCH_TYPE
+     * * used for apache dubbo
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
+
     private static org.apache.seata.core.model.BranchType convertApacheSeata(BranchType branchType) {
         return org.apache.seata.core.model.BranchType.get(branchType.name());
     }

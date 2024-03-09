@@ -16,16 +16,17 @@
  */
 package io.seata.config;
 
-/**
- * the interface ext configuration provider
- * Notes: used for io.seata SPI interface
- */
-public interface ExtConfigurationProvider {
+public enum ConfigurationChangeType {
     /**
-     * provide a AbstractConfiguration implementation instance
-     *
-     * @param originalConfiguration
-     * @return configuration
+     * Add configuration change type.
      */
-    Configuration provide(Configuration originalConfiguration);
+    ADD,
+    /**
+     * Modify configuration change type.
+     */
+    MODIFY,
+    /**
+     * Delete configuration change type.
+     */
+    DELETE
 }
