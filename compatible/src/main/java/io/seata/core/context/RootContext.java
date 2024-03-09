@@ -28,6 +28,18 @@ import io.seata.core.model.BranchType;
  */
 public class RootContext {
 
+    /**
+     * The constant KEY_XID.
+     * used for apache dubbo
+     */
+    public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant KEY_BRANCH_TYPE
+     * * used for apache dubbo
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
+
     private static BranchType convertIoSeata(org.apache.seata.core.model.BranchType branchType) {
         return BranchType.get(branchType.name());
     }
