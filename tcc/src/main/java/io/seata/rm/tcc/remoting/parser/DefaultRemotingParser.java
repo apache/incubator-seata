@@ -164,7 +164,12 @@ public class DefaultRemotingParser {
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName, RemotingParser remotingParser) {
-        RemotingDesc remotingBeanDesc = remotingParser.getServiceDesc(bean, beanName);
+        RemotingDesc remotingBeanDesc = null;
+        try {
+            remotingBeanDesc = remotingParser.getServiceDesc(bean, beanName);
+        } catch (Throwable ignore) {
+            //ignore exception. It's not possible to judge whether the TCC mode was used.
+        }
         if (remotingBeanDesc == null) {
             return null;
         }
