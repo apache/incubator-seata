@@ -47,11 +47,6 @@ import static org.mockito.ArgumentMatchers.any;
 public class DataSourceProxyXATest {
 
 
-    @BeforeEach
-    public void start() {
-        RootContext.unbind();
-    }
-
     @Test
     public void test_constructor() {
         DataSource dataSource = new MockDataSource();
