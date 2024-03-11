@@ -17,4 +17,4 @@
 package io.seata.discovery.registry;
 
 
-public interface RegistryService extends org.apache.seata.discovery.registry.RegistryService{}
+public interface RegistryService<T> extends org.apache.seata.discovery.registry.RegistryService<T>{}
