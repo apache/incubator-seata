@@ -16,17 +16,13 @@
  */
 package io.seata.rm.datasource;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.sqlparser.util.JdbcConstants;
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import org.junit.jupiter.api.Assertions;
