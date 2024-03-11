@@ -77,6 +77,7 @@ public class DataSourceProxyXATest {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        RootContext.unbind();
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         RootContext.bind("test");
@@ -111,6 +112,7 @@ public class DataSourceProxyXATest {
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        RootContext.unbind();
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         RootContext.bind("test");
@@ -128,7 +130,6 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertEquals("org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
-        tearDown();
     }
 
     @AfterEach
