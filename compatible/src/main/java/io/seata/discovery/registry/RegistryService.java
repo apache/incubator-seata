@@ -14,12 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.discovery.loadbalance;
+package io.seata.discovery.registry;
 
 
-/**
- * The interface Load balance.
- * Notes: used for io.seata SPI interface
- */
-public interface LoadBalance extends org.apache.seata.discovery.loadbalance.LoadBalance {
-}
+public interface RegistryService extends org.apache.seata.discovery.registry.RegistryService{}

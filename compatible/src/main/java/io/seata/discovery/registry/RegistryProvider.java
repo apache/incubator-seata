@@ -16,9 +16,15 @@
  */
 package io.seata.discovery.registry;
 
-
 /**
  * the interface registry provider
+ * Notes: used for io.seata SPI interface
  */
-public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider {
+public interface RegistryProvider {
+    /**
+     * provide a registry implementation instance
+     *
+     * @return RegistryService
+     */
+    RegistryService provide();
 }
