@@ -166,12 +166,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-dbcp2</artifactId>
                 <version>${commons-dbcp2.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
@@ -258,12 +252,6 @@
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
@@ -355,10 +343,6 @@
                         <groupId>org.codehaus.jettison</groupId>
                         <artifactId>jettison</artifactId>
                     </exclusion>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -384,10 +368,6 @@
                     <exclusion>
                         <groupId>org.scijava</groupId>
                         <artifactId>native-lib-loader</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-compress</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

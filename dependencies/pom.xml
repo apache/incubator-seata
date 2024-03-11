@@ -42,6 +42,8 @@
     <properties>
         <!-- apache-commons -->
         <commons-lang.version>2.6</commons-lang.version>
+        <commons-logging.version>1.2</commons-logging.version>
+        <commons-compress.version>1.21</commons-compress.version>
 
         <!-- netty -->
         <netty.version>4.1.94.Final</netty.version>
@@ -78,6 +80,16 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress.version}</version>
             </dependency>
 
             <!-- netty -->
