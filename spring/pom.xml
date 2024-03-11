@@ -96,7 +96,7 @@
                 <version>${kotlin-maven-plugin.version}</version>
                 <configuration>
                     <args>
-                        <arg>-Xjvm-default=compatibility</arg>
+                        <arg>-Xjvm-default=all</arg>
                     </args>
                     <jvmTarget>1.8</jvmTarget>
                 </configuration>
