@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.xa;
+package org.apache.seata.rm.datasource.xa;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -31,8 +31,6 @@ import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
-import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
-import org.apache.seata.rm.datasource.xa.DataSourceProxyXA;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
