@@ -34,6 +34,7 @@ import io.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -44,6 +45,12 @@ import static org.mockito.ArgumentMatchers.any;
  * Tests for DataSourceProxyXA
  */
 public class DataSourceProxyXATest {
+
+
+    @BeforeEach
+    public void start() {
+        RootContext.unbind();
+    }
 
     @Test
     public void test_constructor() {
