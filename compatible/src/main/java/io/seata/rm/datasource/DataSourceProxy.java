@@ -99,5 +99,4 @@ public class DataSourceProxy implements SeataDataSourceProxy {
         return dataSourceProxy.getResourceId();
     }
 
-
 }
