@@ -32,13 +32,10 @@ import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import static org.mockito.ArgumentMatchers.any;
@@ -47,9 +44,6 @@ import static org.mockito.ArgumentMatchers.any;
  * Tests for DataSourceProxyXA
  */
 public class DataSourceProxyXATest {
-
-    Logger logger = LoggerFactory.getLogger(getClass());
-
 
     @Test
     public void test_constructor() {
