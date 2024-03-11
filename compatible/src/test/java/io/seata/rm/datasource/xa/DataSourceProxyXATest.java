@@ -33,9 +33,13 @@ import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -43,6 +47,9 @@ import static org.mockito.ArgumentMatchers.any;
  * Tests for DataSourceProxyXA
  */
 public class DataSourceProxyXATest {
+
+    Logger logger = LoggerFactory.getLogger(getClass());
+
 
     @Test
     public void test_constructor() {
@@ -73,7 +80,6 @@ public class DataSourceProxyXATest {
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         RootContext.bind("test");
         connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
 
@@ -124,8 +130,8 @@ public class DataSourceProxyXATest {
         tearDown();
     }
 
-    @AfterAll
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         RootContext.unbind();
     }
 }
