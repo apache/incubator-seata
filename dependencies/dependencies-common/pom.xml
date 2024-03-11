@@ -24,10 +24,11 @@
         <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>seata-dependencies</artifactId>
+    <artifactId>seata-dependencies-common</artifactId>
 
     <packaging>pom</packaging>
 
