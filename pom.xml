@@ -38,9 +38,7 @@
         <module>console</module>
         <module>core</module>
         <module>compatible</module>
-        <module>dependencies/dependencies-common</module>
-        <module>dependencies/dependencies-client</module>
-        <module>dependencies/dependencies-server</module>
+        <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
         <module>integration</module>

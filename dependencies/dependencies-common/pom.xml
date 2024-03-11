@@ -22,9 +22,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-dependencies-base</artifactId>
         <version>${revision}</version>
-        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,30 +31,21 @@
 
     <packaging>pom</packaging>
 
-    <name>Seata dependencies ${project.version}</name>
-    <description>dependencies for Seata built with Maven</description>
+    <name>Seata dependencies-common ${project.version}</name>
+    <description>dependencies-common for Seata built with Maven</description>
 
     <properties>
         <!-- javax -->
         <javax-inject.version>1</javax-inject.version>
-        <!-- apache-commons -->
-        <commons-lang.version>2.6</commons-lang.version>
-        <commons-logging.version>1.2</commons-logging.version>
-        <commons-compress.version>1.21</commons-compress.version>
         <!-- guava -->
         <guava.version>32.1.3-jre</guava.version>
-        <!-- netty -->
-        <netty.version>4.1.94.Final</netty.version>
         <!-- fastjson -->
         <fastjson.version>1.2.83</fastjson.version>
-        <!-- redis -->
-        <jedis.version>3.8.0</jedis.version>
+        <!-- mock-redis-server -->
         <mock-jedis.version>0.3.1</mock-jedis.version>
         <!-- zookeeper -->
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
-        <!-- byte-buddy -->
-        <bytebuddy.version>1.12.17</bytebuddy.version>
 
         <!-- for compressor -->
         <ant.version>1.10.12</ant.version>
@@ -81,10 +71,8 @@
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
         <eureka-clients.version>1.10.18</eureka-clients.version>
         <curator-test.version>5.1.0</curator-test.version>
+        <native-lib-loader.version>2.4.0</native-lib-loader.version>
         <xstream.version>1.4.20</xstream.version>
-        <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
-        <httpcore.version>4.4.16</httpcore.version>
-        <httpclient.version>4.5.14</httpclient.version>
 
         <!-- for serializer -->
         <protobuf.version>3.16.3</protobuf.version>
@@ -104,22 +92,6 @@
         <druid.version>1.2.7</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
-
-        <!-- for test -->
-        <mockito.version>4.11.0</mockito.version>
-        <assertj.version>3.12.2</assertj.version>
-        <junit-jupiter.version>5.8.2</junit-jupiter.version>
-        <jetty.version>9.4.38.v20210224</jetty.version>
-        <native-lib-loader.version>2.4.0</native-lib-loader.version>
-
-        <!-- spring-boot -->
-        <spring-boot.version>2.5.15</spring-boot.version>
-        <!--
-          The purpose of adding this variable:
-            1. Avoid conflicts with variable `-Dspring-boot.version=xxx` in `.github/workflows`.
-            2. The module `dependencies-server` will overwrite it.
-        -->
-        <spring-boot-dependencies.version>${spring-boot.version}</spring-boot-dependencies.version>
     </properties>
 
     <dependencyManagement>
@@ -131,37 +103,11 @@
                 <version>${javax-inject.version}</version>
             </dependency>
 
-            <!-- apache-commons -->
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>
-            </dependency>
-
             <!-- guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-            </dependency>
-
-            <!-- netty -->
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-bom</artifactId>
-                <version>${netty.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
             <!-- fastjson -->
@@ -171,12 +117,7 @@
                 <version>${fastjson.version}</version>
             </dependency>
 
-            <!-- redis -->
-            <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>${jedis.version}</version>
-            </dependency>
+            <!-- mock-redis-server -->
             <dependency>
                 <groupId>com.github.microwww</groupId>
                 <artifactId>redis-server</artifactId>
@@ -215,18 +156,6 @@
                 </exclusions>
             </dependency>
 
-            <!-- byte-buddy -->
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy</artifactId>
-                <version>${bytebuddy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy-agent</artifactId>
-                <version>${bytebuddy.version}</version>
-            </dependency>
-
             <!-- Database Connection Pooling -->
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -237,6 +166,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-dbcp2</artifactId>
                 <version>${commons-dbcp2.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
@@ -323,6 +258,12 @@
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
@@ -370,7 +311,7 @@
                 <version>${apollo-client.version}</version>
             </dependency>
 
-            <!-- region for discovery -->
+            <!-- region # for discovery -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
@@ -414,6 +355,10 @@
                         <groupId>org.codehaus.jettison</groupId>
                         <artifactId>jettison</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -440,6 +385,10 @@
                         <groupId>org.scijava</groupId>
                         <artifactId>native-lib-loader</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-compress</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -462,341 +411,28 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-bom</artifactId>
-                <version>${jetty.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${httpcore.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-            </dependency>
-            <!-- endregion for discovery -->
-
-            <!-- # for test -->
-            <!-- ## mockito -->
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-junit-jupiter</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-bom</artifactId>
-                <version>${mockito.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- ## assertj -->
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-            </dependency>
-            <!-- ## junit:5 -->
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${junit-jupiter.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- spring-boot -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot-dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+            <!-- endregion # for discovery -->
         </dependencies>
     </dependencyManagement>
 
-    <!--test-->
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
     <profiles>
-        <!-- profile: licenseCheck -->
+        <!--
+          For test in github workflow `test.yml`.
+          Make the dependencies version change with the `spring-boot-dependencies`, expanding the scope of testing.
+        -->
         <profile>
-            <id>licenseCheck</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>license-check</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-third-party</goal>
-                                </goals>
-                                <configuration>
-                                    <includeOptional>false</includeOptional>
-                                    <useMissingFile>false</useMissingFile>
-                                    <failOnMissing>false</failOnMissing>
-                                    <licenseMerges>
-                                        <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
-                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License
-                                            v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software
-                                            License, Version 2.0
-                                        </licenseMerge>
-                                        <licenseMerge>The MIT License|MIT License</licenseMerge>
-                                        <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
-                                            License|BSD|3-Clause BSD License|The New BSD License
-                                        </licenseMerge>
-                                    </licenseMerges>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!-- profile: arrch64 -->
-        <profile>
-            <id>arrch64</id>
-            <properties>
-                <os.detected.classifier>osx-x86_64</os.detected.classifier>
-            </properties>
-        </profile>
-        <!-- profile: checkstyle -->
-        <profile>
-            <id>checkstyle</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.mycila</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>remove</goal>
-                                    <goal>format</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <quiet>true</quiet>
-                            <header>${user.dir}/style/copyright</header>
-                            <includes>
-                                <include>**/src/main/java/**</include>
-                                <include>**/src/test/java/**</include>
-                                <include>**/*.xml</include>
-                                <include>**/*.sql</include>
-                                <include>**/*.conf</include>
-                                <include>**/*.yml</include>
-                                <include>**/*.yaml</include>
-                                <include>**/*.sh</include>
-                                <include>**/*.bat</include>
-                                <include>**/*.lua</include>
-                                <include>**/*.properties</include>
-                                <include>**/*.txt</include>
-                                <include>**/*.def</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/generated/**</exclude>
-                                <exclude>**/antlr/mysql/parser/*.*</exclude>
-                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                            </excludes>
-                            <strictCheck>true</strictCheck>
-                            <mapping>
-                                <java>SLASHSTAR_STYLE</java>
-                                <lua>DOUBLEBAR_STYLE</lua>
-                                <conf>SCRIPT_STYLE</conf>
-                                <def>SCRIPT_STYLE</def>
-                            </mapping>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>validate</id>
-                                <phase>validate</phase>
-                                <configuration>
-                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml
-                                    </suppressionsLocation>
-                                    <encoding>UTF-8</encoding>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
-                                </configuration>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
-    <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>${os-maven-plugin.version}</version>
-            </extension>
-        </extensions>
-        <plugins>
-            <!-- Source -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${maven-source-plugin.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*.java.template</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- PMD-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>${maven-pmd-plugin.version}</version>
-                <configuration>
-                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-                    <minimumPriority>2</minimumPriority>
-                    <printFailingErrors>true</printFailingErrors>
-                    <rulesets>
-                        <ruleset>rulesets/java/ali-comment.xml</ruleset>
-                        <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
-                        <ruleset>rulesets/java/ali-constant.xml</ruleset>
-                        <ruleset>rulesets/java/ali-exception.xml</ruleset>
-                        <ruleset>rulesets/java/ali-flowcontrol.xml</ruleset>
-                        <ruleset>rulesets/java/ali-naming.xml</ruleset>
-                        <ruleset>rulesets/java/ali-oop.xml</ruleset>
-                        <ruleset>rulesets/java/ali-orm.xml</ruleset>
-                        <ruleset>rulesets/java/ali-other.xml</ruleset>
-                        <ruleset>rulesets/java/ali-set.xml</ruleset>
-                    </rulesets>
-                    <excludes>
-                        <exclude>**/generated/*.java</exclude>
-                        <exclude>**/antlr/mysql/parser/*.*</exclude>
-                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>pmd-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
+            <id>priority-spring-boot-dependencies</id>
+            <dependencyManagement>
                 <dependencies>
                     <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-dependencies</artifactId>
+                        <version>${spring-boot-dependencies.version}</version>
+                        <type>pom</type>
+                        <scope>import</scope>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <!-- JaCoCo -->
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- SureFire -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <argLine>${maven.surefire.argLine}</argLine>
-                    <excludes>${maven.surefire.excludes}</excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+            </dependencyManagement>
+        </profile>
+    </profiles>
 </project>
