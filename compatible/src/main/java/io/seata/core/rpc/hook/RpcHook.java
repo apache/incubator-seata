@@ -16,9 +16,14 @@
  */
 package io.seata.core.rpc.hook;
 
+import io.seata.core.protocol.RpcMessage;
 
 /**
  * The type RpcHook
+ * Notes: used for io.seata SPI interface
  */
 public interface RpcHook extends org.apache.seata.core.rpc.hook.RpcHook {
+    //todo SPI return same clazz
+    //void doBeforeRequest(String remoteAddr, RpcMessage request);
+    //void doAfterResponse(String remoteAddr, RpcMessage request, Object response);
 }
