@@ -16,36 +16,22 @@
  */
 package io.seata.rm.tcc.resource.parser;
 
+import io.seata.integration.tx.api.interceptor.ActionContextUtil;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.TCCResource;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class TccRegisterResourceParser extends org.apache.seata.rm.tcc.resource.parser.TccRegisterResourceParser {
 
-    @Override
-    public void registerResource(Object target, String beanName) {
-        try {
-            //service bean, registry resource
-            Class<?> serviceClass = target.getClass();
-            this.executeRegisterResource(target, new HashSet<>(Arrays.asList(serviceClass.getMethods())), target.getClass());
-            Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceClass);
-            for (Class<?> interClass : interfaceClasses) {
-                this.executeRegisterResource(target, new HashSet<>(Arrays.asList(interClass.getMethods())), interClass);
-            }
-        } catch (Throwable t) {
-            throw new FrameworkException(t, "parser remoting service error");
-        }
-    }
-
-    private void executeRegisterResource(Object target, Set<Method> methods, Class<?> targetServiceClass) throws NoSuchMethodException {
+    protected void executeRegisterResource(Object target, Set<Method> methods, Class<?> targetServiceClass) throws NoSuchMethodException {
         for (Method m : methods) {
             TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
             if (twoPhaseBusinessAction != null) {
@@ -66,13 +52,41 @@ public class TccRegisterResourceParser extends org.apache.seata.rm.tcc.resource.
                 tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
                 tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
                 // set phase two method's keys
-                tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                tccResource.setPhaseTwoCommitKeys(getTwoPhaseArgs(tccResource.getCommitMethod(),
                         twoPhaseBusinessAction.commitArgsClasses()));
-                tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                tccResource.setPhaseTwoRollbackKeys(getTwoPhaseArgs(tccResource.getRollbackMethod(),
                         twoPhaseBusinessAction.rollbackArgsClasses()));
                 //registry tcc resource
                 DefaultResourceManager.get().registerResource(tccResource);
             }
         }
     }
+
+    @Override
+    protected String[] getTwoPhaseArgs(Method method, Class<?>[] argsClasses) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        String[] keys = new String[parameterAnnotations.length];
+        /*
+         * get parameter's key
+         * if method's parameter list is like
+         * (BusinessActionContext, @BusinessActionContextParameter("a") A a, @BusinessActionContextParameter("b") B b)
+         * the keys will be [null, a, b]
+         */
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
+                    String key = ActionContextUtil.getParamNameFromAnnotation(param);
+                    keys[i] = key;
+                    break;
+                }
+            }
+            if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation " +
+                    "BusinessActionContextParameter");
+            }
+        }
+        return keys;
+    }
+
 }
