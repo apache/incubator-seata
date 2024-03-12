@@ -64,3 +64,4 @@ SagaFactory.prototype.getDefaultSize = function (semantic) {
     height: 80,
   };
 };
+

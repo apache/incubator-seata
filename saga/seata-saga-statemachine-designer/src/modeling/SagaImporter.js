@@ -41,6 +41,53 @@ function collectWaypoints(edge) {
   return null;
 }
 
+function addArrayList(definitions){
+	
+	const adjList = new Map();
+	forEach(definitions.States, (semantic) => {
+	    // Initialize an array to store values for the key
+	    adjList.set(semantic, []);
+
+    if (semantic.Next || semantic.CompensateState || semantic.Choices) {
+        const options = [];
+        
+        if (semantic.Next) {
+            options.push(semantic.Next);
+        }
+
+        if (semantic.CompensateState) {
+            options.push(semantic.CompensateState);
+        }
+
+        if (semantic.Choices) {
+            for (const option of semantic.Choices) {
+                options.push(option.Next);
+            }
+        }
+
+        const existingValues = adjList.get(semantic);
+        options.forEach((next) => {
+            existingValues.push(definitions.States[next]);
+        });
+        adjList.set(semantic, existingValues);
+	}});
+	return adjList;
+}
+
+
+function addCatchList(definitions,nodes){
+	const adjList = new Map();
+	let existingValues=[];
+	adjList.set(nodes, []);
+	for(const option of nodes.Catch){
+		const { Next } = option;
+		let existingValues = adjList.get(nodes);
+		existingValues.push(definitions.States[Next]);
+		adjList.set(nodes, existingValues);
+	}
+	return adjList;
+}
+
 export default function SagaImporter(
   sagaFactory,
   eventBus,
@@ -69,50 +116,86 @@ SagaImporter.$inject = [
 SagaImporter.prototype.import = function (definitions) {
   let error = [];
   const warnings = [];
-
+  
   this.eventBus.fire('import.start', { definitions });
 
   try {
     const root = this.sagaFactory.create('StateMachine');
     root.importJson(definitions);
     this.root(root);
-
     // Add start state
     let start = this.sagaFactory.create('StartState');
+    let stateArrayList=new Map();
     start.importJson(definitions);
+    let begin = start;
     start = this.add(start);
-
     const edges = [];
     const catches = [];
     forEach(definitions.States, (semantic) => {
       const state = this.sagaFactory.create(semantic.Type);
-      state.importJson(semantic);
-      const host = this.add(state);
-      if (semantic.edge) {
-        edges.push(...Object.values(semantic.edge));
+      
+      if(semantic.style === undefined){
+	  	 stateArrayList=addArrayList(definitions);
+      	 state.importStates(definitions,semantic,begin,stateArrayList);
+      }else{
+      	state.importJson(semantic);
+      	begin=state;
       }
-      if (semantic.catch) {
-        const node = this.sagaFactory.create('Catch');
-        node.importJson(semantic.catch);
-        const source = this.add(node);
-        if (semantic.catch.edge) {
+      const host = this.add(state);
+      
+      if (semantic.edge === undefined) {
+        state.importEdges(definitions,semantic);
+        if(semantic.edge){
+			edges.push(...Object.values(semantic.edge));
+		}
+      }else{
+		  edges.push(...Object.values(semantic.edge));
+	  }
+	
+	   if(semantic.Catch) {
+		  let source;
+		  if(semantic.catch === undefined){
+	        	const node = this.sagaFactory.create('Catch');
+	        	const catchList=addCatchList(definitions,semantic);
+	        	node.addCatch(definitions,semantic,catchList,stateArrayList);
+	        	source = this.add(node);
+	       }else
+	       {
+			  	const node = this.sagaFactory.create('Catch');
+	          	node.importJson(semantic.catch);
+        		source = this.add(node);
+		   }  
+	       
+        if (semantic.catch.edge === undefined) {
+			 state.importCatchesEdges(definitions,semantic);
+			 console.log(semantic);
+		}	 
+		if (semantic.catch.edge) {
           semantic.Catch.forEach((exceptionMatch) => {
             if (semantic.catch.edge[exceptionMatch.Next]) {
               semantic.catch.edge[exceptionMatch.Next].Exceptions = exceptionMatch.Exceptions;
             }
           });
-        }
+        
         this.modeling.updateAttachment(source, host);
         catches.push({ source, edges: Object.values(semantic.catch.edge) });
+      	}
       }
     });
 
     // Add start edge
+    
+    
     if (definitions.edge) {
       const startEdge = this.sagaFactory.create('Transition');
       startEdge.importJson(definitions.edge);
       this.add(startEdge, { source: start });
-    }
+    } 
+    if(definitions.edge === undefined){
+		const startEdge = this.sagaFactory.create('Transition');
+		startEdge.importJsonEdges(definitions);
+		this.add(startEdge, { source: start });
+	}
 
     forEach(edges, (semantic) => {
       const transition = this.sagaFactory.create(semantic.Type);
