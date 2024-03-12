@@ -71,8 +71,8 @@ jobs:
           windows, # Skip tests, because too many errors in unit-test.
         ]
         springboot: [
-          3.2.0,
-          3.1.6,
+          3.2.3,
+          3.1.9,
           3.0.13
         ]
     steps:
