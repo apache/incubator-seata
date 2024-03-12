@@ -465,6 +465,7 @@
             <id>priority-spring-boot-dependencies</id>
             <dependencyManagement>
                 <dependencies>
+                    <!-- junit:5 -->
                     <dependency>
                         <groupId>org.junit</groupId>
                         <artifactId>junit-bom</artifactId>
@@ -472,6 +473,16 @@
                         <type>pom</type>
                         <scope>import</scope>
                     </dependency>
+                    <!-- mockito -->
+                    <dependency>
+                        <groupId>org.mockito</groupId>
+                        <artifactId>mockito-bom</artifactId>
+                        <version>${mockito.version}</version>
+                        <type>pom</type>
+                        <scope>import</scope>
+                    </dependency>
+
+                    <!-- spring-boot -->
                     <dependency>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-dependencies</artifactId>
