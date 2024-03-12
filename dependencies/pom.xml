@@ -40,23 +40,10 @@
     </modules>
 
     <properties>
-        <!-- apache-commons -->
-        <commons-lang.version>2.6</commons-lang.version>
-        <commons-logging.version>1.2</commons-logging.version>
-        <commons-compress.version>1.21</commons-compress.version>
-
         <!-- netty -->
         <netty.version>4.1.94.Final</netty.version>
         <!-- jetty -->
         <jetty.version>9.4.38.v20210224</jetty.version>
-        <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
-        <httpcore.version>4.4.16</httpcore.version>
-        <httpclient.version>4.5.14</httpclient.version>
-        <!-- byte-buddy -->
-        <byte-buddy.version>1.12.17</byte-buddy.version>
-
-        <!-- jedis -->
-        <jedis.version>3.8.0</jedis.version>
 
         <!-- for test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -75,23 +62,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- apache-commons -->
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>
-            </dependency>
-
             <!-- netty -->
             <dependency>
                 <groupId>io.netty</groupId>
@@ -108,43 +78,6 @@
                 <version>${jetty.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-                <version>${httpcore.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- byte-buddy -->
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy</artifactId>
-                <version>${byte-buddy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy-agent</artifactId>
-                <version>${byte-buddy.version}</version>
-            </dependency>
-
-            <!-- jedis -->
-            <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>${jedis.version}</version>
             </dependency>
 
             <!-- # for test -->

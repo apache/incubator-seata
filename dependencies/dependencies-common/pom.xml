@@ -35,50 +35,25 @@
     <description>dependencies-common for Seata built with Maven</description>
 
     <properties>
+        <!-- apache-commons -->
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-logging.version>1.2</commons-logging.version>
+        <commons-compress.version>1.21</commons-compress.version>
+        <!-- byte-buddy -->
+        <byte-buddy.version>1.12.17</byte-buddy.version>
         <!-- javax -->
         <javax-inject.version>1</javax-inject.version>
         <!-- guava -->
         <guava.version>32.1.3-jre</guava.version>
         <!-- fastjson -->
         <fastjson.version>1.2.83</fastjson.version>
+        <!-- jedis -->
+        <jedis.version>3.8.0</jedis.version>
         <!-- mock-redis-server -->
-        <mock-jedis.version>0.3.1</mock-jedis.version>
+        <mock-redis-server.version>0.3.1</mock-redis-server.version>
         <!-- zookeeper -->
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
-
-        <!-- for compressor -->
-        <ant.version>1.10.12</ant.version>
-        <lz4.version>1.7.1</lz4.version>
-        <zstd.version>1.5.0-4</zstd.version>
-
-        <!-- for config -->
-        <config.version>1.2.1</config.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
-        <apollo-client.version>2.0.1</apollo-client.version>
-
-        <!-- for config and discovery -->
-        <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.6</nacos-client.version>
-        <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
-
-        <!-- for discovery -->
-        <jettison.version>1.5.4</jettison.version>
-        <testcontainers.version>1.11.2</testcontainers.version>
-        <archaius-core.version>0.7.6</archaius-core.version>
-        <sofa.registry.version>6.3.0</sofa.registry.version>
-        <sofa.hessian.version>4.0.3</sofa.hessian.version>
-        <sofa.bolt.version>1.6.7</sofa.bolt.version>
-        <eureka-clients.version>1.10.18</eureka-clients.version>
-        <curator-test.version>5.1.0</curator-test.version>
-        <native-lib-loader.version>2.4.0</native-lib-loader.version>
-        <xstream.version>1.4.20</xstream.version>
-
-        <!-- for serializer -->
-        <protobuf.version>3.16.3</protobuf.version>
-        <kryo.version>5.4.0</kryo.version>
-        <kryo-serializers.version>0.45</kryo-serializers.version>
-        <hessian.version>4.0.63</hessian.version>
 
         <!-- for database -->
         <!-- Database Driver -->
@@ -92,10 +67,74 @@
         <druid.version>1.2.7</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
+
+        <!-- for compressor -->
+        <ant.version>1.10.12</ant.version>
+        <lz4.version>1.7.1</lz4.version>
+        <zstd.version>1.5.0-4</zstd.version>
+
+        <!-- for config -->
+        <config.version>1.2.1</config.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
+        <apollo-client.version>2.0.1</apollo-client.version>
+        <!-- for config and discovery -->
+        <nacos-client.version>1.4.6</nacos-client.version>
+        <consul-clients.version>1.4.2</consul-clients.version>
+        <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
+        <!-- for discovery -->
+        <eureka-clients.version>1.10.18</eureka-clients.version>
+        <jettison.version>1.5.4</jettison.version>
+        <archaius-core.version>0.7.6</archaius-core.version>
+        <!--<etcd-client-v3.version>0.5.0</etcd-client-v3.version>-->
+        <testcontainers.version>1.11.2</testcontainers.version>
+        <sofa.registry.version>6.3.0</sofa.registry.version>
+        <sofa.hessian.version>4.0.3</sofa.hessian.version>
+        <sofa.bolt.version>1.6.7</sofa.bolt.version>
+        <native-lib-loader.version>2.4.0</native-lib-loader.version>
+        <xstream.version>1.4.20</xstream.version>
+        <curator-test.version>5.1.0</curator-test.version>
+        <!-- http: The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
+        <httpcore.version>4.4.16</httpcore.version>
+        <httpclient.version>4.5.14</httpclient.version>
+
+        <!-- for serializer -->
+        <protobuf.version>3.16.3</protobuf.version>
+        <kryo.version>5.4.0</kryo.version>
+        <kryo-serializers.version>0.45</kryo-serializers.version>
+        <hessian.version>4.0.63</hessian.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- apache-commons -->
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress.version}</version>
+            </dependency>
+
+            <!-- byte-buddy -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+
             <!-- javax -->
             <dependency>
                 <groupId>javax.inject</groupId>
@@ -117,11 +156,17 @@
                 <version>${fastjson.version}</version>
             </dependency>
 
+            <!-- jedis -->
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${jedis.version}</version>
+            </dependency>
             <!-- mock-redis-server -->
             <dependency>
                 <groupId>com.github.microwww</groupId>
                 <artifactId>redis-server</artifactId>
-                <version>${mock-jedis.version}</version>
+                <version>${mock-redis-server.version}</version>
             </dependency>
 
             <!-- zookeeper -->
@@ -200,31 +245,7 @@
                 <version>${mariadb.version}</version>
             </dependency>
 
-            <!-- protobuf -->
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java</artifactId>
-                <version>${protobuf.version}</version>
-            </dependency>
-
-            <!-- for serializer -->
-            <dependency>
-                <groupId>com.esotericsoftware</groupId>
-                <artifactId>kryo</artifactId>
-                <version>${kryo.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.javakaffee</groupId>
-                <artifactId>kryo-serializers</artifactId>
-                <version>${kryo-serializers.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.caucho</groupId>
-                <artifactId>hessian</artifactId>
-                <version>${hessian.version}</version>
-            </dependency>
-
-            <!-- region for compressor -->
+            <!-- for compressor -->
             <dependency>
                 <groupId>org.apache.ant</groupId>
                 <artifactId>ant</artifactId>
@@ -240,19 +261,38 @@
                 <artifactId>lz4-java</artifactId>
                 <version>${lz4.version}</version>
             </dependency>
-            <!-- endregion for compressor -->
 
-            <!-- region for config and discovery -->
+            <!-- for config -->
+            <dependency>
+                <groupId>com.typesafe</groupId>
+                <artifactId>config</artifactId>
+                <version>${config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.apollo</groupId>
+                <artifactId>apollo-client</artifactId>
+                <version>${apollo-client.version}</version>
+            </dependency>
+
+            <!-- for config and discovery -->
+            <!-- nacos -->
             <dependency>
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
                 <version>${nacos-client.version}</version>
             </dependency>
+            <!-- consul -->
             <dependency>
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
             </dependency>
+            <!-- etcd3 -->
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
@@ -280,81 +320,9 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- endregion for config and discovery -->
 
-            <!-- for config -->
-            <dependency>
-                <groupId>com.typesafe</groupId>
-                <artifactId>config</artifactId>
-                <version>${config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.ctrip.framework.apollo</groupId>
-                <artifactId>apollo-client</artifactId>
-                <version>${apollo-client.version}</version>
-            </dependency>
-
-            <!-- region # for discovery -->
-            <dependency>
-                <groupId>org.apache.curator</groupId>
-                <artifactId>curator-test</artifactId>
-                <version>${curator-test.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alipay.sofa</groupId>
-                <artifactId>registry-client-all</artifactId>
-                <version>${sofa.registry.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.alipay.sofa.lookout</groupId>
-                        <artifactId>lookout-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.alipay.sofa</groupId>
-                        <artifactId>hessian</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.alipay.sofa</groupId>
-                <artifactId>hessian</artifactId>
-                <version>${sofa.hessian.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alipay.sofa</groupId>
-                <artifactId>bolt</artifactId>
-                <version>${sofa.bolt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.netflix.eureka</groupId>
-                <artifactId>eureka-client</artifactId>
-                <version>${eureka-clients.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.codehaus.jettison</groupId>
-                        <artifactId>jettison</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jettison</groupId>
-                <artifactId>jettison</artifactId>
-                <version>${jettison.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.netflix.archaius</groupId>
-                <artifactId>archaius-core</artifactId>
-                <version>${archaius-core.version}</version>
-            </dependency>
+            <!-- for discovery -->
+            <!-- for discovery-etcd3 -->
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-launcher</artifactId>
@@ -391,7 +359,100 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- endregion # for discovery -->
+            <!-- for discovery-eureka -->
+            <dependency>
+                <groupId>com.netflix.eureka</groupId>
+                <artifactId>eureka-client</artifactId>
+                <version>${eureka-clients.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jettison</groupId>
+                        <artifactId>jettison</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>${jettison.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.archaius</groupId>
+                <artifactId>archaius-core</artifactId>
+                <version>${archaius-core.version}</version>
+            </dependency>
+            <!-- for discovery-sofa -->
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>registry-client-all</artifactId>
+                <version>${sofa.registry.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.alipay.sofa.lookout</groupId>
+                        <artifactId>lookout-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.alipay.sofa</groupId>
+                        <artifactId>hessian</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>bolt</artifactId>
+                <version>${sofa.bolt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${sofa.hessian.version}</version>
+            </dependency>
+            <!-- for discovery-zk test -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-test</artifactId>
+                <version>${curator-test.version}</version>
+            </dependency>
+            <!-- for discovery-* -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+            </dependency>
+
+            <!-- for serializer -->
+            <!-- protobuf -->
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <!-- kryo -->
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.javakaffee</groupId>
+                <artifactId>kryo-serializers</artifactId>
+                <version>${kryo-serializers.version}</version>
+            </dependency>
+            <!-- hessian -->
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
