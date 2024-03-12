@@ -33,6 +33,12 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <mockito.version>4.11.0</mockito.version>
+        <druid.version>1.2.7</druid.version>
+        <mysql.version>5.1.42</mysql.version>
+        <mariadb.version>2.7.2</mariadb.version>
+        <assertj-core.version>3.12.2</assertj-core.version>
     </properties>
     <dependencies>
         <dependency>
@@ -57,12 +63,12 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-metrics-api</artifactId>
+            <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-sqlparser-druid</artifactId>
+            <artifactId>seata-metrics-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -125,7 +131,43 @@
             <artifactId>seata-tcc</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <scope>provided</scope>
+            <version>${druid.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>${mariadb.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
