@@ -88,6 +88,7 @@ function addCatchList(definitions,nodes){
 	return adjList;
 }
 
+
 export default function SagaImporter(
   sagaFactory,
   eventBus,
@@ -168,7 +169,6 @@ SagaImporter.prototype.import = function (definitions) {
 	       
         if (semantic.catch.edge === undefined) {
 			 state.importCatchesEdges(definitions,semantic);
-			 console.log(semantic);
 		}	 
 		if (semantic.catch.edge) {
           semantic.Catch.forEach((exceptionMatch) => {
@@ -185,17 +185,23 @@ SagaImporter.prototype.import = function (definitions) {
 
     // Add start edge
     
-    
-    if (definitions.edge) {
+    if((definitions.edge === undefined) && (definitions.States)){
+		const start = this.sagaFactory.create('StartState');
+		debugger
+		definitions.edge={};
+		start.importJsonEdges(definitions);
+		if (definitions.edge) {
+	      const startEdge = this.sagaFactory.create('Transition');
+	      startEdge.importJson(definitions.edge);
+	      this.add(startEdge, { source: start });
+    	}
+	}
+	if(definitions.edge) {
       const startEdge = this.sagaFactory.create('Transition');
       startEdge.importJson(definitions.edge);
       this.add(startEdge, { source: start });
     } 
-    if(definitions.edge === undefined){
-		const startEdge = this.sagaFactory.create('Transition');
-		startEdge.importJsonEdges(definitions);
-		this.add(startEdge, { source: start });
-	}
+    
 
     forEach(edges, (semantic) => {
       const transition = this.sagaFactory.create(semantic.Type);
@@ -264,7 +270,7 @@ SagaImporter.prototype.add = function (semantic, attrs = {}) {
         target,
         waypoints,
       });
-      // console.log(elementDefinition);
+      
 
       element = elementFactory.createConnection(elementDefinition);
 
