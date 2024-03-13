@@ -22,25 +22,12 @@ import EdgeStyle from './EdgeStyle';
 export default class Edge extends BaseSpec {
   style = new EdgeStyle();
 
-  importJson(json) {
+  importJson(json) {	
     this.style.source = json.style.source;
     this.style.target = json.style.target;
     assign(this.style.waypoints, json.style.waypoints);
   }
-  
-  importJsonEdges(json){
-	  if(json.edge === undefined){
-		debugger
-		json.edge={};
-		if(json.edge.style === undefined){
-			let targetx=json.States[json.StartState].style.bounds.x;
-			let targety=json.States[json.StartState].style.bounds.y;
-			json.edge={style:{waypoints:[{x:200+36,y:200+18},{x:targetx-20,y:targety+40},{x:targetx,y:targety+40}]
-				,target:json.StartState},Type:"Transition"};
-		}
-	}
-	this.importJson(json.edge);
-  }
+   
 
   exportJson() {
     const json = assign({ style: new EdgeStyle() }, { style: { waypoints: this.style.waypoints } });
