@@ -187,7 +187,6 @@ SagaImporter.prototype.import = function (definitions) {
     
     if((definitions.edge === undefined) && (definitions.States)){
 		const start = this.sagaFactory.create('StartState');
-		debugger
 		definitions.edge={};
 		start.importJsonEdges(definitions);
 		if (definitions.edge) {
