@@ -29,6 +29,7 @@ import org.apache.seata.rm.datasource.SeataDataSourceProxy;
  * DataSource proxy for XA mode.
  *
  */
+@Deprecated
 public class DataSourceProxyXA implements SeataDataSourceProxy {
 
     private final org.apache.seata.rm.datasource.xa.DataSourceProxyXA dataSourceProxyXA;

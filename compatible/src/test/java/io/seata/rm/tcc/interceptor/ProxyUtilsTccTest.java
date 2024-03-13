@@ -30,7 +30,7 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
-import org.apache.seata.integration.tx.api.util.ProxyUtil;
+import io.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
