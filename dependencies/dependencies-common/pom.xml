@@ -493,5 +493,12 @@
                 </dependencies>
             </dependencyManagement>
         </profile>
+
+        <profile>
+            <id>test-by-java21</id>
+            <properties>
+                <mockito.version>5.2.0</mockito.version>
+            </properties>
+        </profile>
     </profiles>
 </project>
