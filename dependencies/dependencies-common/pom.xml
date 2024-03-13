@@ -40,7 +40,7 @@
         <commons-logging.version>1.2</commons-logging.version>
         <commons-compress.version>1.21</commons-compress.version>
         <!-- byte-buddy -->
-        <byte-buddy.version>1.12.17</byte-buddy.version>
+        <byte-buddy.version>1.12.23</byte-buddy.version>
         <!-- javax -->
         <javax-inject.version>1</javax-inject.version>
         <!-- guava -->
@@ -497,7 +497,7 @@
         <profile>
             <id>test-by-java21</id>
             <properties>
-                <mockito.version>5.2.0</mockito.version>
+                <byte-buddy.version>1.14.12</byte-buddy.version>
             </properties>
         </profile>
     </profiles>
