@@ -101,7 +101,7 @@ SagaExporter.prototype.export = function () {
   this.parseRoot(definitions, start);
   assign(definitions, { States: {} });
   states.forEach((state) => this.parseState(definitions, state));
-  
+
   edges.forEach((edge) => this.parseEdge(definitions, edge));
 
   return definitions;
