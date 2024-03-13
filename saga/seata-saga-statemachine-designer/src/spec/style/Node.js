@@ -110,6 +110,15 @@ calculateHeight(state) {
     return (state.Type === "ServiceTask" || state.Type === "ScriptTask" || state.Type === "SubStateMachine") ? 80 : 36;
 }
 
+importJsonEdges(json){
+	  if(json.States){
+			let targetx=json.States[json.StartState].style.bounds.x;
+			let targety=json.States[json.StartState].style.bounds.y;
+			json.edge={style:{waypoints:[{x:200+36,y:200+18},{x:targetx-20,y:targety+40},{x:targetx,y:targety+40}]
+				,target:json.StartState},Type:"Transition"};	
+		}
+	  this.importJson(json);
+	}
 
 importCatchesEdges(definitions,startState){
 	const catchEdges=startState.Catch;
