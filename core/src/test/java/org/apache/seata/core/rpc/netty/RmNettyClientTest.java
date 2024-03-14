@@ -16,9 +16,17 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.AfterAll;
@@ -28,11 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,9 +88,12 @@ class RmNettyClientTest {
         Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
         newClient.setResourceManager(resourceManager);
         System.setProperty("file.listener.enabled", "true");
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                event.getOldValue()));
+        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, new CachedConfigurationChangeListener() {
+                @Override
+                public void onChangeEvent(ConfigurationChangeEvent event) {
+                    logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(), event.getOldValue());
+                }
+            });
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
         Thread.sleep(2000);
         Assertions.assertThrows(FrameworkException.class, newClient::init);

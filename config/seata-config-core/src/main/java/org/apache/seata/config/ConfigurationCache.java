@@ -21,8 +21,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.seata.common.util.CollectionUtils;
+
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
 
@@ -37,45 +38,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
-
-    public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        if (StringUtils.isBlank(dataId)) {
-            return;
-        }
-        synchronized (ConfigurationCache.class) {
-            HashSet<ConfigurationChangeListener> listenerHashSet =
-                getInstance().configListenersMap.computeIfAbsent(dataId, key -> new HashSet<>());
-            if (!listenerHashSet.contains(getInstance())) {
-                ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
-                listenerHashSet.add(getInstance());
-            }
-            if (null != listeners && listeners.length > 0) {
-                for (ConfigurationChangeListener listener : listeners) {
-                    if (!listenerHashSet.contains(listener)) {
-                        listenerHashSet.add(listener);
-                        ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
-                    }
-                }
-            }
-        }
-    }
-
-    public static void removeConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        if (StringUtils.isBlank(dataId)) {
-            return;
-        }
-        synchronized (ConfigurationCache.class) {
-            final HashSet<ConfigurationChangeListener> listenerSet = getInstance().configListenersMap.get(dataId);
-            if (CollectionUtils.isNotEmpty(listenerSet)) {
-                for (ConfigurationChangeListener listener : listeners) {
-                    if (listenerSet.remove(listener)) {
-                        ConfigurationFactory.getInstance().removeConfigListener(dataId, listener);
-                    }
-                }
-            }
-        }
-    }
+    private Set<String> dataIdCached = new HashSet<>();
 
     public static ConfigurationCache getInstance() {
         return ConfigurationCacheInstance.INSTANCE;
@@ -90,12 +53,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(event.getNewValue(), null));
             } else {
                 Object newValue = new ObjectWrapper(event.getNewValue(), null).convertData(oldWrapper.getType());
-                if (!Objects.equals(oldWrapper.getData(), newValue)) {
-                    CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(newValue, oldWrapper.getType(),oldWrapper.getLastDefaultValue()));
-                }
+                CONFIG_CACHE.replace(event.getDataId(), oldWrapper, new ObjectWrapper(newValue, oldWrapper.getType(),oldWrapper.getLastDefaultValue()));
             }
         } else {
-            CONFIG_CACHE.remove(event.getDataId());
+            CONFIG_CACHE.remove(event.getDataId(), oldWrapper);
         }
     }
 
@@ -115,6 +76,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     }
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                        if (dataIdCached.add(rawDataId)) {
+                            originalConfiguration.addConfigListener(rawDataId, this);
+                        }
                         Object result = method.invoke(originalConfiguration, args);
                         // The wrapper.data only exists in the cache when it is not null.
                         if (result != null) {

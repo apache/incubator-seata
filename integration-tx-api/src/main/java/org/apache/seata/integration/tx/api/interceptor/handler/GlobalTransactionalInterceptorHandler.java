@@ -27,9 +27,10 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.event.EventBus;
@@ -70,7 +71,7 @@ import static org.apache.seata.tm.api.GlobalTransactionRole.Participant;
  * The type Global transactional interceptor handler.
  *
  */
-public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocationHandler implements ConfigurationChangeListener {
+public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocationHandler implements CachedConfigurationChangeListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptorHandler.class);
 
@@ -116,20 +117,18 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     public GlobalTransactionalInterceptorHandler(FailureHandler failureHandler, Set<String> methodsToProxy) {
         this.failureHandler = failureHandler == null ? FailureHandlerHolder.getFailureHandler() : failureHandler;
         this.methodsToProxy = methodsToProxy;
-        this.disable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+        Configuration configuration = ConfigurationFactory.getInstance();
+        this.disable = configuration.getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                 DEFAULT_DISABLE_GLOBAL_TRANSACTION);
-
-        boolean degradeCheck = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
+        boolean degradeCheck = configuration.getBoolean(ConfigurationKeys.CLIENT_DEGRADE_CHECK,
                 DEFAULT_TM_DEGRADE_CHECK);
-        degradeCheckPeriod = ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
-        degradeCheckAllowTimes = ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
+        degradeCheckPeriod = configuration.getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_PERIOD, DEFAULT_TM_DEGRADE_CHECK_PERIOD);
+        degradeCheckAllowTimes = configuration.getInt(ConfigurationKeys.CLIENT_DEGRADE_CHECK_ALLOW_TIMES, DEFAULT_TM_DEGRADE_CHECK_ALLOW_TIMES);
         EVENT_BUS.register(this);
         if (degradeCheck && degradeCheckPeriod > 0 && degradeCheckAllowTimes > 0) {
             startDegradeCheck();
         }
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
+        configuration.addConfigListener(ConfigurationKeys.CLIENT_DEGRADE_CHECK, this);
         this.initDefaultGlobalTransactionTimeout();
     }
 

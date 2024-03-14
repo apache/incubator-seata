@@ -23,8 +23,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -142,9 +145,14 @@ public class TmNettyClientTest {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         System.setProperty("file.listener.enabled", "true");
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                event.getOldValue()));
+        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+            new CachedConfigurationChangeListener() {
+                @Override
+                public void onChangeEvent(ConfigurationChangeEvent event) {
+                    logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
+                        event.getOldValue());
+                }
+            });
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
         Thread.sleep(2000);
         Assertions.assertThrows(FrameworkException.class, tmClient::init);

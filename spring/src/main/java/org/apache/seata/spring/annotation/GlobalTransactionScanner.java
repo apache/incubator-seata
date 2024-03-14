@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableSet;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
@@ -86,7 +87,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
  *
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-        implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
+        implements CachedConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
 
     private static final long serialVersionUID = 1L;
 
@@ -473,8 +474,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
             }
-            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                    (ConfigurationChangeListener) this);
+            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (CachedConfigurationChangeListener) this);
             return;
         }
         if (initialized.compareAndSet(false, true)) {
@@ -561,7 +561,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("{} config changed, old value:true, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                         event.getNewValue());
                 initClient();
-                ConfigurationCache.removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
+                ConfigurationFactory.getInstance().removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             }
         }
     }

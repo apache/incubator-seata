@@ -41,9 +41,12 @@ class FileConfigurationTest {
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        ConfigurationCache.addConfigListener("service.disableGlobalTransaction", (event) -> {
-            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
-            countDownLatch.countDown();
+        fileConfig.addConfigListener("service.disableGlobalTransaction", new CachedConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
+                countDownLatch.countDown();
+            }
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
         countDownLatch.await(5, TimeUnit.SECONDS);

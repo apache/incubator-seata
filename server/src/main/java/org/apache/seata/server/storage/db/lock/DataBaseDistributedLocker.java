@@ -32,6 +32,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
@@ -94,7 +95,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
         if (StringUtils.isBlank(distributedLockTable)) {
             demotion = true;
-            ConfigurationCache.addConfigListener(DISTRIBUTED_LOCK_DB_TABLE, new ConfigurationChangeListener() {
+            configuration.addConfigListener(DISTRIBUTED_LOCK_DB_TABLE, new CachedConfigurationChangeListener() {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     String newValue = event.getNewValue();
@@ -102,7 +103,7 @@ public class DataBaseDistributedLocker implements DistributedLocker {
                         distributedLockTable = newValue;
                         init();
                         demotion = false;
-                        ConfigurationCache.removeConfigListener(DISTRIBUTED_LOCK_DB_TABLE, this);
+                        ConfigurationFactory.getInstance().removeConfigListener(DISTRIBUTED_LOCK_DB_TABLE, this);
                     }
                 }
             });
