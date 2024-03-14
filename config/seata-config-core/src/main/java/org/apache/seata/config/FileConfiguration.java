@@ -395,7 +395,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
                                 for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
                                     //file config with no cache
-                                    listener.onChangeEvent(event);
+                                    listener.onProcessEvent(event);
                                 }
                             }
                         }
