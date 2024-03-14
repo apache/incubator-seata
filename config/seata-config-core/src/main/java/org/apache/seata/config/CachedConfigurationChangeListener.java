@@ -18,11 +18,11 @@ package org.apache.seata.config;
 
 public interface CachedConfigurationChangeListener extends ConfigurationChangeListener {
 
-    ConfigurationCache configurationCache = ConfigurationCache.getInstance();
+    ConfigurationCache CONFIGURATION_CACHE = ConfigurationCache.getInstance();
 
     @Override
     default void afterEvent(ConfigurationChangeEvent event) {
-        ConfigurationChangeListener listener = (ConfigurationChangeListener)configurationCache;
+        ConfigurationChangeListener listener = (ConfigurationChangeListener)CONFIGURATION_CACHE;
         listener.onProcessEvent(event);
     }
 }

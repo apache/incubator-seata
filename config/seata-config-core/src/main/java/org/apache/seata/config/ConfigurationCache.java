@@ -38,7 +38,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private Set<String> dataIdCached = new HashSet<>();
+    private static final Set<String> DATA_ID_CACHED = new HashSet<>();
 
     public static ConfigurationCache getInstance() {
         return ConfigurationCacheInstance.INSTANCE;
@@ -76,7 +76,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     }
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
-                        if (dataIdCached.add(rawDataId)) {
+                        if (DATA_ID_CACHED.add(rawDataId)) {
                             originalConfiguration.addConfigListener(rawDataId, this);
                         }
                         Object result = method.invoke(originalConfiguration, args);
