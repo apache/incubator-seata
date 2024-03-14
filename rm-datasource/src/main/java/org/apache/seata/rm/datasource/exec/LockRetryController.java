@@ -20,7 +20,6 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
