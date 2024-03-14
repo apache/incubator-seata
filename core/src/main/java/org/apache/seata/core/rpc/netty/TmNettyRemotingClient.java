@@ -33,7 +33,6 @@ import org.apache.seata.common.thread.RejectedPolicies;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.auth.AuthSigner;
