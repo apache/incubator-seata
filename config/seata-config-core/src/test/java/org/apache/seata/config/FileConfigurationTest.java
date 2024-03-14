@@ -51,6 +51,7 @@ class FileConfigurationTest {
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
         countDownLatch.await(5, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
+        Thread.sleep(1000);
         System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
         Thread.sleep(2000);
         boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
