@@ -29,7 +29,6 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
