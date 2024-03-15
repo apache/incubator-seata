@@ -18,19 +18,24 @@
 import { assign } from 'min-dash';
 import BaseSpec from '../BaseSpec';
 import NodeStyle from './NodeStyle';
+import SagaFactory from '../../modeling/SagaFactory';
+import { is } from '../../utils/index'
 // import THUMBNAIL from '../icons/bpmn-icon-service-task.svg';
+
+
+const OFFSET_X = 36,OFFSET_Y = 18,OFFSET_TARGET_X = 20,DEFAULT_X = 200,OFFSET_TARGET_Y = 40;
+const DEFAULT_WIDTH=100,DEFAULT_HEIGHT=80;
 
 export default class Node extends BaseSpec {
   style = new NodeStyle();
-
   importJson(json) {
     if (json.style === undefined) {
       json.style = {};
       json.style.bounds = {
-        x: 200,
-        y: 200,
-        width: 36,
-        height: 36,
+        x: DEFAULT_X,
+        y: DEFAULT_X,
+        width: OFFSET_X,
+        height: OFFSET_X,
       };
     }
     assign(this.style.bounds, json.style.bounds);
@@ -65,7 +70,7 @@ export default class Node extends BaseSpec {
         x: sourceX + sourceWidth,
         y: sourceY + (sourceHeight / 2),
       }, {
-        x: targetX - 20,
+        x: targetX - OFFSET_TARGET_X,
         y: targetY + (targetHeight / 2),
       }, {
         x: targetX,
@@ -77,7 +82,7 @@ export default class Node extends BaseSpec {
         y: sourceY + sourceHeight,
       }, {
         x: targetX + (targetWidth / 2),
-        y: targetY - 20,
+        y: targetY - OFFSET_TARGET_X,
       }, {
         x: targetX + (targetWidth / 2),
         y: targetY,
@@ -88,7 +93,7 @@ export default class Node extends BaseSpec {
         y: sourceY + sourceHeight,
       }, {
         x: targetX + (targetWidth / 2),
-        y: targetY - 20,
+        y: targetY - OFFSET_TARGET_X,
       }, {
         x: targetX + (targetWidth / 2),
         y: targetY,
@@ -98,7 +103,7 @@ export default class Node extends BaseSpec {
         x: sourceX + sourceWidth,
         y: sourceY + (sourceHeight / 2),
       }, {
-        x: targetX - 20,
+        x: targetX - OFFSET_TARGET_X,
         y: targetY + (targetHeight / 2),
       }, {
         x: targetX,
@@ -154,28 +159,32 @@ export default class Node extends BaseSpec {
   }
 
   calculateWidth(state) {
-    return (state.Type === 'ServiceTask' || state.Type === 'ScriptTask' || state.Type === 'SubStateMachine') ? 100 : 36;
+	const root= new SagaFactory();
+	return root.create(state.Type).DEFAULT_SIZE.width;
+	
   }
 
   calculateHeight(state) {
-    return (state.Type === 'ServiceTask' || state.Type === 'ScriptTask' || state.Type === 'SubStateMachine') ? 80 : 36;
+  const root= new SagaFactory();
+	return root.create(state.Type).DEFAULT_SIZE.height;
   }
 
   importJsonEdges(json) {
+  
     if (json.States) {
       const targetX = json.States[json.StartState].style.bounds.x;
       const targetY = json.States[json.StartState].style.bounds.y;
       json.edge = {
         style: {
           waypoints: [{
-            x: 200 + 36,
-            y: 200 + 18,
+            x: DEFAULT_X + OFFSET_X,
+            y: DEFAULT_X + OFFSET_Y,
           }, {
-            x: targetX - 20,
-            y: targetY + 40,
+            x: targetX - OFFSET_TARGET_X,
+            y: targetY + OFFSET_TARGET_Y,
           }, {
             x: targetX,
-            y: targetY + 40,
+            y: targetY + OFFSET_TARGET_Y,
           }],
           target: json.StartState,
         },
@@ -193,29 +202,27 @@ export default class Node extends BaseSpec {
       const targetX = definitions.States[option.Next].style.bounds.x;
       const targetY = definitions.States[option.Next].style.bounds.y;
       let waypoints1 = [];
-      if ((definitions.States[option.Next].Type === 'ServiceTask')
-        || (definitions.States[option.Next].Type === 'ScriptTask')
-        || (definitions.States[option.Next].Type === 'SubStateMachine')) {
+      if (is(option.Next,'Task')) {
         waypoints1 = [{
-          x: sourceX + 18,
+          x: sourceX + OFFSET_Y,
           y: sourceY,
         }, {
-          x: targetX + 50,
-          y: targetY + 100,
+          x: targetX + DEFAULT_WIDTH/2,
+          y: targetY + DEFAULT_WIDTH,
         }, {
-          x: targetX + 50,
-          y: (targetY + 100) - 20,
+          x: targetX + DEFAULT_WIDTH/2,
+          y: (targetY + DEFAULT_WIDTH) - OFFSET_TARGET_X,
         }];
       } else {
         waypoints1 = [{
-          x: sourceX + 18,
+          x: sourceX + OFFSET_Y,
           y: sourceY,
         }, {
-          x: targetX + 18,
-          y: (targetY + 36) + 20,
+          x: targetX + OFFSET_Y,
+          y: (targetY + OFFSET_X) + OFFSET_TARGET_X,
         }, {
-          x: targetX + 18,
-          y: targetY + 36,
+          x: targetX + OFFSET_Y,
+          y: targetY + OFFSET_X,
         }];
       }
       startState.catch.edge = assign(startState.catch.edge || {}, {
@@ -247,10 +254,10 @@ export default class Node extends BaseSpec {
       const newY = y;
       node.catch.style = {};
       node.catch.style.bounds = {
-        x: newX + 50,
-        y: newY - 20,
-        width: 36,
-        height: 36,
+        x: newX + DEFAULT_WIDTH/2,
+        y: newY - OFFSET_TARGET_X,
+        width: OFFSET_X,
+        height: OFFSET_X,
       };
     }
     this.importJson(node.catch);
@@ -259,17 +266,17 @@ export default class Node extends BaseSpec {
     let width1;
     let height1;
     catchList.get(node).forEach((semantic) => {
-      if ((semantic.Type === 'ServiceTask') || (semantic.Type === 'ScriptTask') || (semantic.Type === 'SubStateMachine')) {
-        width1 = 100;
-        height1 = 80;
+      if (is(semantic,'Task')) {
+        width1 = DEFAULT_WIDTH;
+        height1 = DEFAULT_HEIGHT;
       } else {
-        width1 = 36;
-        height1 = 36;
+        width1 = OFFSET_X;
+        height1 = OFFSET_X;
       }
       semantic.style = {};
       semantic.style.bounds = {
-        x: prev.style.bounds.x - 50,
-        y: prev.style.bounds.y - 100,
+        x: prev.style.bounds.x - DEFAULT_WIDTH/2,
+        y: prev.style.bounds.y - DEFAULT_WIDTH,
         width: width1,
         height: height1,
       };
@@ -289,8 +296,8 @@ export default class Node extends BaseSpec {
           startState.style.bounds = {
             x: begin.style.bounds.x + 150, // Adjust x-coordinate
             y: begin.style.bounds.y, // Adjust y-coordinate
-            width: 100,
-            height: 80,
+            width: DEFAULT_WIDTH,
+            height: DEFAULT_HEIGHT,
           };
         }
       }
@@ -324,21 +331,21 @@ export default class Node extends BaseSpec {
                 neighbor,
                 currentState.style.bounds.x + 150,
                 currentState.style.bounds.y,
-                36,
-                36,
+                OFFSET_X,
+                OFFSET_X,
               );
             } else {
               setBounds(
                 neighbor,
                 currentState.style.bounds.x,
                 currentState.style.bounds.y + 150,
-                36,
-                36,
+                OFFSET_X,
+                OFFSET_X,
               );
             }
           }
 
-          if ((neighbor.Type === 'ServiceTask' && !neighbor.IsForCompensation) || (neighbor.Type === 'ScriptTask' && !neighbor.IsForCompensation) || (neighbor.Type === 'SubStateMachine' && !neighbor.IsForCompensation)) {
+          if (is(neighbor,'Task') && !neighbor.IsForCompensation) {
             const target = [];
             target.push(currentState.style.bounds.x + 150, currentState.style.bounds.y);
             if (this.isElementPresent(visited, target)) {
@@ -346,22 +353,22 @@ export default class Node extends BaseSpec {
                 neighbor,
                 currentState.style.bounds.x + 150,
                 currentState.style.bounds.y,
-                100,
-                80,
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT,
               );
             } else {
               setBounds(
                 neighbor,
                 currentState.style.bounds.x,
                 currentState.style.bounds.y + 150,
-                100,
-                80,
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT,
               );
             }
 
             const { Name } = neighbor;
             queue.push(definitions.States[Name]);
-          } else if ((neighbor.Type === 'ServiceTask' && neighbor.IsForCompensation) || (neighbor.Type === 'ScriptTask' && neighbor.IsForCompensation) || ((neighbor.Type === 'SubStateMachine' && neighbor.IsForCompensation))) {
+          } else if (is(neighbor,'Task') && neighbor.IsForCompensation) {
             const target = [];
             target.push(currentState.style.bounds.x, currentState.style.bounds.y + 150);
             if (this.isElementPresent(visited, target)) {
@@ -369,8 +376,8 @@ export default class Node extends BaseSpec {
                 neighbor,
                 currentState.style.bounds.x,
                 currentState.style.bounds.y + 150,
-                100,
-                80,
+                DEFAULT_WIDTH,
+                DEFAULT_HEIGHT,
               );
             }
           } else if (neighbor.Type === 'CompensationTrigger') {
@@ -378,8 +385,8 @@ export default class Node extends BaseSpec {
               neighbor,
               currentState.style.bounds.x,
               currentState.style.bounds.y - 150,
-              36,
-              36,
+              OFFSET_X,
+              OFFSET_X,
             );
             const { Name } = neighbor;
             queue.push(definitions.States[Name]);
@@ -388,8 +395,8 @@ export default class Node extends BaseSpec {
               neighbor,
               currentState.style.bounds.x + 150,
               currentState.style.bounds.y,
-              36,
-              36,
+              50,
+              50,
             );
             const { Name } = neighbor;
             queue.push(definitions.States[Name]);
