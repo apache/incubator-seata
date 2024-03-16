@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.CachedConfigurationChangeListener;
-import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.model.Resource;
@@ -32,6 +31,7 @@ import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -42,12 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Rm RPC client test.
- *
  */
-class RmNettyClientTest {
-    
+class RmNettyClientTest extends NettyClientTestSuite {
+
     Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     @BeforeAll
     public static void beforeAll() {
         RmNettyRemotingClient.getInstance().destroy();
@@ -78,6 +77,8 @@ class RmNettyClientTest {
     }
 
     @Test
+    @Order(2)
+    @Override
     public void testCheckFailFast() throws Exception {
         RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
 

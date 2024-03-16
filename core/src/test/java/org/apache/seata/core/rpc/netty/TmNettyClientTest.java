@@ -16,40 +16,38 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFactory;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.config.CachedConfigurationChangeListener;
-import org.apache.seata.config.ConfigurationCache;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFactory;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type Tm rpc client test.
- *
  */
-public class TmNettyClientTest {
+public class TmNettyClientTest extends NettyClientTestSuite {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final ThreadPoolExecutor
-        workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
+    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
@@ -141,6 +139,8 @@ public class TmNettyClientTest {
     }
 
     @Test
+    @Order(1)
+    @Override
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
