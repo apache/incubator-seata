@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Tm rpc client test.
  */
-public class TmNettyClientTest extends NettyClientTestSuite {
+public class TmNettyClientTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -140,7 +140,6 @@ public class TmNettyClientTest extends NettyClientTestSuite {
 
     @Test
     @Order(1)
-    @Override
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");

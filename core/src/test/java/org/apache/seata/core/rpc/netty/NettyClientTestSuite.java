@@ -22,7 +22,4 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses({TmNettyClientTest.class, RmNettyClientTest.class})
 public class NettyClientTestSuite {
-    public void testCheckFailFast() throws Exception {
-
-    }
 }
