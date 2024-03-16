@@ -279,8 +279,8 @@ public class EnhancedServiceLoader {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type is null");
             }
-            return (InnerEnhancedServiceLoader<S>) CollectionUtils.computeIfAbsent(SERVICE_LOADERS, type,
-                    key -> new InnerEnhancedServiceLoader<>(type));
+            return (InnerEnhancedServiceLoader<S>)CollectionUtils.computeIfAbsent(SERVICE_LOADERS, type,
+                key -> new InnerEnhancedServiceLoader<>(type));
         }
 
         @SuppressWarnings("unchecked")
@@ -346,7 +346,7 @@ public class EnhancedServiceLoader {
          * @param activateName the activate name
          * @param argsType     the args type
          * @param args         the args
-         * @param loader       the class loader
+         * @param loader  the class loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
@@ -357,8 +357,8 @@ public class EnhancedServiceLoader {
 
         /**
          * get all implements
+         * @param loader  the class loader
          *
-         * @param loader the class loader
          * @return list list
          */
         private List<S> loadAll(ClassLoader loader) {
@@ -408,8 +408,8 @@ public class EnhancedServiceLoader {
                 throw e;
             } catch (Throwable e) {
                 throw new EnhancedServiceNotFoundException(
-                        "not found service provider for : " + type.getName()
-                                + " caused by " + ExceptionUtils.getFullStackTrace(e));
+                    "not found service provider for : " + type.getName()
+                        + " caused by " + ExceptionUtils.getFullStackTrace(e));
             }
         }
 
@@ -425,7 +425,7 @@ public class EnhancedServiceLoader {
                 return getExtensionInstance(cachedExtensionDefinition, loader, argTypes, args);
             } catch (Throwable e) {
                 if (e instanceof EnhancedServiceNotFoundException) {
-                    throw (EnhancedServiceNotFoundException) e;
+                    throw (EnhancedServiceNotFoundException)e;
                 } else {
                     throw new EnhancedServiceNotFoundException(
                             "not found service provider for : " + type.getName() + " caused by " + ExceptionUtils
@@ -441,7 +441,7 @@ public class EnhancedServiceLoader {
             }
             if (Scope.SINGLETON.equals(definition.getScope())) {
                 Holder<Object> holder = CollectionUtils.computeIfAbsent(definitionToInstanceMap, definition,
-                        key -> new Holder<>());
+                    key -> new Holder<>());
                 Object instance = holder.get();
                 if (instance == null) {
                     synchronized (holder) {
@@ -452,7 +452,7 @@ public class EnhancedServiceLoader {
                         }
                     }
                 }
-                return (S) instance;
+                return (S)instance;
             } else {
                 return createNewExtension(definition, loader, argTypes, args);
             }
@@ -673,14 +673,13 @@ public class EnhancedServiceLoader {
                 s = type.cast(implClazz.newInstance());
             }
             if (s instanceof Initialize) {
-                ((Initialize) s).init();
+                ((Initialize)s).init();
             }
             return s;
         }
 
         /**
          * Helper Class for hold a value.
-         *
          * @param <T>
          */
         private static class Holder<T> {
