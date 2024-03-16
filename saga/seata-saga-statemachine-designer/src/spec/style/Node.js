@@ -18,22 +18,22 @@
 import { assign } from 'min-dash';
 import BaseSpec from '../BaseSpec';
 import NodeStyle from './NodeStyle';
-import SagaFactory from '../../modeling/SagaFactory';
-import { is } from '../../utils/index'
+import { is } from '../../utils/index';
 // import THUMBNAIL from '../icons/bpmn-icon-service-task.svg';
 
-
-const OFFSET_X = 36,OFFSET_Y = 18,OFFSET_TARGET_X = 20,DEFAULT_X = 200,OFFSET_TARGET_Y = 40;
-const DEFAULT_WIDTH=100,DEFAULT_HEIGHT=80;
+const OFFSET_X = 36; const OFFSET_Y = 18; const OFFSET_TARGET_X = 20;
+const DEFAULT_X = 200; const DEFAULT_Y = 200; const OFFSET_TARGET_Y = 40;
+const DEFAULT_WIDTH = 100; const DEFAULT_HEIGHT = 80;
 
 export default class Node extends BaseSpec {
   style = new NodeStyle();
+
   importJson(json) {
     if (json.style === undefined) {
       json.style = {};
       json.style.bounds = {
         x: DEFAULT_X,
-        y: DEFAULT_X,
+        y: DEFAULT_Y,
         width: OFFSET_X,
         height: OFFSET_X,
       };
@@ -159,18 +159,32 @@ export default class Node extends BaseSpec {
   }
 
   calculateWidth(state) {
-	const root= new SagaFactory();
-	return root.create(state.Type).DEFAULT_SIZE.width;
-	
+    if (is(state, 'Task')) {
+      return 100;
+    }
+    if (is(state, 'Event')) {
+      return 36;
+    }
+    if (is(state, 'Choice')) {
+      return 50;
+    }
+    return 100;
   }
 
   calculateHeight(state) {
-  const root= new SagaFactory();
-	return root.create(state.Type).DEFAULT_SIZE.height;
+    if (is(state, 'Task')) {
+      return 80;
+    }
+    if (is(state, 'Event')) {
+      return 36;
+    }
+    if (is(state, 'Choice')) {
+      return 50;
+    }
+    return 80;
   }
 
   importJsonEdges(json) {
-  
     if (json.States) {
       const targetX = json.States[json.StartState].style.bounds.x;
       const targetY = json.States[json.StartState].style.bounds.y;
@@ -202,15 +216,15 @@ export default class Node extends BaseSpec {
       const targetX = definitions.States[option.Next].style.bounds.x;
       const targetY = definitions.States[option.Next].style.bounds.y;
       let waypoints1 = [];
-      if (is(option.Next,'Task')) {
+      if (is(option.Next, 'Task')) {
         waypoints1 = [{
           x: sourceX + OFFSET_Y,
           y: sourceY,
         }, {
-          x: targetX + DEFAULT_WIDTH/2,
+          x: targetX + DEFAULT_WIDTH / 2,
           y: targetY + DEFAULT_WIDTH,
         }, {
-          x: targetX + DEFAULT_WIDTH/2,
+          x: targetX + DEFAULT_WIDTH / 2,
           y: (targetY + DEFAULT_WIDTH) - OFFSET_TARGET_X,
         }];
       } else {
@@ -254,7 +268,7 @@ export default class Node extends BaseSpec {
       const newY = y;
       node.catch.style = {};
       node.catch.style.bounds = {
-        x: newX + DEFAULT_WIDTH/2,
+        x: newX + DEFAULT_WIDTH / 2,
         y: newY - OFFSET_TARGET_X,
         width: OFFSET_X,
         height: OFFSET_X,
@@ -266,7 +280,7 @@ export default class Node extends BaseSpec {
     let width1;
     let height1;
     catchList.get(node).forEach((semantic) => {
-      if (is(semantic,'Task')) {
+      if (is(semantic, 'Task')) {
         width1 = DEFAULT_WIDTH;
         height1 = DEFAULT_HEIGHT;
       } else {
@@ -275,7 +289,7 @@ export default class Node extends BaseSpec {
       }
       semantic.style = {};
       semantic.style.bounds = {
-        x: prev.style.bounds.x - DEFAULT_WIDTH/2,
+        x: prev.style.bounds.x - DEFAULT_WIDTH / 2,
         y: prev.style.bounds.y - DEFAULT_WIDTH,
         width: width1,
         height: height1,
@@ -345,7 +359,7 @@ export default class Node extends BaseSpec {
             }
           }
 
-          if (is(neighbor,'Task') && !neighbor.IsForCompensation) {
+          if (is(neighbor, 'Task') && !neighbor.IsForCompensation) {
             const target = [];
             target.push(currentState.style.bounds.x + 150, currentState.style.bounds.y);
             if (this.isElementPresent(visited, target)) {
@@ -368,7 +382,7 @@ export default class Node extends BaseSpec {
 
             const { Name } = neighbor;
             queue.push(definitions.States[Name]);
-          } else if (is(neighbor,'Task') && neighbor.IsForCompensation) {
+          } else if (is(neighbor, 'Task') && neighbor.IsForCompensation) {
             const target = [];
             target.push(currentState.style.bounds.x, currentState.style.bounds.y + 150);
             if (this.isElementPresent(visited, target)) {
