@@ -14,13 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.model;
+package io.seata.spi;
 
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.ResourceManager;
+import org.apache.seata.rm.DefaultResourceManager;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-/**
- * Resource Manager: common behaviors.
- *
- */
-public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
+public class SPITest {
 
+    @Test
+    public void testRmSPIOrder() {
+        DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
+        ResourceManager resourceManager = defaultResourceManager.getResourceManager(BranchType.SAGA);
+        Assertions.assertNotNull(resourceManager);
+        Assertions.assertEquals("io.seata.saga.rm.SagaResourceManager", resourceManager.getClass().getName());
+    }
 }

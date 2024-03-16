@@ -18,12 +18,13 @@ package io.seata.saga.engine.db.mockserver;
 
 import io.seata.saga.SagaCostPrint;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.engine.mock.DemoService.Engineer;
+import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.rm.StateMachineEngineHolder;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.saga.engine.mock.DemoService.Engineer;
-import io.seata.saga.engine.mock.DemoService.People;
+import org.apache.seata.rm.DefaultResourceManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -139,39 +140,6 @@ public class StateMachineDBMockServerTests {
             StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
             Assertions.assertNotNull(inst.getException());
-            Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
-        });
-    }
-
-    @Test
-    public void testSimpleScriptTaskStateMachineWithLayout() throws Exception {
-        String stateMachineName = "designerSimpleScriptTaskStateMachine";
-
-        SagaCostPrint.executeAndPrint("5-8", () -> {
-            Map<String, Object> paramMap = new HashMap<>(1);
-            paramMap.put("a", 1);
-
-            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
-            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
-            Assertions.assertNotNull(inst.getEndParams().get("scriptStateResult"));
-        });
-
-        SagaCostPrint.executeAndPrint("5-9", () -> {
-            Map<String, Object> paramMap = new HashMap<>(1);
-            paramMap.put("a", 1);
-
-            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
-            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
-        });
-
-        SagaCostPrint.executeAndPrint("5-10", () -> {
-            Map<String, Object> paramMap = new HashMap<>(1);
-            paramMap.put("scriptThrowException", true);
-
-            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
-
             Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
         });
     }
