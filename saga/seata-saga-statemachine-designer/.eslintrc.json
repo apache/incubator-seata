@@ -25,6 +25,7 @@
     "react/no-deprecated": 0,
     "react/react-in-jsx-scope": 0,
     "react/jsx-no-bind": 0,
-    "no-underscore-dangle": 0
+    "no-underscore-dangle": 0,
+    "no-restricted-syntax": 0
   }
 }
