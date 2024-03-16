@@ -337,7 +337,7 @@ export default class Node extends BaseSpec {
       adjList.get(currentState).forEach((neighbor) => {
         if (neighbor.style === undefined) {
           neighbor.style = {};
-          if ((neighbor.Type === 'Fail') || (neighbor.Type === 'Succeed')) {
+          if (is(neighbor, 'End')) {
             const target = [];
             target.push(currentState.style.bounds.x + 150, currentState.style.bounds.y);
             if (this.isElementPresent(visited, target)) {
@@ -394,7 +394,7 @@ export default class Node extends BaseSpec {
                 DEFAULT_HEIGHT,
               );
             }
-          } else if (neighbor.Type === 'CompensationTrigger') {
+          } else if (is(neighbor, 'CompensationTrigger')) {
             setBounds(
               neighbor,
               currentState.style.bounds.x,
@@ -404,7 +404,7 @@ export default class Node extends BaseSpec {
             );
             const { Name } = neighbor;
             queue.push(definitions.States[Name]);
-          } else if (neighbor.Type === 'Choice') {
+          } else if (is(neighbor, 'Choice')) {
             setBounds(
               neighbor,
               currentState.style.bounds.x + 150,
