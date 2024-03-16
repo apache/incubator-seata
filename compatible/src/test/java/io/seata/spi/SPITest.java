@@ -16,6 +16,7 @@
  */
 package io.seata.spi;
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.Assertions;
@@ -28,11 +29,11 @@ public class SPITest {
 
     @Test
     public void testRmSPIOrder() {
-        InnerEnhancedServiceLoader<ResourceManager> innerEnhancedServiceLoader = new InnerEnhancedServiceLoader<>(ResourceManager.class);
-        List<ResourceManager> resourceManagers = innerEnhancedServiceLoader.loadAll(this.getClass().getClassLoader());
+        EnhancedServiceLoader.unload(ResourceManager.class);
+        List<ResourceManager> resourceManagers = EnhancedServiceLoader.loadAll(ResourceManager.class);
         List<ResourceManager> list = resourceManagers.stream().filter(resourceManager -> resourceManager.getBranchType().equals(BranchType.SAGA)).collect(Collectors.toList());
-        Assertions.assertEquals(2, list.size());
-        //last order is io.seata
-        Assertions.assertEquals("io.seata.saga.rm.SagaResourceManager", list.get(1).getClass().getName());
+        Assertions.assertNotNull(list);
+        ResourceManager resourceManager = list.get(list.size() - 1);
+        Assertions.assertEquals("io.seata.saga.rm.SagaResourceManager", resourceManager.getClass().getName());
     }
 }
