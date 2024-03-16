@@ -93,7 +93,7 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
-                    Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
+                    Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
                     bodyBytes = serializer.serialize(rpcMessage.getBody());
                     Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                     bodyBytes = compressor.compress(bodyBytes);

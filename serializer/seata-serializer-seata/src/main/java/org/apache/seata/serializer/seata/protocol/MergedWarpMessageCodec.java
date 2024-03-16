@@ -33,6 +33,11 @@ import org.apache.seata.core.protocol.MergedWarpMessage;
  */
 public class MergedWarpMessageCodec extends AbstractMessageCodec {
 
+    private byte version;
+
+    public MergedWarpMessageCodec(byte version) {
+        this.version = version;
+    }
     @Override
     public Class<?> getMessageClassType() {
         return MergedWarpMessage.class;
@@ -51,7 +56,7 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -97,7 +102,7 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractMessage, byteBuffer);
             msgs.add(abstractMessage);
         }
