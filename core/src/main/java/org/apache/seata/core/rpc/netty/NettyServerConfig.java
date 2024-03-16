@@ -49,7 +49,7 @@ public class NettyServerConfig extends NettyBaseConfig {
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
     private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
-    private static final int DEFAULT_LISTEN_PORT = 8091;
+    private int serverListenPort = 0;
     private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
     private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
@@ -217,8 +217,12 @@ public class NettyServerConfig extends NettyBaseConfig {
      *
      * @return the listen port
      */
-    public int getDefaultListenPort() {
-        return DEFAULT_LISTEN_PORT;
+    public int getServerListenPort() {
+        return serverListenPort;
+    }
+
+    public void setServerListenPort(int port){
+        this.serverListenPort = port;
     }
 
     /**
