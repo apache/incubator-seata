@@ -14,13 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.rm.tcc;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * 
- *
- * The interface Register check auth handler.
+ * customized annotation
  *
  */
-public interface RegisterCheckAuthHandler extends org.apache.seata.core.rpc.RegisterCheckAuthHandler {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.PARAMETER, ElementType.FIELD})
+public @interface Param {
+    String value() default "";
 }

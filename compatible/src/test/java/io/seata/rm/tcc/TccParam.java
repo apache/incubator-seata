@@ -14,12 +14,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.tcc;
 
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * The type Undo log manager.
+ * The type Tcc param.
  *
  */
-public interface UndoLogManager extends org.apache.seata.rm.datasource.undo.UndoLogManager {
+public class TccParam {
+
+    /**
+     * The Num.
+     */
+    protected int num;
+
+    /**
+     * The Email.
+     */
+    @BusinessActionContextParameter(paramName = "email")
+    protected String email;
+
+    /**
+     * Instantiates a new Tcc param.
+     *
+     * @param num   the num
+     * @param email the email
+     */
+    public TccParam(int num, String email) {
+        this.num = num;
+        this.email = email;
+    }
+
+    /**
+     * Gets num.
+     *
+     * @return the num
+     */
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * Sets num.
+     *
+     * @param num the num
+     */
+    public void setNum(int num) {
+        this.num = num;
+    }
 }
