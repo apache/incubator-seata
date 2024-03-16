@@ -41,7 +41,7 @@ public class MessageFutureTest {
     private static final byte COMPRESS_FIELD = 2;
     private static final byte MSG_TYPE_FIELD = 3;
     private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
-    private static final long TIME_OUT_FIELD = 100L;
+    private static final long TIME_OUT_FIELD = 500L;
 
     /**
      * Test field set get.

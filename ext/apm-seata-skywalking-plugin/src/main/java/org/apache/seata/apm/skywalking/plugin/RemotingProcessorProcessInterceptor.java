@@ -16,8 +16,8 @@
  */
 package org.apache.seata.apm.skywalking.plugin;
 
-import com.alipay.sofa.common.profile.StringUtil;
 import org.apache.seata.apm.skywalking.plugin.common.SWSeataUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.skywalking.apm.agent.core.context.CarrierItem;
@@ -57,7 +57,7 @@ public class RemotingProcessorProcessInterceptor implements
         activeSpan.setComponent(ComponentsDefine.SEATA);
 
         String xid = SWSeataUtils.convertXid(rpcMessage);
-        if (StringUtil.isNotBlank(xid)) {
+        if (StringUtils.isNotBlank(xid)) {
             activeSpan.tag(new StringTag(20, "Seata.xid"), xid);
         }
     }

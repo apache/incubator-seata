@@ -188,17 +188,17 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── snakeyaml-2.0.jar
     ├── snappy-java-1.1.8.4.jar
     ├── sofa-common-tools-1.0.12.jar
-    ├── spring-aop-5.3.30.jar
-    ├── spring-beans-5.3.30.jar
-    ├── spring-boot-autoconfigure-2.7.17.jar
-    ├── spring-boot-starter-logging-2.7.17.jar
-    ├── spring-boot-starter-security-2.7.17.jar
-    ├── spring-boot-starter-tomcat-2.7.17.jar
-    ├── spring-boot-starter-web-2.7.17.jar
-    ├── spring-context-5.3.30.jar
-    ├── spring-core-5.3.30.jar
-    ├── spring-expression-5.3.30.jar
-    ├── spring-jcl-5.3.30.jar
+    ├── spring-aop-5.3.31.jar
+    ├── spring-beans-5.3.31.jar
+    ├── spring-boot-autoconfigure-2.7.18.jar
+    ├── spring-boot-starter-logging-2.7.18.jar
+    ├── spring-boot-starter-security-2.7.18.jar
+    ├── spring-boot-starter-tomcat-2.7.18.jar
+    ├── spring-boot-starter-web-2.7.18.jar
+    ├── spring-context-5.3.31.jar
+    ├── spring-core-5.3.31.jar
+    ├── spring-expression-5.3.31.jar
+    ├── spring-jcl-5.3.31.jar
     ├── spring-security-config-5.7.11.jar
     ├── spring-security-web-5.7.11.jar
     ├── stringtemplate-3.2.1.jar
@@ -265,13 +265,13 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── seata-spring-autoconfigure-core-2.1.0-SNAPSHOT.jar
     ├── simpleclient_httpserver-0.15.0.jar
     ├── slf4j-api-1.7.36.jar
-    ├── spring-boot-2.7.17.jar
-    ├── spring-boot-starter-2.7.17.jar
-    ├── spring-boot-starter-json-2.7.17.jar
+    ├── spring-boot-2.7.18.jar
+    ├── spring-boot-starter-2.7.18.jar
+    ├── spring-boot-starter-json-2.7.18.jar
     ├── spring-security-core-5.7.11.jar
     ├── spring-security-crypto-5.7.11.jar
-    ├── spring-web-5.3.30.jar
-    ├── spring-webmvc-5.3.30.jar
+    ├── spring-web-5.3.31.jar
+    ├── spring-webmvc-5.3.31.jar
     ├── xstream-1.4.20.jar
     └── jdbc
         ├── mysql-connector-java-8.0.28.jar
@@ -470,17 +470,17 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── snakeyaml-2.0.jar
     ├── snappy-java-1.1.8.4.jar
     ├── sofa-common-tools-1.0.12.jar
-    ├── spring-aop-5.3.30.jar
-    ├── spring-beans-5.3.30.jar
-    ├── spring-boot-autoconfigure-2.7.17.jar
-    ├── spring-boot-starter-logging-2.7.17.jar
-    ├── spring-boot-starter-security-2.7.17.jar
-    ├── spring-boot-starter-tomcat-2.7.17.jar
-    ├── spring-boot-starter-web-2.7.17.jar
-    ├── spring-context-5.3.30.jar
-    ├── spring-core-5.3.30.jar
-    ├── spring-expression-5.3.30.jar
-    ├── spring-jcl-5.3.30.jar
+    ├── spring-aop-5.3.31.jar
+    ├── spring-beans-5.3.31.jar
+    ├── spring-boot-autoconfigure-2.7.18.jar
+    ├── spring-boot-starter-logging-2.7.18.jar
+    ├── spring-boot-starter-security-2.7.18.jar
+    ├── spring-boot-starter-tomcat-2.7.18.jar
+    ├── spring-boot-starter-web-2.7.18.jar
+    ├── spring-context-5.3.31.jar
+    ├── spring-core-5.3.31.jar
+    ├── spring-expression-5.3.31.jar
+    ├── spring-jcl-5.3.31.jar
     ├── spring-security-config-5.7.11.jar
     ├── spring-security-web-5.7.11.jar
     ├── stringtemplate-3.2.1.jar
@@ -547,13 +547,13 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── seata-spring-autoconfigure-core-2.1.0-SNAPSHOT.jar
     ├── simpleclient_httpserver-0.15.0.jar
     ├── slf4j-api-1.7.36.jar
-    ├── spring-boot-2.7.17.jar
-    ├── spring-boot-starter-2.7.17.jar
-    ├── spring-boot-starter-json-2.7.17.jar
+    ├── spring-boot-2.7.18.jar
+    ├── spring-boot-starter-2.7.18.jar
+    ├── spring-boot-starter-json-2.7.18.jar
     ├── spring-security-core-5.7.11.jar
     ├── spring-security-crypto-5.7.11.jar
-    ├── spring-web-5.3.30.jar
-    ├── spring-webmvc-5.3.30.jar
+    ├── spring-web-5.3.31.jar
+    ├── spring-webmvc-5.3.31.jar
     ├── xstream-1.4.20.jar
     └── jdbc
         ├── mysql-connector-java-8.0.28.jar

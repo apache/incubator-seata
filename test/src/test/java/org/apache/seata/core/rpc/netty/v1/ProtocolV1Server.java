@@ -115,6 +115,10 @@ public class ProtocolV1Server {
         return new NioEventLoopGroup(10, threadName);
     }
 
+    public int getPort() {
+        return port;
+    }
+
     public static void main(String[] args) {
         ProtocolV1Server server = new ProtocolV1Server();
         server.start();

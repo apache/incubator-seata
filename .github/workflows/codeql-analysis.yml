@@ -1,6 +1,8 @@
 name: "CodeQL"
 
 on:
+  push:
+    branches: [ 2.x, develop ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ 2.x, develop ]
@@ -23,7 +25,7 @@ jobs:
     steps:
       # step 1
       - name: "Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
 
       # step 2: Initializes the CodeQL tools for scanning.
       - name: "Initialize CodeQL"

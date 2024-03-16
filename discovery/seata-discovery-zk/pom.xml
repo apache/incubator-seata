@@ -38,12 +38,6 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.curator</groupId>
@@ -60,6 +54,6 @@
             <artifactId>jetty-servlet</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
+
 </project>
