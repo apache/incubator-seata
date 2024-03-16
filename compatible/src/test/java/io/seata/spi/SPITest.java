@@ -31,6 +31,7 @@ public class SPITest {
 
     @Test
     public void testRmSPIOrder() {
+        EnhancedServiceLoader.unload(ResourceManager.class);
         List<ResourceManager> resourceManagers = EnhancedServiceLoader.loadAll(ResourceManager.class);
         List<ResourceManager> list = resourceManagers.stream().filter(resourceManager -> resourceManager.getBranchType().equals(BranchType.SAGA)).collect(Collectors.toList());
         Assertions.assertEquals(2, list.size());
