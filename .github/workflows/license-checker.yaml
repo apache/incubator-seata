@@ -2,6 +2,8 @@ name: License checker
 
 on:
   pull_request:
+      paths-ignore:
+        - '**.json'
       branches: [ 2.x, develop, master ]
 
 jobs:
