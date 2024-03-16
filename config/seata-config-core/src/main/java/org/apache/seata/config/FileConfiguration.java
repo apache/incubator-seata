@@ -394,7 +394,6 @@ public class FileConfiguration extends AbstractConfiguration {
                                 event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
 
                                 for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
-                                    //file config with no cache
                                     listener.onProcessEvent(event);
                                 }
                             }

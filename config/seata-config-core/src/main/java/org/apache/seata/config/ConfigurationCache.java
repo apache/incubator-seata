@@ -53,7 +53,10 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(event.getNewValue(), null));
             } else {
                 Object newValue = new ObjectWrapper(event.getNewValue(), null).convertData(oldWrapper.getType());
-                CONFIG_CACHE.replace(event.getDataId(), oldWrapper, new ObjectWrapper(newValue, oldWrapper.getType(), oldWrapper.getLastDefaultValue()));
+                if (!Objects.equals(oldWrapper.getData(), newValue)) {
+                    CONFIG_CACHE.put(event.getDataId(),
+                        new ObjectWrapper(newValue, oldWrapper.getType(), oldWrapper.getLastDefaultValue()));
+                }
             }
         } else {
             CONFIG_CACHE.remove(event.getDataId(), oldWrapper);
