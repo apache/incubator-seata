@@ -14,11 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm;
+package io.seata.saga.engine.mock;
 
-/**
- * The Abstract RM event handler
- *
- */
-public abstract class AbstractRMHandler extends org.apache.seata.rm.AbstractRMHandler {
+
+public class DemoException extends RuntimeException {
+
+    public DemoException() {
+    }
+
+    public DemoException(String message) {
+        super(message);
+    }
+
+    public DemoException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DemoException(Throwable cause) {
+        super(cause);
+    }
+
+    public DemoException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

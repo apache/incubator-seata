@@ -20,6 +20,8 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
+import io.seata.saga.engine.store.StateLogStore;
+import io.seata.saga.engine.store.impl.StateLogStoreImpl;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
@@ -28,7 +30,6 @@ import org.apache.seata.saga.engine.expression.ExpressionResolver;
 import org.apache.seata.saga.engine.invoker.ServiceInvokerManager;
 import org.apache.seata.saga.engine.sequence.SeqGenerator;
 import org.apache.seata.saga.engine.store.StateLangStore;
-import org.apache.seata.saga.engine.store.StateLogStore;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 import org.apache.seata.saga.statelang.domain.StateMachine;
@@ -45,7 +46,6 @@ import java.util.stream.Collectors;
 
 /**
  * Default state machine configuration
- *
  */
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 
@@ -70,11 +70,20 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     @Override
     public StateLogStore getStateLogStore() {
-        return actual.getStateLogStore();
+        org.apache.seata.saga.engine.store.StateLogStore stateLogStore = actual.getStateLogStore();
+        if (stateLogStore == null) {
+            return null;
+        }
+
+        return StateLogStoreImpl.wrap(actual.getStateLogStore());
     }
 
     public void setStateLogStore(StateLogStore stateLogStore) {
-        actual.setStateLogStore(stateLogStore);
+        if (stateLogStore == null) {
+            actual.setStateLogStore(null);
+        } else {
+            actual.setStateLogStore(((StateLogStoreImpl) stateLogStore).unwrap());
+        }
     }
 
     @Override
@@ -146,7 +155,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             }
 
             @Override
-            public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException{
+            public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
                 repository.registryByResources(resourceAsStreamArray, tenantId);
             }
         };

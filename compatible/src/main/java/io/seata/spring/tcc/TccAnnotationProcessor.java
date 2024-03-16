@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+@Deprecated
 public class TccAnnotationProcessor extends org.apache.seata.spring.tcc.TccAnnotationProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(org.apache.seata.spring.tcc.TccAnnotationProcessor.class);
 

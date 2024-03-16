@@ -111,7 +111,11 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public void setStatus(ExecutionStatus status) {
-        actual.setStatus(status.unwrap());
+        if (status == null) {
+            actual.setStatus(null);
+        } else {
+            actual.setStatus(status.unwrap());
+        }
     }
 
     @Override
@@ -121,7 +125,11 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public void setCompensationStatus(ExecutionStatus compensationStatus) {
-        actual.setCompensationStatus(compensationStatus.unwrap());
+        if (compensationStatus == null) {
+            actual.setCompensationStatus(null);
+        } else {
+            actual.setCompensationStatus(compensationStatus.unwrap());
+        }
     }
 
     @Override
