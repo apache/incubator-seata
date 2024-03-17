@@ -18,6 +18,7 @@ package org.apache.seata.core.rpc.netty;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -144,16 +145,18 @@ public class TmNettyClientTest {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         System.setProperty("file.listener.enabled", "true");
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
             new CachedConfigurationChangeListener() {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
                         event.getOldValue());
+                    countDownLatch.countDown();
                 }
             });
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        countDownLatch.await(5, TimeUnit.SECONDS);
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
     }
 

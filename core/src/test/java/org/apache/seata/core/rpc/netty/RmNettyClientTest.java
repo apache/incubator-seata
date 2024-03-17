@@ -19,6 +19,8 @@ package org.apache.seata.core.rpc.netty;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.seata.common.ConfigurationKeys;
@@ -88,14 +90,16 @@ class RmNettyClientTest {
         Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
         newClient.setResourceManager(resourceManager);
         System.setProperty("file.listener.enabled", "true");
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, new CachedConfigurationChangeListener() {
                 @Override
                 public void onChangeEvent(ConfigurationChangeEvent event) {
                     logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(), event.getOldValue());
+                    countDownLatch.countDown();
                 }
             });
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        countDownLatch.await(5, TimeUnit.SECONDS);
         Assertions.assertThrows(FrameworkException.class, newClient::init);
     }
     
