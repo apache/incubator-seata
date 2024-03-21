@@ -14,18 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.discovery.registry;
+package io.seata.integration.tx.api.util;
 
-/**
- * the interface registry provider
- * Notes: used for io.seata SPI interface
- */
-public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider{
-    /**
-     * provide a registry implementation instance
-     *
-     * @return RegistryService
-     */
-    @Override
-    RegistryService provide();
+@Deprecated
+public class ProxyUtil extends org.apache.seata.integration.tx.api.util.ProxyUtil{
 }

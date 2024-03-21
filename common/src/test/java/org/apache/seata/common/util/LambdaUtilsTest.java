@@ -14,18 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.discovery.registry;
+package org.apache.seata.common.util;
 
-/**
- * the interface registry provider
- * Notes: used for io.seata SPI interface
- */
-public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider{
-    /**
-     * provide a registry implementation instance
-     *
-     * @return RegistryService
-     */
-    @Override
-    RegistryService provide();
+import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class LambdaUtilsTest {
+
+    @Test
+    void shouldReturnTrueForDistinctKeys() {
+        Function<Object, Object> keyExtractor = Object::getClass;
+        Predicate<Object> distinctByKey = LambdaUtils.distinctByKey(keyExtractor);
+
+        boolean result = distinctByKey.test(new Object());
+        assertTrue(result);
+    }
 }
