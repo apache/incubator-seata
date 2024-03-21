@@ -29,7 +29,6 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
@@ -124,7 +123,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
-        RpcMessage rpcMessage = new RpcMessage();
+        ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);
