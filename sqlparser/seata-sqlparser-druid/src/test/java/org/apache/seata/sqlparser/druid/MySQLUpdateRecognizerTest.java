@@ -375,4 +375,5 @@ public class MySQLUpdateRecognizerTest extends AbstractRecognizerTest {
             Assertions.assertTrue(updateColumn.contains("`"));
         }
     }
+
 }

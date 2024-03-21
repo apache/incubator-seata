@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.rm.datasource.AbstractConnectionProxy;
 import org.apache.seata.rm.datasource.ConnectionContext;
@@ -34,6 +35,7 @@ import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exception.TableMetaException;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.SQLType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +99,16 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         try {
             TableRecords beforeImage = beforeImage();
             T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+            int updateCount = statementProxy.getUpdateCount();
+            if (updateCount > 0) {
+                if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
+                    if (updateCount > beforeImage.size()) {
+                        String errorMsg =
+                            "Before image size is not equaled to after image size, probably because you use read committed, please retry transaction.";
+                        throw new ShouldNeverHappenException(errorMsg);
+                    }
+                }
+            }
             TableRecords afterImage = afterImage(beforeImage);
             prepareUndoLog(beforeImage, afterImage);
             return result;
