@@ -116,7 +116,8 @@ public class LockStoreDataBaseDAO implements LockStore {
         }
         try {
             conn = lockStoreDataSource.getConnection();
-            if (originalAutoCommit = conn.getAutoCommit()) {
+            originalAutoCommit = conn.getAutoCommit();
+            if (conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
             }
             List<LockDO> unrepeatedLockDOs = lockDOs;
