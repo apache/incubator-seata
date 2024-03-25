@@ -66,7 +66,7 @@ public class DataSourceProxyTest {
         dataSource.setPassword("password");
 
         Throwable throwable = Assertions.assertThrows(IllegalStateException.class, () -> new DataSourceProxy(dataSource));
-        assertThat(throwable).hasMessageContaining("AT mode don't support the the dbtype");
+        assertThat(throwable).hasMessageContaining("AT mode don't support the dbtype");
     }
 
 
