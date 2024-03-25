@@ -24,7 +24,10 @@ public enum ErrorCode {
     /**
      * 0001 ~ 0099  Configuration related errors
      */
-    ERR_CONFIG(ErrorType.Config, 0001);
+    ERR_CONFIG(ErrorType.Config, 0001),
+
+    ERR_RM_RESOURCE_REGISTER(ErrorType.RM, 0002);
+
     /**
      * The error code of the transaction exception.
      */
