@@ -14,11 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm;
+package io.seata.saga.rm;
 
-/**
- * The Abstract RM event handler
- *
- */
-public abstract class AbstractRMHandler extends org.apache.seata.rm.AbstractRMHandler {
+
+import io.seata.saga.engine.StateMachineEngine;
+
+public class StateMachineEngineHolder {
+
+    private static StateMachineEngine stateMachineEngine;
+
+    public static StateMachineEngine getStateMachineEngine() {
+        return stateMachineEngine;
+    }
+
+    public static void  setStateMachineEngine(StateMachineEngine smEngine) {
+        stateMachineEngine = smEngine;
+    }
 }

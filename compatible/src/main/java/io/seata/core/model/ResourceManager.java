@@ -14,8 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.tx.api.util;
+package io.seata.core.model;
 
-@Deprecated
-public class ProxyUtil extends org.apache.seata.integration.tx.api.util.ProxyUtil{
+
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+
+/**
+ * @see EnhancedServiceLoader.InnerEnhancedServiceLoader#findAllExtensionDefinition(ClassLoader)
+ */
+public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
 }

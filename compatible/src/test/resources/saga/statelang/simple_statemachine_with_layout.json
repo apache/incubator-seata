@@ -1,0 +1,288 @@
+{
+  "nodes": [
+    {
+      "type": "node",
+      "size": "72*72",
+      "shape": "flow-circle",
+      "color": "#FA8C16",
+      "label": "Start",
+      "stateId": "Start",
+      "stateType": "Start",
+      "stateProps": {
+        "StateMachine": {
+          "Name": "simpleStateMachineWithCompensationAndSubMachine_layout",
+          "Comment": "带补偿定义和调用子状态机",
+          "Version": "0.0.1"
+        }
+      },
+      "x": 199.875,
+      "y": 95,
+      "id": "e2d86441"
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-rect",
+      "color": "#1890FF",
+      "label": "FirstState",
+      "stateId": "FirstState",
+      "stateType": "ServiceTask",
+      "stateProps": {
+        "ServiceName": "demoService",
+        "ServiceMethod": "foo",
+        "Input": [
+          {
+            "fooInput": "$.[a]"
+          }
+        ],
+        "Output": {
+          "fooResult": "$.#root"
+        }
+      },
+      "x": 199.875,
+      "y": 213,
+      "id": "6111bf54"
+    },
+    {
+      "type": "node",
+      "size": "80*72",
+      "shape": "flow-rhombus",
+      "color": "#13C2C2",
+      "label": "ChoiceState",
+      "stateId": "ChoiceState",
+      "stateType": "Choice",
+      "x": 199.875,
+      "y": 341.5,
+      "id": "5610fa37"
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-rect",
+      "color": "#1890FF",
+      "label": "SecondState",
+      "stateId": "SecondState",
+      "stateType": "ServiceTask",
+      "stateProps": {
+        "ServiceName": "demoService",
+        "ServiceMethod": "bar",
+        "Input": [
+          {
+            "barInput": "$.[fooResult]",
+            "throwException": "$.[barThrowException]"
+          }
+        ],
+        "Output": {
+          "barResult": "$.#root"
+        },
+        "Status": {
+          "#root != null": "SU",
+          "#root == null": "FA",
+          "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
+        }
+      },
+      "x": 199.375,
+      "y": 468,
+      "id": "af5591f9"
+    },
+    {
+      "type": "node",
+      "size": "72*72",
+      "shape": "flow-circle",
+      "color": "#05A465",
+      "label": "Succeed",
+      "stateId": "Succeed",
+      "stateType": "Succeed",
+      "x": 199.375,
+      "y": 609,
+      "id": "2fd4c8de"
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-rect",
+      "color": "#FA8C16",
+      "label": "SubStateMachine",
+      "stateId": "CallSubStateMachine",
+      "stateType": "SubStateMachine",
+      "stateProps": {
+        "StateMachineName": "simpleCompensationStateMachine",
+        "Input": [
+          {
+            "a": "$.1",
+            "barThrowException": "$.[barThrowException]",
+            "fooThrowException": "$.[fooThrowException]",
+            "compensateFooThrowException": "$.[compensateFooThrowException]"
+          }
+        ],
+        "Output": {
+          "fooResult": "$.#root"
+        }
+      },
+      "x": 55.875,
+      "y": 467,
+      "id": "04ea55a5"
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-capsule",
+      "color": "#722ED1",
+      "label": "CompenFirstState",
+      "stateId": "CompensateFirstState",
+      "stateType": "Compensation",
+      "stateProps": {
+        "ServiceName": "demoService",
+        "ServiceMethod": "compensateFoo",
+        "Input": [
+          {
+            "compensateFooInput": "$.[fooResult]"
+          }
+        ]
+      },
+      "x": 68.875,
+      "y": 126,
+      "id": "6a09a5c2"
+    },
+    {
+      "type": "node",
+      "size": "39*39",
+      "shape": "flow-circle",
+      "color": "red",
+      "label": "Catch",
+      "stateId": "Catch",
+      "stateType": "Catch",
+      "x": 257.875,
+      "y": 492,
+      "id": "e28af1c2"
+    },
+    {
+      "type": "node",
+      "size": "110*48",
+      "shape": "flow-capsule",
+      "color": "red",
+      "label": "Compensation\nTrigger",
+      "stateId": "CompensationTrigger",
+      "stateType": "CompensationTrigger",
+      "x": 366.875,
+      "y": 491.5,
+      "id": "e32417a0"
+    },
+    {
+      "type": "node",
+      "size": "72*72",
+      "shape": "flow-circle",
+      "color": "red",
+      "label": "Fail",
+      "stateId": "Fail",
+      "stateType": "Fail",
+      "stateProps": {
+        "ErrorCode": "NOT_FOUND",
+        "Message": "not found"
+      },
+      "x": 513.375,
+      "y": 491.5,
+      "id": "d21d24c9"
+    }
+  ],
+  "edges": [
+    {
+      "source": "e2d86441",
+      "sourceAnchor": 2,
+      "target": "6111bf54",
+      "targetAnchor": 0,
+      "id": "51f30b96"
+    },
+    {
+      "source": "6111bf54",
+      "sourceAnchor": 2,
+      "target": "5610fa37",
+      "targetAnchor": 0,
+      "id": "8c3029b1"
+    },
+    {
+      "source": "5610fa37",
+      "sourceAnchor": 2,
+      "target": "af5591f9",
+      "targetAnchor": 0,
+      "id": "a9e7d5b4",
+      "stateProps": {
+        "Expression": "[a] == 1",
+        "Default": false
+      },
+      "label": "",
+      "shape": "flow-smooth"
+    },
+    {
+      "source": "af5591f9",
+      "sourceAnchor": 2,
+      "target": "2fd4c8de",
+      "targetAnchor": 0,
+      "id": "61f34a49"
+    },
+    {
+      "source": "6111bf54",
+      "sourceAnchor": 3,
+      "target": "6a09a5c2",
+      "targetAnchor": 2,
+      "id": "553384ab",
+      "style": {
+        "lineDash": "4"
+      }
+    },
+    {
+      "source": "5610fa37",
+      "sourceAnchor": 3,
+      "target": "04ea55a5",
+      "targetAnchor": 0,
+      "id": "2ee91c33",
+      "stateProps": {
+        "Expression": "[a] == 2",
+        "Default": false
+      },
+      "label": "",
+      "shape": "flow-smooth"
+    },
+    {
+      "source": "e28af1c2",
+      "sourceAnchor": 1,
+      "target": "e32417a0",
+      "targetAnchor": 3,
+      "id": "d854a4d0",
+      "stateProps": {
+        "Exceptions": [
+          "io.seata.common.exception.FrameworkException"
+        ]
+      },
+      "label": "",
+      "shape": "flow-smooth"
+    },
+    {
+      "source": "04ea55a5",
+      "sourceAnchor": 2,
+      "target": "2fd4c8de",
+      "targetAnchor": 3,
+      "id": "28734ad2"
+    },
+    {
+      "source": "5610fa37",
+      "sourceAnchor": 1,
+      "target": "d21d24c9",
+      "targetAnchor": 0,
+      "id": "7c7595c0",
+      "stateProps": {
+        "Expression": "",
+        "Default": true
+      },
+      "label": "",
+      "shape": "flow-smooth"
+    },
+    {
+      "source": "e32417a0",
+      "sourceAnchor": 1,
+      "target": "d21d24c9",
+      "targetAnchor": 3,
+      "id": "16d809ce"
+    }
+  ]
+}

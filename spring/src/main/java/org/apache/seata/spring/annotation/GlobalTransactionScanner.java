@@ -215,7 +215,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().destroyAll();
     }
 
-    private void initClient() {
+    protected void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
@@ -246,7 +246,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     }
 
-    private void registerSpringShutdownHook() {
+    protected void registerSpringShutdownHook() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
@@ -591,5 +591,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (ArrayUtils.isNotEmpty(beanNames)) {
             EXCLUDE_BEAN_NAME_SET.addAll(Arrays.asList(beanNames));
         }
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public String getTxServiceGroup() {
+        return txServiceGroup;
+    }
+
+    public static String getAccessKey() {
+        return accessKey;
+    }
+
+    public static String getSecretKey() {
+        return secretKey;
     }
 }
