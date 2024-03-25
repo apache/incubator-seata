@@ -17,21 +17,15 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import io.netty.channel.Channel;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.rpc.netty.ChannelManagerTestHelper;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockCoordinator;
-import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.tm.DefaultTransactionManager;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

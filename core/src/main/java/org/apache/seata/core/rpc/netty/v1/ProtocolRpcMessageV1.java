@@ -14,28 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.protocol;
+package org.apache.seata.core.rpc.netty.v1;
 
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The type Rpc message.
- *
- */
-public class RpcMessage implements Serializable {
-
+ * protocol v1 rpc message
+ **/
+public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
     private int id;
     private byte messageType;
     private byte codec;
     private byte compressor;
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
-
-    private String otherSideVersion;
 
     /**
      * Gets id.
@@ -88,9 +85,8 @@ public class RpcMessage implements Serializable {
      * @param codec the codec
      * @return the codec
      */
-    public RpcMessage setCodec(byte codec) {
+    public void setCodec(byte codec) {
         this.codec = codec;
-        return this;
     }
 
     /**
@@ -108,9 +104,8 @@ public class RpcMessage implements Serializable {
      * @param compressor the compressor
      * @return the compressor
      */
-    public RpcMessage setCompressor(byte compressor) {
+    public void setCompressor(byte compressor) {
         this.compressor = compressor;
-        return this;
     }
 
     /**
@@ -128,9 +123,8 @@ public class RpcMessage implements Serializable {
      * @param headMap the head map
      * @return the head map
      */
-    public RpcMessage setHeadMap(Map<String, String> headMap) {
+    public void setHeadMap(Map<String, String> headMap) {
         this.headMap = headMap;
-        return this;
     }
 
     /**
@@ -171,16 +165,31 @@ public class RpcMessage implements Serializable {
         this.messageType = messageType;
     }
 
-    public String getOtherSideVersion() {
-        return otherSideVersion;
-    }
-
-    public void setOtherSideVersion(String otherSideVersion) {
-        this.otherSideVersion = otherSideVersion;
-    }
-
     @Override
     public String toString() {
         return StringUtils.toString(this);
+    }
+
+    @Override
+    public RpcMessage protocolMsg2RpcMsg() {
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setId(this.id);
+        rpcMessage.setMessageType(this.messageType);
+        rpcMessage.setCodec(this.codec);
+        rpcMessage.setCompressor(this.compressor);
+        rpcMessage.setHeadMap(this.headMap);
+        rpcMessage.setBody(this.body);
+        return rpcMessage;
+    }
+
+
+    @Override
+    public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
+        this.body = rpcMessage.getBody();
+        this.headMap = rpcMessage.getHeadMap();
+        this.id = rpcMessage.getId();
+        this.messageType = rpcMessage.getMessageType();
+        this.codec = rpcMessage.getCodec();
+        this.compressor = rpcMessage.getCompressor();
     }
 }

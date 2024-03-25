@@ -45,6 +45,8 @@ import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.core.rpc.netty.CompatibleProtocolDecoder;
+import org.apache.seata.core.rpc.netty.CompatibleProtocolEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +82,8 @@ public class ProtocolV1Client {
             @Override
             protected void initChannel(Channel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
-                pipeline.addLast(new ProtocolV1Encoder());
-                pipeline.addLast(new ProtocolV1Decoder(8 * 1024 * 1024));
+                pipeline.addLast(new CompatibleProtocolEncoder());
+                pipeline.addLast(new CompatibleProtocolDecoder(8 * 1024 * 1024));
                 pipeline.addLast(new ClientChannelHandler(ProtocolV1Client.this));
             }
         });
@@ -123,6 +125,7 @@ public class ProtocolV1Client {
         rpcMessage.setHeadMap(head);
         rpcMessage.setBody(body);
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+
 
         if (channel != null) {
             DefaultPromise promise = new DefaultPromise(defaultEventExecutor);

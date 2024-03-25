@@ -35,8 +35,6 @@ import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.rpc.RemotingBootstrap;
-import org.apache.seata.core.rpc.netty.v1.ProtocolV1Decoder;
-import org.apache.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,8 +132,8 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                         new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                             nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                             nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                        .addLast(new ProtocolV1Decoder())
-                        .addLast(new ProtocolV1Encoder());
+                        .addLast(new CompatibleProtocolDecoder())
+                        .addLast(new CompatibleProtocolEncoder());
                     if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }

@@ -22,6 +22,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +40,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         Channel channel = ctx.channel();
 
-        if (msg instanceof RpcMessage) {
-            ((RpcMessage) msg).setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+        if (msg instanceof ProtocolRpcMessage) {
+            RpcMessage rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
+            channel.writeAndFlush(rpcMessage);
+        } else {
+            LOGGER.error("rpcMessage type error");
         }
-
-        channel.writeAndFlush(msg);
     }
 
     @Override

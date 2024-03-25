@@ -31,6 +31,11 @@ import org.apache.seata.core.protocol.MergeResultMessage;
  */
 public class MergeResultMessageCodec extends AbstractMessageCodec {
 
+    private byte version;
+
+    public MergeResultMessageCodec(byte version) {
+        this.version = version;
+    }
     @Override
     public Class<?> getMessageClassType() {
         return MergeResultMessage.class;
@@ -48,7 +53,7 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
             short typeCode = msg.getTypeCode();
             //put typeCode
             out.writeShort(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, out);
         }
 
@@ -91,7 +96,7 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs[idx] = (AbstractResultMessage)abstractResultMessage;
         }
