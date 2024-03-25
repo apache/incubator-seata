@@ -121,8 +121,8 @@
         <rocketmq-version>5.0.0</rocketmq-version>
 
         <!-- # for kotlin -->
-        <kotlin.version>1.4.32</kotlin.version>
-        <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
+        <kotlin.version>1.7.22</kotlin.version>
+        <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
         <spring-webmvc.version>5.3.26</spring-webmvc.version>

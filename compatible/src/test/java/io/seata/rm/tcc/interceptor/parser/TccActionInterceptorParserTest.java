@@ -39,16 +39,19 @@ import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
-import org.apache.seata.integration.tx.api.util.ProxyUtil;
+import io.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.TCCResourceManager;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
 class TccActionInterceptorParserTest {
+
+    private static ResourceManager resourceManager;
 
     @BeforeAll
     public static void init() throws IOException {
@@ -56,6 +59,34 @@ class TccActionInterceptorParserTest {
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
+    }
+
+    @BeforeEach
+    private void before() {
+        resourceManager = new TCCResourceManager() {
+
+            @Override
+            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+
+                long branchId = System.currentTimeMillis();
+
+                List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
+                BranchSessionMock branchSessionMock = new BranchSessionMock();
+                branchSessionMock.setXid(xid);
+                branchSessionMock.setBranchType(branchType);
+                branchSessionMock.setResourceId(resourceId);
+                branchSessionMock.setApplicationData(applicationData);
+                branchSessionMock.setBranchId(branchId);
+
+                branches.add(branchSessionMock);
+
+                return branchId;
+            }
+        };
+        RootContext.unbind();
+        DefaultResourceManager.get();
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
+        TransactionManagerHolder.set(transactionManager);
     }
 
     @Test
@@ -77,14 +108,9 @@ class TccActionInterceptorParserTest {
     @Test
     public void testNestTcc_should_commit() throws Exception {
         //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
 
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy = ProxyUtil.createProxy(tccAction, "oldtccAction");
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -98,7 +124,7 @@ class TccActionInterceptorParserTest {
 
 
         //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
+        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction, "oldnestTccAction");
         //then
         Assertions.assertNotNull(nestTccActionProxy);
 
@@ -131,15 +157,9 @@ class TccActionInterceptorParserTest {
 
     @Test
     public void testNestTcc_should_rollback() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
 
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction, "oldtccAction");
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -153,7 +173,7 @@ class TccActionInterceptorParserTest {
 
 
         //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
+        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction, "oldnestTccAction");
         //then
         Assertions.assertNotNull(nestTccActionProxy);
 
@@ -186,15 +206,9 @@ class TccActionInterceptorParserTest {
 
     @Test
     public void testNestTcc_required_new_should_rollback_commit() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
 
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction, "oldtccAction");
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -207,7 +221,7 @@ class TccActionInterceptorParserTest {
         Assertions.assertNotNull(proxyInvocationHandler);
 
         //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
+        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction, "oldtccActionProxy");
         //then
         Assertions.assertNotNull(nestTccActionProxy);
 
@@ -241,15 +255,9 @@ class TccActionInterceptorParserTest {
 
     @Test
     public void testNestTcc_required_new_should_both_commit() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
 
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction, "oldtccAction");
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -262,7 +270,7 @@ class TccActionInterceptorParserTest {
         Assertions.assertNotNull(proxyInvocationHandler);
 
         //when
-        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction);
+        NestTccAction nestTccActionProxy = ProxyUtil.createProxy(nestTccAction, "oldnestTccActionProxy");
         //then
         Assertions.assertNotNull(nestTccActionProxy);
 
@@ -329,27 +337,6 @@ class TccActionInterceptorParserTest {
     };
 
 
-    private static ResourceManager resourceManager = new TCCResourceManager() {
-
-        @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-
-            long branchId = System.currentTimeMillis();
-
-            List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
-            BranchSessionMock branchSessionMock = new BranchSessionMock();
-            branchSessionMock.setXid(xid);
-            branchSessionMock.setBranchType(branchType);
-            branchSessionMock.setResourceId(resourceId);
-            branchSessionMock.setApplicationData(applicationData);
-            branchSessionMock.setBranchId(branchId);
-
-            branches.add(branchSessionMock);
-
-            return branchId;
-        }
-    };
-
     public static void commitAll(String xid) throws TransactionException {
 
         List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
@@ -365,5 +352,4 @@ class TccActionInterceptorParserTest {
             resourceManager.branchRollback(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
         }
     }
-
 }

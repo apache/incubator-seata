@@ -61,6 +61,14 @@ export function setProperties(businessObject, properties, override) {
 export function is(element, target) {
   const type = element?.businessObject?.Type || element?.Type || element;
 
+  if (target === 'Event') {
+    return type === 'StartState' || type === 'CompensationTrigger' || type === 'Catch' || type === 'Fail' || type === 'Succeed';
+  }
+
+  if (target === 'End') {
+    return type === 'Fail' || type === 'Succeed';
+  }
+
   if (target === 'Task') {
     return type === 'ServiceTask' || type === 'ScriptTask' || type === 'SubStateMachine';
   }

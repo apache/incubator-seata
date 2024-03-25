@@ -14,8 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser.util;
+package org.apache.seata.common.exception;
 
+import org.junit.jupiter.api.Test;
 
-public interface DbTypeParser extends org.apache.seata.sqlparser.util.DbTypeParser {
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+class SkipCallbackWrapperExceptionTest {
+
+    @Test
+    void testSkipCallbackWrapperException() {
+        assertThrowsExactly(SkipCallbackWrapperException.class, () -> {
+            throw new SkipCallbackWrapperException(new Throwable("error"));
+        });
+
+    }
+
+    @Test
+    void testFillInStackTrace() {
+        SkipCallbackWrapperException skipCallbackWrapperException = new SkipCallbackWrapperException(new Throwable("error"));
+        assertNull(skipCallbackWrapperException.fillInStackTrace());
+
+    }
 }

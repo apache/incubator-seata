@@ -14,12 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser;
+package io.seata.integration.tx.api.util;
 
-
-/**
- * The interface Keyword checker.
- *
- */
-public interface EscapeHandler extends org.apache.seata.sqlparser.EscapeHandler {
+@Deprecated
+public class ProxyUtil extends org.apache.seata.integration.tx.api.util.ProxyUtil{
 }

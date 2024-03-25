@@ -14,8 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.sqlparser;
+package org.apache.seata.common.util;
 
+import org.junit.jupiter.api.Test;
 
-public interface SQLRecognizerFactory extends org.apache.seata.sqlparser.SQLRecognizerFactory {
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class LambdaUtilsTest {
+
+    @Test
+    void shouldReturnTrueForDistinctKeys() {
+        Function<Object, Object> keyExtractor = Object::getClass;
+        Predicate<Object> distinctByKey = LambdaUtils.distinctByKey(keyExtractor);
+
+        boolean result = distinctByKey.test(new Object());
+        assertTrue(result);
+    }
 }

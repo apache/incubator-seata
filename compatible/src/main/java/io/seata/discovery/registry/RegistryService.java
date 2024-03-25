@@ -14,12 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.discovery.registry;
 
 
-/**
- * The type Undo log manager.
- *
- */
-public interface UndoLogManager extends org.apache.seata.rm.datasource.undo.UndoLogManager {
-}
+public interface RegistryService<T> extends org.apache.seata.discovery.registry.RegistryService<T>{}

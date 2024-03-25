@@ -20,7 +20,7 @@ import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterc
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.apache.seata.integration.tx.api.util.ProxyUtil;
+import io.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.tm.api.FailureHandlerHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
