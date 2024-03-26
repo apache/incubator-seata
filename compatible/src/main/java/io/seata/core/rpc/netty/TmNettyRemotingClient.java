@@ -16,9 +16,12 @@
  */
 package io.seata.core.rpc.netty;
 
+/**
+ * TmNettyRemotingClient
+ * Notes: used for Apache ShardingSphere integration
+ */
 public class TmNettyRemotingClient {
-    private static final org.apache.seata.core.rpc.netty.TmNettyRemotingClient INSTANCE
-        = org.apache.seata.core.rpc.netty.TmNettyRemotingClient.getInstance();
+    private static final org.apache.seata.core.rpc.netty.TmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.TmNettyRemotingClient.getInstance();
 
     private static class TmNettyRemotingClientInstance {
         private static final TmNettyRemotingClient INSTANCE = new TmNettyRemotingClient();
