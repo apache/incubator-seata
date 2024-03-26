@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Rm RPC client test.
  */
+@Order(2)
 class RmNettyClientTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
@@ -77,7 +78,6 @@ class RmNettyClientTest {
     }
 
     @Test
-    @Order(2)
     public void testCheckFailFast() throws Exception {
         RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
 

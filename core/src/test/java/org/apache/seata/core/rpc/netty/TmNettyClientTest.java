@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Tm rpc client test.
  */
+@Order(1)
 public class TmNettyClientTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
@@ -80,11 +81,10 @@ public class TmNettyClientTest {
     @Test
     public void testInit() throws Exception {
         String applicationId = "app 1";
-        String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-
+        String transactionServiceGroup = "default_tx_group";
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId,
+            transactionServiceGroup);
         tmNettyRemotingClient.init();
-
         //check if attr of tmNettyClient object has been set success
         Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
         clientBootstrapField.setAccessible(true);
@@ -139,7 +139,6 @@ public class TmNettyClientTest {
     }
 
     @Test
-    @Order(1)
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
