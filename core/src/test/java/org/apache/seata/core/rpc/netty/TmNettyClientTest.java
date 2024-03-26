@@ -31,6 +31,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -84,6 +85,8 @@ public class TmNettyClientTest {
         String transactionServiceGroup = "default_tx_group";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId,
             transactionServiceGroup);
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+        ConfigurationCache.clear();
         tmNettyRemotingClient.init();
         //check if attr of tmNettyClient object has been set success
         Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
@@ -91,7 +94,7 @@ public class TmNettyClientTest {
         NettyClientBootstrap clientBootstrap = (NettyClientBootstrap)clientBootstrapField.get(tmNettyRemotingClient);
         Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
+        Bootstrap bootstrap = (Bootstrap)bootstrapField.get(clientBootstrap);
 
         Assertions.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
@@ -135,12 +138,12 @@ public class TmNettyClientTest {
     @AfterAll
     public static void afterAll() {
         TmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         System.setProperty("file.listener.enabled", "true");
         ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
@@ -152,8 +155,9 @@ public class TmNettyClientTest {
                 }
             });
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     /**

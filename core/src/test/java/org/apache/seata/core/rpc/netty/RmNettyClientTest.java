@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.model.Resource;
@@ -51,13 +52,11 @@ class RmNettyClientTest {
     @BeforeAll
     public static void beforeAll() {
         RmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
     }
 
     @AfterAll
     public static void afterAll() {
         RmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
@@ -95,8 +94,9 @@ class RmNettyClientTest {
                 }
             });
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, newClient::init);
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
     
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
