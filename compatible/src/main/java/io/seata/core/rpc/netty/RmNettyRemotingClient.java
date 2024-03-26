@@ -14,11 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.hook;
 
+package io.seata.core.rpc.netty;
 
 /**
- * The type RpcHook
+ * RmNettyRemotingClient
+ * Notes: used for Apache ShardingSphere integration
  */
-public interface RpcHook extends org.apache.seata.core.rpc.hook.RpcHook {
+public class RmNettyRemotingClient {
+
+    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+
+    private static class RmNettyRemotingClientInstance {
+        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+    }
+
+    private RmNettyRemotingClient() {
+    }
+
+    public static RmNettyRemotingClient getInstance() {
+        return RmNettyRemotingClientInstance.INSTANCE;
+    }
+
+    public void destroy() {
+        INSTANCE.destroy();
+    }
 }

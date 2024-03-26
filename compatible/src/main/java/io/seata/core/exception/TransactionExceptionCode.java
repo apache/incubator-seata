@@ -169,4 +169,8 @@ public enum TransactionExceptionCode {
         return value;
     }
 
+    public org.apache.seata.core.exception.TransactionExceptionCode convertTransactionExceptionCode() {
+        return org.apache.seata.core.exception.TransactionExceptionCode.get(this.ordinal());
+    }
+
 }

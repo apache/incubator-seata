@@ -83,4 +83,8 @@ public enum BranchType {
         }
         throw new IllegalArgumentException("Unknown BranchType[" + name + "]");
     }
+
+    public org.apache.seata.core.model.BranchType convertBranchType() {
+        return org.apache.seata.core.model.BranchType.get(this.name());
+    }
 }

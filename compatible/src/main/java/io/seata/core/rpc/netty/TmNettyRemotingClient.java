@@ -14,12 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.context;
-
+package io.seata.core.rpc.netty;
 
 /**
- * The interface Context core.
- * Notes: used for io.seata SPI interface
+ * TmNettyRemotingClient
+ * Notes: used for Apache ShardingSphere integration
  */
-public interface ContextCore extends org.apache.seata.core.context.ContextCore {
+public class TmNettyRemotingClient {
+    private static final org.apache.seata.core.rpc.netty.TmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.TmNettyRemotingClient.getInstance();
+
+    private static class TmNettyRemotingClientInstance {
+        private static final TmNettyRemotingClient INSTANCE = new TmNettyRemotingClient();
+    }
+
+    private TmNettyRemotingClient() {
+    }
+
+    public static TmNettyRemotingClient getInstance() {
+        return TmNettyRemotingClientInstance.INSTANCE;
+    }
+
+    public void destroy() {
+        INSTANCE.destroy();
+    }
 }
