@@ -16,22 +16,17 @@
  */
 package io.seata.core.exception;
 
-
 /**
  * The type Transaction exception.
  */
 public class TransactionException extends org.apache.seata.core.exception.TransactionException {
 
-    private static org.apache.seata.core.exception.TransactionExceptionCode convertApacheSeataTransactionExceptionCode(TransactionExceptionCode transactionExceptionCode) {
-        return org.apache.seata.core.exception.TransactionExceptionCode.get(transactionExceptionCode.ordinal());
-    }
-
     public TransactionException(TransactionExceptionCode code) {
-        super(convertApacheSeataTransactionExceptionCode(code));
+        super(code.convertTransactionExceptionCode());
     }
 
     public TransactionException(TransactionExceptionCode code, Throwable cause) {
-        super(convertApacheSeataTransactionExceptionCode(code), cause);
+        super(code.convertTransactionExceptionCode(), cause);
     }
 
     public TransactionException(String message) {
@@ -39,7 +34,7 @@ public class TransactionException extends org.apache.seata.core.exception.Transa
     }
 
     public TransactionException(TransactionExceptionCode code, String message) {
-        super(convertApacheSeataTransactionExceptionCode(code), message);
+        super(code.convertTransactionExceptionCode(), message);
     }
 
     public TransactionException(Throwable cause) {
@@ -51,6 +46,6 @@ public class TransactionException extends org.apache.seata.core.exception.Transa
     }
 
     public TransactionException(TransactionExceptionCode code, String message, Throwable cause) {
-        super(convertApacheSeataTransactionExceptionCode(code), message, cause);
+        super(code.convertTransactionExceptionCode(), message, cause);
     }
 }

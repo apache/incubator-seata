@@ -212,4 +212,8 @@ public enum GlobalStatus {
         }
         return false;
     }
+
+    public org.apache.seata.core.model.GlobalStatus convertGlobalStatus() {
+        return org.apache.seata.core.model.GlobalStatus.get(this.getCode());
+    }
 }
