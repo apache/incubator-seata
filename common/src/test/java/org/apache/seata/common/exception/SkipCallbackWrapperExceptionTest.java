@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.discovery.registry;
+package org.apache.seata.common.exception;
 
-/**
- * the interface registry provider
- * Notes: used for io.seata SPI interface
- */
-public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider{
-    /**
-     * provide a registry implementation instance
-     *
-     * @return RegistryService
-     */
-    @Override
-    RegistryService provide();
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+class SkipCallbackWrapperExceptionTest {
+
+    @Test
+    void testSkipCallbackWrapperException() {
+        assertThrowsExactly(SkipCallbackWrapperException.class, () -> {
+            throw new SkipCallbackWrapperException(new Throwable("error"));
+        });
+
+    }
+
+    @Test
+    void testFillInStackTrace() {
+        SkipCallbackWrapperException skipCallbackWrapperException = new SkipCallbackWrapperException(new Throwable("error"));
+        assertNull(skipCallbackWrapperException.fillInStackTrace());
+
+    }
 }
