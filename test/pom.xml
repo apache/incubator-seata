@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-saga-engine-store</artifactId>
+            <artifactId>seata-saga-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -140,6 +140,17 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-sqlparser-druid</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-rocketmq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

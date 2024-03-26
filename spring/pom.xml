@@ -94,6 +94,12 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin-maven-plugin.version}</version>
+                <configuration>
+                    <args>
+                        <arg>-Xjvm-default=all</arg>
+                    </args>
+                    <jvmTarget>1.8</jvmTarget>
+                </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>

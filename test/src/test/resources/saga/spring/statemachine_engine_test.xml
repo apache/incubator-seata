@@ -23,11 +23,11 @@
 
 
 	<bean id="stateMachineEngine" class="org.apache.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
-		<property name="stateMachineConfig" ref="defaultStateMachineConfig"></property>
+		<property name="stateMachineConfig" ref="defaultStateMachineConfig"/>
 	</bean>
 	<bean id="defaultStateMachineConfig" class="org.apache.seata.saga.engine.impl.DefaultStateMachineConfig">
-		<property name="resources" value="saga/statelang/*.json"></property>
-		<property name="enableAsync" value="true"></property>
+		<property name="resources" value="saga/statelang/*.json"/>
+		<property name="enableAsync" value="true"/>
 		<property name="threadPoolExecutor" ref="threadExecutor" />
 	</bean>
 	<bean id="threadExecutor"

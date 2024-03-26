@@ -37,6 +37,7 @@ import org.apache.seata.saga.engine.impl.DefaultStateMachineConfig;
 import org.apache.seata.saga.engine.mock.DemoService.Engineer;
 import org.apache.seata.saga.engine.mock.DemoService.People;
 import org.apache.seata.saga.proctrl.ProcessContext;
+import org.apache.seata.saga.rm.StateMachineEngineHolder;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
@@ -69,6 +70,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+        StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
 
     @AfterAll

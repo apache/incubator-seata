@@ -19,11 +19,12 @@ package io.seata.tm.api;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.tm.api.transaction.SuspendedResourcesHolder;
+import org.apache.seata.tm.api.BaseTransaction;
 
 /**
  * Global transaction.
  */
-public interface GlobalTransaction {
+public interface GlobalTransaction extends BaseTransaction {
 
     /**
      * Begin a new global transaction with default timeout and name.

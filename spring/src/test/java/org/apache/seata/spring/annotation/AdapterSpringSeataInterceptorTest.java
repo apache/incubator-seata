@@ -29,6 +29,7 @@ import org.apache.seata.spring.tcc.NormalTccAction;
 import org.apache.seata.spring.tcc.NormalTccActionImpl;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -36,12 +37,20 @@ import org.junit.jupiter.api.Test;
  */
 class AdapterSpringSeataInterceptorTest {
 
+    private static NormalTccAction normalTccAction;
+
+    private static AdapterSpringSeataInterceptor adapterSpringSeataInterceptor;
+
+    @BeforeAll
+    static void init() throws Throwable {
+        //given
+        normalTccAction = new NormalTccActionImpl();
+        ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(normalTccAction, "proxyTccAction");
+        adapterSpringSeataInterceptor = new AdapterSpringSeataInterceptor(proxyInvocationHandler);
+    }
+
     @Test
     void should_throw_raw_exception_when_call_prepareWithException() throws Throwable {
-        //given
-        NormalTccActionImpl normalTccAction = new NormalTccActionImpl();
-        ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(normalTccAction, "proxyTccAction");
-        AdapterSpringSeataInterceptor adapterSpringSeataInterceptor = new AdapterSpringSeataInterceptor(proxyInvocationHandler);
         MyMockMethodInvocation myMockMethodInvocation = new MyMockMethodInvocation(NormalTccAction.class.getMethod("prepareWithException", BusinessActionContext.class), () -> normalTccAction.prepareWithException(null));
 
         //when then
@@ -50,10 +59,6 @@ class AdapterSpringSeataInterceptorTest {
 
     @Test
     void should_success_when_call_prepare_with_ProxyInvocationHandler() throws Throwable {
-        //given
-        NormalTccActionImpl normalTccAction = new NormalTccActionImpl();
-        ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(normalTccAction, "proxyTccAction");
-        AdapterSpringSeataInterceptor adapterSpringSeataInterceptor = new AdapterSpringSeataInterceptor(proxyInvocationHandler);
         MyMockMethodInvocation myMockMethodInvocation = new MyMockMethodInvocation(NormalTccAction.class.getMethod("prepare", BusinessActionContext.class), () -> normalTccAction.prepare(null));
 
         //when then

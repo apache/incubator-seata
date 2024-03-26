@@ -16,6 +16,13 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -32,6 +39,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.integration.tx.api.event.DegradeCheckEvent;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.util.ClassUtils;
@@ -51,15 +59,6 @@ import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.apache.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static org.apache.seata.common.DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TM_DEGRADE_CHECK;
@@ -76,15 +75,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptorHandler.class);
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    protected final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
+    private final GlobalLockTemplate globalLockTemplate = new GlobalLockTemplate();
 
     private Set<String> methodsToProxy;
 
-    protected volatile boolean disable;
-    protected static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
-    protected static volatile Integer degradeNum = 0;
+    private volatile boolean disable;
+    private static final AtomicBoolean ATOMIC_DEGRADE_CHECK = new AtomicBoolean(false);
+    private static volatile Integer degradeNum = 0;
     private static volatile Integer reachNum = 0;
-    protected static int degradeCheckAllowTimes;
+    private static int degradeCheckAllowTimes;
     protected AspectTransactional aspectTransactional;
     private static int degradeCheckPeriod;
 
@@ -144,22 +143,14 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         Class<?> targetClass = invocation.getTarget().getClass();
         Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
         if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
-            final GlobalTransactional globalTransactionalAnnotation = getAnnotation(specificMethod, targetClass, GlobalTransactional.class);
-            final GlobalLock globalLockAnnotation = getAnnotation(specificMethod, targetClass, GlobalLock.class);
             boolean localDisable = disable || (ATOMIC_DEGRADE_CHECK.get() && degradeNum >= degradeCheckAllowTimes);
             if (!localDisable) {
+                final AspectTransactional globalTransactionalAnnotation = getAspectTransactional(specificMethod, targetClass);
+                final GlobalLockConfig globalLockAnnotation = getGlobalLockConfig(specificMethod, targetClass);
                 if (globalTransactionalAnnotation != null || this.aspectTransactional != null) {
                     AspectTransactional transactional;
                     if (globalTransactionalAnnotation != null) {
-                        transactional = new AspectTransactional(globalTransactionalAnnotation.timeoutMills(),
-                                globalTransactionalAnnotation.name(), globalTransactionalAnnotation.rollbackFor(),
-                                globalTransactionalAnnotation.rollbackForClassName(),
-                                globalTransactionalAnnotation.noRollbackFor(),
-                                globalTransactionalAnnotation.noRollbackForClassName(),
-                                globalTransactionalAnnotation.propagation(),
-                                globalTransactionalAnnotation.lockRetryInterval(),
-                                globalTransactionalAnnotation.lockRetryTimes(),
-                                globalTransactionalAnnotation.lockStrategyMode());
+                        transactional = globalTransactionalAnnotation;
                     } else {
                         transactional = this.aspectTransactional;
                     }
@@ -173,7 +164,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
 
-    protected Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLock globalLockAnno) throws Throwable {
+    private Object handleGlobalLock(final InvocationWrapper methodInvocation, final GlobalLockConfig globalLockConfig) throws Throwable {
         return globalLockTemplate.execute(new GlobalLockExecutor() {
             @Override
             public Object execute() throws Throwable {
@@ -182,16 +173,13 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
             @Override
             public GlobalLockConfig getGlobalLockConfig() {
-                GlobalLockConfig config = new GlobalLockConfig();
-                config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
-                config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
-                return config;
+                return globalLockConfig;
             }
         });
     }
 
-    protected Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
-                                             final AspectTransactional aspectTransactional) throws Throwable {
+    Object handleGlobalTransaction(final InvocationWrapper methodInvocation,
+                                   final AspectTransactional aspectTransactional) throws Throwable {
         boolean succeed = true;
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
@@ -286,10 +274,28 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         }
     }
 
+    public GlobalLockConfig getGlobalLockConfig(Method method, Class<?> targetClass) {
+        final GlobalLock globalLockAnno = getAnnotation(method, targetClass, GlobalLock.class);
+        if (globalLockAnno != null) {
+            GlobalLockConfig config = new GlobalLockConfig();
+            config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
+            config.setLockRetryTimes(globalLockAnno.lockRetryTimes());
+            return config;
+        } else {
+            return null;
+        }
+    }
 
-    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
-                .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
+    public AspectTransactional getAspectTransactional(Method method, Class<?> targetClass) {
+        final GlobalTransactional globalTransactionalAnnotation =
+            getAnnotation(method, targetClass, GlobalTransactional.class);
+        return globalTransactionalAnnotation != null ?
+            new AspectTransactional(globalTransactionalAnnotation.timeoutMills(), globalTransactionalAnnotation.name(),
+                globalTransactionalAnnotation.rollbackFor(), globalTransactionalAnnotation.rollbackForClassName(),
+                globalTransactionalAnnotation.noRollbackFor(), globalTransactionalAnnotation.noRollbackForClassName(),
+                globalTransactionalAnnotation.propagation(), globalTransactionalAnnotation.lockRetryInterval(),
+                globalTransactionalAnnotation.lockRetryTimes(), globalTransactionalAnnotation.lockStrategyMode()) :
+            null;
     }
 
     private String formatMethod(Method method) {
@@ -410,4 +416,9 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         return SeataInterceptorPosition.BeforeTransaction;
     }
 
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.GlobalTransactional.name();
+    }
 }

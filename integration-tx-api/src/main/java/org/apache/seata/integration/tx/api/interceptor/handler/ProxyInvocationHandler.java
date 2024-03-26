@@ -31,4 +31,11 @@ public interface ProxyInvocationHandler extends SeataInterceptor {
 
     SeataInterceptorPosition getPosition();
 
+    String type();
+
+    default int order() {
+        return 0;
+    }
+
+    void setNextProxyInvocationHandler(ProxyInvocationHandler next);
 }

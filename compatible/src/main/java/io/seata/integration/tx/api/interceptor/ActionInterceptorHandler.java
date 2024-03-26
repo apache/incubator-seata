@@ -16,6 +16,7 @@
  */
 package io.seata.integration.tx.api.interceptor;
 
+import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.ParamType;
 
@@ -27,7 +28,36 @@ import java.util.Map;
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  */
+@Deprecated
 public class ActionInterceptorHandler extends org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler {
+
+    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
+        BusinessActionContext actionContext = null;
+
+        // get the action context from arguments
+        int argIndex = 0;
+        for (Class<?> parameterType : parameterTypes) {
+            if (BusinessActionContext.class.isAssignableFrom(parameterType)) {
+                actionContext = (BusinessActionContext) arguments[argIndex];
+                if (actionContext == null) {
+                    // If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
+                    actionContext = new BusinessActionContext();
+                    arguments[argIndex] = actionContext;
+                } else {
+                    // Reset the updated, avoid unnecessary reporting
+                    actionContext.setUpdated(null);
+                }
+                break;
+            }
+            argIndex++;
+        }
+
+        // if null, create a new one
+        if (actionContext == null) {
+            actionContext = new BusinessActionContext();
+        }
+        return actionContext;
+    }
 
 
     /**
