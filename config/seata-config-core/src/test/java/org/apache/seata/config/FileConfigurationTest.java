@@ -18,6 +18,7 @@ package org.apache.seata.config;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,10 +54,10 @@ class FileConfigurationTest {
         System.setProperty(dataId, String.valueOf(!value));
         countDownLatch.await(2, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
-        //wait for loop safety
-        Thread.sleep(1000);
+        //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
+        Thread.sleep(1500);
         System.setProperty(dataId, String.valueOf(value));
-        //wait for event
+        //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
         Thread.sleep(1000);
         boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
