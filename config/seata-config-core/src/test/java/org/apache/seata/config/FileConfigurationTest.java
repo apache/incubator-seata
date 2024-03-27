@@ -40,22 +40,27 @@ class FileConfigurationTest {
     void addConfigListener() throws InterruptedException {
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        fileConfig.addConfigListener("service.disableGlobalTransaction", new CachedConfigurationChangeListener() {
+        String dataId = "service.disableGlobalTransaction";
+        boolean value = fileConfig.getBoolean(dataId);
+        fileConfig.addConfigListener(dataId, new CachedConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
+                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                    !Boolean.parseBoolean(event.getOldValue()));
                 countDownLatch.countDown();
             }
         });
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        System.setProperty(dataId, String.valueOf(!value));
+        countDownLatch.await(2, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
+        //wait for loop safety
         Thread.sleep(1000);
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
-        boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
+        System.setProperty(dataId, String.valueOf(value));
+        //wait for event
+        Thread.sleep(1000);
+        boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        System.setProperty(dataId, String.valueOf(!value));
     }
 
     @Test
