@@ -239,6 +239,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initSqlServerResourceId();
         } else if (JdbcConstants.DM.equals(dbType)) {
             initDMResourceId();
+        } else if (JdbcConstants.DB2.equalsIgnoreCase(dbType)) {
+            initDB2ResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -388,6 +390,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } else {
             resourceId = jdbcUrl;
         }
+    }
+
+    private void initDB2ResourceId() {
+        String schema = "";
+        try {
+            schema = targetDataSource.getConnection().getSchema();
+        } catch (SQLException e) {
+            LOGGER.error(e.getMessage());
+        }
+        resourceId = StringUtils.isBlank(schema) ? jdbcUrl : jdbcUrl + ":" + schema;
     }
 
     @Override

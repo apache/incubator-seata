@@ -150,7 +150,7 @@ public class SQLVisitorFactoryTest {
 
         //test for do not support db
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
-            SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
+            SQLVisitorFactory.get("select * from t", "notSupport");
         });
 
 

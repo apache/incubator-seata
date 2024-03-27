@@ -16,6 +16,8 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
@@ -23,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+
 
 /**
  * The type Abstract statement proxy.
@@ -250,10 +253,27 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
-        if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
-            //Conditions for flushing the cache:
-            //1.originally not cached
-            //2.the original ResultSet was not traversed, including executed repeatedly
+        if (JdbcConstants.DB2.equalsIgnoreCase(connectionProxy.getDbType())) {
+            boolean refreshCacheIfNeed;
+            try {
+                refreshCacheIfNeed = null == scrollableGeneratedKeysCache || !rs.isAfterLast();
+            } catch (SQLException e) {
+                /**
+                 * error code when result set has been closed
+                 */
+                if (e.getErrorCode() == -4470) {
+                    //ResultSet has been automatically closed
+                    refreshCacheIfNeed = false;
+                } else {
+                    throw e;
+                }
+            }
+
+            if (refreshCacheIfNeed) {
+                scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+                scrollableGeneratedKeysCache.populate(rs);
+            }
+        } else {
             scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
             scrollableGeneratedKeysCache.populate(rs);
         }

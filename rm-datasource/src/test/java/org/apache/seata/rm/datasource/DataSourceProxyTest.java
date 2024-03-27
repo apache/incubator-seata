@@ -187,6 +187,13 @@ public class DataSourceProxyTest {
             Assertions.assertEquals("jdbc:mock:xxx;database=test", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
             jdbcUrlField.set(proxy, jdbcUrl);
         }
+
+        // case: dbType = db2
+        {
+            resourceIdField.set(proxy, null);
+            dbTypeField.set(proxy, org.apache.seata.sqlparser.util.JdbcConstants.DB2);
+            Assertions.assertEquals("jdbc:mock:xxx", proxy.getResourceId(), "dbType=" + dbTypeField.get(proxy));
+        }
     }
 
     // to skip the db & undolog table check
