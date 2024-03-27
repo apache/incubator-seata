@@ -221,7 +221,7 @@ public class NettyServerConfig extends NettyBaseConfig {
         return serverListenPort;
     }
 
-    public void setServerListenPort(int port){
+    public void setServerListenPort(int port) {
         this.serverListenPort = port;
     }
 
