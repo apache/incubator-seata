@@ -394,7 +394,7 @@ public class FileConfiguration extends AbstractConfiguration {
                                 event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
 
                                 for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
-                                    listener.onChangeEvent(event);
+                                    listener.onProcessEvent(event);
                                 }
                             }
                         }

@@ -17,16 +17,16 @@
 package org.apache.seata.discovery.registry;
 
 import java.net.InetSocketAddress;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import org.apache.seata.config.ConfigurationCache;
+
 import org.apache.seata.config.ConfigurationFactory;
 
 /**
@@ -113,7 +113,6 @@ public interface RegistryService<T> {
     default String getServiceGroup(String key) {
         key = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
         if (!SERVICE_GROUP_NAME.contains(key)) {
-            ConfigurationCache.addConfigListener(key);
             SERVICE_GROUP_NAME.add(key);
         }
         return ConfigurationFactory.getInstance().getConfig(key);

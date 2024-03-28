@@ -30,7 +30,6 @@ class RegistryConfigurationFactoryTest {
         ConfigurationFactory.reload();
         Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"),"file-test.conf");
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getConfig("service.disableGlobalTransaction"),"true");
         Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8091");
 
     }

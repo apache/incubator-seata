@@ -60,7 +60,6 @@ public class CustomConfigurationForTest extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-        throw new UnsupportedOperationException();
     }
 
     @Override

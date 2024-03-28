@@ -68,6 +68,10 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         super(messageExecutor, new NettyServerConfig());
     }
 
+    public NettyRemotingServer(ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+        super(messageExecutor, nettyServerConfig);
+    }
+
     /**
      * Sets transactionMessageHandler.
      *
