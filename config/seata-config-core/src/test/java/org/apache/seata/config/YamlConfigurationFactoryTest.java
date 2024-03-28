@@ -33,7 +33,7 @@ class YamlConfigurationFactoryTest {
         Assertions.assertNull(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testNull"));
         Assertions.assertNull(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.testExist"));
         Configuration instance = ConfigurationFactory.getInstance();
-        Assertions.assertEquals(instance.getConfig("service.disableGlobalTransaction"), "true");
+        Assertions.assertEquals(instance.getConfig("transport.heartbeat"), "true");
         Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8093");
     }
 

@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -346,7 +346,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                                 for (ConfigurationChangeListener changeListener : entry.getValue()) {
                                     event.setDataId(key).setNewValue(valueNew);
                                     ConfigurationChangeListener listener = ((ConsulListener) changeListener).getTargetListener();
-                                    listener.onChangeEvent(event);
+                                    listener.onProcessEvent(event);
                                 }
                             }
                         }
@@ -354,7 +354,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     } else {
                         // The old config change listener,it would be deleted in next edition
                         event.setDataId(dataId).setNewValue(value);
-                        listener.onChangeEvent(event);
+                        listener.onProcessEvent(event);
                     }
                 }
             }

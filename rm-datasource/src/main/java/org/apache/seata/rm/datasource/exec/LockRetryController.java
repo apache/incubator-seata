@@ -18,10 +18,9 @@ package org.apache.seata.rm.datasource.exec;
 
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.util.NumberUtils;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
@@ -35,10 +34,11 @@ import org.apache.seata.core.model.GlobalLockConfig;
 public class LockRetryController {
 
     private static final GlobalConfig LISTENER = new GlobalConfig();
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     static {
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, LISTENER);
-        ConfigurationCache.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, LISTENER);
+        CONFIG.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL, LISTENER);
+        CONFIG.addConfigListener(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, LISTENER);
     }
 
     private int lockRetryInterval;
@@ -98,7 +98,7 @@ public class LockRetryController {
         return LISTENER.getGlobalLockRetryTimes();
     }
 
-    static class GlobalConfig implements ConfigurationChangeListener {
+    static class GlobalConfig implements CachedConfigurationChangeListener {
 
         private volatile int globalLockRetryInterval;
 

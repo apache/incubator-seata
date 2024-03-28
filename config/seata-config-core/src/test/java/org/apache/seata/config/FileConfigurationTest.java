@@ -18,6 +18,7 @@ package org.apache.seata.config;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,19 +41,27 @@ class FileConfigurationTest {
     void addConfigListener() throws InterruptedException {
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        ConfigurationCache.addConfigListener("service.disableGlobalTransaction", (event) -> {
-            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
-            countDownLatch.countDown();
+        String dataId = "service.disableGlobalTransaction";
+        boolean value = fileConfig.getBoolean(dataId);
+        fileConfig.addConfigListener(dataId, new CachedConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                    !Boolean.parseBoolean(event.getOldValue()));
+                countDownLatch.countDown();
+            }
         });
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        System.setProperty(dataId, String.valueOf(!value));
+        countDownLatch.await(2, TimeUnit.SECONDS);
         System.setProperty("file.listener.enabled", "false");
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
-        Thread.sleep(2000);
-        boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
+        //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
+        Thread.sleep(1500);
+        System.setProperty(dataId, String.valueOf(value));
+        //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
+        Thread.sleep(1000);
+        boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        System.setProperty(dataId, String.valueOf(!value));
     }
 
     @Test
