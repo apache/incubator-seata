@@ -164,7 +164,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         try {
             undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
         } catch (EnhancedServiceNotFoundException e) {
-            String errMsg = String.format("AT mode don't support the the dbtype: %s", dbType);
+            String errMsg = String.format("AT mode don't support the dbtype: %s", dbType);
             throw new IllegalStateException(errMsg, e);
         }
 

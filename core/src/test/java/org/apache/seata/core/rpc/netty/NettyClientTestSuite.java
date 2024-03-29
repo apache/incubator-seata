@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.context;
+package org.apache.seata.core.rpc.netty;
 
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-/**
- * The interface Context core.
- * Notes: used for io.seata SPI interface
- */
-public interface ContextCore extends org.apache.seata.core.context.ContextCore {
+@Suite
+@SelectClasses({TmNettyClientTest.class, RmNettyClientTest.class})
+public class NettyClientTestSuite {
 }
