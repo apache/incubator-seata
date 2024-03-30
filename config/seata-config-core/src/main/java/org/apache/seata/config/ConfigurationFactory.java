@@ -16,12 +16,22 @@
  */
 package org.apache.seata.config;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +75,7 @@ public final class ConfigurationFactory {
             }
         } catch (EnhancedServiceNotFoundException e) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.warn("failed to load extConfiguration: {}", e.getMessage(), e);
+                LOGGER.debug("failed to load extConfiguration: {}", e.getMessage(), e);
             }
         } catch (Exception e) {
             LOGGER.error("failed to load extConfiguration: {}", e.getMessage(), e);
@@ -140,23 +150,10 @@ public final class ConfigurationFactory {
 
     private static Configuration buildConfiguration() {
         ConfigType configType = getConfigType();
-        Configuration extConfiguration = null;
         Configuration configuration = ORIGIN_FILE_INSTANCE;
-        if (configuration != null) {
-            try {
-                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("load Configuration from :{}",
-                        extConfiguration == null ? configuration.getClass().getSimpleName() : "Spring Configuration");
-                }
-            } catch (EnhancedServiceNotFoundException ignore) {
-
-            } catch (Exception e) {
-                LOGGER.error("failed to load extConfiguration:{}", e.getMessage(), e);
-            }
-        } else {
-            configuration = EnhancedServiceLoader
-                    .load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+        Configuration extConfiguration = getSpringConfiguration();
+        if (null == extConfiguration) {
+            configuration = getNonSpringConfiguration(configType);
         }
         try {
             Configuration configurationCache;
@@ -176,6 +173,67 @@ public final class ConfigurationFactory {
         return null == extConfiguration ? configuration : extConfiguration;
     }
 
+    private static Configuration getSpringConfiguration() {
+        Configuration configuration = ORIGIN_FILE_INSTANCE;
+        io.seata.config.Configuration oldConfiguration = new io.seata.config.FileConfiguration(configuration);
+        try {
+            io.seata.config.Configuration configurationSPIInstance = EnhancedServiceLoader.load(
+                io.seata.config.ExtConfigurationProvider.class).provide(oldConfiguration);
+            if (null != configurationSPIInstance) {
+                Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
+                    ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
+                    new oldConfigurationInvocationHandler(configurationSPIInstance));
+                return configurationSPIInstanceProxy;
+            }
+        } catch (EnhancedServiceNotFoundException ignore) {
+            //ignore
+        } catch (Exception exx) {
+            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+        }
+        if (null != configuration) {
+            try {
+                Configuration extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(
+                    configuration);
+                if (null != extConfiguration) {
+                    return extConfiguration;
+                }
+            } catch (EnhancedServiceNotFoundException ignore) {
+                //ignore
+
+            } catch (Exception exx) {
+                LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+            }
+        }
+        return null;
+    }
+
+    private static Configuration getNonSpringConfiguration(ConfigType configType) {
+        try {
+            io.seata.config.Configuration oldConfiguration = EnhancedServiceLoader.load(
+                io.seata.config.ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+            if (null != oldConfiguration) {
+                Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
+                    ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
+                    new oldConfigurationInvocationHandler(oldConfiguration));
+                return configurationSPIInstanceProxy;
+            }
+        } catch (EnhancedServiceNotFoundException ignore) {
+            //ignore
+        } catch (Exception exx) {
+            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+        }
+        try {
+            Configuration configuration = EnhancedServiceLoader.load(ConfigurationProvider.class,
+                Objects.requireNonNull(configType).name()).provide();
+            return configuration;
+        } catch (EnhancedServiceNotFoundException ignore) {
+            //ignore
+        } catch (Exception exx) {
+            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+        }
+        return null;
+    }
+
     protected static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
@@ -183,5 +241,93 @@ public final class ConfigurationFactory {
         maybeNeedOriginFileInstance();
         instance = null;
         getInstance();
+    }
+
+    static class oldConfigurationInvocationHandler implements InvocationHandler {
+        private final io.seata.config.Configuration configuration;
+
+        private final String[] simpleParamsMethodNames = new String[] {"getShort", "getInt", "getLong", "getDuration",
+            "getBoolean", "getConfig", "putConfig", "getLatestConfig", "putConfigIfAbsent", "removeConfig",
+            "getConfigFromSys"};
+
+        public oldConfigurationInvocationHandler(io.seata.config.Configuration configuration) {
+            this.configuration = configuration;
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            List<String> simpleMethod = Arrays.stream(simpleParamsMethodNames).collect(Collectors.toList());
+            if (simpleMethod.contains(method.getName())) {
+                return method.invoke(configuration, args);
+            } else if (method.getName().equals("addConfigListener") || method.getName().equals(
+                "removeConfigListener")) {
+                if (args.length == 2) {
+                    if (args[1] instanceof ConfigurationChangeListener) {
+                        ConfigurationChangeListener listener = (ConfigurationChangeListener)args[1];
+                        oldConfigurationChangeListenerWrapper wrapper = new oldConfigurationChangeListenerWrapper(
+                            listener);
+                        return method.invoke(configuration, args[0], wrapper);
+                    }
+                }
+            } else if (method.getName().equals("getConfigListeners")) {
+                Set<ConfigurationChangeListener> listeners = (Set<ConfigurationChangeListener>)method.invoke(
+                    configuration, args);
+                if (CollectionUtils.isEmpty(listeners)) {
+                    return null;
+                }
+                Set<io.seata.config.ConfigurationChangeListener> oldListeners = new HashSet<>();
+                for (ConfigurationChangeListener listener : listeners) {
+                    oldListeners.add(new oldConfigurationChangeListenerWrapper(listener));
+                }
+                return oldListeners;
+            }
+            return null;
+        }
+    }
+
+    static class oldConfigurationChangeListenerWrapper implements io.seata.config.ConfigurationChangeListener {
+        private final ConfigurationChangeListener listener;
+
+        public oldConfigurationChangeListenerWrapper(ConfigurationChangeListener listener) {
+            this.listener = listener;
+        }
+
+        private ConfigurationChangeEvent convert(io.seata.config.ConfigurationChangeEvent event) {
+            ConfigurationChangeEvent newEvent = new ConfigurationChangeEvent();
+            newEvent.setDataId(event.getDataId()).setOldValue(event.getOldValue()).setNewValue(event.getNewValue())
+                .setNamespace(event.getNamespace());
+            newEvent.setChangeType(ConfigurationChangeType.values()[event.getChangeType().ordinal()]);
+            return newEvent;
+        }
+
+        @Override
+        public void onChangeEvent(io.seata.config.ConfigurationChangeEvent event) {
+            listener.onChangeEvent(convert(event));
+        }
+
+        @Override
+        public void onProcessEvent(io.seata.config.ConfigurationChangeEvent event) {
+            listener.onProcessEvent(convert(event));
+        }
+
+        @Override
+        public void onShutDown() {
+            listener.onShutDown();
+        }
+
+        @Override
+        public ExecutorService getExecutorService() {
+            return listener.getExecutorService();
+        }
+
+        @Override
+        public void beforeEvent() {
+            listener.beforeEvent(null);
+        }
+
+        @Override
+        public void afterEvent() {
+            listener.afterEvent(null);
+        }
     }
 }
