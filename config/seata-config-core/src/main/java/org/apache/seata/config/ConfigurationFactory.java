@@ -259,8 +259,8 @@ public final class ConfigurationFactory {
             List<String> simpleMethod = Arrays.stream(simpleParamsMethodNames).collect(Collectors.toList());
             if (simpleMethod.contains(method.getName())) {
                 return method.invoke(configuration, args);
-            } else if (method.getName().equals("addConfigListener") || method.getName().equals(
-                "removeConfigListener")) {
+            } else if ("addConfigListener".equals(method.getName()) || "removeConfigListener".equals(
+                method.getName())) {
                 if (args.length == 2) {
                     if (args[1] instanceof ConfigurationChangeListener) {
                         ConfigurationChangeListener listener = (ConfigurationChangeListener)args[1];
@@ -269,7 +269,7 @@ public final class ConfigurationFactory {
                         return method.invoke(configuration, args[0], wrapper);
                     }
                 }
-            } else if (method.getName().equals("getConfigListeners")) {
+            } else if ("getConfigListeners".equals(method.getName())) {
                 Set<ConfigurationChangeListener> listeners = (Set<ConfigurationChangeListener>)method.invoke(
                     configuration, args);
                 if (CollectionUtils.isEmpty(listeners)) {
