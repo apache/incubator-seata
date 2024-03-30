@@ -225,7 +225,7 @@ public final class ConfigurationFactory {
         } catch (EnhancedServiceNotFoundException ignore) {
             //ignore
         } catch (Exception exx) {
-            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+            LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }
         try {
             Configuration configuration = EnhancedServiceLoader.load(ConfigurationProvider.class,
@@ -234,7 +234,7 @@ public final class ConfigurationFactory {
         } catch (EnhancedServiceNotFoundException ignore) {
             //ignore
         } catch (Exception exx) {
-            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
+            LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }
         return ORIGIN_FILE_INSTANCE;
     }
