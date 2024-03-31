@@ -182,7 +182,7 @@ public final class ConfigurationFactory {
             if (null != configurationSPIInstance) {
                 Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
                     ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
-                    new oldConfigurationInvocationHandler(configurationSPIInstance));
+                    new OldConfigurationInvocationHandler(configurationSPIInstance));
                 return configurationSPIInstanceProxy;
             }
         } catch (EnhancedServiceNotFoundException ignore) {
@@ -214,7 +214,7 @@ public final class ConfigurationFactory {
             if (null != oldConfiguration) {
                 Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
                     ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
-                    new oldConfigurationInvocationHandler(oldConfiguration));
+                    new OldConfigurationInvocationHandler(oldConfiguration));
                 return configurationSPIInstanceProxy;
             }
         } catch (EnhancedServiceNotFoundException ignore) {
@@ -243,14 +243,14 @@ public final class ConfigurationFactory {
         getInstance();
     }
 
-    static class oldConfigurationInvocationHandler implements InvocationHandler {
+    static class OldConfigurationInvocationHandler implements InvocationHandler {
         private final io.seata.config.Configuration configuration;
 
         private final String[] simpleParamsMethodNames = new String[] {"getShort", "getInt", "getLong", "getDuration",
             "getBoolean", "getConfig", "putConfig", "getLatestConfig", "putConfigIfAbsent", "removeConfig",
             "getConfigFromSys"};
 
-        public oldConfigurationInvocationHandler(io.seata.config.Configuration configuration) {
+        public OldConfigurationInvocationHandler(io.seata.config.Configuration configuration) {
             this.configuration = configuration;
         }
 
@@ -264,7 +264,7 @@ public final class ConfigurationFactory {
                 if (args.length == 2) {
                     if (args[1] instanceof ConfigurationChangeListener) {
                         ConfigurationChangeListener listener = (ConfigurationChangeListener)args[1];
-                        oldConfigurationChangeListenerWrapper wrapper = new oldConfigurationChangeListenerWrapper(
+                        OldConfigurationChangeListenerWrapper wrapper = new OldConfigurationChangeListenerWrapper(
                             listener);
                         return method.invoke(configuration, args[0], wrapper);
                     }
@@ -277,7 +277,7 @@ public final class ConfigurationFactory {
                 }
                 Set<io.seata.config.ConfigurationChangeListener> oldListeners = new HashSet<>();
                 for (ConfigurationChangeListener listener : listeners) {
-                    oldListeners.add(new oldConfigurationChangeListenerWrapper(listener));
+                    oldListeners.add(new OldConfigurationChangeListenerWrapper(listener));
                 }
                 return oldListeners;
             }
@@ -285,10 +285,10 @@ public final class ConfigurationFactory {
         }
     }
 
-    static class oldConfigurationChangeListenerWrapper implements io.seata.config.ConfigurationChangeListener {
+    static class OldConfigurationChangeListenerWrapper implements io.seata.config.ConfigurationChangeListener {
         private final ConfigurationChangeListener listener;
 
-        public oldConfigurationChangeListenerWrapper(ConfigurationChangeListener listener) {
+        public OldConfigurationChangeListenerWrapper(ConfigurationChangeListener listener) {
             this.listener = listener;
         }
 
