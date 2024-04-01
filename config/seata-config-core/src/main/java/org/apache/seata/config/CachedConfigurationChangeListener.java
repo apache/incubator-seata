@@ -14,11 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.hook;
+package org.apache.seata.config;
 
+public interface CachedConfigurationChangeListener extends ConfigurationChangeListener {
 
-/**
- * The type RpcHook
- */
-public interface RpcHook extends org.apache.seata.core.rpc.hook.RpcHook {
+    ConfigurationCache CONFIGURATION_CACHE = ConfigurationCache.getInstance();
+
+    @Override
+    default void afterEvent(ConfigurationChangeEvent event) {
+        ConfigurationChangeListener listener = (ConfigurationChangeListener)CONFIGURATION_CACHE;
+        listener.onProcessEvent(event);
+    }
 }

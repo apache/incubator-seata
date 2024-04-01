@@ -58,9 +58,9 @@ public interface ConfigurationChangeListener {
      */
     default void onProcessEvent(ConfigurationChangeEvent event) {
         getExecutorService().submit(() -> {
-            beforeEvent();
+            beforeEvent(event);
             onChangeEvent(event);
-            afterEvent();
+            afterEvent(event);
         });
     }
 
@@ -83,14 +83,14 @@ public interface ConfigurationChangeListener {
     /**
      * Before event.
      */
-    default void beforeEvent() {
+    default void beforeEvent(ConfigurationChangeEvent event) {
 
     }
 
     /**
      * After event.
      */
-    default void afterEvent() {
+    default void afterEvent(ConfigurationChangeEvent event) {
 
     }
 }
