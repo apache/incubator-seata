@@ -23,10 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationCache;
-import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.AfterAll;
@@ -46,8 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @Order(2)
 class RmNettyClientTest {
-
-    Logger logger = LoggerFactory.getLogger(getClass());
 
     @BeforeAll
     public static void beforeAll() {
@@ -86,13 +81,6 @@ class RmNettyClientTest {
         resourceMap.put("jdbc:xx://localhost/test", mockResource);
         Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
         newClient.setResourceManager(resourceManager);
-        System.setProperty("file.listener.enabled", "true");
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, new CachedConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(), event.getOldValue());
-                }
-            });
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
         ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, newClient::init);
