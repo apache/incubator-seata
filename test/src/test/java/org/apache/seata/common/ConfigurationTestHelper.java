@@ -41,21 +41,13 @@ public class ConfigurationTestHelper {
     }
 
     public static void putConfig(String dataId, String content) {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL,
-            new CachedConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    countDownLatch.countDown();
-                }
-            });
         if (content == null) {
             removeConfig(dataId);
             return;
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        ConfigurationCache.addConfigListener(dataId, event -> countDownLatch.countDown());
+        ConfigurationFactory.getInstance().addConfigListener(dataId, event -> countDownLatch.countDown());
         System.setProperty(dataId, content);
         ConfigurationFactory.getInstance().putConfig(dataId, content);
 
