@@ -16,37 +16,40 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFactory;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.config.ConfigurationCache;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFactory;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type Tm rpc client test.
- *
  */
+@Order(1)
 public class TmNettyClientTest {
 
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final ThreadPoolExecutor
-        workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
+    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
@@ -79,18 +82,19 @@ public class TmNettyClientTest {
     @Test
     public void testInit() throws Exception {
         String applicationId = "app 1";
-        String transactionServiceGroup = "group A";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-
+        String transactionServiceGroup = "default_tx_group";
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId,
+            transactionServiceGroup);
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+        ConfigurationCache.clear();
         tmNettyRemotingClient.init();
-
         //check if attr of tmNettyClient object has been set success
         Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
         clientBootstrapField.setAccessible(true);
         NettyClientBootstrap clientBootstrap = (NettyClientBootstrap)clientBootstrapField.get(tmNettyRemotingClient);
         Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
+        Bootstrap bootstrap = (Bootstrap)bootstrapField.get(clientBootstrap);
 
         Assertions.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
@@ -134,20 +138,26 @@ public class TmNettyClientTest {
     @AfterAll
     public static void afterAll() {
         TmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         System.setProperty("file.listener.enabled", "true");
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                event.getOldValue()));
+        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+            new CachedConfigurationChangeListener() {
+                @Override
+                public void onChangeEvent(ConfigurationChangeEvent event) {
+                    logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
+                        event.getOldValue());
+                }
+            });
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     /**

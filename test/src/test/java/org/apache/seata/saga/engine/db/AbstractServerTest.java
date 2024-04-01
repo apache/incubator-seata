@@ -27,6 +27,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
+import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
@@ -67,7 +68,9 @@ public abstract class AbstractServerTest {
                 //initialize the metrics
                 MetricsManager.get().init();
 
-                nettyServer = new NettyRemotingServer(workingThreads);
+                NettyServerConfig nettyServerConfig = new NettyServerConfig();
+                nettyServerConfig.setServerListenPort(8091);
+                nettyServer = new NettyRemotingServer(workingThreads, nettyServerConfig);
                 UUIDGenerator.init(parameterParser.getServerNode());
                 //log store mode : file、db
                 SessionHolder.init();
@@ -75,6 +78,7 @@ public abstract class AbstractServerTest {
                 DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
                 coordinator.init();
                 nettyServer.setHandler(coordinator);
+
                 // register ShutdownHook
                 ShutdownHook.getInstance().addDisposable(coordinator);
 

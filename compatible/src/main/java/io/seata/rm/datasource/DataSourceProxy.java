@@ -29,6 +29,7 @@ import org.apache.seata.rm.datasource.SeataDataSourceProxy;
  * The type Data source proxy.
  *
  */
+@Deprecated
 public class DataSourceProxy implements SeataDataSourceProxy {
     private final org.apache.seata.rm.datasource.DataSourceProxy dataSourceProxy;
 

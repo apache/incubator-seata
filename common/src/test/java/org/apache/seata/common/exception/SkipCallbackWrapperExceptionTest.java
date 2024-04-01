@@ -14,12 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.context;
+package org.apache.seata.common.exception;
 
+import org.junit.jupiter.api.Test;
 
-/**
- * The interface Context core.
- * Notes: used for io.seata SPI interface
- */
-public interface ContextCore extends org.apache.seata.core.context.ContextCore {
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
+class SkipCallbackWrapperExceptionTest {
+
+    @Test
+    void testSkipCallbackWrapperException() {
+        assertThrowsExactly(SkipCallbackWrapperException.class, () -> {
+            throw new SkipCallbackWrapperException(new Throwable("error"));
+        });
+
+    }
+
+    @Test
+    void testFillInStackTrace() {
+        SkipCallbackWrapperException skipCallbackWrapperException = new SkipCallbackWrapperException(new Throwable("error"));
+        assertNull(skipCallbackWrapperException.fillInStackTrace());
+
+    }
 }
