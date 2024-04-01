@@ -58,7 +58,7 @@ class FileConfigurationTest {
         fileConfig.addConfigListener("file.listener.enabled",
 	        (CachedConfigurationChangeListener)event -> countDownLatch2.countDown());
         System.setProperty("file.listener.enabled", "false");
-        countDownLatch2.countDown();
+        countDownLatch2.await(10, TimeUnit.SECONDS);
         System.setProperty(dataId, String.valueOf(value));
         //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
         Thread.sleep(1000);
