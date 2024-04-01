@@ -40,22 +40,24 @@ class FileConfigurationTest {
     @Test
     void addConfigListener() throws InterruptedException {
         Configuration fileConfig = ConfigurationFactory.getInstance();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean(dataId);
-        fileConfig.addConfigListener(dataId, new CachedConfigurationChangeListener() {
-            @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
-                    !Boolean.parseBoolean(event.getOldValue()));
-                countDownLatch.countDown();
-            }
-        });
+        fileConfig.addConfigListener(dataId, event -> {
+			Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+				!Boolean.parseBoolean(event.getOldValue()));
+			countDownLatch.countDown();
+		});
         System.setProperty(dataId, String.valueOf(!value));
-        countDownLatch.await(2, TimeUnit.SECONDS);
+        countDownLatch.await(20, TimeUnit.SECONDS);
+        Assertions.assertEquals(value, !fileConfig.getBoolean(dataId));
+
         System.setProperty("file.listener.enabled", "false");
+
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
         Thread.sleep(1500);
+
         System.setProperty(dataId, String.valueOf(value));
         //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
         Thread.sleep(1000);
