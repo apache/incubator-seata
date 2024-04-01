@@ -55,8 +55,11 @@ class FileConfigurationTest {
         countDownLatch.await(10, TimeUnit.SECONDS);
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
         CountDownLatch countDownLatch2 = new CountDownLatch(1);
-        fileConfig.addConfigListener("file.listener.enabled",
-	        (CachedConfigurationChangeListener)event -> countDownLatch2.countDown());
+        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener)event -> {
+            if (Boolean.parseBoolean(event.getNewValue())) {
+                countDownLatch2.countDown();
+            }
+        });
         System.setProperty("file.listener.enabled", "false");
         countDownLatch2.await(10, TimeUnit.SECONDS);
         System.setProperty(dataId, String.valueOf(value));
