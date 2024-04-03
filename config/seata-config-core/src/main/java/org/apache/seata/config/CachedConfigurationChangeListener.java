@@ -21,9 +21,6 @@ public interface CachedConfigurationChangeListener extends ConfigurationChangeLi
     ConfigurationChangeListener CONFIGURATION_CACHE = ConfigurationCache.getInstance();
 
     @Override
-    default void afterEvent(ConfigurationChangeEvent event) {
-        ConfigurationChangeListener listener = (ConfigurationChangeListener)CONFIGURATION_CACHE;
-        listener.onProcessEvent(event);
     default void beforeEvent(ConfigurationChangeEvent event) {
         CONFIGURATION_CACHE.onProcessEvent(event);
     }
