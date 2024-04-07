@@ -47,7 +47,7 @@ public class RedisRegisterServiceImplTest {
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
-        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6789");
+        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6379");
         System.setProperty("registry.redis.cluster", "default");
         redisRegistryService = RedisRegistryServiceImpl.getInstance();
     }
