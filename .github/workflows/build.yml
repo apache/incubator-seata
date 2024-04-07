@@ -14,7 +14,7 @@ jobs:
       redis:
         image: redis:7.2
         ports:
-          - 6789:6379
+          - 6379:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
     runs-on: ubuntu-latest
     strategy:
