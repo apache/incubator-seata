@@ -44,9 +44,9 @@ class FileConfigurationTest {
         String dataId = "service.disableGlobalTransaction";
         boolean value = fileConfig.getBoolean(dataId);
         fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
-            if(!event.getNewValue().equals(String.valueOf(value))) {
-                countDownLatch.countDown();
-            }
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                !Boolean.parseBoolean(event.getOldValue()));
+            countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
         countDownLatch.await(10, TimeUnit.SECONDS);
