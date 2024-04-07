@@ -31,10 +31,12 @@ class FileConfigurationTest {
 
     @BeforeEach
     void setUp() {
+        ConfigurationCache.clear();
     }
 
     @AfterEach
     void tearDown() {
+        ConfigurationCache.clear();
     }
 
     @Test
