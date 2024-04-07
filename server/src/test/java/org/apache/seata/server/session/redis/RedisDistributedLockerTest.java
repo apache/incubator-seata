@@ -52,7 +52,6 @@ public class RedisDistributedLockerTest {
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         EnhancedServiceLoader.unload(DistributedLocker.class);
-        MockRedisServer.getInstance();
         DistributedLockerFactory.cleanLocker();
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();

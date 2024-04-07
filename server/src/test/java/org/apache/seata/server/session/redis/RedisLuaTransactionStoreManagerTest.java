@@ -43,7 +43,6 @@ public class RedisLuaTransactionStoreManagerTest extends RedisTransactionStoreMa
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         EnhancedServiceLoader.unloadAll();
         redisTransactionStoreManager = new RedisLuaTransactionStoreManager();
         RedisSessionManager redisSessionManager = new RedisSessionManager();

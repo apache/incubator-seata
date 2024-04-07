@@ -42,9 +42,6 @@ public class RedisRegisterServiceImplTest {
 
     private static RedisRegistryServiceImpl redisRegistryService;
 
-    private static RedisServer server;
-
-
     @BeforeAll
     public static void init() throws IOException {
         System.setProperty("config.type", "file");
@@ -103,14 +100,4 @@ public class RedisRegisterServiceImplTest {
         Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
     }
 
-    @AfterAll
-    public static void afterAll() {
-        if (server != null) {
-            try {
-                server.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

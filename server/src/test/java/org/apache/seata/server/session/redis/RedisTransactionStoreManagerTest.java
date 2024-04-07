@@ -60,7 +60,6 @@ public class RedisTransactionStoreManagerTest {
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         EnhancedServiceLoader.unloadAll();
         JedisPooledFactory.getJedisInstance().flushAll();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();

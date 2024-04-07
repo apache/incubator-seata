@@ -232,12 +232,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.microwww</groupId>
-            <artifactId>redis-server</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
