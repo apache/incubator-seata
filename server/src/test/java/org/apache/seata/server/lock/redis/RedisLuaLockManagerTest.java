@@ -21,7 +21,6 @@ import java.io.IOException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.redis.MockRedisServer;
 import org.apache.seata.server.storage.redis.lock.RedisLockManager;
 import org.apache.seata.server.storage.redis.lock.RedisLuaLocker;
 
@@ -46,7 +45,6 @@ public class RedisLuaLockManagerTest extends RedisLockManagerTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         EnhancedServiceLoader.unloadAll();
         lockManager = new RedisLuaLockManagerTest.RedisLockManagerForTest();
     }

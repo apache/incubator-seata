@@ -24,7 +24,6 @@ import org.apache.seata.core.lock.Locker;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.redis.MockRedisServer;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.apache.seata.server.storage.redis.lock.RedisLockManager;
 import org.apache.seata.server.storage.redis.lock.RedisLocker;
@@ -54,7 +53,6 @@ public class RedisLockManagerTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
