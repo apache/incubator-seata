@@ -65,7 +65,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
 
     /**
      * The constant ALL_COLUMNS.
-     * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
+     * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified, status
      */
     protected static final String ALL_COLUMNS =
         ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
