@@ -35,7 +35,11 @@ import io.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import io.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import io.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import io.seata.integration.tx.api.remoting.RemotingDesc;
+import io.seata.integration.tx.api.util.DubboUtil;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.util.SpringProxyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
@@ -45,6 +49,8 @@ import static io.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
  * @author leezongjie
  */
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorHandler.class);
 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
@@ -67,7 +73,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
-        Method method = invocation.getMethod();
+        Method method = getActionInterfaceMethod(invocation);
         TwoPhaseBusinessAction businessAction = parseAnnotation(method);
 
         //try method
@@ -108,6 +114,57 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
 
         //not TCC try method
         return invocation.proceed();
+    }
+
+    /**
+     * get the method from interface
+     *
+     * @param invocation the invocation
+     * @return the action interface method
+     */
+    protected Method getActionInterfaceMethod(InvocationWrapper invocation) {
+        Class<?> interfaceType = null;
+        try {
+            if (remotingDesc == null) {
+                interfaceType = getProxyInterface(invocation.getTarget());
+            } else {
+                interfaceType = remotingDesc.getServiceClass();
+            }
+            if (interfaceType == null && remotingDesc.getServiceClassName() != null) {
+                interfaceType = Class.forName(remotingDesc.getServiceClassName(), true,
+                        Thread.currentThread().getContextClassLoader());
+            }
+            if (interfaceType == null) {
+                return invocation.getMethod();
+            }
+            return interfaceType.getMethod(invocation.getMethod().getName(),
+                    invocation.getMethod().getParameterTypes());
+        } catch (NoSuchMethodException e) {
+            if (interfaceType != null && !invocation.getMethod().getName().equals("toString")) {
+                LOGGER.warn("no such method '{}' from interface {}", invocation.getMethod().getName(), interfaceType.getName());
+            }
+            return invocation.getMethod();
+        } catch (Exception e) {
+            LOGGER.warn("get Method from interface failed", e);
+            return invocation.getMethod();
+        }
+    }
+
+    /**
+     * get the interface of proxy
+     *
+     * @param proxyBean the proxy bean
+     * @return proxy interface
+     * @throws Exception the exception
+     */
+    protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
+        if (DubboUtil.isDubboProxyName(proxyBean.getClass().getName())) {
+            //dubbo javaassist proxy
+            return DubboUtil.getAssistInterface(proxyBean);
+        } else {
+            //jdk/cglib proxy
+            return SpringProxyUtils.getTargetInterface(proxyBean);
+        }
     }
 
     private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {

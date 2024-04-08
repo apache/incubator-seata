@@ -46,7 +46,7 @@ import io.seata.rm.RMClient;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.remoting.parser.RemotingFactoryBeanParser;
 import io.seata.spring.util.OrderUtil;
-import io.seata.spring.util.SpringProxyUtils;
+import io.seata.rm.tcc.util.SpringProxyUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.FailureHandlerHolder;

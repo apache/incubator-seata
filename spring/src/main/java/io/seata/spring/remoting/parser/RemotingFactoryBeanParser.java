@@ -19,7 +19,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.integration.tx.api.remoting.RemotingDesc;
 import io.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
 import io.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
-import io.seata.spring.util.SpringProxyUtils;
+import io.seata.rm.tcc.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
