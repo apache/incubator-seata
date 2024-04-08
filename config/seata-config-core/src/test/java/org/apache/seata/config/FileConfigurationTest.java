@@ -31,10 +31,12 @@ class FileConfigurationTest {
 
     @BeforeEach
     void setUp() {
+        ConfigurationCache.clear();
     }
 
     @AfterEach
     void tearDown() {
+        ConfigurationCache.clear();
     }
 
     @Test
@@ -43,22 +45,30 @@ class FileConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
         boolean value = fileConfig.getBoolean(dataId);
-        fileConfig.addConfigListener(dataId, new CachedConfigurationChangeListener() {
-            @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
-                    !Boolean.parseBoolean(event.getOldValue()));
-                countDownLatch.countDown();
-            }
+        fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                !Boolean.parseBoolean(event.getOldValue()));
+            System.out.println("oldValue:" + event.getOldValue() + ",newValue:" + event.getNewValue());
+            countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
-        countDownLatch.await(2, TimeUnit.SECONDS);
-        System.setProperty("file.listener.enabled", "false");
+        countDownLatch.await(10, TimeUnit.SECONDS);
+        System.out.println(fileConfig.getBoolean(dataId));
+        System.out.println(value);
+        Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
-        Thread.sleep(1500);
+        CountDownLatch countDownLatch2 = new CountDownLatch(1);
+        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener)event -> {
+            if (!Boolean.parseBoolean(event.getNewValue())) {
+                countDownLatch2.countDown();
+            }
+        });
+        System.setProperty("file.listener.enabled", "false");
+        countDownLatch2.await(10, TimeUnit.SECONDS);
         System.setProperty(dataId, String.valueOf(value));
         //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
         Thread.sleep(1000);
+
         boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
         System.setProperty(dataId, String.valueOf(!value));
