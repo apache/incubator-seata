@@ -122,7 +122,7 @@ public class DemoService {
     public static class People {
 
         private String name;
-        private int    age;
+        private int age;
 
         private People[] childrenArray;
         private List<People> childrenList;
