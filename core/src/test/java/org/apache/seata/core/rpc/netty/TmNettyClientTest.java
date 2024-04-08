@@ -47,11 +47,6 @@ import org.slf4j.LoggerFactory;
 @Order(1)
 public class TmNettyClientTest {
 
-    Logger logger = LoggerFactory.getLogger(getClass());
-
-    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(20000), new ThreadPoolExecutor.CallerRunsPolicy());
-
     /**
      * Test get instance.
      *
@@ -138,22 +133,14 @@ public class TmNettyClientTest {
     @AfterAll
     public static void afterAll() {
         TmNettyRemotingClient.getInstance().destroy();
+        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
     public void testCheckFailFast() throws Exception {
         TmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
         System.setProperty("file.listener.enabled", "true");
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-            new CachedConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                        event.getOldValue());
-                }
-            });
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
         ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
