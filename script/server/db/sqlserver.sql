@@ -83,6 +83,7 @@ CREATE TABLE [lock_table]
     [resource_id]    nvarchar(256) NULL,
     [table_name]     nvarchar(32)  NULL,
     [pk]             nvarchar(36)  NULL,
+    [status]            tinyint       NULL,
     [gmt_create]     datetime2     NULL,
     [gmt_modified]   datetime2     NULL,
     PRIMARY KEY CLUSTERED ([row_key])
@@ -90,8 +91,35 @@ CREATE TABLE [lock_table]
 )
 GO
 
+CREATE NONCLUSTERED INDEX [idx_status]
+    ON [lock_table] (
+                     [status]
+        )
+GO
+
 CREATE NONCLUSTERED INDEX [idx_branch_id]
     ON [lock_table] (
                      [branch_id]
         )
 GO
+
+CREATE NONCLUSTERED INDEX [idx_xid]
+    ON [branch_table] (
+                       [xid]
+        )
+GO
+
+CREATE TABLE [distributed_lock]
+(
+    [lock_key]       VARCHAR(20) NOT NULL,
+    [lock_value]     VARCHAR(20) NOT NULL,
+    [expire]         bigint,
+    PRIMARY KEY CLUSTERED ([lock_key])
+    WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON);
+)
+GO
+
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('AsyncCommitting', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryCommitting', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
+INSERT INTO `distributed_lock` (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
