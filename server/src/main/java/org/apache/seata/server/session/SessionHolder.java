@@ -361,7 +361,8 @@ public class SessionHolder {
     public static boolean distributedLockAndExecute(String key, NoArgsFunc func) {
         boolean lock = false;
         try {
-            if (lock = acquireDistributedLock(key)) {
+            lock = acquireDistributedLock(key);
+            if (lock) {
                 func.call();
             }
         } catch (Exception e) {
