@@ -20,21 +20,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.apache.seata</groupId>
-        <artifactId>seata-build</artifactId>
-        <version>${revision}</version>
-        <relativePath>./build/pom.xml</relativePath>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.apache.seata</groupId>
     <artifactId>seata-parent</artifactId>
     <packaging>pom</packaging>
+    <version>${revision}</version>
+
     <name>Seata Parent POM ${project.version}</name>
-    <description>parent for Seata built with Maven</description>
+    <description>parent and plugin management for Seata built with Maven</description>
 
     <modules>
-        <module>build</module>
         <module>all</module>
         <module>bom</module>
         <module>common</module>
@@ -45,16 +41,7 @@
         <module>dependencies</module>
         <module>discovery</module>
         <module>distribution</module>
-        <module>integration/rpc-core</module>
-        <module>integration/dubbo</module>
-        <module>integration/dubbo-alibaba</module>
-        <module>integration/sofa-rpc</module>
-        <module>integration/motan</module>
-        <module>integration/grpc</module>
-        <module>integration/http</module>
-        <module>integration/http-jakarta</module>
-        <module>integration/hsf</module>
-        <module>integration/brpc</module>
+        <module>integration</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>rocketmq</module>
@@ -66,7 +53,9 @@
         <module>metrics</module>
         <module>serializer</module>
         <module>seata-spring-boot-starter</module>
-        <module>seata-spring-autoconfigure</module>
+        <module>seata-spring-autoconfigure/seata-spring-autoconfigure-core</module>
+        <module>seata-spring-autoconfigure/seata-spring-autoconfigure-client</module>
+        <module>seata-spring-autoconfigure/seata-spring-autoconfigure-server</module>
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
@@ -76,329 +65,424 @@
         <!--<module>seata-plugin</module>-->
     </modules>
 
-    <!--test-->
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-suite-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.seata</groupId>
-                <artifactId>seata-dependencies</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <organization>
+        <name>Apache</name>
+        <url>https://github.com/apache</url>
+    </organization>
 
-    <profiles>
-        <!-- profile: licenseCheck -->
-        <profile>
-            <id>licenseCheck</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>license-check</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-third-party</goal>
-                                </goals>
-                                <configuration>
-                                    <includeOptional>false</includeOptional>
-                                    <useMissingFile>false</useMissingFile>
-                                    <failOnMissing>false</failOnMissing>
-                                    <licenseMerges>
-                                        <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
-                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
-                                        </licenseMerge>
-                                        <licenseMerge>The MIT License|MIT License</licenseMerge>
-                                        <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
-                                            License|BSD|3-Clause BSD License|The New BSD License
-                                        </licenseMerge>
-                                    </licenseMerges>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!-- profile: image -->
-        <profile>
-            <id>image</id>
-            <properties>
-                <image.publish.skip>false</image.publish.skip>
-                <dependencies.copy.skip>false</dependencies.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java8 -->
-        <profile>
-            <id>release-image-based-on-java8</id>
-            <properties>
-                <image.tags>${project.version},latest</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java8-slim -->
-        <profile>
-            <id>release-image-based-on-java8-slim</id>
-            <properties>
-                <image.tags>${project.version}-slim</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java17 -->
-        <profile>
-            <id>release-image-based-on-java17</id>
-            <properties>
-                <image.tags>${project.version}.jre17</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: release-image-based-on-java17-slim -->
-        <profile>
-            <id>release-image-based-on-java17-slim</id>
-            <properties>
-                <image.tags>${project.version}.jre17-slim</image.tags>
-            </properties>
-        </profile>
-        <!-- profile: arrch64 -->
-        <profile>
-            <id>arrch64</id>
-            <properties>
-                <os.detected.classifier>osx-x86_64</os.detected.classifier>
-            </properties>
-        </profile>
-        <!-- profile: checkstyle -->
-        <profile>
-            <id>checkstyle</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.mycila</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>remove</goal>
-                                    <goal>format</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <quiet>true</quiet>
-                            <header>${user.dir}/style/copyright</header>
-                            <includes>
-                                <include>**/src/main/java/**</include>
-                                <include>**/src/test/java/**</include>
-                                <include>**/*.xml</include>
-                                <include>**/*.sql</include>
-                                <include>**/*.conf</include>
-                                <include>**/*.yml</include>
-                                <include>**/*.yaml</include>
-                                <include>**/*.sh</include>
-                                <include>**/*.bat</include>
-                                <include>**/*.lua</include>
-                                <include>**/*.properties</include>
-                                <include>**/*.txt</include>
-                                <include>**/*.def</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/generated/**</exclude>
-                                <exclude>**/antlr/mysql/parser/*.*</exclude>
-                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                            </excludes>
-                            <strictCheck>true</strictCheck>
-                            <mapping>
-                                <java>SLASHSTAR_STYLE</java>
-                                <lua>DOUBLEBAR_STYLE</lua>
-                                <conf>SCRIPT_STYLE</conf>
-                                <def>SCRIPT_STYLE</def>
-                            </mapping>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>validate</id>
-                                <phase>validate</phase>
-                                <configuration>
-                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
-                                    <encoding>UTF-8</encoding>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
-                                </configuration>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <url>https://seata.apache.org</url>
+
+    <developers>
+        <developer>
+            <id>Seata</id>
+            <name>Seata</name>
+            <url>https://seata.apache.org</url>
+            <email>dev@seata.apache.org</email>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/apache/incubator-seata/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>git@github.com:apache/incubator-seata.git</url>
+        <connection>scm:git@github.com:apache/incubator-seata.git</connection>
+        <developerConnection>scm:git@github.com:apache/incubator-seata.git</developerConnection>
+    </scm>
+
+    <properties>
+        <!-- seata version -->
+        <revision>2.1.0-SNAPSHOT</revision>
+
+        <!-- Compiler settings properties -->
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Maven plugin versions -->
+        <!-- Build -->
+        <easyj-maven-plugin.version>1.1.5</easyj-maven-plugin.version>
+        <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+        <!-- Compiler -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
+        <kotlin-maven-plugin.version>1.9.21</kotlin-maven-plugin.version>
+        <!-- Check -->
+        <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
+        <p3c-pmd.version>1.3.6</p3c-pmd.version>
+        <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
+        <license-maven-plugin.version>4.0</license-maven-plugin.version>
+        <mojo-license-maven-plugin.version>1.20</mojo-license-maven-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
+        <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+        <!-- Test -->
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <!-- Packaging -->
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
+        <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
+        <jib-maven-plugin.version>3.2.0</jib-maven-plugin.version>
+        <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
+        <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
+        <!-- Deploy && GPG -->
+        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <!-- Other -->
+        <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+        <os-maven-plugin.version>1.5.0.Final</os-maven-plugin.version>
+
+        <!-- Default values of the Maven plugins -->
+        <checkstyle.skip>true</checkstyle.skip>
+        <license.skip>true</license.skip>
+        <pmd.skip>true</pmd.skip>
+        <maven.test.skip>false</maven.test.skip>
+        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+        <maven.surefire.argLine></maven.surefire.argLine>
+        <maven.surefire.excludes></maven.surefire.excludes>
+        <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
+        <gpg.arg1/>
+        <gpg.arg2/>
+
+        <!-- For docker image-->
+        <image.publish.skip>true</image.publish.skip>
+        <image.name>${IMAGE_NAME}</image.name>
+        <image.tags>latest</image.tags>
+
+        <dependencies.copy.skip>true</dependencies.copy.skip>
+    </properties>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>${os-maven-plugin.version}</version>
-            </extension>
-        </extensions>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${maven-dependency-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven-checkstyle-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.xolstice.maven.plugins</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>${protobuf-maven-plugin.version}</version>
+                    <configuration>
+                        <!-- Solve the problem that protobuf compilation fails due to too long command line under the window operating system,
+                        ref: https://www.xolstice.org/protobuf-maven-plugin/usage.html -->
+                        <useArgumentFile>true</useArgumentFile>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${license-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${mojo-license-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>icu.easyj.maven.plugins</groupId>
+                    <artifactId>easyj-maven-plugin</artifactId>
+                    <version>${easyj-maven-plugin.version}</version>
+                    <!-- This goal can replace flatten-maven-plugin to flatten the pom, and replace '${revision}' to the actual version. -->
+                    <executions>
+                        <execution>
+                            <id>simplify-pom</id>
+                            <goals>
+                                <goal>simplify-pom</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <simplifiedPomFileName>.flattened-pom.xml</simplifiedPomFileName>
+                        <useTabIndent>true</useTabIndent>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${git-commit-id-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>get-the-git-infos</id>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skip>${maven.git-commit-id.skip}</skip>
+                        <verbose>true</verbose>
+                        <dateFormat>yyyy-MM-dd'T'HH:mm:ssZ</dateFormat>
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                        <generateGitPropertiesFilename>${project.build.outputDirectory}/seata-git.properties</generateGitPropertiesFilename>
+                        <includeOnlyProperties>
+                            <includeOnlyProperty>git.commit.message.full</includeOnlyProperty>
+                            <includeOnlyProperty>git.remote.origin.url</includeOnlyProperty>
+                            <includeOnlyProperty>git.branch</includeOnlyProperty>
+                            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                            <includeOnlyProperty>^git.commit.(id|time)$</includeOnlyProperty>
+                            <includeOnlyProperty>git.dirty</includeOnlyProperty>
+                        </includeOnlyProperties>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>${frontend-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
-            <!-- Source -->
+            <!-- Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>${maven-source-plugin.version}</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+            <!-- Resources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <!-- Jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>true</addMavenDescriptor>
+                        <index>true</index>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
                     <excludes>
-                        <exclude>**/*.java.template</exclude>
+                        <exclude>**/META-INF/additional-spring-configuration-metadata.json</exclude>
+                        <exclude>protobuf/**</exclude>
+                        <exclude>**/*.proto</exclude>
+                        <exclude>static/console-fe/**</exclude>
                     </excludes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
-            <!-- PMD-->
+            <!-- Clean -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>${maven-pmd-plugin.version}</version>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven-clean-plugin.version}</version>
                 <configuration>
-                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-                    <minimumPriority>2</minimumPriority>
-                    <printFailingErrors>true</printFailingErrors>
-                    <rulesets>
-                        <ruleset>rulesets/java/ali-comment.xml</ruleset>
-                        <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
-                        <ruleset>rulesets/java/ali-constant.xml</ruleset>
-                        <ruleset>rulesets/java/ali-exception.xml</ruleset>
-                        <ruleset>rulesets/java/ali-flowcontrol.xml</ruleset>
-                        <ruleset>rulesets/java/ali-naming.xml</ruleset>
-                        <ruleset>rulesets/java/ali-oop.xml</ruleset>
-                        <ruleset>rulesets/java/ali-orm.xml</ruleset>
-                        <ruleset>rulesets/java/ali-other.xml</ruleset>
-                        <ruleset>rulesets/java/ali-set.xml</ruleset>
-                    </rulesets>
-                    <excludes>
-                        <exclude>**/generated/*.java</exclude>
-                        <exclude>**/antlr/mysql/parser/*.*</exclude>
-                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                    </excludes>
+                    <filesets>
+                        <fileset>
+                            <directory>./</directory>
+                            <includes>
+                                <include>*-pom.xml</include>
+                                <include>**/db_store/**</include>
+                                <include>**/sessionStore/**</include>
+                                <include>**/root.data</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>pmd-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
-            <!-- JaCoCo -->
+            <!-- EasyJ -->
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>icu.easyj.maven.plugins</groupId>
+                <artifactId>easyj-maven-plugin</artifactId>
             </plugin>
-            <!-- SureFire -->
+            <!-- Enforcer -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <argLine>${maven.surefire.argLine}</argLine>
-                    <excludes>${maven.surefire.excludes}</excludes>
-                </configuration>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.6.0,)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Git commit id -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- profile: release -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Staging -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus-staging-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>oss_seata</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <!-- GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                    <gpgArguments>
+                                        <arg>${gpg.arg1}</arg>
+                                        <arg>${gpg.arg2}</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <!-- distribution management -->
+            <distributionManagement>
+                <repository>
+                    <id>oss_seata</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>oss_seata</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
+
+        <!-- profile: release-by-github-actions -->
+        <profile>
+            <id>release-by-github-actions</id>
+            <properties>
+                <gpg.arg1>--pinentry-mode</gpg.arg1>
+                <gpg.arg2>loopback</gpg.arg2>
+            </properties>
+        </profile>
+
+        <!-- profile: args-for-test-by-jdk17-and-above -->
+        <profile>
+            <id>args-for-test-by-jdk17-and-above</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <maven.surefire.argLine>
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.net=ALL-UNNAMED
+                    --add-opens java.base/java.math=ALL-UNNAMED
+                    --add-opens java.base/java.text=ALL-UNNAMED
+                    --add-opens java.base/java.util=ALL-UNNAMED
+                    --add-opens java.base/java.util.regex=ALL-UNNAMED
+                    --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+
+                    --add-opens java.sql/java.sql=ALL-UNNAMED
+                    --add-opens java.sql.rowset/javax.sql.rowset.serial=ALL-UNNAMED
+
+                    -Dnet.bytebuddy.experimental=true
+                </maven.surefire.argLine>
+            </properties>
+        </profile>
+
+        <!-- profile: args-for-client-test -->
+        <profile>
+            <id>args-for-client-test</id>
+            <properties>
+                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
+            </properties>
+        </profile>
+    </profiles>
 </project>

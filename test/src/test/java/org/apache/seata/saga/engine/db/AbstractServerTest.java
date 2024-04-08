@@ -17,9 +17,11 @@
 package org.apache.seata.saga.engine.db;
 
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
@@ -31,6 +33,8 @@ import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract Server Test
@@ -38,14 +42,22 @@ import org.apache.seata.server.session.SessionHolder;
  */
 public abstract class AbstractServerTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServerTest.class);
 
     private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     protected static void startSeataServer() throws InterruptedException {
-        (new Thread(new Runnable() {
-            public void run() {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicBoolean started = new AtomicBoolean(false);
+		StringBuilder errorMsg = new StringBuilder();
+
+        // start seata-server
+        (new Thread(() -> {
+            LOGGER.info("Starting Seata Server...");
+
+            try {
                 File file = new File("sessionStore/root.data");
                 if(file.exists()){
                     file.delete();
@@ -79,14 +91,44 @@ public abstract class AbstractServerTest {
                 XID.setPort(nettyServer.getListenPort());
 
                 nettyServer.init();
+
+                started.set(true);
+                LOGGER.info("Seata Server started");
+            } catch (Exception e) {
+				errorMsg.append(e.getMessage());
+                LOGGER.error("Start Seata Server error: {}", e.getMessage(), e);
+            } finally {
+                latch.countDown();
             }
         })).start();
-        Thread.sleep(5000);
+
+        // wait until seata-server started
+        LOGGER.info("Waiting for Seata Server to start...");
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            LOGGER.error("Wait seata-server start, but failed: {}", e.getMessage(), e);
+            throw new RuntimeException("Wait seata-server start, but failed: " + e.getMessage());
+        }
+
+        if (started.get()) {
+            LOGGER.info("Seata Server started successfully");
+        } else {
+            throw new RuntimeException("Seata Server failed to start: " + errorMsg);
+        }
     }
 
-    protected static final void stopSeataServer() throws InterruptedException {
+    protected static void stopSeataServer() throws InterruptedException {
         if(nettyServer != null){
-            nettyServer.destroy();
+            LOGGER.info("Stopping Seata Server...");
+
+            try {
+                nettyServer.destroy();
+                LOGGER.info("Seata Server stopped");
+            } catch (Exception e) {
+                LOGGER.error("Stop Seata Server error: {}", e.getMessage(), e);
+            }
+
             Thread.sleep(5000);
         }
     }

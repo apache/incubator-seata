@@ -28,8 +28,12 @@
     <name>seata-all ${project.version}</name>
     <description>compatible with io.seata API</description>
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <mockito.version>4.11.0</mockito.version>
         <druid.version>1.2.7</druid.version>
         <mysql.version>5.1.42</mysql.version>
@@ -95,7 +99,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
+            <version>4.5.14</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -107,7 +111,7 @@
                     <artifactId>spring-expression</artifactId>
                 </exclusion>
             </exclusions>
-            <version>5.3.26</version>
+            <version>5.3.27</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -121,7 +125,7 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.8.2</version>
             <scope>test</scope>
-           </dependency>
+        </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-tcc</artifactId>
@@ -163,6 +167,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>

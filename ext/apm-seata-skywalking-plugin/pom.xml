@@ -22,9 +22,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-dependencies-server</artifactId>
         <version>${revision}</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../../dependencies/dependencies-server/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>apm-seata-skywalking-plugin</artifactId>
@@ -33,25 +33,21 @@
     <description>skywalking plugin for Seata built with Maven</description>
 
     <properties>
-        <skywalking.version>8.6.0</skywalking.version>
-
         <maven-antrun-plugin.skip>true</maven-antrun-plugin.skip>
         <agent.dir>${project.build.directory}/ext/skywalking-agent/</agent.dir>
         <agent-plugins.dir>${agent.dir}/plugins/</agent-plugins.dir>
         <agent-config.dir>${agent.dir}/config</agent-config.dir>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>org.apache.skywalking</groupId>
             <artifactId>apm-agent-core</artifactId>
-            <version>${skywalking.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-all</artifactId>
+            <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
