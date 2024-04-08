@@ -29,7 +29,7 @@ public class SqlServerLockStoreSql extends AbstractLockStoreSql {
      * The constant INSERT_LOCK_SQL_MYSQL.
      */
     private static final String INSERT_LOCK_SQL_SQLSERVER = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")"
-            + " values (?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME())";
+            + " values (?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME(), ?)";
 
     @Override
     public String getInsertLockSQL(String lockTable) {
