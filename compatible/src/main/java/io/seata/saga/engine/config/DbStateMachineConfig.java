@@ -17,6 +17,7 @@
 package io.seata.saga.engine.config;
 
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
+import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.store.impl.StateLogStoreImpl;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;

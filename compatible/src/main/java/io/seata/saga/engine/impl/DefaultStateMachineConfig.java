@@ -23,8 +23,10 @@ import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.engine.store.impl.StateLogStoreImpl;
 import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
+import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.apache.seata.saga.engine.expression.ExpressionResolver;
 import org.apache.seata.saga.engine.invoker.ServiceInvokerManager;
@@ -32,7 +34,6 @@ import org.apache.seata.saga.engine.sequence.SeqGenerator;
 import org.apache.seata.saga.engine.store.StateLangStore;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
-import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -136,22 +137,27 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         return new StateMachineRepository() {
             @Override
             public StateMachine getStateMachineById(String stateMachineId) {
-                return repository.getStateMachineById(stateMachineId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachineById(stateMachineId);
+                return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId) {
-                return repository.getStateMachine(stateMachineName, tenantId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId);
+                return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId, String version) {
-                return repository.getStateMachine(stateMachineName, tenantId, version);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId, version);
+                return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine registryStateMachine(StateMachine stateMachine) {
-                return repository.registryStateMachine(stateMachine);
+                org.apache.seata.saga.statelang.domain.StateMachine unwrap = ((StateMachineImpl) stateMachine).unwrap();
+                repository.registryStateMachine(unwrap);
+                return stateMachine;
             }
 
             @Override
@@ -161,7 +167,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         };
     }
 
-    public void setStateMachineRepository(StateMachineRepository stateMachineRepository) {
+    public void setStateMachineRepository(org.apache.seata.saga.engine.repo.StateMachineRepository stateMachineRepository) {
         actual.setStateMachineRepository(stateMachineRepository);
     }
 

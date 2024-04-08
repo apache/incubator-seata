@@ -18,8 +18,8 @@ package io.seata.saga.statelang.domain.impl;
 
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import org.apache.seata.saga.statelang.domain.StateMachine;
 
 import java.util.AbstractMap;
 import java.util.Date;
@@ -204,12 +204,13 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public StateMachine getStateMachine() {
-        return actual.getStateMachine();
+        return StateMachineImpl.wrap(actual.getStateMachine());
     }
 
     @Override
     public void setStateMachine(StateMachine stateMachine) {
-        actual.setStateMachine(stateMachine);
+        org.apache.seata.saga.statelang.domain.StateMachine unwrap = ((StateMachineImpl) stateMachine).unwrap();
+        actual.setStateMachine(unwrap);
     }
 
     @Override
