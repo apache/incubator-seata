@@ -16,10 +16,10 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.common.util.StringUtils;
 import io.seata.rm.RMClient;
 import io.seata.tm.TMClient;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.tm.api.FailureHandler;
+import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
