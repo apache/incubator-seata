@@ -45,7 +45,7 @@ public class RedisDistributedLocker implements DistributedLocker {
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            //Don't need retry,if can't acquire the lock,let the other get the lock
+            //Don't need to retry, if you can't acquire the lock,let the other get the lock
             String result = jedis.set(distributedLockDO.getLockKey(), distributedLockDO.getLockValue(), SetParams.setParams().nx().px(distributedLockDO.getExpireTime()));
             return SUCCESS.equalsIgnoreCase(result);
         } catch (Exception ex) {
