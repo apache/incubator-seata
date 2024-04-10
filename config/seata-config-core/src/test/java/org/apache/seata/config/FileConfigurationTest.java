@@ -32,12 +32,14 @@ class FileConfigurationTest {
 
     @BeforeEach
     void setUp() {
+        System.setProperty("file.listener.enabled", "true");
         ConfigurationCache.clear();
     }
 
     @AfterEach
     void tearDown() {
         ConfigurationCache.clear();
+        System.setProperty("file.listener.enabled", "true");
     }
 
     @Test
