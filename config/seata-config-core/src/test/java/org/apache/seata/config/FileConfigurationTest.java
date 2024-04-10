@@ -54,7 +54,7 @@ class FileConfigurationTest {
             countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
-        countDownLatch.await(10, TimeUnit.SECONDS);
+        countDownLatch.await();
         logger.info("dataId: {}, oldValue: {}", dataId, value);
         logger.info("dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
         Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
