@@ -358,7 +358,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
     protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
         Map<String, Object> contextVariables = new HashMap<>();
-        if (stateMachineInstance.getStartParams() == null) {
+        if (stateMachineInstance.getStartParams() != null) {
             contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 
