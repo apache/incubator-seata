@@ -23,11 +23,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FileConfigurationTest {
 
-
+    Logger logger = LoggerFactory.getLogger(FileConfigurationTest.class);
 
     @BeforeEach
     void setUp() {
@@ -48,13 +49,14 @@ class FileConfigurationTest {
         fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
             Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
                 !Boolean.parseBoolean(event.getOldValue()));
-            System.out.println("oldValue:" + event.getOldValue() + ",newValue:" + event.getNewValue());
+            logger.info("dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
+                event.getNewValue());
             countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
         countDownLatch.await(10, TimeUnit.SECONDS);
-        System.out.println(fileConfig.getBoolean(dataId));
-        System.out.println(value);
+        logger.info("dataId: {}, oldValue: {}", dataId, value);
+        logger.info("dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
         Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
         CountDownLatch countDownLatch2 = new CountDownLatch(1);
