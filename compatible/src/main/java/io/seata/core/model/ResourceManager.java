@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.rm;
+package io.seata.core.model;
+
+
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 
 /**
- * The Abstract RM event handler
- *
+ * @see EnhancedServiceLoader.InnerEnhancedServiceLoader#findAllExtensionDefinition(ClassLoader)
  */
-public abstract class AbstractRMHandler extends org.apache.seata.rm.AbstractRMHandler {
+public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
 }

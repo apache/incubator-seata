@@ -14,8 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.tx.api.util;
+package io.seata.saga.rm;
 
-@Deprecated
-public class ProxyUtil extends org.apache.seata.integration.tx.api.util.ProxyUtil{
+
+import io.seata.saga.engine.StateMachineEngine;
+
+public class StateMachineEngineHolder {
+
+    private static StateMachineEngine stateMachineEngine;
+
+    public static StateMachineEngine getStateMachineEngine() {
+        return stateMachineEngine;
+    }
+
+    public static void setStateMachineEngine(StateMachineEngine smEngine) {
+        stateMachineEngine = smEngine;
+    }
 }

@@ -153,7 +153,7 @@ public class StateInstanceImpl implements StateInstance {
 
     @Override
     public void setForUpdate(boolean forUpdate) {
-        setForUpdate(forUpdate);
+        actual.setForUpdate(forUpdate);
     }
 
     @Override
@@ -213,7 +213,11 @@ public class StateInstanceImpl implements StateInstance {
 
     @Override
     public void setStatus(ExecutionStatus status) {
-        actual.setStatus(status.unwrap());
+        if(status == null){
+            actual.setStatus(null);
+        }else {
+            actual.setStatus(status.unwrap());
+        }
     }
 
     @Override
