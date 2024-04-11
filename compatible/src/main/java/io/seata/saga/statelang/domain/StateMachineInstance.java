@@ -16,8 +16,6 @@
  */
 package io.seata.saga.statelang.domain;
 
-import org.apache.seata.saga.statelang.domain.StateMachine;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
