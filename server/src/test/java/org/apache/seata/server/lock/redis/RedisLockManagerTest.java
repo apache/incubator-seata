@@ -30,6 +30,7 @@ import org.apache.seata.server.storage.redis.lock.RedisLocker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
@@ -39,6 +40,7 @@ import redis.clients.jedis.JedisPoolConfig;
 /**
  */
 @SpringBootTest
+@DisabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisLockManagerTest {
     static LockManager lockManager = null;
 
