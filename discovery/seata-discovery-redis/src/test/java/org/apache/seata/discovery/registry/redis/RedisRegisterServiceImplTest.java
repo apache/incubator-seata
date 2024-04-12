@@ -20,7 +20,8 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.mockito.MockedStatic;
 import org.mockito.internal.util.collections.Sets;
 
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 
-@DisabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisRegisterServiceImplTest {
 
     private static RedisRegistryServiceImpl redisRegistryService;

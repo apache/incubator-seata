@@ -27,13 +27,13 @@ import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  */
 @SpringBootTest
-@DisabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisQueryConsolTest {
 
     /**
