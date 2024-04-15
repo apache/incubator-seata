@@ -41,7 +41,7 @@ import static org.apache.seata.server.store.StoreConfig.StoreMode;
  *
  */
 @SpringBootTest
-@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "false")
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";
