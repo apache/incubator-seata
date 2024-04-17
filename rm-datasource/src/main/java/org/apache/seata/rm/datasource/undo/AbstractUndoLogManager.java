@@ -91,6 +91,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     protected static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
         + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
 
+    protected static final String DELETE_SUB_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
+            + ClientTableColumnsName.UNDO_LOG_CONTEXT + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
+
     protected static final boolean ROLLBACK_INFO_COMPRESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
         ConfigurationKeys.CLIENT_UNDO_COMPRESS_ENABLE, DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE);
 
@@ -124,10 +127,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL)) {
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
+             PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
+
+            deleteSubPST.setString(1, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
+            deleteSubPST.setString(2, xid);
+            deleteSubPST.executeUpdate();
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
@@ -151,17 +159,27 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
-        try (PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql)) {
+        String batchSubDeleteSql = toBatchSubDeleteUndoLogSql(xidSize, branchIdSize);
+        try (PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
+             PreparedStatement deleteSubPST = conn.prepareStatement(batchSubDeleteSql)) {
             int paramsIndex = 1;
             for (Long branchId : branchIds) {
-                deletePST.setLong(paramsIndex++, branchId);
+                deletePST.setLong(paramsIndex, branchId);
+                deleteSubPST.setString(paramsIndex, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
+                paramsIndex++;
             }
             for (String xid : xids) {
-                deletePST.setString(paramsIndex++, xid);
+                deletePST.setString(paramsIndex, xid);
+                deleteSubPST.setString(paramsIndex, xid);
+                paramsIndex++;
             }
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
+            }
+            int deleteSubRows = deleteSubPST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete sub undo log size {}", deleteSubRows);
             }
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
@@ -175,6 +193,16 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         StringBuilder sqlBuilder = new StringBuilder(64);
         sqlBuilder.append("DELETE FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE  ").append(
             ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" IN ");
+        appendInParam(xidSize, sqlBuilder);
+        return sqlBuilder.toString();
+    }
+
+    protected static String toBatchSubDeleteUndoLogSql(int xidSize, int branchIdSize) {
+        StringBuilder sqlBuilder = new StringBuilder(64);
+        sqlBuilder.append("DELETE FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE  ").append(
+                ClientTableColumnsName.UNDO_LOG_CONTEXT).append(" IN ");
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" IN ");
         appendInParam(xidSize, sqlBuilder);

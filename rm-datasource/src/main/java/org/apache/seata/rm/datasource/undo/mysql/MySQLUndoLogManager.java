@@ -16,15 +16,20 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
+import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IdWorker;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
+import org.apache.seata.rm.datasource.undo.UndoLogConstants;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -49,6 +54,8 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? LIMIT ?";
 
+    private static final IdWorker ID_WORKER = new IdWorker(null);
+
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
@@ -70,7 +77,33 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
                                            Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
+        // 64MB * 0.45
+        int limit = (int) (64 * 0.45 * 1024 * 1024);
+        if (undoLogContent.length > limit) {
+            final String subRollbackCtx = UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId;
+            int pos = 0;
+            byte[] first = new byte[limit];
+            StringBuilder subIdBuilder = new StringBuilder(36);
+            while (pos < undoLogContent.length) {
+                if (pos == 0) {
+                    System.arraycopy(undoLogContent, pos, first, 0, first.length);
+                    pos += first.length;
+                } else {
+                    byte[] bytes = new byte[Math.min(undoLogContent.length - pos, limit)];
+                    System.arraycopy(undoLogContent, pos, bytes, 0, bytes.length);
+                    long subId = ID_WORKER.nextId();
+                    subIdBuilder.append(subId).append(UndoLogConstants.SUB_SPLIT_KEY);
+                    insertUndoLog(xid, subId, subRollbackCtx, bytes, State.Normal, conn);
+                    pos += bytes.length;
+                }
+            }
+            Map<String, String> decodeMap = CollectionUtils.decodeMap(rollbackCtx);
+            decodeMap.put(UndoLogConstants.SUB_ID_KEY, subIdBuilder.toString());
+            String finalRollbackCtx = CollectionUtils.encodeMap(decodeMap);
+            insertUndoLog(xid, branchId, finalRollbackCtx, first, State.Normal, conn);
+        } else {
+            insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
+        }
     }
 
     @Override
@@ -84,7 +117,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             pst.setLong(1, branchId);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            pst.setBytes(4, undoLogContent);
+            pst.setObject(4, new ByteArrayInputStream(undoLogContent));
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
