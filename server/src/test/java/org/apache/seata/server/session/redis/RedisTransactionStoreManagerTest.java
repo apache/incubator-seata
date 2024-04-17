@@ -41,6 +41,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +52,7 @@ import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSe
 /**
  */
 @SpringBootTest
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisTransactionStoreManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisTransactionStoreManagerTest.class);
@@ -60,7 +62,6 @@ public class RedisTransactionStoreManagerTest {
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         EnhancedServiceLoader.unloadAll();
         JedisPooledFactory.getJedisInstance().flushAll();
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
