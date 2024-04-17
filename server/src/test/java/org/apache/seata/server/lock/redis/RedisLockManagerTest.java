@@ -24,13 +24,13 @@ import org.apache.seata.core.lock.Locker;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.redis.MockRedisServer;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.apache.seata.server.storage.redis.lock.RedisLockManager;
 import org.apache.seata.server.storage.redis.lock.RedisLocker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
@@ -40,6 +40,7 @@ import redis.clients.jedis.JedisPoolConfig;
 /**
  */
 @SpringBootTest
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisLockManagerTest {
     static LockManager lockManager = null;
 
@@ -54,11 +55,10 @@ public class RedisLockManagerTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        MockRedisServer.getInstance();
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6789, 60000)).getResource();
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000)).getResource();
         lockManager = new RedisLockManagerForTest();
     }
 
