@@ -403,6 +403,8 @@ public class FileConfiguration extends AbstractConfiguration {
                             LOGGER.error("fileListener execute error, dataId :{}", dataId, exx);
                         }
                     }
+                } else {
+                    LOGGER.warn("fileListener enabled: {}", enabled);
                 }
                 try {
                     Thread.sleep(LISTENER_CONFIG_INTERVAL);
