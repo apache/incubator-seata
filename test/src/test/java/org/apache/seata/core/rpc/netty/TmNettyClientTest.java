@@ -106,7 +106,8 @@ public class TmNettyClientTest extends AbstractServerTest {
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         String serverAddress = "127.0.0.1:8099";
-        List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup("default_tx_group");
+        LOGGER.info("getTransactionServiceGroup: {}",TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
+        List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
         Assertions.assertTrue(inetSocketAddressList.size() > 0);
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
