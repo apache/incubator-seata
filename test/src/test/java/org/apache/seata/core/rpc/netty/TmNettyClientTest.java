@@ -19,8 +19,6 @@ package org.apache.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
-import org.apache.seata.common.XID;
-import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
@@ -28,9 +26,6 @@ import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
 import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
-import org.apache.seata.server.UUIDGenerator;
-import org.apache.seata.server.coordinator.DefaultCoordinator;
-import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,13 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import static org.apache.seata.discovery.registry.RegistryService.CONFIG_SPLIT_CHAR;
+import static org.apache.seata.discovery.registry.RegistryService.PREFIX_SERVICE_MAPPING;
+import static org.apache.seata.discovery.registry.RegistryService.PREFIX_SERVICE_ROOT;
 
 /**
  */
@@ -58,7 +51,9 @@ public class TmNettyClientTest extends AbstractServerTest {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         String applicationId = "app 1";
-        String transactionServiceGroup = "default_tx_group";
+        String transactionServiceGroup = "default_tx_group-test";
+        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + transactionServiceGroup, "test");
+        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + "test.grouplist" ,"127.0.0.1:8099");
         tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
     }
@@ -81,10 +76,14 @@ public class TmNettyClientTest extends AbstractServerTest {
         //then test client
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
+        tmNettyRemotingClient.destroy();
+        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + transactionServiceGroup, "test");
+        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + "test.grouplist" ,"127.0.0.1:8099");
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
         String serverAddress = "127.0.0.1:8099";
+
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
     }
@@ -107,7 +106,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         String serverAddress = "127.0.0.1:8099";
-        testReconnect();
         List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup("default_tx_group");
         Assertions.assertTrue(inetSocketAddressList.size() > 0);
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
