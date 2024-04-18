@@ -58,9 +58,9 @@ class FileConfigurationTest {
             countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
-        logger.info("dataId: {}, oldValue: {}", dataId, value);
-        countDownLatch.await(60, TimeUnit.SECONDS);
-        logger.info("dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
+        logger.info(System.currentTimeMillis()+", dataId: {}, oldValue: {}", dataId, value);
+        boolean result = countDownLatch.await(60, TimeUnit.SECONDS);
+        logger.info(System.currentTimeMillis()+", dataId: {}, currenValue: {}, await: {}", dataId, fileConfig.getBoolean(dataId),result);
         Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
         CountDownLatch countDownLatch2 = new CountDownLatch(1);
