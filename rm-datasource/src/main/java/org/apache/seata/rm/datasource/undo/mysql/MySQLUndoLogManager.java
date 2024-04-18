@@ -19,15 +19,23 @@ package org.apache.seata.rm.datasource.undo.mysql;
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.IdWorker;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
+import org.apache.seata.core.rpc.processor.Pair;
+import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogConstants;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
@@ -75,10 +83,64 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
+    protected Pair<Integer, List<byte[]>> getSubRollbackInfo(Connection conn, String subIds, Long branchId, String xid) throws SQLException {
+        if (StringUtils.isBlank(subIds)) {
+            return new Pair<>(0, Collections.emptyList());
+        }
+        StringBuilder sqlBuilder = new StringBuilder(64);
+        sqlBuilder.append("SELECT * FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE ")
+                .append(ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
+        String[] split = StringUtils.split(subIds, UndoLogConstants.SUB_SPLIT_KEY);
+        appendInParam(split.length, sqlBuilder);
+        sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" = ?");
+
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = conn.prepareStatement(sqlBuilder.toString());
+            int idx = 1;
+            for (String subId : split) {
+                ps.setLong(idx++, Long.parseLong(subId));
+            }
+            ps.setString(idx, xid);
+            rs = ps.executeQuery();
+            int total = 0;
+            List<byte[]> bytesList = new ArrayList<>();
+            while (rs.next()) {
+                byte[] bytes = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+                bytesList.add(bytes);
+                total += bytes.length;
+            }
+            return new Pair<>(total, bytesList);
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            IOUtil.close(rs, ps);
+        }
+    }
+
+    @Override
+    protected String getMaxAllowedPacket(DataSourceProxy dataSourceProxy) {
+        return dataSourceProxy.getVariableValue("max_allowed_packet");
+    }
+
+    @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
                                            Connection conn) throws SQLException {
-        // 64MB * 0.45
-        int limit = (int) (64 * 0.45 * 1024 * 1024);
+        Map<String, String> decodeMap = CollectionUtils.decodeMap(rollbackCtx);
+        String maxAllowedPacketStr = decodeMap.get(UndoLogConstants.MAX_ALLOWED_PACKET);
+        long maxAllowedPacket = 64 * 1024 * 1024; // 64MB -> mysql8 default value
+        if (StringUtils.isNotBlank(maxAllowedPacketStr)) {
+            maxAllowedPacket = Long.parseLong(maxAllowedPacketStr);
+        }
+
+        int limit = (int) (maxAllowedPacket * 0.8);
+        if (logger.isDebugEnabled()) {
+            logger.debug("undo log length : [{}] limit : [{}]", undoLogContent.length, limit);
+        }
         if (undoLogContent.length > limit) {
             final String subRollbackCtx = UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId;
             int pos = 0;
@@ -97,7 +159,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                     pos += bytes.length;
                 }
             }
-            Map<String, String> decodeMap = CollectionUtils.decodeMap(rollbackCtx);
             decodeMap.put(UndoLogConstants.SUB_ID_KEY, subIdBuilder.toString());
             String finalRollbackCtx = CollectionUtils.encodeMap(decodeMap);
             insertUndoLog(xid, branchId, finalRollbackCtx, first, State.Normal, conn);

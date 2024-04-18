@@ -68,7 +68,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String productVersion;
 
-    private Map<String, String> variables = new HashMap<>();
+    private final Map<String, String> variables = new HashMap<>();
 
     /**
      * POLARDB-X 1.X -> TDDL
@@ -401,6 +401,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     public String getKernelVersion() {
         return kernelVersion;
+    }
+
+    public String getVariableValue(String name) {
+        return variables.get(name);
     }
 
     private void validMySQLVersion(Connection connection) {

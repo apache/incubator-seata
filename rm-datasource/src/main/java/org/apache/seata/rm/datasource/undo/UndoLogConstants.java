@@ -35,5 +35,7 @@ public interface UndoLogConstants {
 
     String BRANCH_ID_KEY = "branchId";
 
-    String SUB_SPLIT_KEY = "#";
+    String SUB_SPLIT_KEY = ",";
+
+    String MAX_ALLOWED_PACKET = "map";
 }
