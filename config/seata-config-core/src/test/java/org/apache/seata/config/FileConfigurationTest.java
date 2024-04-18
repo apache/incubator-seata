@@ -49,9 +49,6 @@ class FileConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
         boolean value = fileConfig.getBoolean(dataId);
-        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener)event -> {
-            System.setProperty("file.listener.enabled", "true");
-        });
         fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
             logger.info("before dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
                 event.getNewValue());

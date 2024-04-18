@@ -383,6 +383,7 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 boolean enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
+                LOGGER.info("fileListener enabled:{}", enabled);
                 if (enabled) {
                     for (String dataId : dataIdMap.keySet()) {
                         try {
