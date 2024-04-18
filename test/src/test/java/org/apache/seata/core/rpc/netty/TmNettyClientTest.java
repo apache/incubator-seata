@@ -107,7 +107,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         Assertions.assertNotNull(channel);
 
         BranchRegisterRequest request = new BranchRegisterRequest();
-        request.setXid("127.0.0.1:8091:1249853");
+        request.setXid("127.0.0.1:8099:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
