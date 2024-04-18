@@ -25,6 +25,7 @@ import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
 import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
+import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
 import org.apache.seata.server.UUIDGenerator;
@@ -38,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -104,6 +107,9 @@ public class TmNettyClientTest extends AbstractServerTest {
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         String serverAddress = "127.0.0.1:8099";
+        testReconnect();
+        List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup("default_tx_group");
+        Assertions.assertTrue(inetSocketAddressList.size() > 0);
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
