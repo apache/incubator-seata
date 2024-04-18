@@ -48,30 +48,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TmNettyClientTest extends AbstractServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
-    static NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(initMessageExecutor());
     @BeforeAll
     public static void init() {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
-        // start services server first
-        nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-        // set registry
-        XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(8091);
-        // init snowflake for transactionId, branchId
-        UUIDGenerator.init(1L);
-        System.out.println("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
-        nettyRemotingServer.init();
+        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
     @AfterAll
     public static void after() {
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        nettyRemotingServer.destroy();
-    }
-
-    public static ThreadPoolExecutor initMessageExecutor() {
-        return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        MockServer.close();
     }
 
     /**
@@ -88,7 +72,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
-        String serverAddress = "0.0.0.0:8091";
+        String serverAddress = "127.0.0.1:8099";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
         tmNettyRemotingClient.destroy();
@@ -118,7 +102,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
 
-        String serverAddress = "0.0.0.0:8091";
+        String serverAddress = "127.0.0.1:8099";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
 
