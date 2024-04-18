@@ -93,24 +93,19 @@ public class TmNettyClientTest extends AbstractServerTest {
      */
     @Test
     public void testReconnect() throws Exception {
-        String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
         TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
     }
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
-
-
-        String serverAddress = "127.0.0.1:8099";
-        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
-        Assertions.assertNotNull(channel);
-
         BranchRegisterRequest request = new BranchRegisterRequest();
         request.setXid("127.0.0.1:8099:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
-        testReconnect();
+        String serverAddress = "127.0.0.1:8099";
+        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
+        Assertions.assertNotNull(channel);
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
