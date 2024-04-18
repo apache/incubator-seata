@@ -50,12 +50,14 @@ public class TmNettyClientTest extends AbstractServerTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
     @BeforeAll
     public static void init() {
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
     @AfterAll
     public static void after() {
-        MockServer.close();
+       // MockServer.close();
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }
 
     /**
