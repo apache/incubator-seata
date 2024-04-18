@@ -63,7 +63,7 @@ class FileConfigurationTest {
         });
         System.setProperty(dataId, String.valueOf(!value));
         logger.info(System.currentTimeMillis()+", dataId: {}, oldValue: {}", dataId, value);
-        countDownLatch.await();
+        countDownLatch.await(10,TimeUnit.MINUTES);
         logger.info(System.currentTimeMillis()+", dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
         Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
         //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
