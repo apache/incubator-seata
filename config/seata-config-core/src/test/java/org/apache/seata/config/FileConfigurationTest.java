@@ -49,9 +49,11 @@ class FileConfigurationTest {
         String dataId = "service.disableGlobalTransaction";
         boolean value = fileConfig.getBoolean(dataId);
         fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
+            logger.info("before dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
+                event.getNewValue());
             Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
                 !Boolean.parseBoolean(event.getOldValue()));
-            logger.info("dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
+            logger.info("after dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
                 event.getNewValue());
             countDownLatch.countDown();
         });
