@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.List;
 import static org.apache.seata.discovery.registry.RegistryService.CONFIG_SPLIT_CHAR;
 import static org.apache.seata.discovery.registry.RegistryService.PREFIX_SERVICE_MAPPING;
@@ -75,7 +76,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         //then test client
         String applicationId = "app 1";
-        String transactionServiceGroup = "group A";
+        String transactionServiceGroup = "groupA";
         tmNettyRemotingClient.destroy();
         System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + transactionServiceGroup, "test");
         System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + "test.grouplist" ,"127.0.0.1:8099");
@@ -86,6 +87,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
+        TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
     }
 
     /**
@@ -109,6 +111,9 @@ public class TmNettyClientTest extends AbstractServerTest {
         LOGGER.info("getTransactionServiceGroup: {}",TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
         List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
         Assertions.assertTrue(inetSocketAddressList.size() > 0);
+        try(Socket socket = new Socket()){
+            socket.connect(new InetSocketAddress("127.0.0.1",8099),1000);
+        }
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
