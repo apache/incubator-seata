@@ -409,6 +409,7 @@ public class FileConfiguration extends AbstractConfiguration {
                 }
                 enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
             }
+            LOGGER.info("fileListener thread exit");
         }
 
         @Override
