@@ -48,16 +48,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TmNettyClientTest extends AbstractServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
+    static TmNettyRemotingClient tmNettyRemotingClient;
     @BeforeAll
     public static void init() {
+        TmNettyRemotingClient.getInstance().destroy();
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
+        String applicationId = "app 1";
+        String transactionServiceGroup = "default_tx_group";
+        tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        tmNettyRemotingClient.init();
     }
 
     @AfterAll
     public static void after() {
        // MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        tmNettyRemotingClient.destroy();
     }
 
     /**
@@ -77,7 +84,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         String serverAddress = "127.0.0.1:8099";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
-        tmNettyRemotingClient.destroy();
     }
 
     /**
@@ -89,20 +95,12 @@ public class TmNettyClientTest extends AbstractServerTest {
     public void testReconnect() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-
-        tmNettyRemotingClient.init();
-
         TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
-        tmNettyRemotingClient.destroy();
     }
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
-        String applicationId = "app 1";
-        String transactionServiceGroup = "default_tx_group";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-        tmNettyRemotingClient.init();
+
 
         String serverAddress = "127.0.0.1:8099";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
@@ -117,7 +115,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
                 branchRegisterResponse.getMsg());
-        tmNettyRemotingClient.destroy();
     }
 
 }
