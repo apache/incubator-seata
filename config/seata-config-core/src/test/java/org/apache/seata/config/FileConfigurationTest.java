@@ -19,9 +19,9 @@ package org.apache.seata.config;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,20 +30,21 @@ class FileConfigurationTest {
 
     Logger logger = LoggerFactory.getLogger(FileConfigurationTest.class);
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+   static void setUp() {
         System.setProperty("file.listener.enabled", "true");
         ConfigurationCache.clear();
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         ConfigurationCache.clear();
         System.setProperty("file.listener.enabled", "true");
     }
 
     @Test
     void addConfigListener() throws InterruptedException {
+        logger.info("addConfigListener");
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
