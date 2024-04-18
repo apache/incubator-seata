@@ -19,13 +19,16 @@ package org.apache.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
-import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
-import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
+import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,37 +36,30 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.List;
-import static org.apache.seata.discovery.registry.RegistryService.CONFIG_SPLIT_CHAR;
-import static org.apache.seata.discovery.registry.RegistryService.PREFIX_SERVICE_MAPPING;
-import static org.apache.seata.discovery.registry.RegistryService.PREFIX_SERVICE_ROOT;
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  */
 public class TmNettyClientTest extends AbstractServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
-    static TmNettyRemotingClient tmNettyRemotingClient;
-    @BeforeAll
-    public static void init() {
-        TmNettyRemotingClient.getInstance().destroy();
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-        String applicationId = "app 1";
-        String transactionServiceGroup = "default_tx_group-test";
-        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + transactionServiceGroup, "test");
-        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + "test.grouplist" ,"127.0.0.1:8099");
-        tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-        tmNettyRemotingClient.init();
-    }
 
+    @BeforeAll
+    public static void init(){
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
+    }
     @AfterAll
     public static void after() {
-       // MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        tmNettyRemotingClient.destroy();
+    }
+
+    public static ThreadPoolExecutor initMessageExecutor() {
+        return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
+            new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -73,21 +69,52 @@ public class TmNettyClientTest extends AbstractServerTest {
      */
     @Test
     public void testDoConnect() throws Exception {
+        ThreadPoolExecutor workingThreads = initMessageExecutor();
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        //start services server first
+        AtomicBoolean serverStatus = new AtomicBoolean();
+        Thread thread = new Thread(() -> {
+            try {
+                nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+                // set registry
+                XID.setIpAddress(NetUtil.getLocalIp());
+                XID.setPort(8091);
+                // init snowflake for transactionId, branchId
+                UUIDGenerator.init(1L);
+                System.out.println("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                nettyRemotingServer.init();
+                serverStatus.set(true);
+            } catch (Throwable t) {
+                serverStatus.set(false);
+                LOGGER.error("The seata-server failed to start", t);
+            }
+        });
+        thread.start();
+
+        //Wait for the seata-server to start.
+        long start = System.nanoTime();
+        long maxWaitNanoTime = 10 * 1000 * 1000 * 1000L; // 10s
+        while (System.nanoTime() - start < maxWaitNanoTime) {
+            Thread.sleep(100);
+            if (serverStatus.get()) {
+                break;
+            }
+        }
+        if (!serverStatus.get()) {
+            throw new RuntimeException("Waiting for a while, but the seata-server did not start successfully.");
+        }
 
         //then test client
         String applicationId = "app 1";
-        String transactionServiceGroup = "groupA";
-        tmNettyRemotingClient.destroy();
-        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + transactionServiceGroup, "test");
-        System.setProperty(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + "test.grouplist" ,"127.0.0.1:8099");
+        String transactionServiceGroup = "group A";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
         tmNettyRemotingClient.init();
-        String serverAddress = "127.0.0.1:8099";
-
+        String serverAddress = "0.0.0.0:8091";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
-        TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
+        nettyRemotingServer.destroy();
+        tmNettyRemotingClient.destroy();
     }
 
     /**
@@ -97,30 +124,69 @@ public class TmNettyClientTest extends AbstractServerTest {
      */
     @Test
     public void testReconnect() throws Exception {
+        ThreadPoolExecutor workingThreads = initMessageExecutor();
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        //start services server first
+        Thread thread = new Thread(() -> {
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+            // set registry
+            XID.setIpAddress(NetUtil.getLocalIp());
+            XID.setPort(8091);
+            // init snowflake for transactionId, branchId
+            UUIDGenerator.init(1L);
+            nettyRemotingServer.init();
+        });
+        thread.start();
+
+        //then test client
+        Thread.sleep(3000);
+
+        String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+
+        tmNettyRemotingClient.init();
+
         TmNettyRemotingClient.getInstance().getClientChannelManager().reconnect(transactionServiceGroup);
+        nettyRemotingServer.destroy();
+        tmNettyRemotingClient.destroy();
     }
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
-        BranchRegisterRequest request = new BranchRegisterRequest();
-        request.setXid("127.0.0.1:8099:1249853");
-        request.setLockKey("lock key testSendMsgWithResponse");
-        request.setResourceId("resoutceId1");
-        String serverAddress = "127.0.0.1:8099";
-        LOGGER.info("getTransactionServiceGroup: {}",TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
-        List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().aliveLookup(TmNettyRemotingClient.getInstance().getTransactionServiceGroup());
-        Assertions.assertTrue(inetSocketAddressList.size() > 0);
-        try(Socket socket = new Socket()){
-            socket.connect(new InetSocketAddress("127.0.0.1",8099),1000);
-        }
+        ThreadPoolExecutor workingThreads = initMessageExecutor();
+        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
+        new Thread(() -> {
+            SessionHolder.init(null);
+            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+            // set registry
+            XID.setIpAddress(NetUtil.getLocalIp());
+            XID.setPort(8091);
+            // init snowflake for transactionId, branchId
+            UUIDGenerator.init(1L);
+            nettyRemotingServer.init();
+        }).start();
+        Thread.sleep(3000);
+
+        String applicationId = "app 1";
+        String transactionServiceGroup = "default_tx_group";
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        tmNettyRemotingClient.init();
+
+        String serverAddress = "0.0.0.0:8091";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
+
+        BranchRegisterRequest request = new BranchRegisterRequest();
+        request.setXid("127.0.0.1:8091:1249853");
+        request.setLockKey("lock key testSendMsgWithResponse");
+        request.setResourceId("resoutceId1");
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
-                branchRegisterResponse.getMsg());
+            branchRegisterResponse.getMsg());
+        nettyRemotingServer.destroy();
+        tmNettyRemotingClient.destroy();
     }
-
 }
