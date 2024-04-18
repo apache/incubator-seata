@@ -235,7 +235,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 String key = others[i++];
                 String value = others[i++];
                 if (key != null) {
-                    map.put(key, value);
+                    map.put(key, value == null ? "" : value);
                 }
             }
         }
