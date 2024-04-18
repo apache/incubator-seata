@@ -45,6 +45,7 @@ class FileConfigurationTest {
     @Test
     void addConfigListener() throws InterruptedException {
         logger.info("addConfigListener");
+        ConfigurationFactory.reload();
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
