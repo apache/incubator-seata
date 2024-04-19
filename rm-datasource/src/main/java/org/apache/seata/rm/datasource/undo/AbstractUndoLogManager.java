@@ -161,9 +161,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
-        String batchSubDeleteSql = toBatchSubDeleteUndoLogSql(xidSize, branchIdSize);
+        String batchDeleteSubSql = toBatchDeleteSubUndoLogSql(xidSize, branchIdSize);
         try (PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
-             PreparedStatement deleteSubPST = conn.prepareStatement(batchSubDeleteSql)) {
+             PreparedStatement deleteSubPST = conn.prepareStatement(batchDeleteSubSql)) {
             int paramsIndex = 1;
             for (Long branchId : branchIds) {
                 deletePST.setLong(paramsIndex, branchId);
@@ -201,7 +201,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         return sqlBuilder.toString();
     }
 
-    protected static String toBatchSubDeleteUndoLogSql(int xidSize, int branchIdSize) {
+    protected static String toBatchDeleteSubUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder(64);
         sqlBuilder.append("DELETE FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE  ").append(
                 ClientTableColumnsName.UNDO_LOG_CONTEXT).append(" IN ");
