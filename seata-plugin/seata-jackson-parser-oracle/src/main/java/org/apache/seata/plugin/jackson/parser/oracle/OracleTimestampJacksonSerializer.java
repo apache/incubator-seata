@@ -59,7 +59,7 @@ public class OracleTimestampJacksonSerializer implements JacksonSerializer<oracl
                 try {
                     gen.writeBinary(timestamp.getBytes());
                 } catch (IOException e) {
-                    LOGGER.error("serialize oralce.sql.Timestamp error : {}", e.getMessage(), e);
+                    LOGGER.error("serialize oracle.sql.Timestamp error : {}", e.getMessage(), e);
                 }
             }
         };
