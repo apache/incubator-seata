@@ -16,7 +16,7 @@
  */
 package org.apache.seata.sqlparser.druid;
 
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * A db type adapter for druid parser.

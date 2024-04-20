@@ -34,7 +34,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
 
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * The type Mariadb delete recognizer test.

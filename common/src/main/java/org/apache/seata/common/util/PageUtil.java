@@ -23,6 +23,14 @@ import java.util.List;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 
+import static org.apache.seata.common.JdbcConstants.DM;
+import static org.apache.seata.common.JdbcConstants.H2;
+import static org.apache.seata.common.JdbcConstants.MYSQL;
+import static org.apache.seata.common.JdbcConstants.OCEANBASE;
+import static org.apache.seata.common.JdbcConstants.ORACLE;
+import static org.apache.seata.common.JdbcConstants.POSTGRESQL;
+import static org.apache.seata.common.JdbcConstants.SQLSERVER;
+
 /**
  * db page util
  *
@@ -48,6 +56,10 @@ public class PageUtil {
      * The constant SOURCE_SQL_PLACE_HOLD
      */
     private static final String SOURCE_SQL_PLACE_HOLD = " #sourcesql# ";
+    /**
+     * The constant ORDER_BY_PLACE_HOLD
+     */
+    private static final String ORDER_BY_PLACE_HOLD = " #order_by# ";
     /**
      * The constant LIMIT_PLACE_HOLD
      */
@@ -78,7 +90,7 @@ public class PageUtil {
     /**
      * The constant SQLSERVER_PAGE_TEMPLATE
      */
-    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from ("
+    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY " + ORDER_BY_PLACE_HOLD + ") AS rowId from ("
             + SOURCE_SQL_PLACE_HOLD + ") temp ) t where t.rowId between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
     /**
      * check page parm
@@ -104,22 +116,23 @@ public class PageUtil {
      * @param pageSize the page size
      * @return the page sql
      */
-    public static String pageSql(String sourceSql, String dbType, int pageNum, int pageSize) {
+    public static String pageSql(String sourceSql, String dbType, int pageNum, int pageSize, String orderByCondition) {
         switch (dbType) {
-            case "mysql":
-            case "h2":
-            case "postgresql":
-            case "oceanbase":
-            case "dm":
+            case MYSQL:
+            case H2:
+            case POSTGRESQL:
+            case OCEANBASE:
+            case DM:
                 return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
-            case "oracle":
+            case ORACLE:
                 return ORACLE_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
-            case "sqlserver":
+            case SQLSERVER:
                 return SQLSERVER_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
+                        .replace(ORDER_BY_PLACE_HOLD, orderByCondition)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
             default:
@@ -136,14 +149,14 @@ public class PageUtil {
      */
     public static String countSql(String sourceSql, String dbType) {
         switch (dbType) {
-            case "mysql":
-            case "h2":
-            case "oceanbase":
-            case "oracle":
-            case "dm":
+            case MYSQL:
+            case H2:
+            case OCEANBASE:
+            case ORACLE:
+            case DM:
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
-            case "postgresql":
-            case "sqlserver":
+            case POSTGRESQL:
+            case SQLSERVER:
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {
                     return sourceSql.substring(0, lastIndexOfOrderBy).replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");

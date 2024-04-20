@@ -47,7 +47,7 @@ import org.apache.seata.rm.datasource.xa.ResourceManagerXA;
 import org.apache.seata.rm.datasource.xa.XAXid;
 import org.apache.seata.rm.datasource.xa.XAXidBuilder;
 import org.apache.seata.spring.annotation.GlobalTransactionScanner;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.Assertions;

@@ -26,6 +26,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.JdbcConstants;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.IOUtil;
@@ -80,9 +81,10 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
 
         List<Object> sqlParamList = new ArrayList<>();
         String whereCondition = this.getWhereConditionByParam(param, sqlParamList);
+        String orderByCondition = getOrderByCondition();
 
         String sourceSql = LockStoreSqlFactory.getLogStoreSql(dbType).getAllLockSql(lockTable, whereCondition);
-        String queryLockSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
+        String queryLockSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize(), orderByCondition);
         String lockCountSql = PageUtil.countSql(sourceSql, dbType);
 
         List<GlobalLockVO> list = new ArrayList<>();
@@ -113,6 +115,13 @@ public class GlobalLockDBServiceImpl implements GlobalLockService {
             IOUtil.close(rs, countRs, ps, countPs, conn);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
+    }
+
+    private String getOrderByCondition() {
+        if(JdbcConstants.SQLSERVER.equals(dbType)) {
+            return "gmt_create desc";
+        }
+        return null;
     }
 
     private String getWhereConditionByParam(GlobalLockParam param, List<Object> sqlParamList) {

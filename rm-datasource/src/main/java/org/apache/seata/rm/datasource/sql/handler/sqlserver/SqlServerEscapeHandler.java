@@ -24,7 +24,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeSymbol;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * The type SqlServer keyword checker.

@@ -34,7 +34,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * The type Mariadb select for update recognizer test.

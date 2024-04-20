@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.JdbcConstants;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.IOUtil;
@@ -86,9 +87,10 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
 
         List<Object> sqlParamList = new ArrayList<>();
         String whereCondition = getWhereConditionByParam(param, sqlParamList);
+        String orderByCondition = getOrderByCondition();
 
         String sourceSql = LogStoreSqlsFactory.getLogStoreSqls(dbType).getAllGlobalSessionSql(globalTable, whereCondition);
-        String querySessionSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize());
+        String querySessionSql = PageUtil.pageSql(sourceSql, dbType, param.getPageNum(), param.getPageSize(), orderByCondition);
         String sessionCountSql = PageUtil.countSql(sourceSql, dbType);
 
         List<GlobalSessionVO> list = new ArrayList<>();
@@ -127,6 +129,13 @@ public class GlobalSessionDBServiceImpl implements GlobalSessionService {
             IOUtil.close(rs, countRs, ps, countPs, conn);
         }
         return PageResult.success(list, count, param.getPageNum(), param.getPageSize());
+    }
+
+    private String getOrderByCondition() {
+        if (JdbcConstants.SQLSERVER.equals(dbType)) {
+            return "gmt_create desc";
+        }
+        return null;
     }
 
     private String getWhereConditionByParam(GlobalSessionParam param, List<Object> sqlParamList) {

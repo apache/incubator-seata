@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -31,7 +30,7 @@ import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.struct.Null;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

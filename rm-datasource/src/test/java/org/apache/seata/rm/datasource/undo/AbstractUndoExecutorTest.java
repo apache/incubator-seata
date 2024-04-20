@@ -17,13 +17,12 @@
 package org.apache.seata.rm.datasource.undo;
 
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -94,10 +93,10 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
-        // case1: normal case  before:0 -> after:2 -> current:2 
+        // case1: normal case  before:0 -> after:2 -> current:2
         Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
-        // case2: dirty data   before:0 -> after:2 -> current:2' 
+        // case2: dirty data   before:0 -> after:2 -> current:2'
         execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
             Assertions.assertTrue(spy.dataValidationAndGoOn(connection));

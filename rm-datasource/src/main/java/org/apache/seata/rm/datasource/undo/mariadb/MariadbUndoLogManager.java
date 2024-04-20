@@ -22,7 +22,7 @@ import java.util.Date;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 @LoadLevel(name = JdbcConstants.MARIADB)

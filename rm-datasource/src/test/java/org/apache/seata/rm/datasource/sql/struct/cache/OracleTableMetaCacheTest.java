@@ -30,7 +30,7 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
   */

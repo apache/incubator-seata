@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.sql;
 
-import org.apache.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
@@ -39,7 +38,7 @@ import org.apache.seata.sqlparser.druid.polardbx.PolarDBXUpdateRecognizer;
 import org.apache.seata.sqlparser.druid.sqlserver.SqlServerDeleteRecognizer;
 import org.apache.seata.sqlparser.druid.sqlserver.SqlServerInsertRecognizer;
 import org.apache.seata.sqlparser.druid.sqlserver.SqlServerUpdateRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

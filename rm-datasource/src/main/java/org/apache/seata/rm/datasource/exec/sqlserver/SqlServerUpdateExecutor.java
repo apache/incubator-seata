@@ -30,7 +30,7 @@ import org.apache.seata.rm.datasource.exec.UpdateExecutor;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLUpdateRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * @date 2021-07-21

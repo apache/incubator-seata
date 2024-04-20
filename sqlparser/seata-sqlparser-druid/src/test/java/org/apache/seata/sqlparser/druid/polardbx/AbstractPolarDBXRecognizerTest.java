@@ -17,7 +17,7 @@
 package org.apache.seata.sqlparser.druid.polardbx;
 
 import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * Base Test for recognizer of PolarDB-X

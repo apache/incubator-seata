@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.sqlparser.util;
+package org.apache.seata.common;
 
 
 public interface JdbcConstants {

@@ -17,16 +17,22 @@
 package org.apache.seata.core.store.db.sql.distributed.lock;
 
 
+import org.apache.seata.core.constants.DBType;
+
 public class DistributedLockSqlFactory {
     private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
+    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL_SERVER = new BaseDistributedLockSqlServer();
 
     /**
      * get the lock store sql
      *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm, it's useless now, but maybe useful later
+     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm/sqlserver ...
      * @return lock store sql
      */
     public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
+        if (DBType.SQLSERVER.name().equalsIgnoreCase(dbType)) {
+            return DISTRIBUTED_LOCK_SQL_SERVER;
+        }
         return DISTRIBUTED_LOCK_SQL;
     }
 }

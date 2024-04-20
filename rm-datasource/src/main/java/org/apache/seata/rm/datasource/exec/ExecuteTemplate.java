@@ -38,7 +38,7 @@ import org.apache.seata.rm.datasource.exec.sqlserver.SqlServerUpdateExecutor;
 import org.apache.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * The type Execute template.

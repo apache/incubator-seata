@@ -21,7 +21,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 import java.util.Arrays;
 import java.util.Set;

@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.sql.struct;
 
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache;
 import org.junit.jupiter.api.Assertions;
@@ -25,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 public class TableMetaCacheFactoryTest {

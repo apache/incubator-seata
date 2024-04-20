@@ -55,7 +55,7 @@ import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.Defaultable;
 import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.util.ColumnUtils;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 @LoadLevel(name = JdbcConstants.MYSQL, scope = Scope.PROTOTYPE)
@@ -282,7 +282,7 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
                 for (int j = 0; j < paramAppender.size(); j++) {
                     Object param = paramAppender.get(j);
                     ps.setObject(paramAppenderCount + 1, (param instanceof Null) ? null : param);
-                    paramAppenderCount++; 
+                    paramAppenderCount++;
                 }
             }
             for (int i = 0; i < primaryKeys.size(); i++) {

@@ -24,7 +24,7 @@ import org.apache.seata.rm.datasource.exec.sqlserver.SqlServerMultiUpdateExecuto
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;

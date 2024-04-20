@@ -19,7 +19,7 @@ package org.apache.seata.rm.datasource.sql.struct.cache;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

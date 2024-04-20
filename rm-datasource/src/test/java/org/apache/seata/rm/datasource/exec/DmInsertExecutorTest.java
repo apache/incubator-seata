@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -27,7 +26,7 @@ import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;

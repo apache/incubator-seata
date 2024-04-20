@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeHandlerFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 public class OracleEscapeHandlerTest {

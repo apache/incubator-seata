@@ -48,7 +48,7 @@ import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

@@ -28,9 +28,6 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 
 import com.google.common.collect.Lists;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.mock.MockConnection;
 import org.apache.seata.rm.datasource.mock.MockDriver;
@@ -40,7 +37,7 @@ import org.apache.seata.sqlparser.SqlParserType;
 import org.apache.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

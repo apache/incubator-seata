@@ -23,7 +23,7 @@ import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.ArrayList;

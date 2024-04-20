@@ -57,7 +57,7 @@ import org.apache.seata.sqlparser.SqlParserType;
 import org.apache.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 public class MariadbUndoLogManagerTest {

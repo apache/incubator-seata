@@ -22,7 +22,7 @@ import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertOnDuplicateUpdateExecutor;
 import org.apache.seata.sqlparser.SQLRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 
 @LoadLevel(name = JdbcConstants.MARIADB, scope = Scope.PROTOTYPE)

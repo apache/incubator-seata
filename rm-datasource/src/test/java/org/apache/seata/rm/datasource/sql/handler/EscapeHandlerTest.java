@@ -27,7 +27,7 @@ import org.apache.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import org.apache.seata.sqlparser.druid.oracle.OracleUpdateRecognizer;
 import org.apache.seata.sqlparser.druid.postgresql.PostgresqlInsertRecognizer;
 import org.apache.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

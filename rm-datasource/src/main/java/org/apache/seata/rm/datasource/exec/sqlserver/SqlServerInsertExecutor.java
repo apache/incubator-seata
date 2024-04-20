@@ -43,7 +43,7 @@ import org.apache.seata.sqlparser.struct.Sequenceable;
 import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

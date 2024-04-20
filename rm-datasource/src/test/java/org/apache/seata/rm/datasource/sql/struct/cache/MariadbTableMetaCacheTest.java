@@ -35,7 +35,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * The table meta fetch test.

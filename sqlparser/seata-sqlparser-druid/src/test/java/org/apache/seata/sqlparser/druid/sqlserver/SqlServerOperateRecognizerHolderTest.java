@@ -18,7 +18,7 @@ package org.apache.seata.sqlparser.druid.sqlserver;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Collections;
 
 import com.google.common.collect.Lists;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -38,7 +37,7 @@ import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

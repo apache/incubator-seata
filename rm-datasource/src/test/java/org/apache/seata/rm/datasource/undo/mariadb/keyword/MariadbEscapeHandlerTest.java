@@ -29,7 +29,7 @@ import org.apache.seata.rm.datasource.undo.mariadb.MariadbUndoUpdateExecutor;
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.datasource.sql.handler.mariadb;
+package org.apache.seata.core.store.db.sql.distributed.lock;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
-import org.apache.seata.common.JdbcConstants;
+import org.apache.seata.core.constants.ServerTableColumnsName;
 
-/**
- * The type Mariadb escape handler.
- *
- */
-@LoadLevel(name = JdbcConstants.MARIADB)
-public class MariadbEscapeHandler extends MySQLEscapeHandler {
+public class BaseDistributedLockSqlServer extends BaseDistributedLockSql {
+
+    protected static final String SELECT_FOR_UPDATE_SQL = "SELECT " + ALL_COLUMNS + " FROM " + DISTRIBUTED_LOCK_TABLE_PLACE_HOLD
+            + " WITH (ROWLOCK, UPDLOCK, HOLDLOCK) WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ?";
+
+    @Override
+    public String getSelectDistributeForUpdateSql(String distributedLockTable) {
+        return SELECT_FOR_UPDATE_SQL.replace(DISTRIBUTED_LOCK_TABLE_PLACE_HOLD, distributedLockTable);
+    }
+
 }

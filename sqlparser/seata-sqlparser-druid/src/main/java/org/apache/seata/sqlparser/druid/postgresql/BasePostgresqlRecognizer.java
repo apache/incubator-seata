@@ -34,7 +34,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.druid.BaseRecognizer;
 import org.apache.seata.sqlparser.struct.Null;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;

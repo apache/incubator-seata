@@ -18,7 +18,7 @@ package org.apache.seata.rm.datasource.sql.handler.polardbx;
 
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * Escape handler for PolarDB-X

@@ -24,7 +24,7 @@ import java.sql.Statement;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 
 /**
  * Table meta cache for PolarDB-X

@@ -22,6 +22,7 @@ import java.sql.Statement;
 
 import com.alibaba.druid.pool.DruidDataSource;
 
+import org.apache.seata.common.JdbcConstants;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -152,7 +153,7 @@ public class SupportOracleDataTypeTest {
         helperStat = helperConn.createStatement();
         helperRes = helperStat.executeQuery("select * from " + tableName + " where id = " + TEST_RECORD_ID);
         LOGGER.info("the helperRes is:[{}]", helperRes);
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(org.apache.seata.sqlparser.util.JdbcConstants.ORACLE)
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE)
             .getTableMeta(dataSourceProxy.getPlainConnection(), tableName, dataSourceProxy.getResourceId());
         TableRecords beforeImage = TableRecords.buildRecords(tableMeta, helperRes);
 

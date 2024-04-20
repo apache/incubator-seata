@@ -26,7 +26,7 @@ import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
         " FROM " + UNDO_LOG_TABLE_NAME +
         " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? " +
         " ORDER BY " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " ASC )";
-    
+
     private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT TOP 1 1 FROM " + UNDO_LOG_TABLE_NAME;
 
     @Override
@@ -105,7 +105,7 @@ public class SqlServerUndoLogManager extends AbstractUndoLogManager {
         return "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WITH(UPDLOCK) WHERE "
                 + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
     }
-    
+
     @Override
     protected String getCheckUndoLogTableExistSql() {
         return CHECK_UNDO_LOG_TABLE_EXIST_SQL;

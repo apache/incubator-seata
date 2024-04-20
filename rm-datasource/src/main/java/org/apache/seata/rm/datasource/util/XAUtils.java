@@ -32,7 +32,7 @@ import com.alibaba.druid.util.MySqlUtils;
 import com.alibaba.druid.util.PGUtils;
 
 import org.apache.seata.rm.BaseDataSourceResource;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

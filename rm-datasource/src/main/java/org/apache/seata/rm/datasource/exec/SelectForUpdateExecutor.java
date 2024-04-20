@@ -30,7 +30,7 @@ import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLSelectRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.apache.seata.common.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +98,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
 
                     if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                        // Do the same thing under either @GlobalTransactional or @GlobalLock, 
+                        // Do the same thing under either @GlobalTransactional or @GlobalLock,
                         // that only check the global lock  here.
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
                     } else {
