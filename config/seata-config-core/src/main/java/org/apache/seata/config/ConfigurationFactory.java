@@ -126,7 +126,7 @@ public final class ConfigurationFactory {
     }
 
     private static void maybeNeedOriginFileInstance() {
-        if (ConfigType.File == getConfigType()) {
+        if (ConfigType.File.name().equalsIgnoreCase(getConfigType())) {
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
                     ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
@@ -135,13 +135,18 @@ public final class ConfigurationFactory {
         }
     }
 
-    private static ConfigType getConfigType() {
+    /**
+     * Notes: should not rely on the ConfigType type, as it will prevent the extension of configuration types
+     * implemented externally.
+     * @return
+     */
+    private static String getConfigType() {
         String configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
             + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
         if (StringUtils.isBlank(configTypeName)) {
             throw new NotSupportYetException("config type can not be null");
         }
-        return ConfigType.getType(configTypeName);
+        return configTypeName;
     }
 
     public static Optional<FileConfiguration> getOriginFileInstance() {
@@ -149,11 +154,11 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        ConfigType configType = getConfigType();
+        String configTypeName = getConfigType();
         Configuration configuration = ORIGIN_FILE_INSTANCE;
         Configuration extConfiguration = getSpringConfiguration();
         if (null == extConfiguration) {
-            configuration = getNonSpringConfiguration(configType);
+            configuration = getNonSpringConfiguration(configTypeName);
         }
         try {
             Configuration configurationCache;
@@ -207,10 +212,10 @@ public final class ConfigurationFactory {
         return null;
     }
 
-    private static Configuration getNonSpringConfiguration(ConfigType configType) {
+    private static Configuration getNonSpringConfiguration(String configTypeName) {
         try {
             io.seata.config.Configuration oldConfiguration = EnhancedServiceLoader.load(
-                io.seata.config.ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+                io.seata.config.ConfigurationProvider.class, Objects.requireNonNull(configTypeName)).provide();
             if (null != oldConfiguration) {
                 Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
                     ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
@@ -224,14 +229,14 @@ public final class ConfigurationFactory {
         }
         try {
             Configuration configuration = EnhancedServiceLoader.load(ConfigurationProvider.class,
-                Objects.requireNonNull(configType).name(), false).provide();
+                Objects.requireNonNull(configTypeName), false).provide();
             return configuration;
         } catch (EnhancedServiceNotFoundException ignore) {
             //ignore
         } catch (Exception exx) {
             LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
         }
-        return null;
+        return ORIGIN_FILE_INSTANCE;
     }
 
     protected static void reload() {
@@ -258,7 +263,12 @@ public final class ConfigurationFactory {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             List<String> simpleMethod = Arrays.stream(simpleParamsMethodNames).collect(Collectors.toList());
             if (simpleMethod.contains(method.getName())) {
-                return method.invoke(configuration, args);
+                Class[] classes = new Class[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    classes[i] = args[i].getClass();
+                }
+                Method oldMethod = this.configuration.getClass().getMethod(method.getName(), classes);
+                return oldMethod.invoke(configuration, args);
             } else if ("addConfigListener".equals(method.getName()) || "removeConfigListener".equals(
                 method.getName())) {
                 if (args.length == 2) {
@@ -266,22 +276,28 @@ public final class ConfigurationFactory {
                         ConfigurationChangeListener listener = (ConfigurationChangeListener)args[1];
                         OldConfigurationChangeListenerWrapper wrapper = new OldConfigurationChangeListenerWrapper(
                             listener);
-                        return method.invoke(configuration, args[0], wrapper);
+                        Method oldMethod = this.configuration.getClass().getMethod(method.getName(),
+                            new Class[] {String.class, io.seata.config.ConfigurationChangeListener.class});
+                        return oldMethod.invoke(configuration, args[0], wrapper);
                     }
                 }
             } else if ("getConfigListeners".equals(method.getName())) {
-                Set<ConfigurationChangeListener> listeners = (Set<ConfigurationChangeListener>)method.invoke(
-                    configuration, args);
+                Method oldMethod = this.configuration.getClass().getMethod(method.getName(),
+                    new Class[] {String.class});
+                Set<io.seata.config.ConfigurationChangeListener> listeners
+                    = (Set<io.seata.config.ConfigurationChangeListener>)oldMethod.invoke(configuration, args);
                 if (CollectionUtils.isEmpty(listeners)) {
                     return null;
                 }
-                Set<io.seata.config.ConfigurationChangeListener> oldListeners = new HashSet<>();
-                for (ConfigurationChangeListener listener : listeners) {
-                    oldListeners.add(new OldConfigurationChangeListenerWrapper(listener));
+                Set<ConfigurationChangeListener> newListeners = new HashSet<>();
+                for (io.seata.config.ConfigurationChangeListener listener : listeners) {
+                    if (listener instanceof OldConfigurationChangeListenerWrapper) {
+                        newListeners.add(((OldConfigurationChangeListenerWrapper)listener).getTargetListener());
+                    }
                 }
-                return oldListeners;
+                return newListeners;
             }
-            return null;
+            throw new NotSupportYetException(String.format("not support method:%s", method.getName()));
         }
     }
 
@@ -328,6 +344,10 @@ public final class ConfigurationFactory {
         @Override
         public void afterEvent() {
             listener.afterEvent(null);
+        }
+
+        public ConfigurationChangeListener getTargetListener() {
+            return listener;
         }
     }
 }
