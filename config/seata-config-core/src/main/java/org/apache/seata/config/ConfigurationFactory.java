@@ -192,7 +192,7 @@ public final class ConfigurationFactory {
         }
         if (null != configuration) {
             try {
-                Configuration extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(
+                Configuration extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, false).provide(
                     configuration);
                 if (null != extConfiguration) {
                     return extConfiguration;
@@ -224,7 +224,7 @@ public final class ConfigurationFactory {
         }
         try {
             Configuration configuration = EnhancedServiceLoader.load(ConfigurationProvider.class,
-                Objects.requireNonNull(configType).name()).provide();
+                Objects.requireNonNull(configType).name(), false).provide();
             return configuration;
         } catch (EnhancedServiceNotFoundException ignore) {
             //ignore
