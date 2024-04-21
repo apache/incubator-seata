@@ -232,7 +232,7 @@ public class EnhancedServiceLoader {
                 classToDefinitionMap.remove(entry.getKey());
             }
         }
-        serviceLoader.nameToDefinitionsMap.remove(activateName);
+        serviceLoader.nameToDefinitionsMap.remove(activateName.toLowerCase());
         if (CollectionUtils.isNotEmpty(extensionDefinitions)) {
             for (ExtensionDefinition<S> definition : extensionDefinitions) {
                 serviceLoader.definitionToInstanceMap.remove(definition);
@@ -650,7 +650,7 @@ public class EnhancedServiceLoader {
                 ExtensionDefinition<S> result = new ExtensionDefinition<>(serviceName, priority, scope, enhancedServiceClass);
                 classToDefinitionMap.put(clazz, result);
                 if (serviceName != null) {
-                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName, e -> new ArrayList<>())
+                    CollectionUtils.computeIfAbsent(nameToDefinitionsMap, serviceName.toLowerCase(), e -> new ArrayList<>())
                             .add(result);
                 }
                 return result;
@@ -676,7 +676,7 @@ public class EnhancedServiceLoader {
         }
 
         private ExtensionDefinition<S> getCachedExtensionDefinition(String activateName) {
-            List<ExtensionDefinition<S>> definitions = nameToDefinitionsMap.get(activateName);
+            List<ExtensionDefinition<S>> definitions = nameToDefinitionsMap.get(activateName.toLowerCase());
             return CollectionUtils.getLast(definitions);
         }
 

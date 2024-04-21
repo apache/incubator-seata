@@ -19,7 +19,7 @@ package io.seata.config.nacos;
 import io.seata.config.Configuration;
 import org.apache.seata.common.loader.LoadLevel;
 
-@LoadLevel(name = "test", order = 1)
+@LoadLevel(name = "Test", order = 1)
 public class NacosConfigurationProvider implements io.seata.config.ConfigurationProvider {
     @Override
     public Configuration provide() {
