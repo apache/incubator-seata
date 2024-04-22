@@ -22,6 +22,8 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
+import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
@@ -29,6 +31,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * the type MockServerTest
@@ -37,16 +41,22 @@ public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
 
+    Logger logger = LoggerFactory.getLogger(MockServerTest.class);
+
     @BeforeAll
     public static void before() {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
+        TmNettyRemotingClient.getInstance().destroy();
+        RmNettyRemotingClient.getInstance().destroy();
     }
 
     @AfterAll
     public static void after() {
-        MockServer.close();
+        //MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        TmNettyRemotingClient.getInstance().destroy();
+        RmNettyRemotingClient.getInstance().destroy();
     }
 
     @Test
@@ -87,7 +97,7 @@ public class MockServerTest {
         RmClientTest.testRm();
     }
 
-    private static String doTestCommit(int times) throws TransactionException {
+    private String doTestCommit(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
@@ -100,11 +110,12 @@ public class MockServerTest {
 
     }
 
-    private static String doTestRollback(int times) throws TransactionException {
+    private String doTestRollback(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
         String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
+        logger.info("doTestRollback xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus rollback = tm.rollback(xid);
