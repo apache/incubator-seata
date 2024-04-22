@@ -29,6 +29,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * the type MockServerTest
@@ -36,6 +38,8 @@ import org.junit.jupiter.api.Test;
 public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
+
+    Logger logger = LoggerFactory.getLogger(MockServerTest.class);
 
     @BeforeAll
     public static void before() {
@@ -87,7 +91,7 @@ public class MockServerTest {
         RmClientTest.testRm();
     }
 
-    private static String doTestCommit(int times) throws TransactionException {
+    private String doTestCommit(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
@@ -100,11 +104,12 @@ public class MockServerTest {
 
     }
 
-    private static String doTestRollback(int times) throws TransactionException {
+    private String doTestRollback(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
         String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
+        logger.info("doTestRollback xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus rollback = tm.rollback(xid);

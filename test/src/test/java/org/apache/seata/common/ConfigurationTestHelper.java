@@ -16,11 +16,11 @@
  */
 package org.apache.seata.common;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.seata.config.CachedConfigurationChangeListener;
-import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,16 +33,25 @@ public class ConfigurationTestHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationTestHelper.class);
     private static final long PUT_CONFIG_TIMEOUT = 60000L;
 
+    static {
+        System.setProperty("config.type","file");
+        System.setProperty("config.file.name","file.conf");
+        System.setProperty("file.listener.enabled","true");
+        try {
+            Method method = ConfigurationFactory.class.getMethod("reload", null);
+            method.invoke(ConfigurationFactory.getInstance(), null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void removeConfig(String dataId) {
         putConfig(dataId, null);
     }
 
     public static void putConfig(String dataId, String content) {
-        System.setProperty("config.type","file");
-        System.setProperty("config.file.name","file.conf");
-        ConfigurationFactory.reload();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        System.setProperty("file.listener.enabled","true");
+
         ConfigurationFactory.getInstance().addConfigListener(dataId,
 	        (CachedConfigurationChangeListener)event -> countDownLatch.countDown());
         if (content == null) {
@@ -54,10 +63,10 @@ public class ConfigurationTestHelper {
 
         try {
             boolean await = countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
-            if(await){
-                LOGGER.info("putConfig ok, dataId={}", dataId);
-            }else {
-                LOGGER.error("putConfig fail, dataId={}", dataId);
+            if (await) {
+                LOGGER.info("putConfig ok, dataId={}, value={}", dataId, ConfigurationFactory.getInstance().getConfig(dataId));
+            } else {
+                LOGGER.error("putConfig fail, dataId={}, value={}", dataId, ConfigurationFactory.getInstance().getConfig(dataId));
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
