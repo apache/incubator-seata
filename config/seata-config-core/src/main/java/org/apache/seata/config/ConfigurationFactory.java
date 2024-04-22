@@ -176,7 +176,7 @@ public final class ConfigurationFactory {
         return null == extConfiguration ? configuration : extConfiguration;
     }
 
-    protected static void reload() {
+    public static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();

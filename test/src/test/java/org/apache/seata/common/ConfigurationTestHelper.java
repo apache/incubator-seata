@@ -38,22 +38,19 @@ public class ConfigurationTestHelper {
     }
 
     public static void putConfig(String dataId, String content) {
+        System.setProperty("config.type","file");
+        System.setProperty("config.file.name","file.conf");
+        ConfigurationFactory.reload();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL,
-            new CachedConfigurationChangeListener() {
-                @Override
-                public void onChangeEvent(ConfigurationChangeEvent event) {
-                    countDownLatch.countDown();
-                }
-            });
+        System.setProperty("file.listener.enabled","true");
+        ConfigurationFactory.getInstance().addConfigListener(dataId,
+	        (CachedConfigurationChangeListener)event -> countDownLatch.countDown());
         if (content == null) {
             System.clearProperty(dataId);
-            ConfigurationFactory.getInstance().removeConfig(dataId);
             return;
         }
 
         System.setProperty(dataId, content);
-        ConfigurationFactory.getInstance().putConfig(dataId, content);
 
         try {
             boolean await = countDownLatch.await(PUT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
