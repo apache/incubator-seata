@@ -38,8 +38,9 @@ public class ConfigurationTestHelper {
         System.setProperty("config.file.name","file.conf");
         System.setProperty("file.listener.enabled","true");
         try {
-            Method method = ConfigurationFactory.class.getDeclaredMethod("reload", null);
-            method.invoke(ConfigurationFactory.getInstance(), null);
+            Method method = ConfigurationFactory.class.getDeclaredMethod("reload");
+            method.setAccessible(true);
+            method.invoke( null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
