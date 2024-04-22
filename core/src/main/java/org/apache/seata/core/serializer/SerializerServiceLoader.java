@@ -16,8 +16,10 @@
  */
 package org.apache.seata.core.serializer;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
@@ -28,6 +30,11 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.seata.core.serializer.SerializerType.HESSIAN;
+import static org.apache.seata.core.serializer.SerializerType.KRYO;
+import static org.apache.seata.core.serializer.SerializerType.PROTOBUF;
+import static org.apache.seata.core.serializer.SerializerType.SEATA;
+
 /**
  * The Service Loader for the interface {@link Serializer}
  *
@@ -36,6 +43,10 @@ public final class SerializerServiceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN};
+
+    private static final String SPLIT_CHAR = ",";
 
     private SerializerServiceLoader() {
     }
@@ -64,14 +75,13 @@ public final class SerializerServiceLoader {
 
     public static Set<SerializerType> getSupportedSerializers() {
         Set<SerializerType> supportedSerializers = new HashSet<>();
-        String serializerNames = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name());
-        String[] serializerNameArray = serializerNames.split(",");
+        String defaultSupportSerializers = Arrays.stream(DEFAULT_SERIALIZER_TYPE).map(SerializerType::name).collect(Collectors.joining(SPLIT_CHAR));
+        String serializerNames = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, defaultSupportSerializers);
+        String[] serializerNameArray = serializerNames.split(SPLIT_CHAR);
         for (String serializerName : serializerNameArray) {
             try {
                 SerializerType serializerType = SerializerType.getByName(serializerName);
-                if (serializerType != null) {
-                    supportedSerializers.add(serializerType);
-                }
+                supportedSerializers.add(serializerType);
             } catch (IllegalArgumentException ignore) {
                 LOGGER.warn("Invalid serializer name: " + serializerName);
             }
