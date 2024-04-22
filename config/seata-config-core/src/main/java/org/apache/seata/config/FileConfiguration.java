@@ -381,25 +381,27 @@ public class FileConfiguration extends AbstractConfiguration {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            Boolean enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
-            while (enabled) {
-                for (String dataId : dataIdMap.keySet()) {
-                    try {
-                        String currentConfig =
-                                ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
-                        if (StringUtils.isNotBlank(currentConfig)) {
-                            String oldConfig = listenedConfigMap.get(dataId);
-                            if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
-                                listenedConfigMap.put(dataId, currentConfig);
-                                event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
+            while (true) {
+                boolean enabled = Boolean.parseBoolean(System.getProperty("file.listener.enabled", "true"));
+                if (enabled) {
+                    for (String dataId : dataIdMap.keySet()) {
+                        try {
+                            String currentConfig = ConfigurationFactory.getInstance().getLatestConfig(dataId, null,
+                                DEFAULT_CONFIG_TIMEOUT);
+                            if (StringUtils.isNotBlank(currentConfig)) {
+                                String oldConfig = listenedConfigMap.get(dataId);
+                                if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
+                                    listenedConfigMap.put(dataId, currentConfig);
+                                    event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
 
-                                for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
-                                    listener.onChangeEvent(event);
+                                    for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
+                                        listener.onProcessEvent(event);
+                                    }
                                 }
                             }
+                        } catch (Exception exx) {
+                            LOGGER.error("fileListener execute error, dataId :{}", dataId, exx);
                         }
-                    } catch (Exception exx) {
-                        LOGGER.error("fileListener execute error, dataId :{}", dataId, exx);
                     }
                 }
                 try {
@@ -407,7 +409,6 @@ public class FileConfiguration extends AbstractConfiguration {
                 } catch (InterruptedException e) {
                     LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
                 }
-                enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
             }
         }
 

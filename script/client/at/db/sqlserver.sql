@@ -29,3 +29,9 @@ CREATE TABLE [undo_log]
         WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
 GO
+
+CREATE NONCLUSTERED INDEX [ix_log_created]
+    ON [undo_log] (
+                     [log_created]
+        )
+GO
