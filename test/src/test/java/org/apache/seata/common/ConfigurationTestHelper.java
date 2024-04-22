@@ -16,13 +16,14 @@
  */
 package org.apache.seata.common;
 
-import org.apache.seata.config.ConfigurationCache;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * the type ConfigurationTestHelper
@@ -38,7 +39,13 @@ public class ConfigurationTestHelper {
 
     public static void putConfig(String dataId, String content) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        ConfigurationCache.addConfigListener(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, event -> countDownLatch.countDown());
+        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL,
+            new CachedConfigurationChangeListener() {
+                @Override
+                public void onChangeEvent(ConfigurationChangeEvent event) {
+                    countDownLatch.countDown();
+                }
+            });
         if (content == null) {
             System.clearProperty(dataId);
             ConfigurationFactory.getInstance().removeConfig(dataId);

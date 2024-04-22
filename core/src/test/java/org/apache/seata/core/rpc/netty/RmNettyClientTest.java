@@ -16,6 +16,11 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
@@ -24,37 +29,29 @@ import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Rm RPC client test.
- *
  */
+@Order(2)
 class RmNettyClientTest {
-    
-    Logger logger = LoggerFactory.getLogger(getClass());
-    
+
     @BeforeAll
     public static void beforeAll() {
         RmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
     }
 
     @AfterAll
     public static void afterAll() {
         RmNettyRemotingClient.getInstance().destroy();
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
 
     @Test
@@ -84,13 +81,10 @@ class RmNettyClientTest {
         resourceMap.put("jdbc:xx://localhost/test", mockResource);
         Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
         newClient.setResourceManager(resourceManager);
-        System.setProperty("file.listener.enabled", "true");
-        ConfigurationCache.addConfigListener(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-            event -> logger.info("dataId:{}, value: {}, oldValue: {}", event.getDataId(), event.getNewValue(),
-                event.getOldValue()));
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        Thread.sleep(2000);
+        ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, newClient::init);
+        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
     
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {

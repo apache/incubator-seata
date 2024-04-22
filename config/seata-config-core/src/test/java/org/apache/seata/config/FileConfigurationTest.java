@@ -18,41 +18,64 @@ package org.apache.seata.config;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class FileConfigurationTest {
 
-
+    Logger logger = LoggerFactory.getLogger(FileConfigurationTest.class);
 
     @BeforeEach
     void setUp() {
+        System.setProperty("file.listener.enabled", "true");
+        ConfigurationCache.clear();
     }
 
     @AfterEach
     void tearDown() {
+        ConfigurationCache.clear();
+        System.setProperty("file.listener.enabled", "true");
     }
 
     @Test
     void addConfigListener() throws InterruptedException {
         Configuration fileConfig = ConfigurationFactory.getInstance();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
-        ConfigurationCache.addConfigListener("service.disableGlobalTransaction", (event) -> {
-            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
+        String dataId = "service.disableGlobalTransaction";
+        boolean value = fileConfig.getBoolean(dataId);
+        fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
+                !Boolean.parseBoolean(event.getOldValue()));
+            logger.info("dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
+                event.getNewValue());
             countDownLatch.countDown();
         });
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
-        countDownLatch.await(5, TimeUnit.SECONDS);
+        System.setProperty(dataId, String.valueOf(!value));
+        countDownLatch.await(60, TimeUnit.SECONDS);
+        logger.info("dataId: {}, oldValue: {}", dataId, value);
+        logger.info("dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
+        Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
+        //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
+        CountDownLatch countDownLatch2 = new CountDownLatch(1);
+        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener)event -> {
+            if (!Boolean.parseBoolean(event.getNewValue())) {
+                countDownLatch2.countDown();
+            }
+        });
         System.setProperty("file.listener.enabled", "false");
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(value));
-        Thread.sleep(2000);
-        boolean currentValue = fileConfig.getBoolean("service.disableGlobalTransaction");
+        countDownLatch2.await(10, TimeUnit.SECONDS);
+        System.setProperty(dataId, String.valueOf(value));
+        //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
+        Thread.sleep(1000);
+
+        boolean currentValue = fileConfig.getBoolean(dataId);
         Assertions.assertNotEquals(value, currentValue);
-        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        System.setProperty(dataId, String.valueOf(!value));
     }
 
     @Test

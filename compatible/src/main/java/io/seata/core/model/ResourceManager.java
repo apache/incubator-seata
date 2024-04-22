@@ -17,10 +17,10 @@
 package io.seata.core.model;
 
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+
 /**
- * Resource Manager: common behaviors.
- *
+ * @see EnhancedServiceLoader.InnerEnhancedServiceLoader#findAllExtensionDefinition(ClassLoader)
  */
 public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
-
 }
