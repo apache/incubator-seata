@@ -49,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * seata mq producer test
  **/
+@Disabled
 public class SeataMQProducerSendTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
@@ -75,7 +76,6 @@ public class SeataMQProducerSendTest {
     }
 
     @Test
-    @Disabled
     public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
@@ -91,7 +91,6 @@ public class SeataMQProducerSendTest {
     }
 
     @Test
-    @Disabled
     public void testSendRollback()
         throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();

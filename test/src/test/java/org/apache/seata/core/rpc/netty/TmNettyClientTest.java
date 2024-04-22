@@ -59,7 +59,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
     public static ThreadPoolExecutor initMessageExecutor() {
         return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+            new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -185,7 +185,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         Assertions.assertNotNull(branchRegisterResponse);
         Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
-                branchRegisterResponse.getMsg());
+            branchRegisterResponse.getMsg());
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }
