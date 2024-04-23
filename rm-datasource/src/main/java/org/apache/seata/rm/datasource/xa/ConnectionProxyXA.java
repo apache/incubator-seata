@@ -55,6 +55,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile boolean xaActive = false;
 
+    private volatile boolean xaEnded = false;
+
     private volatile boolean kept = false;
 
     private volatile boolean rollBacked = false;
@@ -108,6 +110,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                     resource.release(xaBranchXid, this);
                 }
             }
+        }
+    }
+
+    private void xaEnd(XAXid xaXid, int flags) throws XAException {
+        if (!xaEnded) {
+            xaResource.end(xaXid, flags);
+            xaEnded = true;
         }
     }
 
@@ -206,7 +215,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         try {
             // XA End: Success
-            end(XAResource.TMSUCCESS);
+            try {
+                end(XAResource.TMSUCCESS);
+            } catch (SQLException sqle) {
+                // Rollback immediately before the XA Branch Context is deleted.
+                String xaBranchXid = this.xaBranchXid.toString();
+                rollback();
+                throw new SQLException("Branch " + xaBranchXid + " was rollbacked on commiting since " + sqle.getMessage(), SQLSTATE_XA_NOT_END, sqle);
+            }
             long now = System.currentTimeMillis();
             checkTimeout(now);
             setPrepareTime(now);
@@ -234,7 +250,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                xaResource.end(this.xaBranchXid, XAResource.TMFAIL);
+                xaEnd(xaBranchXid, XAResource.TMFAIL);
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
@@ -269,7 +285,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private synchronized void end(int flags) throws XAException, SQLException {
-        xaResource.end(xaBranchXid, flags);
+        xaEnd(xaBranchXid, flags);
         termination();
     }
 
@@ -307,6 +323,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         // Force close the physical connection
         physicalConn.close();
+        xaEnded = false;
         rollBacked = false;
         cleanXABranchContext();
         originalConnection.close();
