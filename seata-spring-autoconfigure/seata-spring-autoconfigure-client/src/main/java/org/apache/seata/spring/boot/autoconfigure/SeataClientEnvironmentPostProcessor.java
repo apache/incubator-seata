@@ -46,7 +46,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SAGA_S
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 
@@ -67,7 +67,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, SpringFenceConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
-        PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, SeataTccProperties.class);
+        PROPERTY_BEAN_MAP.put(TCC_PREFIX, SeataTccProperties.class);
     }
 
     @Override
