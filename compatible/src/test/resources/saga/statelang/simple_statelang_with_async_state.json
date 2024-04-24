@@ -1,0 +1,50 @@
+{
+    "Name": "simpleStateMachineWithAsyncState",
+    "Comment": "带异步执行节点的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState"
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "IsAsync": true,
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "IsAsync": true,
+            "Next": "Succeed"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

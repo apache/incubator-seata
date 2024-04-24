@@ -40,9 +40,9 @@ public interface ConfigurationChangeListener {
     /**
      * The constant EXECUTOR_SERVICE.
      */
-    ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-        new NamedThreadFactory("configListenerOperate", MAX_LISTENER_THREAD));
+    ExecutorService EXECUTOR_SERVICE =
+        new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("configListenerOperate", MAX_LISTENER_THREAD));
 
     /**
      * Process.

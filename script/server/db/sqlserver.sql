@@ -83,11 +83,18 @@ CREATE TABLE [lock_table]
     [resource_id]    nvarchar(256) NULL,
     [table_name]     nvarchar(32)  NULL,
     [pk]             nvarchar(36)  NULL,
+    [status]            tinyint       NULL,
     [gmt_create]     datetime2     NULL,
     [gmt_modified]   datetime2     NULL,
     PRIMARY KEY CLUSTERED ([row_key])
         WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 )
+GO
+
+CREATE NONCLUSTERED INDEX [idx_status]
+    ON [lock_table] (
+                     [status]
+        )
 GO
 
 CREATE NONCLUSTERED INDEX [idx_branch_id]

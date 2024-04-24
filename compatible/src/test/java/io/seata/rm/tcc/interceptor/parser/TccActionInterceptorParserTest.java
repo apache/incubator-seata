@@ -39,7 +39,7 @@ import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
-import io.seata.integration.tx.api.util.ProxyUtil;
+import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.TCCResourceManager;
 import org.apache.seata.tm.TransactionManagerHolder;
@@ -62,7 +62,7 @@ class TccActionInterceptorParserTest {
     }
 
     @BeforeEach
-    private void before() {
+    public void before() {
         resourceManager = new TCCResourceManager() {
 
             @Override
