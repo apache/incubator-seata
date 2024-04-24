@@ -17,16 +17,35 @@
 package org.apache.seata.core.store.db.sql.distributed.lock;
 
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class DistributedLockSqlFactory {
-    private static final DistributedLockSql DISTRIBUTED_LOCK_SQL = new BaseDistributedLockSql();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributedLockSqlFactory.class);
+
+    protected static Map<String, DistributedLockSql> distributedLockSqlCache = new ConcurrentHashMap<>(4);
 
     /**
      * get the lock store sql
      *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm, it's useless now, but maybe useful later
+     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm/sqlserver ...
      * @return lock store sql
      */
     public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
-        return DISTRIBUTED_LOCK_SQL;
+        return distributedLockSqlCache.computeIfAbsent(dbType, method -> {
+                    try {
+                        return EnhancedServiceLoader.load(DistributedLockSql.class, dbType);
+                    } catch (EnhancedServiceNotFoundException ex) {
+                        LOGGER.debug("Can't special implementation of DistributedLockSql for {}", dbType);
+                    }
+                    return EnhancedServiceLoader.load(DistributedLockSql.class, "default");
+                }
+        );
     }
 }
