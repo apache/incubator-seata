@@ -17,9 +17,10 @@
 package org.apache.seata.core.protocol;
 
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
+import org.apache.seata.core.serializer.SerializerType;
 
 /**
  * @since 0.7.0
@@ -75,8 +76,7 @@ public interface ProtocolConstants {
      * 
      * @see SerializerType#SEATA
      */
-    byte CONFIGURED_CODEC = SerializerType.getByName(ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name())).getCode();
+    byte CONFIGURED_CODEC = SerializerServiceLoader.getSupportedSerializers().iterator().next().getCode();
 
     /**
      * Configured compressor by user, default is NONE
