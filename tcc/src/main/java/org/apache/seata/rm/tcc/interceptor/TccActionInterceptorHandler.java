@@ -38,6 +38,8 @@ import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 
@@ -45,6 +47,8 @@ import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_O
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorHandler.class);
 
     private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
             DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
@@ -54,7 +58,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private Set<String> methodsToProxy;
     protected Object targetBean;
 
-    protected Map<Method, Annotation> parseAnnotationCache = new ConcurrentHashMap<>();
+    protected Map<Method, Object[]> parseAnnotationCache = new ConcurrentHashMap<>();
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         this.targetBean = targetBean;
@@ -67,8 +71,10 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             //not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
-        Method method = invocation.getMethod();
-        Annotation businessAction = parseAnnotation(method);
+
+        Object[] methodAndAnnotation = parseAnnotation(invocation);
+        Method method = (Method) methodAndAnnotation[0];
+        Annotation businessAction = (Annotation) methodAndAnnotation[1];
 
         //try method
         if (businessAction != null) {
@@ -99,30 +105,41 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return invocation.proceed();
     }
 
-    private Annotation parseAnnotation(Method methodKey) throws NoSuchMethodException {
-        Annotation result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
+    /**
+     * Get try method and the corresponding annotation of TCC mode.
+     *
+     * @param invocation
+     * @return
+     */
+    private Object[] parseAnnotation(InvocationWrapper invocation) {
+        Object[] results = parseAnnotationCache.computeIfAbsent(invocation.getMethod(), method -> {
             Annotation twoPhaseBusinessAction = method.getAnnotation(getAnnotationClass());
-            if (twoPhaseBusinessAction == null && targetBean.getClass() != null) {
-                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
+            Method tryMethod =  method;
+            if (twoPhaseBusinessAction == null && invocation.getTarget() != null) {
+                Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(invocation.getTarget().getClass());
                 if (interfaceClasses != null) {
                     for (Class<?> interClass : interfaceClasses) {
                         try {
                             Method m = interClass.getMethod(method.getName(), method.getParameterTypes());
                             twoPhaseBusinessAction = m.getAnnotation(getAnnotationClass());
                             if (twoPhaseBusinessAction != null) {
-                                // init common fence clean task if enable useTccFence
-                                initCommonFenceCleanTask(twoPhaseBusinessAction);
+                                tryMethod = m;
                                 break;
                             }
                         } catch (NoSuchMethodException e) {
-                            throw new RuntimeException(e);
+                            LOGGER.debug(method.getName() + ", no such method found", e);
                         }
                     }
                 }
             }
-            return twoPhaseBusinessAction;
+            if (twoPhaseBusinessAction == null) {
+                throw new RuntimeException("No such method with annotation" + getAnnotationClass());
+            }
+            // init common fence clean task if enable useTccFence
+            initCommonFenceCleanTask(twoPhaseBusinessAction);
+            return new Object[] {tryMethod, twoPhaseBusinessAction};
         });
-        return result;
+        return results;
     }
 
     protected TwoPhaseBusinessActionParam createTwoPhaseBusinessActionParam(Annotation annotation) {
