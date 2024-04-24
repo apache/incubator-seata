@@ -21,6 +21,7 @@ import org.apache.seata.rm.fence.SpringFenceConfig;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.SeataTccProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties;
@@ -45,8 +46,8 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SAGA_S
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_FENCE_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
-
 
 
 public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
@@ -66,6 +67,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(TCC_FENCE_PREFIX, SpringFenceConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
+        PROPERTY_BEAN_MAP.put(TCC_PREFIX, SeataTccProperties.class);
     }
 
     @Override
