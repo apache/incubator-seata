@@ -221,7 +221,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 // Rollback immediately before the XA Branch Context is deleted.
                 String xaBranchXid = this.xaBranchXid.toString();
                 rollback();
-                throw new SQLException("Branch " + xaBranchXid + " was rollbacked on commiting since " + sqle.getMessage(), SQLSTATE_XA_NOT_END, sqle);
+                throw new SQLException("Branch " + xaBranchXid + " was rollbacked on committing since " + sqle.getMessage(), SQLSTATE_XA_NOT_END, sqle);
             }
             long now = System.currentTimeMillis();
             checkTimeout(now);
