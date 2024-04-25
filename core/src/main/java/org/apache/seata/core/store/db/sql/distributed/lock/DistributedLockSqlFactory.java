@@ -39,13 +39,14 @@ public class DistributedLockSqlFactory {
      */
     public static DistributedLockSql getDistributedLogStoreSql(String dbType) {
         return distributedLockSqlCache.computeIfAbsent(dbType, method -> {
-                    try {
-                        return EnhancedServiceLoader.load(DistributedLockSql.class, dbType);
-                    } catch (EnhancedServiceNotFoundException ex) {
-                        LOGGER.debug("Can't special implementation of DistributedLockSql for {}", dbType);
-                    }
-                    return EnhancedServiceLoader.load(DistributedLockSql.class, "default");
+            try {
+                return EnhancedServiceLoader.load(DistributedLockSql.class, dbType);
+            } catch (EnhancedServiceNotFoundException ex) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Can't special implementation of DistributedLockSql for {}", dbType);
                 }
-        );
+            }
+            return EnhancedServiceLoader.load(DistributedLockSql.class, "default");
+        });
     }
 }
