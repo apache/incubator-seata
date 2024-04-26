@@ -540,7 +540,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private void rollbackingSchedule(long delay) {
         syncProcessing.schedule(
-            () -> SessionHolder.distributedLockAndExecute(ROLLBACKING, this::handleRollbackingByScheduled),
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(ROLLBACKING, this::handleRollbackingByScheduled);
+                if (!called) {
+                    rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
+                }
+            },
             delay, TimeUnit.MILLISECONDS);
     }
 
@@ -584,7 +589,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private void committingSchedule(long delay) {
         syncProcessing.schedule(
-            () -> SessionHolder.distributedLockAndExecute(COMMITTING, this::handleCommittingByScheduled),
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(COMMITTING, this::handleCommittingByScheduled);
+                if (!called) {
+                    committingSchedule(COMMITTING_RETRY_PERIOD);
+                }
+            },
             delay, TimeUnit.MILLISECONDS);
     }
 
