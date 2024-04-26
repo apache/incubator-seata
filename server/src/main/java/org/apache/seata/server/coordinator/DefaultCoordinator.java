@@ -28,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -159,6 +160,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
+
+    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+        .getInt(org.apache.seata.common.ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));
@@ -492,15 +496,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle rollbacking by scheduled.
      */
     protected void handleRollbackingByScheduled() {
-        long delay = ROLLBACKING_RETRY_PERIOD;
         SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
         sessionCondition.setLazyLoadBranch(true);
         List<GlobalSession> rollbackingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
-            rollbackingSchedule(delay);
+            rollbackingSchedule(RETRY_DEAD_THRESHOLD);
             return;
         }
+        long delay = ROLLBACKING_RETRY_PERIOD;
         rollbackingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
         List<GlobalSession> needDoRollbackingSessions = new ArrayList<>();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
@@ -548,15 +552,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle committing by scheduled.
      */
     protected void handleCommittingByScheduled() {
-        long delay = COMMITTING_RETRY_PERIOD;
         SessionCondition sessionCondition = new SessionCondition(committingStatuses);
         sessionCondition.setLazyLoadBranch(true);
         List<GlobalSession> committingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
-            committingSchedule(delay);
+            committingSchedule(RETRY_DEAD_THRESHOLD);
             return;
         }
+        long delay = COMMITTING_RETRY_PERIOD;
         committingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
         List<GlobalSession> needDoCommittingSessions = new ArrayList<>();
         for (GlobalSession committingSession : committingSessions) {
