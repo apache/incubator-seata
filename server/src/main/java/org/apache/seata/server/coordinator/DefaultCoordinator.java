@@ -146,11 +146,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final int DEFAULT_BRANCH_ASYNC_QUEUE_SIZE = 5000;
 
     /**
-     * the constant DEFAULT_SYNC_PROCESSING_DELAY
-     */
-    private static final long DEFAULT_SYNC_PROCESSING_DELAY = 1000;
-
-    /**
      * the pool size of branch asynchronous remove thread pool
      */
     private static final int BRANCH_ASYNC_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
@@ -618,9 +613,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             () -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
             UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
 
-        rollbackingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+        rollbackingSchedule(0);
 
-        committingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+        committingSchedule(0);
     }
 
     @Override
