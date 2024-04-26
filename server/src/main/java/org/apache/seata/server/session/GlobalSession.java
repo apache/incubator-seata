@@ -206,6 +206,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
     }
 
+    /**
+     * prevent could not handle committing and rollbacking transaction
+     * @return time to dead session. if not greater than 0, then deadSession
+     */
+    public long timeToDeadSession() {
+        return beginTime + RETRY_DEAD_THRESHOLD - System.currentTimeMillis();
+    }
+
     @Override
     public void begin() throws TransactionException {
         this.status = GlobalStatus.Begin;

@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -424,12 +425,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
-                // prevent repeated commit
-                if (GlobalStatus.Committed.equals(committingSession.getStatus())
-                        && !committingSession.isDeadSession()) {
-                    // The function of this 'return' is 'continue'.
-                    return;
-                }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
 
                     // commit retry timeout event
@@ -513,8 +508,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         rollbackingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
         //The first one is the oldest one.
         GlobalSession globalSession = rollbackingSessions.get(0);
-        if (!globalSession.isDeadSession()) {
-            rollbackingSchedule(System.currentTimeMillis() - globalSession.getBeginTime());
+        long delay = globalSession.timeToDeadSession();
+        if (delay > 0) {
+            rollbackingSchedule(Math.max(delay, ROLLBACKING_RETRY_PERIOD));
             return;
         }
         long now = System.currentTimeMillis();
@@ -564,8 +560,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         committingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
         //The first one is the oldest one.
         GlobalSession globalSession = committingSessions.get(0);
-        if (!globalSession.isDeadSession()) {
-            committingSchedule(System.currentTimeMillis() - globalSession.getBeginTime());
+        long delay = globalSession.timeToDeadSession();
+        if (delay > 0) {
+            committingSchedule(Math.max(delay, COMMITTING_RETRY_PERIOD));
             return;
         }
         long now = System.currentTimeMillis();
