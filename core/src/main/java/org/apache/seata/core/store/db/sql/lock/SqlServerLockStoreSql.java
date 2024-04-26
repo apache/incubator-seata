@@ -31,8 +31,19 @@ public class SqlServerLockStoreSql extends AbstractLockStoreSql {
     private static final String INSERT_LOCK_SQL_SQLSERVER = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")"
             + " values (?, ?, ?, ?, ?, ?, ?, SYSDATETIME(), SYSDATETIME(), ?)";
 
+    /**
+     * The constant QUERY_ALL_LOCK.
+     */
+    private static final String QUERY_ALL_LOCK_SQLSERVER = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
+            + WHERE_PLACE_HOLD;
+
     @Override
     public String getInsertLockSQL(String lockTable) {
         return INSERT_LOCK_SQL_SQLSERVER.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
+    }
+
+    @Override
+    public String getAllLockSql(String lockTable, String whereCondition) {
+        return QUERY_ALL_LOCK_SQLSERVER.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(WHERE_PLACE_HOLD, whereCondition);
     }
 }

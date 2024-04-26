@@ -37,7 +37,7 @@ public class PageUtilTest {
         String oracleTargetSql = "select * from " +
                 "( select ROWNUM rn, temp.* from (select * from test where a = 1) temp )" +
                 " where rn between 1 and 5";
-        String sqlserverTargetSql = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
+        String sqlserverTargetSql = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
 
         assertEquals(PageUtil.pageSql(sourceSql, "mysql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "h2", 1, 5), mysqlTargetSql);

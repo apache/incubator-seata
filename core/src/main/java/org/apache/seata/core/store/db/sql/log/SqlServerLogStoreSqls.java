@@ -27,6 +27,12 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
 
     /**
+     * The constant QUERY_ALL_GLOBAL_SESSION_SQLSERVER.
+     */
+    private static final String QUERY_ALL_GLOBAL_SESSION_SQLSERVER = "select " + ALL_GLOBAL_COLUMNS + " from "
+            + GLOBAL_TABLE_PLACEHOLD + WHERE_PLACEHOLD;
+
+    /**
      * The constant INSERT_GLOBAL_TRANSACTION_SQLSERVER.
      */
     public static final String INSERT_GLOBAL_TRANSACTION_SQLSERVER = "insert into " + GLOBAL_TABLE_PLACEHOLD
@@ -84,6 +90,11 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
             + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = SYSDATETIME()"
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
             + "   and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
+
+    @Override
+    public String getAllGlobalSessionSql(String globalTable, String whereCondition) {
+        return QUERY_ALL_GLOBAL_SESSION_SQLSERVER.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(WHERE_PLACEHOLD, whereCondition);
+    }
 
     @Override
     public String getInsertGlobalTransactionSQL(String globalTable) {
