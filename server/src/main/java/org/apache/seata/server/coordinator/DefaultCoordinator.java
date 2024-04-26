@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.coordinator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -491,24 +492,28 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle rollbacking by scheduled.
      */
     protected void handleRollbackingByScheduled() {
+        long delay = ROLLBACKING_RETRY_PERIOD;
         SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
         sessionCondition.setLazyLoadBranch(true);
         List<GlobalSession> rollbackingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
-            rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
+            rollbackingSchedule(delay);
             return;
         }
         rollbackingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
-        //The first one is the oldest one.
-        GlobalSession globalSession = rollbackingSessions.get(0);
-        long delay = globalSession.timeToDeadSession();
-        if (delay > 0) {
-            rollbackingSchedule(Math.max(delay, ROLLBACKING_RETRY_PERIOD));
-            return;
+        List<GlobalSession> needDoRollbackingSessions = new ArrayList<>();
+        for (GlobalSession rollbackingSession : rollbackingSessions) {
+            long time = rollbackingSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoRollbackingSessions.add(rollbackingSession);
+            } else {
+                delay = Math.max(time, ROLLBACKING_RETRY_PERIOD);
+                break;
+            }
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
+        SessionHelper.forEach(needDoRollbackingSessions, rollbackingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
@@ -525,7 +530,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.error("Failed to handle rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         });
-        rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
+        rollbackingSchedule(delay);
     }
 
     private void rollbackingSchedule(long delay) {
@@ -543,24 +548,28 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle committing by scheduled.
      */
     protected void handleCommittingByScheduled() {
+        long delay = COMMITTING_RETRY_PERIOD;
         SessionCondition sessionCondition = new SessionCondition(committingStatuses);
         sessionCondition.setLazyLoadBranch(true);
         List<GlobalSession> committingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
-            committingSchedule(COMMITTING_RETRY_PERIOD);
+            committingSchedule(delay);
             return;
         }
         committingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
-        //The first one is the oldest one.
-        GlobalSession globalSession = committingSessions.get(0);
-        long delay = globalSession.timeToDeadSession();
-        if (delay > 0) {
-            committingSchedule(Math.max(delay, COMMITTING_RETRY_PERIOD));
-            return;
+        List<GlobalSession> needDoCommittingSessions = new ArrayList<>();
+        for (GlobalSession committingSession : committingSessions) {
+            long time = committingSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoCommittingSessions.add(committingSession);
+            } else {
+                delay = Math.max(time, COMMITTING_RETRY_PERIOD);
+                break;
+            }
         }
         long now = System.currentTimeMillis();
-        SessionHelper.forEach(committingSessions, committingSession -> {
+        SessionHelper.forEach(needDoCommittingSessions, committingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
 
@@ -575,7 +584,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.error("Failed to handle committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         });
-        committingSchedule(COMMITTING_RETRY_PERIOD);
+        committingSchedule(delay);
     }
 
     private void committingSchedule(long delay) {
