@@ -507,7 +507,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         List<GlobalSession> rollbackingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
-            rollbackingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+            rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
             return;
         }
         rollbackingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
@@ -535,7 +535,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.error("Failed to handle rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         });
-        rollbackingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+        rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
     }
 
     private void rollbackingSchedule(long delay) {
@@ -553,7 +553,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         List<GlobalSession> committingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
         if (CollectionUtils.isEmpty(committingSessions)) {
-            committingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+            committingSchedule(COMMITTING_RETRY_PERIOD);
             return;
         }
         committingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
@@ -579,7 +579,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 LOGGER.error("Failed to handle committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         });
-        committingSchedule(DEFAULT_SYNC_PROCESSING_DELAY);
+        committingSchedule(COMMITTING_RETRY_PERIOD);
     }
 
     private void committingSchedule(long delay) {
