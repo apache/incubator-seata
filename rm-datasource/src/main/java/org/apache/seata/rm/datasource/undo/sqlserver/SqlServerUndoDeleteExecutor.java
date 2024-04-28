@@ -16,21 +16,32 @@
  */
 package org.apache.seata.rm.datasource.undo.sqlserver;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
+import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 
 public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
+
+    private boolean tableIdentifyExistence = false;
+
     /**
      * Instantiates a new sql server delete undo executor.
      *
@@ -59,17 +70,88 @@ public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
                 .collect(Collectors.joining(", "));
 
-        return "SET IDENTITY_INSERT " +
-                sqlUndoLog.getTableName() +
-                " ON; INSERT INTO " +
-                sqlUndoLog.getTableName() +
-                " (" +
-                insertColumns +
-                ") VALUES (" +
-                insertValues +
-                "); SET IDENTITY_INSERT " +
-                sqlUndoLog.getTableName() +
-                " OFF;";
+        if (tableIdentifyExistence) {
+            return "begin " +
+                    "SET IDENTITY_INSERT " + sqlUndoLog.getTableName() + " ON;" +
+                    "INSERT INTO " + sqlUndoLog.getTableName() + "(" + insertColumns + ") VALUES (" + insertValues + ");" +
+                    "SET IDENTITY_INSERT " + sqlUndoLog.getTableName() + " OFF; " +
+                    "end";
+        }
+        return "INSERT INTO " + sqlUndoLog.getTableName() + "(" + insertColumns + ") VALUES (" + insertValues + ");";
+    }
+
+    /**
+     * Obtain the real table name. Sometimes the table name in sqlUndoLog is combined with its schema or even database.
+     *
+     * @param tableName
+     * @return
+     */
+    private String getPureTableName(String tableName) {
+        int i = tableName.lastIndexOf(".");
+        if (i <= 0) {
+            return tableName;
+        }
+        return tableName.substring(i + 1);
+    }
+
+    /**
+     * Judge whether there is a column of a SQLServer table is with a "IDENTITY"
+     *
+     * @param connectionProxy
+     */
+    private void judgeTableIdentifyExistence(ConnectionProxy connectionProxy) {
+        tableIdentifyExistence = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+                .getTableMeta(
+                        connectionProxy.getTargetConnection(),
+                        getPureTableName(sqlUndoLog.getTableName()),
+                        connectionProxy.getDataSourceProxy().getResourceId()
+                ).getAllColumns().values().stream().anyMatch(ColumnMeta::isAutoincrement);
+    }
+
+    /**
+     * Execute on.
+     *
+     * @param connectionProxy the connection proxy
+     * @throws SQLException the sql exception
+     */
+    @Override
+    public void executeOn(ConnectionProxy connectionProxy) throws SQLException {
+        Connection conn = connectionProxy.getTargetConnection();
+        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(connectionProxy)) {
+            return;
+        }
+
+        judgeTableIdentifyExistence(connectionProxy);
+
+        PreparedStatement undoPST = null;
+        try {
+            String undoSQL = buildUndoSQL();
+            undoPST = conn.prepareStatement(undoSQL);
+            TableRecords undoRows = getUndoRows();
+            for (Row undoRow : undoRows.getRows()) {
+                ArrayList<Field> undoValues = new ArrayList<>();
+                List<Field> pkValueList = getOrderedPkList(undoRows, undoRow, connectionProxy.getDbType());
+                for (Field field : undoRow.getFields()) {
+                    if (field.getKeyType() != KeyType.PRIMARY_KEY) {
+                        undoValues.add(field);
+                    }
+                }
+
+                undoPrepare(undoPST, undoValues, pkValueList);
+
+                undoPST.executeUpdate();
+            }
+
+        } catch (Exception ex) {
+            if (ex instanceof SQLException) {
+                throw (SQLException) ex;
+            } else {
+                throw new SQLException(ex);
+            }
+        } finally {
+            IOUtil.close(undoPST);
+        }
+
     }
 
     @Override
