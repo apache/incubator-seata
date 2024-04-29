@@ -158,7 +158,10 @@ public final class ConfigurationFactory {
         Configuration configuration = ORIGIN_FILE_INSTANCE;
         Configuration extConfiguration = getSpringConfiguration();
         if (null == extConfiguration) {
-            configuration = getNonSpringConfiguration(configTypeName);
+            Configuration springConfiguration = getNonSpringConfiguration(configTypeName);
+            if (null != springConfiguration) {
+                configuration = springConfiguration;
+            }
         }
         try {
             Configuration configurationCache;
@@ -217,8 +220,9 @@ public final class ConfigurationFactory {
                 Objects.requireNonNull(configTypeName), false).provide();
             return configuration;
         }  catch (Exception exx) {
-            throw new RuntimeException(String.format("failed to load non-spring configuration :%s", exx.getMessage()), exx);
+            LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }
+        return null;
     }
 
     protected static void reload() {
