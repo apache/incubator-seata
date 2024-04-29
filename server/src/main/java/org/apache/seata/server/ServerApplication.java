@@ -29,21 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application
-        SpringApplication app = new SpringApplication(ServerApplication.class);
-        // set the banner and version information
-        app.setBanner((environment, sourceClass, out) -> {
-            out.println("====================================================================");
-            out.println("                           _             _____            _        \n" +
-                    "    /\\                    | |           / ____|          | |       \n" +
-                    "   /  \\   _ __   __ _  ___| |__   ___  | (___   ___  __ _| |_ __ _ \n" +
-                    "  / /\\ \\ | '_ \\ / _` |/ __| '_ \\ / _ \\  \\___ \\ / _ \\/ _` | __/ _` |\n" +
-                    " / ____ \\| |_) | (_| | (__| | | |  __/  ____) |  __/ (_| | || (_| |\n" +
-                    "/_/    \\_\\ .__/ \\__,_|\\___|_| |_|\\___| |_____/ \\___|\\__,_|\\__\\__,_|\n" +
-                    "         | |                                                       \n" +
-                    "         |_|                                                       \n");
-            out.println("                        Current Version: " + Version.getCurrent());
-            out.println("====================================================================");
-        });
-        app.run(args);
+        System.out.println("current version:"+Version.getCurrent());
+        SpringApplication.run(ServerApplication.class, args);
     }
 }
