@@ -180,21 +180,6 @@ public final class ConfigurationFactory {
 
     private static Configuration getSpringConfiguration() {
         Configuration configuration = ORIGIN_FILE_INSTANCE;
-        io.seata.config.Configuration oldConfiguration = new io.seata.config.FileConfiguration(configuration);
-        try {
-            io.seata.config.Configuration configurationSPIInstance = EnhancedServiceLoader.load(
-                io.seata.config.ExtConfigurationProvider.class).provide(oldConfiguration);
-            if (null != configurationSPIInstance) {
-                Configuration configurationSPIInstanceProxy = (Configuration)Proxy.newProxyInstance(
-                    ConfigurationFactory.class.getClassLoader(), new Class[] {Configuration.class},
-                    new OldConfigurationInvocationHandler(configurationSPIInstance));
-                return configurationSPIInstanceProxy;
-            }
-        } catch (EnhancedServiceNotFoundException ignore) {
-            //ignore
-        } catch (Exception exx) {
-            LOGGER.error("failed to load spring configuration :{}", exx.getMessage(), exx);
-        }
         if (null != configuration) {
             try {
                 Configuration extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class, false).provide(
@@ -231,12 +216,9 @@ public final class ConfigurationFactory {
             Configuration configuration = EnhancedServiceLoader.load(ConfigurationProvider.class,
                 Objects.requireNonNull(configTypeName), false).provide();
             return configuration;
-        } catch (EnhancedServiceNotFoundException ignore) {
-            //ignore
-        } catch (Exception exx) {
-            LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
+        }  catch (Exception exx) {
+            throw new RuntimeException(String.format("failed to load non-spring configuration :%s", exx.getMessage()), exx);
         }
-        return ORIGIN_FILE_INSTANCE;
     }
 
     protected static void reload() {
@@ -251,9 +233,10 @@ public final class ConfigurationFactory {
     static class OldConfigurationInvocationHandler implements InvocationHandler {
         private final io.seata.config.Configuration configuration;
 
-        private final String[] simpleParamsMethodNames = new String[] {"getShort", "getInt", "getLong", "getDuration",
-            "getBoolean", "getConfig", "putConfig", "getLatestConfig", "putConfigIfAbsent", "removeConfig",
-            "getConfigFromSys"};
+        private static final String[] SIMPLE_PARAMS_METHOD_NAMES = new String[] {"getShort", "getInt", "getLong", "getDuration", "getBoolean", "getConfig", "putConfig", "getLatestConfig", "putConfigIfAbsent", "removeConfig", "getConfigFromSys"};
+
+        private static final List<String> SIMPLE_METHOD_NAMES =
+            Arrays.stream(SIMPLE_PARAMS_METHOD_NAMES).collect(Collectors.toList());
 
         public OldConfigurationInvocationHandler(io.seata.config.Configuration configuration) {
             this.configuration = configuration;
@@ -261,8 +244,7 @@ public final class ConfigurationFactory {
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            List<String> simpleMethod = Arrays.stream(simpleParamsMethodNames).collect(Collectors.toList());
-            if (simpleMethod.contains(method.getName())) {
+            if (SIMPLE_METHOD_NAMES.contains(method.getName())) {
                 Class[] classes = new Class[args.length];
                 for (int i = 0; i < args.length; i++) {
                     classes[i] = args[i].getClass();
