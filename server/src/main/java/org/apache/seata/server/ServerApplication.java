@@ -29,7 +29,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
         // run the spring-boot application
-        System.out.println("current version:"+Version.getCurrent());
+        System.out.println("current version:" + Version.getCurrent());
         SpringApplication.run(ServerApplication.class, args);
     }
 }
