@@ -6,5 +6,5 @@
 /_/    \_\ .__/ \__,_|\___|_| |_|\___| |_____/ \___|\__,_|\__\__,_|
          | |
          |_|
-github:https://github.com/apache/incubator-seata
 document:https://seata.apache.org
+github:https://github.com/apache/incubator-seata
