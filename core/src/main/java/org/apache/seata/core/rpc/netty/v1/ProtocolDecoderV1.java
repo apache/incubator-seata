@@ -16,6 +16,9 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.util.Map;
+import java.util.Set;
+
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
@@ -29,7 +32,6 @@ import org.apache.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 
 /**
  * <pre>
@@ -62,6 +64,13 @@ import java.util.Map;
 public class ProtocolDecoderV1 implements ProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
+    private final Set<SerializerType> supportDeSerializerTypes;
+
+    public ProtocolDecoderV1() {
+        supportDeSerializerTypes = SerializerServiceLoader.getSupportedSerializers();
+        if (supportDeSerializerTypes.isEmpty()) {
+            throw new IllegalArgumentException("No serializer found");
+        }    }
 
     @Override
     public ProtocolRpcMessage decodeFrame(ByteBuf frame) {
@@ -106,8 +115,13 @@ public class ProtocolDecoderV1 implements ProtocolDecoder {
                 frame.readBytes(bs);
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), version);
-                rpcMessage.setBody(serializer.deserialize(bs));
+                SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
+                if (this.supportDeSerializerTypes.contains(protocolType)) {
+                    Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
+                    rpcMessage.setBody(serializer.deserialize(bs));
+                } else {
+                    throw new IllegalArgumentException("SerializerType not match");
+                }
             }
         }
 
