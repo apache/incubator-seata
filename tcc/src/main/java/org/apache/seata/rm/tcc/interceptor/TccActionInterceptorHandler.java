@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.tcc.interceptor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     private Set<String> methodsToProxy;
     protected Object targetBean;
 
-    protected Map<Method, TwoPhaseBusinessAction> parseAnnotationCache = new ConcurrentHashMap<>();
+    protected Map<Method, Annotation> parseAnnotationCache = new ConcurrentHashMap<>();
 
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         this.targetBean = targetBean;
@@ -67,7 +68,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             return invocation.proceed();
         }
         Method method = invocation.getMethod();
-        TwoPhaseBusinessAction businessAction = parseAnnotation(method);
+        Annotation businessAction = parseAnnotation(method);
 
         //try method
         if (businessAction != null) {
@@ -76,28 +77,17 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             //save the previous branchType
             BranchType previousBranchType = RootContext.getBranchType();
             //if not TCC, bind TCC branchType
-            if (BranchType.TCC != previousBranchType) {
-                RootContext.bindBranchType(BranchType.TCC);
+            if (getBranchType() != previousBranchType) {
+                RootContext.bindBranchType(getBranchType());
             }
             try {
-                TwoPhaseBusinessActionParam businessActionParam = new TwoPhaseBusinessActionParam();
-                businessActionParam.setActionName(businessAction.name());
-                businessActionParam.setDelayReport(businessAction.isDelayReport());
-                businessActionParam.setUseCommonFence(businessAction.useTCCFence());
-                businessActionParam.setBranchType(BranchType.TCC);
-                Map<String, Object> businessActionContextMap = new HashMap<>(4);
-                //the phase two method name
-                businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
-                businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
-                businessActionContextMap.put(Constants.ACTION_NAME, businessAction.name());
-                businessActionContextMap.put(Constants.USE_COMMON_FENCE, businessAction.useTCCFence());
-                businessActionParam.setBusinessActionContext(businessActionContextMap);
+                TwoPhaseBusinessActionParam businessActionParam = createTwoPhaseBusinessActionParam(businessAction);
                 //Handler the TCC Aspect, and return the business result
                 return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
                         invocation::proceed);
             } finally {
                 //if not TCC, unbind branchType
-                if (BranchType.TCC != previousBranchType) {
+                if (getBranchType() != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
                 //MDC remove branchId
@@ -109,19 +99,19 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return invocation.proceed();
     }
 
-    private TwoPhaseBusinessAction parseAnnotation(Method methodKey) throws NoSuchMethodException {
-        TwoPhaseBusinessAction result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
-            TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (businessAction == null && targetBean.getClass() != null) {
+    private Annotation parseAnnotation(Method methodKey) throws NoSuchMethodException {
+        Annotation result = parseAnnotationCache.computeIfAbsent(methodKey, method -> {
+            Annotation twoPhaseBusinessAction = method.getAnnotation(getAnnotationClass());
+            if (twoPhaseBusinessAction == null && targetBean.getClass() != null) {
                 Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
                 if (interfaceClasses != null) {
                     for (Class<?> interClass : interfaceClasses) {
                         try {
                             Method m = interClass.getMethod(method.getName(), method.getParameterTypes());
-                            businessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
-                            if (businessAction != null) {
+                            twoPhaseBusinessAction = m.getAnnotation(getAnnotationClass());
+                            if (twoPhaseBusinessAction != null) {
                                 // init common fence clean task if enable useTccFence
-                                initCommonFenceCleanTask(businessAction);
+                                initCommonFenceCleanTask(twoPhaseBusinessAction);
                                 break;
                             }
                         } catch (NoSuchMethodException e) {
@@ -130,9 +120,42 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                     }
                 }
             }
-            return businessAction;
+            return twoPhaseBusinessAction;
         });
         return result;
+    }
+
+    protected TwoPhaseBusinessActionParam createTwoPhaseBusinessActionParam(Annotation annotation) {
+        TwoPhaseBusinessAction businessAction = (TwoPhaseBusinessAction) annotation;
+        TwoPhaseBusinessActionParam businessActionParam = new TwoPhaseBusinessActionParam();
+        businessActionParam.setActionName(businessAction.name());
+        businessActionParam.setDelayReport(businessAction.isDelayReport());
+        businessActionParam.setUseCommonFence(businessAction.useTCCFence());
+        businessActionParam.setBranchType(getBranchType());
+        Map<String, Object> businessActionContextMap = new HashMap<>(4);
+        //the phase two method name
+        businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
+        businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
+        businessActionContextMap.put(Constants.ACTION_NAME, businessAction.name());
+        businessActionContextMap.put(Constants.USE_COMMON_FENCE, businessAction.useTCCFence());
+        businessActionParam.setBusinessActionContext(businessActionContextMap);
+        return businessActionParam;
+    }
+
+    protected boolean parserCommonFenceConfig(Annotation annotation) {
+        if (annotation == null) {
+            return false;
+        }
+        TwoPhaseBusinessAction businessAction = (TwoPhaseBusinessAction) annotation;
+        return businessAction.useTCCFence();
+    }
+
+    protected BranchType getBranchType() {
+        return BranchType.TCC;
+    }
+
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return TwoPhaseBusinessAction.class;
     }
 
     /**
@@ -140,12 +163,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
      *
      * @param twoPhaseBusinessAction the twoPhaseBusinessAction
      */
-    private void initCommonFenceCleanTask(TwoPhaseBusinessAction twoPhaseBusinessAction) {
+    private void initCommonFenceCleanTask(Annotation twoPhaseBusinessAction) {
         CommonFenceConfig commonFenceConfig = (CommonFenceConfig) ObjectHolder.INSTANCE.getObject(BEAN_NAME_SPRING_FENCE_CONFIG);
         if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
             return;
         }
-        if (twoPhaseBusinessAction != null && twoPhaseBusinessAction.useTCCFence()) {
+        if (twoPhaseBusinessAction != null && parserCommonFenceConfig(twoPhaseBusinessAction)) {
             if (commonFenceConfig.getInitialized().compareAndSet(false, true)) {
                 // init common fence clean task if enable useTccFence
                 commonFenceConfig.init();

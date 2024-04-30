@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.tcc.interceptor;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,17 +33,12 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.NormalTccActionImpl;
 import org.apache.seata.rm.tcc.TccParam;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
 public class ProxyUtilsTccTest {
 
     private final String DEFAULT_XID = "default_xid";
-
-    private static NormalTccActionImpl tccAction;
-
-    private static NormalTccActionImpl tccActionProxy;
 
     AtomicReference<String> branchReference = new AtomicReference<String>();
 
@@ -105,11 +99,7 @@ public class ProxyUtilsTccTest {
 
     };
 
-    @BeforeAll
-    public static void init() throws IOException {
-        tccAction = new NormalTccActionImpl();
-        tccActionProxy = ProxyUtil.createProxy(tccAction);
-    }
+    private final NormalTccActionImpl tccActionProxy= ProxyUtil.createProxy(new NormalTccActionImpl());
 
 
     @Test

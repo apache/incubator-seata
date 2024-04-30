@@ -80,7 +80,12 @@ public class MockServer {
                     coordinator.setRemotingServer(nettyRemotingServer);
                     nettyRemotingServer.setHandler(coordinator);
                     nettyRemotingServer.init();
-
+                    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            close();
+                        }
+                    }));
                     LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
                 }
             }
