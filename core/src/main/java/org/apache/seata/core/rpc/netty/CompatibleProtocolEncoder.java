@@ -21,7 +21,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.protocol.AbstractIdentifyRequest;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
@@ -39,7 +38,6 @@ import java.util.Map;
  * <li>Head Length: include head data from magic code to head map. </li>
  * <li>Body Length: Full Length - Head Length</li>
  * </p>
- *
  */
 public class CompatibleProtocolEncoder extends MessageToByteEncoder {
 
@@ -61,7 +59,7 @@ public class CompatibleProtocolEncoder extends MessageToByteEncoder {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
                 String sdkVersion = rpcMessage.getOtherSideVersion();
-                if(StringUtils.isBlank(sdkVersion)){
+                if (StringUtils.isBlank(sdkVersion)) {
                     sdkVersion = Version.getCurrent();
                 }
                 byte protocolVersion = Version.calcProtocolVersion(sdkVersion);
