@@ -16,6 +16,14 @@
  */
 package org.apache.seata.common.loader;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,19 +38,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-import org.apache.seata.common.Constants;
-import org.apache.seata.common.executor.Initialize;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * The type Enhanced service loader.
- *
  */
 public class EnhancedServiceLoader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
 
     /**
      * Class->InnerEnhancedServiceLoader map
@@ -183,11 +183,15 @@ public class EnhancedServiceLoader {
      * @param activateName the activate name
      */
     public static <S> void unload(Class<S> service, String activateName) {
-
         if (activateName == null) {
             throw new IllegalArgumentException("activateName is null");
         }
+
         InnerEnhancedServiceLoader<S> serviceLoader = InnerEnhancedServiceLoader.getServiceLoader(service);
+        doUnload(serviceLoader, activateName);
+    }
+
+    private static <S> void doUnload(InnerEnhancedServiceLoader<S> serviceLoader, String activateName) {
         ConcurrentMap<Class<?>, ExtensionDefinition<S>> classToDefinitionMap = serviceLoader.classToDefinitionMap;
         List<ExtensionDefinition<S>> extensionDefinitions = new ArrayList<>();
         for (Map.Entry<Class<?>, ExtensionDefinition<S>> entry : classToDefinitionMap.entrySet()) {
@@ -207,7 +211,6 @@ public class EnhancedServiceLoader {
 
             }
         }
-
     }
 
 
@@ -233,6 +236,7 @@ public class EnhancedServiceLoader {
     static <S> List<Class<S>> getAllExtensionClass(Class<S> service, ClassLoader loader) {
         return InnerEnhancedServiceLoader.getServiceLoader(service).getAllExtensionClass(loader);
     }
+
     /**
      * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
      *
@@ -248,6 +252,9 @@ public class EnhancedServiceLoader {
         private static final String SERVICES_DIRECTORY = "META-INF/services/";
         private static final String SEATA_DIRECTORY = "META-INF/seata/";
 
+        private static final String APACHE_SEATA_PACKAGE_NAME = "org.apache.seata";
+        private static final String IO_SEATA_PACKAGE_NAME = "io.seata";
+
         private final Class<S> type;
         private final Holder<List<ExtensionDefinition<S>>> definitionsHolder = new Holder<>();
         private final ConcurrentMap<ExtensionDefinition<S>, Holder<Object>> definitionToInstanceMap =
@@ -258,6 +265,7 @@ public class EnhancedServiceLoader {
         private InnerEnhancedServiceLoader(Class<S> type) {
             this.type = type;
         }
+
 
         /**
          * Get the ServiceLoader for the specified Class
@@ -280,7 +288,7 @@ public class EnhancedServiceLoader {
             if (type == null) {
                 throw new IllegalArgumentException("Enhanced Service type is null");
             }
-            return (InnerEnhancedServiceLoader<S>)SERVICE_LOADERS.remove(type);
+            return (InnerEnhancedServiceLoader<S>) SERVICE_LOADERS.remove(type);
         }
 
         private static void removeAllServiceLoader() {
@@ -477,8 +485,20 @@ public class EnhancedServiceLoader {
         private List<ExtensionDefinition<S>> findAllExtensionDefinition(ClassLoader loader) {
             List<ExtensionDefinition<S>> extensionDefinitions = new ArrayList<>();
             try {
-                loadFile(SERVICES_DIRECTORY, loader, extensionDefinitions);
-                loadFile(SEATA_DIRECTORY, loader, extensionDefinitions);
+                loadFile(SERVICES_DIRECTORY, type, loader, extensionDefinitions);
+                loadFile(SEATA_DIRECTORY, type, loader, extensionDefinitions);
+
+                @SuppressWarnings("rawtypes") Class compatibleService = getCompatibleService(type);
+                if (compatibleService != null) {
+                    if (type.isAssignableFrom(compatibleService)) {
+                        LOGGER.info("Load compatible class {}", compatibleService.getName());
+                        loadFile(SERVICES_DIRECTORY, compatibleService, loader, extensionDefinitions);
+                        loadFile(SEATA_DIRECTORY, compatibleService, loader, extensionDefinitions);
+                    } else {
+                        LOGGER.info("Ignore load compatible class {}, because is not assignable from origin type {}", compatibleService.getName(), type.getName());
+                    }
+                }
+
             } catch (IOException e) {
                 throw new EnhancedServiceNotFoundException(e);
             }
@@ -505,8 +525,17 @@ public class EnhancedServiceLoader {
             return extensionDefinitions;
         }
 
+        private static Class getCompatibleService(Class originType) {
+            String ioSeataType = originType.getName().replace(APACHE_SEATA_PACKAGE_NAME, IO_SEATA_PACKAGE_NAME);
+            try {
+                return Class.forName(ioSeataType);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
 
-        private void loadFile(String dir, ClassLoader loader, List<ExtensionDefinition<S>> extensions)
+
+        private void loadFile(String dir, Class type, ClassLoader loader, List<ExtensionDefinition<S>> extensions)
                 throws IOException {
             String fileName = dir + type.getName();
             Enumeration<java.net.URL> urls;

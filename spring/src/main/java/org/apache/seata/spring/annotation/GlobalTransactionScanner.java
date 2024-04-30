@@ -23,14 +23,17 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableSet;
+import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.ShutdownHook;
@@ -54,9 +57,6 @@ import org.apache.seata.spring.util.SpringProxyUtils;
 import org.apache.seata.tm.TMClient;
 import org.apache.seata.tm.api.FailureHandler;
 import org.apache.seata.tm.api.FailureHandlerHolder;
-import org.aopalliance.aop.Advice;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
@@ -86,7 +86,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
  *
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-        implements ConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
+        implements CachedConfigurationChangeListener, InitializingBean, ApplicationContextAware, DisposableBean {
 
     private static final long serialVersionUID = 1L;
 
@@ -215,7 +215,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().destroyAll();
     }
 
-    private void initClient() {
+    protected void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
@@ -246,7 +246,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     }
 
-    private void registerSpringShutdownHook() {
+    protected void registerSpringShutdownHook() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
@@ -473,8 +473,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
             }
-            ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                    (ConfigurationChangeListener) this);
+            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (CachedConfigurationChangeListener) this);
             return;
         }
         if (initialized.compareAndSet(false, true)) {
@@ -561,7 +560,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("{} config changed, old value:true, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                         event.getNewValue());
                 initClient();
-                ConfigurationCache.removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
+                ConfigurationFactory.getInstance().removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             }
         }
     }
@@ -591,5 +590,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (ArrayUtils.isNotEmpty(beanNames)) {
             EXCLUDE_BEAN_NAME_SET.addAll(Arrays.asList(beanNames));
         }
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public String getTxServiceGroup() {
+        return txServiceGroup;
+    }
+
+    public static String getAccessKey() {
+        return accessKey;
+    }
+
+    public static String getSecretKey() {
+        return secretKey;
     }
 }

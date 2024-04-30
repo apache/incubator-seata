@@ -25,11 +25,11 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.tcc.NormalTccAction;
 import org.apache.seata.rm.tcc.NormalTccActionImpl;
 import org.apache.seata.rm.tcc.TccParam;
 import org.junit.jupiter.api.Assertions;
@@ -90,14 +90,21 @@ public class ProxyUtilsTccTest {
         public BranchType getBranchType() {
             return null;
         }
+
+        @Override
+        public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+            return null;
+        }
+
+
     };
+
+    private final NormalTccActionImpl tccActionProxy= ProxyUtil.createProxy(new NormalTccActionImpl());
 
 
     @Test
     public void testTcc() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -111,14 +118,12 @@ public class ProxyUtilsTccTest {
         //then
         Assertions.assertEquals("a", result);
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("tccActionForTest", branchReference.get());
+        Assertions.assertEquals("normalTccActionForTest", branchReference.get());
     }
 
     @Test
     public void testTccThrowRawException() {
         //given
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         RootContext.bind(DEFAULT_XID);
 
         TccParam tccParam = new TccParam(1, "abc@163.com");
@@ -133,11 +138,7 @@ public class ProxyUtilsTccTest {
 
     @Test
     public void testTccImplementOtherMethod(){
-        NormalTccActionImpl tccAction = new NormalTccActionImpl();
-        NormalTccActionImpl tccActionProxy = ProxyUtil.createProxy(tccAction);
-
         Assertions.assertTrue(tccActionProxy.otherMethod());
-
     }
 
 

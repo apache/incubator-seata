@@ -394,7 +394,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                         List<KeyValue> keyValues = getResponse.getKvs();
                         if (CollectionUtils.isNotEmpty(keyValues)) {
                             event.setDataId(dataId).setNewValue(keyValues.get(0).getValue().toString(UTF_8));
-                            listener.onChangeEvent(event);
+                            listener.onProcessEvent(event);
                         }
                     } catch (Exception e) {
                         LOGGER.error("error occurred while getting value{}", e.getMessage(), e);

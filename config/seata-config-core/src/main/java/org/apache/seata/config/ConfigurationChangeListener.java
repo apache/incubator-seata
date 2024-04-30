@@ -40,9 +40,9 @@ public interface ConfigurationChangeListener {
     /**
      * The constant EXECUTOR_SERVICE.
      */
-    ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-        new NamedThreadFactory("configListenerOperate", MAX_LISTENER_THREAD));
+    ExecutorService EXECUTOR_SERVICE =
+        new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(), new NamedThreadFactory("configListenerOperate", MAX_LISTENER_THREAD));
 
     /**
      * Process.
@@ -58,9 +58,9 @@ public interface ConfigurationChangeListener {
      */
     default void onProcessEvent(ConfigurationChangeEvent event) {
         getExecutorService().submit(() -> {
-            beforeEvent();
+            beforeEvent(event);
             onChangeEvent(event);
-            afterEvent();
+            afterEvent(event);
         });
     }
 
@@ -83,14 +83,14 @@ public interface ConfigurationChangeListener {
     /**
      * Before event.
      */
-    default void beforeEvent() {
+    default void beforeEvent(ConfigurationChangeEvent event) {
 
     }
 
     /**
      * After event.
      */
-    default void afterEvent() {
+    default void afterEvent(ConfigurationChangeEvent event) {
 
     }
 }

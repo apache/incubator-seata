@@ -28,6 +28,7 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.protocol.ResultCode;
@@ -35,6 +36,8 @@ import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 import org.apache.seata.core.protocol.transaction.BranchReportResponse;
+import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
+import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,5 +142,17 @@ public abstract class AbstractResourceManager implements ResourceManager {
     @Override
     public void registerResource(Resource resource) {
         RmNettyRemotingClient.getInstance().registerResource(resource.getResourceGroupId(), resource.getResourceId());
+    }
+
+    @Override
+    public GlobalStatus getGlobalStatus(BranchType branchType, String xid) {
+        GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
+        queryGlobalStatus.setXid(xid);
+        try {
+            GlobalStatusResponse response = (GlobalStatusResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
+            return response.getGlobalStatus();
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

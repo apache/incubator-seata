@@ -57,6 +57,7 @@
         <module>integration/brpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
+        <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
@@ -85,6 +86,16 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -32,7 +32,7 @@ public class ChannelManagerTestHelper {
 
     public static Channel getChannel(TmNettyRemotingClient client) {
         return getChannelManager(client)
-                .acquireChannel(ProtocolTestConstants.SERVER_ADDRESS);
+                .acquireChannel(ProtocolTestConstants.MOCK_SERVER_ADDRESS);
     }
     private static NettyClientChannelManager getChannelManager(AbstractNettyRemotingClient remotingClient) {
         return remotingClient.getClientChannelManager();

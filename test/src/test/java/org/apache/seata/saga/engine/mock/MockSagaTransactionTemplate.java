@@ -19,7 +19,7 @@ package org.apache.seata.saga.engine.mock;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.saga.tm.SagaTransactionalTemplate;
+import org.apache.seata.saga.engine.tm.SagaTransactionalTemplate;
 import org.apache.seata.server.UUIDGenerator;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor.ExecutionException;
@@ -76,7 +76,7 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
     }
 
     @Override
-    public void cleanUp() {
+    public void cleanUp(GlobalTransaction tx) {
 
     }
 }

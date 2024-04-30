@@ -16,11 +16,12 @@
  */
 package org.apache.seata.discovery.registry.redis;
 
-import com.github.microwww.redis.RedisServer;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.mockito.MockedStatic;
 import org.mockito.internal.util.collections.Sets;
 
@@ -38,12 +39,10 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisRegisterServiceImplTest {
 
     private static RedisRegistryServiceImpl redisRegistryService;
-
-    private static RedisServer server;
-
 
     @BeforeAll
     public static void init() throws IOException {
@@ -51,10 +50,8 @@ public class RedisRegisterServiceImplTest {
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
-        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6789");
+        System.setProperty("registry.redis.serverAddr", "127.0.0.1:6379");
         System.setProperty("registry.redis.cluster", "default");
-        RedisServer server = new RedisServer();
-        server.listener("127.0.0.1", 6789);
         redisRegistryService = RedisRegistryServiceImpl.getInstance();
     }
 
@@ -103,14 +100,4 @@ public class RedisRegisterServiceImplTest {
         Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
     }
 
-    @AfterAll
-    public static void afterAll() {
-        if (server != null) {
-            try {
-                server.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

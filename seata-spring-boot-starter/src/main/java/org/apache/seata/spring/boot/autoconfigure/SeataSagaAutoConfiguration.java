@@ -16,11 +16,11 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import javax.sql.DataSource;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.StateMachineEngine;
@@ -88,7 +88,7 @@ public class SeataSagaAutoConfiguration {
     public StateMachineEngine stateMachineEngine(StateMachineConfig config) {
         ProcessCtrlStateMachineEngine engine = new ProcessCtrlStateMachineEngine();
         engine.setStateMachineConfig(config);
-        new StateMachineEngineHolder().setStateMachineEngine(engine);
+        StateMachineEngineHolder.setStateMachineEngine(engine);
         return engine;
     }
 
