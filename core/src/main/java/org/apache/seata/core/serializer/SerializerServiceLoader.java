@@ -87,6 +87,13 @@ public final class SerializerServiceLoader {
         return serializer;
     }
 
+    private static String serialzerKey(SerializerType type, byte version) {
+        if (type == SerializerType.SEATA) {
+            return type.name() + version;
+        }
+        return type.name();
+    }
+
 
     public static Set<SerializerType> getSupportedSerializers() {
         Set<SerializerType> supportedSerializers = new HashSet<>();
@@ -104,11 +111,4 @@ public final class SerializerServiceLoader {
         return supportedSerializers;
     }
 
-
-    private static String serialzerKey(SerializerType type, byte version) {
-        if (type == SerializerType.SEATA) {
-            return type.name() + version;
-        }
-        return type.name();
-    }
 }
