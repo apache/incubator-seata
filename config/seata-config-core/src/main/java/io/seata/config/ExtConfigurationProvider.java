@@ -17,10 +17,15 @@
 package io.seata.config;
 
 /**
- * The processing configuration.
- * 
- *
- *
+ * the interface ext configuration provider
+ * Notes: used for io.seata SPI interface
  */
-public interface Processor extends org.apache.seata.config.processor.Processor {
+public interface ExtConfigurationProvider {
+    /**
+     * provide a AbstractConfiguration implementation instance
+     *
+     * @param originalConfiguration
+     * @return configuration
+     */
+    Configuration provide(Configuration originalConfiguration);
 }
