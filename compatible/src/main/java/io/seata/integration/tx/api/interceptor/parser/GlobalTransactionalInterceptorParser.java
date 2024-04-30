@@ -16,6 +16,8 @@
  */
 package io.seata.integration.tx.api.interceptor.parser;
 
+import java.lang.reflect.Method;
+
 import io.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -23,8 +25,9 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.tm.api.FailureHandlerHolder;
 
-import java.lang.reflect.Method;
-
+/**
+ * The type Global transactional interceptor parser.
+ */
 @Deprecated
 public class GlobalTransactionalInterceptorParser extends org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser {
 

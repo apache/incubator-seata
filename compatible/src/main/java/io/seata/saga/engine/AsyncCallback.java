@@ -23,6 +23,7 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * Async Callback
  *
  */
+@Deprecated
 public interface AsyncCallback {
 
     /**

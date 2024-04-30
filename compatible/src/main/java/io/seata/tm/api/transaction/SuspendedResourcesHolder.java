@@ -20,6 +20,7 @@ package io.seata.tm.api.transaction;
  * Holder for suspended resources to support propagation or nested logic.
  * Used by {@code suspend} and {@code resume}
  */
+@Deprecated
 public class SuspendedResourcesHolder extends org.apache.seata.tm.api.transaction.SuspendedResourcesHolder {
     public SuspendedResourcesHolder(String xid) {
         super(xid);

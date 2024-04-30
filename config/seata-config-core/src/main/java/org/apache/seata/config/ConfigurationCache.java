@@ -28,7 +28,6 @@ import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
 
 /**
- * @author funkye
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 

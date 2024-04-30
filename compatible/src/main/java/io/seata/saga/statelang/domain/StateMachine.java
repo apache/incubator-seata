@@ -19,6 +19,10 @@ package io.seata.saga.statelang.domain;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * The interface State machine.
+ */
+@Deprecated
 public interface StateMachine {
 
     /**
@@ -42,6 +46,11 @@ public interface StateMachine {
      */
     String getStartState();
 
+    /**
+     * Sets start state.
+     *
+     * @param startState the start state
+     */
     void setStartState(String startState);
 
     /**
@@ -80,6 +89,11 @@ public interface StateMachine {
      */
     String getId();
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
     void setId(String id);
 
     /**
@@ -159,6 +173,11 @@ public interface StateMachine {
      */
     String getContent();
 
+    /**
+     * Sets content.
+     *
+     * @param content the content
+     */
     void setContent(String content);
 
     /**
@@ -175,6 +194,9 @@ public interface StateMachine {
      */
     void setGmtCreate(Date date);
 
+    /**
+     * The enum Status.
+     */
     enum Status {
         /**
          * Active
@@ -191,10 +213,21 @@ public interface StateMachine {
             this.statusString = statusString;
         }
 
+        /**
+         * Gets status string.
+         *
+         * @return the status string
+         */
         public String getStatusString() {
             return statusString;
         }
 
+        /**
+         * Wrap status.
+         *
+         * @param target the target
+         * @return the status
+         */
         public static Status wrap(org.apache.seata.saga.statelang.domain.StateMachine.Status target) {
             if (target == null) {
                 return null;
@@ -209,6 +242,11 @@ public interface StateMachine {
             }
         }
 
+        /**
+         * Unwrap org . apache . seata . saga . statelang . domain . state machine . status.
+         *
+         * @return the org . apache . seata . saga . statelang . domain . state machine . status
+         */
         public org.apache.seata.saga.statelang.domain.StateMachine.Status unwrap() {
             switch (this) {
                 case AC:

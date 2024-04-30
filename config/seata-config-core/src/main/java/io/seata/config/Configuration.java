@@ -22,8 +22,15 @@ import java.util.Set;
 
 import org.apache.seata.common.util.StringUtils;
 
+/**
+ * The interface Configuration.
+ */
+@Deprecated
 public interface Configuration {
 
+    /**
+     * The Env map.
+     */
     Map<String, String> ENV_MAP = System.getenv();
 
     /**
