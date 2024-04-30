@@ -16,9 +16,17 @@
  */
 package io.seata.config;
 
-/**
- * the interface configuration provider
- * 
- */
-public interface ConfigurationProvider extends org.apache.seata.config.ConfigurationProvider {
+public enum ConfigurationChangeType {
+    /**
+     * Add configuration change type.
+     */
+    ADD,
+    /**
+     * Modify configuration change type.
+     */
+    MODIFY,
+    /**
+     * Delete configuration change type.
+     */
+    DELETE
 }

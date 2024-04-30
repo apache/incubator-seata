@@ -14,18 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config;
+package io.seata.config;
 
-public interface CachedConfigurationChangeListener extends ConfigurationChangeListener {
-
-    ConfigurationChangeListener CONFIGURATION_CACHE = ConfigurationCache.getInstance();
-
-    @Override
-    default void beforeEvent(ConfigurationChangeEvent event) {
-        if (null == event) {
-            return;
-        }
-        CONFIGURATION_CACHE.onProcessEvent(event);
-    }
-
+/**
+ * the interface configuration provider
+ * Notes: used for io.seata SPI interface
+ */
+public interface ConfigurationProvider {
+    /**
+     * provide a AbstractConfiguration implementation instance
+     *
+     * @return Configuration
+     */
+    Configuration provide();
 }
