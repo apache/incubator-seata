@@ -1,0 +1,2 @@
+org.apache.seata.core.store.db.sql.distributed.lock.BaseDistributedLockSql
+org.apache.seata.core.store.db.sql.distributed.lock.BaseDistributedLockSqlServer
