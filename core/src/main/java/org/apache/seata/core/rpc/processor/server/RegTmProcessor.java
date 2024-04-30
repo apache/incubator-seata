@@ -90,7 +90,7 @@ public class RegTmProcessor implements RemotingProcessor {
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{},client protocol-version:{}"
-                    , message, ctx.channel(), message.getVersion(), rpcMessage.getSdkVersion());
+                    , message, ctx.channel(), message.getVersion(), rpcMessage.getOtherSideVersion());
         }
     }
 
