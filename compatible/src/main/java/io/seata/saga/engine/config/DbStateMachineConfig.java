@@ -16,8 +16,13 @@
  */
 package io.seata.saga.engine.config;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
-import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.store.impl.StateLogStoreImpl;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;
@@ -32,17 +37,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.util.StringUtils;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
+/**
+ * The type Db state machine config.
+ */
+@Deprecated
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
@@ -59,6 +63,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
+    /**
+     * Instantiates a new Db state machine config.
+     */
     public DbStateMachineConfig() {
         try {
             Configuration configuration = ConfigurationFactory.getInstance();
@@ -80,6 +87,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         }
     }
 
+    /**
+     * Gets db type from data source.
+     *
+     * @param dataSource the data source
+     * @return the db type from data source
+     * @throws SQLException the sql exception
+     */
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
@@ -144,78 +158,173 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         }
     }
 
+    /**
+     * Gets data source.
+     *
+     * @return the data source
+     */
     public DataSource getDataSource() {
         return dataSource;
     }
 
+    /**
+     * Sets data source.
+     *
+     * @param dataSource the data source
+     */
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
+    /**
+     * Gets application id.
+     *
+     * @return the application id
+     */
     public String getApplicationId() {
         return applicationId;
     }
 
+    /**
+     * Sets application id.
+     *
+     * @param applicationId the application id
+     */
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 
+    /**
+     * Gets tx service group.
+     *
+     * @return the tx service group
+     */
     public String getTxServiceGroup() {
         return txServiceGroup;
     }
 
+    /**
+     * Sets tx service group.
+     *
+     * @param txServiceGroup the tx service group
+     */
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
     }
 
+    /**
+     * Gets access key.
+     *
+     * @return the access key
+     */
     public String getAccessKey() {
         return accessKey;
     }
 
+    /**
+     * Sets access key.
+     *
+     * @param accessKey the access key
+     */
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
     }
 
+    /**
+     * Gets secret key.
+     *
+     * @return the secret key
+     */
     public String getSecretKey() {
         return secretKey;
     }
 
+    /**
+     * Sets secret key.
+     *
+     * @param secretKey the secret key
+     */
     public void setSecretKey(String secretKey) {
         this.secretKey = secretKey;
     }
 
+    /**
+     * Sets saga transactional template.
+     *
+     * @param sagaTransactionalTemplate the saga transactional template
+     */
     public void setSagaTransactionalTemplate(SagaTransactionalTemplate sagaTransactionalTemplate) {
         this.sagaTransactionalTemplate = sagaTransactionalTemplate;
     }
 
+    /**
+     * Gets table prefix.
+     *
+     * @return the table prefix
+     */
     public String getTablePrefix() {
         return tablePrefix;
     }
 
+    /**
+     * Sets table prefix.
+     *
+     * @param tablePrefix the table prefix
+     */
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
     }
 
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
     public String getDbType() {
         return dbType;
     }
 
+    /**
+     * Sets db type.
+     *
+     * @param dbType the db type
+     */
     public void setDbType(String dbType) {
         this.dbType = dbType;
     }
 
+    /**
+     * Is rm report success enable boolean.
+     *
+     * @return the boolean
+     */
     public boolean isRmReportSuccessEnable() {
         return rmReportSuccessEnable;
     }
 
+    /**
+     * Is saga branch register enable boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSagaBranchRegisterEnable() {
         return sagaBranchRegisterEnable;
     }
 
+    /**
+     * Sets rm report success enable.
+     *
+     * @param rmReportSuccessEnable the rm report success enable
+     */
     public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
         this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 
+    /**
+     * Sets saga branch register enable.
+     *
+     * @param sagaBranchRegisterEnable the saga branch register enable
+     */
     public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
         this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
     }

@@ -21,6 +21,7 @@ package io.seata.core.model;
  * Compatible for dubbo dubbo-filter-seata
  *
  */
+@Deprecated
 public enum BranchType {
 
     /**

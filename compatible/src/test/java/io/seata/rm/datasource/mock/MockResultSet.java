@@ -24,12 +24,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.druid.util.jdbc.ResultSetBase;
+
+import com.google.common.collect.Lists;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.druid.util.jdbc.ResultSetBase;
-import com.google.common.collect.Lists;
 
 
 public class MockResultSet extends ResultSetBase {

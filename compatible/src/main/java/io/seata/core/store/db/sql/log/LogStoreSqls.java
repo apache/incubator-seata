@@ -20,5 +20,6 @@ package io.seata.core.store.db.sql.log;
  * The interface Log store sqls.
  * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface LogStoreSqls extends org.apache.seata.core.store.db.sql.log.LogStoreSqls {
 }

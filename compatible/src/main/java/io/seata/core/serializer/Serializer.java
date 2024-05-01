@@ -20,5 +20,6 @@ package io.seata.core.serializer;
  * The interface Codec.
  * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface Serializer extends org.apache.seata.core.serializer.Serializer {
 }

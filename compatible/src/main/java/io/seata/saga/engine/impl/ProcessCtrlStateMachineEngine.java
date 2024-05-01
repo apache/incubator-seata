@@ -16,21 +16,22 @@
  */
 package io.seata.saga.engine.impl;
 
+import java.util.Map;
+
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.exception.ForwardInvalidException;
-import io.seata.saga.proctrl.ProcessContext;
-
-import java.util.Map;
 
 /**
  * ProcessCtrl-based state machine engine
  */
+@Deprecated
 public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
     private final org.apache.seata.saga.engine.impl.ProcessCtrlStateMachineEngine actual =

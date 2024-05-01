@@ -21,6 +21,10 @@ import java.time.Duration;
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
 
+/**
+ * The type Abstract configuration.
+ */
+@Deprecated
 public abstract class AbstractConfiguration implements Configuration {
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.
@@ -31,9 +35,21 @@ public abstract class AbstractConfiguration implements Configuration {
      * The constant DEFAULT_XXX.
      */
     public static final short DEFAULT_SHORT = (short)0;
+    /**
+     * The constant DEFAULT_INT.
+     */
     public static final int DEFAULT_INT = 0;
+    /**
+     * The constant DEFAULT_LONG.
+     */
     public static final long DEFAULT_LONG = 0L;
+    /**
+     * The constant DEFAULT_DURATION.
+     */
     public static final Duration DEFAULT_DURATION = Duration.ZERO;
+    /**
+     * The constant DEFAULT_BOOLEAN.
+     */
     public static final boolean DEFAULT_BOOLEAN = false;
 
     @Override

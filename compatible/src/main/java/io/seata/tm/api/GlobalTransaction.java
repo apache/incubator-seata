@@ -24,6 +24,7 @@ import org.apache.seata.tm.api.BaseTransaction;
 /**
  * Global transaction.
  */
+@Deprecated
 public interface GlobalTransaction extends BaseTransaction {
 
     /**

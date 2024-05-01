@@ -24,6 +24,7 @@ import java.util.Map;
  * StateMachine execution instance
  *
  */
+@Deprecated
 public interface StateMachineInstance {
 
     /**

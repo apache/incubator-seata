@@ -16,20 +16,23 @@
  */
 package io.seata.saga.engine.store;
 
+import java.util.List;
 
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 
-import java.util.List;
-
+/**
+ * The interface State log store.
+ */
+@Deprecated
 public interface StateLogStore {
 
     /**
      * Record state machine startup events
      *
      * @param machineInstance the state machine instance
-     * @param context the state machine process context
+     * @param context         the state machine process context
      */
     void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context);
 
@@ -37,7 +40,7 @@ public interface StateLogStore {
      * Record status end event
      *
      * @param machineInstance the state machine instance
-     * @param context the state machine process context
+     * @param context         the state machine process context
      */
     void recordStateMachineFinished(StateMachineInstance machineInstance, ProcessContext context);
 
@@ -45,7 +48,7 @@ public interface StateLogStore {
      * Record state machine restarted
      *
      * @param machineInstance the state machine instance
-     * @param context the state machine process context
+     * @param context         the state machine process context
      */
     void recordStateMachineRestarted(StateMachineInstance machineInstance, ProcessContext context);
 
@@ -53,7 +56,7 @@ public interface StateLogStore {
      * Record state start execution event
      *
      * @param stateInstance the state machine instance
-     * @param context the state machine process context
+     * @param context       the state machine process context
      */
     void recordStateStarted(StateInstance stateInstance, ProcessContext context);
 
@@ -61,7 +64,7 @@ public interface StateLogStore {
      * Record state execution end event
      *
      * @param stateInstance the state machine instance
-     * @param context the state machine process context
+     * @param context       the state machine process context
      */
     void recordStateFinished(StateInstance stateInstance, ProcessContext context);
 
@@ -77,7 +80,7 @@ public interface StateLogStore {
      * Get state machine instance by businessKey
      *
      * @param businessKey the businessKey
-     * @param tenantId the tenant id
+     * @param tenantId    the tenant id
      * @return state machine message
      */
     StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId);
@@ -94,7 +97,7 @@ public interface StateLogStore {
      * Get state instance
      *
      * @param stateInstanceId the state instance id
-     * @param machineInstId the machine instance id
+     * @param machineInstId   the machine instance id
      * @return state instance message
      */
     StateInstance getStateInstance(String stateInstanceId, String machineInstId);
@@ -109,6 +112,8 @@ public interface StateLogStore {
 
     /**
      * clear the LocalThread
+     *
+     * @param context the context
      */
     void clearUp(ProcessContext context);
 }

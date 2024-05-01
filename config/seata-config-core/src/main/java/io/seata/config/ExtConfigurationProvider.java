@@ -20,6 +20,7 @@ package io.seata.config;
  * the interface ext configuration provider
  * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface ExtConfigurationProvider {
     /**
      * provide a AbstractConfiguration implementation instance

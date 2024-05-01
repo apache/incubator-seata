@@ -25,11 +25,18 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
+/**
+ * The type Auto data source proxy registrar.
+ */
+@Deprecated
 public class AutoDataSourceProxyRegistrar implements ImportBeanDefinitionRegistrar {
     private static final String ATTRIBUTE_KEY_USE_JDK_PROXY = "useJdkProxy";
     private static final String ATTRIBUTE_KEY_EXCLUDES = "excludes";
     private static final String ATTRIBUTE_KEY_DATA_SOURCE_PROXY_MODE = "dataSourceProxyMode";
 
+    /**
+     * The constant BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR.
+     */
     public static final String BEAN_NAME_SEATA_AUTO_DATA_SOURCE_PROXY_CREATOR = "seataAutoDataSourceProxyCreator";
 
     @Override

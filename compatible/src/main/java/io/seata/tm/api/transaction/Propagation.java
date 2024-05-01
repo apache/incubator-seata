@@ -16,6 +16,7 @@
  */
 package io.seata.tm.api.transaction;
 
+@Deprecated
 public enum Propagation {
     /**
      * The REQUIRED.

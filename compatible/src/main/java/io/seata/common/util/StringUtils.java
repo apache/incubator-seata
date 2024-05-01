@@ -28,6 +28,7 @@ import java.util.Iterator;
  * https://github.com/apache/dubbo-spi-extensions/blob/master/dubbo-filter-extensions/dubbo-filter-seata/src/main
  * /java/org/apache/dubbo/seata/SeataTransactionPropagationProviderFilter.java
  */
+@Deprecated
 public class StringUtils {
     /**
      * Is empty boolean.

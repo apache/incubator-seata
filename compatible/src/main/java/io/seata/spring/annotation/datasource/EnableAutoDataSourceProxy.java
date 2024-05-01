@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Import;
 /**
  * This annotation will enable auto proxying of datasource bean.
  */
+@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Import(AutoDataSourceProxyRegistrar.class)
