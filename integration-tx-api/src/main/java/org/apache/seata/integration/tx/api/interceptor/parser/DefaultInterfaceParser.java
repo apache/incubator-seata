@@ -28,7 +28,6 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 
 /**
- * @author leezongjie
  */
 public class DefaultInterfaceParser implements InterfaceParser {
 

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Expression factory manager
  */
+@Deprecated
 public class ExpressionFactoryManager {
 
     private final org.apache.seata.saga.engine.expression.ExpressionFactoryManager actual;

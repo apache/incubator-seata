@@ -19,6 +19,7 @@ package io.seata.saga.statelang.domain;
 /**
  * Recover Strategy
  */
+@Deprecated
 public enum RecoverStrategy {
 
     /**

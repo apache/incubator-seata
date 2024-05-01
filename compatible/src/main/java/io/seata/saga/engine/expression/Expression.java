@@ -20,6 +20,7 @@ package io.seata.saga.engine.expression;
  * Expression
  *
  */
+@Deprecated
 public interface Expression extends org.apache.seata.saga.engine.expression.Expression {
 
 }

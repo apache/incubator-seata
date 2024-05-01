@@ -22,6 +22,7 @@ import java.util.Map;
  * Hierarchical process context
  *
  */
+@Deprecated
 public interface HierarchicalProcessContext extends ProcessContext {
 
     /**

@@ -16,16 +16,16 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Set;
+
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.tm.api.transaction.Propagation;
-
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * The type Global transactional interceptor handler.

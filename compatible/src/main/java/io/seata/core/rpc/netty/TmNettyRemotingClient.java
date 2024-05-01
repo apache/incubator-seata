@@ -20,6 +20,7 @@ package io.seata.core.rpc.netty;
  * TmNettyRemotingClient
  * Notes: used for Apache ShardingSphere integration
  */
+@Deprecated
 public class TmNettyRemotingClient {
     private static final org.apache.seata.core.rpc.netty.TmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.TmNettyRemotingClient.getInstance();
 

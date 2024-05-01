@@ -16,6 +16,9 @@
  */
 package io.seata.saga.rm;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -32,9 +35,10 @@ import org.apache.seata.saga.statelang.domain.RecoverStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * The type Saga resource manager.
+ */
+@Deprecated
 public class SagaResourceManager extends AbstractResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SagaResourceManager.class);

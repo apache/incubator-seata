@@ -16,4 +16,8 @@
  */
 package io.seata.integration.http;
 
+/**
+ * The type Seata web mvc configurer.
+ */
+@Deprecated
 public class SeataWebMvcConfigurer extends org.apache.seata.integration.http.SeataWebMvcConfigurer {}

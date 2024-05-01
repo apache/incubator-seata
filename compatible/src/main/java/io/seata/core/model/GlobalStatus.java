@@ -20,6 +20,7 @@ package io.seata.core.model;
  * Status of global transaction.
  *
  */
+@Deprecated
 public enum GlobalStatus {
 
     /**

@@ -16,14 +16,15 @@
  */
 package io.seata.saga.proctrl;
 
-import org.apache.seata.saga.proctrl.Instruction;
-
 import java.util.Map;
+
+import org.apache.seata.saga.proctrl.Instruction;
 
 /**
  * Process Context
  *
  */
+@Deprecated
 public interface ProcessContext extends org.apache.seata.saga.proctrl.ProcessContext {
 
     String VAR_NAME_PROCESS_TYPE = "_ProcessType_";

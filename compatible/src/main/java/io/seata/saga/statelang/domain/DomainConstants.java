@@ -20,6 +20,7 @@ package io.seata.saga.statelang.domain;
  * State Language Domain Constants
  *
  */
+@Deprecated
 public interface DomainConstants {
 
     //region State Types

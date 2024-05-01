@@ -20,6 +20,7 @@ package io.seata.saga.statelang.domain;
  * Execution Status
  *
  */
+@Deprecated
 public enum ExecutionStatus {
 
     /**

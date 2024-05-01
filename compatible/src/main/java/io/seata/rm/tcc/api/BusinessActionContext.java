@@ -16,5 +16,9 @@
  */
 package io.seata.rm.tcc.api;
 
+/**
+ * The type Business action context.
+ */
+@Deprecated
 public class BusinessActionContext extends org.apache.seata.rm.tcc.api.BusinessActionContext {
 }

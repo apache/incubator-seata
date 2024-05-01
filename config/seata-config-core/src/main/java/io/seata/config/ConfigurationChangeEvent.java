@@ -16,6 +16,10 @@
  */
 package io.seata.config;
 
+/**
+ * The type Configuration change event.
+ */
+@Deprecated
 public class ConfigurationChangeEvent {
     private String dataId;
     private String oldValue;
@@ -24,14 +28,32 @@ public class ConfigurationChangeEvent {
     private ConfigurationChangeType changeType;
     private static final String DEFAULT_NAMESPACE = "DEFAULT";
 
+    /**
+     * Instantiates a new Configuration change event.
+     */
     public ConfigurationChangeEvent() {
 
     }
 
+    /**
+     * Instantiates a new Configuration change event.
+     *
+     * @param dataId   the data id
+     * @param newValue the new value
+     */
     public ConfigurationChangeEvent(String dataId, String newValue) {
         this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY);
     }
 
+    /**
+     * Instantiates a new Configuration change event.
+     *
+     * @param dataId    the data id
+     * @param namespace the namespace
+     * @param oldValue  the old value
+     * @param newValue  the new value
+     * @param type      the type
+     */
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
                                     ConfigurationChangeType type) {
         this.dataId = dataId;
@@ -54,6 +76,7 @@ public class ConfigurationChangeEvent {
      * Sets data id.
      *
      * @param dataId the data id
+     * @return the data id
      */
     public ConfigurationChangeEvent setDataId(String dataId) {
         this.dataId = dataId;
@@ -73,6 +96,7 @@ public class ConfigurationChangeEvent {
      * Sets old value.
      *
      * @param oldValue the old value
+     * @return the old value
      */
     public ConfigurationChangeEvent setOldValue(String oldValue) {
         this.oldValue = oldValue;
@@ -92,6 +116,7 @@ public class ConfigurationChangeEvent {
      * Sets new value.
      *
      * @param newValue the new value
+     * @return the new value
      */
     public ConfigurationChangeEvent setNewValue(String newValue) {
         this.newValue = newValue;
@@ -111,6 +136,7 @@ public class ConfigurationChangeEvent {
      * Sets change type.
      *
      * @param changeType the change type
+     * @return the change type
      */
     public ConfigurationChangeEvent setChangeType(ConfigurationChangeType changeType) {
         this.changeType = changeType;
@@ -130,6 +156,7 @@ public class ConfigurationChangeEvent {
      * Sets namespace.
      *
      * @param namespace the namespace
+     * @return the namespace
      */
     public ConfigurationChangeEvent setNamespace(String namespace) {
         this.namespace = namespace;

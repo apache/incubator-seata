@@ -23,6 +23,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.seata.common.thread.NamedThreadFactory;
 
+/**
+ * The interface Configuration change listener.
+ */
+@Deprecated
 public interface ConfigurationChangeListener {
     /**
      * The constant CORE_LISTENER_THREAD.
