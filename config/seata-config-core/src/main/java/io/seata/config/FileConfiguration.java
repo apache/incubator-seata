@@ -29,6 +29,7 @@ import org.apache.seata.common.exception.NotSupportYetException;
  * /apache/shardingsphere/transaction/base/seata/at/SeataATShardingSphereTransactionManager.java
  * 2.EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration)
  */
+@Deprecated
 public class FileConfiguration extends AbstractConfiguration {
 
     private final org.apache.seata.config.FileConfiguration target;

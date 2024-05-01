@@ -19,6 +19,7 @@ package io.seata.core.exception;
 /**
  * The type Transaction exception.
  */
+@Deprecated
 public class TransactionException extends org.apache.seata.core.exception.TransactionException {
 
     public TransactionException(TransactionExceptionCode code) {

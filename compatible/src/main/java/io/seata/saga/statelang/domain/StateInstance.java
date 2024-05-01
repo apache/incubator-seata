@@ -22,6 +22,7 @@ import java.util.Date;
  * State execution instance
  *
  */
+@Deprecated
 public interface StateInstance {
 
     /**
