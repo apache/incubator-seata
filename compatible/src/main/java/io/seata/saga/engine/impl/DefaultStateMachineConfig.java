@@ -16,6 +16,14 @@
  */
 package io.seata.saga.engine.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+
+import javax.script.ScriptEngineManager;
+
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
@@ -38,16 +46,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.script.ScriptEngineManager;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-
 /**
  * Default state machine configuration
  */
+@Deprecated
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 
     private final org.apache.seata.saga.engine.impl.DefaultStateMachineConfig actual;
