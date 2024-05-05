@@ -6,7 +6,6 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.tm.api.GlobalTransactionContext;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
