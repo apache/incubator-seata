@@ -16,12 +16,6 @@
  */
 package org.apache.seata.saga.proctrl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.saga.proctrl.eventing.impl.AsyncEventBus;
 import org.apache.seata.saga.proctrl.eventing.impl.DirectEventBus;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventConsumer;
@@ -37,6 +31,12 @@ import org.apache.seata.saga.proctrl.mock.MockProcessRouter;
 import org.apache.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ProcessController Tests
