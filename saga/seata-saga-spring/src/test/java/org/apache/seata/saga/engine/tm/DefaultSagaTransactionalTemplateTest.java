@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.tm;
 
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -56,14 +57,13 @@ public class DefaultSagaTransactionalTemplateTest {
     @Test
     public void testBeginTransaction() {
         TransactionInfo transactionInfo = new TransactionInfo();
-        Assertions.assertThrows(NoClassDefFoundError.class,
+        Assertions.assertThrows(FrameworkException.class,
                 () -> sagaTransactionalTemplate.beginTransaction(transactionInfo));
     }
 
     @Test
     public void testReloadTransaction() {
-        Assertions.assertThrows(NoClassDefFoundError.class,
-                () -> sagaTransactionalTemplate.reloadTransaction(""));
+        Assertions.assertDoesNotThrow(() -> sagaTransactionalTemplate.reloadTransaction(""));
     }
 
     @Test
