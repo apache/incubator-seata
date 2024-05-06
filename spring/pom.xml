@@ -95,6 +95,7 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <version>${kotlin-maven-plugin.version}</version>
                 <configuration>
+                    <nowarn>true</nowarn>  <!-- Disable warnings -->
                     <args>
                         <arg>-Xjvm-default=all</arg>
                     </args>
