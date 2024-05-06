@@ -17,6 +17,7 @@
 package io.seata.config.nacos;
 
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -57,10 +58,23 @@ public class TestConfigCustomSPI {
         String dataId = "nacos.config.custom.spi.test";
         String group = FILE_CONFIG.getString("config.test.group");
         String content = "seata";
+        CountDownLatch listenerCountDown = new CountDownLatch(1);
+        configuration.addConfigListener(dataId, new CachedConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                Assertions.assertEquals(content, event.getNewValue());
+                listenerCountDown.countDown();
+            }
+        });
         configService.publishConfig(dataId, group, content);
+        boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
+        Assertions.assertFalse(reachZero);
         //get config
         String config = configuration.getConfig(dataId);
         Assertions.assertEquals(content, config);
+        //listener
+        Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
+        Assertions.assertEquals(2, listeners.size());
 
     }
 
