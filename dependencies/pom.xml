@@ -108,7 +108,7 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.7</druid.version>
+        <druid.version>1.2.22</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <!-- sql parser -->
