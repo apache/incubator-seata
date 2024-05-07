@@ -58,7 +58,7 @@ public class SeataSerializer implements Serializer {
 
     static class SeataSerializerV1 implements Serializer {
 
-        private static SeataSerializerV1 instance;
+        private static volatile SeataSerializerV1 instance;
 
         private SeataSerializerV1() {
         }
@@ -111,7 +111,7 @@ public class SeataSerializer implements Serializer {
     }
     static class SeataSerializerV0 implements Serializer {
 
-        private static SeataSerializerV0 instance;
+        private static volatile SeataSerializerV0 instance;
 
         private SeataSerializerV0() {
         }
