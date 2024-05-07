@@ -66,7 +66,7 @@ public class SeataSerializer implements Serializer {
         public static SeataSerializerV1 getInstance() {
             if (instance == null) {
                 synchronized (SeataSerializerV1.class) {
-                    if(instance == null){
+                    if (instance == null) {
                         instance = new SeataSerializerV1();
                     }
                 }
@@ -119,7 +119,7 @@ public class SeataSerializer implements Serializer {
         public static SeataSerializerV0 getInstance() {
             if (instance == null) {
                 synchronized (SeataSerializerV0.class) {
-                    if(instance == null){
+                    if (instance == null) {
                         instance = new SeataSerializerV0();
                     }
                 }
