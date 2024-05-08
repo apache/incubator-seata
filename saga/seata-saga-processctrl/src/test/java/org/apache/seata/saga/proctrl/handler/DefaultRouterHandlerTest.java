@@ -31,7 +31,6 @@ import java.util.Map;
  * @author jingliu_xiong@foxmail.com
  */
 public class DefaultRouterHandlerTest {
-
     @Test
     public void testRouteOfFrameworkException() {
         ProcessContextImpl context = new ProcessContextImpl();
