@@ -132,7 +132,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                                            Connection conn) throws SQLException {
         Map<String, String> decodeMap = CollectionUtils.decodeMap(rollbackCtx);
         String maxAllowedPacketStr = decodeMap.get(UndoLogConstants.MAX_ALLOWED_PACKET);
-        long maxAllowedPacket = 64 * 1024 * 1024; // 64MB -> mysql8 default value
+        long maxAllowedPacket = 1024 * 1024; // 1MB -> mysql5.6 default value
         if (StringUtils.isNotBlank(maxAllowedPacketStr)) {
             maxAllowedPacket = Long.parseLong(maxAllowedPacketStr);
         }
