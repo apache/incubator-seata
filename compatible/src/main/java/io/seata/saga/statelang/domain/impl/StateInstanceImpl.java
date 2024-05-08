@@ -16,16 +16,17 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
+import java.util.Date;
+
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-
-import java.util.Date;
 
 /**
  * state execution instance
  *
  */
+@Deprecated
 public class StateInstanceImpl implements StateInstance {
 
     private final org.apache.seata.saga.statelang.domain.StateInstance actual;

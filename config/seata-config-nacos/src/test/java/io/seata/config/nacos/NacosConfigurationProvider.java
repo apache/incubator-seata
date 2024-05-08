@@ -14,11 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config;
+package io.seata.config.nacos;
 
-/**
- * the interface configuration provider
- * 
- */
-public interface ConfigurationProvider extends org.apache.seata.config.ConfigurationProvider {
+import io.seata.config.Configuration;
+import org.apache.seata.common.loader.LoadLevel;
+
+@LoadLevel(name = "Test", order = 1)
+public class NacosConfigurationProvider implements io.seata.config.ConfigurationProvider {
+    @Override
+    public Configuration provide() {
+        return NacosConfiguration.getInstance();
+    }
 }

@@ -24,5 +24,6 @@ import org.apache.seata.saga.engine.pcext.StateRouter;
  *
  * @see StateRouter
  */
+@Deprecated
 public interface StateRouterInterceptor extends org.apache.seata.saga.engine.pcext.StateRouterInterceptor {
 }

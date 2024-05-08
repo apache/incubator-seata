@@ -16,16 +16,17 @@
  */
 package io.seata.saga.proctrl.impl;
 
+import java.util.Map;
+
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.Instruction;
-
-import java.util.Map;
 
 /**
  * The default process context implementation
  *
  */
+@Deprecated
 public class ProcessContextImpl implements HierarchicalProcessContext, ProcessContext {
 
     private final org.apache.seata.saga.proctrl.HierarchicalProcessContext actual;

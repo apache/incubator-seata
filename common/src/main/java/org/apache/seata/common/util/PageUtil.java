@@ -76,9 +76,9 @@ public class PageUtil {
             + SOURCE_SQL_PLACE_HOLD + ") temp ) where rn between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
 
     /**
-     * The constant SQLSERVER_PAGE_TEMPLATE
+     * The constant SQLSERVER_PAGE_TEMPLATE. Currently, it only works for order-by condition of "ORDER BY gmt_create desc"
      */
-    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY (select NULL)) AS rowId from ("
+    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from ("
             + SOURCE_SQL_PLACE_HOLD + ") temp ) t where t.rowId between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
     /**
      * check page parm

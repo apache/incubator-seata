@@ -19,14 +19,28 @@ package io.seata.saga.rm;
 
 import io.seata.saga.engine.StateMachineEngine;
 
+/**
+ * The type State machine engine holder.
+ */
+@Deprecated
 public class StateMachineEngineHolder {
 
     private static StateMachineEngine stateMachineEngine;
 
+    /**
+     * Gets state machine engine.
+     *
+     * @return the state machine engine
+     */
     public static StateMachineEngine getStateMachineEngine() {
         return stateMachineEngine;
     }
 
+    /**
+     * Sets state machine engine.
+     *
+     * @param smEngine the sm engine
+     */
     public static void setStateMachineEngine(StateMachineEngine smEngine) {
         stateMachineEngine = smEngine;
     }
