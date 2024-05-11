@@ -16,18 +16,22 @@
  */
 package org.apache.seata.saga.engine.tm;
 
-import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.tm.api.GlobalTransactionContext;
+import org.apache.seata.tm.api.transaction.TransactionHookManager;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -50,15 +54,23 @@ public class DefaultSagaTransactionalTemplateTest {
 
     @Test
     public void testRollbackTransaction() {
+        MockedStatic<TransactionHookManager> enhancedTransactionHookManager = Mockito.mockStatic(TransactionHookManager.class);
+        enhancedTransactionHookManager.when(TransactionHookManager::getHooks).thenReturn(Collections.singletonList(new MockTransactionHook()));
         MockGlobalTransaction mockGlobalTransaction = new MockGlobalTransaction();
         Assertions.assertDoesNotThrow(() -> sagaTransactionalTemplate.rollbackTransaction(mockGlobalTransaction, null));
+        enhancedTransactionHookManager.close();
     }
 
     @Test
     public void testBeginTransaction() {
+        MockedStatic<GlobalTransactionContext> enhancedServiceLoader = Mockito.mockStatic(GlobalTransactionContext.class);
+        enhancedServiceLoader.when(GlobalTransactionContext::getCurrentOrCreate).thenReturn(new MockGlobalTransaction());
+        MockedStatic<TransactionHookManager> enhancedTransactionHookManager = Mockito.mockStatic(TransactionHookManager.class);
+        enhancedTransactionHookManager.when(TransactionHookManager::getHooks).thenReturn(Collections.singletonList(new MockTransactionHook()));
         TransactionInfo transactionInfo = new TransactionInfo();
-        Assertions.assertThrows(FrameworkException.class,
-                () -> sagaTransactionalTemplate.beginTransaction(transactionInfo));
+        Assertions.assertDoesNotThrow(() -> sagaTransactionalTemplate.beginTransaction(transactionInfo));
+        enhancedServiceLoader.close();
+        enhancedTransactionHookManager.close();
     }
 
     @Test
@@ -95,7 +107,16 @@ public class DefaultSagaTransactionalTemplateTest {
 
     @Test
     public void testTriggerAfterCompletion() {
+        MockedStatic<TransactionHookManager> enhancedTransactionHookManager = Mockito.mockStatic(TransactionHookManager.class);
+        enhancedTransactionHookManager.when(TransactionHookManager::getHooks).thenReturn(Collections.singletonList(new MockTransactionHook()));
         MockGlobalTransaction mockGlobalTransaction = new MockGlobalTransaction();
         Assertions.assertDoesNotThrow(() -> sagaTransactionalTemplate.triggerAfterCompletion(mockGlobalTransaction));
+        enhancedTransactionHookManager.close();
+    }
+
+    @Test
+    public void testCleanUp() {
+        MockGlobalTransaction mockGlobalTransaction = new MockGlobalTransaction();
+        sagaTransactionalTemplate.cleanUp(mockGlobalTransaction);
     }
 }

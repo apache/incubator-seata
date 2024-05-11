@@ -111,7 +111,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     @Override
     public GlobalTransactionRole getGlobalTransactionRole() {
-        return null;
+        return GlobalTransactionRole.Launcher;
     }
 
     @Override
