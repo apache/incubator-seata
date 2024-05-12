@@ -16,11 +16,15 @@
  */
 package org.apache.seata.server;
 
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -31,12 +35,18 @@ import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.store.StoreConfig;
+import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -45,6 +55,51 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  *
  */
 public class Server {
+
+    public static void metadataInit(){
+
+        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+
+        // load node properties
+        Instance instance = Instance.getInstance();
+        // load namespace
+        String namespaceKey = "seata.registry.namingserver.namespace";
+        String namespace = environment.getProperty(namespaceKey, "public");
+        instance.setNamespace(namespace);
+        // load cluster name
+        String clusterNameKey = "seata.registry.namingserver.cluster";
+        String clusterName = environment.getProperty(clusterNameKey, "default");
+        instance.setClusterName(clusterName);
+
+        // load cluster type
+        String clusterType = String.valueOf(StoreConfig.getSessionMode());;
+        instance.addMetadata("cluster-type", "raft".equals(clusterType) ? clusterType : "default");
+
+        // load unit name
+        instance.setUnit(String.valueOf(UUID.randomUUID()));
+
+        // load node Endpoint
+        instance.setControlEndpoint(new Node.Endpoint(NetUtil.getLocalIp(),Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))),"http"));
+
+        // load metadata
+        String prefix = "seata.registry.metadata.";
+        for (PropertySource<?> propertySource : environment.getPropertySources()) {
+            if (propertySource instanceof EnumerablePropertySource) {
+                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
+                for (String propertyName : enumerablePropertySource.getPropertyNames()) {
+                    if (propertyName.startsWith(prefix)) {
+                        instance.addMetadata(propertyName.substring(prefix.length()), enumerablePropertySource.getProperty(propertyName));
+                    }
+                }
+            }
+        }
+
+        // load vgroup mapping relationship
+        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+        instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
+    }
+
+
     /**
      * The entry point of application.
      *
@@ -96,6 +151,8 @@ public class Server {
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
+
+        metadataInit();
 
         nettyRemotingServer.init();
     }

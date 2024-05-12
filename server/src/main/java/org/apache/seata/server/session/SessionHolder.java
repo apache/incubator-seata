@@ -43,6 +43,7 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.StoreConfig.SessionMode;
+import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,10 +71,23 @@ public class SessionHolder {
      */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
 
+
+    /**
+     * The constant ROOT_MAPPING_MANAGER_NAME.
+     */
+    public static final String ROOT_MAPPING_MANAGER_NAME = "mapping.json";
+
     /**
      * The redis distributed lock expire time
      */
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
+
+    /**
+     * The default vgroup mapping store dir
+     */
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = System.getProperty("user.dir");;
+
+    private static VGroupMappingStoreManager ROOT_VGROUP_MAPPING_MANAGER;
 
     private static SessionManager ROOT_SESSION_MANAGER;
     private static volatile Map<String, SessionManager> SESSION_MANAGER_MAP;
@@ -98,6 +112,8 @@ public class SessionHolder {
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             reload(sessionMode);
+
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.DB.getName());
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
             RaftServerManager.init();
             if (CollectionUtils.isNotEmpty(RaftServerManager.getRaftServers())) {
@@ -111,18 +127,26 @@ public class SessionHolder {
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
                 RaftServerManager.start();
             } else {
+                String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR);
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                         + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
-                if (StringUtils.isBlank(sessionStorePath)) {
+                if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
                     throw new StoreException("the {store.file.dir} is empty.");
                 }
+                ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.FILE.getName(),
+                    new Object[]{ROOT_MAPPING_MANAGER_NAME, vGroupMappingStorePath});
+
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                     new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 reload(sessionMode);
             }
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.REDIS.getName());
             reload(sessionMode);
         } else {
             // unknown store
@@ -277,6 +301,22 @@ public class SessionHolder {
     }
 
 
+    //region get group mapping manager
+
+    /**
+     * Gets root session manager.
+     *
+     * @return the root session manager
+     */
+    public static VGroupMappingStoreManager getRootVGroupMappingManager() {
+        if (ROOT_VGROUP_MAPPING_MANAGER == null) {
+            init();
+            if(ROOT_VGROUP_MAPPING_MANAGER == null){
+                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
+            }
+        }
+        return ROOT_VGROUP_MAPPING_MANAGER;
+    }
 
     //endregion
 
