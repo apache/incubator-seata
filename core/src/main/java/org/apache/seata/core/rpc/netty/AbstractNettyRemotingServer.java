@@ -93,10 +93,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
-        Channel clientChannel = channel;
-        if (!(msg instanceof HeartbeatMessage)) {
-            clientChannel = ChannelManager.getSameClientChannel(channel);
-        }
+        final Channel clientChannel = msg instanceof HeartbeatMessage
+                ? channel
+                : ChannelManager.getSameClientChannel(channel);
 
         if (clientChannel == null) {
             throw new RuntimeException("Not found client channel to response | channel: " + channel);
