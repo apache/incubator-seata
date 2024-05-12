@@ -21,6 +21,7 @@ package io.seata.core.model;
  * Compatible for dubbo dubbo-filter-seata
  *
  */
+@Deprecated
 public enum BranchType {
 
     /**
@@ -82,5 +83,9 @@ public enum BranchType {
             }
         }
         throw new IllegalArgumentException("Unknown BranchType[" + name + "]");
+    }
+
+    public org.apache.seata.core.model.BranchType convertBranchType() {
+        return org.apache.seata.core.model.BranchType.get(this.name());
     }
 }

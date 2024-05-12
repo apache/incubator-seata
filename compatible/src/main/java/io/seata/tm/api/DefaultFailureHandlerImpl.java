@@ -17,6 +17,7 @@
 package io.seata.tm.api;
 
 import java.util.concurrent.TimeUnit;
+
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * The type Default failure handler.
  *
  */
+@Deprecated
 public class DefaultFailureHandlerImpl implements FailureHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);

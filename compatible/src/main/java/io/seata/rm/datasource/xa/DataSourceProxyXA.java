@@ -16,19 +16,86 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
+
 import javax.sql.DataSource;
+
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 
 /**
  * DataSource proxy for XA mode.
  *
  */
-public class DataSourceProxyXA extends org.apache.seata.rm.datasource.xa.DataSourceProxyXA {
+@Deprecated
+public class DataSourceProxyXA implements SeataDataSourceProxy {
+
+    private final org.apache.seata.rm.datasource.xa.DataSourceProxyXA dataSourceProxyXA;
 
     public DataSourceProxyXA(DataSource dataSource) {
-        super(dataSource);
+        this.dataSourceProxyXA = new org.apache.seata.rm.datasource.xa.DataSourceProxyXA(dataSource);
     }
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
-        super(dataSource, resourceGroupId);
+        this.dataSourceProxyXA = new org.apache.seata.rm.datasource.xa.DataSourceProxyXA(dataSource, resourceGroupId);
+    }
+
+    @Override
+    public DataSource getTargetDataSource() {
+        return dataSourceProxyXA.getTargetDataSource();
+    }
+
+    @Override
+    public BranchType getBranchType() {
+        return dataSourceProxyXA.getBranchType();
+    }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        return dataSourceProxyXA.getConnection();
+    }
+
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return dataSourceProxyXA.getConnection(username, password);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return dataSourceProxyXA.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return dataSourceProxyXA.isWrapperFor(iface);
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return dataSourceProxyXA.getLogWriter();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        dataSourceProxyXA.setLogWriter(out);
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        dataSourceProxyXA.setLoginTimeout(seconds);
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return dataSourceProxyXA.getLoginTimeout();
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return dataSourceProxyXA.getParentLogger();
     }
 }

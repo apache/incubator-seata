@@ -18,8 +18,9 @@ package io.seata.core.compressor;
 
 /**
  * The type Compressor
- * 
+ * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface Compressor extends org.apache.seata.core.compressor.Compressor {
 
 }

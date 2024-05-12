@@ -18,6 +18,7 @@ package io.seata.tm.api;
 
 import java.lang.reflect.Field;
 
+import io.netty.util.HashedWheelTimer;
 import io.seata.core.context.RootContext;
 import io.seata.tm.api.transaction.MyRuntimeException;
 import org.apache.seata.core.exception.TransactionException;
@@ -29,8 +30,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.netty.util.HashedWheelTimer;
 
 class DefaultFailureHandlerImplTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImplTest.class);
@@ -88,7 +87,7 @@ class DefaultFailureHandlerImplTest {
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getSuperclass().getDeclaredField("TIMER");
+        Field field = c.getDeclaredField("TIMER");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
@@ -115,7 +114,7 @@ class DefaultFailureHandlerImplTest {
 
         // get timer
         Class<?> c = Class.forName("io.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getSuperclass().getDeclaredField("TIMER");
+        Field field = c.getDeclaredField("TIMER");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1

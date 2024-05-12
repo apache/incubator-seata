@@ -21,6 +21,7 @@ package io.seata.saga.statelang.parser;
  * Json Parser
  *
  */
+@Deprecated
 public interface JsonParser extends org.apache.seata.saga.statelang.parser.JsonParser {
 
 }

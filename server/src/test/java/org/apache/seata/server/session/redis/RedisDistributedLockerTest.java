@@ -24,6 +24,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
@@ -40,6 +41,7 @@ import static org.apache.seata.server.store.StoreConfig.StoreMode;
  *
  */
 @SpringBootTest
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";
@@ -52,7 +54,6 @@ public class RedisDistributedLockerTest {
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         EnhancedServiceLoader.unload(DistributedLocker.class);
-        MockRedisServer.getInstance();
         DistributedLockerFactory.cleanLocker();
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();
@@ -120,9 +121,8 @@ public class RedisDistributedLockerTest {
         boolean d = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 2000L));
         Assertions.assertFalse(d);
 
-       //sleep 60s
         try {
-            Thread.sleep(2000);
+            Thread.sleep(2100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

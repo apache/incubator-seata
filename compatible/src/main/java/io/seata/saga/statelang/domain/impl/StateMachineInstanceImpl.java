@@ -16,11 +16,6 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachineInstance;
-import org.apache.seata.saga.statelang.domain.StateMachine;
-
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.List;
@@ -28,9 +23,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
+
 /**
  * state machine execution instance
  */
+@Deprecated
 public class StateMachineInstanceImpl implements StateMachineInstance {
 
     private final org.apache.seata.saga.statelang.domain.StateMachineInstance actual;
@@ -111,7 +112,11 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public void setStatus(ExecutionStatus status) {
-        actual.setStatus(status.unwrap());
+        if (status == null) {
+            actual.setStatus(null);
+        } else {
+            actual.setStatus(status.unwrap());
+        }
     }
 
     @Override
@@ -121,7 +126,11 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public void setCompensationStatus(ExecutionStatus compensationStatus) {
-        actual.setCompensationStatus(compensationStatus.unwrap());
+        if (compensationStatus == null) {
+            actual.setCompensationStatus(null);
+        } else {
+            actual.setCompensationStatus(compensationStatus.unwrap());
+        }
     }
 
     @Override
@@ -196,12 +205,13 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public StateMachine getStateMachine() {
-        return actual.getStateMachine();
+        return StateMachineImpl.wrap(actual.getStateMachine());
     }
 
     @Override
     public void setStateMachine(StateMachine stateMachine) {
-        actual.setStateMachine(stateMachine);
+        org.apache.seata.saga.statelang.domain.StateMachine unwrap = ((StateMachineImpl) stateMachine).unwrap();
+        actual.setStateMachine(unwrap);
     }
 
     @Override

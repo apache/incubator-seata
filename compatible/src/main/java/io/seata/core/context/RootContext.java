@@ -16,20 +16,30 @@
  */
 package io.seata.core.context;
 
-import io.seata.core.model.BranchType;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
+
+import io.seata.core.model.BranchType;
 
 /**
  * The type Root context.
  */
+@Deprecated
 public class RootContext {
 
-    private static org.apache.seata.core.model.BranchType convertApacheSeata(BranchType branchType) {
-        return org.apache.seata.core.model.BranchType.get(branchType.name());
-    }
+    /**
+     * The constant KEY_XID.
+     * used for apache dubbo
+     */
+    public static final String KEY_XID = "TX_XID";
+
+    /**
+     * The constant KEY_BRANCH_TYPE
+     * * used for apache dubbo
+     */
+    public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     private static BranchType convertIoSeata(org.apache.seata.core.model.BranchType branchType) {
         return BranchType.get(branchType.name());
@@ -41,7 +51,7 @@ public class RootContext {
      * @param defaultBranchType the default branch type
      */
     public static void setDefaultBranchType(BranchType defaultBranchType) {
-        org.apache.seata.core.context.RootContext.setDefaultBranchType(convertApacheSeata(defaultBranchType));
+        org.apache.seata.core.context.RootContext.setDefaultBranchType(defaultBranchType.convertBranchType());
     }
 
     /**
@@ -148,7 +158,7 @@ public class RootContext {
      * @param branchType the branch type
      */
     public static void bindBranchType(@Nonnull BranchType branchType) {
-        org.apache.seata.core.context.RootContext.bindBranchType(convertApacheSeata(branchType));
+        org.apache.seata.core.context.RootContext.bindBranchType(branchType.convertBranchType());
     }
 
     /**

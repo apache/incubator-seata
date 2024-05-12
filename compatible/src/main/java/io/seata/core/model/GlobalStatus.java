@@ -20,6 +20,7 @@ package io.seata.core.model;
  * Status of global transaction.
  *
  */
+@Deprecated
 public enum GlobalStatus {
 
     /**
@@ -211,5 +212,9 @@ public enum GlobalStatus {
             return true;
         }
         return false;
+    }
+
+    public org.apache.seata.core.model.GlobalStatus convertGlobalStatus() {
+        return org.apache.seata.core.model.GlobalStatus.get(this.getCode());
     }
 }

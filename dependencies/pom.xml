@@ -52,7 +52,6 @@
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
         <curator-test.version>5.1.0</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
-        <mock-jedis.version>0.3.1</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
         <eureka-clients.version>1.10.18</eureka-clients.version>
         <jettison.version>1.5.4</jettison.version>
@@ -121,8 +120,8 @@
         <rocketmq-version>5.0.0</rocketmq-version>
 
         <!-- # for kotlin -->
-        <kotlin.version>1.4.32</kotlin.version>
-        <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
+        <kotlin.version>1.7.22</kotlin.version>
+        <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
         <spring-webmvc.version>5.3.26</spring-webmvc.version>
@@ -415,11 +414,6 @@
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${jedis.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.microwww</groupId>
-                <artifactId>redis-server</artifactId>
-                <version>${mock-jedis.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.netflix.eureka</groupId>

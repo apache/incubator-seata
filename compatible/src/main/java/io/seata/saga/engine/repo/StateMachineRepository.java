@@ -16,10 +16,58 @@
  */
 package io.seata.saga.engine.repo;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import io.seata.saga.statelang.domain.StateMachine;
+
 /**
  * StateMachineRepository
- *
  */
-public interface StateMachineRepository extends org.apache.seata.saga.engine.repo.StateMachineRepository {
+@Deprecated
+public interface StateMachineRepository {
 
+    /**
+     * Gets get state machine by id.
+     *
+     * @param stateMachineId the state machine id
+     * @return the get state machine by id
+     */
+    StateMachine getStateMachineById(String stateMachineId);
+
+    /**
+     * Gets get state machine.
+     *
+     * @param stateMachineName the state machine name
+     * @param tenantId         the tenant id
+     * @return the get state machine
+     */
+    StateMachine getStateMachine(String stateMachineName, String tenantId);
+
+    /**
+     * Gets get state machine.
+     *
+     * @param stateMachineName the state machine name
+     * @param tenantId         the tenant id
+     * @param version          the version
+     * @return the get state machine
+     */
+    StateMachine getStateMachine(String stateMachineName, String tenantId, String version);
+
+    /**
+     * Register the state machine to the repository (if the same version already exists, return the existing version)
+     *
+     * @param stateMachine stateMachine
+     * @return the state machine
+     */
+    StateMachine registryStateMachine(StateMachine stateMachine);
+
+    /**
+     * Registry by resources.
+     *
+     * @param resourceAsStreamArray the resource as stream array
+     * @param tenantId              the tenant id
+     * @throws IOException the io exception
+     */
+    void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException;
 }

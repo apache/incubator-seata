@@ -20,6 +20,7 @@ package io.seata.core.exception;
  * The enum Transaction exception code.
  *
  */
+@Deprecated
 public enum TransactionExceptionCode {
 
     /**
@@ -167,6 +168,10 @@ public enum TransactionExceptionCode {
             throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
         }
         return value;
+    }
+
+    public org.apache.seata.core.exception.TransactionExceptionCode convertTransactionExceptionCode() {
+        return org.apache.seata.core.exception.TransactionExceptionCode.get(this.ordinal());
     }
 
 }

@@ -16,69 +16,38 @@
  */
 package org.apache.seata.config;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.seata.common.util.CollectionUtils;
+
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
 
 /**
- * @author funkye
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
-    private static final String METHOD_PREFIX = "get";
+    private static final String PROXY_METHOD_PREFIX = "get";
 
-    private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
-
+    private static final String[] NOT_PROXY_METHOD_NAMES = new String[] {PROXY_METHOD_PREFIX + "LatestConfig", PROXY_METHOD_PREFIX + "ConfigListeners"};
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
-    private Map<String, HashSet<ConfigurationChangeListener>> configListenersMap = new HashMap<>();
-
-    public static void addConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        if (StringUtils.isBlank(dataId)) {
-            return;
-        }
-        synchronized (ConfigurationCache.class) {
-            HashSet<ConfigurationChangeListener> listenerHashSet =
-                getInstance().configListenersMap.computeIfAbsent(dataId, key -> new HashSet<>());
-            if (!listenerHashSet.contains(getInstance())) {
-                ConfigurationFactory.getInstance().addConfigListener(dataId, getInstance());
-                listenerHashSet.add(getInstance());
-            }
-            if (null != listeners && listeners.length > 0) {
-                for (ConfigurationChangeListener listener : listeners) {
-                    if (!listenerHashSet.contains(listener)) {
-                        listenerHashSet.add(listener);
-                        ConfigurationFactory.getInstance().addConfigListener(dataId, listener);
-                    }
-                }
-            }
-        }
-    }
-
-    public static void removeConfigListener(String dataId, ConfigurationChangeListener... listeners) {
-        if (StringUtils.isBlank(dataId)) {
-            return;
-        }
-        synchronized (ConfigurationCache.class) {
-            final HashSet<ConfigurationChangeListener> listenerSet = getInstance().configListenersMap.get(dataId);
-            if (CollectionUtils.isNotEmpty(listenerSet)) {
-                for (ConfigurationChangeListener listener : listeners) {
-                    if (listenerSet.remove(listener)) {
-                        ConfigurationFactory.getInstance().removeConfigListener(dataId, listener);
-                    }
-                }
-            }
-        }
-    }
+    private static final Set<String> DATA_ID_CACHED = new HashSet<>();
 
     public static ConfigurationCache getInstance() {
         return ConfigurationCacheInstance.INSTANCE;
+    }
+
+    @Override
+    public void onProcessEvent(ConfigurationChangeEvent event) {
+        beforeEvent(event);
+        onChangeEvent(event);
+        afterEvent(event);
     }
 
     @Override
@@ -91,23 +60,23 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             } else {
                 Object newValue = new ObjectWrapper(event.getNewValue(), null).convertData(oldWrapper.getType());
                 if (!Objects.equals(oldWrapper.getData(), newValue)) {
-                    CONFIG_CACHE.put(event.getDataId(), new ObjectWrapper(newValue, oldWrapper.getType(),oldWrapper.getLastDefaultValue()));
+                    CONFIG_CACHE.put(event.getDataId(),
+                        new ObjectWrapper(newValue, oldWrapper.getType(), oldWrapper.getLastDefaultValue()));
                 }
             }
         } else {
-            CONFIG_CACHE.remove(event.getDataId());
+            CONFIG_CACHE.remove(event.getDataId(), oldWrapper);
         }
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
         return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
             , (proxy, method, args) -> {
-                String methodName = method.getName();
-                if (methodName.startsWith(METHOD_PREFIX) && !methodName.equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                if (isProxyTargetMethod(method)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type =
-                        ObjectWrapper.getTypeByName(methodName.substring(METHOD_PREFIX.length()));
+                        ObjectWrapper.getTypeByName(method.getName().substring(PROXY_METHOD_PREFIX.length()));
                     Object defaultValue = null;
                     if (args.length > 1
                             && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
@@ -115,6 +84,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     }
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                        if (DATA_ID_CACHED.add(rawDataId)) {
+                            originalConfiguration.addConfigListener(rawDataId, this);
+                        }
                         Object result = method.invoke(originalConfiguration, args);
                         // The wrapper.data only exists in the cache when it is not null.
                         if (result != null) {
@@ -127,6 +99,19 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 return method.invoke(originalConfiguration, args);
             }
         );
+    }
+
+    private boolean isProxyTargetMethod(Method method) {
+        String methodName = method.getName();
+        if (!methodName.startsWith(PROXY_METHOD_PREFIX)) {
+            return false;
+        }
+        for (String name : NOT_PROXY_METHOD_NAMES) {
+            if (methodName.equalsIgnoreCase(name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static class ConfigurationCacheInstance {
