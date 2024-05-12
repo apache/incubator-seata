@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: naming server
+
+heartbeat:
+  threshold: 3000
+  period: 2000
