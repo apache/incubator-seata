@@ -99,7 +99,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
 
         if (clientChannel == null) {
-            throw new RuntimeException("channel is error.");
+            throw new RuntimeException("Not found client channel to response | channel: " + channel);
         }
 
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
