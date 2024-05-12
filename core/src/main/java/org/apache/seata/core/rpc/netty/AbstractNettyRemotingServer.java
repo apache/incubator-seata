@@ -97,14 +97,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (!(msg instanceof HeartbeatMessage)) {
             clientChannel = ChannelManager.getSameClientChannel(channel);
         }
-        if (clientChannel != null) {
-            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
-                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
-                : ProtocolConstants.MSGTYPE_RESPONSE);
-            super.sendAsync(clientChannel, rpcMsg);
-        } else {
+
+        if (clientChannel == null) {
             throw new RuntimeException("channel is error.");
         }
+
+        RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+                ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
+                : ProtocolConstants.MSGTYPE_RESPONSE);
+        super.sendAsync(clientChannel, rpcMsg);
     }
 
     @Override
