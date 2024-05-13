@@ -21,7 +21,6 @@ import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.seata.core.store.MappingDO;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;

@@ -32,7 +32,7 @@ import java.util.List;
 @LoadLevel(name = "redis")
 public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager {
 
-    private final String REDIS_SPLIT_KEY = ":";
+    private static final String REDIS_SPLIT_KEY = ":";
 
 
     @Override
