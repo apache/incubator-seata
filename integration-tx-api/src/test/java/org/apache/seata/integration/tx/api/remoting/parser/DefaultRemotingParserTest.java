@@ -1,11 +1,15 @@
 package org.apache.seata.integration.tx.api.remoting.parser;
 
+import org.apache.seata.integration.tx.api.remoting.Protocols;
+import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.remoting.RemotingParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,5 +67,54 @@ public class DefaultRemotingParserTest {
     @Test
     public void testIsServiceFromClassFail() {
         assertFalse(remotingParser.isService(SimpleBean.class));
+    }
+
+    @Test
+    public void testGetServiceDesc() {
+        SimpleRemoteBean remoteBean = new SimpleRemoteBean();
+        RemotingDesc desc = remotingParser.getServiceDesc(remoteBean, remoteBean.getClass().getName());
+        assertEquals(Protocols.IN_JVM, desc.getProtocol());
+        assertEquals(SimpleRemoteBean.class, desc.getServiceClass());
+    }
+
+    @Test
+    public void testGetServiceDescFail() {
+        SimpleBean simpleBean = new SimpleBean();
+        assertNull(remotingParser.getServiceDesc(simpleBean, simpleBean.getClass().getName()));
+    }
+
+    @Test
+    public void testParserRemotingServiceInfo() {
+        SimpleRemoteBean remoteBean = new SimpleRemoteBean();
+        SimpleRemotingParser parser = new SimpleRemotingParser();
+        RemotingDesc desc = remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
+                parser);
+
+        assertEquals(desc, remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
+                parser));
+        assertEquals(Protocols.IN_JVM, desc.getProtocol());
+        assertEquals(SimpleRemoteBean.class, desc.getServiceClass());
+    }
+
+    @Test
+    public void testParserRemotingServiceInfoFail() {
+        SimpleBean simpleBean = new SimpleBean();
+        assertNull(remotingParser.parserRemotingServiceInfo(simpleBean, simpleBean.getClass().getName(),
+                new SimpleRemotingParser()));
+    }
+
+    @Test
+    public void testGetRemotingBeanDesc() {
+        SimpleRemoteBean remoteBean = new SimpleRemoteBean();
+        remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
+                new SimpleRemotingParser());
+
+        assertNotNull(remotingParser.getRemotingBeanDesc(remoteBean));
+    }
+
+    @Test
+    public void testGetRemotingDeanDescFail() {
+        SimpleBean simpleBean = new SimpleBean();
+        assertNull(remotingParser.getRemotingBeanDesc(simpleBean));
     }
 }
