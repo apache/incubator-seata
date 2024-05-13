@@ -82,7 +82,7 @@
         </file>
 
         <file>
-            <source>LICENSE-BIN</source>
+            <source>../LICENSE</source>
             <destName>LICENSE</destName>
         </file>
 
