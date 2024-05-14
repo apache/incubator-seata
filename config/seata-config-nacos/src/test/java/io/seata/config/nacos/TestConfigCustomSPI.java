@@ -16,6 +16,7 @@
  */
 package io.seata.config.nacos;
 
+import java.security.SecureRandom;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +43,12 @@ public class TestConfigCustomSPI {
     private static final Config FILE_CONFIG = ConfigFactory.load("registry-test.conf");
     private static ConfigService configService;
 
+    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
+
+    private static final int STRING_LENGTH = 6;
+
+    private static final SecureRandom random = new SecureRandom();
+
     @BeforeAll
     public static void setup() throws NacosException {
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
@@ -55,7 +62,8 @@ public class TestConfigCustomSPI {
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
-        String dataId = "nacos.config.custom.spi.test";
+        String postfix = generateRandomString();
+        String dataId = "nacos.config.custom.spi." + postfix;
         String group = FILE_CONFIG.getString("config.test.group");
         String content = "seata";
         CountDownLatch listenerCountDown = new CountDownLatch(1);
@@ -76,6 +84,14 @@ public class TestConfigCustomSPI {
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
         Assertions.assertEquals(2, listeners.size());
 
+    }
+
+    public static String generateRandomString() {
+        StringBuilder sb = new StringBuilder(STRING_LENGTH);
+        for (int i = 0; i < STRING_LENGTH; i++) {
+            sb.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        return sb.toString();
     }
 
     @AfterAll
