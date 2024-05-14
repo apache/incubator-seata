@@ -325,6 +325,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                     branchSessions = new ArrayList<>();
                     Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
                         .ifPresent(globalSession -> branchSessions.addAll(globalSession.getBranchSessions()));
+                    Collections.reverse(branchSessions);
                 }
             }
         }

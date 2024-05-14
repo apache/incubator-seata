@@ -662,7 +662,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
             }
         }
         if (CollectionUtils.isNotEmpty(branchTransactionDOs)) {
-            Collections.sort(branchTransactionDOs);
+            Collections.reverse(branchTransactionDOs);
         }
         return branchTransactionDOs;
     }

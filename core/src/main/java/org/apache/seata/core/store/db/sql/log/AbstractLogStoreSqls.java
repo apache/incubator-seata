@@ -107,7 +107,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String QUERY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS
             + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?"
-            + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
+            + " order by " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " desc";
 
     /**
      * The constant QUERY_BRANCH_TRANSACTION_XIDS.
@@ -115,7 +115,7 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String QUERY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS
             + "  from " + BRANCH_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")"
-            + " order by " + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + " asc";
+            + " order by " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " desc";
 
     /**
      * The constant CHECK_MAX_TRANS_ID.
