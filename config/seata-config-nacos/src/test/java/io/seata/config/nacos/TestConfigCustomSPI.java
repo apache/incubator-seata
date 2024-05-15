@@ -68,7 +68,6 @@ public class TestConfigCustomSPI {
         Configuration configuration = ConfigurationFactory.getInstance();
         String postfix = generateRandomString();
         String dataId = "nacos.config.custom.spi." + postfix;
-        System.setProperty("nacos.config.test.dataId", dataId);
         String group = FILE_CONFIG.getString("config.test.group");
         String content = "seata";
         CountDownLatch listenerCountDown = new CountDownLatch(1);

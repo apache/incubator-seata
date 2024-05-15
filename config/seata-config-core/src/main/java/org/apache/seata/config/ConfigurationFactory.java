@@ -288,8 +288,6 @@ public final class ConfigurationFactory {
     static class OldConfigurationChangeListenerWrapper implements io.seata.config.ConfigurationChangeListener {
         private final ConfigurationChangeListener listener;
 
-        private ConfigurationChangeEvent event;
-
         public OldConfigurationChangeListenerWrapper(ConfigurationChangeListener listener) {
             this.listener = listener;
         }
@@ -306,18 +304,12 @@ public final class ConfigurationFactory {
 
         @Override
         public void onChangeEvent(io.seata.config.ConfigurationChangeEvent event) {
-            if (this.event == null) {
-                this.event = convert(event);
-            }
-            listener.onChangeEvent(this.event);
+            onProcessEvent(event);
         }
 
         @Override
         public void onProcessEvent(io.seata.config.ConfigurationChangeEvent event) {
-            if (this.event == null) {
-                this.event = convert(event);
-            }
-            listener.onProcessEvent(this.event);
+            listener.onProcessEvent(convert(event));
         }
 
         @Override
@@ -332,7 +324,7 @@ public final class ConfigurationFactory {
 
         @Override
         public void beforeEvent() {
-            listener.beforeEvent(this.event != null ? this.event : null);
+            listener.beforeEvent(null);
         }
 
         @Override
