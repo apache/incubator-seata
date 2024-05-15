@@ -164,7 +164,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             configService.addListener(dataId, getNacosGroup(), new AbstractSharedListener() {
                 @Override
                 public void innerReceive(String dataId, String group, String configInfo) {
-                    LOGGER.info("innerReceive nacos listener for dataId:{}, group:{}", dataId, getNacosGroup());
+                    nacosListener.innerReceive(dataId, group, configInfo);
                 }
             });
             LOGGER.info("add nacos listener for dataId:{}, group:{}", dataId, getNacosGroup());
