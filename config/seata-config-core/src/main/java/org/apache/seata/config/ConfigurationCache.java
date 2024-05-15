@@ -27,14 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationCache.class);
 
     private static final String PROXY_METHOD_PREFIX = "get";
 
@@ -56,7 +52,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        LOGGER.info("Configuration change event: {}", event);
         ObjectWrapper oldWrapper = CONFIG_CACHE.get(event.getDataId());
         // The wrapper.data only exists in the cache when it is not null.
         if (StringUtils.isNotBlank(event.getNewValue())) {
@@ -75,7 +70,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
-        LOGGER.info("proxy class: {}",originalConfiguration.getClass().getName());
         return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
             , (proxy, method, args) -> {
                 if (isProxyTargetMethod(method)) {
@@ -91,7 +85,6 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
                         if (DATA_ID_CACHED.add(rawDataId)) {
-                            LOGGER.info("Add listener for dataId: {}", rawDataId);
                             originalConfiguration.addConfigListener(rawDataId, this);
                         }
                         Object result = method.invoke(originalConfiguration, args);

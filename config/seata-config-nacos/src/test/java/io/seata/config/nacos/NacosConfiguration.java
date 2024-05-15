@@ -79,7 +79,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         if (instance == null) {
             synchronized (NacosConfiguration.class) {
                 if (instance == null) {
-                    LOGGER.info("NacosConfiguration init");
                     instance = new NacosConfiguration();
                 }
             }
@@ -105,8 +104,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         String value = seataConfig.getProperty(dataId);
         if (null == value) {
             try {
-                LOGGER.info("get nacos config dataId:{}, group:{}", dataId, getNacosGroup());
-                System.out.println("get nacos config dataId:" + dataId + ", group:" + getNacosGroup());
                 value = configService.getConfig(dataId, getNacosGroup(), timeoutMills);
             } catch (NacosException exx) {
                 LOGGER.error(exx.getErrMsg());
@@ -155,7 +152,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
-       LOGGER.info("add nacos listener dataId:{}, group:{}", dataId, getNacosGroup());
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }

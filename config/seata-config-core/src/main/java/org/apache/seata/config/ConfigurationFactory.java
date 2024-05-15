@@ -223,7 +223,7 @@ public final class ConfigurationFactory {
         return null;
     }
 
-    public static void reload() {
+    protected static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();

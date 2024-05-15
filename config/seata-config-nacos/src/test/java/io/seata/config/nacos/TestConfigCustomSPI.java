@@ -56,7 +56,6 @@ public class TestConfigCustomSPI {
     @BeforeAll
     public static void setup() throws NacosException {
         System.setProperty("seataEnv", "test");
-        ConfigurationFactory.reload();
         FILE_CONFIG = ConfigFactory.load("registry-test.conf");
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
         Properties properties = new Properties();
