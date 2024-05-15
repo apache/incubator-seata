@@ -222,7 +222,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
-        LOGGER.info("NacosConfiguration properties:{}", properties);
         return properties;
     }
 
@@ -321,8 +320,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                         String listenedDataId = entry.getKey();
                         String propertyOld = seataConfig.getProperty(listenedDataId, "");
                         String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
-                        LOGGER.info("listenedDataId:{}, propertyOld:{}, propertyNew:{}", listenedDataId, propertyOld,
-                            propertyNew);
                         if (!propertyOld.equals(propertyNew)) {
                             ConfigurationChangeEvent event =
                                 new ConfigurationChangeEvent().setDataId(listenedDataId).setNewValue(propertyNew)
@@ -343,7 +340,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                 LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
             //Compatible with old writing
-            LOGGER.info("Compatible with old writing");
             ConfigurationChangeEvent event =
                 new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
             listener.onProcessEvent(event);
