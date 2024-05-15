@@ -173,8 +173,6 @@ public final class ConfigurationFactory {
             if (null != configurationCache) {
                 extConfiguration = configurationCache;
             }
-        } catch (EnhancedServiceNotFoundException ignore) {
-
         } catch (Exception e) {
             LOGGER.error("failed to load configurationCacheProvider:{}", e.getMessage(), e);
         }

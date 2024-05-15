@@ -74,6 +74,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
+        LOGGER.info("proxy class: {}",originalConfiguration.getClass().getName());
         return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
             , (proxy, method, args) -> {
                 if (isProxyTargetMethod(method)) {
@@ -89,7 +90,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
                         if (DATA_ID_CACHED.add(rawDataId)) {
-                            LOGGER.info("Add listener for dataId: {} , class: {}", rawDataId,originalConfiguration.getClass().getName());
+                            LOGGER.info("Add listener for dataId: {}", rawDataId);
                             originalConfiguration.addConfigListener(rawDataId, this);
                         }
                         Object result = method.invoke(originalConfiguration, args);
