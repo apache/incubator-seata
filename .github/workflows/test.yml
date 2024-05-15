@@ -44,7 +44,7 @@ jobs:
         if: matrix.os == 'macos'
         run: |
           ./mvnw     -version;
-          ./mvnw     -T 4C -P arrch64 clean test \
+          ./mvnw     -T 4C clean test \
                      -P args-for-client-test \
                      -Dspring-boot.version=${{ matrix.springboot }} \
                      -Dmaven.git-commit-id.skip=true \

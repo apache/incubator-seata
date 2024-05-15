@@ -322,6 +322,8 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
+                    LOGGER.info("listenedDataId:{}, propertyOld:{}, propertyNew:{}", listenedDataId, propertyOld,
+                        propertyNew);
                     if (!propertyOld.equals(propertyNew)) {
                         ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(listenedDataId)
                             .setNewValue(propertyNew).setNamespace(group);
