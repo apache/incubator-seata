@@ -37,8 +37,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestConfigCustomSPI {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigCustomSPI.class);
 
     private static final Config FILE_CONFIG = ConfigFactory.load("registry-test.conf");
     private static ConfigService configService;
@@ -61,6 +65,7 @@ public class TestConfigCustomSPI {
     @Test
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
+        ConfigurationFactory.reload();
         Configuration configuration = ConfigurationFactory.getInstance();
         String postfix = generateRandomString();
         String dataId = "nacos.config.custom.spi." + postfix;
@@ -70,6 +75,8 @@ public class TestConfigCustomSPI {
         configuration.addConfigListener(dataId, new CachedConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
+                LOGGER.info("onChangeEvent: {}", event.getNewValue());
+                System.out.println("onChangeEvent: " + event.getNewValue());
                 Assertions.assertEquals(content, event.getNewValue());
                 listenerCountDown.countDown();
             }

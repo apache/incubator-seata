@@ -225,7 +225,7 @@ public final class ConfigurationFactory {
         return null;
     }
 
-    protected static void reload() {
+    public static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();
