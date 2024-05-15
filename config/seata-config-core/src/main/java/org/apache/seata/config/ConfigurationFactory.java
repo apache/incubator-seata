@@ -173,8 +173,6 @@ public final class ConfigurationFactory {
             if (null != configurationCache) {
                 extConfiguration = configurationCache;
             }
-        } catch (EnhancedServiceNotFoundException ignore) {
-
         } catch (Exception e) {
             LOGGER.error("failed to load configurationCacheProvider:{}", e.getMessage(), e);
         }
@@ -225,7 +223,7 @@ public final class ConfigurationFactory {
         return null;
     }
 
-    protected static void reload() {
+    public static void reload() {
         ConfigurationCache.clear();
         initOriginConfiguraction();
         load();
@@ -298,13 +296,15 @@ public final class ConfigurationFactory {
             ConfigurationChangeEvent newEvent = new ConfigurationChangeEvent();
             newEvent.setDataId(event.getDataId()).setOldValue(event.getOldValue()).setNewValue(event.getNewValue())
                 .setNamespace(event.getNamespace());
-            newEvent.setChangeType(ConfigurationChangeType.values()[event.getChangeType().ordinal()]);
+            if (event.getChangeType() != null) {
+                newEvent.setChangeType(ConfigurationChangeType.values()[event.getChangeType().ordinal()]);
+            }
             return newEvent;
         }
 
         @Override
         public void onChangeEvent(io.seata.config.ConfigurationChangeEvent event) {
-            listener.onChangeEvent(convert(event));
+            onProcessEvent(event);
         }
 
         @Override
