@@ -103,8 +103,8 @@ public class TestConfigCustomSPI {
         configService.publishConfig(dataId, group, content);
         String currentContent = configService.getConfig(dataId, group, 5000);
         Assertions.assertEquals(content, currentContent);
-        Assertions.assertTrue(listenerCountDown2.await(60, TimeUnit.SECONDS));
-        boolean reachZero = listenerCountDown.await(60, TimeUnit.SECONDS);
+        Assertions.assertTrue(listenerCountDown2.await(10, TimeUnit.SECONDS));
+        boolean reachZero = listenerCountDown.await(10, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
         //get config
         String config = configuration.getConfig(dataId);

@@ -223,6 +223,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             }
             properties.setProperty(PRO_NAMESPACE_KEY, namespace);
         }
+        LOGGER.info("NacosConfiguration properties:{}", properties);
         return properties;
     }
 
@@ -281,7 +282,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
      */
     public static class NacosListener extends AbstractSharedListener {
-        private final String dataId;
         private final ConfigurationChangeListener listener;
 
         /**
@@ -291,7 +291,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
          * @param listener the listener
          */
         public NacosListener(String dataId, ConfigurationChangeListener listener) {
-            this.dataId = dataId;
             this.listener = listener;
         }
 
