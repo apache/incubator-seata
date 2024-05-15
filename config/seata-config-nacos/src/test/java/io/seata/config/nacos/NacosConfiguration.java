@@ -339,15 +339,14 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                     seataConfig = seataConfigNew;
                     return;
                 }
-
-                //Compatible with old writing
-                LOGGER.info("Compatible with old writing");
-                ConfigurationChangeEvent event =
-                    new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
-                listener.onProcessEvent(event);
             } catch (Exception e) {
                 LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
+            //Compatible with old writing
+            LOGGER.info("Compatible with old writing");
+            ConfigurationChangeEvent event =
+                new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
+            listener.onProcessEvent(event);
         }
     }
 
