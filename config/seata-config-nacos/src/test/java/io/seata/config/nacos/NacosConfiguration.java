@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
@@ -300,6 +302,10 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
          */
         public ConfigurationChangeListener getTargetListener() {
             return this.listener;
+        }
+        @Override
+        public Executor getExecutor() {
+            return Executors.newCachedThreadPool();
         }
 
         @Override

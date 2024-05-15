@@ -2,7 +2,7 @@ name: "test"
 
 on:
   push:
-    branches: [ test*, "*.*.*", "0513" ]
+    branches: [ test*, "*.*.*" ]
 
 jobs:
   # job 1
