@@ -20,10 +20,13 @@ import java.security.SecureRandom;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import com.typesafe.config.Config;
@@ -85,9 +88,20 @@ public class TestConfigCustomSPI {
                 listenerCountDown.countDown();
             }
         });
+        CountDownLatch listenerCountDown2 = new CountDownLatch(1);
+        configService.addListener(dataId, group, new Listener() {
+            @Override public Executor getExecutor() {
+                return Executors.newFixedThreadPool(1);
+            }
+
+            @Override public void receiveConfigInfo(String configInfo) {
+                listenerCountDown2.countDown();
+            }
+        });
         configService.publishConfig(dataId, group, content);
         String currentContent = configService.getConfig(dataId, group, 5000);
         Assertions.assertEquals(content, currentContent);
+        Assertions.assertTrue(listenerCountDown2.await(60, TimeUnit.SECONDS));
         boolean reachZero = listenerCountDown.await(60, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
         //get config
