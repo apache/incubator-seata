@@ -298,7 +298,9 @@ public final class ConfigurationFactory {
             ConfigurationChangeEvent newEvent = new ConfigurationChangeEvent();
             newEvent.setDataId(event.getDataId()).setOldValue(event.getOldValue()).setNewValue(event.getNewValue())
                 .setNamespace(event.getNamespace());
-            newEvent.setChangeType(ConfigurationChangeType.values()[event.getChangeType().ordinal()]);
+            if (event.getChangeType() != null) {
+                newEvent.setChangeType(ConfigurationChangeType.values()[event.getChangeType().ordinal()]);
+            }
             return newEvent;
         }
 
