@@ -44,7 +44,7 @@ public class TestConfigCustomSPI {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigCustomSPI.class);
 
-    private static final Config FILE_CONFIG = ConfigFactory.load("registry-test.conf");
+    private static  Config FILE_CONFIG;
     private static ConfigService configService;
 
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -55,6 +55,8 @@ public class TestConfigCustomSPI {
 
     @BeforeAll
     public static void setup() throws NacosException {
+        ConfigurationFactory.reload();
+        FILE_CONFIG = ConfigFactory.load("registry-test.conf");
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
         Properties properties = new Properties();
         properties.put("serverAddr", serverAddr);
@@ -65,7 +67,6 @@ public class TestConfigCustomSPI {
     @Test
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
-        ConfigurationFactory.reload();
         Configuration configuration = ConfigurationFactory.getInstance();
         String postfix = generateRandomString();
         String dataId = "nacos.config.custom.spi." + postfix;
