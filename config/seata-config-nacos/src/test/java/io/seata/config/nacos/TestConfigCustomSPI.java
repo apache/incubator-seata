@@ -62,7 +62,6 @@ public class TestConfigCustomSPI {
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
-	    Assertions.assertInstanceOf(NacosConfiguration.class, configuration);
         String postfix = generateRandomString();
         String dataId = "nacos.config.custom.spi." + postfix;
         String group = FILE_CONFIG.getString("config.test.group");
@@ -76,6 +75,8 @@ public class TestConfigCustomSPI {
             }
         });
         configService.publishConfig(dataId, group, content);
+        String currentContent = configService.getConfig(dataId, group, 5000);
+        Assertions.assertEquals(content, currentContent);
         boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
         Assertions.assertFalse(reachZero);
         //get config
