@@ -86,10 +86,12 @@ jobs:
           java-version: ${{ matrix.java }}
       # step 3
       ## step 3.1: for Ubuntu and MacOS
+      - name: Set os.detected.classifier
+        run: echo "os.detected.classifier=$(uname -m)" >> $GITHUB_ENV
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
-          if [ "${{ os.detected.classifier }}" == "osx-aarch_64" ]; then
+          if [ "${{ env.os.detected.classifier }}" == "osx-aarch_64" ]; then
             ./mvnw -T 4C clean test -P args-for-client-test -P arrch64 -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
             ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
