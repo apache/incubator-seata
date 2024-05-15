@@ -304,45 +304,50 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            //The new configuration method to puts all configurations into a dateId
-            if (getNacosDataId().equals(dataId)) {
-                Properties seataConfigNew = new Properties();
-                if (StringUtils.isNotBlank(configInfo)) {
-                    try {
-                        seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
-                    } catch (IOException e) {
-                        LOGGER.error("load config properties error", e);
-                        return;
-                    }
-                }
-                //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
-                    CONFIG_LISTENERS_MAP.entrySet()) {
-                    String listenedDataId = entry.getKey();
-                    String propertyOld = seataConfig.getProperty(listenedDataId, "");
-                    String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
-                    LOGGER.info("listenedDataId:{}, propertyOld:{}, propertyNew:{}", listenedDataId, propertyOld,
-                        propertyNew);
-                    if (!propertyOld.equals(propertyNew)) {
-                        ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(listenedDataId)
-                            .setNewValue(propertyNew).setNamespace(group);
-
-                        ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners = entry.getValue();
-                        for (ConfigurationChangeListener configListener : configListeners.keySet()) {
-                            configListener.onProcessEvent(event);
+            try {
+                //The new configuration method to puts all configurations into a dateId
+                if (getNacosDataId().equals(dataId)) {
+                    Properties seataConfigNew = new Properties();
+                    if (StringUtils.isNotBlank(configInfo)) {
+                        try {
+                            seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
+                        } catch (IOException e) {
+                            LOGGER.error("load config properties error", e);
+                            return;
                         }
                     }
+                    //Get all the monitored dataids and judge whether it has been modified
+                    for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                        String listenedDataId = entry.getKey();
+                        String propertyOld = seataConfig.getProperty(listenedDataId, "");
+                        String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
+                        LOGGER.info("listenedDataId:{}, propertyOld:{}, propertyNew:{}", listenedDataId, propertyOld,
+                            propertyNew);
+                        if (!propertyOld.equals(propertyNew)) {
+                            ConfigurationChangeEvent event =
+                                new ConfigurationChangeEvent().setDataId(listenedDataId).setNewValue(propertyNew)
+                                    .setNamespace(group);
+
+                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners =
+                                entry.getValue();
+                            for (ConfigurationChangeListener configListener : configListeners.keySet()) {
+                                configListener.onProcessEvent(event);
+                            }
+                        }
+                    }
+
+                    seataConfig = seataConfigNew;
+                    return;
                 }
 
-                seataConfig = seataConfigNew;
-                return;
+                //Compatible with old writing
+                LOGGER.info("Compatible with old writing");
+                ConfigurationChangeEvent event =
+                    new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
+                listener.onProcessEvent(event);
+            } catch (Exception e) {
+                LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
-
-            //Compatible with old writing
-            LOGGER.info("Compatible with old writing");
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
-                .setNamespace(group);
-            listener.onProcessEvent(event);
         }
     }
 
