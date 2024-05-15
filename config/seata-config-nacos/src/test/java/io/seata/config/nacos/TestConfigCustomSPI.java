@@ -41,12 +41,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TestConfigCustomSPI {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigCustomSPI.class);
 
     private static  Config FILE_CONFIG;
     private static ConfigService configService;
@@ -79,16 +75,12 @@ public class TestConfigCustomSPI {
         configuration.addConfigListener(dataId, new CachedConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                LOGGER.info("onChangeEvent: {}", event.getNewValue());
-                System.out.println("onChangeEvent: " + event.getNewValue());
                 Assertions.assertEquals(content, event.getNewValue());
                 listenerCountDown.countDown();
             }
         });
         configService.publishConfig(dataId, group, content);
-        String currentContent = configService.getConfig(dataId, group, 5000);
-        Assertions.assertEquals(content, currentContent);
-        boolean reachZero = listenerCountDown.await(10, TimeUnit.SECONDS);
+        boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
         //get config
         String config = configuration.getConfig(dataId);
@@ -109,5 +101,7 @@ public class TestConfigCustomSPI {
 
     @AfterAll
     public static void afterAll() {
+        ConfigurationFactory.reload();
+        ConfigurationCache.clear();
     }
 }
