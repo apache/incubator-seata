@@ -304,7 +304,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            LOGGER.info("dataId:{}, group:{}, configInfo:{}", dataId, group, configInfo);
+            LOGGER.info("dataId:{}, group:{}, configInfo:{},dataId: {}", dataId, group, configInfo, getNacosDataId());
             //The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
@@ -340,6 +340,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             }
 
             //Compatible with old writing
+            LOGGER.info("Compatible with old writing");
             ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
                 .setNamespace(group);
             listener.onProcessEvent(event);
