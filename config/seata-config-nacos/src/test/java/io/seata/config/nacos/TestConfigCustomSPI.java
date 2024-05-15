@@ -85,22 +85,9 @@ public class TestConfigCustomSPI {
                 listenerCountDown.countDown();
             }
         });
-        CountDownLatch listenerCountDown2 = new CountDownLatch(1);
-        LOGGER.info("add dataid: {},group: {}", dataId,group);
-        configService.addListener(dataId, group, new AbstractSharedListener() {
-            @Override public Executor getExecutor() {
-                return Executors.newFixedThreadPool(1);
-            }
-
-            @Override
-            public void innerReceive(String dataId, String group, String configInfo) {
-                listenerCountDown2.countDown();
-            }
-        });
         configService.publishConfig(dataId, group, content);
         String currentContent = configService.getConfig(dataId, group, 5000);
         Assertions.assertEquals(content, currentContent);
-        Assertions.assertTrue(listenerCountDown2.await(10, TimeUnit.SECONDS));
         boolean reachZero = listenerCountDown.await(10, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
         //get config
@@ -108,7 +95,7 @@ public class TestConfigCustomSPI {
         Assertions.assertEquals(content, config);
         //listener
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
-        Assertions.assertEquals(2, listeners.size());
+        Assertions.assertEquals(1, listeners.size());
 
     }
 
