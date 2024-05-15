@@ -66,6 +66,9 @@ public class TestConfigCustomSPI {
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
         Properties properties = new Properties();
         properties.put("serverAddr", serverAddr);
+        properties.put("isUseCloudNamespaceParsing", "false");
+        properties.put("isUseEndpointParsingRule", "false");
+        properties.put("namespace", "");
         configService = NacosFactory.createConfigService(properties);
     }
 
