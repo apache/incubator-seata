@@ -62,6 +62,7 @@ public class TestConfigCustomSPI {
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
+	    Assertions.assertInstanceOf(NacosConfiguration.class, configuration);
         String postfix = generateRandomString();
         String dataId = "nacos.config.custom.spi." + postfix;
         String group = FILE_CONFIG.getString("config.test.group");
