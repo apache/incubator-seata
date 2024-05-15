@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.config.listener.Listener;
+import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import com.typesafe.config.Config;
@@ -89,12 +89,14 @@ public class TestConfigCustomSPI {
             }
         });
         CountDownLatch listenerCountDown2 = new CountDownLatch(1);
-        configService.addListener(dataId, group, new Listener() {
+        LOGGER.info("add dataid: {},group: {}", dataId,group);
+        configService.addListener(dataId, group, new AbstractSharedListener() {
             @Override public Executor getExecutor() {
                 return Executors.newFixedThreadPool(1);
             }
 
-            @Override public void receiveConfigInfo(String configInfo) {
+            @Override
+            public void innerReceive(String dataId, String group, String configInfo) {
                 listenerCountDown2.countDown();
             }
         });

@@ -303,10 +303,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         public ConfigurationChangeListener getTargetListener() {
             return this.listener;
         }
-        @Override
-        public Executor getExecutor() {
-            return Executors.newCachedThreadPool();
-        }
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
