@@ -159,6 +159,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             NacosListener nacosListener = new NacosListener(dataId, listener);
             CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>()).put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
+            LOGGER.info("add nacos listener for dataId:{}, group:{}", dataId, getNacosGroup());
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
         }
@@ -303,6 +304,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
+            LOGGER.info("dataId:{}, group:{}, configInfo:{}", dataId, group, configInfo);
             //The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
@@ -314,7 +316,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                         return;
                     }
                 }
-
                 //Get all the monitored dataids and judge whether it has been modified
                 for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
                     CONFIG_LISTENERS_MAP.entrySet()) {
