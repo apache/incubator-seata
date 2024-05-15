@@ -155,6 +155,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+       LOGGER.info("add nacos listener dataId:{}, group:{}", dataId, getNacosGroup());
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
