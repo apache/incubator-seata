@@ -30,6 +30,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
@@ -55,6 +56,8 @@ public class TestConfigCustomSPI {
 
     @BeforeAll
     public static void setup() throws NacosException {
+        ConfigurationFactory.reload();
+        ConfigurationCache.clear();
         System.setProperty("seataEnv", "test");
         FILE_CONFIG = ConfigFactory.load("registry-test.conf");
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
