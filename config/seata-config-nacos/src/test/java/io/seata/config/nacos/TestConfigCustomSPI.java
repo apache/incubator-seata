@@ -63,13 +63,7 @@ public class TestConfigCustomSPI {
         ConfigurationFactory.reload();
         ConfigurationCache.clear();
         FILE_CONFIG = ConfigFactory.load("registry-test.conf");
-        String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
-        Properties properties = new Properties();
-        properties.put("serverAddr", serverAddr);
-        properties.put("isUseCloudNamespaceParsing", "false");
-        properties.put("isUseEndpointParsingRule", "false");
-        properties.put("namespace", "");
-        configService = NacosFactory.createConfigService(properties);
+        configService = NacosFactory.createConfigService(NacosConfiguration.getConfigProperties());
     }
 
     @Test

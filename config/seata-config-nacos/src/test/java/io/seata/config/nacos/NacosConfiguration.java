@@ -201,7 +201,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         }
     }
 
-    private static Properties getConfigProperties() {
+    protected static Properties getConfigProperties() {
         Properties properties = new Properties();
         properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
         properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
