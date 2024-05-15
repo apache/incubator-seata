@@ -46,7 +46,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "macos" ]; then
             ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dprotobuf.version=3.20.1 -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          else if [ "${{ matrix.os }}" == "ubuntu"]; then
+          else
             ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
       ## step 3.2: for Windows
@@ -91,7 +91,7 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "macos" ]; then
             ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dprotobuf.version=3.20.1 -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          else if [ "${{ matrix.os }}" == "ubuntu"]; then
+          else
             ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
       ## step 3.2: for Windows
