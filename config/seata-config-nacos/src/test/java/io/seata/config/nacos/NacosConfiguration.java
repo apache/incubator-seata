@@ -79,6 +79,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         if (instance == null) {
             synchronized (NacosConfiguration.class) {
                 if (instance == null) {
+                    LOGGER.info("NacosConfiguration init");
                     instance = new NacosConfiguration();
                 }
             }

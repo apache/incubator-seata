@@ -55,13 +55,13 @@ public class TestConfigCustomSPI {
 
     @BeforeAll
     public static void setup() throws NacosException {
+        System.setProperty("seataEnv", "test");
         ConfigurationFactory.reload();
         FILE_CONFIG = ConfigFactory.load("registry-test.conf");
         String serverAddr = FILE_CONFIG.getString("config.test.serverAddr");
         Properties properties = new Properties();
         properties.put("serverAddr", serverAddr);
         configService = NacosFactory.createConfigService(properties);
-        System.setProperty("seataEnv", "test");
     }
 
     @Test
@@ -86,7 +86,7 @@ public class TestConfigCustomSPI {
         String currentContent = configService.getConfig(dataId, group, 5000);
         Assertions.assertEquals(content, currentContent);
         boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
-        Assertions.assertFalse(reachZero);
+        Assertions.assertTrue(reachZero);
         //get config
         String config = configuration.getConfig(dataId);
         Assertions.assertEquals(content, config);
