@@ -27,10 +27,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationCache.class);
 
     private static final String PROXY_METHOD_PREFIX = "get";
 
@@ -85,6 +89,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                     if (null == wrapper
                             || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
                         if (DATA_ID_CACHED.add(rawDataId)) {
+                            LOGGER.info("Add listener for dataId: {} , class: {}", rawDataId,originalConfiguration.getClass().getName());
                             originalConfiguration.addConfigListener(rawDataId, this);
                         }
                         Object result = method.invoke(originalConfiguration, args);
