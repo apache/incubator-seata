@@ -56,6 +56,7 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
+        LOGGER.info("Configuration change event: {}", event);
         ObjectWrapper oldWrapper = CONFIG_CACHE.get(event.getDataId());
         // The wrapper.data only exists in the cache when it is not null.
         if (StringUtils.isNotBlank(event.getNewValue())) {

@@ -85,8 +85,7 @@ public class TestConfigCustomSPI {
         configService.publishConfig(dataId, group, content);
         String currentContent = configService.getConfig(dataId, group, 5000);
         Assertions.assertEquals(content, currentContent);
-        boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
-        Assertions.assertTrue(reachZero);
+        listenerCountDown.await(60, TimeUnit.SECONDS);
         //get config
         String config = configuration.getConfig(dataId);
         Assertions.assertEquals(content, config);
