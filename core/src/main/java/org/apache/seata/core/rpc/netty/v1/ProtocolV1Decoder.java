@@ -16,8 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -64,7 +64,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
 
-    private final Set<SerializerType> supportDeSerializerTypes;
+    private final List<SerializerType> supportDeSerializerTypes;
 
 
     public ProtocolV1Decoder() {
