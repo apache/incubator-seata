@@ -1,1 +1,2 @@
 io.seata.saga.rm.SagaResourceManager
+io.seata.rm.tcc.TCCResourceManager
