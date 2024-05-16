@@ -36,7 +36,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    private static final String CURRENT = VersionInfo.VERSION;
+    private static final String CURRENT = "2.1.0-SNAPSHOT";
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final int MAX_VERSION_DOT = 3;
