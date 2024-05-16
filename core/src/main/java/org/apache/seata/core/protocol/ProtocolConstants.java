@@ -76,7 +76,10 @@ public interface ProtocolConstants {
      * 
      * @see SerializerType#SEATA
      */
-    byte CONFIGURED_CODEC = SerializerServiceLoader.getSupportedSerializers().iterator().next().getCode();
+    byte CONFIGURED_CODEC = SerializerType
+        .getByName(ConfigurationFactory.getInstance()
+            .getConfig(org.apache.seata.common.ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name()))
+        .getCode();
 
     /**
      * Configured compressor by user, default is NONE
