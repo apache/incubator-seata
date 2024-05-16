@@ -239,7 +239,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
-                String host = inetSocketAddress.getAddress().getHostAddress();
+                String host = inetSocketAddress.getHostName();
                 Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
                 return host + IP_PORT_SPLIT_CHAR
                     + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
