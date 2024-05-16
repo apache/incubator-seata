@@ -78,7 +78,7 @@ public interface ProtocolConstants {
      */
     byte CONFIGURED_CODEC = SerializerType
         .getByName(ConfigurationFactory.getInstance()
-            .getConfig(org.apache.seata.common.ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name()))
+            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, SerializerType.SEATA.name()))
         .getCode();
 
     /**
