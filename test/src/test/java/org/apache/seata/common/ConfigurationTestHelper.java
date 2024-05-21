@@ -51,6 +51,7 @@ public class ConfigurationTestHelper {
     }
 
     public static void putConfig(String dataId, String content) {
+        LOGGER.info("config type: {}",ConfigurationFactory.getInstance().getConfig("config.type","file"));
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         ConfigurationFactory.getInstance().addConfigListener(dataId,
