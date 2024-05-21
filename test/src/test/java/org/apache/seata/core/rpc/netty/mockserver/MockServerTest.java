@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 /**
  * the type MockServerTest
  */
-@Order(2)
 public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";

@@ -58,7 +58,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * State machine tests with db log store
  *
  */
-@Order(1)
 public class StateMachineDBTests extends AbstractServerTest {
 
     private static StateMachineEngine stateMachineEngine;
