@@ -16,18 +16,22 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
-import org.apache.seata.common.util.ReflectionUtil;
-import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
-
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
+import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
+
+/**
+ * The type Tcc action interceptor parser.
+ */
+@Deprecated
 public class TccActionInterceptorParser extends org.apache.seata.rm.tcc.interceptor.parser.TccActionInterceptorParser {
 
     @Override

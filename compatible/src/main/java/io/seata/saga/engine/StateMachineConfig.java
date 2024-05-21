@@ -16,6 +16,10 @@
  */
 package io.seata.saga.engine;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
+import javax.script.ScriptEngineManager;
+
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
@@ -27,13 +31,11 @@ import org.apache.seata.saga.engine.store.StateLangStore;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 
-import javax.script.ScriptEngineManager;
-import java.util.concurrent.ThreadPoolExecutor;
-
 /**
  * StateMachineConfig
  *
  */
+@Deprecated
 public interface StateMachineConfig {
 
     /**

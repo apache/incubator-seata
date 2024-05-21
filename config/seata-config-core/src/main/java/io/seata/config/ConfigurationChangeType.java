@@ -16,11 +16,21 @@
  */
 package io.seata.config;
 
-
 /**
- * the interface ext configuration provider
- *
- * 
+ * The enum Configuration change type.
  */
-public interface ExtConfigurationProvider extends org.apache.seata.config.ExtConfigurationProvider {
+@Deprecated
+public enum ConfigurationChangeType {
+    /**
+     * Add configuration change type.
+     */
+    ADD,
+    /**
+     * Modify configuration change type.
+     */
+    MODIFY,
+    /**
+     * Delete configuration change type.
+     */
+    DELETE
 }

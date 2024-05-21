@@ -16,6 +16,10 @@
  */
 package io.seata.saga.engine.store.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -24,10 +28,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.apache.seata.common.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class StateLogStoreImpl implements StateLogStore {
 

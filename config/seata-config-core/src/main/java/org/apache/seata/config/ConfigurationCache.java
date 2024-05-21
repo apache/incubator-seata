@@ -16,6 +16,7 @@
  */
 package org.apache.seata.config;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,14 +29,12 @@ import org.apache.seata.common.util.DurationUtil;
 import org.apache.seata.common.util.StringUtils;
 
 /**
- * @author funkye
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
-    private static final String METHOD_PREFIX = "get";
+    private static final String PROXY_METHOD_PREFIX = "get";
 
-    private static final String METHOD_LATEST_CONFIG = METHOD_PREFIX + "LatestConfig";
-
+    private static final String[] NOT_PROXY_METHOD_NAMES = new String[] {PROXY_METHOD_PREFIX + "LatestConfig", PROXY_METHOD_PREFIX + "ConfigListeners"};
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private static final Set<String> DATA_ID_CACHED = new HashSet<>();
@@ -73,12 +72,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
         return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
             , (proxy, method, args) -> {
-                String methodName = method.getName();
-                if (methodName.startsWith(METHOD_PREFIX) && !methodName.equalsIgnoreCase(METHOD_LATEST_CONFIG)) {
+                if (isProxyTargetMethod(method)) {
                     String rawDataId = (String)args[0];
                     ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
                     ObjectWrapper.ConfigType type =
-                        ObjectWrapper.getTypeByName(methodName.substring(METHOD_PREFIX.length()));
+                        ObjectWrapper.getTypeByName(method.getName().substring(PROXY_METHOD_PREFIX.length()));
                     Object defaultValue = null;
                     if (args.length > 1
                             && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
@@ -101,6 +99,19 @@ public class ConfigurationCache implements ConfigurationChangeListener {
                 return method.invoke(originalConfiguration, args);
             }
         );
+    }
+
+    private boolean isProxyTargetMethod(Method method) {
+        String methodName = method.getName();
+        if (!methodName.startsWith(PROXY_METHOD_PREFIX)) {
+            return false;
+        }
+        for (String name : NOT_PROXY_METHOD_NAMES) {
+            if (methodName.equalsIgnoreCase(name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static class ConfigurationCacheInstance {
