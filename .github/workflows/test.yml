@@ -3,7 +3,6 @@ name: "test"
 on:
   push:
     branches: [ test*, "*.*.*" ]
-
 jobs:
   # job 1
   test:
@@ -43,12 +42,11 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
-          ./mvnw     -version;
-          ./mvnw     -T 4C clean test \
-                     -P args-for-client-test \
-                     -Dspring-boot.version=${{ matrix.springboot }} \
-                     -Dmaven.git-commit-id.skip=true \
-                     -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          if [ "${{ matrix.os }}" == "macos" ]; then
+            ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
       ## step 3.2: for Windows
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: matrix.os == 'windows'
@@ -89,12 +87,11 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
-          ./mvnw     -version;
-          ./mvnw     -T 4C clean install \
-                     -P args-for-client-test \
-                     -Dspring-boot.version=${{ matrix.springboot }} \
-                     -Dmaven.git-commit-id.skip=true \
-                     -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          if [ "${{ matrix.os }}" == "macos" ]; then
+            ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -Dmaven.git-commit-id.skip=true -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
       ## step 3.2: for Windows
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: matrix.os == 'windows'
