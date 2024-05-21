@@ -30,6 +30,8 @@ import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
+import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.saga.engine.AsyncCallback;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -47,6 +49,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -65,9 +68,9 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-
         startSeataServer();
-
+        TmNettyRemotingClient.getInstance().destroy();
+        RmNettyRemotingClient.getInstance().destroy();
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
         StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
@@ -76,6 +79,8 @@ public class StateMachineDBTests extends AbstractServerTest {
     @AfterAll
     public static void destory() throws InterruptedException {
         stopSeataServer();
+        TmNettyRemotingClient.getInstance().destroy();
+        RmNettyRemotingClient.getInstance().destroy();
     }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance) {
