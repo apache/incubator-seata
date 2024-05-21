@@ -30,6 +30,7 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * the type MockServerTest
  */
+@Order(2)
 public class MockServerTest {
 
     static String RESOURCE_ID = "mock-action";
