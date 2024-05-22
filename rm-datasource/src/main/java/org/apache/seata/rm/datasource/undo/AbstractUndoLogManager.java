@@ -339,20 +339,22 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             State.GlobalFinished.name());
                     }
                 } else {
-                    insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);
-                    conn.commit();
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("xid {} branch {}, undo_log added with {}", xid, branchId,
-                            State.GlobalFinished.name());
+                    try {
+                        insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);
+                        conn.commit();
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("xid {} branch {}, undo_log added with {}", xid, branchId,
+                                    State.GlobalFinished.name());
+                        }
+                    } catch (SQLIntegrityConstraintViolationException e) {
+                        // Possible undo_log has been inserted into the database by other processes, retrying rollback undo_log
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("xid {} branch {}, undo_log inserted, retry rollback", xid, branchId);
+                        }
+                        continue;
                     }
                 }
-
                 return;
-            } catch (SQLIntegrityConstraintViolationException e) {
-                // Possible undo_log has been inserted into the database by other processes, retrying rollback undo_log
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("xid {} branch {}, undo_log inserted, retry rollback", xid, branchId);
-                }
             } catch (Throwable e) {
                 if (conn != null) {
                     try {
