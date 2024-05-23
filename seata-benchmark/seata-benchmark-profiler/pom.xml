@@ -5,16 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-benchmark</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>seata-benchmark</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>seata-benchmark-baseline</module>
-        <module>seata-benchmark-profiler</module>
-        <module>seata-benchmark-scenario</module>
-    </modules>
+    <artifactId>seata-benchmark-profiler</artifactId>
+    <description>seata benchmark profiler</description>
+
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
 </project>

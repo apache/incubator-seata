@@ -220,10 +220,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     @Nullable
     private Object getConfigFromEnvironment(String dataId, Class<?> dataType) {
         ConfigurableEnvironment environment = (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        Object value = environment.getProperty(dataId, dataType);
-        if (value == null) {
-            value = environment.getProperty(org.apache.seata.common.util.StringUtils.hump2Line(dataId), dataType);
+
+        Object value = null;
+        if(environment != null){
+            value = environment.getProperty(dataId, dataType);
+            if (value == null) {
+                value = environment.getProperty(org.apache.seata.common.util.StringUtils.hump2Line(dataId), dataType);
+            }
         }
+
         if (value == null) {
             String grouplistPrefix = SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT;
             if (dataId.startsWith(grouplistPrefix)) {

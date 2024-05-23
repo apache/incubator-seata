@@ -9,8 +9,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>seata-benchmark-core</artifactId>
-
+    <artifactId>seata-benchmark-baseline</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,6 +33,18 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-all</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-server</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>hessian</artifactId>
+                    <groupId>com.alipay.sofa</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
