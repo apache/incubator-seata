@@ -87,6 +87,11 @@
         </file>
 
         <file>
+            <source>../NOTICE</source>
+            <destName>NOTICE</destName>
+        </file>
+
+        <file>
             <source>../server/target/seata-server-exec.jar</source>
             <outputDirectory>target/</outputDirectory>
             <destName>seata-server.jar</destName>
