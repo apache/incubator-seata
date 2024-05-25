@@ -33,9 +33,11 @@ public class Main {
      * TODO support api baseline diff integrate into ci, not only dev
      */
     public static void main(String[] args) throws RunnerException, IOException {
-        runBenchmark();
+        org.openjdk.jmh.Main.main(args);
 
-        BenchmarkChartGenerator.getInstance().generateChart(getResultFilePath());
+        //use json format and generate chart
+        //runBenchmark();
+        //BenchmarkChartGenerator.getInstance().generateChart(getResultFilePath());
     }
 
     private static void runBenchmark() throws RunnerException {
