@@ -24,25 +24,26 @@ public class JFRProfiler implements Profiler {
 
     @Override
     public void profile(Runnable runnable, EventType eventType) throws Exception {
-        String jfrUnLockResponse = runCommand("jcmd", pid, "VM.unlock_commercial_features");
-        LOGGER.info("jfr unLock: {}", jfrUnLockResponse);
+        String JFRUnLockResponse = runCommand("jcmd", pid, "VM.unlock_commercial_features");
+        LOGGER.info("JFR unLock: {}", JFRUnLockResponse);
 
         String name = "seata-profile";
 
         //TODO append event
-        String[] jfrStart = {"jcmd", pid, "JFR.start", "name=" + name};
-        String jfrStartResponse = runCommand(jfrStart);
-        LOGGER.info("jfr start: {}", jfrStartResponse);
+        String[] JFRStartCommand = {"jcmd", pid, "JFR.start", "name=" + name};
+        String JFRStartResponse = runCommand(JFRStartCommand);
+        LOGGER.info("JFR start: {}", JFRStartResponse);
 
         runnable.run();
 
-        String[] jfrDump = {"jcmd", pid, "JFR.dump", "name=" + name, "filename=" + getDefaultJFRFilePath()};
-        String jfrDumpResponse = runCommand(jfrDump);
-        LOGGER.info("jfr dump: {}", jfrDumpResponse);
+        String[] JFRDumpCommand = {"jcmd", pid, "JFR.dump", "name=" + name, "filename=" + getDefaultJFRFilePath()};
+        String JFRDumpResponse = runCommand(JFRDumpCommand);
+        LOGGER.info("JFR dump: {}", JFRDumpResponse);
 
-        String[] jfrStop = {"jcmd", pid, "JFR.stop", "name=" + name};
-        String jfrStopResponse = runCommand(jfrStop);
-        LOGGER.info("jfr stop: {}", jfrStopResponse);
+        String[] JFRStopCommand = {"jcmd", pid, "JFR.stop", "name=" + name};
+        String JFRStopResponse = runCommand(JFRStopCommand);
+
+        LOGGER.info("JFR stop: {}", JFRStopResponse);
     }
 
     private String getDefaultJFRFilePath() {
