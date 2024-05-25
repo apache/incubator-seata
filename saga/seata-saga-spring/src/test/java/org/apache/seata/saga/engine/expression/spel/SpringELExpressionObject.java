@@ -17,7 +17,7 @@
 package org.apache.seata.saga.engine.expression.spel;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * SpringELExpressionObject
  */
 public class SpringELExpressionObject {
     private String name;

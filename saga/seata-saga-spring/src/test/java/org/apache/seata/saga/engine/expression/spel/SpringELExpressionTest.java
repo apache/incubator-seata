@@ -23,7 +23,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * SpringELExpressionTest
  */
 public class SpringELExpressionTest {
     @Test

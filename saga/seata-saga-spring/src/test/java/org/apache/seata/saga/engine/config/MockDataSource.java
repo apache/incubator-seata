@@ -23,7 +23,9 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-
+/**
+ * MockDataSource
+ */
 public class MockDataSource implements DataSource {
     private Connection connection;
 

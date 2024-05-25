@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * CustomizeBusinessProcessorTest
  */
 public class CustomizeBusinessProcessorTest {
 

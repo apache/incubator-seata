@@ -34,7 +34,7 @@ import java.util.HashMap;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * DbAndReportTcStateLogStoreTest
  */
 public class DbAndReportTcStateLogStoreTest {
     private DbAndReportTcStateLogStore dbAndReportTcStateLogStore;

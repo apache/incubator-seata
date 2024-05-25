@@ -19,7 +19,7 @@ package org.apache.seata.saga.engine.expression.spel;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * SpringELExpressionFactoryTest
  */
 public class SpringELExpressionFactoryTest {
     @Test

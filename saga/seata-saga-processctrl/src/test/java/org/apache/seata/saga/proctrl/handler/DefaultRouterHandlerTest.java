@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * DefaultRouterHandlerTest
  */
 public class DefaultRouterHandlerTest {
     @Test

@@ -27,7 +27,9 @@ import org.apache.seata.tm.api.transaction.TransactionInfo;
 
 import java.util.Random;
 
-
+/**
+ * MockSagaTransactionTemplate
+ */
 public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
 
     @Override

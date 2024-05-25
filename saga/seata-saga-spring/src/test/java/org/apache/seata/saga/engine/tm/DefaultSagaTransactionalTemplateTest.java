@@ -36,7 +36,7 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * DefaultSagaTransactionalTemplateTest
  */
 public class DefaultSagaTransactionalTemplateTest {
     private static SagaTransactionalTemplate sagaTransactionalTemplate;

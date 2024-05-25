@@ -19,7 +19,7 @@ package org.apache.seata.saga.engine.tm;
 import org.apache.seata.tm.api.transaction.TransactionHook;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * MockTransactionHook
  */
 public class MockTransactionHook implements TransactionHook {
     @Override

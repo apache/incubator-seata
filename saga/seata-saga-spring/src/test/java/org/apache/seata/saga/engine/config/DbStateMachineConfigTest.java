@@ -28,7 +28,7 @@ import java.sql.SQLException;
 import static org.mockito.Mockito.when;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * DbStateMachineConfigTest
  */
 public class DbStateMachineConfigTest {
     @Test

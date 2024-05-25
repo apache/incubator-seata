@@ -18,7 +18,7 @@
 package org.apache.seata.saga.engine.invoker.impl;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * MockService
  */
 public class MockService {
    private int times;

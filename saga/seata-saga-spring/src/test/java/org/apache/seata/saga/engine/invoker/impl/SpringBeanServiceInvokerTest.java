@@ -33,7 +33,7 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
 /**
- * @author jingliu_xiong@foxmail.com
+ * SpringBeanServiceInvokerTest
  */
 public class SpringBeanServiceInvokerTest {
     @Test
