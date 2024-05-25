@@ -33,7 +33,8 @@ import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.SqlServerTableMeta;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
@@ -81,31 +82,18 @@ public class SqlServerUndoDeleteExecutor extends BaseSqlServerUndoExecutor {
     }
 
     /**
-     * Obtain the real table name. Sometimes the table name in sqlUndoLog is combined with its schema or even database.
-     *
-     * @param tableName
-     * @return
-     */
-    private String getPureTableName(String tableName) {
-        int i = tableName.lastIndexOf(".");
-        if (i <= 0) {
-            return tableName;
-        }
-        return tableName.substring(i + 1);
-    }
-
-    /**
      * Judge whether there is a column of a SQLServer table is with a "IDENTITY"
      *
      * @param connectionProxy
      */
     private void judgeTableIdentifyExistence(ConnectionProxy connectionProxy) {
-        tableIdentifyExistence = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
                 .getTableMeta(
                         connectionProxy.getTargetConnection(),
-                        getPureTableName(sqlUndoLog.getTableName()),
+                        sqlUndoLog.getTableName(),
                         connectionProxy.getDataSourceProxy().getResourceId()
-                ).getAllColumns().values().stream().anyMatch(ColumnMeta::isAutoincrement);
+                );
+        tableIdentifyExistence = ((SqlServerTableMeta) tableMeta).isTableIdentifyExistence();
     }
 
     /**
