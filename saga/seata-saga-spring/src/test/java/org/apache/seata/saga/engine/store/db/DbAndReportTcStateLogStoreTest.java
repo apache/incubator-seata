@@ -16,6 +16,10 @@
  */
 package org.apache.seata.saga.engine.store.db;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
 import org.apache.seata.saga.engine.config.DbStateMachineConfig;
 import org.apache.seata.saga.engine.sequence.UUIDSeqGenerator;
 import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -26,10 +30,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 

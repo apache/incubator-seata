@@ -16,6 +16,9 @@
  */
 package org.apache.seata.saga.proctrl.handler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.saga.proctrl.ProcessRouter;
 import org.apache.seata.saga.proctrl.ProcessType;
@@ -23,9 +26,6 @@ import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
 import org.apache.seata.saga.proctrl.mock.MockProcessRouter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * DefaultRouterHandlerTest

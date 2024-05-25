@@ -16,6 +16,8 @@
  */
 package org.apache.seata.saga.engine.tm;
 
+import java.util.Collections;
+
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -30,8 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 
