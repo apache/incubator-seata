@@ -17,23 +17,19 @@
 package org.apache.seata.benchmark.profiler;
 
 
-import org.apache.seata.benchmark.profiler.base.EventType;
 import org.apache.seata.benchmark.profiler.base.ProfilerTemplate;
-import org.apache.seata.benchmark.profiler.base.ProfilerType;
 import org.apache.seata.benchmark.profiler.serializer.SeataSerializerMethods;
-
-import java.util.concurrent.CountDownLatch;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        ProfilerTemplate.executeProfile(() -> {
-//            new SeataSerializerMethods().seataDeserialize();
-//        });
-
-        ProfilerTemplate.executeProfile(ProfilerType.jfr, EventType.cpu, () -> {
+        ProfilerTemplate.executeProfile(() -> {
             new SeataSerializerMethods().seataDeserialize();
         });
+
+//        ProfilerTemplate.executeProfile(ProfilerType.jfr, EventType.cpu, () -> {
+//            new SeataSerializerMethods().seataDeserialize();
+//        });
 //
 //        ProfilerTemplate.executeProfile(() -> {
 //            try {
@@ -42,7 +38,5 @@ public class Main {
 //                throw new RuntimeException(e);
 //            }
 //        }, 1, 100000);
-
-        new CountDownLatch(1).await();
     }
 }

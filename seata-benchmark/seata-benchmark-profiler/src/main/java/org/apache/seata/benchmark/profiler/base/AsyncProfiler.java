@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AsyncProfiler implements Profiler {
@@ -114,7 +115,7 @@ public class AsyncProfiler implements Profiler {
 
     @Override
     public void destroy() {
-        ArthasBootstrap.getInstance().destroy();
+        //ArthasBootstrap.getInstance().destroy();
     }
 
 

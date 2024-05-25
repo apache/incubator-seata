@@ -31,12 +31,14 @@ public class ProfilerTemplate {
         Profiler profiler = ProfilerFactory.getProfiler(profilerType);
         profiler.start();
         profiler.profile(runnable, eventType, warmUpIterations, profileIterations);
+        profiler.destroy();
     }
 
     public static void executeProfile(ProfilerType profilerType, EventType eventType, Runnable runnable) throws Exception {
         Profiler profiler = ProfilerFactory.getProfiler(profilerType);
         profiler.start();
         profiler.profile(runnable, eventType);
+        profiler.destroy();
     }
 
 }
