@@ -337,9 +337,9 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                     Object elContext;
 
                     Class<? extends Expression> expressionClass = evaluator.getClass();
-                    if (expressionClass.isAssignableFrom(ExceptionMatchExpression.class)) {
+                    if (ExceptionMatchExpression.class.isAssignableFrom(expressionClass)) {
                         elContext = context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
-                    } else if (expressionClass.isAssignableFrom(ELExpression.class)) {
+                    } else if (ELExpression.class.isAssignableFrom(expressionClass)) {
                         elContext = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
                     } else {
                         elContext = context.getVariables();

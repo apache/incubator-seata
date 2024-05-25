@@ -18,7 +18,9 @@ package org.apache.seata.core.constants;
 
 /**
  * DubboConstants
- *
+ * Notes:
+ * https://github.com/apache/dubbo-spi-extensions/blob/master/dubbo-filter-extensions/dubbo-filter-seata/src/main
+ * /java/org/apache/dubbo/seata/SeataTransactionPropagationConsumerFilter.java
  */
 public class DubboConstants {
 

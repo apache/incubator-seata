@@ -22,6 +22,9 @@ public interface CachedConfigurationChangeListener extends ConfigurationChangeLi
 
     @Override
     default void beforeEvent(ConfigurationChangeEvent event) {
+        if (null == event) {
+            return;
+        }
         CONFIGURATION_CACHE.onProcessEvent(event);
     }
 

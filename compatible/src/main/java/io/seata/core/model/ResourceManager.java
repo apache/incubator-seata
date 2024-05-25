@@ -22,5 +22,6 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 /**
  * @see EnhancedServiceLoader.InnerEnhancedServiceLoader#findAllExtensionDefinition(ClassLoader)
  */
+@Deprecated
 public interface ResourceManager extends org.apache.seata.core.model.ResourceManager {
 }

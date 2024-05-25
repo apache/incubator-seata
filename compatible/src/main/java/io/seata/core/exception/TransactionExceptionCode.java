@@ -20,6 +20,7 @@ package io.seata.core.exception;
  * The enum Transaction exception code.
  *
  */
+@Deprecated
 public enum TransactionExceptionCode {
 
     /**

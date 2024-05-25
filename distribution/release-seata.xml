@@ -82,8 +82,13 @@
         </file>
 
         <file>
-            <source>LICENSE-BIN</source>
+            <source>../LICENSE</source>
             <destName>LICENSE</destName>
+        </file>
+
+        <file>
+            <source>../NOTICE</source>
+            <destName>NOTICE</destName>
         </file>
 
         <file>
