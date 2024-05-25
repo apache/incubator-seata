@@ -26,6 +26,7 @@ public class ProfilerFactory {
 
     static {
         profilerMap.put(ProfilerType.async_profiler, new AsyncProfiler());
+        profilerMap.put(ProfilerType.jfr, new JFRProfiler());
     }
 
     public static Profiler getProfiler(ProfilerType profilerType) {
