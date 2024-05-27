@@ -181,6 +181,7 @@
                 <dependencies.copy.skip>false</dependencies.copy.skip>
                 <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java8 -->
@@ -188,6 +189,7 @@
             <id>release-image-based-on-java8</id>
             <properties>
                 <image.tags>${project.version},latest</image.tags>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java8-slim -->
@@ -195,6 +197,7 @@
             <id>release-image-based-on-java8-slim</id>
             <properties>
                 <image.tags>${project.version}-slim</image.tags>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java17 -->
@@ -202,6 +205,7 @@
             <id>release-image-based-on-java17</id>
             <properties>
                 <image.tags>${project.version}.jre17</image.tags>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
         <!-- profile: release-image-based-on-java17-slim -->
@@ -209,6 +213,7 @@
             <id>release-image-based-on-java17-slim</id>
             <properties>
                 <image.tags>${project.version}.jre17-slim</image.tags>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
         <!-- profile: arrch64 -->
