@@ -135,7 +135,7 @@
         <license.skip>true</license.skip>
         <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
-        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+        <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <maven.surefire.excludes></maven.surefire.excludes>
 
@@ -354,6 +354,9 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
@@ -399,6 +402,7 @@
             <properties>
                 <gpg.arg1>--pinentry-mode</gpg.arg1>
                 <gpg.arg2>loopback</gpg.arg2>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
 
