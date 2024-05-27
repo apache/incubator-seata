@@ -402,6 +402,7 @@
             <properties>
                 <gpg.arg1>--pinentry-mode</gpg.arg1>
                 <gpg.arg2>loopback</gpg.arg2>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
 
