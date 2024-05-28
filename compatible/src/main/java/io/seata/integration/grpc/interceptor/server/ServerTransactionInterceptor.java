@@ -20,4 +20,7 @@ package io.seata.integration.grpc.interceptor.server;
  * The type Server transaction interceptor.
  */
 @Deprecated
-public class ServerTransactionInterceptor extends org.apache.seata.integration.grpc.interceptor.server.ServerTransactionInterceptor{}
+public class ServerTransactionInterceptor
+    extends org.apache.seata.integration.grpc.interceptor.server.ServerTransactionInterceptor {
+
+}
