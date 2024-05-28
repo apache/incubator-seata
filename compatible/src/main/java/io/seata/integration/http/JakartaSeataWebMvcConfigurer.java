@@ -20,4 +20,6 @@ package io.seata.integration.http;
  * The type Jakarta seata web mvc configurer.
  */
 @Deprecated
-public class JakartaSeataWebMvcConfigurer extends org.apache.seata.integration.http.JakartaSeataWebMvcConfigurer {}
+public class JakartaSeataWebMvcConfigurer extends org.apache.seata.integration.http.JakartaSeataWebMvcConfigurer {
+
+}
