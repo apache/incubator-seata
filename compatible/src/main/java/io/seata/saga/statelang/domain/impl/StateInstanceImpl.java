@@ -24,7 +24,6 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 
 /**
  * state execution instance
- *
  */
 @Deprecated
 public class StateInstanceImpl implements StateInstance {
@@ -214,9 +213,9 @@ public class StateInstanceImpl implements StateInstance {
 
     @Override
     public void setStatus(ExecutionStatus status) {
-        if(status == null){
+        if (status == null) {
             actual.setStatus(null);
-        }else {
+        } else {
             actual.setStatus(status.unwrap());
         }
     }
@@ -228,7 +227,7 @@ public class StateInstanceImpl implements StateInstance {
 
     @Override
     public void setCompensationState(StateInstance compensationState) {
-        actual.setCompensationState(((StateInstanceImpl) compensationState).unwrap());
+        actual.setCompensationState(((StateInstanceImpl)compensationState).unwrap());
     }
 
     @Override
