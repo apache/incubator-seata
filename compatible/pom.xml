@@ -20,21 +20,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.apache.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
     <groupId>io.seata</groupId>
-    <version>2.1.0</version>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-all</artifactId>
     <packaging>jar</packaging>
     <name>seata-all ${project.version}</name>
     <description>compatible with io.seata API</description>
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
         <mockito.version>4.11.0</mockito.version>
         <druid.version>1.2.7</druid.version>
         <mysql.version>5.1.42</mysql.version>
         <mariadb.version>2.7.2</mariadb.version>
         <assertj-core.version>3.12.2</assertj-core.version>
+        <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
     </properties>
     <dependencies>
         <dependency>
@@ -121,7 +124,7 @@
             <artifactId>junit-jupiter-api</artifactId>
             <version>5.8.2</version>
             <scope>test</scope>
-           </dependency>
+        </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-tcc</artifactId>
