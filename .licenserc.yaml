@@ -37,9 +37,6 @@ header:
 
   paths-ignore:
     - '.gitignore'
-    - '.gitattributes'
-    - '.travis.yml'
-    - 'codecov.yml'
     - 'CONTRIBUTING.md'
     - 'CONTRIBUTING_CN.md'
     - 'CODE_OF_CONDUCT.md'
@@ -61,10 +58,7 @@ header:
     - 'style/**'
     - 'script/**'
     - 'seata-plugins/**'
-    - '.mvn/**'
     - 'sessionStore/**'
-    - 'distribution/LICENSE-BIN'
-    - 'distribution/NOTICE-BIN'
     - 'test/src/test/resources/**'
     - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/org/apache/seata/protocol/transcation/*.proto'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
