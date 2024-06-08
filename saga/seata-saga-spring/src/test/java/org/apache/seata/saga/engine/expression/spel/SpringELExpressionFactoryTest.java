@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.expression.spel;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,6 +26,6 @@ public class SpringELExpressionFactoryTest {
     @Test
     public void testCreateExpression() {
         SpringELExpressionFactory factory = new SpringELExpressionFactory(null);
-        factory.createExpression("'Hello World'.concat('!')");
+        Assertions.assertNotNull(factory.createExpression("'Hello World'.concat('!')"));
     }
 }
