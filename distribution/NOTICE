@@ -517,3 +517,520 @@ Nacos NOTICE
       limitations under the License.
 
 ========================================================================
+
+Netty NOTICE
+
+========================================================================
+
+                            The Netty Project
+                            =================
+
+Please visit the Netty web site for more information:
+
+  * https://netty.io/
+
+Copyright 2014 The Netty Project
+
+The Netty Project licenses this file to you under the Apache License,
+version 2.0 (the "License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at:
+
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+
+Also, please refer to each LICENSE.<component>.txt file, which is located in
+the 'license' directory of the distribution file, for the license terms of the
+components that this product depends on.
+
+-------------------------------------------------------------------------------
+This product contains the extensions to Java Collections Framework which has
+been derived from the works by JSR-166 EG, Doug Lea, and Jason T. Greene:
+
+  * LICENSE:
+    * license/LICENSE.jsr166y.txt (Public Domain)
+  * HOMEPAGE:
+    * http://gee.cs.oswego.edu/cgi-bin/viewcvs.cgi/jsr166/
+    * http://viewvc.jboss.org/cgi-bin/viewvc.cgi/jbosscache/experimental/jsr166/
+
+This product contains a modified version of Robert Harder's Public Domain
+Base64 Encoder and Decoder, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.base64.txt (Public Domain)
+  * HOMEPAGE:
+    * http://iharder.sourceforge.net/current/java/base64/
+
+This product contains a modified portion of 'Webbit', an event based
+WebSocket and HTTP server, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.webbit.txt (BSD License)
+  * HOMEPAGE:
+    * https://github.com/joewalnes/webbit
+
+This product contains a modified portion of 'SLF4J', a simple logging
+facade for Java, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.slf4j.txt (MIT License)
+  * HOMEPAGE:
+    * https://www.slf4j.org/
+
+This product contains a modified portion of 'Apache Harmony', an open source
+Java SE, which can be obtained at:
+
+  * NOTICE:
+    * license/NOTICE.harmony.txt
+  * LICENSE:
+    * license/LICENSE.harmony.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://archive.apache.org/dist/harmony/
+
+This product contains a modified portion of 'jbzip2', a Java bzip2 compression
+and decompression library written by Matthew J. Francis. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.jbzip2.txt (MIT License)
+  * HOMEPAGE:
+    * https://code.google.com/p/jbzip2/
+
+This product contains a modified portion of 'libdivsufsort', a C API library to construct
+the suffix array and the Burrows-Wheeler transformed string for any input string of
+a constant-size alphabet written by Yuta Mori. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.libdivsufsort.txt (MIT License)
+  * HOMEPAGE:
+    * https://github.com/y-256/libdivsufsort
+
+This product contains a modified portion of Nitsan Wakart's 'JCTools', Java Concurrency Tools for the JVM,
+ which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.jctools.txt (ASL2 License)
+  * HOMEPAGE:
+    * https://github.com/JCTools/JCTools
+
+This product optionally depends on 'JZlib', a re-implementation of zlib in
+pure Java, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.jzlib.txt (BSD style License)
+  * HOMEPAGE:
+    * http://www.jcraft.com/jzlib/
+
+This product optionally depends on 'Compress-LZF', a Java library for encoding and
+decoding data in LZF format, written by Tatu Saloranta. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.compress-lzf.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/ning/compress
+
+This product optionally depends on 'lz4', a LZ4 Java compression
+and decompression library written by Adrien Grand. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.lz4.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/jpountz/lz4-java
+
+This product optionally depends on 'lzma-java', a LZMA Java compression
+and decompression library, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.lzma-java.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/jponge/lzma-java
+
+This product optionally depends on 'zstd-jni', a zstd-jni Java compression
+and decompression library, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.zstd-jni.txt (BSD)
+  * HOMEPAGE:
+    * https://github.com/luben/zstd-jni
+
+This product contains a modified portion of 'jfastlz', a Java port of FastLZ compression
+and decompression library written by William Kinney. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.jfastlz.txt (MIT License)
+  * HOMEPAGE:
+    * https://code.google.com/p/jfastlz/
+
+This product contains a modified portion of and optionally depends on 'Protocol Buffers', Google's data
+interchange format, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.protobuf.txt (New BSD License)
+  * HOMEPAGE:
+    * https://github.com/google/protobuf
+
+This product optionally depends on 'Bouncy Castle Crypto APIs' to generate
+a temporary self-signed X.509 certificate when the JVM does not provide the
+equivalent functionality.  It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.bouncycastle.txt (MIT License)
+  * HOMEPAGE:
+    * https://www.bouncycastle.org/
+
+This product optionally depends on 'Snappy', a compression library produced
+by Google Inc, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.snappy.txt (New BSD License)
+  * HOMEPAGE:
+    * https://github.com/google/snappy
+
+This product optionally depends on 'JBoss Marshalling', an alternative Java
+serialization API, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.jboss-marshalling.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/jboss-remoting/jboss-marshalling
+
+This product optionally depends on 'Caliper', Google's micro-
+benchmarking framework, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.caliper.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/google/caliper
+
+This product optionally depends on 'Apache Commons Logging', a logging
+framework, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.commons-logging.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://commons.apache.org/logging/
+
+This product optionally depends on 'Apache Log4J', a logging framework, which
+can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.log4j.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://logging.apache.org/log4j/
+
+This product optionally depends on 'Aalto XML', an ultra-high performance
+non-blocking XML processor, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.aalto-xml.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://wiki.fasterxml.com/AaltoHome
+
+This product contains a modified version of 'HPACK', a Java implementation of
+the HTTP/2 HPACK algorithm written by Twitter. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.hpack.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/twitter/hpack
+
+This product contains a modified version of 'HPACK', a Java implementation of
+the HTTP/2 HPACK algorithm written by Cory Benfield. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.hyper-hpack.txt (MIT License)
+  * HOMEPAGE:
+    * https://github.com/python-hyper/hpack/
+
+This product contains a modified version of 'HPACK', a Java implementation of
+the HTTP/2 HPACK algorithm written by Tatsuhiro Tsujikawa. It can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.nghttp2-hpack.txt (MIT License)
+  * HOMEPAGE:
+    * https://github.com/nghttp2/nghttp2/
+
+This product contains a modified portion of 'Apache Commons Lang', a Java library
+provides utilities for the java.lang API, which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.commons-lang.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://commons.apache.org/proper/commons-lang/
+
+
+This product contains the Maven wrapper scripts from 'Maven Wrapper', that provides an easy way to ensure a user has everything necessary to run the Maven build.
+
+  * LICENSE:
+    * license/LICENSE.mvn-wrapper.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/takari/maven-wrapper
+
+This product contains the dnsinfo.h header file, that provides a way to retrieve the system DNS configuration on MacOS.
+This private header is also used by Apple's open source
+ mDNSResponder (https://opensource.apple.com/tarballs/mDNSResponder/).
+
+ * LICENSE:
+    * license/LICENSE.dnsinfo.txt (Apple Public Source License 2.0)
+  * HOMEPAGE:
+    * https://www.opensource.apple.com/source/configd/configd-453.19/dnsinfo/dnsinfo.h
+
+This product optionally depends on 'Brotli4j', Brotli compression and
+decompression for Java., which can be obtained at:
+
+  * LICENSE:
+    * license/LICENSE.brotli4j.txt (Apache License 2.0)
+  * HOMEPAGE:
+    * https://github.com/hyperxpro/Brotli4j
+
+========================================================================
+
+Perfmark NOTICE
+
+========================================================================
+
+Copyright 2019 Google LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-----------------------------------------------------------------------
+
+This product contains a modified portion of 'Catapult', an open source
+Trace Event viewer for Chome, Linux, and Android applications, which can
+be obtained at:
+
+  * LICENSE:
+    * traceviewer/src/main/resources/io/perfmark/traceviewer/third_party/catapult/LICENSE (New BSD License)
+  * HOMEPAGE:
+    * https://github.com/catapult-project/catapult
+
+This product contains a modified portion of 'Polymer', a library for Web
+Components, which can be obtained at:
+  * LICENSE:
+    * traceviewer/src/main/resources/io/perfmark/traceviewer/third_party/polymer/LICENSE (New BSD License)
+  * HOMEPAGE:
+    * https://github.com/Polymer/polymer
+
+
+This product contains a modified portion of 'ASM', an open source
+Java Bytecode library, which can be obtained at:
+
+  * LICENSE:
+    * agent/src/main/resources/io/perfmark/agent/third_party/asm/LICENSE (BSD style License)
+  * HOMEPAGE:
+    * https://asm.ow2.io/
+
+========================================================================
+
+Servo NOTICE
+
+========================================================================
+   Servo
+   Copyright 2011 Netflix, Inc.
+
+   This product includes software developed by The Apache Software
+   Foundation (http://www.apache.org/).
+
+   Alternative collection types provided by Google Guava from
+   http://code.google.com/p/guava-libraries/
+   Copyright (C) 2007 Google Inc.
+
+========================================================================
+
+simpleclient NOTICE
+
+========================================================================
+   Prometheus instrumentation library for JVM applications
+   Copyright 2012-2015 The Prometheus Authors
+
+   This product includes software developed at
+   Boxever Ltd. (http://www.boxever.com/).
+
+   This product includes software developed at
+   SoundCloud Ltd. (http://soundcloud.com/).
+
+   This product includes software developed as part of the
+   Ocelli project by Netflix Inc. (https://github.com/Netflix/ocelli/).
+
+========================================================================
+
+Snappy-java NOTICE
+
+========================================================================
+   This product includes software developed by Google
+    Snappy: http://code.google.com/p/snappy/ (New BSD License)
+
+   This product includes software developed by Apache
+    PureJavaCrc32C from apache-hadoop-common http://hadoop.apache.org/
+    (Apache 2.0 license)
+
+   This library contains statically linked libstdc++. This inclusion is allowed by
+   "GCC Runtime Library Exception"
+   http://gcc.gnu.org/onlinedocs/libstdc++/manual/license.html
+
+   == Contributors ==
+     * Tatu Saloranta
+       * Providing benchmark suite
+     * Alec Wysoker
+       * Performance and memory usage improvement
+
+   Third-Party Notices and Licenses:
+
+   - Hadoop: Apache Hadoop is used as a dependency
+     License: Apache License 2.0
+     Source/Reference: https://github.com/apache/hadoop/blob/trunk/NOTICE.txt
+
+========================================================================
+
+Spring-security NOTICE
+
+========================================================================
+      ======================================================================
+      == NOTICE file corresponding to section 4(d) of the Apache License, ==
+      == Version 2.0, in this case for the Spring Security distribution.  ==
+      ======================================================================
+
+      The end-user documentation included with a redistribution, if any,
+      must include the following acknowledgement:
+
+        "This product includes software developed by Spring Security
+         Project (https://www.springframework.org/security)."
+
+      Alternately, this acknowledgement may appear in the software itself,
+      if and wherever such third-party acknowledgements normally appear.
+
+      The names "Spring", "Spring Security", "Spring Security System",
+      "SpringSource", "Acegi", "Acegi Security", "Acegi Security System",
+      "Acegi" or any derivatives thereof may not be used to endorse or
+      promote products derived from this software without prior written
+      permission. For written permission, please contact
+      ben.alex@springsource.com.
+
+========================================================================
+
+Apache Tomcat NOTICE
+
+========================================================================
+      Apache Tomcat
+      Copyright 1999-2024 The Apache Software Foundation
+
+      This product includes software developed at
+      The Apache Software Foundation (https://www.apache.org/).
+
+      This software contains code derived from netty-native
+      developed by the Netty project
+      (https://netty.io, https://github.com/netty/netty-tcnative/)
+      and from finagle-native developed at Twitter
+      (https://github.com/twitter/finagle).
+
+      This software contains code derived from jgroups-kubernetes
+      developed by the JGroups project (http://www.jgroups.org/).
+
+      The Windows Installer is built with the Nullsoft
+      Scriptable Install System (NSIS), which is
+      open source software.  The original software and
+      related information is available at
+      http://nsis.sourceforge.net.
+
+      Java compilation software for JSP pages is provided by the Eclipse
+      JDT Core Batch Compiler component, which is open source software.
+      The original software and related information is available at
+      https://www.eclipse.org/jdt/core/.
+
+      org.apache.tomcat.util.json.JSONParser.jj is a public domain javacc grammar
+      for JSON written by Robert Fischer.
+      https://github.com/RobertFischer/json-parser
+
+      For portions of the Tomcat JNI OpenSSL API and the OpenSSL JSSE integration
+      The org.apache.tomcat.jni and the org.apache.tomcat.net.openssl packages
+      are derivative work originating from the Netty project and the finagle-native
+      project developed at Twitter
+      * Copyright 2014 The Netty Project
+      * Copyright 2014 Twitter
+
+      For portions of the Tomcat cloud support
+      The org.apache.catalina.tribes.membership.cloud package contains derivative
+      work originating from the jgroups project.
+      https://github.com/jgroups-extras/jgroups-kubernetes
+      Copyright 2002-2018 Red Hat Inc.
+
+      The original XML Schemas for Java EE Deployment Descriptors:
+       - javaee_5.xsd
+       - javaee_web_services_1_2.xsd
+       - javaee_web_services_client_1_2.xsd
+       - javaee_6.xsd
+       - javaee_web_services_1_3.xsd
+       - javaee_web_services_client_1_3.xsd
+       - jsp_2_2.xsd
+       - web-app_3_0.xsd
+       - web-common_3_0.xsd
+       - web-fragment_3_0.xsd
+       - javaee_7.xsd
+       - javaee_web_services_1_4.xsd
+       - javaee_web_services_client_1_4.xsd
+       - jsp_2_3.xsd
+       - web-app_3_1.xsd
+       - web-common_3_1.xsd
+       - web-fragment_3_1.xsd
+       - javaee_8.xsd
+       - web-app_4_0.xsd
+       - web-common_4_0.xsd
+       - web-fragment_4_0.xsd
+
+      may be obtained from:
+      http://www.oracle.com/webfolder/technetwork/jsc/xml/ns/javaee/index.html
+
+========================================================================
+
+Apache ZooKeeper NOTICE
+
+========================================================================
+      Apache ZooKeeper
+      Copyright 2009-2022 The Apache Software Foundation
+
+      This product includes software developed at
+      The Apache Software Foundation (http://www.apache.org/).
+
+      This product includes software components originally
+      developed for Airlift (https://github.com/airlift/airlift),
+      licensed under the Apache 2.0 license. The licensing terms
+      for Airlift code can be found at:
+      https://github.com/airlift/airlift/blob/master/LICENSE
+
+      This project also includes some files with the following licenses.
+
+      These BSD licensed files:
+        ./zookeeper-client/zookeeper-client-c/src/hashtable/hashtable.c
+        ./zookeeper-client/zookeeper-client-c/src/hashtable/hashtable.h
+        ./zookeeper-client/zookeeper-client-c/src/hashtable/hashtable_itr.c
+        ./zookeeper-client/zookeeper-client-c/src/hashtable/hashtable_itr.h
+        ./zookeeper-client/zookeeper-client-c/src/hashtable/hashtable_private.h
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/yui-min.js
+        ./zookeeper-docs/src/main/resources/markdown/skin/prototype.js
+
+      These MIT licensed files:
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/date.format.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/g.bar.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/g.dot.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/g.line.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/g.pie.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/g.raphael.js
+        ./zookeeper-contrib/zookeeper-contrib-loggraph/src/main/resources/webapp/org/apache/zookeeper/graph/resources/raphael.js
+
+      This Apache 2.0 licensed file:
+      ./zookeeper-contrib/zookeeper-contrib-zooinspector/src/main/java/com/nitido/utils/toaster/Toaster.java
+
+========================================================================

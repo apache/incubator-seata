@@ -51,13 +51,9 @@ header:
     - '**/src/main/resources/META-INF/**'
     - '**/target/**'
     - '**/*.iml'
-    - 'mvnw'
-    - 'mvnw.cmd'
-    - '*.sh'
     - 'changes/**'
     - 'style/**'
     - 'script/**'
-    - 'seata-plugins/**'
     - 'sessionStore/**'
     - 'test/src/test/resources/**'
     - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/org/apache/seata/protocol/transcation/*.proto'
@@ -74,8 +70,6 @@ header:
     - 'server/src/main/resources/lua/redislocker/redislock.lua'
     - 'server/src/main/resources/banner.txt'
     - '**/*.json'
-
-
   comment: on-failure
 dependency:
   files:
