@@ -32,6 +32,7 @@ ignore:
  - ".mvn/.*"
  - ".style/.*"
  - "*.md"
+ - "distribution/.*"
  - "rm-datasource/src/test/java/org/apache/seata/rm/datasource/mock"
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/antlr/.*"
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/parser/.*"
