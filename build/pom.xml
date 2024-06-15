@@ -71,7 +71,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>2.1.0-SNAPSHOT</revision>
+        <revision>2.1.0</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
