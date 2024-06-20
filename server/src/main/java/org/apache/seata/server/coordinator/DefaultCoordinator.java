@@ -16,7 +16,10 @@
  */
 package org.apache.seata.server.coordinator;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -25,6 +28,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -73,8 +77,11 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
+import static org.apache.seata.common.Constants.COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_ROLLBACKING;
+import static org.apache.seata.common.Constants.ROLLBACKING;
+import static org.apache.seata.common.Constants.SYNC_PROCESSING;
 import static org.apache.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static org.apache.seata.common.Constants.UNDOLOG_DELETE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
@@ -154,6 +161,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
 
+    private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+        .getInt(org.apache.seata.common.ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
+
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));
 
@@ -169,10 +179,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private final ScheduledThreadPoolExecutor undoLogDelete =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
 
-    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.TimeoutRollbacking,
-        GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying, GlobalStatus.Rollbacking};
+    private final ScheduledThreadPoolExecutor syncProcessing =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(SYNC_PROCESSING, 1));
 
-    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Committed};
+    private final GlobalStatus[] retryRollbackingStatuses = new GlobalStatus[] {
+        GlobalStatus.TimeoutRollbacking,
+        GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying};
+
+    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committed};
+
+    private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.Rollbacking};
+    private final GlobalStatus[] committingStatuses = new GlobalStatus[] {GlobalStatus.Committing};
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
@@ -366,7 +383,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry rollbacking.
      */
     protected void handleRetryRollbacking() {
-        SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
+        SessionCondition sessionCondition = new SessionCondition(retryRollbackingStatuses);
         sessionCondition.setLazyLoadBranch(true);
         Collection<GlobalSession> rollbackingSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
@@ -376,12 +393,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
-                // prevent repeated rollback
-                if (rollbackingSession.getStatus() == GlobalStatus.Rollbacking
-                    && !rollbackingSession.isDeadSession()) {
-                    // The function of this 'return' is 'continue'.
-                    return;
-                }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
                     if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
@@ -413,13 +424,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long now = System.currentTimeMillis();
         SessionHelper.forEach(committingSessions, committingSession -> {
             try {
-                // prevent repeated commit
-                if ((GlobalStatus.Committing.equals(committingSession.getStatus())
-                        || GlobalStatus.Committed.equals(committingSession.getStatus()))
-                        && !committingSession.isDeadSession()) {
-                    // The function of this 'return' is 'continue'.
-                    return;
-                }
                 if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
 
                     // commit retry timeout event
@@ -489,6 +493,116 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle rollbacking by scheduled.
+     */
+    protected void handleRollbackingByScheduled() {
+        SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
+        sessionCondition.setLazyLoadBranch(true);
+        List<GlobalSession> rollbackingSessions =
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(rollbackingSessions)) {
+            rollbackingSchedule(RETRY_DEAD_THRESHOLD);
+            return;
+        }
+        long delay = ROLLBACKING_RETRY_PERIOD;
+        rollbackingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+        List<GlobalSession> needDoRollbackingSessions = new ArrayList<>();
+        for (GlobalSession rollbackingSession : rollbackingSessions) {
+            long time = rollbackingSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoRollbackingSessions.add(rollbackingSession);
+            } else {
+                delay = Math.max(time, ROLLBACKING_RETRY_PERIOD);
+                break;
+            }
+        }
+        long now = System.currentTimeMillis();
+        SessionHelper.forEach(needDoRollbackingSessions, rollbackingSession -> {
+            try {
+                if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                        rollbackingSession.clean();
+                    }
+
+                    SessionHelper.endRollbackFailed(rollbackingSession, true, true);
+
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
+                core.doGlobalRollback(rollbackingSession, true);
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to handle rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
+            }
+        });
+        rollbackingSchedule(delay);
+    }
+
+    private void rollbackingSchedule(long delay) {
+        syncProcessing.schedule(
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(ROLLBACKING, this::handleRollbackingByScheduled);
+                if (!called) {
+                    rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
+                }
+            },
+            delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Handle committing by scheduled.
+     */
+    protected void handleCommittingByScheduled() {
+        SessionCondition sessionCondition = new SessionCondition(committingStatuses);
+        sessionCondition.setLazyLoadBranch(true);
+        List<GlobalSession> committingSessions =
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(committingSessions)) {
+            committingSchedule(RETRY_DEAD_THRESHOLD);
+            return;
+        }
+        long delay = COMMITTING_RETRY_PERIOD;
+        committingSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+        List<GlobalSession> needDoCommittingSessions = new ArrayList<>();
+        for (GlobalSession committingSession : committingSessions) {
+            long time = committingSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoCommittingSessions.add(committingSession);
+            } else {
+                delay = Math.max(time, COMMITTING_RETRY_PERIOD);
+                break;
+            }
+        }
+        long now = System.currentTimeMillis();
+        SessionHelper.forEach(needDoCommittingSessions, committingSession -> {
+            try {
+                if (isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())) {
+
+                    // commit retry timeout event
+                    SessionHelper.endCommitFailed(committingSession, true, true);
+
+                    //The function of this 'return' is 'continue'.
+                    return;
+                }
+                core.doGlobalCommit(committingSession, true);
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to handle committing [{}] {} {}", committingSession.getXid(), ex.getCode(), ex.getMessage());
+            }
+        });
+        committingSchedule(delay);
+    }
+
+    private void committingSchedule(long delay) {
+        syncProcessing.schedule(
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(COMMITTING, this::handleCommittingByScheduled);
+                if (!called) {
+                    committingSchedule(COMMITTING_RETRY_PERIOD);
+                }
+            },
+            delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -511,6 +625,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         undoLogDelete.scheduleAtFixedRate(
             () -> SessionHolder.distributedLockAndExecute(UNDOLOG_DELETE, this::undoLogDelete),
             UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+
+        rollbackingSchedule(0);
+
+        committingSchedule(0);
     }
 
     @Override
