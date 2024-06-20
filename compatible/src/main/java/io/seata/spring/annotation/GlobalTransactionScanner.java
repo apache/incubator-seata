@@ -26,30 +26,73 @@ import org.slf4j.LoggerFactory;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
 
+/**
+ * The type Global transaction scanner.
+ */
+@Deprecated
 public class GlobalTransactionScanner extends org.apache.seata.spring.annotation.GlobalTransactionScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param txServiceGroup the tx service group
+     */
     public GlobalTransactionScanner(String txServiceGroup) {
         super(txServiceGroup);
     }
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param txServiceGroup the tx service group
+     * @param mode           the mode
+     */
     public GlobalTransactionScanner(String txServiceGroup, int mode) {
         super(txServiceGroup, mode);
     }
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup) {
         super(applicationId, txServiceGroup);
     }
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     * @param mode           the mode
+     */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
         super(applicationId, txServiceGroup, mode);
     }
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId      the application id
+     * @param txServiceGroup     the tx service group
+     * @param failureHandlerHook the failure handler hook
+     */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, FailureHandler failureHandlerHook) {
         super(applicationId, txServiceGroup, failureHandlerHook);
     }
 
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId      the application id
+     * @param txServiceGroup     the tx service group
+     * @param mode               the mode
+     * @param failureHandlerHook the failure handler hook
+     */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook) {
         super(applicationId, txServiceGroup, mode, failureHandlerHook);
     }

@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config;
+package org.apache.seata.server.config;
 
-/**
- * The processing configuration.
- * 
- *
- *
- */
-public interface Processor extends org.apache.seata.config.processor.Processor {
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+
+@Configuration
+@EnableAsync(proxyTargetClass = true)
+public class AsyncConfig {
 }

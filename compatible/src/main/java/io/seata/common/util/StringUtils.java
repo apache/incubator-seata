@@ -24,7 +24,11 @@ import java.util.Iterator;
  * The type String utils.
  *
  * Compatible for dubbo dubbo-filter-seata
+ * Notes:
+ * https://github.com/apache/dubbo-spi-extensions/blob/master/dubbo-filter-extensions/dubbo-filter-seata/src/main
+ * /java/org/apache/dubbo/seata/SeataTransactionPropagationProviderFilter.java
  */
+@Deprecated
 public class StringUtils {
     /**
      * Is empty boolean.

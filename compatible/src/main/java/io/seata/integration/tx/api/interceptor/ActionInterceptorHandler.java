@@ -16,14 +16,14 @@
  */
 package io.seata.integration.tx.api.interceptor;
 
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
-import org.apache.seata.rm.tcc.api.ParamType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import org.apache.seata.rm.tcc.api.ParamType;
 
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
@@ -74,7 +74,7 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     // get annotation
                     BusinessActionContextParameter annotation = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {

@@ -18,7 +18,7 @@
 
 -->
 <assembly>
-    <id>server-${project.version}</id>
+    <id>${project.version}-incubating-bin</id>
     <includeBaseDirectory>true</includeBaseDirectory>
     <formats>
         <format>dir</format>
@@ -82,8 +82,18 @@
         </file>
 
         <file>
-            <source>LICENSE-BIN</source>
+            <source>LICENSE</source>
             <destName>LICENSE</destName>
+        </file>
+
+        <file>
+            <source>../DISCLAIMER</source>
+            <destName>DISCLAIMER</destName>
+        </file>
+
+        <file>
+            <source>NOTICE</source>
+            <destName>NOTICE</destName>
         </file>
 
         <file>

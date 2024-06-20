@@ -21,6 +21,7 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 
 import com.alibaba.druid.pool.DruidDataSource;
+
 import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;

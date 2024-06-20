@@ -16,14 +16,14 @@
  */
 package io.seata.spi;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SPITest {
 

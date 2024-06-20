@@ -21,5 +21,6 @@ package io.seata.discovery.loadbalance;
  * The interface Load balance.
  * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface LoadBalance extends org.apache.seata.discovery.loadbalance.LoadBalance {
 }

@@ -16,6 +16,10 @@
  */
 package io.seata.rm.tcc.resource.parser;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Set;
+
 import io.seata.integration.tx.api.interceptor.ActionContextUtil;
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -25,10 +29,10 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.TCCResource;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Set;
-
+/**
+ * The type Tcc register resource parser.
+ */
+@Deprecated
 public class TccRegisterResourceParser extends org.apache.seata.rm.tcc.resource.parser.TccRegisterResourceParser {
 
     protected void executeRegisterResource(Object target, Set<Method> methods, Class<?> targetServiceClass) throws NoSuchMethodException {
