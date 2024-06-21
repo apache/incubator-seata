@@ -46,7 +46,7 @@ public final class SerializerServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN};
+    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN};
 
     private static final String SPLIT_CHAR = ",";
 
@@ -114,7 +114,5 @@ public final class SerializerServiceLoader {
     public static SerializerType getDefaultSerializerType() {
         return getSupportedSerializers().get(0);
     }
-
-}
 
 }
