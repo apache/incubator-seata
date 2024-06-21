@@ -35,22 +35,25 @@ import static org.apache.seata.core.serializer.SerializerType.KRYO;
 import static org.apache.seata.core.serializer.SerializerType.PROTOBUF;
 import static org.apache.seata.core.serializer.SerializerType.SEATA;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The Service Loader for the interface {@link Serializer}
- *
  */
 public final class SerializerServiceLoader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN};
+    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN};
+
+    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String SPLIT_CHAR = ",";
 
     private SerializerServiceLoader() {
     }
-
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
 
@@ -61,7 +64,7 @@ public final class SerializerServiceLoader {
      * @return the service of {@link Serializer}
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static Serializer load(SerializerType type) throws EnhancedServiceNotFoundException {
+    public static Serializer load(SerializerType type, byte version) throws EnhancedServiceNotFoundException {
         if (type == SerializerType.PROTOBUF) {
             try {
                 ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
@@ -70,8 +73,27 @@ public final class SerializerServiceLoader {
                         "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency ", e);
             }
         }
-        return EnhancedServiceLoader.load(Serializer.class, type.name());
+
+        String key = serialzerKey(type, version);
+        Serializer serializer = SERIALIZER_MAP.get(key);
+        if (serializer == null) {
+            if (type == SerializerType.SEATA) {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[]{version});
+            } else {
+                serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+            }
+            SERIALIZER_MAP.put(key, serializer);
+        }
+        return serializer;
     }
+
+    private static String serialzerKey(SerializerType type, byte version) {
+        if (type == SerializerType.SEATA) {
+            return type.name() + version;
+        }
+        return type.name();
+    }
+
 
     public static List<SerializerType> getSupportedSerializers() {
         List<SerializerType> supportedSerializers = new ArrayList<>();
