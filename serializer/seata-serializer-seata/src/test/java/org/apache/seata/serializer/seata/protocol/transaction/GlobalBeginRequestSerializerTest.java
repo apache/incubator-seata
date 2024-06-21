@@ -16,6 +16,7 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class GlobalBeginRequestSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
 
     /**
      * Test codec.
