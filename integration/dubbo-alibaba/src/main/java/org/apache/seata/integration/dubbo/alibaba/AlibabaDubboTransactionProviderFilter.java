@@ -23,51 +23,41 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
+
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.constants.DubboConstants;
+import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Transaction propagation filter.
- *
+ * The type Alibaba dubbo transaction provider filter.
  */
-@Activate(group = {DubboConstants.PROVIDER, DubboConstants.CONSUMER}, order = 100)
-public class AlibabaDubboTransactionPropagationFilter implements Filter {
+@Activate(group = {DubboConstants.PROVIDER}, order = 100)
+public class AlibabaDubboTransactionProviderFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AlibabaDubboTransactionPropagationFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlibabaDubboTransactionProviderFilter.class);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         if (!DubboConstants.ALIBABADUBBO) {
             return invoker.invoke(invocation);
         }
-        String xid = RootContext.getXID();
-        BranchType branchType = RootContext.getBranchType();
-
         String rpcXid = getRpcXid();
         String rpcBranchType = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
+            LOGGER.debug("xid in RpcContext[{}], branchType in RpcContext[{}]", rpcXid, rpcBranchType);
         }
         boolean bind = false;
-        if (xid != null) {
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
-        } else {
-            if (rpcXid != null) {
-                RootContext.bind(rpcXid);
-                if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
-                    RootContext.bindBranchType(BranchType.TCC);
-                }
-                bind = true;
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
-                }
+        if (rpcXid != null) {
+            RootContext.bind(rpcXid);
+            if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
+                RootContext.bindBranchType(BranchType.TCC);
             }
+            bind = true;
         }
+
         try {
             return invoker.invoke(invocation);
         } finally {
@@ -82,7 +72,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                        rpcBranchType != null ? rpcBranchType : BranchType.AT,previousBranchType);
+                        rpcBranchType != null ? rpcBranchType : BranchType.AT, previousBranchType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
@@ -93,8 +83,6 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
                     }
                 }
             }
-            RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
-            RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
             RpcContext.getServerContext().removeAttachment(RootContext.KEY_XID);
             RpcContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
         }
@@ -102,6 +90,7 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
 
     /**
      * get rpc xid
+     *
      * @return
      */
     private String getRpcXid() {
@@ -111,5 +100,4 @@ public class AlibabaDubboTransactionPropagationFilter implements Filter {
         }
         return rpcXid;
     }
-
 }
