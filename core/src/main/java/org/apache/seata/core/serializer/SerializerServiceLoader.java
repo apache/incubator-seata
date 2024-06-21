@@ -48,12 +48,12 @@ public final class SerializerServiceLoader {
 
     private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN};
 
+    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
+
     private static final String SPLIT_CHAR = ",";
 
     private SerializerServiceLoader() {
     }
-
-    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
 
