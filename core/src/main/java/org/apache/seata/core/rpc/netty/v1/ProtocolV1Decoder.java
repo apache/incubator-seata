@@ -16,8 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -64,7 +64,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
 
-    private final Set<SerializerType> supportDeSerializerTypes;
+    private final List<SerializerType> supportDeSerializerTypes;
 
 
     public ProtocolV1Decoder() {
@@ -155,7 +155,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
-                    throw new IllegalArgumentException("SerializerType not match");
+                    throw new IllegalArgumentException("SerializerType not match: " + protocolType.name());
                 }
             }
         }
