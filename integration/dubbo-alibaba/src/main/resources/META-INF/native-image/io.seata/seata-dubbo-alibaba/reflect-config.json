@@ -3,7 +3,19 @@
     "condition": {
       "typeReachable": "com.alibaba.dubbo.rpc.Filter"
     },
-    "name": "io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionPropagationFilter",
+    "name": "io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionConsumerFilter",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.dubbo.rpc.Filter"
+    },
+    "name": "io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionProviderFilter",
     "methods": [
       {
         "name": "<init>",

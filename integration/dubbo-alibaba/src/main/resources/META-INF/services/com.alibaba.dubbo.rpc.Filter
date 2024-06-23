@@ -1,1 +1,2 @@
-io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionPropagationFilter
+io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionConsumerFilter
+io.seata.integration.dubbo.alibaba.AlibabaDubboTransactionProviderFilter
