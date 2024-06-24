@@ -18,8 +18,8 @@ package io.seata.saga.statelang.domain;
 
 /**
  * Execution Status
- *
  */
+@Deprecated
 public enum ExecutionStatus {
 
     /**
@@ -58,7 +58,7 @@ public enum ExecutionStatus {
     }
 
     public static ExecutionStatus wrap(org.apache.seata.saga.statelang.domain.ExecutionStatus target) {
-        if(target == null){
+        if (target == null) {
             return null;
         }
         switch (target) {

@@ -162,15 +162,4 @@ public final class BusinessActionContextUtil {
         return businessActionContext;
     }
 
-    public static Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
-        Object[] args = new Object[argsClasses.length];
-        for (int i = 0; i < argsClasses.length; i++) {
-            if (argsClasses[i].equals(BusinessActionContext.class)) {
-                args[i] = businessActionContext;
-            } else {
-                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
-            }
-        }
-        return args;
-    }
 }

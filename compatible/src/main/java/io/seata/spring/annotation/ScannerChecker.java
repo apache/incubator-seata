@@ -21,7 +21,9 @@ import org.apache.seata.spring.annotation.GlobalTransactionScanner;
 /**
  * The Scanner checker for {@link GlobalTransactionScanner}
  *
- * @see GlobalTransactionScanner#wrapIfNecessary(Object, String, Object)
+ * @see GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) GlobalTransactionScanner#wrapIfNecessary
+ * (Object, String, Object)
  */
+@Deprecated
 public interface ScannerChecker extends org.apache.seata.spring.annotation.ScannerChecker {
 }
