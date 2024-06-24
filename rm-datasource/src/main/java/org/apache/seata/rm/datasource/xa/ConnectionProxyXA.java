@@ -226,7 +226,12 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long now = System.currentTimeMillis();
             checkTimeout(now);
             setPrepareTime(now);
-            xaResource.prepare(xaBranchXid);
+            int prepare = xaResource.prepare(xaBranchXid);
+            if (prepare == XAResource.XA_RDONLY
+                    && JdbcConstants.ORACLE.equals(resource.getDbType())){
+                // Branch Report to TC: RDONLY
+                reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
+            }
         } catch (XAException xe) {
             // Branch Report to TC: Failed
             reportStatusToTC(BranchStatus.PhaseOne_Failed);
