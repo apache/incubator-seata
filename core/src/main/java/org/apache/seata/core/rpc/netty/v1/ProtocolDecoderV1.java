@@ -16,8 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.compressor.Compressor;
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class ProtocolDecoderV1 implements ProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
-    private final Set<SerializerType> supportDeSerializerTypes;
+    private final List<SerializerType> supportDeSerializerTypes;
 
     public ProtocolDecoderV1() {
         supportDeSerializerTypes = SerializerServiceLoader.getSupportedSerializers();
