@@ -16,14 +16,18 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.RecoverStrategy;
-import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.StateMachine;
-
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.RecoverStrategy;
+import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.StateMachine;
+
+/**
+ * The type State machine.
+ */
+@Deprecated
 public class StateMachineImpl implements StateMachine {
 
     private final org.apache.seata.saga.statelang.domain.StateMachine actual;
@@ -166,6 +170,12 @@ public class StateMachineImpl implements StateMachine {
         actual.setGmtCreate(date);
     }
 
+    /**
+     * Wrap state machine.
+     *
+     * @param target the target
+     * @return the state machine
+     */
     public static StateMachineImpl wrap(org.apache.seata.saga.statelang.domain.StateMachine target) {
         if (target == null) {
             return null;
@@ -173,6 +183,11 @@ public class StateMachineImpl implements StateMachine {
         return new StateMachineImpl(target);
     }
 
+    /**
+     * Unwrap org . apache . seata . saga . statelang . domain . state machine.
+     *
+     * @return the org . apache . seata . saga . statelang . domain . state machine
+     */
     public org.apache.seata.saga.statelang.domain.StateMachine unwrap() {
         return actual;
     }

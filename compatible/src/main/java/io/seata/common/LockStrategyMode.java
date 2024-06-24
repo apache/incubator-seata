@@ -16,6 +16,7 @@
  */
 package io.seata.common;
 
+@Deprecated
 public enum LockStrategyMode {
     /**
      * Optimistic lock mode is recommended when resources are not reused in the current global transaction.

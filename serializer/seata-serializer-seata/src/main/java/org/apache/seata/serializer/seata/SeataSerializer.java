@@ -58,7 +58,7 @@ public class SeataSerializer implements Serializer {
 
     static class SeataSerializerV1 implements Serializer {
 
-        private static SeataSerializerV1 instance;
+        private static volatile SeataSerializerV1 instance;
 
         private SeataSerializerV1() {
         }
@@ -66,7 +66,9 @@ public class SeataSerializer implements Serializer {
         public static SeataSerializerV1 getInstance() {
             if (instance == null) {
                 synchronized (SeataSerializerV1.class) {
-                    instance = new SeataSerializerV1();
+                    if (instance == null) {
+                        instance = new SeataSerializerV1();
+                    }
                 }
             }
             return instance;
@@ -109,7 +111,7 @@ public class SeataSerializer implements Serializer {
     }
     static class SeataSerializerV0 implements Serializer {
 
-        private static SeataSerializerV0 instance;
+        private static volatile SeataSerializerV0 instance;
 
         private SeataSerializerV0() {
         }
@@ -117,7 +119,9 @@ public class SeataSerializer implements Serializer {
         public static SeataSerializerV0 getInstance() {
             if (instance == null) {
                 synchronized (SeataSerializerV0.class) {
-                    instance = new SeataSerializerV0();
+                    if (instance == null) {
+                        instance = new SeataSerializerV0();
+                    }
                 }
             }
             return instance;

@@ -24,6 +24,7 @@ import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 /**
  * The type Default global transaction.
  */
+@Deprecated
 public class DefaultGlobalTransaction implements GlobalTransaction {
     private final org.apache.seata.tm.api.DefaultGlobalTransaction instance;
 

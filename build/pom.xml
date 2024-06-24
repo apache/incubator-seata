@@ -20,8 +20,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>19</version>
+        <relativePath/>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.apache.seata</groupId>
     <artifactId>seata-build</artifactId>
     <packaging>pom</packaging>
@@ -130,12 +135,9 @@
         <license.skip>true</license.skip>
         <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
-        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+        <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <maven.surefire.excludes></maven.surefire.excludes>
-        <gpg.keyname>37F181C60AACE24BD5C1D3925583F79497E8E293</gpg.keyname>
-        <gpg.arg1/>
-        <gpg.arg2/>
 
         <!-- For docker image-->
         <image.publish.skip>true</image.publish.skip>
@@ -352,6 +354,9 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
@@ -372,18 +377,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- Staging -->
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${nexus-staging-maven-plugin.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>oss_seata</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
                     <!-- GPG -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -396,29 +389,11 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                                <configuration>
-                                    <keyname>${gpg.keyname}</keyname>
-                                    <gpgArguments>
-                                        <arg>${gpg.arg1}</arg>
-                                        <arg>${gpg.arg2}</arg>
-                                    </gpgArguments>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-            <!-- distribution management -->
-            <distributionManagement>
-                <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-            </distributionManagement>
         </profile>
 
         <!-- profile: release-by-github-actions -->
@@ -427,6 +402,7 @@
             <properties>
                 <gpg.arg1>--pinentry-mode</gpg.arg1>
                 <gpg.arg2>loopback</gpg.arg2>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
 

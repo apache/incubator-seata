@@ -39,7 +39,7 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
+        <bytebuddy.version>1.14.15</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -475,6 +475,12 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>listenablefuture</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
@@ -552,6 +558,16 @@
                 <artifactId>grpc-testing</artifactId>
                 <version>${grpc.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>

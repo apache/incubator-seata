@@ -16,9 +16,9 @@
  */
 package org.apache.seata.core.serializer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -46,14 +46,14 @@ public final class SerializerServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN};
+    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN};
+
+    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String SPLIT_CHAR = ",";
 
     private SerializerServiceLoader() {
     }
-
-    private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
 
@@ -95,8 +95,8 @@ public final class SerializerServiceLoader {
     }
 
 
-    public static Set<SerializerType> getSupportedSerializers() {
-        Set<SerializerType> supportedSerializers = new HashSet<>();
+    public static List<SerializerType> getSupportedSerializers() {
+        List<SerializerType> supportedSerializers = new ArrayList<>();
         String defaultSupportSerializers = Arrays.stream(DEFAULT_SERIALIZER_TYPE).map(SerializerType::name).collect(Collectors.joining(SPLIT_CHAR));
         String serializerNames = CONFIG.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, defaultSupportSerializers);
         String[] serializerNameArray = serializerNames.split(SPLIT_CHAR);
@@ -108,7 +108,11 @@ public final class SerializerServiceLoader {
                 LOGGER.warn("Invalid serializer name: " + serializerName);
             }
         }
-        return supportedSerializers;
+        return supportedSerializers.stream().distinct().collect(Collectors.toList());
+    }
+
+    public static SerializerType getDefaultSerializerType() {
+        return getSupportedSerializers().get(0);
     }
 
 }
