@@ -13,6 +13,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#4410](https://github.com/seata/seata/pull/4410)] support jdk9+ compile code
 - [[#6104](https://github.com/seata/seata/pull/6104)] fix dubbo 3.x consumer can't generate TCC proxy in tcc mode.
 - [[#6409](https://github.com/seata/seata/pull/6409)] fix the failure of RemotingParser to prevent AT mode from executing.
+- [[#6628](https://github.com/seata/seata/pull/6628)] fix Alibaba Dubbo convert error.
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
