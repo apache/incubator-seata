@@ -14,9 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.metadata;
+package org.apache.seata.common.metadata.namingserver;
 
 
+
+import org.apache.seata.common.metadata.ClusterRole;
+import org.apache.seata.common.metadata.Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,8 +36,8 @@ public class Instance {
     private Node.Endpoint transactionEndpoint = new Node.Endpoint();
     private double weight = 1.0;
     private boolean healthy = true;
-    private long timeStamp;
-    private String role = "member";
+    private long term;
+    private ClusterRole role = ClusterRole.MEMBER;
     private Map<String, Object> metadata = new HashMap<>();
 
 
@@ -70,11 +73,11 @@ public class Instance {
         this.unit = unit;
     }
 
-    public String getRole() {
+    public ClusterRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(ClusterRole role) {
         this.role = role;
     }
 
@@ -110,13 +113,13 @@ public class Instance {
         this.healthy = healthy;
     }
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getTerm() {
+        return term;
     }
 
 
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTerm(long term) {
+        this.term = term;
     }
 
     public void addMetadata(String key, Object value) {
@@ -156,7 +159,7 @@ public class Instance {
         sb.append("\"transactionEndpoint\": ").append(transactionEndpoint.toString()).append(", ");
         sb.append("\"weight\": ").append(weight).append(", ");
         sb.append("\"healthy\": ").append(healthy).append(", ");
-        sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
+        sb.append("\"term\": ").append(term).append(", ");
         sb.append("\"metadata\": ");
 
         // handle metadata kv map
@@ -178,7 +181,7 @@ public class Instance {
         resultMap.put("transactionEndpoint", transactionEndpoint.toString());
         resultMap.put("weight", String.valueOf(weight));
         resultMap.put("healthy", String.valueOf(healthy));
-        resultMap.put("timeStamp", String.valueOf(timeStamp));
+        resultMap.put("term", String.valueOf(term));
         resultMap.put("metadata", mapToJsonString(metadata));
 
         return resultMap;

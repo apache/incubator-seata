@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.metadata;
+package org.apache.seata.common.metadata.namingserver;
+
+import org.apache.seata.common.metadata.Node;
 
 import java.util.List;
 
@@ -50,13 +52,13 @@ public class Unit {
      * @param node
      * @return true if the node has changed, false if there is no change.
      */
-    public boolean addInstance(Node node) {
+    public boolean addInstance(NamingServerNode node) {
         if (nodeList.contains(node)) {
             Node node1 = nodeList.get(nodeList.indexOf(node));
             if (node.isTotalEqual(node1)) {
                 return false;
             } else {
-                nodeList.remove(node);
+                nodeList.remove(node1);
             }
         }
         nodeList.add(node);

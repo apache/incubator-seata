@@ -183,10 +183,10 @@ public class NamingController {
     }
 
     /**
-     * @param clientTerm 客户端保存的订阅时间戳
-     * @param vGroup     事务分组名称
-     * @param timeout    超时时间
-     * @param request    客户端HTTP请求
+     * @param clientTerm The timestamp of the subscription saved on the client side
+     * @param vGroup     The name of the transaction group
+     * @param timeout    The timeout duration
+     * @param request    The client's HTTP request
      */
 
     @PostMapping("/watch")
