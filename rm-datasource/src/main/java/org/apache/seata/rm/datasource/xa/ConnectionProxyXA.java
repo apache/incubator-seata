@@ -228,7 +228,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             setPrepareTime(now);
             int prepare = xaResource.prepare(xaBranchXid);
             if (prepare == XAResource.XA_RDONLY
-                    && JdbcConstants.ORACLE.equals(resource.getDbType())){
+                    && JdbcConstants.ORACLE.equals(resource.getDbType())) {
                 // Branch Report to TC: RDONLY
                 reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
             }
