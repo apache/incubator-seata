@@ -26,10 +26,9 @@
         <version>2.7.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.example</groupId>
+    <groupId>org.apache.seata</groupId>
     <artifactId>namingserver</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>namingserver</name>
+    <name>namingserver ${project.version}</name>
     <description>namingserver</description>
     <properties>
         <java.version>8</java.version>
