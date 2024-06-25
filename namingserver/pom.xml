@@ -33,6 +33,8 @@
     <description>namingserver</description>
     <properties>
         <java.version>8</java.version>
+        <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
+        <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
     </properties>
     <dependencies>
         <dependency>
