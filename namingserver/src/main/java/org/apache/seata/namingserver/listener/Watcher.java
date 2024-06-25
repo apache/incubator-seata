@@ -19,10 +19,6 @@ package org.apache.seata.namingserver.listener;
 
 import static org.apache.seata.namingserver.listener.Watcher.Protocol.HTTP;
 
-/**
- * @author funkye
- * @author ggbocoder
- */
 
 public class Watcher<T> {
 

@@ -18,10 +18,7 @@ package org.apache.seata.common.result;
 
 import java.io.Serializable;
 
-/**
- * The basic result
- * @author zhongxiang.wang
- */
+
 public class Result<T>  implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;
 
