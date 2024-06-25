@@ -20,7 +20,6 @@ import com.taobao.hsf.context.RPCContext;
 import com.taobao.hsf.invocation.Invocation;
 import com.taobao.hsf.invocation.InvocationHandler;
 import com.taobao.hsf.invocation.RPCResult;
-import com.taobao.hsf.invocation.filter.ClientFilter;
 import com.taobao.hsf.invocation.filter.ServerFilter;
 import com.taobao.hsf.util.concurrent.ListenableFuture;
 import org.apache.seata.common.util.StringUtils;
@@ -30,42 +29,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The type Transaction propagation filter.
- *
+ * The type Hsf transaction provider filter.
  */
-public class HsfTransactionFilter implements ClientFilter, ServerFilter {
+public class HsfTransactionProviderFilter implements ServerFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HsfTransactionFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HsfTransactionProviderFilter.class);
 
     @Override
-    public ListenableFuture<RPCResult> invoke(InvocationHandler invocationHandler, Invocation invocation)
-        throws Throwable {
-        String xid = RootContext.getXID();
-        BranchType branchType = RootContext.getBranchType();
+    public ListenableFuture<RPCResult> invoke(InvocationHandler nextHandler, Invocation invocation) throws Throwable {
 
         Object rpcXid = RPCContext.getServerContext().getAttachment(RootContext.KEY_XID);
         Object rpcBranchType = RPCContext.getServerContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
+            LOGGER.debug("xid in RpcContext[{}], branchType in RpcContext[{}]", rpcXid, rpcBranchType);
         }
         boolean bind = false;
-        if (xid != null) {
-            RPCContext.getClientContext().putAttachment(RootContext.KEY_XID, xid);
-            RPCContext.getClientContext().putAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
-        } else {
-            if (rpcXid != null) {
-                RootContext.bind(rpcXid.toString());
-                if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType.toString())) {
-                    RootContext.bindBranchType(BranchType.TCC);
-                }
-                bind = true;
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
-                }
+        if (rpcXid != null) {
+            RootContext.bind(rpcXid.toString());
+            if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType.toString())) {
+                RootContext.bindBranchType(BranchType.TCC);
+            }
+            bind = true;
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
             }
         }
         try {
-            return invocationHandler.invoke(invocation);
+            return nextHandler.invoke(invocation);
         } finally {
             if (bind) {
                 BranchType previousBranchType = RootContext.getBranchType();
@@ -89,8 +79,6 @@ public class HsfTransactionFilter implements ClientFilter, ServerFilter {
                     }
                 }
             }
-            RPCContext.getClientContext().removeAttachment(RootContext.KEY_XID);
-            RPCContext.getClientContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
             RPCContext.getServerContext().removeAttachment(RootContext.KEY_XID);
             RPCContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
         }

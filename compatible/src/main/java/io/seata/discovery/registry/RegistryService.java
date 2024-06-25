@@ -22,4 +22,6 @@ package io.seata.discovery.registry;
  * @param <T> the type parameter
  */
 @Deprecated
-public interface RegistryService<T> extends org.apache.seata.discovery.registry.RegistryService<T>{}
+public interface RegistryService<T> extends org.apache.seata.discovery.registry.RegistryService<T> {
+
+}

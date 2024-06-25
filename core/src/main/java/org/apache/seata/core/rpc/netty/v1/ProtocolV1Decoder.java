@@ -16,8 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,7 +27,6 @@ import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
@@ -64,7 +63,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
 
-    private final Set<SerializerType> supportDeSerializerTypes;
+    private final List<SerializerType> supportDeSerializerTypes;
 
 
     public ProtocolV1Decoder() {
@@ -125,7 +124,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
-        RpcMessage rpcMessage = new RpcMessage();
+        ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressorType);
@@ -152,10 +151,10 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 bs = compressor.decompress(bs);
                 SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
                 if (this.supportDeSerializerTypes.contains(protocolType)) {
-                    Serializer serializer = SerializerServiceLoader.load(protocolType);
+                    Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
-                    throw new IllegalArgumentException("SerializerType not match");
+                    throw new IllegalArgumentException("SerializerType not match: " + protocolType.name());
                 }
             }
         }
