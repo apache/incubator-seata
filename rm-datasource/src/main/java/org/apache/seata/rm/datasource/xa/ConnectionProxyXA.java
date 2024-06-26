@@ -290,6 +290,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void cleanXABranchContext() {
+        xaEnded = false;
         branchRegisterTime = null;
         prepareTime = null;
         xaActive = false;
@@ -323,7 +324,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         // Force close the physical connection
         physicalConn.close();
-        xaEnded = false;
         rollBacked = false;
         cleanXABranchContext();
         originalConnection.close();
