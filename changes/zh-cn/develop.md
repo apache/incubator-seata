@@ -14,6 +14,7 @@
 - [[#6104](https://github.com/seata/seata/pull/6104)] 修复在TCC模式下, dubbo 3.x版本消费者端不能生成TCC代理的问题
 - [[#6409](https://github.com/seata/seata/pull/6409)] 修复 RemotingParser 失败导致 AT 模式无法执行的问题
 - [[#6628](https://github.com/seata/seata/pull/6628)] 修复 Alibaba Dubbo 转换错误
+- [[#6632](https://github.com/seata/seata/pull/6632)] 修复 hsf ConsumerModel 转换错误
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
