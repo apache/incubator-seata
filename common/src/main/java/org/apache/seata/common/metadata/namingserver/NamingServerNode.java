@@ -16,9 +16,10 @@
  */
 package org.apache.seata.common.metadata.namingserver;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.Node;
 
-import java.util.Map;
 import java.util.Objects;
 
 
@@ -61,32 +62,18 @@ public class NamingServerNode extends Node {
                 Double.compare(otherNode.weight, weight) == 0 &&
                 healthy == otherNode.healthy &&
                 Objects.equals(getRole(), otherNode.getRole()) &&
+                term == otherNode.term &&
                 Objects.equals(getMetadata(), otherNode.getMetadata());
     }
 
     // convert to String
     public String toJsonString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("\"getControl()Endpoint\": ").append(getControl().toString()).append(", ");
-        sb.append("\"getTransaction()Endpoint\": ").append(getTransaction().toString()).append(", ");
-        sb.append("\"weight\": ").append(weight).append(", ");
-        sb.append("\"healthy\": ").append(healthy).append(", ");
-        sb.append("\"term\": ").append(term).append(", ");
-        sb.append("\"metadata\": {");
-
-        // handle metadata k-v map
-        int i = 0;
-        for (Map.Entry<String, Object> entry : getMetadata().entrySet()) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
-            i++;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-
-        sb.append("}}");
-        return sb.toString();
     }
 
     public void setWeight(double weight) {

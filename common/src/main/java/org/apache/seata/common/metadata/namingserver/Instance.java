@@ -18,6 +18,8 @@ package org.apache.seata.common.metadata.namingserver;
 
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 
@@ -150,23 +152,12 @@ public class Instance {
 
     // Recursively convert metadata to JSON
     public String toJsonString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("\"namespace\": \"").append(namespace).append("\", ");
-        sb.append("\"clusterName\": \"").append(clusterName).append("\", ");
-        sb.append("\"unit\": \"").append(unit).append("\", ");
-        sb.append("\"controlEndpoint\": ").append(controlEndpoint.toString()).append(", ");
-        sb.append("\"transactionEndpoint\": ").append(transactionEndpoint.toString()).append(", ");
-        sb.append("\"weight\": ").append(weight).append(", ");
-        sb.append("\"healthy\": ").append(healthy).append(", ");
-        sb.append("\"term\": ").append(term).append(", ");
-        sb.append("\"metadata\": ");
-
-        // handle metadata kv map
-        sb.append(mapToJsonString(metadata));
-
-        sb.append("}");
-        return sb.toString();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
