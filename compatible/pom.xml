@@ -33,7 +33,7 @@
     <description>compatible with io.seata API</description>
     <properties>
         <mockito.version>4.11.0</mockito.version>
-        <druid.version>1.2.7</druid.version>
+        <druid.version>1.2.20</druid.version>
         <mysql.version>5.1.42</mysql.version>
         <mariadb.version>2.7.2</mariadb.version>
         <assertj-core.version>3.12.2</assertj-core.version>
