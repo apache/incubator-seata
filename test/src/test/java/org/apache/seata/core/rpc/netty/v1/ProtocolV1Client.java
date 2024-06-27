@@ -94,13 +94,13 @@ public class ProtocolV1Client {
         } else {
             Throwable cause = channelFuture.cause();
             throw new RuntimeException("Failed to connect " + host + ":" + port +
-                    (cause != null ? ". Cause by: " + cause.getMessage() : "."));
+                (cause != null ? ". Cause by: " + cause.getMessage() : "."));
         }
     }
 
     private EventLoopGroup createWorkerGroup() {
         NamedThreadFactory threadName =
-                new NamedThreadFactory("CLI-WORKER", false);
+            new NamedThreadFactory("CLI-WORKER", false);
         return new NioEventLoopGroup(10, threadName);
     }
 
@@ -157,7 +157,7 @@ public class ProtocolV1Client {
         final AtomicLong cnt = new AtomicLong(0);
         // no queue
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
+            new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
                 while (true) {

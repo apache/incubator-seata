@@ -89,7 +89,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
-                || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
+            || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
             throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
         }
 

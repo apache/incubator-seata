@@ -107,6 +107,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
     }
 
+
     @Override
     public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
         Pair<RemotingProcessor, ExecutorService> pair = new Pair<>(processor, executor);

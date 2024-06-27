@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV0.class);
-    
+
     public ProtocolDecoderV0() {
 
     }

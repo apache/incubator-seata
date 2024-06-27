@@ -93,7 +93,7 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
 
             byte[] bodyBytes = null;
             if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                    && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                 // heartbeat has no body
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
                 bodyBytes = serializer.serialize(rpcMessage.getBody());

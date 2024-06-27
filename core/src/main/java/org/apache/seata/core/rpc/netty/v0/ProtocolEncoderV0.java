@@ -69,9 +69,9 @@ public class ProtocolEncoderV0 extends MessageToByteEncoder implements ProtocolE
 
             out.writeShort(ProtocolConstantsV0.MAGIC);
             int flag = (msg.isAsync() ? ProtocolConstantsV0.FLAG_ASYNC : 0)
-                    | (msg.isHeartbeat() ? ProtocolConstantsV0.FLAG_HEARTBEAT : 0)
-                    | (msg.isRequest() ? ProtocolConstantsV0.FLAG_REQUEST : 0)
-                    | (msg.isSeataCodec() ? ProtocolConstantsV0.FLAG_SEATA_CODEC : 0);
+                | (msg.isHeartbeat() ? ProtocolConstantsV0.FLAG_HEARTBEAT : 0)
+                | (msg.isRequest() ? ProtocolConstantsV0.FLAG_REQUEST : 0)
+                | (msg.isSeataCodec() ? ProtocolConstantsV0.FLAG_SEATA_CODEC : 0);
 
             out.writeShort((short) flag);
 
