@@ -20,18 +20,18 @@ import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
-import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.rpc.netty.ProtocolDecoder;
+import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * <pre>
@@ -56,57 +56,24 @@ import org.slf4j.LoggerFactory;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @see ProtocolV1Encoder
+ * @see ProtocolEncoderV1
+ * @author Geng Zhang
+ * @see ProtocolEncoderV1
  * @since 0.7.0
  */
-public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
+public class ProtocolDecoderV1 implements ProtocolDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
     private final List<SerializerType> supportDeSerializerTypes;
 
-
-    public ProtocolV1Decoder() {
-        // default is 8M
-        this(ProtocolConstants.MAX_FRAME_LENGTH);
-    }
-
-    public ProtocolV1Decoder(int maxFrameLength) {
-        /*
-        int maxFrameLength,      
-        int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
-        int lengthFieldLength,  FullLength is int(4B). so values is 4
-        int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
-        int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
-        */
-        super(maxFrameLength, 3, 4, -7, 0);
+    public ProtocolDecoderV1() {
         supportDeSerializerTypes = SerializerServiceLoader.getSupportedSerializers();
         if (supportDeSerializerTypes.isEmpty()) {
             throw new IllegalArgumentException("No serializer found");
-        }
-    }
+        }    }
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        Object decoded;
-        try {
-            decoded = super.decode(ctx, in);
-            if (decoded instanceof ByteBuf) {
-                ByteBuf frame = (ByteBuf)decoded;
-                try {
-                    return decodeFrame(frame);
-                } finally {
-                    frame.release();
-                }
-            }
-        } catch (Exception exx) {
-            LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
-            throw new DecodeException(exx);
-        }
-        return decoded;
-    }
-
-    public Object decodeFrame(ByteBuf frame) {
+    public ProtocolRpcMessage decodeFrame(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
@@ -115,7 +82,6 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         }
 
         byte version = frame.readByte();
-        // TODO  check version compatible here
 
         int fullLength = frame.readInt();
         short headLength = frame.readShort();
@@ -154,13 +120,11 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                     Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
-                    throw new IllegalArgumentException("SerializerType not match: " + protocolType.name());
+                    throw new IllegalArgumentException("SerializerType not match");
                 }
             }
         }
 
         return rpcMessage;
     }
-
-
 }

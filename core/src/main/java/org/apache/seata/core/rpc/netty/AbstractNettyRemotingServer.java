@@ -69,7 +69,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        RpcMessage rpcMessage = buildRequestMessage(channel, msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -78,7 +78,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        RpcMessage rpcMessage = buildRequestMessage(channel, msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
@@ -87,25 +87,41 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new RuntimeException("client is not connected");
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        RpcMessage rpcMessage = buildRequestMessage(channel, msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         super.sendAsync(channel, rpcMessage);
     }
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
-        final Channel clientChannel = msg instanceof HeartbeatMessage
-                ? channel
-                : ChannelManager.getSameClientChannel(channel);
-
-        if (clientChannel == null) {
-            throw new RuntimeException("Not found client channel to response | channel: " + channel);
+        Channel clientChannel = channel;
+        if (!(msg instanceof HeartbeatMessage)) {
+            clientChannel = ChannelManager.getSameClientChannel(channel);
         }
-
-        RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+        if (clientChannel != null) {
+            RpcMessage rpcMsg = buildResponseMessage(channel, rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
-        super.sendAsync(clientChannel, rpcMsg);
+            super.sendAsync(clientChannel, rpcMsg);
+        } else {
+            throw new RuntimeException("channel is error.");
+        }
     }
+
+
+    private RpcMessage buildResponseMessage(Channel channel, RpcMessage fromRpcMessage, Object msg, byte messageType) {
+        RpcMessage rpcMessage = super.buildResponseMessage(fromRpcMessage, msg, messageType);
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        rpcMessage.setOtherSideVersion(rpcContext.getVersion());
+        return rpcMessage;
+    }
+
+    protected RpcMessage buildRequestMessage(Channel channel, Object msg, byte messageType) {
+        RpcMessage rpcMessage = super.buildRequestMessage(msg, messageType);
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        rpcMessage.setOtherSideVersion(rpcContext.getVersion());
+        return rpcMessage;
+    }
+
 
     @Override
     public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
