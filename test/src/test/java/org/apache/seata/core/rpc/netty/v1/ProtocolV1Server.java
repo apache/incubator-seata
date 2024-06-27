@@ -35,12 +35,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.core.rpc.netty.CompatibleProtocolDecoder;
-import org.apache.seata.core.rpc.netty.CompatibleProtocolEncoder;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
+import org.apache.seata.core.rpc.netty.MultiProtocolDecoder;
 
 /**
  */
@@ -73,9 +68,7 @@ public class ProtocolV1Server {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {
                         ChannelPipeline pipeline = channel.pipeline();
-                        pipeline.addLast(new CompatibleProtocolDecoder(8 * 1024 * 1024));
-                        pipeline.addLast(new CompatibleProtocolEncoder());
-                        pipeline.addLast(new ServerChannelHandler());
+                        pipeline.addLast(new MultiProtocolDecoder(new ServerChannelHandler()));
                     }
                 });
 

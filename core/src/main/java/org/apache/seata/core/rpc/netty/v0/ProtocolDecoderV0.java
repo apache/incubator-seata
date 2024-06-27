@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 
 import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.rpc.netty.ProtocolDecoder;
+import org.apache.seata.core.rpc.netty.AbstractProtocolDecoder;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
@@ -53,10 +53,13 @@ import org.slf4j.LoggerFactory;
  *
  * @see ProtocolEncoderV0
  */
-public class ProtocolDecoderV0 implements ProtocolDecoder {
+public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV0.class);
+    
+    public ProtocolDecoderV0() {
 
+    }
 
     @Override
     public ProtocolRpcMessageV0 decodeFrame(ByteBuf in) {
@@ -127,6 +130,5 @@ public class ProtocolDecoderV0 implements ProtocolDecoder {
         }
         return rpcMessage;
     }
-
 
 }

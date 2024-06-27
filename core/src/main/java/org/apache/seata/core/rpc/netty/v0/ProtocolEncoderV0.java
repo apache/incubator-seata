@@ -17,6 +17,8 @@
 package org.apache.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MessageTypeAware;
 import org.apache.seata.core.protocol.ProtocolConstants;
@@ -54,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see ProtocolDecoderV0
  */
-public class ProtocolEncoderV0 implements ProtocolEncoder {
+public class ProtocolEncoderV0 extends MessageToByteEncoder implements ProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV0.class);
 
@@ -98,6 +100,19 @@ public class ProtocolEncoderV0 implements ProtocolEncoder {
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Send:" + msg.getBody());
+            }
+        } catch (Throwable e) {
+            LOGGER.error("Encode request error!", e);
+        }
+    }
+
+    @Override
+    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+        try {
+            if (msg instanceof RpcMessage) {
+                encode((RpcMessage)msg, out);
+            } else {
+                throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);

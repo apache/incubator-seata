@@ -35,8 +35,6 @@ public class RpcMessage implements Serializable {
     private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
-    private String otherSideVersion;
-
     /**
      * Gets id.
      *
@@ -169,14 +167,6 @@ public class RpcMessage implements Serializable {
      */
     public void setMessageType(byte messageType) {
         this.messageType = messageType;
-    }
-
-    public String getOtherSideVersion() {
-        return otherSideVersion;
-    }
-
-    public void setOtherSideVersion(String otherSideVersion) {
-        this.otherSideVersion = otherSideVersion;
     }
 
     @Override
