@@ -66,7 +66,7 @@ public class ProtocolV1SerializerTest {
             body.setXid("xid-1234");
 
             // test run times
-            int runTimes = 100;
+            int runTimes = 100000;
 
             final int threads = 50;
             final CountDownLatch cnt = new CountDownLatch(runTimes);
@@ -96,6 +96,7 @@ public class ProtocolV1SerializerTest {
             cnt.await(10,TimeUnit.SECONDS);
             LOGGER.info("success {}/{}", success.get(), runTimes);
             Assertions.assertEquals(success.get(), runTimes);
+            service1.shutdown();
         } catch (InterruptedException e) {
             LOGGER.error("Thread interrupted", e);
         } finally {
