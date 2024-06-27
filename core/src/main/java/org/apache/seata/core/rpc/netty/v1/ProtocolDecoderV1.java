@@ -27,8 +27,8 @@ import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.ProtocolDecoder;
-import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
@@ -85,7 +85,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
     }
 
     @Override
-    public ProtocolRpcMessage decodeFrame(ByteBuf frame) {
+    public RpcMessage decodeFrame(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
@@ -137,7 +137,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
             }
         }
 
-        return rpcMessage;
+        return rpcMessage.protocolMsg2RpcMsg();
     }
 
     @Override

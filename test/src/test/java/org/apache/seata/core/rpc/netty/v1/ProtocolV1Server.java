@@ -75,13 +75,9 @@ public class ProtocolV1Server {
         String host = "0.0.0.0";
 
         ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(host, port));
-        ChannelFuture channelFuture = future.addListener(new ChannelFutureListener() {
-
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                if (!future.isSuccess()) {
-                    throw new RuntimeException("Server start fail !", future.cause());
-                }
+        ChannelFuture channelFuture = future.addListener((ChannelFutureListener)future1 -> {
+            if (!future1.isSuccess()) {
+                throw new RuntimeException("Server start fail !", future1.cause());
             }
         });
 

@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 
 import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.AbstractProtocolDecoder;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
@@ -62,7 +63,7 @@ public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
     }
 
     @Override
-    public ProtocolRpcMessageV0 decodeFrame(ByteBuf in) {
+    public RpcMessage decodeFrame(ByteBuf in) {
         ProtocolRpcMessageV0 rpcMessage = new ProtocolRpcMessageV0();
         if (in.readableBytes() < ProtocolConstantsV0.HEAD_LENGTH) {
             throw new IllegalArgumentException("Nothing to decode.");
@@ -96,7 +97,7 @@ public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
                 rpcMessage.setBody(HeartbeatMessage.PONG);
             }
 
-            return rpcMessage;
+            return rpcMessage.protocolMsg2RpcMsg();
         }
 
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
@@ -128,7 +129,7 @@ public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Receive:" + rpcMessage.getBody() + ", messageId:" + msgId);
         }
-        return rpcMessage;
+        return rpcMessage.protocolMsg2RpcMsg();
     }
 
 }
