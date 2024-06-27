@@ -83,15 +83,13 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
-        this.protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
-                .put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
-                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
-                .build();
-       this.protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
-            .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
-            .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1())
-            .build();
-       this.channelHandlers = channelHandlers;
+        this.protocolDecoderMap =
+            ImmutableMap.<Byte, ProtocolDecoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1()).build();
+        this.protocolEncoderMap =
+            ImmutableMap.<Byte, ProtocolEncoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1()).build();
+        this.channelHandlers = channelHandlers;
     }
 
     @Override

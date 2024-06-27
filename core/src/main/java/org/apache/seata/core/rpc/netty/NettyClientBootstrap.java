@@ -130,8 +130,8 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ChannelPipeline pipeline = ch.pipeline();
-                    pipeline.addLast(
-                        new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                    pipeline
+                        .addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                             nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                             nettyClientConfig.getChannelMaxAllIdleSeconds()))
                         .addLast(new ProtocolDecoderV1())

@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
  * @see ProtocolEncoderV1
  * @since 0.7.0
  */
-public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements ProtocolDecoder{
+public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements ProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
     private final List<SerializerType> supportDeSerializerTypes;
