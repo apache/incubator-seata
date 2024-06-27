@@ -17,10 +17,11 @@
 package org.apache.seata.namingserver.manager;
 
 
-import javafx.util.Pair;
+
+import jdk.internal.net.http.common.Pair;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.pojo.AbstractClusterData;
@@ -95,7 +96,7 @@ public class NamingManager {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
-            String clusterName = pair.getKey();
+            String clusterName = pair.first;
             ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
             if (clusterVO != null) {
                 clusterVO.addMapping(vGroup);
@@ -130,8 +131,8 @@ public class NamingManager {
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
                 String namespace1 = innerEntry.getKey();
                 Pair<String, String> pair = innerEntry.getValue();
-                String clusterName1 = pair.getKey();
-                String unitName1 = pair.getValue();
+                String clusterName1 = pair.first;
+                String unitName1 = pair.second;
                 if (namespace1.equals(namespace)
                         && clusterName1.equals(clusterName)
                         && (unitName1 == null || unitName1.equals(unitName))) {
@@ -204,8 +205,8 @@ public class NamingManager {
         List<Cluster> clusterList = new ArrayList<>();
         try {
             Pair<String, String> clusterUnitPair = VGroupMap.get(vGroup).get(namespace);
-            String clusterName = clusterUnitPair.getKey();
-            String unitName = clusterUnitPair.getValue();
+            String clusterName = clusterUnitPair.first;
+            String unitName = clusterUnitPair.second;
             ClusterData clusterData = NamespaceClusterDataMap.get(namespace).get(clusterName);
             clusterList.add(clusterData.getClusterByUnit(unitName));
         } catch (NullPointerException e) {

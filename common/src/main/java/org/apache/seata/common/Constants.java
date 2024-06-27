@@ -204,4 +204,9 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
+    /**
+     * The constant HTTP_PREFIX
+     */
+    String HTTP_PREFIX = "http://";
 }

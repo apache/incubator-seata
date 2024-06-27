@@ -16,7 +16,7 @@
  */
 package org.apache.seata.namingserver.vo.monitor;
 
-import org.apache.seata.common.metadata.Unit;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.pojo.ClusterData;
 
 import java.util.ArrayList;

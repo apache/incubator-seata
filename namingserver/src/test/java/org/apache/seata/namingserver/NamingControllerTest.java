@@ -17,9 +17,9 @@
 package org.apache.seata.namingserver;
 
 import org.apache.seata.common.metadata.Cluster;
-import org.apache.seata.common.metadata.MetaResponse;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
+import org.apache.seata.common.metadata.namingserver.MetaResponse;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

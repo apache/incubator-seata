@@ -18,11 +18,12 @@ package org.apache.seata.namingserver;
 
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.metadata.namingserver.MetaResponse;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.metadata.Cluster;
-import org.apache.seata.common.metadata.MetaResponse;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
@@ -126,7 +127,7 @@ public class NamingController {
             Node node = nodeList.get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
-            String httpUrl = "http://"
+            String httpUrl = Constants.HTTP_PREFIX
                     + controlHost
                     + ":"
                     + controlPort
@@ -155,7 +156,7 @@ public class NamingController {
                         && unit.getNamingInstanceList() != null
                         && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = "http://"
+                    String httpUrl = Constants.HTTP_PREFIX
                             + node.getControl().getHost()
                             + ":"
                             + node.getControl().getPort()
