@@ -17,11 +17,14 @@
 package org.apache.seata.core.rpc.netty.v0;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.rpc.netty.AbstractProtocolDecoder;
+import org.apache.seata.core.rpc.netty.ProtocolDecoder;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
@@ -54,11 +57,19 @@ import org.slf4j.LoggerFactory;
  *
  * @see ProtocolEncoderV0
  */
-public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
+public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements ProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV0.class);
 
     public ProtocolDecoderV0() {
+        /*
+        int maxFrameLength,
+        int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
+        int lengthFieldLength,  FullLength is int(4B). so values is 4
+        int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
+        int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
+        */
+        super(ProtocolConstants.MAX_FRAME_LENGTH, 3, 4, -7, 0);
     }
 
     @Override
@@ -129,6 +140,26 @@ public class ProtocolDecoderV0 extends AbstractProtocolDecoder {
             LOGGER.debug("Receive:" + rpcMessage.getBody() + ", messageId:" + msgId);
         }
         return rpcMessage.protocolMsg2RpcMsg();
+    }
+
+    @Override
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        Object decoded;
+        try {
+            decoded = super.decode(ctx, in);
+            if (decoded instanceof ByteBuf) {
+                ByteBuf frame = (ByteBuf)decoded;
+                try {
+                    return decodeFrame(frame);
+                } finally {
+                    frame.release();
+                }
+            }
+        } catch (Exception exx) {
+            LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
+            throw new DecodeException(exx);
+        }
+        return decoded;
     }
 
 }
