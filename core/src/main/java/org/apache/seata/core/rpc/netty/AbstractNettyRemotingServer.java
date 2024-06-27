@@ -109,11 +109,11 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
 
     private RpcMessage buildResponseMessage(Channel channel, RpcMessage fromRpcMessage, Object msg, byte messageType) {
-	    return super.buildResponseMessage(fromRpcMessage, msg, messageType);
+        return super.buildResponseMessage(fromRpcMessage, msg, messageType);
     }
 
     protected RpcMessage buildRequestMessage(Channel channel, Object msg, byte messageType) {
-	    return super.buildRequestMessage(msg, messageType);
+        return super.buildRequestMessage(msg, messageType);
     }
 
 
