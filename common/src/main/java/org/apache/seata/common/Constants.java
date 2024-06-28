@@ -209,4 +209,12 @@ public interface Constants {
      * The constant HTTP_PREFIX
      */
     String HTTP_PREFIX = "http://";
+
+    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
+
+    String CONSTANT_UNIT = "unit";
+
+    String CONSTANT_GROUP = "vGroup";
+
+    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
 }

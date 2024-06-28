@@ -45,7 +45,6 @@ import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,12 +128,12 @@ public class NamingController {
             int controlPort = node.getControl().getPort();
             String httpUrl = Constants.HTTP_PREFIX
                     + controlHost
-                    + ":"
+                    + Constants.IP_PORT_SPLIT_CHAR
                     + controlPort
-                    + "/naming/v1/addVGroup?";
+                    + Constants.HTTP_ADD_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
-            params.put("vGroup", vGroup);
-            params.put("unit", unitName);
+            params.put(Constants.CONSTANT_GROUP, vGroup);
+            params.put(Constants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
@@ -158,12 +157,12 @@ public class NamingController {
                     Node node = unit.getNamingInstanceList().get(0);
                     String httpUrl = Constants.HTTP_PREFIX
                             + node.getControl().getHost()
-                            + ":"
+                            + Constants.IP_PORT_SPLIT_CHAR
                             + node.getControl().getPort()
-                            + "/naming/v1/removeVGroup?";
+                            + Constants.HTTP_REMOVE_GROUP_SUFFIX;
                     HashMap<String, String> params = new HashMap<>();
-                    params.put("vGroup", vGroup);
-                    params.put("unit", unitName);
+                    params.put(Constants.CONSTANT_GROUP, vGroup);
+                    params.put(Constants.CONSTANT_UNIT, unitName);
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
