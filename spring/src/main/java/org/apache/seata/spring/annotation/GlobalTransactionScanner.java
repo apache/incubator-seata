@@ -500,6 +500,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 try {
                     // get the class by bean definition class name
                     Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
+
+                    // 之前我想的是在 挪到这里 调用getRemotingFactoryBean(Object bean, String beanName),判断改bean是否是代理bean
+                    // 后来发现这里,我是利用BeanDefinition,得到 bean 的类型Class<?>, 去判断该bean是否是 serviceBean. 所以根本用到 bean本身.
+                    // 所以我觉得是否是可以直接去掉类RemotingFactoryBeanParser了?
+                    // 而且getRemotingFactoryBean中有一个判断, 只有SpringProxyUtils.isProxy(bean) 才会区判断bean是否是remotingBean
+                    // 进到SpringProxyUtils.isProxy()中,可以看到判断是的DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean))
+                    // 在初始化没有完成的时候, 应该没有bean符合这个判断, 而且即使有符合这个判断,那么 这时候从 applicationContext取 bean也会促使bean提前初始化, 对后边逻辑会产生错误,笔记不会AOP自动代理处理.
+
                     // check if it needs enhancement by the class
                     IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
                     if (!ifNeedEnhanceBean.isIfNeed()) {
@@ -606,5 +614,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static String getSecretKey() {
         return secretKey;
+    }
+
+    /**
+     * if it is proxy bean, check if the FactoryBean is Remoting bean
+     *
+     * @param bean               the bean
+     * @param beanName           the bean name
+     * @return boolean boolean
+     */
+    private Object getRemotingFactoryBean(Object bean, String beanName) {
+        if (!SpringProxyUtils.isProxy(bean)) {
+            return null;
+        }
+        //the FactoryBean of proxy bean
+        String factoryBeanName = getFactoryBeanName(beanName);
+        Object factoryBean = null;
+        if (applicationContext.containsBean(factoryBeanName)) {
+            factoryBean = applicationContext.getBean(factoryBeanName);
+        }
+        return factoryBean;
+    }
+
+    private String getFactoryBeanName(String beanName) {
+        return "&" + beanName;
     }
 }
