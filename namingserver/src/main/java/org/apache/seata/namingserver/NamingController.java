@@ -16,13 +16,8 @@
  */
 package org.apache.seata.namingserver;
 
-import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HTTP;
-import org.apache.seata.common.Constants;
+
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
-import org.apache.seata.common.metadata.namingserver.Unit;
-import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
@@ -30,7 +25,6 @@ import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.apache.seata.namingserver.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.vo.monitor.WatcherVO;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -116,16 +110,16 @@ public class NamingController {
                                  @RequestParam String vGroup) {
 
         Result<?> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
-        if(!addGroupResult.isSuccess()){
+        if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
         // remove vGroup in old cluster
-        Result<?> removeGroupResult = namingManager.removeGroup(namespace,vGroup,unitName);
-        if(!removeGroupResult.isSuccess()){
+        Result<?> removeGroupResult = namingManager.removeGroup(namespace, vGroup, unitName);
+        if (!removeGroupResult.isSuccess()) {
             return removeGroupResult;
         }
         namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-        return new Result<>("200","change vGroup " + vGroup + "to cluster " + clusterName + "successfully!" );
+        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + "successfully!");
     }
 
     /**

@@ -141,7 +141,7 @@ public class NamingManager {
                 }
             } catch (IOException e) {
                 LOGGER.warn("add vGroup in new cluster failed");
-                return new Result<>("500","add vGroup in new cluster failed");
+                return new Result<>("500", "add vGroup in new cluster failed");
             }
         }
         return new Result<>("200", "add vGroup successfully!");
@@ -169,16 +169,16 @@ public class NamingManager {
                     try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
                         if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                             LOGGER.warn("remove vGroup in old cluster failed");
-                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),"removing vGroup " + vGroup +" in old cluster " + cluster + " failed");
+                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()), "removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
                         }
                     } catch (IOException e) {
                         LOGGER.warn("handle removing vGroup in old cluster failed");
-                        return new Result<>("500","handle removing vGroup " + vGroup +" in old cluster " + cluster + " failed");
+                        return new Result<>("500", "handle removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
                     }
                 }
             }
         }
-        return new Result<>("200","remove group in old cluster successfully!");
+        return new Result<>("200", "remove group in old cluster successfully!");
     }
 
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
