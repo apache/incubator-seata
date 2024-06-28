@@ -115,71 +115,17 @@ public class NamingController {
                                  @RequestParam String unitName,
                                  @RequestParam String vGroup) {
 
-        List<Cluster> clusterList = namingManager.getClusterListByVgroup(vGroup, namespace);
-
-        // add vGroup in new cluster
-        List<Node> nodeList = namingManager.getInstances(namespace, clusterName);
-        if (nodeList == null || nodeList.size() == 0) {
-            LOGGER.error("no instance in cluster {}", clusterName);
-            return new Result<>("301", "no instance in cluster" + clusterName);
-        } else {
-            Node node = nodeList.get(0);
-            String controlHost = node.getControl().getHost();
-            int controlPort = node.getControl().getPort();
-            String httpUrl = Constants.HTTP_PREFIX
-                    + controlHost
-                    + Constants.IP_PORT_SPLIT_CHAR
-                    + controlPort
-                    + Constants.HTTP_ADD_GROUP_SUFFIX;
-            HashMap<String, String> params = new HashMap<>();
-            params.put(Constants.CONSTANT_GROUP, vGroup);
-            params.put(Constants.CONSTANT_UNIT, unitName);
-            Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params,header,30000)) {
-                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                    return new Result<>("200", "add vGroup in new cluster failed");
-                }
-            } catch (IOException e) {
-                LOGGER.warn("add vGroup in new cluster failed");
-            }
-
+        Result<?> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
+        if(!addGroupResult.isSuccess()){
+            return addGroupResult;
         }
-
         // remove vGroup in old cluster
-        for (Cluster cluster : clusterList) {
-            if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
-                Unit unit = cluster.getUnitData().get(0);
-                if (unit != null
-                        && unit.getNamingInstanceList() != null
-                        && unit.getNamingInstanceList().size() > 0) {
-                    Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = Constants.HTTP_PREFIX
-                            + node.getControl().getHost()
-                            + Constants.IP_PORT_SPLIT_CHAR
-                            + node.getControl().getPort()
-                            + Constants.HTTP_REMOVE_GROUP_SUFFIX;
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put(Constants.CONSTANT_GROUP, vGroup);
-                    params.put(Constants.CONSTANT_UNIT, unitName);
-                    Map<String, String> header = new HashMap<>();
-                    header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-                    try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
-                        if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                            LOGGER.warn("remove vGroup in old cluster failed");
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn("remove vGroup in new cluster failed");
-                    }
-                }
-            }
+        Result<?> removeGroupResult = namingManager.removeGroup(namespace,vGroup,unitName);
+        if(!removeGroupResult.isSuccess()){
+            return removeGroupResult;
         }
-
         namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-
-        return new Result<>();
+        return new Result<>("200","change vGroup " + vGroup + "to cluster " + clusterName + "successfully!" );
     }
 
     /**
