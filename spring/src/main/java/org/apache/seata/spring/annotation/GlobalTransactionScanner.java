@@ -555,8 +555,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
-        RemotingFactoryBeanParser remotingFactoryBeanParser = new RemotingFactoryBeanParser(applicationContext);
-        DefaultRemotingParser.get().registerRemotingParser(remotingFactoryBeanParser);
+//        RemotingFactoryBeanParser remotingFactoryBeanParser = new RemotingFactoryBeanParser(applicationContext);
+//        DefaultRemotingParser.get().registerRemotingParser(remotingFactoryBeanParser);
         this.setBeanFactory(applicationContext);
     }
 
