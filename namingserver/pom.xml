@@ -83,13 +83,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.10.12</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
             <version>2.1.0-SNAPSHOT</version>
