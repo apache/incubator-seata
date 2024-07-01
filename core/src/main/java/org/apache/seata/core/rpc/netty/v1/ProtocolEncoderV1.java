@@ -19,6 +19,7 @@ package org.apache.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import org.apache.seata.core.rpc.netty.ProtocolEncoder;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
@@ -54,65 +55,78 @@ import java.util.Map;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @see ProtocolV1Decoder
+ * @author Geng Zhang
+ * @see ProtocolDecoderV1
  * @since 0.7.0
  */
-public class ProtocolV1Encoder extends MessageToByteEncoder {
+public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolEncoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Encoder.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV1.class);
 
-    @Override
-    public void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
+
+    public void encode(RpcMessage message, ByteBuf out) {
         try {
 
+            ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
+            rpcMessage.rpcMsg2ProtocolMsg(message);
+
+            int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
+            int headLength = ProtocolConstants.V1_HEAD_LENGTH;
+
+            byte messageType = rpcMessage.getMessageType();
+            out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
+            out.writeByte(ProtocolConstants.VERSION_1);
+            // full Length(4B) and head length(2B) will fix in the end.
+            out.writerIndex(out.writerIndex() + 6);
+            out.writeByte(messageType);
+            out.writeByte(rpcMessage.getCodec());
+            out.writeByte(rpcMessage.getCompressor());
+            out.writeInt(rpcMessage.getId());
+
+            // direct write head with zero-copy
+            Map<String, String> headMap = rpcMessage.getHeadMap();
+            if (headMap != null && !headMap.isEmpty()) {
+                int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, out);
+                headLength += headMapBytesLength;
+                fullLength += headMapBytesLength;
+            }
+
+            byte[] bodyBytes = null;
+            if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                // heartbeat has no body
+                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
+                bodyBytes = serializer.serialize(rpcMessage.getBody());
+                Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+                bodyBytes = compressor.compress(bodyBytes);
+                fullLength += bodyBytes.length;
+            }
+
+            if (bodyBytes != null) {
+                out.writeBytes(bodyBytes);
+            }
+
+            // fix fullLength and headLength
+            int writeIndex = out.writerIndex();
+            // skip magic code(2B) + version(1B)
+            out.writerIndex(writeIndex - fullLength + 3);
+            out.writeInt(fullLength);
+            out.writeShort(headLength);
+            out.writerIndex(writeIndex);
+
+
+        } catch (Throwable e) {
+            LOGGER.error("Encode request error!", e);
+            // todo
+            throw e;
+        }
+    }
+
+    @Override
+    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+        try {
             if (msg instanceof RpcMessage) {
-                RpcMessage rpcMsg = (RpcMessage) msg;
-
-                ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
-                rpcMessage.rpcMsg2ProtocolMsg(rpcMsg);
-                int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
-                int headLength = ProtocolConstants.V1_HEAD_LENGTH;
-
-                byte messageType = rpcMessage.getMessageType();
-                out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
-                out.writeByte(ProtocolConstants.VERSION);
-                // full Length(4B) and head length(2B) will fix in the end. 
-                out.writerIndex(out.writerIndex() + 6);
-                out.writeByte(messageType);
-                out.writeByte(rpcMessage.getCodec());
-                out.writeByte(rpcMessage.getCompressor());
-                out.writeInt(rpcMessage.getId());
-
-                // direct write head with zero-copy
-                Map<String, String> headMap = rpcMessage.getHeadMap();
-                if (headMap != null && !headMap.isEmpty()) {
-                    int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, out);
-                    headLength += headMapBytesLength;
-                    fullLength += headMapBytesLength;
-                }
-
-                byte[] bodyBytes = null;
-                if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                        && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
-                    // heartbeat has no body
-                    Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
-                    bodyBytes = serializer.serialize(rpcMessage.getBody());
-                    Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
-                    bodyBytes = compressor.compress(bodyBytes);
-                    fullLength += bodyBytes.length;
-                }
-
-                if (bodyBytes != null) {
-                    out.writeBytes(bodyBytes);
-                }
-
-                // fix fullLength and headLength
-                int writeIndex = out.writerIndex();
-                // skip magic code(2B) + version(1B)
-                out.writerIndex(writeIndex - fullLength + 3);
-                out.writeInt(fullLength);
-                out.writeShort(headLength);
-                out.writerIndex(writeIndex);
+                this.encode((RpcMessage)msg, out);
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }
@@ -120,4 +134,5 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
             LOGGER.error("Encode request error!", e);
         }
     }
+
 }
