@@ -158,13 +158,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
-                    ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                        .addLast(new CompatibleProtocolDecoder())
-                        .addLast(new CompatibleProtocolEncoder());
-                    if (channelHandlers != null) {
-                        addChannelPipelineLast(ch, channelHandlers);
-                    }
-
+                    MultiProtocolDecoder multiProtocolDecoder = new MultiProtocolDecoder(channelHandlers);
+                    ch.pipeline()
+                        .addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
+                        .addLast(multiProtocolDecoder);
                 }
             });
 

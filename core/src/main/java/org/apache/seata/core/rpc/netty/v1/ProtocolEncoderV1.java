@@ -17,6 +17,8 @@
 package org.apache.seata.core.rpc.netty.v1;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 import org.apache.seata.core.rpc.netty.ProtocolEncoder;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.compressor.Compressor;
@@ -57,7 +59,7 @@ import java.util.Map;
  * @see ProtocolDecoderV1
  * @since 0.7.0
  */
-public class ProtocolEncoderV1 implements ProtocolEncoder {
+public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV1.class);
 
@@ -91,7 +93,7 @@ public class ProtocolEncoderV1 implements ProtocolEncoder {
 
             byte[] bodyBytes = null;
             if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                    && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                 // heartbeat has no body
                 Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
                 bodyBytes = serializer.serialize(rpcMessage.getBody());
@@ -119,4 +121,18 @@ public class ProtocolEncoderV1 implements ProtocolEncoder {
             throw e;
         }
     }
+
+    @Override
+    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+        try {
+            if (msg instanceof RpcMessage) {
+                this.encode((RpcMessage)msg, out);
+            } else {
+                throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
+            }
+        } catch (Throwable e) {
+            LOGGER.error("Encode request error!", e);
+        }
+    }
+
 }

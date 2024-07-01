@@ -50,8 +50,8 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof ProtocolRpcMessage) {
-            RpcMessage rpcMessage = ((ProtocolRpcMessage) msg).protocolMsg2RpcMsg();
+        if (msg instanceof RpcMessage) {
+            RpcMessage rpcMessage = (RpcMessage)msg;
             int msgId = rpcMessage.getId();
             DefaultPromise future = (DefaultPromise) client.futureMap.remove(msgId);
             if (future != null) {

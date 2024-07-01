@@ -18,12 +18,15 @@ package org.apache.seata.core.rpc.netty;
 
 import com.google.common.collect.ImmutableMap;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.rpc.netty.v0.ProtocolDecoderV0;
+import org.apache.seata.core.rpc.netty.v0.ProtocolEncoderV0;
 import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
+import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,17 +55,26 @@ import java.util.Map;
  * <li>Body Length: Full Length - Head Length</li>
  * </p>
  */
-public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
+public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CompatibleProtocolDecoder.class);
-    private static Map<Byte, ProtocolDecoder> protocolDecoderMap;
+    private static final Logger LOGGER = LoggerFactory.getLogger(MultiProtocolDecoder.class);
+    private final Map<Byte, ProtocolDecoder> protocolDecoderMap;
 
-    public CompatibleProtocolDecoder() {
+    private final Map<Byte, ProtocolEncoder> protocolEncoderMap;
+    
+    private final ChannelHandler[] channelHandlers;
+
+    public MultiProtocolDecoder(ChannelHandler... channelHandlers) {
         // default is 8M
-        this(ProtocolConstants.MAX_FRAME_LENGTH);
+        this(ProtocolConstants.MAX_FRAME_LENGTH, channelHandlers);
     }
 
-    public CompatibleProtocolDecoder(int maxFrameLength) {
+    public MultiProtocolDecoder() {
+        // default is 8M
+        this(ProtocolConstants.MAX_FRAME_LENGTH, null);
+    }
+
+    public MultiProtocolDecoder(int maxFrameLength, ChannelHandler[] channelHandlers) {
         /*
         int maxFrameLength,      
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
@@ -71,10 +83,13 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
-        protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
-                .put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
-                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
-                .build();
+        this.protocolDecoderMap =
+            ImmutableMap.<Byte, ProtocolDecoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1()).build();
+        this.protocolEncoderMap =
+            ImmutableMap.<Byte, ProtocolEncoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1()).build();
+        this.channelHandlers = channelHandlers;
     }
 
     @Override
@@ -93,9 +108,10 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
             if (decoded instanceof ByteBuf) {
                 frame = (ByteBuf) decoded;
+                ProtocolDecoder decoder = protocolDecoderMap.get(version);
+                ProtocolEncoder encoder = protocolEncoderMap.get(version);
                 try {
-                    ProtocolDecoder decoder = protocolDecoderMap.get(version);
-                    if (decoder == null) {
+                    if (decoder == null || encoder == null) {
                         throw new UnsupportedOperationException("Unsupported version: " + version);
                     }
                     return decoder.decodeFrame(frame);
@@ -103,6 +119,12 @@ public class CompatibleProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     if (version != ProtocolConstants.VERSION_0) {
                         frame.release();
                     }
+                    ctx.pipeline().addLast((ChannelHandler)decoder);
+                    ctx.pipeline().addLast((ChannelHandler)encoder);
+                    if (channelHandlers != null) {
+                        ctx.pipeline().addLast(channelHandlers);
+                    }
+                    ctx.pipeline().remove(this);
                 }
             }
         } catch (Exception exx) {
