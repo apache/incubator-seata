@@ -80,8 +80,9 @@ public class ProtocolV1Client {
             @Override
             protected void initChannel(Channel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
-                pipeline.addLast(new ProtocolV1Encoder());
-                pipeline.addLast(new ProtocolV1Decoder(8 * 1024 * 1024));
+                pipeline
+                    .addLast(new ProtocolDecoderV1())
+                    .addLast(new ProtocolEncoderV1());
                 pipeline.addLast(new ClientChannelHandler(ProtocolV1Client.this));
             }
         });
@@ -93,13 +94,13 @@ public class ProtocolV1Client {
         } else {
             Throwable cause = channelFuture.cause();
             throw new RuntimeException("Failed to connect " + host + ":" + port +
-                    (cause != null ? ". Cause by: " + cause.getMessage() : "."));
+                (cause != null ? ". Cause by: " + cause.getMessage() : "."));
         }
     }
 
     private EventLoopGroup createWorkerGroup() {
         NamedThreadFactory threadName =
-                new NamedThreadFactory("CLI-WORKER", false);
+            new NamedThreadFactory("CLI-WORKER", false);
         return new NioEventLoopGroup(10, threadName);
     }
 
@@ -123,6 +124,7 @@ public class ProtocolV1Client {
         rpcMessage.setHeadMap(head);
         rpcMessage.setBody(body);
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+
 
         if (channel != null) {
             DefaultPromise promise = new DefaultPromise(defaultEventExecutor);
@@ -155,7 +157,7 @@ public class ProtocolV1Client {
         final AtomicLong cnt = new AtomicLong(0);
         // no queue
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
+            new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
                 while (true) {

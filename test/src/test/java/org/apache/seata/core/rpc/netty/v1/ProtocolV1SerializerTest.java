@@ -80,7 +80,7 @@ public class ProtocolV1SerializerTest {
                     while (tag.getAndIncrement() < runTimes) {
                         try {
                             Future future = client.sendRpc(head, body);
-                            RpcMessage resp = (RpcMessage) future.get(10, TimeUnit.SECONDS);
+                            RpcMessage resp = (RpcMessage)future.get(10, TimeUnit.SECONDS);
                             if (resp != null) {
                                 success.incrementAndGet();
                             }
@@ -93,9 +93,10 @@ public class ProtocolV1SerializerTest {
                 });
             }
 
-            cnt.await();
+            cnt.await(10,TimeUnit.SECONDS);
             LOGGER.info("success {}/{}", success.get(), runTimes);
             Assertions.assertEquals(success.get(), runTimes);
+            service1.shutdown();
         } catch (InterruptedException e) {
             LOGGER.error("Thread interrupted", e);
         } finally {
