@@ -80,6 +80,7 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.setAccessKey(seataProperties.getAccessKey());
         GlobalTransactionScanner.setSecretKey(seataProperties.getSecretKey());
         // create global transaction scanner
-        return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
+        return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(),
+                seataProperties.isExposeProxy(), failureHandler);
     }
 }

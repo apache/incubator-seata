@@ -90,11 +90,36 @@ public class GlobalTransactionScanner extends org.apache.seata.spring.annotation
      *
      * @param applicationId      the application id
      * @param txServiceGroup     the tx service group
+     * @param exposeProxy        the exposeProxy
+     * @param failureHandlerHook the failure handler hook
+     */
+    public GlobalTransactionScanner(String applicationId, String txServiceGroup, boolean exposeProxy, FailureHandler failureHandlerHook) {
+        super(applicationId, txServiceGroup, exposeProxy, failureHandlerHook);
+    }
+
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId      the application id
+     * @param txServiceGroup     the tx service group
      * @param mode               the mode
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook) {
-        super(applicationId, txServiceGroup, mode, failureHandlerHook);
+        super(applicationId, txServiceGroup, mode, false, failureHandlerHook);
+    }
+
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId      the application id
+     * @param txServiceGroup     the tx service group
+     * @param mode               the mode
+     * @param exposeProxy        the exposeProxy
+     * @param failureHandlerHook the failure handler hook
+     */
+    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, boolean exposeProxy, FailureHandler failureHandlerHook) {
+        super(applicationId, txServiceGroup, mode, exposeProxy, failureHandlerHook);
     }
 
     protected void initClient() {
