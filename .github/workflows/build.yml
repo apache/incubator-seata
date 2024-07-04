@@ -53,6 +53,7 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          version: v0.6.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
