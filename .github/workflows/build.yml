@@ -53,6 +53,8 @@ jobs:
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
