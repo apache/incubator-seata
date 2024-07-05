@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.result;
+package org.apache.seata.common.result;
 
 import java.io.Serializable;
 
