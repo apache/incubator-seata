@@ -150,6 +150,16 @@ public class Version {
         return -1;
     }
 
+    public static byte calcProtocolVersion(String sdkVersion) throws IncompatibleVersionException {
+        long version = convertVersion(sdkVersion);
+        long v0 = convertVersion(VERSION_0_7_1);
+        if (version <= v0) {
+            return ProtocolConstants.VERSION_0;
+        } else {
+            return ProtocolConstants.VERSION_1;
+        }
+    }
+
     private static long calculatePartValue(String partNumeric, int size, int index) {
         return Long.parseLong(partNumeric) * Double.valueOf(Math.pow(100, size - index)).longValue();
     }
