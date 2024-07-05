@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
     Licensed to the Apache Software Foundation (ASF) under one or more
     contributor license agreements.  See the NOTICE file distributed with
     this work for additional information regarding copyright ownership.
@@ -15,25 +14,57 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>org.apache.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
-    <groupId>com.example</groupId>
+
+    <groupId>org.apache.seata</groupId>
     <artifactId>namingserver</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>namingserver</name>
+    <name>namingserver ${project.version}</name>
     <description>namingserver</description>
+
     <properties>
         <java.version>8</java.version>
+        <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
+        <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Framework -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework-for-server.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Boot -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot-for-server.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-framework-bom</artifactId>
+                    </exclusion>
+                </exclusions>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,31 +76,31 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>1.10.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
-            <version>2.1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
         </dependency>
     </dependencies>
 
@@ -82,6 +113,7 @@
                     <includeSystemScope>true</includeSystemScope>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -98,7 +130,7 @@
                             <stripVersion>false</stripVersion>
                             <silent>true</silent>
                             <overWriteIfNewer>true</overWriteIfNewer>
-                            <!--resolve slf4j-simple conflicts-->
+                            <!-- resolve slf4j-simple conflicts -->
                             <includeScope>runtime</includeScope>
                             <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
                             <skip>false</skip>

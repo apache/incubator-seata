@@ -42,10 +42,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author funkye
- * @author ggbocoder
- */
+
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
 

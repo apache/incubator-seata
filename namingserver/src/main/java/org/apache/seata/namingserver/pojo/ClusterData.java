@@ -19,7 +19,8 @@ package org.apache.seata.namingserver.pojo;
 
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -110,7 +111,7 @@ public class ClusterData extends AbstractClusterData {
     }
 
 
-    public boolean registerInstance(Node instance, String unitName) {
+    public boolean registerInstance(NamingServerNode instance, String unitName) {
         // refresh node weight
         Object weightValue = instance.getMetadata().get("weight");
         if (weightValue != null) {

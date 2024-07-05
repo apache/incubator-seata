@@ -14,22 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver;
+package org.apache.seata.namingserver.controller;
 
-import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HTTP;
-import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.common.metadata.Cluster;
-import org.apache.seata.common.metadata.MetaResponse;
+
+import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.apache.seata.namingserver.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.vo.monitor.WatcherVO;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,11 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -115,78 +106,24 @@ public class NamingController {
                                  @RequestParam String unitName,
                                  @RequestParam String vGroup) {
 
-        List<Cluster> clusterList = namingManager.getClusterListByVgroup(vGroup, namespace);
-
-        // add vGroup in new cluster
-        List<Node> nodeList = namingManager.getInstances(namespace, clusterName);
-        if (nodeList == null || nodeList.size() == 0) {
-            LOGGER.error("no instance in cluster {}", clusterName);
-            return new Result<>("301", "no instance in cluster" + clusterName);
-        } else {
-            Node node = nodeList.get(0);
-            String controlHost = node.getControl().getHost();
-            int controlPort = node.getControl().getPort();
-            String httpUrl = "http://"
-                    + controlHost
-                    + ":"
-                    + controlPort
-                    + "/naming/v1/addVGroup?";
-            HashMap<String, String> params = new HashMap<>();
-            params.put("vGroup", vGroup);
-            params.put("unit", unitName);
-            Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params,header,30000)) {
-                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                    return new Result<>("200", "add vGroup in new cluster failed");
-                }
-            } catch (IOException e) {
-                LOGGER.warn("add vGroup in new cluster failed");
-            }
-
+        Result<?> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
+        if (!addGroupResult.isSuccess()) {
+            return addGroupResult;
         }
-
         // remove vGroup in old cluster
-        for (Cluster cluster : clusterList) {
-            if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
-                Unit unit = cluster.getUnitData().get(0);
-                if (unit != null
-                        && unit.getNamingInstanceList() != null
-                        && unit.getNamingInstanceList().size() > 0) {
-                    Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = "http://"
-                            + node.getControl().getHost()
-                            + ":"
-                            + node.getControl().getPort()
-                            + "/naming/v1/removeVGroup?";
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put("vGroup", vGroup);
-                    params.put("unit", unitName);
-                    Map<String, String> header = new HashMap<>();
-                    header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-                    try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
-                        if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                            LOGGER.warn("remove vGroup in old cluster failed");
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn("remove vGroup in new cluster failed");
-                    }
-                }
-            }
+        Result<?> removeGroupResult = namingManager.removeGroup(namespace, vGroup, unitName);
+        if (!removeGroupResult.isSuccess()) {
+            return removeGroupResult;
         }
-
         namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-
-        return new Result<>();
+        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + "successfully!");
     }
 
     /**
-     * @param clientTerm 客户端保存的订阅时间戳
-     * @param vGroup     事务分组名称
-     * @param timeout    超时时间
-     * @param request    客户端HTTP请求
+     * @param clientTerm The timestamp of the subscription saved on the client side
+     * @param vGroup     The name of the transaction group
+     * @param timeout    The timeout duration
+     * @param request    The client's HTTP request
      */
 
     @PostMapping("/watch")

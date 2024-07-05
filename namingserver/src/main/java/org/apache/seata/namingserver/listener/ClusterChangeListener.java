@@ -16,10 +16,7 @@
  */
 package org.apache.seata.namingserver.listener;
 
-/**
- * @author funkye
- * @author ggbocoder
- */
+
 public interface ClusterChangeListener {
 
     /**

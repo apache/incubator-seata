@@ -17,11 +17,17 @@
 package org.apache.seata.namingserver.manager;
 
 
-import javafx.util.Pair;
+import jdk.internal.net.http.common.Pair;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.protocol.HTTP;
+import org.apache.seata.common.Constants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.Unit;
+import org.apache.seata.common.metadata.namingserver.Unit;
+import org.apache.seata.common.result.Result;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.pojo.AbstractClusterData;
 import org.apache.seata.namingserver.pojo.ClusterData;
@@ -33,6 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -95,7 +102,7 @@ public class NamingManager {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
-            String clusterName = pair.getKey();
+            String clusterName = pair.first;
             ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
             if (clusterVO != null) {
                 clusterVO.addMapping(vGroup);
@@ -104,6 +111,74 @@ public class NamingManager {
 
         return new ArrayList<>(clusterVOHashMap.values());
 
+    }
+
+    public Result<?> addGroup(String namespace, String vGroup, String clusterName, String unitName) {
+
+        // add vGroup in new cluster
+        List<Node> nodeList = getInstances(namespace, clusterName);
+        if (nodeList == null || nodeList.size() == 0) {
+            LOGGER.error("no instance in cluster {}", clusterName);
+            return new Result<>("301", "no instance in cluster" + clusterName);
+        } else {
+            Node node = nodeList.get(0);
+            String controlHost = node.getControl().getHost();
+            int controlPort = node.getControl().getPort();
+            String httpUrl = Constants.HTTP_PREFIX
+                    + controlHost
+                    + Constants.IP_PORT_SPLIT_CHAR
+                    + controlPort
+                    + Constants.HTTP_ADD_GROUP_SUFFIX;
+            HashMap<String, String> params = new HashMap<>();
+            params.put(Constants.CONSTANT_GROUP, vGroup);
+            params.put(Constants.CONSTANT_UNIT, unitName);
+            Map<String, String> header = new HashMap<>();
+            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()), "add vGroup in new cluster failed");
+                }
+            } catch (IOException e) {
+                LOGGER.warn("add vGroup in new cluster failed");
+                return new Result<>("500", "add vGroup in new cluster failed");
+            }
+        }
+        return new Result<>("200", "add vGroup successfully!");
+    }
+
+    public Result<?> removeGroup(String namespace, String vGroup, String unitName) {
+        List<Cluster> clusterList = getClusterListByVgroup(vGroup, namespace);
+        for (Cluster cluster : clusterList) {
+            if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
+                Unit unit = cluster.getUnitData().get(0);
+                if (unit != null
+                        && unit.getNamingInstanceList() != null
+                        && unit.getNamingInstanceList().size() > 0) {
+                    Node node = unit.getNamingInstanceList().get(0);
+                    String httpUrl = Constants.HTTP_PREFIX
+                            + node.getControl().getHost()
+                            + Constants.IP_PORT_SPLIT_CHAR
+                            + node.getControl().getPort()
+                            + Constants.HTTP_REMOVE_GROUP_SUFFIX;
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put(Constants.CONSTANT_GROUP, vGroup);
+                    params.put(Constants.CONSTANT_UNIT, unitName);
+                    Map<String, String> header = new HashMap<>();
+                    header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+                    try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+                        if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                            LOGGER.warn("remove vGroup in old cluster failed");
+                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()), "removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
+                        }
+                    } catch (IOException e) {
+                        LOGGER.warn("handle removing vGroup in old cluster failed");
+                        return new Result<>("500", "handle removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
+                    }
+                }
+            }
+        }
+        return new Result<>("200", "remove group in old cluster successfully!");
     }
 
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
@@ -115,7 +190,6 @@ public class NamingManager {
                 VGroupMap.put(vGroup, stringPairHashMap);
                 applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
             }
-
         } catch (Exception e) {
             LOGGER.error("change vGroup mapping failed:{}", vGroup);
         }
@@ -130,8 +204,8 @@ public class NamingManager {
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
                 String namespace1 = innerEntry.getKey();
                 Pair<String, String> pair = innerEntry.getValue();
-                String clusterName1 = pair.getKey();
-                String unitName1 = pair.getValue();
+                String clusterName1 = pair.first;
+                String unitName1 = pair.second;
                 if (namespace1.equals(namespace)
                         && clusterName1.equals(clusterName)
                         && (unitName1 == null || unitName1.equals(unitName))) {
@@ -204,8 +278,8 @@ public class NamingManager {
         List<Cluster> clusterList = new ArrayList<>();
         try {
             Pair<String, String> clusterUnitPair = VGroupMap.get(vGroup).get(namespace);
-            String clusterName = clusterUnitPair.getKey();
-            String unitName = clusterUnitPair.getValue();
+            String clusterName = clusterUnitPair.first;
+            String unitName = clusterUnitPair.second;
             ClusterData clusterData = NamespaceClusterDataMap.get(namespace).get(clusterName);
             clusterList.add(clusterData.getClusterByUnit(unitName));
         } catch (NullPointerException e) {
