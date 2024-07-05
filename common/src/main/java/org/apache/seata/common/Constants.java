@@ -161,6 +161,21 @@ public interface Constants {
     String UNDOLOG_DELETE = "UndologDelete";
 
     /**
+     * The constant SYNC_PROCESSING
+     */
+    String SYNC_PROCESSING = "SyncProcessing";
+
+    /**
+     * The constant Committing
+     */
+    String COMMITTING = "Committing";
+
+    /**
+     * The constant Rollbacking
+     */
+    String ROLLBACKING = "Rollbacking";
+
+    /**
      * The constant AUTO_COMMIT
      */
     String AUTO_COMMIT = "autoCommit";
@@ -204,4 +219,29 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
+    /**
+     * The constant HTTP_PREFIX
+     */
+    String HTTP_PREFIX = "http://";
+
+    /**
+     * The constant HTTP_ADD_GROUP_SUFFIX
+     */
+    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
+
+    /**
+     * The constant CONSTANT_UNIT
+     */
+    String CONSTANT_UNIT = "unit";
+
+    /**
+     * The constant CONSTANT_GROUP
+     */
+    String CONSTANT_GROUP = "vGroup";
+
+    /**
+     * The constant HTTP_REMOVE_GROUP_SUFFIX
+     */
+    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
 }

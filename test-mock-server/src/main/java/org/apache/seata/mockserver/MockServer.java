@@ -83,7 +83,7 @@ public class MockServer {
                     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            close();
+                            LOGGER.info("system is closing , pid info: " + ManagementFactory.getRuntimeMXBean().getName());
                         }
                     }));
                     LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());

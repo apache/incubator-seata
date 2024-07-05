@@ -34,6 +34,9 @@
     <profiles>
         <profile>
             <id>release-seata</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.apache.seata</groupId>
@@ -47,7 +50,7 @@
                 </dependency>
             </dependencies>
             <build>
-                <finalName>seata</finalName>
+                <finalName>apache-seata</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
