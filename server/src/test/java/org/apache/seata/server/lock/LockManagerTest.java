@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Resource;
 
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.console.result.PageResult;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.UUIDGenerator;

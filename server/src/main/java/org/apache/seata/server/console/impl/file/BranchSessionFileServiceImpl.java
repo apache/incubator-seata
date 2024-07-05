@@ -18,7 +18,7 @@ package org.apache.seata.server.console.impl.file;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.server.console.vo.BranchSessionVO;
-import org.apache.seata.console.result.PageResult;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;

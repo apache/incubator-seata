@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.console.result.PageResult;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.vo.BranchSessionVO;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.server.console.service.BranchSessionService;

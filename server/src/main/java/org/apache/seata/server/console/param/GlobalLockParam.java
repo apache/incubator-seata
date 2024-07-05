@@ -16,9 +16,10 @@
  */
 package org.apache.seata.server.console.param;
 
+import org.apache.seata.common.result.BaseParam;
+
 import java.io.Serializable;
 
-import org.apache.seata.console.param.BaseParam;
 
 /**
  * Global lock param

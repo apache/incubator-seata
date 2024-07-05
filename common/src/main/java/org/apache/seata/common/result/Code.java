@@ -14,12 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.constant;
+package org.apache.seata.common.result;
 
-/**
- * The Code for the response of message
- *
- */
+
 public enum Code {
     /**
      * response success
