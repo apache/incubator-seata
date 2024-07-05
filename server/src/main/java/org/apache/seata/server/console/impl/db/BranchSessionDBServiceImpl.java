@@ -32,7 +32,7 @@ import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.console.result.PageResult;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.core.store.db.DataSourceProvider;
 import org.apache.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.apache.seata.server.console.service.BranchSessionService;

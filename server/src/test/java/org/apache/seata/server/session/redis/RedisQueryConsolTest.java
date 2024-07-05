@@ -19,7 +19,7 @@ package org.apache.seata.server.session.redis;
 import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.seata.console.result.PageResult;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.GlobalLockService;

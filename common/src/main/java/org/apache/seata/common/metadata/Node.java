@@ -109,6 +109,12 @@ public class Node {
             this.port = port;
         }
 
+        public Endpoint(String host, int port, String protocol) {
+            this.host = host;
+            this.port = port;
+            this.protocol = protocol;
+        }
+
         public String getHost() {
             return host;
         }

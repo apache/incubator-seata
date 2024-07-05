@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.console.service;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.vo.GlobalLockVO;
-import org.apache.seata.console.result.PageResult;
 
 
 /**
