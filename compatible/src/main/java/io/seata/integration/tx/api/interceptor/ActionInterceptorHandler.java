@@ -74,7 +74,7 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
-                if (parameterAnnotations[i][j] instanceof org.apache.seata.rm.tcc.api.BusinessActionContextParameter) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     // get annotation
                     BusinessActionContextParameter annotation = (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
