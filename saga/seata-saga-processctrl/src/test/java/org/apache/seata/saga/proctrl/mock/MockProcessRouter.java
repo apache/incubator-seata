@@ -39,6 +39,9 @@ public class MockProcessRouter implements ProcessRouter {
                 return null;//end process
             }
         }
+        if (context.hasVariable("exception")) {
+            throw new RuntimeException("exception");
+        }
         return instruction;
     }
 }
