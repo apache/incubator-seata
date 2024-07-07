@@ -14,6 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 */}}
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
