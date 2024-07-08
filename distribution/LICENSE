@@ -209,16 +209,10 @@ subcomponents is subject to the terms and conditions of the following
 licenses.
 
 ========================================================================
-(MIT AND BSD-3-Clause) licenses
+Apache-1.1 licenses
 ========================================================================
 
-    sha.js 2.4.11 (MIT AND BSD-3-Clause)
-
-========================================================================
-0BSD licenses
-========================================================================
-
-    tslib 2.6.2 0BSD
+    com.caucho:hessian 4.0.63 Apache-1.1
 
 ========================================================================
 Apache-2.0 licenses
@@ -493,6 +487,10 @@ Apache-2.0 licenses
     org.apache.zookeeper:zookeeper 3.7.2  Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2  Apache-2.0
     org.apache.skywalking 8.4.0 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.83 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.82 Apache-2.0
+    net.java.dev.jna:jna 5.5.0 Apache-2.0
+    org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
 
 
 ========================================================================
@@ -529,18 +527,12 @@ Apache-2.0 and BSD-3-Clause licenses
     org.springframework:spring-webmvc 5.3.30 Apache-2.0 and BSD-3-Clause
 
 ========================================================================
-Apache-2.0 and CDDL-1.0 licenses
-========================================================================
-
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.83 Apache-2.0 and CDDL-1.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.82 Apache-2.0 and CDDL-1.0
-
-========================================================================
 BSD-2-Clause licenses
 ========================================================================
 
     org.postgresql:postgresql 42.3.8 BSD-2-Clause
     webidl-conversions 3.0.1 BSD-2-Clause
+    com.github.luben:zstd-jni 1.5.0-4 BSD 2-Clause
 
 ========================================================================
 BSD-3-Clause licenses
@@ -599,6 +591,15 @@ BSD-3-Clause licenses
     org.antlr:antlr-runtime 3.5.2 The BSD License
     org.antlr:antlr-runtime  3.4  The BSD License
     org.antlr:antlr4 4.8 The BSD License
+    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause
+    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause
+    org.codehaus.janino:commons-compiler 3.1.9 BSD-3-Clause
+    org.codehaus.janino:janino 3.1.10 BSD-3-Clause
+    org.codehaus.janino:janino 3.1.7 BSD-3-Clause
+    org.antlr:stringtemplate 3.2.1 BSD-3-Clause
+    antlr:antlr 2.7.7 BSD-3-Clause
+    org.antlr:antlr4-runtime 4.8 BSD-3-Clause
+    org.abego.treelayout:org.abego.treelayout.core 1.0.3 BSD-3-Clause
 
 ========================================================================
 CC-BY-4.0 licenses
@@ -607,25 +608,30 @@ CC-BY-4.0 licenses
     caniuse-lite 1.0.30001589 CC-BY-4.0
 
 ========================================================================
-CDDL-1.0 and GPL-2.0 licenses
+CDDL-1.0 licenses
 ========================================================================
 
-    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 and GPL-2.0
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0
+    javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0
+    org.glassfish:javax.json 1.0.4 CDDL-1.0
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.0
+    com.sun.jersey:jersey-client 1.19.1 CDDL-1.0
+    com.sun.jersey:jersey-core 1.19.1 CDDL-1.0
 
 ========================================================================
-EPL-1.0 and LGPL-2.1 licenses
+EPL-1.0 licenses
 ========================================================================
 
-    ch.qos.logback:logback-classic 1.2.12 EPL-1.0 and LGPL-2.1
-    ch.qos.logback:logback-classic 1.3.14 EPL-1.0 and LGPL-2.1
-    ch.qos.logback:logback-core 1.2.12 EPL-1.0 and LGPL-2.1
-    ch.qos.logback:logback-core 1.3.14 EPL-1.0 and LGPL-2.1
+    ch.qos.logback:logback-classic 1.2.12 EPL-1.0
+    ch.qos.logback:logback-classic 1.3.14 EPL-1.0
+    ch.qos.logback:logback-core 1.2.12 EPL-1.0
+    ch.qos.logback:logback-core 1.3.14 EPL-1.0
 
 ========================================================================
-EPL-2.0 and GPL-2.0 licenses
+EPL-2.0 licenses
 ========================================================================
 
-    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 and GPL-2.0
+    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0
 
 ========================================================================
 ISC licenses
@@ -1013,6 +1019,7 @@ MIT licenses
     wide-align/node_modules/strip-ansi 4.0.0 MIT
     yamljs 0.3.0 MIT
     yargs 16.2.0 MIT
+    sha.js 2.4.11 MIT
     yargs-unparser 2.0.0 MIT
     yargs-unparser/node_modules/camelcase 6.3.0 MIT
     yargs-unparser/node_modules/decamelize 4.0.0 MIT
@@ -1020,6 +1027,7 @@ MIT licenses
     yocto-queue 0.1.0 MIT
     org.slf4j:jul-to-slf4j 1.7.36  MIT
     org.slf4j:slf4j-api 1.7.36  MIT
+    redis.clients:jedis 3.8.0 MIT
 
 ========================================================================
 Public Domain licenses
@@ -1040,97 +1048,25 @@ SIL licenses
     bpmn-font 0.12.1 SIL
 
 ========================================================================
-http://antlr.org/license.html licenses
+Unicode, Inc licenses
 ========================================================================
 
-    org.antlr:stringtemplate 3.2.1 http://antlr.org/license.html
+    com.ibm.icu:icu4j 61.1 Unicode, Inc
 
 ========================================================================
-http://github.com/redis/jedis/raw/master/LICENSE.txt licenses
+Mozilla Public License Version 2.0
 ========================================================================
 
-    redis.clients:jedis 3.8.0 http://github.com/redis/jedis/raw/master/LICENSE.txt
+    com.h2database:h2 2.1.214 MPL-2.0
 
 ========================================================================
-http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html licenses
+Indiana University Extreme! Lab Software License
 ========================================================================
 
-    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    com.sun.jersey:jersey-client 1.19.1 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
-    com.sun.jersey:jersey-core 1.19.1 http://glassfish.java.net/public/CDDL+GPL_1_1.html, http://glassfish.java.net/public/CDDL+GPL_1_1.html
+    io.github.x-stream:mxparser 1.2.2 Indiana University Extreme! Lab Software License
 
 ========================================================================
-http://source.icu-project.org/repos/icu/trunk/icu4j/main/shared/licenses/LICENSE licenses
+0BSD licenses
 ========================================================================
 
-    com.ibm.icu:icu4j 61.1 http://source.icu-project.org/repos/icu/trunk/icu4j/main/shared/licenses/LICENSE
-
-========================================================================
-http://www.abego-software.de/legal/apl-v10.html licenses
-========================================================================
-
-    org.abego.treelayout:org.abego.treelayout.core 1.0.3 http://www.abego-software.de/legal/apl-v10.html
-
-========================================================================
-http://www.antlr.org/license.html licenses
-========================================================================
-
-    antlr:antlr 2.7.7 http://www.antlr.org/license.html
-    org.antlr:antlr4-runtime 4.8 http://www.antlr.org/license.html
-
-========================================================================
-http://www.apache.org/licenses/LICENSE-1.1.txt licenses
-========================================================================
-
-    com.caucho:hessian 4.0.63 http://www.apache.org/licenses/LICENSE-1.1.txt
-
-========================================================================
-http://www.apache.org/licenses/LICENSE-2.0.html and http://www.gnu.org/licenses/gpl-2.0.html licenses
-========================================================================
-
-    org.rocksdb:rocksdbjni 8.8.1 http://www.apache.org/licenses/LICENSE-2.0.html and http://www.gnu.org/licenses/gpl-2.0.html
-
-========================================================================
-http://www.gnu.org/licenses/licenses.html and Apache-2.0 licenses
-========================================================================
-
-    net.java.dev.jna:jna 5.5.0 http://www.gnu.org/licenses/licenses.html and Apache-2.0
-
-========================================================================
-http://www.opensource.org/licenses/cddl1.php licenses
-========================================================================
-
-    javax.ws.rs:jsr311-api 1.1.1 http://www.opensource.org/licenses/cddl1.php
-
-========================================================================
-https://glassfish.java.net/public/CDDL+GPL_1_1.html licenses
-========================================================================
-
-    org.glassfish:javax.json 1.0.4 https://glassfish.java.net/public/CDDL+GPL_1_1.html
-
-========================================================================
-https://h2database.com/html/license.html licenses
-========================================================================
-
-    com.h2database:h2 2.1.214 https://h2database.com/html/license.html
-
-========================================================================
-https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License licenses
-========================================================================
-
-    com.github.luben:zstd-jni 1.5.0-4 https://opensource.org/licenses/BSD-2-Clause;description=BSD 2-Clause License
-
-========================================================================
-https://raw.githubusercontent.com/x-stream/mxparser/master/LICENSE.txt licenses
-========================================================================
-
-    io.github.x-stream:mxparser 1.2.2 https://raw.githubusercontent.com/x-stream/mxparser/master/LICENSE.txt
-
-========================================================================
-https://spdx.org/licenses/BSD-3-Clause.html licenses
-========================================================================
-
-    org.codehaus.janino:commons-compiler 3.1.10 https://spdx.org/licenses/BSD-3-Clause.html
-    org.codehaus.janino:commons-compiler 3.1.9 https://spdx.org/licenses/BSD-3-Clause.html
-    org.codehaus.janino:janino 3.1.10 https://spdx.org/licenses/BSD-3-Clause.html
-    org.codehaus.janino:janino 3.1.7 https://spdx.org/licenses/BSD-3-Clause.html
+    tslib 2.6.2 0BSD
