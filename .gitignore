@@ -27,7 +27,6 @@ dependency-reduced-pom.xml
 *.diff
 *.patch
 *.tmp
-/distribution/bin/
 /distribution/conf/
 /distribution/lib/
 /distribution/ext/

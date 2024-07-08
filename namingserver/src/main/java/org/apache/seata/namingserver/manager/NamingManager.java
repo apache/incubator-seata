@@ -17,17 +17,17 @@
 package org.apache.seata.namingserver.manager;
 
 
-import jdk.internal.net.http.common.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.seata.common.Constants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.namingserver.config.NamingServerConfig;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.pojo.AbstractClusterData;
 import org.apache.seata.namingserver.pojo.ClusterData;
@@ -102,7 +102,7 @@ public class NamingManager {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
-            String clusterName = pair.first;
+            String clusterName = pair.getKey();
             ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
             if (clusterVO != null) {
                 clusterVO.addMapping(vGroup);
@@ -124,14 +124,14 @@ public class NamingManager {
             Node node = nodeList.get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
-            String httpUrl = Constants.HTTP_PREFIX
+            String httpUrl = NamingServerConfig.HTTP_PREFIX
                     + controlHost
-                    + Constants.IP_PORT_SPLIT_CHAR
+                    + NamingServerConfig.IP_PORT_SPLIT_CHAR
                     + controlPort
-                    + Constants.HTTP_ADD_GROUP_SUFFIX;
+                    + NamingServerConfig.HTTP_ADD_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
-            params.put(Constants.CONSTANT_GROUP, vGroup);
-            params.put(Constants.CONSTANT_UNIT, unitName);
+            params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
+            params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
@@ -156,14 +156,14 @@ public class NamingManager {
                         && unit.getNamingInstanceList() != null
                         && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = Constants.HTTP_PREFIX
+                    String httpUrl = NamingServerConfig.HTTP_PREFIX
                             + node.getControl().getHost()
-                            + Constants.IP_PORT_SPLIT_CHAR
+                            + NamingServerConfig.IP_PORT_SPLIT_CHAR
                             + node.getControl().getPort()
-                            + Constants.HTTP_REMOVE_GROUP_SUFFIX;
+                            + NamingServerConfig.HTTP_REMOVE_GROUP_SUFFIX;
                     HashMap<String, String> params = new HashMap<>();
-                    params.put(Constants.CONSTANT_GROUP, vGroup);
-                    params.put(Constants.CONSTANT_UNIT, unitName);
+                    params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
+                    params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
                     try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
@@ -183,7 +183,7 @@ public class NamingManager {
 
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
-            Pair<String, String> pair = new Pair<>(clusterName, unitName);
+            Pair<String, String> pair = Pair.of(clusterName, unitName);
             HashMap<String, Pair<String, String>> stringPairHashMap = new HashMap<>();
             stringPairHashMap.put(namespace, pair);
             if (!VGroupMap.containsKey(vGroup) || !VGroupMap.get(vGroup).equals(stringPairHashMap)) {
@@ -204,8 +204,8 @@ public class NamingManager {
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
                 String namespace1 = innerEntry.getKey();
                 Pair<String, String> pair = innerEntry.getValue();
-                String clusterName1 = pair.first;
-                String unitName1 = pair.second;
+                String clusterName1 = pair.getKey();
+                String unitName1 = pair.getValue();
                 if (namespace1.equals(namespace)
                         && clusterName1.equals(clusterName)
                         && (unitName1 == null || unitName1.equals(unitName))) {
@@ -278,8 +278,8 @@ public class NamingManager {
         List<Cluster> clusterList = new ArrayList<>();
         try {
             Pair<String, String> clusterUnitPair = VGroupMap.get(vGroup).get(namespace);
-            String clusterName = clusterUnitPair.first;
-            String unitName = clusterUnitPair.second;
+            String clusterName = clusterUnitPair.getKey();
+            String unitName = clusterUnitPair.getValue();
             ClusterData clusterData = NamespaceClusterDataMap.get(namespace).get(clusterName);
             clusterList.add(clusterData.getClusterByUnit(unitName));
         } catch (NullPointerException e) {

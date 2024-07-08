@@ -85,6 +85,7 @@
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
@@ -101,6 +102,10 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
     </dependencies>
 

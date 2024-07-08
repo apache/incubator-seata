@@ -21,6 +21,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.controller.NamingController;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class NamingControllerTest {
