@@ -51,6 +51,11 @@ jobs:
       - name: "Codecov"
         if: matrix.java == '8'
         uses: codecov/codecov-action@v3.1.4
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=xjlgod_seata
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
