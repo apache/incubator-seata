@@ -16,6 +16,7 @@
  */
 package org.apache.seata.common.metadata;
 
+import org.apache.seata.common.metadata.namingserver.Unit;
 import java.util.ArrayList;
 import java.util.List;
 

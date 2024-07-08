@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
@@ -198,7 +200,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         }
     }
 
-    private static Properties getConfigProperties() {
+    protected static Properties getConfigProperties() {
         Properties properties = new Properties();
         properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
         properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
@@ -278,7 +280,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
      */
     public static class NacosListener extends AbstractSharedListener {
-        private final String dataId;
         private final ConfigurationChangeListener listener;
 
         /**
@@ -288,7 +289,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
          * @param listener the listener
          */
         public NacosListener(String dataId, ConfigurationChangeListener listener) {
-            this.dataId = dataId;
             this.listener = listener;
         }
 
@@ -303,42 +303,45 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            //The new configuration method to puts all configurations into a dateId
-            if (getNacosDataId().equals(dataId)) {
-                Properties seataConfigNew = new Properties();
-                if (StringUtils.isNotBlank(configInfo)) {
-                    try {
-                        seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
-                    } catch (IOException e) {
-                        LOGGER.error("load config properties error", e);
-                        return;
-                    }
-                }
-
-                //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
-                    CONFIG_LISTENERS_MAP.entrySet()) {
-                    String listenedDataId = entry.getKey();
-                    String propertyOld = seataConfig.getProperty(listenedDataId, "");
-                    String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
-                    if (!propertyOld.equals(propertyNew)) {
-                        ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(listenedDataId)
-                            .setNewValue(propertyNew).setNamespace(group);
-
-                        ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners = entry.getValue();
-                        for (ConfigurationChangeListener configListener : configListeners.keySet()) {
-                            configListener.onProcessEvent(event);
+            try {
+                //The new configuration method to puts all configurations into a dateId
+                if (getNacosDataId().equals(dataId)) {
+                    Properties seataConfigNew = new Properties();
+                    if (StringUtils.isNotBlank(configInfo)) {
+                        try {
+                            seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
+                        } catch (IOException e) {
+                            LOGGER.error("load config properties error", e);
+                            return;
                         }
                     }
+                    //Get all the monitored dataids and judge whether it has been modified
+                    for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                        String listenedDataId = entry.getKey();
+                        String propertyOld = seataConfig.getProperty(listenedDataId, "");
+                        String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
+                        if (!propertyOld.equals(propertyNew)) {
+                            ConfigurationChangeEvent event =
+                                new ConfigurationChangeEvent().setDataId(listenedDataId).setNewValue(propertyNew)
+                                    .setNamespace(group);
+
+                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners =
+                                entry.getValue();
+                            for (ConfigurationChangeListener configListener : configListeners.keySet()) {
+                                configListener.onProcessEvent(event);
+                            }
+                        }
+                    }
+
+                    seataConfig = seataConfigNew;
+                    return;
                 }
-
-                seataConfig = seataConfigNew;
-                return;
+            } catch (Exception e) {
+                LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
-
             //Compatible with old writing
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
-                .setNamespace(group);
+            ConfigurationChangeEvent event =
+                new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
             listener.onProcessEvent(event);
         }
     }

@@ -35,6 +35,11 @@ import org.apache.seata.serializer.seata.MessageSeataCodec;
  */
 public class BatchResultMessageCodec extends AbstractMessageCodec {
 
+    private byte version;
+
+    public BatchResultMessageCodec(byte version) {
+        this.version = version;
+    }
     @Override
     public Class<?> getMessageClassType() {
         return BatchResultMessage.class;
@@ -53,7 +58,7 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         for (final AbstractMessage msg : msgs) {
             final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(subBuffer);
@@ -107,7 +112,7 @@ public class BatchResultMessageCodec extends AbstractMessageCodec {
         for (int idx = 0; idx < msgNum; idx++) {
             short typeCode = byteBuffer.getShort();
             AbstractMessage abstractResultMessage = MessageCodecFactory.getMessage(typeCode);
-            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
+            MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode, version);
             messageCodec.decode(abstractResultMessage, byteBuffer);
             msgs.add((AbstractResultMessage) abstractResultMessage);
         }
