@@ -30,7 +30,7 @@
 
         <fileSet>
             <includes>
-                <include>bin/seata-namingserver.bat</include>
+                <include>bin/namingserver/*</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -52,8 +52,9 @@
 
     <files>
         <file>
-            <source>../namingserver/target/namingserver-0.0.1-SNAPSHOT.jar</source>
+            <source>../namingserver/target/namingserver-${project.version}.jar</source>
             <outputDirectory>target/</outputDirectory>
+            <destName>namingserver.jar</destName>
         </file>
 
         <file>
@@ -66,7 +67,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>com.example:namingserver</include>
+                <include>org.apache.seata:namingserver</include>
             </includes>
         </moduleSet>
     </moduleSets>
