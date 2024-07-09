@@ -16,6 +16,7 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
@@ -33,7 +34,7 @@ public class GlobalCommitResponseSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
 
     /**
      * Test codec.

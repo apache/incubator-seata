@@ -192,6 +192,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.mariadb.jdbc</groupId>-->

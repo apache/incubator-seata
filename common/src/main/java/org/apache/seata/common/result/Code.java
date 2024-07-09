@@ -16,11 +16,7 @@
  */
 package org.apache.seata.common.result;
 
-/**
- * The Code for the response of message
- *
- * @author jameslcj
- */
+
 public enum Code {
     /**
      * response success
