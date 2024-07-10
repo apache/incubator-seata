@@ -15,6 +15,7 @@
 - [[#6409](https://github.com/seata/seata/pull/6409)] 修复 RemotingParser 失败导致 AT 模式无法执行的问题
 - [[#6628](https://github.com/seata/seata/pull/6628)] 修复 Alibaba Dubbo 转换错误
 - [[#6632](https://github.com/seata/seata/pull/6632)] 修复 hsf ConsumerModel 转换错误
+- [[#6661](https://github.com/seata/seata/pull/6661)] 修复`tableMeta`缓存定时刷新失效问题
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
@@ -35,5 +36,6 @@
 - [ptyin](https://github.com/ptyin)
 - [funky-eyes](https://github.com/funky-eyes)
 - [laywin](https://github.com/laywin)
+- [wuwen5](https://github.com/wuwen5)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

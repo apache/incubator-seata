@@ -15,6 +15,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6409](https://github.com/seata/seata/pull/6409)] fix the failure of RemotingParser to prevent AT mode from executing.
 - [[#6628](https://github.com/seata/seata/pull/6628)] fix Alibaba Dubbo convert error.
 - [[#6632](https://github.com/seata/seata/pull/6632)] fix hsf ConsumerModel convert error.
+- [[#6661](https://github.com/seata/seata/pull/6661)] fix `tableMeta` cache scheduled refresh issue
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
@@ -35,6 +36,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [ptyin](https://github.com/ptyin)
 - [funky-eyes](https://github.com/funky-eyes)
 - [laywin](https://github.com/laywin)
-
+- [wuwen5](https://github.com/wuwen5)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
