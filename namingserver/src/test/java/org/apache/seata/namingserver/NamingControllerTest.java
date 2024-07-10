@@ -33,7 +33,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 class NamingControllerTest {
