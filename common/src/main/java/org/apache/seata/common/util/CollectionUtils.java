@@ -329,4 +329,35 @@ public class CollectionUtils {
             }
         }
     }
+
+    /**
+     * Convert a Map<String, Object> into a JSON-formatted string.
+     *
+     * @param map Map containing key-value pairs
+     * @return JSON string representing the Map
+     */
+    public static String mapToJsonString(Map<String, Object> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        int i = 0;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append("\"").append(entry.getKey()).append("\": ");
+            if (entry.getValue() instanceof HashMap) {
+                HashMap<String, Object> objectHashMap = (HashMap<String, Object>) entry.getValue();
+                sb.append(mapToJsonString(objectHashMap));
+            } else if (entry.getValue() instanceof String) {
+                sb.append("\"");
+                sb.append(entry.getValue());
+                sb.append("\"");
+            } else {
+                sb.append(entry.getValue());
+            }
+            i++;
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }

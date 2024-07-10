@@ -409,10 +409,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (!(msg instanceof RpcMessage)) {
-                return;
+            if (msg instanceof RpcMessage) {
+                processMessage(ctx, (RpcMessage)msg);
+            } else {
+                LOGGER.error("rpcMessage type error");
             }
-            processMessage(ctx, (RpcMessage) msg);
         }
 
         @Override
