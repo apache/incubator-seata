@@ -18,7 +18,7 @@
 
 -->
 <assembly>
-    <id>namingserver-${project.version}-incubating-bin</id>
+    <id>${project.version}-incubating-bin</id>
     <includeBaseDirectory>true</includeBaseDirectory>
     <formats>
         <format>dir</format>
@@ -40,6 +40,13 @@
         <fileSet>
             <directory>../namingserver/target/lib/</directory>
             <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../namingserver/src/main/resources/logback/</directory>
+            <outputDirectory>conf/logback/</outputDirectory>
+            <includes>
+                <include>**/*.xml</include>
+            </includes>
         </fileSet>
 
         <fileSet>

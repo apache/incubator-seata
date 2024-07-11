@@ -35,8 +35,10 @@
         <then>
             <!-- console-appender -->
             <include resource="logback/console-appender.xml"/>
+
             <!-- file-appender -->
             <include resource="logback/file-appender.xml"/>
+
         </then>
         <else>
             <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
