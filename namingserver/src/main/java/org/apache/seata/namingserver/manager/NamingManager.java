@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 
 @Component
 public class NamingManager {
@@ -57,29 +58,34 @@ public class NamingManager {
     private final HashMap<String/* VGroup */,
         HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
     private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> NamespaceClusterDataMap;
-    private int HEARTBEAT_TIME_THRESHOLD = 90 * 1000;
-    private int HEARTBEAT_CHECK_TIME_PERIOD = 60 * 1000;
+
+    @Value("${heartbeat.threshold:90000}")
+    private int heartbeatTimeThreshold;
+
+    @Value("${heartbeat.period:60000}")
+    private int heartbeatCheckTimePeriod;
     protected final ScheduledExecutorService heartBeatCheckService =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    public NamingManager(@Value("${heartbeat.threshold}") int heartbeatThreshold,
-        @Value("${heartbeat.period}") int heartbeatPeriod) {
-        HEARTBEAT_CHECK_TIME_PERIOD = heartbeatPeriod;
-        HEARTBEAT_TIME_THRESHOLD = heartbeatThreshold;
+    public NamingManager() {
         this.instanceLiveTable = new HashMap<>();
         this.VGroupMap = new HashMap<>();
         this.NamespaceClusterDataMap = new HashMap<>();
         // start heartbeat checking
+    }
+
+    @PostConstruct
+    public void init(){
         this.heartBeatCheckService.scheduleAtFixedRate(() -> {
             try {
                 instanceHeartBeatCheck();
             } catch (Exception e) {
                 LOGGER.error("Heart Beat Check Exception", e);
             }
-        }, 0, HEARTBEAT_CHECK_TIME_PERIOD, TimeUnit.MILLISECONDS);
+        }, 0, heartbeatCheckTimePeriod, TimeUnit.MILLISECONDS);
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -309,7 +315,7 @@ public class NamingManager {
                             instance.getTransaction().getPort());
                         long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
 
-                        if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > HEARTBEAT_TIME_THRESHOLD) {
+                        if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > heartbeatTimeThreshold) {
                             instanceLiveTable.remove(inetSocketAddress);
 
                             instanceIterator.remove(); // Safe removal using iterator's remove method
