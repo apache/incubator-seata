@@ -16,7 +16,6 @@
  */
 package org.apache.seata.namingserver.manager;
 
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
@@ -55,20 +54,19 @@ import java.util.concurrent.TimeUnit;
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
     private final HashMap<InetSocketAddress, Long> instanceLiveTable;
-    private final HashMap<String/* VGroup */, HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
+    private final HashMap<String/* VGroup */,
+        HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
     private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> NamespaceClusterDataMap;
     private int HEARTBEAT_TIME_THRESHOLD = 90 * 1000;
     private int HEARTBEAT_CHECK_TIME_PERIOD = 60 * 1000;
-    protected final ScheduledExecutorService heartBeatCheckService = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
-
+    protected final ScheduledExecutorService heartBeatCheckService =
+        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
 
     @Autowired
     private ApplicationContext applicationContext;
 
-
     public NamingManager(@Value("${heartbeat.threshold}") int heartbeatThreshold,
-                         @Value("${heartbeat.period}") int heartbeatPeriod) {
+        @Value("${heartbeat.period}") int heartbeatPeriod) {
         HEARTBEAT_CHECK_TIME_PERIOD = heartbeatPeriod;
         HEARTBEAT_TIME_THRESHOLD = heartbeatThreshold;
         this.instanceLiveTable = new HashMap<>();
@@ -124,11 +122,8 @@ public class NamingManager {
             Node node = nodeList.get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
-            String httpUrl = NamingServerConfig.HTTP_PREFIX
-                    + controlHost
-                    + NamingServerConfig.IP_PORT_SPLIT_CHAR
-                    + controlPort
-                    + NamingServerConfig.HTTP_ADD_GROUP_SUFFIX;
+            String httpUrl = NamingServerConfig.HTTP_PREFIX + controlHost + NamingServerConfig.IP_PORT_SPLIT_CHAR
+                + controlPort + NamingServerConfig.HTTP_ADD_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
             params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
             params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
@@ -137,7 +132,8 @@ public class NamingManager {
 
             try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
                 if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()), "add vGroup in new cluster failed");
+                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                        "add vGroup in new cluster failed");
                 }
             } catch (IOException e) {
                 LOGGER.warn("add vGroup in new cluster failed");
@@ -152,28 +148,28 @@ public class NamingManager {
         for (Cluster cluster : clusterList) {
             if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
                 Unit unit = cluster.getUnitData().get(0);
-                if (unit != null
-                        && unit.getNamingInstanceList() != null
-                        && unit.getNamingInstanceList().size() > 0) {
+                if (unit != null && unit.getNamingInstanceList() != null && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = NamingServerConfig.HTTP_PREFIX
-                            + node.getControl().getHost()
-                            + NamingServerConfig.IP_PORT_SPLIT_CHAR
-                            + node.getControl().getPort()
-                            + NamingServerConfig.HTTP_REMOVE_GROUP_SUFFIX;
+                    String httpUrl = NamingServerConfig.HTTP_PREFIX + node.getControl().getHost()
+                        + NamingServerConfig.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
+                        + NamingServerConfig.HTTP_REMOVE_GROUP_SUFFIX;
                     HashMap<String, String> params = new HashMap<>();
                     params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
                     params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-                    try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
-                        if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    try (CloseableHttpResponse closeableHttpResponse =
+                        HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+                        if (closeableHttpResponse == null
+                            || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                             LOGGER.warn("remove vGroup in old cluster failed");
-                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()), "removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
+                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                                "removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
                         }
                     } catch (IOException e) {
                         LOGGER.warn("handle removing vGroup in old cluster failed");
-                        return new Result<>("500", "handle removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
+                        return new Result<>("500",
+                            "handle removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
                     }
                 }
             }
@@ -206,9 +202,8 @@ public class NamingManager {
                 Pair<String, String> pair = innerEntry.getValue();
                 String clusterName1 = pair.getKey();
                 String unitName1 = pair.getValue();
-                if (namespace1.equals(namespace)
-                        && clusterName1.equals(clusterName)
-                        && (unitName1 == null || unitName1.equals(unitName))) {
+                if (namespace1.equals(namespace) && clusterName1.equals(clusterName)
+                    && (unitName1 == null || unitName1.equals(unitName))) {
                     applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
                 }
             }
@@ -218,22 +213,23 @@ public class NamingManager {
 
     public boolean registerInstance(Node node, String namespace, String clusterName, String unitName) {
         try {
-            HashMap<String, ClusterData> clusterDataHashMap = NamespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
+            HashMap<String, ClusterData> clusterDataHashMap =
+                NamespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
 
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
-            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName, key -> new ClusterData(clusterName, (String) node.getMetadata().get("cluster-type")));
+            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
+                key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
             node.getMetadata().remove("cluster-type");
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Object mappingObj = node.getMetadata().get("vGroup");
 
             if (mappingObj instanceof HashMap) {
-                HashMap<String, Object> mapping = (HashMap<String, Object>) mappingObj;
+                HashMap<String, Object> mapping = (HashMap<String, Object>)mappingObj;
                 mapping.forEach((vGroup, unitObj) -> {
-                            changeGroup(namespace, clusterName, (String) unitObj, vGroup);
-                        }
-                );
+                    changeGroup(namespace, clusterName, (String)unitObj, vGroup);
+                });
                 node.getMetadata().remove("vGroup");
             }
 
@@ -241,7 +237,9 @@ public class NamingManager {
             if (hasChanged) {
                 notifyClusterChange(namespace, clusterName, unitName);
             }
-            instanceLiveTable.put(new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()), System.currentTimeMillis());
+            instanceLiveTable.put(
+                new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
+                System.currentTimeMillis());
         } catch (Exception e) {
             LOGGER.error("Instance registered failed!", e);
             return false;
@@ -249,19 +247,21 @@ public class NamingManager {
         return true;
     }
 
-
     public boolean unregisterInstance(String unitName, Node node) {
         try {
             for (String namespace : NamespaceClusterDataMap.keySet()) {
                 HashMap<String, ClusterData> clusterMap = NamespaceClusterDataMap.get(namespace);
-                if (clusterMap == null) continue;
+                if (clusterMap == null)
+                    continue;
                 for (String clusterName : clusterMap.keySet()) {
                     ClusterData clusterData = clusterMap.get(clusterName);
-                    if (clusterData == null) continue;
+                    if (clusterData == null)
+                        continue;
                     if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
                         clusterData.removeInstance(node, unitName);
                         notifyClusterChange(namespace, clusterName, unitName);
-                        instanceLiveTable.remove(new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
+                        instanceLiveTable.remove(
+                            new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
                     }
                 }
             }
@@ -271,7 +271,6 @@ public class NamingManager {
         }
         return true;
     }
-
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
@@ -306,23 +305,24 @@ public class NamingManager {
 
                     while (instanceIterator.hasNext()) {
                         Node instance = instanceIterator.next();
-                        InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(), instance.getTransaction().getPort());
-                        long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long) 0);
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(),
+                            instance.getTransaction().getPort());
+                        long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
 
                         if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > HEARTBEAT_TIME_THRESHOLD) {
                             instanceLiveTable.remove(inetSocketAddress);
 
-                            instanceIterator.remove();  // Safe removal using iterator's remove method
+                            instanceIterator.remove(); // Safe removal using iterator's remove method
                             clusterData.removeInstance(instance, unit.getUnitName());
 
                             notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
-                            LOGGER.warn("{} instance has gone offline", instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
+                            LOGGER.warn("{} instance has gone offline",
+                                instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
                     }
                 }
             }
         }
-
 
     }
 

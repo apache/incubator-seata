@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
