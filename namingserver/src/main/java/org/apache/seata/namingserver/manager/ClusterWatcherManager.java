@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -52,7 +53,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     private static final Map<String/* vgroup */, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
+        new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("long-polling"));
 
     @PostConstruct
     public void init() {

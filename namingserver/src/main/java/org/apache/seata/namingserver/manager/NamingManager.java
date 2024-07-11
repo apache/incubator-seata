@@ -24,7 +24,6 @@ import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.namingserver.config.NamingServerConfig;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
@@ -36,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class NamingManager {
     private int heartbeatCheckTimePeriod;
 
     protected final ScheduledExecutorService heartBeatCheckService =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
+        new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("heartBeatCheckExcuter"));
 
     @Autowired
     private ApplicationContext applicationContext;
