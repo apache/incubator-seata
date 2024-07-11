@@ -56,14 +56,15 @@ public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
     private final HashMap<InetSocketAddress, Long> instanceLiveTable;
     private final HashMap<String/* VGroup */,
-        HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>> VGroupMap;
-    private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> NamespaceClusterDataMap;
+        HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>>    vGroupMap;
+    private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
 
     @Value("${heartbeat.threshold:90000}")
     private int heartbeatTimeThreshold;
 
     @Value("${heartbeat.period:60000}")
     private int heartbeatCheckTimePeriod;
+
     protected final ScheduledExecutorService heartBeatCheckService =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartBeatCheckExcuter", 1, true));
 
@@ -72,12 +73,12 @@ public class NamingManager {
 
     public NamingManager() {
         this.instanceLiveTable = new HashMap<>();
-        this.VGroupMap = new HashMap<>();
-        this.NamespaceClusterDataMap = new HashMap<>();
+        this.vGroupMap = new HashMap<>();
+        this.namespaceClusterDataMap = new HashMap<>();
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.heartBeatCheckService.scheduleAtFixedRate(() -> {
             try {
                 instanceHeartBeatCheck();
@@ -89,7 +90,7 @@ public class NamingManager {
 
     public List<ClusterVO> monitorCluster(String namespace) {
         HashMap<String, ClusterVO> clusterVOHashMap = new HashMap<>();
-        HashMap<String, ClusterData> clusterDataMap = NamespaceClusterDataMap.get(namespace);
+        HashMap<String, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
 
         if (clusterDataMap != null) {
             for (Map.Entry<String, ClusterData> entry : clusterDataMap.entrySet()) {
@@ -101,7 +102,7 @@ public class NamingManager {
             LOGGER.warn("no cluster in namespace:" + namespace);
         }
 
-        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : VGroupMap.entrySet()) {
+        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
@@ -187,8 +188,8 @@ public class NamingManager {
             Pair<String, String> pair = Pair.of(clusterName, unitName);
             HashMap<String, Pair<String, String>> stringPairHashMap = new HashMap<>();
             stringPairHashMap.put(namespace, pair);
-            if (!VGroupMap.containsKey(vGroup) || !VGroupMap.get(vGroup).equals(stringPairHashMap)) {
-                VGroupMap.put(vGroup, stringPairHashMap);
+            if (!vGroupMap.containsKey(vGroup) || !vGroupMap.get(vGroup).equals(stringPairHashMap)) {
+                vGroupMap.put(vGroup, stringPairHashMap);
                 applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
             }
         } catch (Exception e) {
@@ -197,7 +198,7 @@ public class NamingManager {
     }
 
     public void notifyClusterChange(String namespace, String clusterName, String unitName) {
-        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : VGroupMap.entrySet()) {
+        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
             HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
 
@@ -219,7 +220,7 @@ public class NamingManager {
     public boolean registerInstance(Node node, String namespace, String clusterName, String unitName) {
         try {
             HashMap<String, ClusterData> clusterDataHashMap =
-                NamespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
+                namespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
 
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
@@ -254,8 +255,8 @@ public class NamingManager {
 
     public boolean unregisterInstance(String unitName, Node node) {
         try {
-            for (String namespace : NamespaceClusterDataMap.keySet()) {
-                HashMap<String, ClusterData> clusterMap = NamespaceClusterDataMap.get(namespace);
+            for (String namespace : namespaceClusterDataMap.keySet()) {
+                HashMap<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
                 if (clusterMap != null) {
                     clusterMap.forEach((clusterName, clusterData) -> {
                         if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
@@ -278,10 +279,10 @@ public class NamingManager {
         // find the cluster where the transaction group is located
         List<Cluster> clusterList = new ArrayList<>();
         try {
-            Pair<String, String> clusterUnitPair = VGroupMap.get(vGroup).get(namespace);
+            Pair<String, String> clusterUnitPair = vGroupMap.get(vGroup).get(namespace);
             String clusterName = clusterUnitPair.getKey();
             String unitName = clusterUnitPair.getValue();
-            ClusterData clusterData = NamespaceClusterDataMap.get(namespace).get(clusterName);
+            ClusterData clusterData = namespaceClusterDataMap.get(namespace).get(clusterName);
             clusterList.add(clusterData.getClusterByUnit(unitName));
         } catch (NullPointerException e) {
             LOGGER.error("no cluster mapping for vGroup: " + vGroup);
@@ -290,7 +291,7 @@ public class NamingManager {
     }
 
     public List<Node> getInstances(String namespace, String clusterName) {
-        HashMap<String, ClusterData> clusterDataHashMap = NamespaceClusterDataMap.get(namespace);
+        HashMap<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
         AbstractClusterData abstractClusterData = clusterDataHashMap.get(clusterName);
         if (abstractClusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
@@ -300,8 +301,8 @@ public class NamingManager {
     }
 
     public void instanceHeartBeatCheck() {
-        for (String namespace : NamespaceClusterDataMap.keySet()) {
-            for (ClusterData clusterData : NamespaceClusterDataMap.get(namespace).values()) {
+        for (String namespace : namespaceClusterDataMap.keySet()) {
+            for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
                     Iterator<Node> instanceIterator = unit.getNamingInstanceList().iterator();
 
