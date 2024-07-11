@@ -18,7 +18,7 @@
 
 -->
 <assembly>
-    <id>namingserver-${project.version}</id>
+    <id>namingserver-${project.version}-incubating-bin</id>
     <includeBaseDirectory>true</includeBaseDirectory>
     <formats>
         <format>dir</format>
@@ -30,7 +30,9 @@
 
         <fileSet>
             <includes>
-                <include>bin/namingserver/*</include>
+                <include>bin/seata-namingserver.bat</include>
+                <include>bin/seata-namingserver.sh</include>
+                <include>bin/seata-namingserver-setup.sh</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -52,9 +54,9 @@
 
     <files>
         <file>
-            <source>../namingserver/target/namingserver-${project.version}.jar</source>
+            <source>../namingserver/target/seata-namingserver-${project.version}.jar</source>
             <outputDirectory>target/</outputDirectory>
-            <destName>namingserver.jar</destName>
+            <destName>seata-namingserver.jar</destName>
         </file>
 
         <file>

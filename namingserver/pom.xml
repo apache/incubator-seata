@@ -26,9 +26,8 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>org.apache.seata</groupId>
-    <artifactId>namingserver</artifactId>
-    <name>namingserver ${project.version}</name>
+    <artifactId>seata-namingserver</artifactId>
+    <name>seata-namingserver ${project.version}</name>
     <description>namingserver</description>
 
     <properties>
@@ -114,8 +113,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-for-server.version}</version>
                 <configuration>
-                    <includeSystemScope>true</includeSystemScope>
+                    <mainClass>org.apache.seata.namingserver.NamingserverApplication</mainClass>
                 </configuration>
             </plugin>
 
