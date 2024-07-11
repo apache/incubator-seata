@@ -74,7 +74,6 @@ public class NamingManager {
         this.instanceLiveTable = new HashMap<>();
         this.VGroupMap = new HashMap<>();
         this.NamespaceClusterDataMap = new HashMap<>();
-        // start heartbeat checking
     }
 
     @PostConstruct
@@ -257,18 +256,15 @@ public class NamingManager {
         try {
             for (String namespace : NamespaceClusterDataMap.keySet()) {
                 HashMap<String, ClusterData> clusterMap = NamespaceClusterDataMap.get(namespace);
-                if (clusterMap == null)
-                    continue;
-                for (String clusterName : clusterMap.keySet()) {
-                    ClusterData clusterData = clusterMap.get(clusterName);
-                    if (clusterData == null)
-                        continue;
-                    if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
-                        clusterData.removeInstance(node, unitName);
-                        notifyClusterChange(namespace, clusterName, unitName);
-                        instanceLiveTable.remove(
-                            new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
-                    }
+                if (clusterMap != null) {
+                    clusterMap.forEach((clusterName, clusterData) -> {
+                        if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
+                            clusterData.removeInstance(node, unitName);
+                            notifyClusterChange(namespace, clusterName, unitName);
+                            instanceLiveTable.remove(new InetSocketAddress(node.getTransaction().getHost(),
+                                node.getTransaction().getPort()));
+                        }
+                    });
                 }
             }
         } catch (Exception e) {
@@ -298,7 +294,7 @@ public class NamingManager {
         AbstractClusterData abstractClusterData = clusterDataHashMap.get(clusterName);
         if (abstractClusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return abstractClusterData.getInstanceList();
     }
