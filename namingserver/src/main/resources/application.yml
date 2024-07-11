@@ -20,8 +20,11 @@ server:
 
 spring:
   application:
-    name: naming server
-
+    name: seata-namingserver
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${log.home:${user.home}/logs/seata}
 heartbeat:
   threshold: 90000
   period: 60000

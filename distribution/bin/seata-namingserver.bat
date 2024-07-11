@@ -90,7 +90,7 @@ if exist %BASEDIR%/logs (
 )
 
 
-%JAVACMD% %JAVA_OPTS%  -server -Dloader.path="%BASEDIR%"/lib -Xmx2048m -Xms2048m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -Xloggc:"%BASEDIR%"/logs/seata_namingserver_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-namingserver" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.location="%BASEDIR%"/conf/application.yml   -jar "%BASEDIR%"/target/namingserver.jar %CMD_LINE_ARGS%
+%JAVACMD% %JAVA_OPTS%  -server -Dloader.path="%BASEDIR%"/lib -Xmx2048m -Xms2048m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -Xloggc:"%BASEDIR%"/logs/seata_namingserver_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-namingserver" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.location="%BASEDIR%"/conf/application.yml   -jar "%BASEDIR%"/target/seata-namingserver.jar %CMD_LINE_ARGS%
 if %ERRORLEVEL% NEQ 0 goto error
 goto end
 
