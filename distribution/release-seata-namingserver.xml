@@ -54,7 +54,7 @@
 
     <files>
         <file>
-            <source>../namingserver/target/seata-namingserver-${project.version}.jar</source>
+            <source>../namingserver/target/seata-namingserver-exec.jar</source>
             <outputDirectory>target/</outputDirectory>
             <destName>seata-namingserver.jar</destName>
         </file>

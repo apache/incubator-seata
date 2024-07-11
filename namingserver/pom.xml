@@ -108,42 +108,43 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot-for-server.version}</version>
-                <configuration>
-                    <mainClass>org.apache.seata.namingserver.NamingserverApplication</mainClass>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
+    <profiles>
+        <profile>
+            <id>release-seata-namingserver</id>
+            <properties>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
+            <build>
+                <finalName>seata-namingserver</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-for-server.version}</version>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <excludeTransitive>false</excludeTransitive>
-                            <stripVersion>false</stripVersion>
-                            <silent>true</silent>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                            <!-- resolve slf4j-simple conflicts -->
-                            <includeScope>runtime</includeScope>
-                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
-                            <skip>false</skip>
+                            <mainClass>org.apache.seata.namingserver.NamingserverApplication</mainClass>
+                            <layout>ZIP</layout>
+                            <attach>false</attach>
+                            <classifier>exec</classifier>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
 </project>
