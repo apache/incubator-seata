@@ -31,7 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
-import org.apache.seata.common.util.IdWorker;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.core.rpc.processor.Pair;
@@ -61,8 +61,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? LIMIT ?";
-
-    private static final IdWorker ID_WORKER = new IdWorker(null);
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
@@ -153,7 +151,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                 } else {
                     byte[] bytes = new byte[Math.min(undoLogContent.length - pos, limit)];
                     System.arraycopy(undoLogContent, pos, bytes, 0, bytes.length);
-                    long subId = ID_WORKER.nextId();
+                    long subId = UUIDGenerator.generateUUID();
                     subIdBuilder.append(subId).append(UndoLogConstants.SUB_SPLIT_KEY);
                     insertUndoLog(xid, subId, subRollbackCtx, bytes, State.Normal, conn);
                     pos += bytes.length;

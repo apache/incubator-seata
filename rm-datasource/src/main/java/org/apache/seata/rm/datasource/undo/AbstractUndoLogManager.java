@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -512,6 +513,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         CompressorType compressorType = CompressorType.getByName(context.getOrDefault(UndoLogConstants.COMPRESSOR_TYPE_KEY,
                 CompressorType.NONE.name()));
         return CompressorFactory.getCompressor(compressorType.getCode()).decompress(rollbackInfo);
+    }
+
+    @Override
+    public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
+        return 0;
     }
 
     /**
