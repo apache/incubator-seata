@@ -23,6 +23,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -81,7 +82,7 @@ public class NamingManager {
             } catch (Exception e) {
                 LOGGER.error("Heart Beat Check Exception", e);
             }
-        }, 0, HEARTBEAT_CHECK_TIME_PERIOD, TimeUnit.MILLISECONDS);
+        }, HEARTBEAT_CHECK_TIME_PERIOD, HEARTBEAT_CHECK_TIME_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -110,11 +111,10 @@ public class NamingManager {
         }
 
         return new ArrayList<>(clusterVOHashMap.values());
-
     }
 
     public Result<?> addGroup(String namespace, String vGroup, String clusterName, String unitName) {
-
+        changeGroup(namespace,clusterName,unitName,vGroup);
         // add vGroup in new cluster
         List<Node> nodeList = getInstances(namespace, clusterName);
         if (nodeList == null || nodeList.size() == 0) {
@@ -216,7 +216,7 @@ public class NamingManager {
 
     }
 
-    public boolean registerInstance(Node node, String namespace, String clusterName, String unitName) {
+    public boolean registerInstance(NamingServerNode node, String namespace, String clusterName, String unitName) {
         try {
             HashMap<String, ClusterData> clusterDataHashMap = NamespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
 

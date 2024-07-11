@@ -110,7 +110,7 @@ public class ClusterData extends AbstractClusterData {
         return clusterResponse;
     }
 
-
+    @Override
     public boolean registerInstance(NamingServerNode instance, String unitName) {
         // refresh node weight
         Object weightValue = instance.getMetadata().get("weight");

@@ -23,5 +23,5 @@ spring:
     name: naming server
 
 heartbeat:
-  threshold: 3000
-  period: 2000
+  threshold: 90000
+  period: 60000
