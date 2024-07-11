@@ -124,6 +124,35 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <excludeTransitive>false</excludeTransitive>
+                            <stripVersion>false</stripVersion>
+                            <silent>true</silent>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                            <!--resolve slf4j-simple conflicts-->
+                            <includeScope>runtime</includeScope>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
+                            <skip>${dependencies.copy.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <profile>
             <id>release-seata-namingserver</id>
