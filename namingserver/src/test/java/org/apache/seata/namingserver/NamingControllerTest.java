@@ -151,7 +151,7 @@ class NamingControllerTest {
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
         assertEquals(8091, node1.getTransaction().getPort());
-        int timeGap = threshold + period;
+        int timeGap = threshold + period + 100;
         Thread.sleep(timeGap);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
