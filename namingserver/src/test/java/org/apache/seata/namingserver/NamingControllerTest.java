@@ -19,6 +19,7 @@ package org.apache.seata.namingserver;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.controller.NamingController;
 import org.junit.jupiter.api.Test;
@@ -28,9 +29,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+
+import static org.apache.seata.namingserver.constants.NamingServerConstants.CONSTANT_GROUP;
 import static org.junit.jupiter.api.Assertions.*;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -50,11 +57,12 @@ class NamingControllerTest {
         String clusterName = "cluster1";
         String namespace = "public";
         String unitName = String.valueOf(UUID.randomUUID());
-        Node node = new Node();
-        node.setTransaction(new Node.Endpoint("127.0.0.1", 8080, "netty"));
+        NamingServerNode node = new NamingServerNode();
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
-        namingController.changeGroup(namespace, clusterName, null, vGroup);
+        namingController.changeGroup(namespace, clusterName, unitName, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -67,7 +75,7 @@ class NamingControllerTest {
         assertEquals(1, unit.getNamingInstanceList().size());
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
-        assertEquals(8080, node1.getTransaction().getPort());
+        assertEquals(8091, node1.getTransaction().getPort());
         namingController.unregisterInstance(unitName, node);
     }
 
@@ -76,11 +84,23 @@ class NamingControllerTest {
         String clusterName = "cluster1";
         String namespace = "public";
         String unitName = String.valueOf(UUID.randomUUID());
-        Node node = new Node();
-        node.setTransaction(new Node.Endpoint("127.0.0.1", 8080, "netty"));
+        NamingServerNode node = new NamingServerNode();
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata = node.getMetadata();
+        List<String> vGroups = new ArrayList<>();
+        vGroups.add("vgroup1");
+        meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
+        NamingServerNode node2 = new NamingServerNode();
+        node2.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node2.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata2 = node2.getMetadata();
+        List<String> vGroups2 = new ArrayList<>();
+        vGroups2.add("vgroup2");
+        meatadata2.put(CONSTANT_GROUP, vGroups2);
+        namingController.registerInstance(namespace, "cluster2", UUID.randomUUID().toString(), node2);
         String vGroup = "vgroup1";
-        namingController.changeGroup(namespace, clusterName, null, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -93,7 +113,7 @@ class NamingControllerTest {
         assertEquals(1, unit.getNamingInstanceList().size());
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
-        assertEquals(8080, node1.getTransaction().getPort());
+        assertEquals(8091, node1.getTransaction().getPort());
         namingController.unregisterInstance(unitName, node);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
@@ -108,11 +128,16 @@ class NamingControllerTest {
         String clusterName = "cluster1";
         String namespace = "public";
         String unitName = String.valueOf(UUID.randomUUID());
-        Node node = new Node();
-        node.setTransaction(new Node.Endpoint("127.0.0.1", 8080, "netty"));
+        NamingServerNode node = new NamingServerNode();
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata = node.getMetadata();
+        List<String> vGroups = new ArrayList<>();
+        vGroups.add("vgroup1");
+        meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
-        namingController.changeGroup(namespace, clusterName, null, vGroup);
+        //namingController.changeGroup(namespace, clusterName, vGroup, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -125,7 +150,7 @@ class NamingControllerTest {
         assertEquals(1, unit.getNamingInstanceList().size());
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
-        assertEquals(8080, node1.getTransaction().getPort());
+        assertEquals(8091, node1.getTransaction().getPort());
         int timeGap = threshold + period;
         Thread.sleep(timeGap);
         metaResponse = namingController.discovery(vGroup, namespace);

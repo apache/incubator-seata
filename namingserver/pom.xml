@@ -26,15 +26,14 @@
         <version>${revision}</version>
     </parent>
 
-    <groupId>org.apache.seata</groupId>
-    <artifactId>namingserver</artifactId>
-    <name>namingserver ${project.version}</name>
+    <artifactId>seata-namingserver</artifactId>
+    <name>seata-namingserver ${project.version}</name>
     <description>namingserver</description>
 
     <properties>
-        <java.version>8</java.version>
-        <spring-boot-for-server.version>2.7.17</spring-boot-for-server.version>
-        <spring-framework-for-server.version>5.3.30</spring-framework-for-server.version>
+        <java.version>1.8</java.version>
+        <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
+        <spring-framework-for-server.version>5.3.37</spring-framework-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -67,6 +66,18 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>commons-compiler</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
@@ -80,11 +91,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-to-slf4j</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -102,18 +120,14 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <includeSystemScope>true</includeSystemScope>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -130,15 +144,54 @@
                             <stripVersion>false</stripVersion>
                             <silent>true</silent>
                             <overWriteIfNewer>true</overWriteIfNewer>
-                            <!-- resolve slf4j-simple conflicts -->
+                            <!--resolve slf4j-simple conflicts-->
                             <includeScope>runtime</includeScope>
-                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
-                            <skip>false</skip>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j</excludeGroupIds>
+                            <skip>${dependencies.copy.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release-seata-namingserver</id>
+            <properties>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
+            <build>
+                <finalName>seata-namingserver</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-for-server.version}</version>
+                        <configuration>
+                            <mainClass>org.apache.seata.namingserver.NamingserverApplication</mainClass>
+                            <layout>ZIP</layout>
+                            <attach>false</attach>
+                            <classifier>exec</classifier>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
 </project>
