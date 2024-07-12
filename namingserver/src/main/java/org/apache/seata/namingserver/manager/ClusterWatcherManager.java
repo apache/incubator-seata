@@ -16,7 +16,6 @@
  */
 package org.apache.seata.namingserver.manager;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.ClusterChangeListener;
 import org.apache.seata.namingserver.listener.Watcher;
