@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.common.executor.Callback;
@@ -253,21 +254,25 @@ public class SpringFenceHandler implements FenceHandler {
     private static boolean updateStatusAndInvokeTargetMethod(Connection conn, Method method, Object targetTCCBean,
                                                              String xid, Long branchId, int status,
                                                              TransactionStatus transactionStatus,
-                                                             Object[] args) throws Exception {
+                                                             Object[] args) throws Throwable {
         boolean result = COMMON_FENCE_DAO.updateCommonFenceDO(conn, xid, branchId, status, CommonFenceConstant.STATUS_TRIED);
         if (result) {
-            // invoke two phase method
-            Object ret = method.invoke(targetTCCBean, args);
-            if (null != ret) {
-                if (ret instanceof TwoPhaseResult) {
-                    result = ((TwoPhaseResult) ret).isSuccess();
-                } else {
-                    result = (boolean) ret;
+            try {
+                // invoke two phase method
+                Object ret = method.invoke(targetTCCBean, args);
+                if (null != ret) {
+                    if (ret instanceof TwoPhaseResult) {
+                        result = ((TwoPhaseResult) ret).isSuccess();
+                    } else {
+                        result = (boolean) ret;
+                    }
+                    // If the business execution result is false, the transaction will be rolled back
+                    if (!result) {
+                        transactionStatus.setRollbackOnly();
+                    }
                 }
-                // If the business execution result is false, the transaction will be rolled back
-                if (!result) {
-                    transactionStatus.setRollbackOnly();
-                }
+            } catch (Exception e) {
+                throw ExceptionUtil.unwrap(e);
             }
         }
         return result;
