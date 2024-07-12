@@ -19,9 +19,6 @@ package org.apache.seata.common.exception;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 
-/**
- * @author clever.cheng
- */
 public class ExceptionUtil {
 
     private ExceptionUtil() {
