@@ -60,6 +60,10 @@ class NamingControllerTest {
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata = node.getMetadata();
+        List<String> vGroups = new ArrayList<>();
+        vGroups.add("vgroup1");
+        meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
         namingController.changeGroup(namespace, clusterName, unitName, vGroup);
@@ -151,7 +155,7 @@ class NamingControllerTest {
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
         assertEquals(8091, node1.getTransaction().getPort());
-        int timeGap = threshold + period + 100;
+        int timeGap = threshold + period;
         Thread.sleep(timeGap);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);

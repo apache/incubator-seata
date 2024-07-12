@@ -313,24 +313,24 @@ public class NamingManager {
         for (String namespace : namespaceClusterDataMap.keySet()) {
             for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
-                    Iterator<Node> instanceIterator = unit.getNamingInstanceList().iterator();
-
-                    while (instanceIterator.hasNext()) {
-                        Node instance = instanceIterator.next();
+                    List<Node> removeList = new ArrayList<>();
+                    for (Node instance : unit.getNamingInstanceList()) {
                         InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(),
                             instance.getTransaction().getPort());
                         long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
-
                         if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > heartbeatTimeThreshold) {
                             instanceLiveTable.remove(inetSocketAddress);
-
-                            instanceIterator.remove(); // Safe removal using iterator's remove method
+                            removeList.add(instance);
+                        }
+                    }
+                    if (!CollectionUtils.isEmpty(removeList)) {
+                        unit.getNamingInstanceList().removeAll(removeList);
+                        for (Node instance : removeList) {
                             clusterData.removeInstance(instance, unit.getUnitName());
-
-                            notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
                             LOGGER.warn("{} instance has gone offline",
                                 instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
+                        notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
                     }
                 }
             }
