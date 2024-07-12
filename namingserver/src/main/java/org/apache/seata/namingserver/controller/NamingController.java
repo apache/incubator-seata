@@ -19,6 +19,7 @@ package org.apache.seata.namingserver.controller;
 
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
@@ -58,7 +59,7 @@ public class NamingController {
     public Result<?> registerInstance(@RequestParam String namespace,
                                       @RequestParam String clusterName,
                                       @RequestParam String unit,
-                                      @RequestBody Node registerBody) {
+                                      @RequestBody NamingServerNode registerBody) {
         Result result = new Result();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
         if (isSuccess) {

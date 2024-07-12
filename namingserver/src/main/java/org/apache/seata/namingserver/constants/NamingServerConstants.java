@@ -14,29 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.namingserver.constants;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+public interface NamingServerConstants {
+    /**
+     * The constant HTTP_PREFIX
+     */
+    String HTTP_PREFIX = "http://";
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+    /**
+     * The constant HTTP_ADD_GROUP_SUFFIX
+     */
+    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
-    }
+    /**
+     * The constant CONSTANT_UNIT
+     */
+    String CONSTANT_UNIT = "unit";
 
-    private RmNettyRemotingClient() {
-    }
+    /**
+     * The constant CONSTANT_GROUP
+     */
+    String CONSTANT_GROUP = "vGroup";
 
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
-    }
+    /**
+     * The constant HTTP_REMOVE_GROUP_SUFFIX
+     */
+    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
 
-    public void destroy() {
-        INSTANCE.destroy();
-    }
+    /**
+     * The constant IP_PORT_SPLIT_CHAR
+     */
+    String IP_PORT_SPLIT_CHAR = ":";
 }
