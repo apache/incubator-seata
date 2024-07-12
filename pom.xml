@@ -73,6 +73,7 @@
         <module>server</module>
         <module>ext/apm-seata-skywalking-plugin</module>
         <module>integration-tx-api</module>
+        <module>namingserver</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 

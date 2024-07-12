@@ -26,9 +26,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -36,20 +38,20 @@ public class ClusterData extends AbstractClusterData {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterData.class);
     private String clusterName;
     private String clusterType;
-    private final HashMap<String, Unit> unitData;
+    private final Map<String, Unit> unitData;
 
 
     public ClusterData() {
-        unitData = new HashMap<>(32);
+        unitData = new ConcurrentHashMap<>(32);
     }
 
     public ClusterData(String clusterName) {
-        unitData = new HashMap<>(32);
+        unitData = new ConcurrentHashMap<>(32);
         this.clusterName = clusterName;
     }
 
     public ClusterData(String clusterName, String clusterType) {
-        unitData = new HashMap<>(32);
+        unitData = new ConcurrentHashMap<>(32);
         this.clusterName = clusterName;
         this.clusterType = clusterType;
     }
@@ -71,7 +73,7 @@ public class ClusterData extends AbstractClusterData {
     }
 
 
-    public HashMap<String, Unit> getUnitData() {
+    public Map<String, Unit> getUnitData() {
         return unitData;
     }
 
@@ -103,14 +105,14 @@ public class ClusterData extends AbstractClusterData {
             clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
         } else {
             List<Unit> unitList = new ArrayList<>();
-            unitList.add(unitData.get(unitName));
+            Optional.ofNullable(unitData.get(unitName)).ifPresent(unitList::add);
             clusterResponse.setUnitData(unitList);
         }
 
         return clusterResponse;
     }
 
-
+    @Override
     public boolean registerInstance(NamingServerNode instance, String unitName) {
         // refresh node weight
         Object weightValue = instance.getMetadata().get("weight");

@@ -15,10 +15,16 @@
 # limitations under the License.
 #
 
-ERR_PREFIX=ERR-CODE: [Seata-{code}][{key}]
-ERR_POSTFIX=More: [https://seata.apache.org/docs/next/overview/faq#{code}]
-ERR_CONFIG=config error, {0}
-ERR_NOT_EXIST=
-ERROR_LOOP=ERROR_LOOP
-ERR_NEST1=ERR NEST TEST
-ERR_NEST2=ERR_NEST1
+server:
+  port: 8081
+
+spring:
+  application:
+    name: seata-namingserver
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${log.home:${user.home}/logs/seata}
+heartbeat:
+  threshold: 5000
+  period: 5000

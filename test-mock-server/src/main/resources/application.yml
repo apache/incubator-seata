@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 server:
   port: 7091
-  servicePort: 8091
+  service-port: 8091
 
 spring:
   application:
