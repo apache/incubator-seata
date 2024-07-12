@@ -18,6 +18,7 @@ package org.apache.seata.namingserver.pojo;
 
 
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,7 @@ public abstract class AbstractClusterData {
      * @param unitName unit Name
      * @return true if the node has changed, false if there is no change.
      */
-    public boolean registerInstance(Node node, String unitName) {
+    public boolean registerInstance(NamingServerNode node, String unitName) {
         return false;
     }
 
