@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.config;
+package org.apache.seata.namingserver.constants;
 
-public interface NamingServerConfig {
+public interface NamingServerConstants {
     /**
      * The constant HTTP_PREFIX
      */

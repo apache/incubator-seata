@@ -26,7 +26,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.namingserver.config.NamingServerConfig;
+import org.apache.seata.namingserver.constants.NamingServerConstants;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.pojo.AbstractClusterData;
 import org.apache.seata.namingserver.pojo.ClusterData;
@@ -47,18 +47,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
+
+import static org.apache.seata.namingserver.constants.NamingServerConstants.CONSTANT_GROUP;
+
 @Component
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
-    private final HashMap<InetSocketAddress, Long> instanceLiveTable;
-    private final HashMap<String/* VGroup */,
-        HashMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>>    vGroupMap;
-    private final HashMap<String/* namespace */, HashMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
+    private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
+    private final ConcurrentMap<String/* VGroup */,
+        ConcurrentMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>>    vGroupMap;
+    private final ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
 
     @Value("${heartbeat.threshold:90000}")
     private int heartbeatTimeThreshold;
@@ -73,9 +79,9 @@ public class NamingManager {
     private ApplicationContext applicationContext;
 
     public NamingManager() {
-        this.instanceLiveTable = new HashMap<>();
-        this.vGroupMap = new HashMap<>();
-        this.namespaceClusterDataMap = new HashMap<>();
+        this.instanceLiveTable = new ConcurrentHashMap<>();
+        this.vGroupMap = new ConcurrentHashMap<>();
+        this.namespaceClusterDataMap = new ConcurrentHashMap<>();
     }
 
     @PostConstruct
@@ -90,8 +96,8 @@ public class NamingManager {
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
-        HashMap<String, ClusterVO> clusterVOHashMap = new HashMap<>();
-        HashMap<String, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
+        Map<String, ClusterVO> clusterVOHashMap = new HashMap<>();
+        Map<String, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
 
         if (clusterDataMap != null) {
             for (Map.Entry<String, ClusterData> entry : clusterDataMap.entrySet()) {
@@ -103,9 +109,9 @@ public class NamingManager {
             LOGGER.warn("no cluster in namespace:" + namespace);
         }
 
-        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
+        for (Map.Entry<String, ConcurrentMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
-            HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
+            Map<String, Pair<String, String>> namespaceMap = entry.getValue();
             Pair<String, String> pair = namespaceMap.get(namespace);
             String clusterName = pair.getKey();
             ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
@@ -128,11 +134,11 @@ public class NamingManager {
             Node node = nodeList.get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
-            String httpUrl = NamingServerConfig.HTTP_PREFIX + controlHost + NamingServerConfig.IP_PORT_SPLIT_CHAR
-                + controlPort + NamingServerConfig.HTTP_ADD_GROUP_SUFFIX;
+            String httpUrl = NamingServerConstants.HTTP_PREFIX + controlHost + NamingServerConstants.IP_PORT_SPLIT_CHAR
+                + controlPort + NamingServerConstants.HTTP_ADD_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
-            params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
-            params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
+            params.put(CONSTANT_GROUP, vGroup);
+            params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
@@ -156,12 +162,12 @@ public class NamingManager {
                 Unit unit = cluster.getUnitData().get(0);
                 if (unit != null && unit.getNamingInstanceList() != null && unit.getNamingInstanceList().size() > 0) {
                     Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = NamingServerConfig.HTTP_PREFIX + node.getControl().getHost()
-                        + NamingServerConfig.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
-                        + NamingServerConfig.HTTP_REMOVE_GROUP_SUFFIX;
+                    String httpUrl = NamingServerConstants.HTTP_PREFIX + node.getControl().getHost()
+                        + NamingServerConstants.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
+                        + NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX;
                     HashMap<String, String> params = new HashMap<>();
-                    params.put(NamingServerConfig.CONSTANT_GROUP, vGroup);
-                    params.put(NamingServerConfig.CONSTANT_UNIT, unitName);
+                    params.put(CONSTANT_GROUP, vGroup);
+                    params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
                     try (CloseableHttpResponse closeableHttpResponse =
@@ -186,7 +192,7 @@ public class NamingManager {
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
             Pair<String, String> pair = Pair.of(clusterName, unitName);
-            HashMap<String, Pair<String, String>> stringPairHashMap = new HashMap<>();
+            ConcurrentMap<String, Pair<String, String>> stringPairHashMap = new ConcurrentHashMap<>();
             stringPairHashMap.put(namespace, pair);
             if (!vGroupMap.containsKey(vGroup) || !vGroupMap.get(vGroup).equals(stringPairHashMap)) {
                 vGroupMap.put(vGroup, stringPairHashMap);
@@ -198,9 +204,9 @@ public class NamingManager {
     }
 
     public void notifyClusterChange(String namespace, String clusterName, String unitName) {
-        for (Map.Entry<String, HashMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
+        for (Map.Entry<String, ConcurrentMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
-            HashMap<String, Pair<String, String>> namespaceMap = entry.getValue();
+            Map<String, Pair<String, String>> namespaceMap = entry.getValue();
 
             // Iterating through an internal HashMap
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
@@ -219,25 +225,23 @@ public class NamingManager {
 
     public boolean registerInstance(NamingServerNode node, String namespace, String clusterName, String unitName) {
         try {
-            HashMap<String, ClusterData> clusterDataHashMap =
-                namespaceClusterDataMap.computeIfAbsent(namespace, k -> new HashMap<>());
+            Map<String, ClusterData> clusterDataHashMap =
+                namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
 
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
-                key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
-            node.getMetadata().remove("cluster-type");
+                key -> new ClusterData(clusterName, (String)node.getMetadata().remove("cluster-type")));
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
-            Object mappingObj = node.getMetadata().get("vGroup");
-
-            if (mappingObj instanceof HashMap) {
-                HashMap<String, Object> mapping = (HashMap<String, Object>)mappingObj;
-                mapping.forEach((vGroup, unitObj) -> {
-                    changeGroup(namespace, clusterName, (String)unitObj, vGroup);
-                });
-                node.getMetadata().remove("vGroup");
-            }
+            Optional.ofNullable(node.getMetadata().remove(CONSTANT_GROUP)).ifPresent(mappingObj -> {
+                if (mappingObj instanceof List) {
+                    List<String> vGroups = (List<String>)mappingObj;
+                    for (String vGroup : vGroups) {
+                        changeGroup(namespace, clusterName, unitName, vGroup);
+                    }
+                }
+            });
 
             boolean hasChanged = clusterData.registerInstance(node, unitName);
             if (hasChanged) {
@@ -256,7 +260,7 @@ public class NamingManager {
     public boolean unregisterInstance(String unitName, Node node) {
         try {
             for (String namespace : namespaceClusterDataMap.keySet()) {
-                HashMap<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
+                Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
                 if (clusterMap != null) {
                     clusterMap.forEach((clusterName, clusterData) -> {
                         if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
@@ -291,7 +295,7 @@ public class NamingManager {
     }
 
     public List<Node> getInstances(String namespace, String clusterName) {
-        HashMap<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
+        Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
         AbstractClusterData abstractClusterData = clusterDataHashMap.get(clusterName);
         if (abstractClusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
