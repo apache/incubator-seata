@@ -65,7 +65,10 @@
             <outputDirectory>target/</outputDirectory>
             <destName>seata-namingserver.jar</destName>
         </file>
-
+        <file>
+            <source>../server/src/main/resources/logback-spring.xml</source>
+            <outputDirectory>conf/</outputDirectory>
+        </file>
         <file>
             <source>../namingserver/src/main/resources/application.yml</source>
             <outputDirectory>conf/</outputDirectory>
