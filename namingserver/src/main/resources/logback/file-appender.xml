@@ -23,6 +23,8 @@
                     defaultValue="${user.home}/logs/seata"/>
     <springProperty name="FILE_LOG_PATTERN" source="logging.pattern.file"
                     defaultValue="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%t] [%logger] [%M] [%X{X-TX-XID:-}]: %m%n%wEx2"/>
+    <springProperty name="RPC_PORT" source="server.port"
+                    defaultValue="8081"/>
 
     <!--ALL-->
     <appender name="FILE_ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
