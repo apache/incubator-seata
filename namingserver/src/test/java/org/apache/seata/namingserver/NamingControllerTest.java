@@ -60,6 +60,10 @@ class NamingControllerTest {
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata = node.getMetadata();
+        List<String> vGroups = new ArrayList<>();
+        vGroups.add("vgroup1");
+        meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
         namingController.changeGroup(namespace, clusterName, unitName, vGroup);

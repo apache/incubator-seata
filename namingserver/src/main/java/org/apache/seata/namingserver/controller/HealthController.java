@@ -14,35 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.vo.monitor;
+package org.apache.seata.namingserver.controller;
 
-import java.util.List;
+import org.apache.seata.common.result.Result;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-public class WatcherVO {
-    private String vGroup;
-    private List<String> watcherIp;
+@RestController
+public class HealthController {
 
-    public WatcherVO() {
+    @GetMapping("/health")
+    public Result<?> healthCheck() {
+        return new Result<>();
     }
 
-    public WatcherVO(String vGroup, List<String> watcherIp) {
-        this.vGroup = vGroup;
-        this.watcherIp = watcherIp;
-    }
-
-    public String getvGroup() {
-        return vGroup;
-    }
-
-    public void setvGroup(String vGroup) {
-        this.vGroup = vGroup;
-    }
-
-    public List<String> getWatcherIp() {
-        return watcherIp;
-    }
-
-    public void setWatcherIp(List<String> watcherIp) {
-        this.watcherIp = watcherIp;
-    }
 }
