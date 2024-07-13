@@ -49,20 +49,18 @@ public class Unit {
     }
 
     /**
-     * @param node
-     * @return true if the node has changed, false if there is no change.
+     * @param node node
      */
-    public boolean addInstance(NamingServerNode node) {
+    public void addInstance(NamingServerNode node) {
         if (nodeList.contains(node)) {
             Node node1 = nodeList.get(nodeList.indexOf(node));
             if (node.isTotalEqual(node1)) {
-                return false;
+                return;
             } else {
                 nodeList.remove(node1);
             }
         }
         nodeList.add(node);
-        return true;
 
     }
 

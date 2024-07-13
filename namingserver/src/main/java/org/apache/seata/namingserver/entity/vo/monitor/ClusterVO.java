@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.vo.monitor;
+package org.apache.seata.namingserver.entity.vo.monitor;
 
 import org.apache.seata.common.metadata.namingserver.Unit;
-import org.apache.seata.namingserver.pojo.ClusterData;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
 
 import java.util.ArrayList;
 import java.util.List;

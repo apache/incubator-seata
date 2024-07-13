@@ -28,9 +28,8 @@ import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.namingserver.constants.NamingServerConstants;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
-import org.apache.seata.namingserver.pojo.AbstractClusterData;
-import org.apache.seata.namingserver.pojo.ClusterData;
-import org.apache.seata.namingserver.vo.monitor.ClusterVO;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
+import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -123,8 +122,7 @@ public class NamingManager {
         return new ArrayList<>(clusterVOHashMap.values());
     }
 
-    public Result<?> addGroup(String namespace, String vGroup, String clusterName, String unitName) {
-        changeGroup(namespace,clusterName,unitName,vGroup);
+    public Result<String> addGroup(String namespace, String vGroup, String clusterName, String unitName) {
         // add vGroup in new cluster
         List<Node> nodeList = getInstances(namespace, clusterName);
         if (nodeList == null || nodeList.size() == 0) {
@@ -152,10 +150,11 @@ public class NamingManager {
                 return new Result<>("500", "add vGroup in new cluster failed");
             }
         }
+        changeGroup(namespace,clusterName,unitName,vGroup);
         return new Result<>("200", "add vGroup successfully!");
     }
 
-    public Result<?> removeGroup(String namespace, String vGroup, String unitName) {
+    public Result<String> removeGroup(String namespace, String vGroup, String unitName) {
         List<Cluster> clusterList = getClusterListByVgroup(vGroup, namespace);
         for (Cluster cluster : clusterList) {
             if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
@@ -281,56 +280,60 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        List<Cluster> clusterList = new ArrayList<>();
-        try {
-            Pair<String, String> clusterUnitPair = vGroupMap.get(vGroup).get(namespace);
-            String clusterName = clusterUnitPair.getKey();
-            String unitName = clusterUnitPair.getValue();
-            ClusterData clusterData = namespaceClusterDataMap.get(namespace).get(clusterName);
-            clusterList.add(clusterData.getClusterByUnit(unitName));
-        } catch (NullPointerException e) {
-            LOGGER.error("no cluster mapping for vGroup: " + vGroup);
+        ConcurrentMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>> map =
+            vGroupMap.get(vGroup);
+        if (!CollectionUtils.isEmpty(map)) {
+            Pair<String, String> clusterUnitPair = map.get(namespace);
+            if (clusterUnitPair != null) {
+                String clusterName = clusterUnitPair.getKey();
+                String unitName = clusterUnitPair.getValue();
+                List<Cluster> clusterList = new ArrayList<>();
+                Optional.ofNullable(namespaceClusterDataMap.get(namespace))
+                    .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName))).ifPresent(data -> {
+                        clusterList.add(data.getClusterByUnit(unitName));
+                    });
+                return clusterList;
+            }
         }
-        return clusterList;
+        return Collections.emptyList();
     }
 
     public List<Node> getInstances(String namespace, String clusterName) {
         Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
-        AbstractClusterData abstractClusterData = clusterDataHashMap.get(clusterName);
-        if (abstractClusterData == null) {
+        ClusterData clusterData = clusterDataHashMap.get(clusterName);
+        if (clusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
             return Collections.emptyList();
         }
-        return abstractClusterData.getInstanceList();
+        return clusterData.getInstanceList();
     }
 
     public void instanceHeartBeatCheck() {
         for (String namespace : namespaceClusterDataMap.keySet()) {
             for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
-                    Iterator<Node> instanceIterator = unit.getNamingInstanceList().iterator();
-
-                    while (instanceIterator.hasNext()) {
-                        Node instance = instanceIterator.next();
+                    List<Node> removeList = new ArrayList<>();
+                    for (Node instance : unit.getNamingInstanceList()) {
                         InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(),
                             instance.getTransaction().getPort());
                         long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
-
                         if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > heartbeatTimeThreshold) {
                             instanceLiveTable.remove(inetSocketAddress);
-
-                            instanceIterator.remove(); // Safe removal using iterator's remove method
+                            removeList.add(instance);
+                        }
+                    }
+                    if (!CollectionUtils.isEmpty(removeList)) {
+                        unit.getNamingInstanceList().removeAll(removeList);
+                        for (Node instance : removeList) {
                             clusterData.removeInstance(instance, unit.getUnitName());
-
-                            notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
                             LOGGER.warn("{} instance has gone offline",
                                 instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
+                        notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
                     }
                 }
             }
         }
-
     }
 
 }

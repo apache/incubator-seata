@@ -14,28 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.controller;
+package org.apache.seata.namingserver.entity.vo.monitor;
 
-import org.apache.seata.server.ServerRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
-/**
- */
-@RestController
-public class HealthController {
+public class WatcherVO {
+    private String vGroup;
+    private List<String> watcherIp;
 
-    private static final String OK = "ok";
-    private static final String NOT_OK = "not_ok";
-
-    @Autowired
-    private ServerRunner serverRunner;
-
-
-    @RequestMapping("/health")
-    String healthCheck() {
-        return serverRunner.started() ? OK : NOT_OK;
+    public WatcherVO() {
     }
 
+    public WatcherVO(String vGroup, List<String> watcherIp) {
+        this.vGroup = vGroup;
+        this.watcherIp = watcherIp;
+    }
+
+    public String getvGroup() {
+        return vGroup;
+    }
+
+    public void setvGroup(String vGroup) {
+        this.vGroup = vGroup;
+    }
+
+    public List<String> getWatcherIp() {
+        return watcherIp;
+    }
+
+    public void setWatcherIp(List<String> watcherIp) {
+        this.watcherIp = watcherIp;
+    }
 }

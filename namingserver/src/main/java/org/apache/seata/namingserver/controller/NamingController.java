@@ -24,8 +24,8 @@ import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
-import org.apache.seata.namingserver.vo.monitor.ClusterVO;
-import org.apache.seata.namingserver.vo.monitor.WatcherVO;
+import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
+import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,11 +56,11 @@ public class NamingController {
     private ClusterWatcherManager clusterWatcherManager;
 
     @PostMapping("/register")
-    public Result<?> registerInstance(@RequestParam String namespace,
+    public Result<String> registerInstance(@RequestParam String namespace,
                                       @RequestParam String clusterName,
                                       @RequestParam String unit,
                                       @RequestBody NamingServerNode registerBody) {
-        Result result = new Result();
+        Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
         if (isSuccess) {
             result.setMessage("node has registered successfully!");
@@ -72,9 +72,9 @@ public class NamingController {
     }
 
     @PostMapping("/unregister")
-    public Result<?> unregisterInstance(@RequestParam String unit,
+    public Result<String> unregisterInstance(@RequestParam String unit,
                                         @RequestBody Node registerBody) {
-        Result result = new Result();
+        Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
         if (isSuccess) {
             result.setMessage("node has unregistered successfully!");
@@ -90,11 +90,6 @@ public class NamingController {
         return namingManager.monitorCluster(namespace);
     }
 
-    @GetMapping("/health")
-    public Result<?> healthCheck() {
-        return new Result<>();
-    }
-
     @GetMapping("/discovery")
     public MetaResponse discovery(@RequestParam String vGroup, @RequestParam String namespace) {
         return new MetaResponse(namingManager.getClusterListByVgroup(vGroup, namespace),
@@ -102,17 +97,17 @@ public class NamingController {
     }
 
     @PostMapping("/changeGroup")
-    public Result<?> changeGroup(@RequestParam String namespace,
+    public Result<String> changeGroup(@RequestParam String namespace,
                                  @RequestParam String clusterName,
                                  @RequestParam String unitName,
                                  @RequestParam String vGroup) {
 
-        Result<?> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
+        Result<String> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
         // remove vGroup in old cluster
-        Result<?> removeGroupResult = namingManager.removeGroup(namespace, vGroup, unitName);
+        Result<String> removeGroupResult = namingManager.removeGroup(namespace, vGroup, unitName);
         if (!removeGroupResult.isSuccess()) {
             return removeGroupResult;
         }
