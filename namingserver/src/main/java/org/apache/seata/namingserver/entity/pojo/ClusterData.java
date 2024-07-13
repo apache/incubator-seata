@@ -14,16 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.pojo;
-
-
-import org.apache.seata.common.metadata.Cluster;
-import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.namingserver.NamingServerNode;
-import org.apache.seata.common.metadata.namingserver.Unit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+package org.apache.seata.namingserver.entity.pojo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +22,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-@Component
-public class ClusterData extends AbstractClusterData {
+import org.apache.seata.common.metadata.Cluster;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
+import org.apache.seata.common.metadata.namingserver.Unit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
+
+public class ClusterData {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterData.class);
     private String clusterName;
     private String clusterType;
     private final Map<String, Unit> unitData;
+    
+    private Lock lock = new ReentrantLock();
 
 
     public ClusterData() {
@@ -84,8 +88,14 @@ public class ClusterData extends AbstractClusterData {
             return;
         }
         unit.removeInstance(node);
-        if (unit.getNamingInstanceList() == null || unit.getNamingInstanceList().size() == 0) {
-            unitData.remove(unitName);
+        // remove unit if unit has no instance
+        lock.lock();
+        try {
+            if (CollectionUtils.isEmpty(unit.getNamingInstanceList())) {
+                unitData.remove(unitName);
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -101,7 +111,7 @@ public class ClusterData extends AbstractClusterData {
         Cluster clusterResponse = new Cluster();
         clusterResponse.setClusterName(clusterName);
         clusterResponse.setClusterType(clusterType);
-        if (unitName == null || unitName.equals("")) {
+        if (!StringUtils.hasLength(unitName)) {
             clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
         } else {
             List<Unit> unitList = new ArrayList<>();
@@ -112,7 +122,6 @@ public class ClusterData extends AbstractClusterData {
         return clusterResponse;
     }
 
-    @Override
     public boolean registerInstance(NamingServerNode instance, String unitName) {
         // refresh node weight
         Object weightValue = instance.getMetadata().get("weight");
@@ -120,18 +129,21 @@ public class ClusterData extends AbstractClusterData {
             instance.setWeight(Double.parseDouble(String.valueOf(weightValue)));
             instance.getMetadata().remove("weight");
         }
-
-        Unit unit = unitData.get(unitName);
-        if (unit == null) {
-            unit = new Unit();
-            List<Node> instances = new ArrayList<>();
-            instances.add(instance);
+        Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
+            Unit unit = new Unit();
+            List<Node> instances = new CopyOnWriteArrayList<>();
             unit.setUnitName(unitName);
             unit.setNamingInstanceList(instances);
-            unitData.put(unitName, unit);
-            return true;
+            return unit;
+        });
+        // ensure that when adding an instance, the remove side will not delete the unit.
+        lock.lock();
+        try {
+            currentUnit.addInstance(instance);
+        } finally {
+            lock.unlock();
         }
-        return unit.addInstance(instance);
+        return true;
     }
 
 
