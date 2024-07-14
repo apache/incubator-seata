@@ -17,7 +17,6 @@
     limitations under the License.
 
 -->
-
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
     <!-- Context listeners -->
     <contextListener class="org.apache.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
