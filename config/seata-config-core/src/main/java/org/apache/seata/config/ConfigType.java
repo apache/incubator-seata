@@ -52,7 +52,11 @@ public enum ConfigType {
     /**
      * Custom config type
      */
-    Custom;
+    Custom,
+    /**
+     * Raft config type
+     */
+    Raft;
 
     /**
      * Gets type.

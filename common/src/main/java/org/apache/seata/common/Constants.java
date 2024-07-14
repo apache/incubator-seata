@@ -219,4 +219,29 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
+    /**
+     * The constant APPLICATION_TYPE_KEY
+     */
+    String APPLICATION_TYPE_KEY = "application.type";
+
+    /**
+     * The constant APPLICATION_TYPE_SERVER
+     */
+    String APPLICATION_TYPE_SERVER = "server";
+
+    /**
+     * The constant APPLICATION_TYPE_CLIENT
+     */
+    String APPLICATION_TYPE_CLIENT = "client";
+
+    /**
+     * The constant DEFAULT_DB_CONFIG_KEY in raft configuration
+     */
+    String DEFAULT_STORE_GROUP = "SEATA_GROUP";
+
+    /**
+     * The constant RAFT_CONFIG_GROUP
+     */
+    String RAFT_CONFIG_GROUP = "config";
 }

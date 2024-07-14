@@ -132,7 +132,7 @@ public class RaftServerManager {
             try {
                 // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this
                 // separately
-                rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
+                rpcServer = RaftConfigServerManager.getRpcServer() == null? RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint()) : RaftConfigServerManager.getRpcServer();
                 RaftServer raftServer = new RaftServer(dataPath, group, serverId, initNodeOptions(initConf), rpcServer);
                 // as the foundation for multi raft group in the future
                 RAFT_SERVER_MAP.put(group, raftServer);
@@ -152,7 +152,7 @@ public class RaftServerManager {
             }
             LOGGER.info("started seata server raft cluster, group: {} ", group);
         });
-        if (rpcServer != null) {
+        if (rpcServer != null && RaftConfigServerManager.getRpcServer() == null) {
             rpcServer.registerProcessor(new PutNodeInfoRequestProcessor());
             SerializerManager.addSerializer(SerializerType.JACKSON.getCode(), new JacksonBoltSerializer());
             if (!rpcServer.init(null)) {

@@ -1011,4 +1011,27 @@ public interface ConfigurationKeys {
      * The constant ROCKET_MQ_MSG_TIMEOUT
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
+
+    String CONFIG_STORE_PREFIX = FILE_ROOT_PREFIX_CONFIG + "db" + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant CONFIG_STORE_TYPE
+     */
+    String CONFIG_STORE_TYPE = CONFIG_STORE_PREFIX + "type";
+
+    /**
+     * The constant CONFIG_STORE_DIR
+     */
+    String CONFIG_STORE_DIR = CONFIG_STORE_PREFIX + "dir";
+
+    /**
+     * The constant CONFIG_STORE_DESTROY_ON_SHUTDOWN
+     */
+    String CONFIG_STORE_DESTROY_ON_SHUTDOWN = CONFIG_STORE_PREFIX + "destroyOnShutdown";
+
+    /**
+     * The constant CONFIG_STORE_GROUP
+     */
+    String CONFIG_STORE_GROUP = CONFIG_STORE_PREFIX + "group";
+
 }

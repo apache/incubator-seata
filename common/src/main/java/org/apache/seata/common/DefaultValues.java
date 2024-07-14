@@ -314,4 +314,8 @@ public interface DefaultValues {
     String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 
     int DEFAULT_ROCKET_MQ_MSG_TIMEOUT = 60 * 1000;
+
+    String DEFAULT_DB_STORE_FILE_DIR = "configStore";
+
+    String DEFAULT_DB_TYPE = "rocksdb";
 }
