@@ -14,35 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.vo.monitor;
+package org.apache.seata.sqlparser.struct;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WatcherVO {
-    private String vGroup;
-    private List<String> watcherIp;
+import org.junit.jupiter.api.Test;
 
-    public WatcherVO() {
+public class NullTest {
+
+    @Test
+    public void testGet() {
+        Null instance = Null.get();
+        assertEquals(instance, Null.get());
     }
 
-    public WatcherVO(String vGroup, List<String> watcherIp) {
-        this.vGroup = vGroup;
-        this.watcherIp = watcherIp;
+    @Test
+    public void testToString() {
+        String expected = "NULL";
+        assertEquals(expected.trim(), Null.get().toString().trim());
     }
 
-    public String getvGroup() {
-        return vGroup;
-    }
-
-    public void setvGroup(String vGroup) {
-        this.vGroup = vGroup;
-    }
-
-    public List<String> getWatcherIp() {
-        return watcherIp;
-    }
-
-    public void setWatcherIp(List<String> watcherIp) {
-        this.watcherIp = watcherIp;
-    }
 }
