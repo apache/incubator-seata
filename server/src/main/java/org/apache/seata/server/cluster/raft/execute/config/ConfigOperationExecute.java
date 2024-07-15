@@ -16,15 +16,24 @@
  */
 package org.apache.seata.server.cluster.raft.execute.config;
 
+import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.server.cluster.listener.ClusterConfigChangeEvent;
 import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationResponse;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftConfigOperationSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Map;
 
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+
 
 public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigOperationExecute.class);
+
     @Override
     public Object execute(RaftBaseMsg syncMsg) throws Throwable {
         RaftConfigOperationSyncMsg configSyncMsg = (RaftConfigOperationSyncMsg) syncMsg;
@@ -50,11 +59,26 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
 
     private ConfigOperationResponse put(ConfigOperationDTO configOperation) {
         Boolean success = configStoreManager.put(configOperation.getGroup(), configOperation.getKey(), configOperation.getValue());
+        if (success) {
+            // ApplicationContext may not have been started at this point
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getGroup()));
+            }
+            LOGGER.info("config group: {}, config change event: {}", configOperation.getGroup(), configOperation.getOptType());
+        }
         return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse delete(ConfigOperationDTO configOperation) {
         Boolean success = configStoreManager.delete(configOperation.getGroup(), configOperation.getKey());
+        if (success) {
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getGroup()));
+            }
+            LOGGER.info("config group: {}, config change event: {}", configOperation.getGroup(), configOperation.getOptType());
+        }
         return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 

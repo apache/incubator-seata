@@ -37,6 +37,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.console.result.Result;
 import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.server.cluster.manager.ClusterConfigWatcherManager;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.apache.seata.server.cluster.raft.RaftConfigServer;
 import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
@@ -66,6 +67,9 @@ public class ClusterController {
 
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
+
+    @Resource
+    private ClusterConfigWatcherManager clusterConfigWatcherManager;
 
     private ServerProperties serverProperties;
 
@@ -262,6 +266,15 @@ public class ClusterController {
                 new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
+    }
+
+    @PostMapping("/config/watch")
+    public void watch(HttpServletRequest request, @RequestParam String group,
+                      @RequestParam(defaultValue = "28000") int timeout) {
+        AsyncContext context = request.startAsync();
+        context.setTimeout(0L);
+        Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, 0L);
+        clusterConfigWatcherManager.registryWatcher(watcher);
     }
 
 }

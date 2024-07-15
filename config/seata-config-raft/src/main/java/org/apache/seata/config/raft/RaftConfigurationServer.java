@@ -173,8 +173,6 @@ public class RaftConfigurationServer extends AbstractConfiguration {
                 seataConfig = seataConfigNew;
                 return;
             }
-            // todo
-            // 如果不是当前分组的配置变更，则通知相应client端，配置变更了
             // Compatible with old writing
             listener.onProcessEvent(event);
         }

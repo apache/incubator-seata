@@ -47,7 +47,6 @@ import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataRe
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.config.ConfigSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.ConfigLeaderMetadataSnapshotFile;
-import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;

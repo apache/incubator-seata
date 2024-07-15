@@ -67,6 +67,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_CUSTOM_PREFIX, ConfigCustomProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_STORE_PREFIX, ConfigStoreProperties.class);
+            PROPERTY_BEAN_MAP.put(CONFIG_RAFT_PREFIX, ConfigRaftProperties.class);
 
             PROPERTY_BEAN_MAP.put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);

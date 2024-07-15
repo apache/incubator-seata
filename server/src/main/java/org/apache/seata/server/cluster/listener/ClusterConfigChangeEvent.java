@@ -14,24 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.raft;
+package org.apache.seata.server.cluster.listener;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationProvider;
+import org.springframework.context.ApplicationEvent;
 
-import static org.apache.seata.common.Constants.*;
+/**
+ * The type ClusterConfigChangeEvent
+ */
+public class ClusterConfigChangeEvent extends ApplicationEvent {
 
-@LoadLevel(name = "Raft", order = 1)
-public class RaftConfigurationProvider implements ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        // todo : optimize
-        String applicationType = System.getProperty(APPLICATION_TYPE_KEY);
-        if (APPLICATION_TYPE_SERVER.equals(applicationType)){
-            return RaftConfigurationServer.getInstance();
-        }else{
-            return RaftConfigurationClient.getInstance();
-        }
+    private String group;
+
+    public ClusterConfigChangeEvent(Object source, String group) {
+        super(source);
+        this.group = group;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 }

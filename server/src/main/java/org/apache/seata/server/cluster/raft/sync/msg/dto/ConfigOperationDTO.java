@@ -95,4 +95,14 @@ public class ConfigOperationDTO implements Serializable {
     public static ConfigOperationDTO convertConfigRequest2Dto(ConfigOperationRequest request) {
         return new ConfigOperationDTO(request.getOptType(), request.getGroup(), request.getKey(), request.getValue());
     }
+
+    @Override
+    public String toString() {
+        return "ConfigOperationDTO{" +
+                "optType=" + optType +
+                ", group='" + group + '\'' +
+                ", key='" + key + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

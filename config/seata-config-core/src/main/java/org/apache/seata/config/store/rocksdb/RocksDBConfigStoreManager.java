@@ -21,6 +21,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.*;
 import org.apache.seata.config.store.AbstractConfigStoreManager;
+import org.apache.seata.config.store.ConfigStoreManager;
 import org.rocksdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.apache.seata.common.ConfigurationKeys.*;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_GROUP;
+
 
 
 /**
@@ -80,6 +82,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         CURRENT_GROUP = FILE_CONFIG.getConfig(CONFIG_STORE_GROUP, DEFAULT_GROUP);
         maybeNeedLoadOriginConfig();
         LOGGER.info("RocksDBConfigStoreManager initialized successfully");
+       
     }
 
     /**
@@ -118,7 +121,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             group = StringUtils.isEmpty(group)? CURRENT_GROUP : group;
             byte[] value = rocksdb.get(group.getBytes(DEFAULT_CHARSET));
             String configStr = value != null ? new String(value, DEFAULT_CHARSET) : null;
-            return convertConfigStr2Map(configStr);
+            return ConfigStoreManager.convertConfigStr2Map(configStr);
         }finally {
             lock.readLock().unlock();
         }
@@ -155,10 +158,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         try {
             Map<String, Object> configMap = getConfigMap(group);
             configMap.put(key, value);
-            String configStr = convertConfig2Str(configMap);
+            String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             rocksdb.put(group.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
             notifyConfigChange(group, new ConfigurationChangeEvent(group, configStr));
-            // LOGGER.info("put {} = {} in group: {}", key, value, group);
             return true;
         }catch (RocksDBException e){
             LOGGER.error("Failed to put value for key: " + key, e);
@@ -174,10 +176,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         try {
             Map<String, Object> configMap = getConfigMap(group);
             configMap.remove(key);
-            String configStr = convertConfig2Str(configMap);
+            String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             rocksdb.put(group.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
             notifyConfigChange(group, new ConfigurationChangeEvent(group, configStr));
-            // LOGGER.info("delete {} in group: {}", key, group);
             return true;
         }catch (RocksDBException e){
             LOGGER.error("Failed to delete value for key: " + key, e);
@@ -191,7 +192,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     public Boolean putAll(String group, Map<String, Object> configMap) {
         lock.writeLock().lock();
         try{
-            String configStr = convertConfig2Str(configMap);
+            String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             rocksdb.put(group.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
             notifyConfigChange(group, new ConfigurationChangeEvent(group, configStr));
             return true;
@@ -284,19 +285,25 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return CollectionUtils.isEmpty(getAll(group));
     }
 
-    // todo server关闭时需要被调用
+    // todo
     @Override
     public void shutdown() {
-        RocksDBFactory.close();
-        if (RocksDBOptions.getDBDestroyOnShutdown()) {
-            destroy();
+        lock.writeLock().lock();
+        try {
+            RocksDBFactory.close();
+            if (RocksDBOptions.getDBDestroyOnShutdown()) {
+                destroy();
+            }
+            LOGGER.info("RocksDBConfigStoreManager has shutdown");
+        }finally {
+            lock.writeLock().unlock();
         }
-        LOGGER.info("RocksDBConfigStoreManager has shutdown");
+
     }
 
     @Override
     public void destroy() {
-        RocksDBFactory.destroy(DB_PATH, DB_OPTIONS);
+        RocksDBFactory.destroy(DB_PATH);
         LOGGER.info("DB destroyed, the db path is: {}.", DB_PATH);
     }
 

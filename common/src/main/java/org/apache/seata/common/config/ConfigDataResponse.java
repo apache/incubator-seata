@@ -14,24 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.raft;
+package org.apache.seata.common.config;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationProvider;
 
-import static org.apache.seata.common.Constants.*;
+public class ConfigDataResponse<T> {
 
-@LoadLevel(name = "Raft", order = 1)
-public class RaftConfigurationProvider implements ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        // todo : optimize
-        String applicationType = System.getProperty(APPLICATION_TYPE_KEY);
-        if (APPLICATION_TYPE_SERVER.equals(applicationType)){
-            return RaftConfigurationServer.getInstance();
-        }else{
-            return RaftConfigurationClient.getInstance();
-        }
+    T result;
+    String errMsg;
+    Boolean success;
+
+    public T getResult() {
+        return result;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
+    }
+
+    public String getErrMsg() {
+        return errMsg;
+    }
+
+    public void setErrMsg(String errMsg) {
+        this.errMsg = errMsg;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
     }
 }

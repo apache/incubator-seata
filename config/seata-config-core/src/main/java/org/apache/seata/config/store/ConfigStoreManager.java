@@ -16,9 +16,15 @@
  */
 package org.apache.seata.config.store;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.processor.ConfigDataType;
+import org.apache.seata.config.processor.ConfigProcessor;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * The interface Local config store manager.
@@ -50,5 +56,25 @@ public interface ConfigStoreManager {
 
     default void removeConfigListener(String group, String dataId, ConfigurationChangeListener listener) {};
 
+    static String convertConfig2Str(Map<String, Object> configs) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> entry : configs.entrySet()) {
+            sb.append(entry.getKey()).append("=").append(entry.getValue().toString()).append("\n");
+        }
+        return sb.toString();
+    }
 
+    static Map<String, Object> convertConfigStr2Map(String configStr) {
+        if (StringUtils.isEmpty(configStr)) {
+            return new HashMap<>();
+        }
+        Map<String, Object> configs = new HashMap<>();
+        try {
+            Properties properties = ConfigProcessor.processConfig(configStr, ConfigDataType.properties.name());
+            properties.forEach((k, v) -> configs.put(k.toString(), v));
+            return configs;
+        } catch (IOException e) {
+            return new HashMap<>();
+        }
+    }
 }

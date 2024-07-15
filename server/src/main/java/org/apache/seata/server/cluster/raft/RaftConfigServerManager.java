@@ -35,11 +35,7 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigType;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.store.rocksdb.RocksDBOptions;
 import org.apache.seata.core.serializer.SerializerType;
-import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
-import org.apache.seata.discovery.registry.MultiRegistryFactory;
-import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.seata.server.cluster.raft.processor.ConfigOperationRequestProcessor;
 import org.apache.seata.server.cluster.raft.processor.PutNodeInfoRequestProcessor;
 import org.apache.seata.server.cluster.raft.serializer.JacksonBoltSerializer;
@@ -47,10 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -133,6 +126,9 @@ public class RaftConfigServerManager {
         }
     }
     public static void start() {
+        if (!RAFT_MODE){
+            return;
+        }
         try {
             if (raftServer != null) {
                 raftServer.start();
@@ -150,15 +146,17 @@ public class RaftConfigServerManager {
                 throw new RuntimeException("start raft node fail!");
             }
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(RaftConfigServerManager::destroy));
     }
 
-    // todo 需要调用
+
     public static void destroy() {
         raftServer.close();
         LOGGER.info("closed seata server raft cluster, group: {} ", group);
         Optional.ofNullable(rpcServer).ifPresent(RpcServer::shutdown);
         raftServer = null;
         rpcServer = null;
+        RAFT_MODE = false;
         INIT.set(false);
     }
 

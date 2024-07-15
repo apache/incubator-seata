@@ -16,19 +16,10 @@
  */
 package org.apache.seata.config.store;
 
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigType;
-import org.apache.seata.config.processor.ConfigDataType;
-import org.apache.seata.config.processor.ConfigProcessor;
-import org.apache.seata.config.store.rocksdb.RocksDBConfigStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * The type Abstract config store manager.
@@ -91,27 +82,5 @@ public abstract class AbstractConfigStoreManager implements ConfigStoreManager {
 
     public abstract void shutdown();
 
-    protected static String convertConfig2Str(Map<String, Object> configs) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, Object> entry : configs.entrySet()) {
-            sb.append(entry.getKey()).append("=").append(entry.getValue().toString()).append("\n");
-        }
-        return sb.toString();
-    }
-
-    protected static Map<String, Object> convertConfigStr2Map(String configStr) {
-        if (StringUtils.isEmpty(configStr)) {
-            return new HashMap<>();
-        }
-        Map<String, Object> configs = new HashMap<>();
-        try {
-            Properties properties = ConfigProcessor.processConfig(configStr, ConfigDataType.properties.name());
-            properties.forEach((k, v) -> configs.put(k.toString(), v));
-            return configs;
-        } catch (IOException e) {
-            LOGGER.error("convert config properties error", e);
-            return new HashMap<>();
-        }
-    }
 
 }

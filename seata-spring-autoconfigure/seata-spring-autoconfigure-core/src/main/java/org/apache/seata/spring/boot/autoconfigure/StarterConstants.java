@@ -66,6 +66,7 @@ public interface StarterConstants {
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
     String CONFIG_STORE_PREFIX = CONFIG_PREFIX + ".db";
+    String CONFIG_RAFT_PREFIX = CONFIG_PREFIX + ".raft";
 
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
