@@ -53,7 +53,7 @@ public class Unit {
     public boolean addInstance(Node node) {
         if (nodeList.contains(node)) {
             Node node1 = nodeList.get(nodeList.indexOf(node));
-            if (node.isTotalEqual(node1)) {
+            if (node.equals(node1)) {
                 return false;
             } else {
                 nodeList.remove(node);
