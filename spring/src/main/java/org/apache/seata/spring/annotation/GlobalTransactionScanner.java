@@ -160,7 +160,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param mode           the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
-        this(applicationId, txServiceGroup, mode, null);
+        this(applicationId, txServiceGroup, mode, false, null);
     }
 
     /**
@@ -171,7 +171,20 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, FailureHandler failureHandlerHook) {
-        this(applicationId, txServiceGroup, DEFAULT_MODE, failureHandlerHook);
+        this(applicationId, txServiceGroup, DEFAULT_MODE, false, failureHandlerHook);
+    }
+
+    /**
+     * Instantiates a new Global transaction scanner.
+     *
+     * @param applicationId      the application id
+     * @param txServiceGroup     the tx service group
+     * @param exposeProxy        the exposeProxy
+     * @param failureHandlerHook the failure handler hook
+     */
+    public GlobalTransactionScanner(String applicationId, String txServiceGroup, boolean exposeProxy,
+                                    FailureHandler failureHandlerHook) {
+        this(applicationId, txServiceGroup, DEFAULT_MODE, exposeProxy, failureHandlerHook);
     }
 
     /**
@@ -180,12 +193,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param applicationId      the application id
      * @param txServiceGroup     the tx service group
      * @param mode               the mode
+     * @param exposeProxy        the exposeProxy
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode,
+    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, boolean exposeProxy,
                                     FailureHandler failureHandlerHook) {
         setOrder(ORDER_NUM);
         setProxyTargetClass(true);
+        setExposeProxy(exposeProxy);
         this.applicationId = applicationId;
         this.txServiceGroup = txServiceGroup;
         this.failureHandlerHook = failureHandlerHook;

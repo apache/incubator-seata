@@ -93,19 +93,20 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     @Override
     public void sendAsyncResponse(RpcMessage rpcMessage, Channel channel, Object msg) {
-        final Channel clientChannel = msg instanceof HeartbeatMessage
-                ? channel
-                : ChannelManager.getSameClientChannel(channel);
-
-        if (clientChannel == null) {
-            throw new RuntimeException("Not found client channel to response | channel: " + channel);
+        Channel clientChannel = channel;
+        if (!(msg instanceof HeartbeatMessage)) {
+            clientChannel = ChannelManager.getSameClientChannel(channel);
         }
-
-        RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
+        if (clientChannel != null) {
+            RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, msg instanceof HeartbeatMessage
                 ? ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE
                 : ProtocolConstants.MSGTYPE_RESPONSE);
-        super.sendAsync(clientChannel, rpcMsg);
+            super.sendAsync(clientChannel, rpcMsg);
+        } else {
+            throw new RuntimeException("channel is error.");
+        }
     }
+
 
     @Override
     public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
@@ -163,10 +164,11 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
          */
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (!(msg instanceof RpcMessage)) {
-                return;
+            if (msg instanceof RpcMessage) {
+                processMessage(ctx, (RpcMessage)msg);
+            } else {
+                LOGGER.error("rpcMessage type error");
             }
-            processMessage(ctx, (RpcMessage) msg);
         }
 
         @Override

@@ -24,6 +24,7 @@ seata:
   enable-auto-data-source-proxy: true
   data-source-proxy-mode: AT
   use-jdk-proxy: false
+  expose-proxy: false
   scan-packages: firstPackage,secondPackage
   excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
