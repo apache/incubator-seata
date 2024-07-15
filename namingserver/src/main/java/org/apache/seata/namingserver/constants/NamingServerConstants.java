@@ -14,41 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.pojo;
+package org.apache.seata.namingserver.constants;
 
-
-import org.apache.seata.common.metadata.Node;
-
-import java.util.Collections;
-import java.util.List;
-
-public abstract class AbstractClusterData {
+public interface NamingServerConstants {
     /**
-     * register instance in cluster
-     *
-     * @param node     node msg
-     * @param unitName unit Name
-     * @return true if the node has changed, false if there is no change.
+     * The constant HTTP_PREFIX
      */
-    public boolean registerInstance(Node node, String unitName) {
-        return false;
-    }
+    String HTTP_PREFIX = "http://";
 
     /**
-     * get all nodes in cluster
-     *
-     * @return all nodes in cluster
+     * The constant HTTP_ADD_GROUP_SUFFIX
      */
-    public List<Node> getInstanceList() {
-        return Collections.EMPTY_LIST;
-    }
+    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
 
     /**
-     * remove instacne in cluster
-     *
-     * @param node     node msg
-     * @param unitName unit Name
+     * The constant CONSTANT_UNIT
      */
-    public void removeInstance(Node node, String unitName) {
-    }
+    String CONSTANT_UNIT = "unit";
+
+    /**
+     * The constant CONSTANT_GROUP
+     */
+    String CONSTANT_GROUP = "vGroup";
+
+    /**
+     * The constant HTTP_REMOVE_GROUP_SUFFIX
+     */
+    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
+
+    /**
+     * The constant IP_PORT_SPLIT_CHAR
+     */
+    String IP_PORT_SPLIT_CHAR = ":";
 }

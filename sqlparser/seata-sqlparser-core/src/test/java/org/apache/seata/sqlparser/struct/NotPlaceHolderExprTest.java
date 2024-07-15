@@ -14,29 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.sqlparser.struct;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+import org.junit.jupiter.api.Test;
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+public class NotPlaceHolderExprTest {
+
+    @Test
+    public void testGet() {
+        NotPlaceholderExpr instance = NotPlaceholderExpr.get();
+        // Check that the returned instance is not null
+        assertEquals(instance, NotPlaceholderExpr.get());
     }
 
-    private RmNettyRemotingClient() {
-    }
-
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
-    }
-
-    public void destroy() {
-        INSTANCE.destroy();
+    @Test
+    public void testToString() {
+        NotPlaceholderExpr instance = NotPlaceholderExpr.get();
+        // Check that the toString method returns the expected string
+        assertEquals("NOT_PLACEHOLDER", instance.toString());
     }
 }

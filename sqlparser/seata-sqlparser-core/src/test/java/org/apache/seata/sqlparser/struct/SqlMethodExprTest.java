@@ -14,29 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.sqlparser.struct;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+import org.junit.jupiter.api.Test;
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+public class SqlMethodExprTest {
+    @Test
+    public void testGet() {
+        SqlMethodExpr instance = SqlMethodExpr.get();
+        assertEquals(instance, SqlMethodExpr.get());
     }
 
-    private RmNettyRemotingClient() {
+    @Test
+    public void testToString() {
+        String expected = "SQL_METHOD";
+        assertEquals(expected.trim(), SqlMethodExpr.get().toString().trim());
     }
 
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
-    }
-
-    public void destroy() {
-        INSTANCE.destroy();
-    }
 }

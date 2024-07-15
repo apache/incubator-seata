@@ -14,29 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.common.exception;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+public class ExceptionUtil {
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+    private ExceptionUtil() {
     }
 
-    private RmNettyRemotingClient() {
+    public static Throwable unwrap(Throwable wrapped) {
+        Throwable unwrapped = wrapped;
+        while (true) {
+            if (unwrapped instanceof InvocationTargetException) {
+                unwrapped = ((InvocationTargetException) unwrapped).getTargetException();
+            } else if (unwrapped instanceof UndeclaredThrowableException) {
+                unwrapped = ((UndeclaredThrowableException) unwrapped).getUndeclaredThrowable();
+            } else {
+                return unwrapped;
+            }
+        }
     }
 
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
-    }
-
-    public void destroy() {
-        INSTANCE.destroy();
-    }
 }

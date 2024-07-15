@@ -14,29 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.sqlparser;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+public class EscapeSymbolTest {
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+    @Test
+    public void testGetLeftSymbol() {
+        char expectedLeftSymbol = '"';
+        EscapeSymbol escapeSymbol = new EscapeSymbol(expectedLeftSymbol, '"');
+        assertEquals(expectedLeftSymbol, escapeSymbol.getLeftSymbol(),
+                "The left symbol should be '" + expectedLeftSymbol + "'");
     }
 
-    private RmNettyRemotingClient() {
-    }
-
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
-    }
-
-    public void destroy() {
-        INSTANCE.destroy();
+    @Test
+    public void testGetRightSymbol() {
+        char expectedRightSymbol = '"';
+        EscapeSymbol escapeSymbol = new EscapeSymbol('"', expectedRightSymbol);
+        assertEquals(expectedRightSymbol, escapeSymbol.getRightSymbol(),
+                "The right symbol should be '" + expectedRightSymbol + "'");
     }
 }

@@ -14,29 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.namingserver.entity.vo.monitor;
 
-/**
- * RmNettyRemotingClient
- * Notes: used for Apache ShardingSphere integration
- */
-@Deprecated
-public class RmNettyRemotingClient {
+import java.util.List;
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+public class WatcherVO {
+    private String vGroup;
+    private List<String> watcherIp;
 
-    private static class RmNettyRemotingClientInstance {
-        private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
+    public WatcherVO() {
     }
 
-    private RmNettyRemotingClient() {
+    public WatcherVO(String vGroup, List<String> watcherIp) {
+        this.vGroup = vGroup;
+        this.watcherIp = watcherIp;
     }
 
-    public static RmNettyRemotingClient getInstance() {
-        return RmNettyRemotingClientInstance.INSTANCE;
+    public String getvGroup() {
+        return vGroup;
     }
 
-    public void destroy() {
-        INSTANCE.destroy();
+    public void setvGroup(String vGroup) {
+        this.vGroup = vGroup;
+    }
+
+    public List<String> getWatcherIp() {
+        return watcherIp;
+    }
+
+    public void setWatcherIp(List<String> watcherIp) {
+        this.watcherIp = watcherIp;
     }
 }
