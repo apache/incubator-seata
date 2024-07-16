@@ -56,9 +56,9 @@ public class DmTableMetaCache extends OracleTableMetaCache {
     @Override
     protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta result = new TableMeta();
-        result.setTableName(tableName);
 
         TableNameMeta tableNameMeta = toTableNameMeta(tableName, dbmd.getConnection().getSchema());
+        result.setTableName(tableNameMeta.getTableName());
         try (ResultSet rsColumns = dbmd.getColumns("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, tableNameMeta.getSchema(), tableNameMeta.getTableName(), false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
