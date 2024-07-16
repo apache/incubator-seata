@@ -78,6 +78,11 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         "PSEUDO_COLUMN"
     );
 
+    private static List<String> tableMetaColumnLabels = Arrays.asList(
+            "TABLE_NAME",
+            "TABLE_SCHEM"
+    );
+
     private Object[][] columnsMetasReturnValue;
 
     private Object[][] indexMetasReturnValue;
@@ -85,6 +90,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     private Object[][] pkMetasReturnValue;
 
     private Object[][] mockColumnsMetasReturnValue;
+
+    private Object[][] mockTableMetasReturnValue;
 
     /**
      * Instantiate a new MockDatabaseMetaData
@@ -95,6 +102,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         this.indexMetasReturnValue = connection.getDriver().getMockIndexMetasReturnValue();
         this.pkMetasReturnValue = connection.getDriver().getMockPkMetasReturnValue();
         this.mockColumnsMetasReturnValue = connection.getDriver().getMockOnUpdateColumnsReturnValue();
+        this.mockTableMetasReturnValue = connection.getDriver().getMockTableMetasReturnValue();
     }
 
     @Override
@@ -702,7 +710,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
         throws SQLException {
-        return null;
+        return new MockResultSet(this.connection.createStatement())
+                .mockResultSet(tableMetaColumnLabels, mockTableMetasReturnValue);
     }
 
     @Override

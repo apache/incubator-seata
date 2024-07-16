@@ -41,12 +41,12 @@ import static org.mockito.Mockito.mock;
 public class SqlServerTableMetaCacheTest {
     private static Object[][] columnMetas =
             new Object[][]{
-                    new Object[]{"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                    new Object[]{"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+                    new Object[]{"", "", "st1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                    new Object[]{"", "", "st1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
                             "NO"},
-                    new Object[]{"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+                    new Object[]{"", "", "st1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
                             "NO"},
-                    new Object[]{"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+                    new Object[]{"", "", "st1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
                             "NO"}
             };
     private static Object[][] indexMetas =
@@ -59,6 +59,11 @@ public class SqlServerTableMetaCacheTest {
     private static Object[][] pkMetas =
             new Object[][]{
                     new Object[]{"id"}
+            };
+
+    private static Object[][] tableMetas =
+            new Object[][]{
+                    new Object[]{"st1", "m"}
             };
 
     private TableMetaCache getTableMetaCache() {
@@ -79,16 +84,16 @@ public class SqlServerTableMetaCacheTest {
     @Test
     public void getTableMetaTest_0() throws SQLException {
 
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas, tableMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.mt1", proxy.getResourceId());
+        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
 
-        Assertions.assertEquals("m.mt1", tableMeta.getTableName());
+        Assertions.assertEquals("m.st1", tableMeta.getTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
@@ -115,12 +120,12 @@ public class SqlServerTableMetaCacheTest {
                 };
         mockDriver.setMockIndexMetasReturnValue(indexMetas);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
+            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "st2", proxy.getResourceId());
         });
 
         mockDriver.setMockColumnsMetasReturnValue(null);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
+            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "st2", proxy.getResourceId());
         });
 
         //can not cover the way to get from connection because the mockConnection not support

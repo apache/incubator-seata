@@ -59,9 +59,14 @@ public class PostgresqlTableMetaCacheTest {
             new Object[] {"id"}
         };
 
+    private static Object[][] tableMetas =
+            new Object[][]{
+                    new Object[]{"pt1", "public"}
+            };
+
     @Test
     public void getTableMetaTest() throws SQLException {
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas, tableMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -73,6 +78,9 @@ public class PostgresqlTableMetaCacheTest {
         TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "pt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
+        tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "Pt1", proxy.getResourceId());
+        Assertions.assertNotNull(tableMeta);
+        Assertions.assertEquals("pt1", tableMeta.getTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.pt1", proxy.getResourceId());
 
