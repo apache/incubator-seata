@@ -23,22 +23,19 @@ import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.mock.MockDriver;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.struct.IndexMeta;
-import org.apache.seata.sqlparser.struct.IndexType;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.struct.TableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import org.apache.seata.sqlparser.struct.*;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.apache.seata.rm.datasource.DataSourceProxyTest;
 
-import static org.mockito.Mockito.mock;
-
-
-public class SqlServerTableMetaCacheTest {
+/**
+ * @author GoodBoyCoder
+ * @date 2021-10-15
+ */
+public class DB2TableMetaCacheTest {
     private static Object[][] columnMetas =
             new Object[][]{
                     new Object[]{"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
@@ -49,21 +46,18 @@ public class SqlServerTableMetaCacheTest {
                     new Object[]{"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
                             "NO"}
             };
+
     private static Object[][] indexMetas =
             new Object[][]{
-                    new Object[]{"id", "id", false, "", 3, 0, "A", 34L},
+                    new Object[]{"id_pk", "id", false, "", 3, 0, "A", 34L},
                     new Object[]{"name1", "name1", false, "", 3, 1, "A", 34L},
                     new Object[]{"name2", "name2", true, "", 3, 2, "A", 34L},
             };
 
-    private static Object[][] pkMetas =
+    private static final Object[][] pkMetas =
             new Object[][]{
-                    new Object[]{"id"}
+                    new Object[]{"id_pk"}
             };
-
-    private TableMetaCache getTableMetaCache() {
-        return TableMetaCacheFactory.getTableMetaCache(JdbcConstants.SQLSERVER);
-    }
 
     @Test
     public void testTableMeta() {
@@ -71,6 +65,10 @@ public class SqlServerTableMetaCacheTest {
         Assertions.assertNotNull(tableMetaCache);
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> tableMetaCache.getTableMeta(null, null, null));
+    }
+
+    private TableMetaCache getTableMetaCache() {
+        return TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DB2);
     }
 
     /**
@@ -86,9 +84,9 @@ public class SqlServerTableMetaCacheTest {
 
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
-        System.out.println(tableMeta);
-        Assertions.assertEquals("m.st1", tableMeta.getTableName());
+        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "t.mt1", proxy.getResourceId());
+
+        Assertions.assertEquals("t.mt1", tableMeta.getTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
@@ -105,8 +103,8 @@ public class SqlServerTableMetaCacheTest {
 
         Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
-        assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("id"));
-        Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("id").getIndextype());
+        assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("id_pk"));
+        Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("id_pk").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
         Assertions.assertEquals(IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
 
@@ -114,16 +112,39 @@ public class SqlServerTableMetaCacheTest {
                 new Object[][]{
                 };
         mockDriver.setMockIndexMetasReturnValue(indexMetas);
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
-        });
+        Assertions.assertThrows(ShouldNeverHappenException.class,
+                () -> getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId()));
 
         mockDriver.setMockColumnsMetasReturnValue(null);
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
-        });
+        Assertions.assertThrows(ShouldNeverHappenException.class,
+                () -> getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId()));
 
-        //can not cover the way to get from connection because the mockConnection not support
+    }
+
+    @Test
+    public void refreshTest_0() throws SQLException {
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
+
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setUrl("jdbc:mock:xxx");
+        druidDataSource.setDriver(mockDriver);
+
+        DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(druidDataSource);
+
+        getTableMetaCache().getTableMeta(dataSourceProxy.getPlainConnection(), "t.t1", dataSourceProxy.getResourceId());
+        //change the columns meta
+        columnMetas =
+                new Object[][]{
+                        new Object[]{"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                        new Object[]{"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+                                "NO"},
+                        new Object[]{"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+                                "NO"},
+                        new Object[]{"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+                                "NO"}
+                };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
+        getTableMetaCache().refresh(dataSourceProxy.getPlainConnection(), dataSourceProxy.getResourceId());
     }
 
     private void assertColumnMetaEquals(Object[] expected, ColumnMeta actual) {
