@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.constants;
+package org.apache.seata.common;
 
 public interface NamingServerConstants {
     /**
@@ -46,4 +46,19 @@ public interface NamingServerConstants {
      * The constant IP_PORT_SPLIT_CHAR
      */
     String IP_PORT_SPLIT_CHAR = ":";
+
+    /**
+     * The constant DEFAULT_VGROUP_MAPPING
+     */
+    String DEFAULT_VGROUP_MAPPING = "vgroup_table";
+
+    /**
+     * The constant REGISTRY_NAMINGSERVER_CLUSTER
+     */
+    String REGISTRY_NAMINGSERVER_CLUSTER = "registry.namingserver.cluster";
+
+    /**
+     * The constant MAPPING_TABLE_NAME
+     */
+    String MAPPING_TABLE_NAME = "store.db.mapping-table";
 }

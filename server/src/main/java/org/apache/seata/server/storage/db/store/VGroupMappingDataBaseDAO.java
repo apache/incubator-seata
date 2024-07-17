@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.storage.db.store;
 
-import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.seata.common.NamingServerConstants.*;
+
 public class VGroupMappingDataBaseDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(VGroupMappingDataBaseDAO.class);
 
@@ -39,15 +41,11 @@ public class VGroupMappingDataBaseDAO {
 
     protected final String vMapping;
 
-    private static final String DEFAULT_VGROUP_MAPPING = "vgroup_table";
-
-    private static final String REGISTRY_NAMINGSERVER_CLUSTER = "registry.namingserver.cluster";
-
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     public VGroupMappingDataBaseDAO(DataSource vGroupMappingDataSource) {
         this.vGroupMappingDataSource = vGroupMappingDataSource;
-        this.vMapping = CONFIG.getConfig("store.db.mapping-table", DEFAULT_VGROUP_MAPPING);
+        this.vMapping = CONFIG.getConfig(MAPPING_TABLE_NAME, DEFAULT_VGROUP_MAPPING);
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {

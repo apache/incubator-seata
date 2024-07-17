@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.controller;
 
-import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
