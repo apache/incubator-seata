@@ -33,7 +33,7 @@ import static org.apache.seata.common.Constants.DEFAULT_STORE_GROUP;
 class RocksDBTest {
     private static RocksDBConfigStoreManager configStoreManager;
 
-    private static String group = DEFAULT_STORE_GROUP;
+    private static final String group = DEFAULT_STORE_GROUP;
     @BeforeAll
     static void setUp() {
         configStoreManager = RocksDBConfigStoreManager.getInstance();

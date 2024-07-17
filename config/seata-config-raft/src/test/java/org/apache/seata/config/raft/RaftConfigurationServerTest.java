@@ -16,6 +16,8 @@
  */
 package org.apache.seata.config.raft;
 
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -24,6 +26,10 @@ import org.junit.jupiter.api.Test;
  */
 public class RaftConfigurationServerTest {
 
+    @Test
+    public void testRaftConfigurationServer() {
 
+
+    }
 
 }

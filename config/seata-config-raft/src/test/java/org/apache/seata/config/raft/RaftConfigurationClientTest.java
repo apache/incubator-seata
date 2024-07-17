@@ -18,8 +18,10 @@ package org.apache.seata.config.raft;
 
 import org.junit.jupiter.api.Test;
 
-
-
+/**
+ * The type Raft configuration of server test
+ *
+ */
 public class RaftConfigurationClientTest {
     @Test
     public void testRaftConfigurationClient() {
