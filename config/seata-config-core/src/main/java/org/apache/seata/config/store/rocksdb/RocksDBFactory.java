@@ -69,10 +69,10 @@ public class RocksDBFactory {
 
     public static synchronized void destroy(String dbPath) {
         close();
-        try {
-            RocksDB.destroyDB(dbPath, new Options());
+        try(final Options opt = new Options()) {
+            RocksDB.destroyDB(dbPath, opt);
         }catch (RocksDBException e){
-            LOGGER.error("RocksDB destroy error: {}",e.getMessage(),e);
+            LOGGER.error("RocksDB destroy error: {}", e.getMessage(), e);
         }
     }
 

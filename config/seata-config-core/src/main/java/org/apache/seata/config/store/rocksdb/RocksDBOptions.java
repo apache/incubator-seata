@@ -59,10 +59,14 @@ public class RocksDBOptions {
 
     private static Options buildOptions() {
         Options options = new Options();
-        options.setCreateIfMissing(true); // 不存在则创建
-        options.setKeepLogFileNum(1);  // 只保留最新的一个日志文件
-        options.setLogFileTimeToRoll(0);  // 禁止基于时间的日志滚动
-        options.setMaxLogFileSize(0);  // 禁止基于大小的日志滚动
+        // If the database does not exist, create it
+        options.setCreateIfMissing(true);
+        // Retain only the latest log file
+        options.setKeepLogFileNum(1);
+        // Disable log file rolling based on time
+        options.setLogFileTimeToRoll(0);
+        // Disable log file rolling based on size
+        options.setMaxLogFileSize(0);
         return options;
     }
 

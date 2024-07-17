@@ -64,8 +64,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
 
     private static final String CONFIG_TYPE = "raft";
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String RAFT_GROUP = RAFT_CONFIG_GROUP; // config
-    private static final String RAFT_CLUSTER = DEFAULT_SEATA_GROUP; // default
+    private static final String RAFT_GROUP = RAFT_CONFIG_GROUP;
+    private static final String RAFT_CLUSTER = DEFAULT_SEATA_GROUP;
     private static final String CONFIG_GROUP;
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
@@ -117,13 +117,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     }
 
     private static void initClientConfig() {
-        // acquire configs from server
-        // 0.发送/cluster获取raft集群
-        // 1.向raft集群发送getAll请求
-        // 2.等待Raft日志提交，leader从rocksdb中读取全部配置返回(保证一致性)
-        // 3.加载到seataConfig
-        // 4.定期轮询配置变更
-        //   触发监听
         try {
             Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_GROUP);
             if (configMap != null) {
@@ -302,6 +295,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     });
                     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                         CLOSED.compareAndSet(false, true);
+                        // is there should be shutdown gracefully?
                         REFRESH_METADATA_EXECUTOR.shutdown();
                     }));
                 }
@@ -486,7 +480,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             try {
                 Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_GROUP);
                 if (CollectionUtils.isNotEmpty(configMap)) {
-                    value = configMap.get(dataId).toString();
+                    value = configMap.get(dataId) == null ? null : configMap.get(dataId).toString();
                 }
             } catch (RetryableException e) {
                 LOGGER.error(e.getMessage());
@@ -524,7 +518,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         if (CollectionUtils.isNotEmpty(configChangeListeners)) {
             for (ConfigurationChangeListener entry : configChangeListeners) {
                 if (listener.equals(entry)) {
-                    ConfigStoreListener storeListener = null;
                     Map<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
                     if (configListeners != null) {
                         configListeners.remove(entry);
@@ -644,6 +637,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     }
                 }
                 seataConfig = seataConfigNew;
+                // todo : test code remove
                 System.out.println(seataConfigNew);
                 return;
             }

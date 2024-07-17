@@ -24,7 +24,7 @@ public class RaftConfigurationServer extends AbstractConfiguration {
     private static volatile RaftConfigurationServer instance;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static ConfigStoreManager configStoreManager;
-    private static String CURRENT_GROUP; // current group of configuration
+    private static String CURRENT_GROUP;
     private static final String CONFIG_TYPE = "raft";
     private static volatile Properties seataConfig = new Properties();
     private static final int MAP_INITIAL_CAPACITY = 8;
