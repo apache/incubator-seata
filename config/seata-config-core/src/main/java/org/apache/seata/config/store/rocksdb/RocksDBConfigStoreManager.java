@@ -63,7 +63,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private static volatile RocksDBConfigStoreManager instance;
     private final RocksDB rocksdb;
     private static final List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
-            STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX);
+            STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX, LOG_PREFIX, TCC_PREFIX);
 
     public static RocksDBConfigStoreManager getInstance() {
         if (instance == null) {
