@@ -97,6 +97,7 @@ public class Server {
         // load vgroup mapping relationship
         VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
+        vGroupMappingStoreManager.notifyMapping();
     }
 
 
