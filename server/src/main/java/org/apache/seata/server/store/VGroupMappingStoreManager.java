@@ -43,7 +43,7 @@ public interface VGroupMappingStoreManager {
     /**
      * get VGroup Mapping relationship in cluster
      *
-     * @return
+     * @return Key:vGroup,Value:unit
      */
     HashMap<String, Object> loadVGroups();
 
