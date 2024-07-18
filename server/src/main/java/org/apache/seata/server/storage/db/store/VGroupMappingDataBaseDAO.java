@@ -32,7 +32,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.seata.common.NamingServerConstants.*;
+import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPING;
+import static org.apache.seata.common.NamingServerConstants.MAPPING_TABLE_NAME;
+import static org.apache.seata.common.NamingServerConstants.REGISTRY_NAMINGSERVER_CLUSTER;
+
 
 public class VGroupMappingDataBaseDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(VGroupMappingDataBaseDAO.class);
