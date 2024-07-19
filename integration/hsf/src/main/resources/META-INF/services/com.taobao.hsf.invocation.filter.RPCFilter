@@ -1,1 +1,2 @@
-io.seata.integration.hsf.HsfTransactionFilter
+io.seata.integration.hsf.HsfTransactionClientFilter
+io.seata.integration.hsf.HsfTransactionServerFilter
