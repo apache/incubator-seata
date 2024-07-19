@@ -75,15 +75,7 @@ import static io.seata.common.Constants.RETRY_COMMITTING;
 import static io.seata.common.Constants.RETRY_ROLLBACKING;
 import static io.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static io.seata.common.Constants.UNDOLOG_DELETE;
-import static io.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
-import static io.seata.common.DefaultValues.DEFAULT_COMMITING_RETRY_PERIOD;
-import static io.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
-import static io.seata.common.DefaultValues.DEFAULT_MAX_COMMIT_RETRY_TIMEOUT;
-import static io.seata.common.DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT;
-import static io.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
-import static io.seata.common.DefaultValues.DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE;
-import static io.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
-import static io.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
+import static io.seata.common.DefaultValues.*;
 
 /**
  * The type Default coordinator.
@@ -147,8 +139,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     private static final long MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getLong(
             ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT);
 
-    private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+    static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
             ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
+
+    static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE);
 
     private final ScheduledThreadPoolExecutor retryRollbacking =
         new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));

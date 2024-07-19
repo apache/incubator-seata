@@ -42,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import static io.seata.core.constants.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
+import static io.seata.server.coordinator.DefaultCoordinator.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE;
+import static io.seata.server.coordinator.DefaultCoordinator.ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE;
 import static io.seata.server.session.BranchSessionHandler.CONTINUE;
 
 /**
@@ -325,6 +327,9 @@ public class DefaultCore implements Core {
                             LOGGER.info("Rollback branch transaction successfully, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return CONTINUE;
                         case PhaseTwo_RollbackFailed_Unretryable:
+                            if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE && ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE) {
+                                globalSession.clean();
+                            }
                             SessionHelper.endRollbackFailed(globalSession, retrying);
                             LOGGER.error("Rollback branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
                             return false;

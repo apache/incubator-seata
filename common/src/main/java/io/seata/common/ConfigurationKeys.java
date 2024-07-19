@@ -508,6 +508,11 @@ public interface ConfigurationKeys {
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
     /**
+     * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE.
+     */
+    String ROLLBACK_RETRY_TIMEOUT_UNLOCK_INCLUDE_UNRETRYABLE_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockIncludeUnretryableEnable";
+
+    /**
      * the constant RETRY_DEAD_THRESHOLD
      */
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
