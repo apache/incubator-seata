@@ -24,10 +24,16 @@ public enum ErrorCode {
     /**
      * 0001 ~ 0099  Configuration related errors
      */
-    ERR_CONFIG(ErrorType.Config, 0001);
+    ERR_CONFIG(ErrorType.Config, 0001),
     /**
      * The error code of the transaction exception.
      */
+
+
+    /**
+     * The error code of the sql exception
+     */
+    ERROR_SQL(ErrorType.Datasource, 0101);
 
     private int code;
     private ErrorType type;

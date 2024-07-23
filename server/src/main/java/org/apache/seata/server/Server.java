@@ -48,6 +48,9 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.common.NamingServerConstants.CLUSTER_NAME_KEY;
+import static org.apache.seata.common.NamingServerConstants.META_PREFIX;
+import static org.apache.seata.common.NamingServerConstants.NAMESPACE_KEY;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -63,12 +66,10 @@ public class Server {
         // load node properties
         Instance instance = Instance.getInstance();
         // load namespace
-        String namespaceKey = "seata.registry.namingserver.namespace";
-        String namespace = environment.getProperty(namespaceKey, "public");
+        String namespace = environment.getProperty(NAMESPACE_KEY, "public");
         instance.setNamespace(namespace);
         // load cluster name
-        String clusterNameKey = "seata.registry.namingserver.cluster";
-        String clusterName = environment.getProperty(clusterNameKey, "default");
+        String clusterName = environment.getProperty(CLUSTER_NAME_KEY, "default");
         instance.setClusterName(clusterName);
 
         // load cluster type
@@ -82,13 +83,12 @@ public class Server {
         instance.setControlEndpoint(new Node.Endpoint(NetUtil.getLocalIp(), Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))), "http"));
 
         // load metadata
-        String prefix = "seata.registry.metadata.";
         for (PropertySource<?> propertySource : environment.getPropertySources()) {
             if (propertySource instanceof EnumerablePropertySource) {
                 EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
                 for (String propertyName : enumerablePropertySource.getPropertyNames()) {
-                    if (propertyName.startsWith(prefix)) {
-                        instance.addMetadata(propertyName.substring(prefix.length()), enumerablePropertySource.getProperty(propertyName));
+                    if (propertyName.startsWith(META_PREFIX)) {
+                        instance.addMetadata(propertyName.substring(META_PREFIX.length()), enumerablePropertySource.getProperty(propertyName));
                     }
                 }
             }

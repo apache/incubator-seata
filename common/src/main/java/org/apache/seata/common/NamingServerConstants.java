@@ -53,12 +53,17 @@ public interface NamingServerConstants {
     String DEFAULT_VGROUP_MAPPING = "vgroup_table";
 
     /**
-     * The constant REGISTRY_NAMINGSERVER_CLUSTER
+     * The constant NAMESPACE_KEY
      */
-    String REGISTRY_NAMINGSERVER_CLUSTER = "registry.namingserver.cluster";
+    String NAMESPACE_KEY = "seata.registry.namingserver.namespace";
 
     /**
-     * The constant MAPPING_TABLE_NAME
+     * The constant CLUSTER_NAME_KEY
      */
-    String MAPPING_TABLE_NAME = "store.db.mapping-table";
+    String CLUSTER_NAME_KEY = "seata.registry.namingserver.cluster";
+
+    /**
+     * The constant META_PREFIX
+     */
+    String META_PREFIX = "seata.registry.metadata.";
 }

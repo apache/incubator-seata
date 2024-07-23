@@ -16,6 +16,8 @@
  */
 package org.apache.seata.server.storage.db.store;
 
+import org.apache.seata.common.exception.ErrorCode;
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.config.Configuration;
@@ -32,9 +34,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.seata.common.ConfigurationKeys.MAPPING_TABLE_NAME;
+import static org.apache.seata.common.ConfigurationKeys.REGISTRY_NAMINGSERVER_CLUSTER;
 import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPING;
-import static org.apache.seata.common.NamingServerConstants.MAPPING_TABLE_NAME;
-import static org.apache.seata.common.NamingServerConstants.REGISTRY_NAMINGSERVER_CLUSTER;
 
 
 public class VGroupMappingDataBaseDAO {
@@ -105,11 +107,10 @@ public class VGroupMappingDataBaseDAO {
             ps.setString(2, instance.getClusterName());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SeataRuntimeException(ErrorCode.ERROR_SQL,e);
         } finally {
             IOUtil.close(ps, conn);
         }
-        return false;
     }
 
     public List<MappingDO> queryMappingDO() {
@@ -134,7 +135,7 @@ public class VGroupMappingDataBaseDAO {
                 result.add(mappingDO);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SeataRuntimeException(ErrorCode.ERR_CONFIG, e);
         } finally {
             IOUtil.close(rs, ps, conn);
         }

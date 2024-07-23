@@ -812,6 +812,11 @@ public interface ConfigurationKeys {
     String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
 
     /**
+     * The constant NAMING_SERVER
+     */
+    String NAMING_SERVER = "namingserver";
+
+    /**
      * The constant APPLICATION_ID.
      */
     String APPLICATION_ID = "applicationId";
@@ -1011,4 +1016,14 @@ public interface ConfigurationKeys {
      * The constant ROCKET_MQ_MSG_TIMEOUT
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
+
+    /**
+     * The constant REGISTRY_NAMINGSERVER_CLUSTER
+     */
+    String REGISTRY_NAMINGSERVER_CLUSTER = FILE_ROOT_REGISTRY + NAMING_SERVER + "cluster";
+
+    /**
+     * The constant MAPPING_TABLE_NAME
+     */
+    String MAPPING_TABLE_NAME = STORE_DB_PREFIX + "mapping-table";
 }
