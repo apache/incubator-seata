@@ -33,15 +33,26 @@ jobs:
       - name: "Use Python 3.x"
         uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
-      # step 3
+          python-version: '3.12'
+      # step 3 setuptools
+      - name: Ensure pip and setuptools
+        run: |
+          python3 -m ensurepip --upgrade
+          python3 -m pip install --upgrade pip setuptools
+      # step 4 install distutils
+      - name: Install distutils
+        run: |
+          if ! python3 -c "import distutils" &>/dev/null; then
+          python3 -m pip install --upgrade setuptools
+          fi
+      # step 6
       - name: "Set up Java JDK"
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      # step 4
-      ## step 4.1: for Ubuntu and MacOS
+      # step 7
+      ## step 7.1: for Ubuntu and MacOS
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
@@ -50,7 +61,7 @@ jobs:
           else
             ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
-      ## step 4.2: for Windows
+      ## step 7.2: for Windows
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: matrix.os == 'windows'
         run: | # Skip tests, because too many errors in unit-test.
