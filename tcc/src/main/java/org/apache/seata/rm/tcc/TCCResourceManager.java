@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -143,7 +144,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
     }
@@ -202,7 +203,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
     }
