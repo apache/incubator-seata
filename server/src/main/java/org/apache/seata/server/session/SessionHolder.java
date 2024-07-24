@@ -309,6 +309,7 @@ public class SessionHolder {
      * @return the root session manager
      */
     public static VGroupMappingStoreManager getRootVGroupMappingManager() {
+
         if (ROOT_VGROUP_MAPPING_MANAGER == null) {
             init();
             if (ROOT_VGROUP_MAPPING_MANAGER == null) {

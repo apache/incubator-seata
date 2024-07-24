@@ -30,6 +30,7 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
@@ -46,6 +47,10 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 
+import static org.apache.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
+import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.common.NamingServerConstants.CLUSTER_NAME_KEY;
@@ -152,9 +157,10 @@ public class Server {
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
-
-        metadataInit();
-
+        if (!StringUtils.equals(ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY
+                + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE), NAMING_SERVER)) {
+            metadataInit();
+        }
         nettyRemotingServer.init();
     }
 }
