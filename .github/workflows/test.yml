@@ -1,7 +1,7 @@
 name: "test"
 
 on:
-  pull_request:
+  push:
     branches: [ test*, "*.*.*" ]
 jobs:
   # job 1
@@ -13,7 +13,9 @@ jobs:
       matrix:
         java: [ 8, 11, 17, 21 ]
         os: [
+          ubuntu,
           macos,
+          windows, # Skip tests, because too many errors in unit-test.
         ]
         springboot: [
           2.7.18         -D spring-framework.version=5.3.31,
