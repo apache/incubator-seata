@@ -146,13 +146,13 @@ public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements P
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object decoded;
         try {
-            decoded = super.decode(ctx, in);
+            decoded = in;
             if (decoded instanceof ByteBuf) {
                 ByteBuf frame = (ByteBuf)decoded;
                 try {
                     return decodeFrame(frame);
                 } finally {
-                    frame.release();
+//                    frame.release();
                 }
             }
         } catch (Exception exx) {
