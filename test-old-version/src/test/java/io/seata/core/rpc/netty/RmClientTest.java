@@ -16,11 +16,9 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.netty.channel.Channel;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
-import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
 import io.seata.rm.tcc.TCCResource;
@@ -30,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * rm client test
@@ -39,8 +36,8 @@ public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
     private static DefaultResourceManager rm = null;
-    public static void testRm() throws TransactionException, NoSuchMethodException {
-        String resourceId = "mock-action";
+
+    public static void testRm(String resourceId) throws TransactionException, NoSuchMethodException {
         String xid = "1111";
 
         DefaultResourceManager rm = getRm(resourceId);
@@ -50,50 +47,37 @@ public class RmClientTest {
         Assertions.assertTrue(branchId > 0);
 
 
-        // branchReport:TYPE_BRANCH_STATUS_REPORT = 13 , TYPE_BRANCH_STATUS_REPORT_RESULT = 14
-        //lockQuery:TYPE_GLOBAL_LOCK_QUERY = 21 , TYPE_GLOBAL_LOCK_QUERY_RESULT = 22
-
-//        RmRpcClient remotingClient = RmRpcClient.getInstance();
-//        ConcurrentMap<String, Channel> channels = getChannelConcurrentMap(remotingClient);
-//        channels.forEach(
-//                (key, value) -> RmRpcClient.getInstance().sendRequest(value, HeartbeatMessage.PING));
+        // (not support)branchReport:TYPE_BRANCH_STATUS_REPORT = 13 , TYPE_BRANCH_STATUS_REPORT_RESULT = 14
+        // (not support)lockQuery:TYPE_GLOBAL_LOCK_QUERY = 21 , TYPE_GLOBAL_LOCK_QUERY_RESULT = 22
 
     }
 
 
-//    public static ConcurrentMap<String, Channel> getChannelConcurrentMap(RmRpcClient remotingClient) {
-//        return remotingClient.getClientChannelManager().getChannels();
-//    }
-
-
-
-
     public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
-        if(rm == null){
-            synchronized (RmClientTest.class){
-                if(rm == null){
+        if (rm == null) {
+            synchronized (RmClientTest.class) {
+                if (rm == null) {
+                    //register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
                     RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
 
                     DefaultResourceManager resourceManager = DefaultResourceManager.get();
                     resourceManager.getResourceManager(BranchType.TCC).getManagedResources().clear();
 
-                    //register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
-                    Action1 target = new Action1Impl();
-
-                    TCCResource tccResource = new TCCResource();
-                    tccResource.setActionName("action-061");
-                    tccResource.setTargetBean(target);
-                    tccResource.setPrepareMethod(target.getClass().getMethod("insert", Long.class, Map.class));
-                    tccResource.setCommitMethodName("commitTcc");
-                    tccResource.setRollbackMethodName("cancel");
-                    tccResource.setCommitMethod(ReflectionUtil.getMethod(Action1.class, "commitTcc", new Class[] {BusinessActionContext.class}));
-                    tccResource.setRollbackMethod(ReflectionUtil.getMethod(Action1.class, "cancel", new Class[] {BusinessActionContext.class}));
-                    resourceManager.registerResource(tccResource);
-                    LOGGER.info("registerResource ok");
                     rm = resourceManager;
                 }
             }
         }
+        Action1 target = new Action1Impl();
+        TCCResource tccResource = new TCCResource();
+        tccResource.setActionName(resourceId);
+        tccResource.setTargetBean(target);
+        tccResource.setPrepareMethod(target.getClass().getMethod("insert", Long.class, Map.class));
+        tccResource.setCommitMethodName("commitTcc");
+        tccResource.setRollbackMethodName("cancel");
+        tccResource.setCommitMethod(ReflectionUtil.getMethod(Action1.class, "commitTcc", new Class[]{BusinessActionContext.class}));
+        tccResource.setRollbackMethod(ReflectionUtil.getMethod(Action1.class, "cancel", new Class[]{BusinessActionContext.class}));
+        rm.registerResource(tccResource);
+        LOGGER.info("registerResource ok");
         return rm;
     }
 

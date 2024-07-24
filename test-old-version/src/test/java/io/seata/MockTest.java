@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 package io.seata;
+
 import io.seata.core.rpc.netty.Action1Impl;
 import io.seata.core.rpc.netty.ConfigurationTestHelper;
 import io.seata.core.rpc.netty.ProtocolTestConstants;
@@ -27,7 +28,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
-import io.seata.rm.RMClient;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.mockserver.MockCoordinator;
@@ -55,8 +55,6 @@ public class MockTest {
         ConfigurationFactory.reload();
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-        TmRpcClient.getInstance().destroy();
-        RmRpcClient.getInstance().destroy();
     }
 
     @AfterAll
@@ -101,23 +99,23 @@ public class MockTest {
 
     @Test
     public void testRm() throws Exception {
-        RmClientTest.testRm();
+        RmClientTest.testRm("testRM01");
     }
 
-    private String doTestCommit(int times) throws TransactionException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private String doTestCommit(int times) throws TransactionException, NoSuchMethodException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
         String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
+        logger.info("branch register ok, branchId=" + branchId);
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
-
     }
 
-    private String doTestRollback(int times) throws TransactionException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    private String doTestRollback(int times) throws TransactionException, NoSuchMethodException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
@@ -125,9 +123,9 @@ public class MockTest {
         logger.info("doTestRollback xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
+        logger.info("branch register ok, branchId=" + branchId);
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
         return xid;
-
     }
 }
