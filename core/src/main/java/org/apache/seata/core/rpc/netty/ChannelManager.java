@@ -34,7 +34,6 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.IncompatibleVersionException;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
