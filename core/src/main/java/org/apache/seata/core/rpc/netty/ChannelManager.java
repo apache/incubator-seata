@@ -133,7 +133,6 @@ public class ChannelManager {
      */
     public static void registerTMChannel(RegisterTMRequest request, Channel channel)
         throws IncompatibleVersionException {
-        Version.checkVersion(request.getVersion());
         RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
             request.getApplicationId(),
             request.getTransactionServiceGroup(),
@@ -155,7 +154,6 @@ public class ChannelManager {
      */
     public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
         throws IncompatibleVersionException {
-        Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {
