@@ -151,5 +151,4 @@ public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements P
             throw new DecodeException(exx);
         }
     }
-
 }
