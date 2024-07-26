@@ -24,11 +24,16 @@ public enum ErrorCode {
     /**
      * 0001 ~ 0099  Configuration related errors
      */
-    ERR_CONFIG(ErrorType.Config, 0001);
+    ERR_CONFIG(ErrorType.Config, 0001),
+
+    /**
+     * 0100 ~ 0199 Security related errors
+     */
+    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 0110);
+
     /**
      * The error code of the transaction exception.
      */
-
     private int code;
     private ErrorType type;
 
@@ -77,6 +82,10 @@ public enum ErrorCode {
          * Network error type.
          */
         Network,
+        /**
+         * Security related error type.
+         */
+        Security,
         /**
          * Tm error type.
          */
