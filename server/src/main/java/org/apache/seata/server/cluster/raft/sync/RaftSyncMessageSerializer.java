@@ -37,16 +37,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-public class    RaftSyncMessageSerializer {
+public class RaftSyncMessageSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSyncMessageSerializer.class);
 
-    private static final   List<String> PERMITS = new ArrayList<>();
+    private static final List<String> PERMITS = new ArrayList<>();
 
     static {
         PERMITS.add(RaftSyncMessage.class.getName());
-        PERMITS.add( io.seata.server.cluster.raft.sync.msg.RaftSyncMessage.class.getName());
-        PERMITS.add( "[B");
+        PERMITS.add(io.seata.server.cluster.raft.sync.msg.RaftSyncMessage.class.getName());
+        PERMITS.add("[B");
     }
 
     public static byte[] encode(RaftSyncMessage raftSyncMessage) throws IOException {
