@@ -76,11 +76,12 @@ public class    RaftSyncMessageSerializer {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(raftSyncMsgByte);
             ObjectInputStream ois = new ObjectInputStream(bin) {
                 boolean primitive = false;;
+
                 @Override
                 protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
                     if (!primitive) {
                         primitive = PERMIT_CLASSES.contains(
-                            Class.forName(desc.getName(), true, RaftSyncMessageSerializer.class.getClassLoader()));
+                            Class.forName(desc.getName(), false, RaftSyncMessageSerializer.class.getClassLoader()));
                         if (!primitive) {
                             throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,
                                 "Failed to deserialize object: " + desc.getName() + " is not permitted");
