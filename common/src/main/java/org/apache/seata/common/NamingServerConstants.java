@@ -52,18 +52,4 @@ public interface NamingServerConstants {
      */
     String DEFAULT_VGROUP_MAPPING = "vgroup_table";
 
-    /**
-     * The constant NAMESPACE_KEY
-     */
-    String NAMESPACE_KEY = "seata.registry.namingserver.namespace";
-
-    /**
-     * The constant CLUSTER_NAME_KEY
-     */
-    String CLUSTER_NAME_KEY = "seata.registry.namingserver.cluster";
-
-    /**
-     * The constant META_PREFIX
-     */
-    String META_PREFIX = "seata.registry.metadata.";
 }

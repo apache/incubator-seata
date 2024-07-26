@@ -69,11 +69,10 @@ public class VGroupMappingDataBaseDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SeataRuntimeException(ErrorCode.ERR_CONFIG, e);
         } finally {
             IOUtil.close(ps, conn);
         }
-        return false;
     }
 
     public boolean clearMappingDOByVGroup(String vGroup) {
@@ -87,11 +86,10 @@ public class VGroupMappingDataBaseDAO {
             ps.setString(1, vGroup);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SeataRuntimeException(ErrorCode.ERR_CONFIG, e);
         } finally {
             IOUtil.close(ps, conn);
         }
-        return false;
     }
 
     public boolean deleteMappingDOByVGroup(String vGroup) {

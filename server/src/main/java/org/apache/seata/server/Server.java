@@ -46,15 +46,15 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 
+import static org.apache.seata.common.ConfigurationKeys.CLUSTER_NAME_KEY;
 import static org.apache.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
 import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
+import static org.apache.seata.common.ConfigurationKeys.META_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.NAMESPACE_KEY;
 import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static org.apache.seata.common.NamingServerConstants.CLUSTER_NAME_KEY;
-import static org.apache.seata.common.NamingServerConstants.META_PREFIX;
-import static org.apache.seata.common.NamingServerConstants.NAMESPACE_KEY;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
