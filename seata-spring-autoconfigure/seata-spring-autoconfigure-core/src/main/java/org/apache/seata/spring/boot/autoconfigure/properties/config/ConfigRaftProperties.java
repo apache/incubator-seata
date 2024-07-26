@@ -38,32 +38,36 @@ public class ConfigRaftProperties {
         return metadataMaxAgeMs;
     }
 
-    public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
+    public ConfigRaftProperties setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
         this.metadataMaxAgeMs = metadataMaxAgeMs;
+        return this;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
+    public ConfigRaftProperties setUsername(String username) {
         this.username = username;
+        return this;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public ConfigRaftProperties setPassword(String password) {
         this.password = password;
+        return this;
     }
 
     public Long getTokenValidityInMilliseconds() {
         return tokenValidityInMilliseconds;
     }
 
-    public void setTokenValidityInMilliseconds(Long tokenValidityInMilliseconds) {
+    public ConfigRaftProperties setTokenValidityInMilliseconds(Long tokenValidityInMilliseconds) {
         this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
+        return this;
     }
 
     public String getServerAddr() {

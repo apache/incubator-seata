@@ -1012,7 +1012,7 @@ public interface ConfigurationKeys {
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
 
-    String CONFIG_STORE_PREFIX = FILE_ROOT_PREFIX_CONFIG + "db" + FILE_CONFIG_SPLIT_CHAR;
+    String CONFIG_STORE_PREFIX = FILE_ROOT_PREFIX_CONFIG + "raft" + FILE_CONFIG_SPLIT_CHAR + "db" + FILE_CONFIG_SPLIT_CHAR;
 
     /**
      * The constant CONFIG_STORE_TYPE

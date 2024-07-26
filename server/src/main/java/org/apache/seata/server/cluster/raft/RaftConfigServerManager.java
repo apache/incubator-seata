@@ -52,6 +52,8 @@ import static org.apache.seata.common.ConfigurationKeys.*;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
 import static org.apache.seata.common.DefaultValues.*;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
 /**
  * The type to manager raft server of config center
@@ -96,7 +98,13 @@ public class RaftConfigServerManager {
             int port = Integer.parseInt(System.getProperty(SERVER_RAFT_PORT_CAMEL, "0"));
             PeerId serverId = null;
             // XID may be null when configuration center is not initialized.
-            String host = XID.getIpAddress() == null? NetUtil.getLocalIp() : XID.getIpAddress();
+            String host = null;
+            if (XID.getIpAddress() == null){
+                String preferredNetworks = CONFIG.getConfig(REGISTRY_PREFERED_NETWORKS);
+                host = StringUtils.isNotBlank(preferredNetworks) ? NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)) : NetUtil.getLocalIp();
+            }else{
+                host = XID.getIpAddress();
+            }
             if (port <= 0) {
                 // Highly available deployments require different nodes
                 for (PeerId peer : initConf.getPeers()) {
