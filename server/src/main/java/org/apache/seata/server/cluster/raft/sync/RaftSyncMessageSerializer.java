@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-public class RaftSyncMessageSerializer {
+public class    RaftSyncMessageSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSyncMessageSerializer.class);
 
@@ -75,12 +75,16 @@ public class RaftSyncMessageSerializer {
     public static RaftSyncMessage decode(byte[] raftSyncMsgByte) {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(raftSyncMsgByte);
             ObjectInputStream ois = new ObjectInputStream(bin) {
+                boolean primitive = false;;
                 @Override
                 protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                    if (!PERMIT_CLASSES.contains(
-                        Class.forName(desc.getName(), true, RaftSyncMessageSerializer.class.getClassLoader()))) {
-                        throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,
-                            "Failed to deserialize object: " + desc.getName() + " is not permitted");
+                    if (!primitive) {
+                        primitive = PERMIT_CLASSES.contains(
+                            Class.forName(desc.getName(), true, RaftSyncMessageSerializer.class.getClassLoader()));
+                        if (!primitive) {
+                            throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,
+                                "Failed to deserialize object: " + desc.getName() + " is not permitted");
+                        }
                     }
                     return super.resolveClass(desc);
                 }
