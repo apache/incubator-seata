@@ -29,7 +29,7 @@ public enum ErrorCode {
     /**
      * 0100 ~ 0199 Security related errors
      */
-    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 0110);
+    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 156);
 
     /**
      * The error code of the transaction exception.
