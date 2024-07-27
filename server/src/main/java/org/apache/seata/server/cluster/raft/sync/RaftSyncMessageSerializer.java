@@ -21,7 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import org.apache.seata.common.exception.ErrorCode;
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.serializer.Serializer;
@@ -35,6 +40,14 @@ import org.slf4j.LoggerFactory;
 public class RaftSyncMessageSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSyncMessageSerializer.class);
+
+    private static final List<String> PERMITS = new ArrayList<>();
+
+    static {
+        PERMITS.add(RaftSyncMessage.class.getName());
+        PERMITS.add(io.seata.server.cluster.raft.sync.msg.RaftSyncMessage.class.getName());
+        PERMITS.add("[B");
+    }
 
     public static byte[] encode(RaftSyncMessage raftSyncMessage) throws IOException {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -62,12 +75,22 @@ public class RaftSyncMessageSerializer {
 
     public static RaftSyncMessage decode(byte[] raftSyncMsgByte) {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(raftSyncMsgByte);
-                ObjectInputStream ois = new ObjectInputStream(bin)) {
+            ObjectInputStream ois = new ObjectInputStream(bin) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                    if (!PERMITS.contains(desc.getName())) {
+                        throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,
+                            "Failed to deserialize object: " + desc.getName() + " is not permitted");
+                    }
+
+                    return super.resolveClass(desc);
+                }
+            }) {
             Object object = ois.readObject();
             RaftSyncMessage raftSyncMessage;
             if (object instanceof io.seata.server.cluster.raft.sync.msg.RaftSyncMessage) {
                 io.seata.server.cluster.raft.sync.msg.RaftSyncMessage oldRaftSyncMessage =
-                        (io.seata.server.cluster.raft.sync.msg.RaftSyncMessage)object;
+                    (io.seata.server.cluster.raft.sync.msg.RaftSyncMessage)object;
                 raftSyncMessage = new RaftSyncMessage();
                 raftSyncMessage.setCodec(oldRaftSyncMessage.getCodec());
                 raftSyncMessage.setCompressor(oldRaftSyncMessage.getCompressor());
@@ -77,13 +100,16 @@ public class RaftSyncMessageSerializer {
                 raftSyncMessage = (RaftSyncMessage)object;
             }
             Serializer serializer = EnhancedServiceLoader.load(Serializer.class,
-                    SerializerType.getByCode(raftSyncMessage.getCodec()).name());
+                SerializerType.getByCode(raftSyncMessage.getCodec()).name());
             Optional.ofNullable(raftSyncMessage.getBody())
-                    .ifPresent(value -> raftSyncMessage.setBody(serializer.deserialize(CompressorFactory
-                            .getCompressor(raftSyncMessage.getCompressor()).decompress((byte[])raftSyncMessage.getBody()))));
+                .ifPresent(value -> raftSyncMessage.setBody(serializer.deserialize(CompressorFactory
+                    .getCompressor(raftSyncMessage.getCompressor()).decompress((byte[])raftSyncMessage.getBody()))));
             return raftSyncMessage;
-        } catch (ClassNotFoundException | IOException e) {
+        } catch (Exception e) {
             LOGGER.info("Failed to read raft synchronization log: {}", e.getMessage(), e);
+            if (e instanceof SeataRuntimeException) {
+                throw (SeataRuntimeException)e;
+            }
             throw new RuntimeException(e);
         }
     }
