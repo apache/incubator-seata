@@ -29,7 +29,7 @@ public enum ErrorCode {
     /**
      * 0100 ~ 0199 Security related errors
      */
-    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 0156);
+    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 0156),
 
     /**
      * The error code of the transaction exception.
@@ -105,6 +105,10 @@ public enum ErrorCode {
          * Datasource error type.
          */
         Datasource,
+        /**
+         * Security error type.
+         */
+        Security,
         /**
          * Other error type.
          */
