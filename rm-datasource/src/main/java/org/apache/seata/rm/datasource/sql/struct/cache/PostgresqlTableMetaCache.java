@@ -112,6 +112,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsTable = dbmd.getTables(null, schemaName, tableName, new String[]{"TABLE"});
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
@@ -181,6 +182,19 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
+            }
+
+            while (rsTable.next()) {
+                String rsTableName = rsTable.getString("TABLE_NAME");
+                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                //set origin tableName with schema if necessary
+                if ("public".equalsIgnoreCase(rsTableSchema)) {
+                    //for compatibility reasons, old clients generally do not have the 'public' default schema by default.
+                    tm.setTableName(rsTableName);
+                } else {
+                    //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
+                    tm.setTableName(rsTableSchema + "." + rsTableName);
+                }
             }
         }
 
