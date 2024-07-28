@@ -43,7 +43,7 @@ public class FileVGroupMappingStoreManagerTest {
 
     @BeforeEach
     public void setUp() {
-        fileVGroupMappingStoreManager = new FileVGroupMappingStoreManager("vgroup_mapping.json", "sessionStore");
+        fileVGroupMappingStoreManager = new FileVGroupMappingStoreManager("sessionStore");
         File file = new File(STORE_PATH);
         if (file.exists()) {
             file.delete();
@@ -106,7 +106,7 @@ public class FileVGroupMappingStoreManagerTest {
 
     @Test
     public void testAddVGroupFailure() {
-        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager("testName", "src/test/resources"));
+        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager( "src/test/resources"));
         doReturn(false).when(spyManager).save(any(HashMap.class));
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup(VGROUP_NAME);
@@ -117,7 +117,7 @@ public class FileVGroupMappingStoreManagerTest {
 
     @Test
     public void testRemoveVGroupFailure() {
-        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager("testName", "src/test/resources"));
+        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager("src/test/resources"));
         doReturn(false).when(spyManager).save(any(HashMap.class));
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup(VGROUP_NAME);

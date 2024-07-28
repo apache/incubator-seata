@@ -70,12 +70,6 @@ public class SessionHolder {
      */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
 
-
-    /**
-     * The constant ROOT_MAPPING_MANAGER_NAME.
-     */
-    public static final String ROOT_MAPPING_MANAGER_NAME = "mapping.json";
-
     /**
      * The redis distributed lock expire time
      */
@@ -136,7 +130,7 @@ public class SessionHolder {
                     throw new StoreException("the {store.file.dir} is empty.");
                 }
                 ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.FILE.getName(),
-                    new Object[]{ROOT_MAPPING_MANAGER_NAME, vGroupMappingStorePath});
+                    new Object[]{vGroupMappingStorePath});
 
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
                     new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
@@ -302,14 +296,7 @@ public class SessionHolder {
 
 
     //region get group mapping manager
-
-    /**
-     * Gets root session manager.
-     *
-     * @return the root session manager
-     */
     public static VGroupMappingStoreManager getRootVGroupMappingManager() {
-
         if (ROOT_VGROUP_MAPPING_MANAGER == null) {
             init();
             if (ROOT_VGROUP_MAPPING_MANAGER == null) {

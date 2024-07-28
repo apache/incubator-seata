@@ -38,6 +38,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileVGroupMappingStoreManager.class);
 
+    public static final String ROOT_MAPPING_MANAGER_NAME = "mapping.json";
+
     private final ReentrantLock writeLock = new ReentrantLock();
 
     private String storePath;
@@ -48,8 +50,8 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
     public FileVGroupMappingStoreManager() {
     }
 
-    public FileVGroupMappingStoreManager(String name, String mappingStoreFilePath) {
-        storePath = mappingStoreFilePath + File.separator + name;
+    public FileVGroupMappingStoreManager(String mappingStoreFilePath) {
+        storePath = mappingStoreFilePath + File.separator + ROOT_MAPPING_MANAGER_NAME;
     }
 
     @Override
