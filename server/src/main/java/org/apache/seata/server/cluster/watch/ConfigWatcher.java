@@ -14,22 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.listener;
+package org.apache.seata.server.cluster.watch;
 
-import org.springframework.context.ApplicationEvent;
+import static org.apache.seata.server.cluster.watch.Watcher.Protocol.HTTP;
 
-/**
- * The type ClusterConfigChangeEvent
- */
-public class ClusterConfigChangeEvent extends ApplicationEvent {
-
+public class ConfigWatcher<T> {
     private String namespace;
+
     private String dataId;
 
-    public ClusterConfigChangeEvent(Object source, String namespace, String dataId) {
-        super(source);
+    private volatile boolean done = false;
+
+    private T asyncContext;
+
+    private long timeout;
+
+
+    private String protocol = HTTP;
+
+    public ConfigWatcher(String namespace, String dataId, T asyncContext, int timeout) {
         this.namespace = namespace;
         this.dataId = dataId;
+        this.asyncContext = asyncContext;
+        this.timeout = System.currentTimeMillis() + timeout;
     }
 
     public String getNamespace() {
@@ -46,5 +53,37 @@ public class ClusterConfigChangeEvent extends ApplicationEvent {
 
     public void setDataId(String dataId) {
         this.dataId = dataId;
+    }
+
+    public boolean isDone() {
+        return done;
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
+    }
+
+    public T getAsyncContext() {
+        return asyncContext;
+    }
+
+    public void setAsyncContext(T asyncContext) {
+        this.asyncContext = asyncContext;
+    }
+
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 }

@@ -22,31 +22,42 @@ import org.apache.seata.server.cluster.raft.processor.request.ConfigOperationReq
 
 import java.io.Serializable;
 
-import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_GROUP;
-import static org.apache.seata.common.Constants.DEFAULT_STORE_GROUP;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
 
 
 public class ConfigOperationDTO implements Serializable {
     private static final long serialVersionUID = -1237293571963636954L;
 
     private ConfigOperationType optType;
-    private String group = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(CONFIG_STORE_GROUP, DEFAULT_STORE_GROUP);;
+    private String namespace = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(CONFIG_STORE_NAMESPACE, DEFAULT_STORE_NAMESPACE);;
+    private String dataId = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(CONFIG_STORE_DATA_ID, DEFAULT_STORE_DATA_ID);
     private String key;
     private Object value;
 
     public ConfigOperationDTO() {
     }
 
-    public ConfigOperationDTO(ConfigOperationType optType, String group, String key, Object value) {
+    public ConfigOperationDTO(ConfigOperationType optType, String namespace, String dataId, String key, Object value) {
         this.optType = optType;
-        this.group = group;
+        this.namespace = namespace;
+        this.dataId = dataId;
         this.key = key;
         this.value = value;
     }
 
-    public ConfigOperationDTO(ConfigOperationType optType, String group, String key){
+    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key, Object value) {
         this.optType = optType;
-        this.group = group;
+        this.dataId = dataId;
+        this.key = key;
+        this.value = value;
+    }
+
+    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key){
+        this.optType = optType;
+        this.dataId = dataId;
         this.key = key;
     }
     public ConfigOperationDTO(ConfigOperationType optType,  String key){
@@ -68,12 +79,20 @@ public class ConfigOperationDTO implements Serializable {
         this.optType = optType;
     }
 
-    public String getGroup() {
-        return group;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getDataId() {
+        return dataId;
+    }
+
+    public void setDataId(String dataId) {
+        this.dataId = dataId;
     }
 
     public String getKey() {
@@ -93,14 +112,15 @@ public class ConfigOperationDTO implements Serializable {
     }
 
     public static ConfigOperationDTO convertConfigRequest2Dto(ConfigOperationRequest request) {
-        return new ConfigOperationDTO(request.getOptType(), request.getGroup(), request.getKey(), request.getValue());
+        return new ConfigOperationDTO(request.getOptType(), request.getNamespace(), request.getDataId(), request.getKey(), request.getValue());
     }
 
     @Override
     public String toString() {
         return "ConfigOperationDTO{" +
                 "optType=" + optType +
-                ", group='" + group + '\'' +
+                ", namespace='" + namespace + '\'' +
+                ", dataId='" + dataId + '\'' +
                 ", key='" + key + '\'' +
                 ", value=" + value +
                 '}';

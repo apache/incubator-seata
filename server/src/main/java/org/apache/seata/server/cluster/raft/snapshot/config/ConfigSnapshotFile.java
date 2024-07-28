@@ -62,7 +62,7 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
 
     @Override
     public Status save(SnapshotWriter writer) {
-        Map<String, Object> configMap = configStoreManager.getConfigMap();
+        Map<String, Map<String, Object>> configMap = configStoreManager.getConfigMap();
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         raftSnapshot.setBody(configMap);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.config);
@@ -91,7 +91,7 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
         String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
         try {
             LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            Map<String, Object> configMap = (Map<String, Object>)load(path);
+            Map<String, Map<String, Object>> configMap = (Map<String, Map<String, Object>>)load(path);
             ConfigStoreManager configStoreManager = RocksDBConfigStoreManager.getInstance();
             configStoreManager.clearData();
             configStoreManager.putConfigMap(configMap);

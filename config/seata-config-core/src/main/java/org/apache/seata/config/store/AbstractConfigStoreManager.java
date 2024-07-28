@@ -27,48 +27,49 @@ import java.util.Map;
  */
 public abstract class AbstractConfigStoreManager implements ConfigStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractConfigStoreManager.class);
+
     @Override
-    public String get(String group, String key) {
+    public String get(String namespace, String dataId, String key) {
         return null;
     }
 
     @Override
-    public Map<String, Object> getAll(String group) {
+    public Map<String, Object> getAll(String namespace, String dataId) {
         return new HashMap<>();
     }
 
     @Override
-    public Boolean put(String group, String key, Object value) {
+    public Boolean put(String namespace, String dataId, String key, Object value) {
         return Boolean.FALSE;
     }
 
     @Override
-    public Boolean delete(String group, String key) {
+    public Boolean delete(String namespace, String dataId, String key) {
         return Boolean.FALSE;
     }
 
     @Override
-    public Boolean putAll(String group, Map<String, Object> configMap) {
+    public Boolean putAll(String namespace, String dataId, Map<String, Object> configMap) {
         return Boolean.FALSE;
     }
 
     @Override
-    public Boolean deleteAll(String group) {
+    public Boolean deleteAll(String namespace, String dataId) {
         return Boolean.FALSE;
     }
 
     @Override
-    public Boolean isEmpty(String group) {
+    public Boolean isEmpty(String namespace, String dataId) {
         return Boolean.TRUE;
     }
 
     @Override
-    public Map<String, Object> getConfigMap() {
+    public Map<String, Map<String, Object>> getConfigMap() {
         return new HashMap<>();
     }
 
     @Override
-    public Boolean putConfigMap(Map<String, Object> configMap) {
+    public Boolean putConfigMap(Map<String, Map<String, Object>> configMap) {
         return Boolean.FALSE;
     }
 
@@ -81,6 +82,5 @@ public abstract class AbstractConfigStoreManager implements ConfigStoreManager {
     public void destroy() {}
 
     public abstract void shutdown();
-
 
 }

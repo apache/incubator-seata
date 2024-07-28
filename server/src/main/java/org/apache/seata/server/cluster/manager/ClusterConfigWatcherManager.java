@@ -17,11 +17,9 @@
 package org.apache.seata.server.cluster.manager;
 
 import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
-import org.apache.seata.server.cluster.listener.ClusterChangeListener;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeListener;
-import org.apache.seata.server.cluster.watch.Watcher;
+import org.apache.seata.server.cluster.watch.ConfigWatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -48,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class ClusterConfigWatcherManager implements ClusterConfigChangeListener {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    private static final Map<String/*config group*/, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
+    private static final Map<String/*namespace*/, Map<String/*dataId*/, Queue<ConfigWatcher<?>>>> WATCHERS = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
             new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
@@ -57,21 +55,24 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
     public void init() {
         // Responds to monitors that time out
         scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
-            for (String group : WATCHERS.keySet()) {
-                Optional.ofNullable(WATCHERS.remove(group))
-                        .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                            if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                HttpServletResponse httpServletResponse =
-                                        (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                                watcher.setDone(true);
-                                httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                                ((AsyncContext)watcher.getAsyncContext()).complete();
-                            }
-                            if (!watcher.isDone()) {
-                                // Re-register
-                                registryWatcher(watcher);
-                            }
-                        }));
+            for (String namespace : WATCHERS.keySet()) {
+                Map<String, Queue<ConfigWatcher<?>>> dataIdWatchersMap = WATCHERS.get(namespace);
+                for (String dataId : dataIdWatchersMap.keySet()) {
+                    Optional.ofNullable(dataIdWatchersMap.remove(dataId))
+                            .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                                if (System.currentTimeMillis() >= watcher.getTimeout()) {
+                                    HttpServletResponse httpServletResponse =
+                                            (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
+                                    watcher.setDone(true);
+                                    httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                                    ((AsyncContext)watcher.getAsyncContext()).complete();
+                                }
+                                if (!watcher.isDone()) {
+                                    // Re-register
+                                    registryWatcher(watcher);
+                                }
+                            }));
+                }
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
@@ -79,11 +80,14 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
     @EventListener
     @Async
     public void onChangeEvent(ClusterConfigChangeEvent event) {
-        Optional.ofNullable(WATCHERS.remove(event.getGroup()))
+        String namespace = event.getNamespace();
+        String dataId = event.getDataId();
+        Map<String, Queue<ConfigWatcher<?>>> dataIdWatchersMap = WATCHERS.get(namespace);
+        Optional.ofNullable(dataIdWatchersMap.remove(dataId))
                 .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
     }
 
-    private void notify(Watcher<?> watcher) {
+    private void notify(ConfigWatcher<?> watcher) {
         AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
         HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
         watcher.setDone(true);
@@ -95,8 +99,10 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
         asyncContext.complete();
     }
 
-    public void registryWatcher(Watcher<?> watcher) {
-        String group = watcher.getGroup();
-        WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
+    public void registryWatcher(ConfigWatcher<?> watcher) {
+        String namespace = watcher.getNamespace();
+        String dataId = watcher.getDataId();
+        WATCHERS.computeIfAbsent(namespace, ns -> new ConcurrentHashMap<>())
+                .computeIfAbsent(dataId, did -> new ConcurrentLinkedQueue<>()).add(watcher);
     }
 }

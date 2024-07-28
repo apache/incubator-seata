@@ -46,6 +46,7 @@ import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.processor.request.ConfigOperationRequest;
 import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationResponse;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
+import org.apache.seata.server.cluster.watch.ConfigWatcher;
 import org.apache.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,8 +177,8 @@ public class ClusterController {
     }
 
     @GetMapping("/config/get")
-    public ConfigOperationResponse getConfig(String group, String key) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildGetRequest(group, key);
+    public ConfigOperationResponse getConfig(String namespace, String dataId, String key) {
+        ConfigOperationRequest request = ConfigOperationRequest.buildGetRequest(namespace, dataId, key);
 
         PeerId leader = RaftConfigServerManager.getLeader();
         if (leader == null) {
@@ -190,14 +191,14 @@ public class ClusterController {
         try {
             return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
-            LOGGER.error("Failed to get value for key: {} in group: {}: ",key, group, e);
+            LOGGER.error("Failed to get value for key: {} in namespace: {} and dataId: {}!",key, namespace, dataId, e);
             return ConfigOperationResponse.fail(e.getMessage());
         }
     }
 
     @PostMapping("/config/put")
-    public ConfigOperationResponse putConfig(String group, String key, String value) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildPutRequest(group, key, value);
+    public ConfigOperationResponse putConfig(String namespace, String dataId, String key, String value) {
+        ConfigOperationRequest request = ConfigOperationRequest.buildPutRequest(namespace, dataId, key, value);
 
         PeerId leader = RaftConfigServerManager.getLeader();
         if (leader == null) {
@@ -210,14 +211,14 @@ public class ClusterController {
         try {
             return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
-            LOGGER.error("Failed to put value: {} for key: {} in group: {}: ", value, key, group, e);
+            LOGGER.error("Failed to put value: {} for key: {} in namespace: {} and dataId: {}!", value, key, namespace, dataId, e);
             return ConfigOperationResponse.fail(e.getMessage());
         }
     }
 
     @DeleteMapping("/config/delete")
-    public ConfigOperationResponse deleteConfig(String group, String key) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildDeleteRequest(group, key);
+    public ConfigOperationResponse deleteConfig(String namespace, String dataId, String key) {
+        ConfigOperationRequest request = ConfigOperationRequest.buildDeleteRequest(namespace, dataId, key);
 
         PeerId leader = RaftConfigServerManager.getLeader();
         if (leader == null) {
@@ -230,14 +231,14 @@ public class ClusterController {
         try {
             return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
-            LOGGER.error("Failed to delete key: {} in group: {}: ", key, group, e);
+            LOGGER.error("Failed to delete key: {} in namespace: {} and dataId: {}!", key, namespace, dataId, e);
             return ConfigOperationResponse.fail(e.getMessage());
         }
     }
 
     @GetMapping("/config/getAll")
-    public ConfigOperationResponse getAllConfig(String group) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildGetAllRequest(group);
+    public ConfigOperationResponse getAllConfig(String namespace, String dataId) {
+        ConfigOperationRequest request = ConfigOperationRequest.buildGetAllRequest(namespace, dataId);
 
         PeerId leader = RaftConfigServerManager.getLeader();
         if (leader == null) {
@@ -250,7 +251,7 @@ public class ClusterController {
         try {
             return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
-            LOGGER.error("Failed to get all configs in group:{}: ", group, e);
+            LOGGER.error("Failed to get all configs in namespace: {} and dataId: {}!", namespace, dataId, e);
             return ConfigOperationResponse.fail(e.getMessage());
         }
     }
@@ -269,12 +270,12 @@ public class ClusterController {
     }
 
     @PostMapping("/config/watch")
-    public void watch(HttpServletRequest request, @RequestParam String group,
+    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId,
                       @RequestParam(defaultValue = "28000") int timeout) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(group, context, timeout, 0L);
-        clusterConfigWatcherManager.registryWatcher(watcher);
+        ConfigWatcher<AsyncContext> configWatcher = new ConfigWatcher<>(namespace, dataId, context, timeout);
+        clusterConfigWatcherManager.registryWatcher(configWatcher);
     }
 
 }

@@ -1030,8 +1030,11 @@ public interface ConfigurationKeys {
     String CONFIG_STORE_DESTROY_ON_SHUTDOWN = CONFIG_STORE_PREFIX + "destroyOnShutdown";
 
     /**
-     * The constant CONFIG_STORE_GROUP
+     * The constant CONFIG_STORE_NAMESPACE
      */
-    String CONFIG_STORE_GROUP = CONFIG_STORE_PREFIX + "group";
-
+    String CONFIG_STORE_NAMESPACE = CONFIG_STORE_PREFIX + "namespace";
+    /**
+     * The constant CONFIG_STORE_DATA_ID
+     */
+    String CONFIG_STORE_DATA_ID = CONFIG_STORE_PREFIX + "dataId";
 }

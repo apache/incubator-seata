@@ -24,45 +24,49 @@ import java.io.Serializable;
 public class ConfigOperationRequest implements Serializable {
     private static final long serialVersionUID = -1149573667621259458L;
     private ConfigOperationType optType;
-    private String group;
+    private String namespace;
+    private String dataId;
     private String key;
     private String value;
 
     public ConfigOperationRequest() {
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType, String group) {
+    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId) {
         this.optType = optType;
-        this.group = group;
+        this.namespace = namespace;
+        this.dataId = dataId;
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType, String group, String key) {
+    public ConfigOperationRequest(ConfigOperationType optType,String namespace, String dataId, String key) {
         this.optType = optType;
-        this.group = group;
+        this.namespace = namespace;
+        this.dataId = dataId;
         this.key = key;
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType, String group, String key, String value) {
+    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId, String key, String value) {
         this.optType = optType;
-        this.group = group;
+        this.namespace = namespace;
+        this.dataId = dataId;
         this.key = key;
         this.value = value;
     }
 
-    public static ConfigOperationRequest buildGetRequest(String group, String key) {
-        return new ConfigOperationRequest(ConfigOperationType.GET, group, key);
+    public static ConfigOperationRequest buildGetRequest(String namespace, String dataId, String key) {
+        return new ConfigOperationRequest(ConfigOperationType.GET, namespace, dataId, key);
     }
 
-    public static ConfigOperationRequest buildPutRequest(String group, String key, String value) {
-        return new ConfigOperationRequest(ConfigOperationType.PUT, group, key, value);
+    public static ConfigOperationRequest buildPutRequest(String namespace, String dataId, String key, String value) {
+        return new ConfigOperationRequest(ConfigOperationType.PUT, namespace, dataId, key, value);
     }
 
-    public static ConfigOperationRequest buildDeleteRequest(String group, String key) {
-        return new ConfigOperationRequest(ConfigOperationType.DELETE, group, key);
+    public static ConfigOperationRequest buildDeleteRequest(String namespace, String dataId, String key) {
+        return new ConfigOperationRequest(ConfigOperationType.DELETE, namespace, dataId, key);
     }
 
-    public static ConfigOperationRequest buildGetAllRequest(String group) {
-        return new ConfigOperationRequest(ConfigOperationType.GET_ALL, group);
+    public static ConfigOperationRequest buildGetAllRequest(String namespace, String dataId) {
+        return new ConfigOperationRequest(ConfigOperationType.GET_ALL, namespace, dataId);
     }
 
     public ConfigOperationType getOptType() {
@@ -72,12 +76,20 @@ public class ConfigOperationRequest implements Serializable {
         this.optType = optType;
     }
 
-    public String getGroup() {
-        return group;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getDataId() {
+        return dataId;
+    }
+
+    public void setDataId(String dataId) {
+        this.dataId = dataId;
     }
 
     public String getKey() {

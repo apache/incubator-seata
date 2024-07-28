@@ -236,9 +236,14 @@ public interface Constants {
     String APPLICATION_TYPE_CLIENT = "client";
 
     /**
-     * The constant DEFAULT_DB_CONFIG_KEY in raft configuration
+     * The constant DEFAULT_STORE_NAMESPACE in raft configuration
      */
-    String DEFAULT_STORE_GROUP = "SEATA_GROUP";
+
+    String DEFAULT_STORE_NAMESPACE = "default";
+    /**
+     * The constant DEFAULT_STORE_DATA_ID in raft configuration
+     */
+    String DEFAULT_STORE_DATA_ID = "seata.properties";
 
     /**
      * The constant RAFT_CONFIG_GROUP

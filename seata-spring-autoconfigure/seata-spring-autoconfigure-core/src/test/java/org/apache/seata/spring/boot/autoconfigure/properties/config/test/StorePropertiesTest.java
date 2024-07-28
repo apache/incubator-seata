@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 public class StorePropertiesTest extends BasePropertiesTest {
     @Bean("testConfigStoreProperties")
     public ConfigStoreProperties configStoreProperties() {
-        return new ConfigStoreProperties().setType(STR_TEST_AAA).setDir(STR_TEST_BBB).setDestroyOnShutdown(false).setGroup(STR_TEST_DDD);
+        return new ConfigStoreProperties().setType(STR_TEST_AAA).setDir(STR_TEST_BBB).setDestroyOnShutdown(false).setNamespace(STR_TEST_DDD).setDataId(STR_TEST_EEE);
     }
 
     @Test
@@ -48,6 +48,7 @@ public class StorePropertiesTest extends BasePropertiesTest {
         assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.raft.db.type"));
         assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.raft.db.dir"));
         assertFalse(currentConfiguration.getBoolean("config.raft.db.destroyOnShutdown"));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.raft.db.group"));
+        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.raft.db.namespace"));
+        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig("config.raft.db.dataId"));
     }
 }

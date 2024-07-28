@@ -31,23 +31,23 @@ import java.util.Properties;
  *
  */
 public interface ConfigStoreManager {
-    String get(String group, String key);
+    String get(String namespace, String dataId, String key);
 
-    Map<String, Object> getAll(String group);
+    Map<String, Object> getAll(String namespace, String dataId);
 
-    Boolean put(String group, String key, Object value);
+    Boolean put(String namespace, String dataId, String key, Object value);
 
-    Boolean delete(String group, String key);
+    Boolean delete(String namespace, String dataId, String key);
 
-    Boolean putAll(String group, Map<String, Object> configMap);
+    Boolean putAll(String namespace, String dataId, Map<String, Object> configMap);
 
-    Boolean deleteAll(String group);
+    Boolean deleteAll(String namespace, String dataId);
 
-    Boolean isEmpty(String group);
+    Boolean isEmpty(String namespace, String dataId);
 
-    Map<String, Object> getConfigMap();
+    Map<String, Map<String, Object>> getConfigMap();
 
-    Boolean putConfigMap(Map<String, Object> configMap);
+    Boolean putConfigMap(Map<String, Map<String, Object>> configMap);
 
     Boolean clearData();
     void destroy();

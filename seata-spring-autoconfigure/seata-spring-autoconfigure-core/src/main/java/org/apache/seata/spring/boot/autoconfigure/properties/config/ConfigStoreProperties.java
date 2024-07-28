@@ -31,7 +31,8 @@ public class ConfigStoreProperties {
     private String type = "rocksdb";
     private String dir = "configStore";
     private boolean destroyOnShutdown = false;
-    private String group = "SEATA_GROUP";
+    private String namespace = "SEATA_GROUP";
+    private String dataId = "seata.properties";
 
     public String getType() {
         return type;
@@ -60,12 +61,21 @@ public class ConfigStoreProperties {
         return this;
     }
 
-    public String getGroup() {
-        return group;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public ConfigStoreProperties setGroup(String group) {
-        this.group = group;
+    public ConfigStoreProperties setNamespace(String namespace) {
+        this.namespace = namespace;
+        return this;
+    }
+
+    public String getDataId() {
+        return dataId;
+    }
+
+    public ConfigStoreProperties setDataId(String dataId) {
+        this.dataId = dataId;
         return this;
     }
 }

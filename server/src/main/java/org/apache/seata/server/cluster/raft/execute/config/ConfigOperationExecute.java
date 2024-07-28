@@ -53,37 +53,37 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
     }
 
     private ConfigOperationResponse get(ConfigOperationDTO configOperation) {
-        String result = configStoreManager.get(configOperation.getGroup(), configOperation.getKey());
+        String result = configStoreManager.get(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey());
         return ConfigOperationResponse.success(result);
     }
 
     private ConfigOperationResponse put(ConfigOperationDTO configOperation) {
-        Boolean success = configStoreManager.put(configOperation.getGroup(), configOperation.getKey(), configOperation.getValue());
+        Boolean success = configStoreManager.put(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey(), configOperation.getValue());
         if (success) {
             // ApplicationContext may not have been started at this point
             if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getGroup()));
+                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
-            LOGGER.info("config group: {}, config change event: {}", configOperation.getGroup(), configOperation.getOptType());
+            LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
         return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse delete(ConfigOperationDTO configOperation) {
-        Boolean success = configStoreManager.delete(configOperation.getGroup(), configOperation.getKey());
+        Boolean success = configStoreManager.delete(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey());
         if (success) {
             if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getGroup()));
+                        .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
-            LOGGER.info("config group: {}, config change event: {}", configOperation.getGroup(), configOperation.getOptType());
+            LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
         return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse getAll(ConfigOperationDTO configOperation) {
-        Map<String, Object> configMap = configStoreManager.getAll(configOperation.getGroup());
+        Map<String, Object> configMap = configStoreManager.getAll(configOperation.getNamespace(), configOperation.getDataId());
         return ConfigOperationResponse.success(configMap);
     }
 }

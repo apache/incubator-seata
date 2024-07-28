@@ -16,14 +16,15 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
+import org.rocksdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The RocksDB Factory
@@ -34,25 +35,26 @@ public class RocksDBFactory {
 
     private static volatile RocksDB instance = null;
 
+
     static {
         RocksDB.loadLibrary();
     }
 
-    public static RocksDB getInstance(String dbPath, Options options) {
+    public static RocksDB getInstance(String dbPath, DBOptions dbOptions, List<ColumnFamilyDescriptor> columnFamilyDescriptors, List<ColumnFamilyHandle> columnFamilyHandles) {
         if (instance == null) {
             synchronized (RocksDBFactory.class) {
                 if (instance == null) {
-                    instance = build(dbPath,options);
+                    instance = build(dbPath, dbOptions, columnFamilyDescriptors, columnFamilyHandles);
                 }
             }
         }
         return instance;
     }
 
-    private static RocksDB build(String dbPath, Options options) {
+    private static RocksDB build(String dbPath, DBOptions dbOptions, List<ColumnFamilyDescriptor> columnFamilyDescriptors, List<ColumnFamilyHandle> columnFamilyHandles) {
         try {
             checkPath(dbPath);
-            return RocksDB.open(options, dbPath);
+            return RocksDB.open(dbOptions, dbPath, columnFamilyDescriptors, columnFamilyHandles);
         }catch (RocksDBException | IOException e){
             LOGGER.error("RocksDB open error: {}", e.getMessage(), e);
             return null;

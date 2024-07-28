@@ -50,9 +50,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_GROUP;
-import static org.apache.seata.common.Constants.DEFAULT_STORE_GROUP;
-import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
+import static org.apache.seata.common.Constants.*;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
@@ -66,7 +66,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String RAFT_GROUP = RAFT_CONFIG_GROUP;
     private static final String RAFT_CLUSTER = DEFAULT_SEATA_GROUP;
-    private static final String CONFIG_GROUP;
+    private static final String CONFIG_NAMESPACE;
+    private static final String CONFIG_DATA_ID;
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -97,7 +98,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         USERNAME = FILE_CONFIG.getConfig(getRaftUsernameKey());
         PASSWORD = FILE_CONFIG.getConfig(getRaftPasswordKey());
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = FILE_CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
-        CONFIG_GROUP = FILE_CONFIG.getConfig(CONFIG_STORE_GROUP, DEFAULT_STORE_GROUP);
+        CONFIG_NAMESPACE = FILE_CONFIG.getConfig(CONFIG_STORE_NAMESPACE, DEFAULT_STORE_NAMESPACE);
+        CONFIG_DATA_ID = FILE_CONFIG.getConfig(CONFIG_STORE_DATA_ID, DEFAULT_STORE_DATA_ID);
     }
     public static String jwtToken;
     public static RaftConfigurationClient getInstance() {
@@ -118,11 +120,11 @@ public class RaftConfigurationClient extends AbstractConfiguration {
 
     private static void initClientConfig() {
         try {
-            Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_GROUP);
+            Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
             if (configMap != null) {
                 seataConfig.putAll(configMap);
             }
-            CONFIG_LISTENER = new ConfigStoreListener(CONFIG_GROUP, null);
+            CONFIG_LISTENER = new ConfigStoreListener(CONFIG_NAMESPACE, null);
             startQueryConfigData();
         }catch (RetryableException e){
             LOGGER.error("init config properties error", e);
@@ -200,7 +202,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
     }
 
-    private static Map<String, Object> acquireClusterConfigData(String clusterName, String group, String configGroup) throws RetryableException {
+    private static Map<String, Object> acquireClusterConfigData(String clusterName, String group, String configNamespace, String configDataId) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -212,7 +214,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
-            param.put("group", configGroup);
+            param.put("namespace", configNamespace);
+            param.put("dataId", configDataId);
             String response = null;
             try (CloseableHttpResponse httpResponse =
                          HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/config/getAll", param, header, 1000)) {
@@ -322,7 +325,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                 // Cluster config changes or reaches timeout refresh time
                                 if (fetch) {
                                     try {
-                                        Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_GROUP);
+                                        Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
                                         if(CollectionUtils.isNotEmpty(configMap)) {
                                             notifyConfigMayChange(configMap);
                                         }
@@ -399,7 +402,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         String tcAddress = queryHttpAddress(RAFT_CLUSTER, RAFT_GROUP);
         Map<String, String> param = new HashMap<>();
-        param.put("group", CONFIG_GROUP);
+        param.put("namespace", CONFIG_NAMESPACE);
+        param.put("dataId", CONFIG_DATA_ID);
         if (isTokenExpired()) {
             refreshToken(tcAddress);
         }
@@ -478,7 +482,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         String value = seataConfig.getProperty(dataId);
         if (value == null) {
             try {
-                Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_GROUP);
+                Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
                 if (CollectionUtils.isNotEmpty(configMap)) {
                     value = configMap.get(dataId) == null ? null : configMap.get(dataId).toString();
                 }
@@ -540,7 +544,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
 
     private static void notifyConfigMayChange(Map<String, Object> configMap) {
         String configStr = ConfigStoreManager.convertConfig2Str(configMap);
-        CONFIG_LISTENER.onChangeEvent(new ConfigurationChangeEvent(CONFIG_GROUP, configStr));
+        CONFIG_LISTENER.onChangeEvent(new ConfigurationChangeEvent(CONFIG_NAMESPACE, configStr));
     }
 
 
@@ -611,7 +615,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            if (CONFIG_GROUP.equals(event.getDataId())) {
+            if (CONFIG_NAMESPACE.equals(event.getDataId())) {
                 Properties seataConfigNew = new Properties();
                 Map<String, Object> newConfigMap = ConfigStoreManager.convertConfigStr2Map(event.getNewValue());
                 if (CollectionUtils.isNotEmpty(newConfigMap)) {
@@ -626,7 +630,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                         ConfigurationChangeEvent newEvent = new ConfigurationChangeEvent()
                                 .setDataId(listenedDataId)
                                 .setNewValue(propertyNew)
-                                .setNamespace(CONFIG_GROUP)
+                                .setNamespace(CONFIG_NAMESPACE)
                                 .setChangeType(ConfigurationChangeType.MODIFY);
 
                         // 通知ConfigurationCache
