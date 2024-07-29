@@ -20,14 +20,21 @@ import java.lang.reflect.Method;
 
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.aopalliance.intercept.MethodInvocation;
+import org.springframework.aop.framework.ReflectiveMethodInvocation;
 
 
 public class AdapterInvocationWrapper implements InvocationWrapper {
 
-    private MethodInvocation invocation;
-
+    private final MethodInvocation invocation;
+    private final Object proxy;
     public AdapterInvocationWrapper(MethodInvocation invocation) {
         this.invocation = invocation;
+        if (invocation instanceof ReflectiveMethodInvocation) {
+            ReflectiveMethodInvocation reflectiveInvocation = (ReflectiveMethodInvocation) invocation;
+            this.proxy = reflectiveInvocation.getProxy();
+        } else {
+            this.proxy = null;
+        }
     }
 
     @Override
@@ -37,7 +44,7 @@ public class AdapterInvocationWrapper implements InvocationWrapper {
 
     @Override
     public Object getProxy() {
-        return null;
+        return this.proxy;
     }
 
     @Override

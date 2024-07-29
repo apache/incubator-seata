@@ -17,11 +17,7 @@
 package org.apache.seata.spring.annotation;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
@@ -30,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
@@ -50,6 +47,11 @@ import org.apache.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
 import org.apache.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
 import org.apache.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
 import org.apache.seata.rm.RMClient;
+import org.apache.seata.rm.fence.interceptor.TccFenceCommitInterceptor;
+import org.apache.seata.rm.fence.interceptor.TccFencePrepareInterceptor;
+import org.apache.seata.rm.fence.interceptor.TccFenceRollbackInterceptor;
+import org.apache.seata.rm.tcc.api.LocalTCC;
+import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import org.apache.seata.spring.remoting.parser.RemotingFactoryBeanParser;
 import org.apache.seata.spring.util.OrderUtil;
@@ -61,9 +63,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.TargetSource;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.DisposableBean;
@@ -76,6 +82,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
@@ -327,11 +335,167 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         advised.addAdvisor(pos, avr);
                     }
                 }
+                addTccFenceAdvisorsForBean(bean);
                 PROXYED_SET.add(beanName);
                 return bean;
             }
         } catch (Exception exx) {
             throw new RuntimeException(exx);
+        }
+    }
+
+    /**
+     * Add tcc fence advisors to the bean
+     * @param bean bean
+     * @throws Exception
+     */
+    private static void addTccFenceAdvisorsForBean(Object bean) throws Exception {
+        List<Advisor> advisorsBeforeTransactionalInterceptor = getTccFenceAdvisorsForBean(bean);
+        AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
+        if (CollectionUtils.isNotEmpty(advisorsBeforeTransactionalInterceptor)) {
+            for (Advisor avr : advisorsBeforeTransactionalInterceptor) {
+                addAdvisorAfterTransactionalInterceptor(avr, advised);
+            }
+        }
+    }
+
+    /**
+     * get tcc fence advisors from Bean
+     * @param bean the raw bean instance
+     * @return tcc fence advisors
+     */
+    private static List<Advisor> getTccFenceAdvisorsForBean(Object bean) {
+        Class<?> beanClass = bean.getClass();
+
+        // Check the @LocalTCC annotation on the class
+        LocalTCC localTCCAnnotation = AnnotatedElementUtils.findMergedAnnotation(beanClass, LocalTCC.class);
+        if (localTCCAnnotation != null) {
+            ProxyFactory proxyFactory = new ProxyFactory(bean);
+            // Get all methods
+            Method[] methods = beanClass.getDeclaredMethods();
+            Set<Method> processedMethods = new HashSet<>();
+            List<Advisor> advisors = new ArrayList<>();
+            for (Method prepareMethod : methods) {
+                // Check the @TwoPhaseBusinessAction annotation and its properties on the method
+                TwoPhaseBusinessAction annotation = AnnotatedElementUtils.findMergedAnnotation(prepareMethod, TwoPhaseBusinessAction.class);
+                if (annotation != null && annotation.useTCCFence() && !processedMethods.contains(prepareMethod)) {
+                    String commitMethodName = annotation.commitMethod();
+                    Class<?>[] commitArgsClasses = annotation.commitArgsClasses();
+                    String rollbackMethodName = annotation.rollbackMethod();
+                    Class<?>[] rollbackArgsClasses = annotation.rollbackArgsClasses();
+                    Method commitMethod = findMethodBySignature(beanClass, commitMethodName, commitArgsClasses);
+                    Method rollbackMethod = findMethodBySignature(beanClass, rollbackMethodName, rollbackArgsClasses);
+                    processedMethods.add(prepareMethod);
+                    advisors.add(createAdvisorForTccFence(bean, prepareMethod, new TccFencePrepareInterceptor()));
+                    if (commitMethod != null) {
+                        processedMethods.add(commitMethod);
+                        advisors.add(createAdvisorForTccFence(bean, commitMethod, new TccFenceCommitInterceptor()));
+                    }
+                    if (rollbackMethod != null) {
+                        processedMethods.add(rollbackMethod);
+                        advisors.add(createAdvisorForTccFence(bean, rollbackMethod, new TccFenceRollbackInterceptor()));
+                    }
+                }
+            }
+
+            // add all Advisor
+            advisors.forEach(proxyFactory::addAdvisor);
+            return advisors;
+        }
+        return null;
+    }
+
+    /**
+     * find method by signature
+     * @param clazz  the clazz
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
+     * @return the specific signature method
+     */
+    private static Method findMethodBySignature(Class<?> clazz, String methodName, Class<?>[] parameterTypes) {
+        try {
+            return clazz.getMethod(methodName, parameterTypes);
+        } catch (NoSuchMethodException e) {
+            LOGGER.warn("no such method, methodName:[{}], error: {}", methodName, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Create an tcc fence advisor for a specific expression
+     * @param proxy proxy
+     * @param proxyMethod proxy method
+     * @param advice advice
+     * @return the tcc fence advisor for specific expressions
+     */
+    private static Advisor createAdvisorForTccFence(Object proxy, Method proxyMethod, Advice advice) {
+        // Create tangential expressions dynamically
+        Method interfaceMethod = getInterfaceMethod(proxy, proxyMethod);
+        String expression = buildPointcutExpression(interfaceMethod);
+        AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+        pointcut.setExpression(expression);
+        return new DefaultPointcutAdvisor(pointcut, advice);
+    }
+
+    /**
+     * Create a tangent expression
+     * @param method method
+     * @return the expression
+     */
+    private static String buildPointcutExpression(Method method) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("execution(");
+        sb.append(method.getReturnType().getName()).append(" ");
+        sb.append(method.getDeclaringClass().getName()).append(".");
+        sb.append(method.getName()).append("(");
+        Class<?>[] paramTypes = method.getParameterTypes();
+        for (int i = 0; i < paramTypes.length; i++) {
+            sb.append(paramTypes[i].getName());
+            if (i < paramTypes.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("))");
+        return sb.toString();
+    }
+
+    /**
+     * get interface method
+     * @param proxy proxy
+     * @param proxyMethod proxy method
+     * @return the interface method
+     */
+    private static Method getInterfaceMethod(Object proxy, Method proxyMethod) {
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(proxy);
+        Class<?>[] interfaces = targetClass.getInterfaces();
+        for (Class<?> interfaceClass : interfaces) {
+            try {
+                return interfaceClass.getMethod(proxyMethod.getName(), proxyMethod.getParameterTypes());
+            } catch (NoSuchMethodException e) {
+                throw new ShouldNeverHappenException(e);
+            }
+        }
+        throw new ShouldNeverHappenException("Interface method not found for proxy method: " + proxyMethod.getName());
+    }
+
+    /**
+     * join the tcc fence Advisor after TransactionalInterceptor
+     * @param advisor tcc fence advisor
+     * @param advised bean advise
+     */
+    private static void addAdvisorAfterTransactionalInterceptor(Advisor advisor, AdvisedSupport advised) {
+        Advisor[] advisors = advised.getAdvisors();
+        Integer transactionInterceptorIndex = null;
+        for (int i = 0; i < advisors.length; i++) {
+            if (advisors[i].getAdvice() instanceof TransactionInterceptor) {
+                transactionInterceptorIndex = i;
+                break;
+            }
+        }
+        if (transactionInterceptorIndex != null) {
+            advised.addAdvisor(transactionInterceptorIndex + 1, advisor);
+        } else {
+            advised.addAdvisor(advisor);
         }
     }
 

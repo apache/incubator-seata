@@ -45,9 +45,9 @@ public class DefaultCommonFenceHandler implements FenceHandler {
     }
 
     @Override
-    public Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
+    public Object prepareFence(Method prepareMethod, Object targetTCCBean, String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
         check();
-        return fenceHandler.prepareFence(xid, branchId, actionName, targetCallback);
+        return fenceHandler.prepareFence(prepareMethod, targetTCCBean, xid, branchId, actionName, targetCallback);
     }
 
     @Override

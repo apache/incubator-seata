@@ -16,14 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.interceptor;
 
-import javax.annotation.Nonnull;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -42,6 +34,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
  *
@@ -53,16 +53,17 @@ public class ActionInterceptorHandler {
     /**
      * Handler the Tx Aspect
      *
-     * @param method              the method
-     * @param arguments           the arguments
+     * @param invocation          the invocation wrapper
      * @param xid                 the xid
      * @param businessActionParam the business action params
-     * @param targetCallback      the target callback
      * @return the business result
      * @throws Throwable the throwable
      */
-    public Object proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessActionParam businessActionParam,
-                          Callback<Object> targetCallback) throws Throwable {
+    public Object proceed(InvocationWrapper invocation, String xid, TwoPhaseBusinessActionParam businessActionParam) throws Throwable {
+        Method method = invocation.getMethod();
+        Object targetTCCBean = invocation.getProxy();
+        Object[] arguments = invocation.getArguments();
+        Callback<Object> targetCallback = invocation::proceed;
         //Get action context from arguments, or create a new one and then reset to arguments
         BusinessActionContext actionContext = getOrCreateActionContextAndResetToArguments(method.getParameterTypes(), arguments);
 
@@ -87,11 +88,13 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
+            RootContext.bindBranchId(branchId);
+            RootContext.bindResourceId(actionName);
 
             if (businessActionParam.getUseCommonFence()) {
                 try {
                     // Use common Fence, and return the business result
-                    return DefaultCommonFenceHandler.get().prepareFence(xid, Long.valueOf(branchId), actionName, targetCallback);
+                    return DefaultCommonFenceHandler.get().prepareFence(method, targetTCCBean, xid, Long.valueOf(branchId), actionName, targetCallback);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     Throwable originException = e.getCause();
                     if (originException instanceof FrameworkException) {
@@ -104,6 +107,8 @@ public class ActionInterceptorHandler {
                 return targetCallback.execute();
             }
         } finally {
+            RootContext.unbindBranchId();
+            RootContext.unbindResourceId();
             try {
                 //to report business action context finally if the actionContext.getUpdated() is true
                 BusinessActionContextUtil.reportContext(actionContext);

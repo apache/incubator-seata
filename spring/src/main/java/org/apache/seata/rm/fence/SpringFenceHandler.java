@@ -16,23 +16,13 @@
  */
 package org.apache.seata.rm.fence;
 
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
 import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.common.executor.Callback;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.model.TccLocalTxActive;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.FenceHandler;
 import org.apache.seata.integration.tx.api.fence.constant.CommonFenceConstant;
@@ -41,11 +31,31 @@ import org.apache.seata.integration.tx.api.fence.store.CommonFenceDO;
 import org.apache.seata.integration.tx.api.fence.store.CommonFenceStore;
 import org.apache.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
+import org.apache.seata.rm.fence.interceptor.TccFenceCommitInterceptor;
+import org.apache.seata.rm.fence.interceptor.TccFencePrepareInterceptor;
+import org.apache.seata.rm.fence.interceptor.TccFenceRollbackInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.framework.Advised;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.TransactionAttributeSource;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Common Fence Handler(idempotent, non_rollback, suspend)
@@ -55,9 +65,9 @@ public class SpringFenceHandler implements FenceHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringFenceHandler.class);
 
-    private static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();
+    protected static final CommonFenceStore COMMON_FENCE_DAO = CommonFenceStoreDataBaseDAO.getInstance();
 
-    private static DataSource dataSource;
+    protected static DataSource dataSource;
 
     private static TransactionTemplate transactionTemplate;
 
@@ -100,6 +110,8 @@ public class SpringFenceHandler implements FenceHandler {
     /**
      * common prepare method enhanced
      *
+     * @param prepareMethod  prepare method
+     * @param targetTCCBean  target common bean
      * @param xid            the global transaction id
      * @param branchId       the branch transaction id
      * @param actionName     the action name
@@ -107,30 +119,46 @@ public class SpringFenceHandler implements FenceHandler {
      * @return the boolean
      */
     @Override
-    public Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
-        return transactionTemplate.execute(status -> {
+    public Object prepareFence(Method prepareMethod, Object targetTCCBean, String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
+        if (hasTransactionAspectBeforeInterceptor(prepareMethod, targetTCCBean, TccFencePrepareInterceptor.class)) {
             try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                boolean result = insertCommonFenceLog(conn, xid, branchId, actionName, CommonFenceConstant.STATUS_TRIED);
-                LOGGER.info("Common fence prepare result: {}. xid: {}, branchId: {}", result, xid, branchId);
-                if (result) {
-                    return targetCallback.execute();
-                } else {
-                    throw new CommonFenceException(String.format("Insert common fence record error, prepare fence failed. xid= %s, branchId= %s", xid, branchId),
-                            FrameworkErrorCode.InsertRecordError);
-                }
-            } catch (CommonFenceException e) {
-                if (e.getErrcode() == FrameworkErrorCode.DuplicateKeyException) {
-                    LOGGER.error("Branch transaction has already rollbacked before,prepare fence failed. xid= {},branchId = {}", xid, branchId);
-                    addToLogCleanQueue(xid, branchId);
-                }
-                status.setRollbackOnly();
-                throw new SkipCallbackWrapperException(e);
+                // The tcc transaction is activated on the service side.
+                RootContext.bindTccLocalTxActive(TccLocalTxActive.ACTIVE);
+                return targetCallback.execute();
             } catch (Throwable t) {
-                status.setRollbackOnly();
-                throw new SkipCallbackWrapperException(t);
+                throw new SkipCallbackWrapperException(ExceptionUtil.unwrap(t));
+            } finally {
+                RootContext.unbindTccLocalTxActive();
             }
-        });
+        } else {
+            return transactionTemplate.execute(status -> {
+                try {
+                    // The tcc transaction is not activated on the service side.
+                    RootContext.bindTccLocalTxActive(TccLocalTxActive.UN_ACTIVE);
+                    Connection conn = DataSourceUtils.getConnection(dataSource);
+                    boolean result = insertCommonFenceLog(conn, xid, branchId, actionName, CommonFenceConstant.STATUS_TRIED);
+                    LOGGER.info("Common fence prepare result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                    if (result) {
+                        return targetCallback.execute();
+                    } else {
+                        throw new CommonFenceException(String.format("Insert common fence record error, prepare fence failed. xid= %s, branchId= %s", xid, branchId),
+                                FrameworkErrorCode.InsertRecordError);
+                    }
+                } catch (CommonFenceException e) {
+                    if (e.getErrcode() == FrameworkErrorCode.DuplicateKeyException) {
+                        LOGGER.error("Branch transaction has already rollbacked before,prepare fence failed. xid= {},branchId = {}", xid, branchId);
+                        addToLogCleanQueue(xid, branchId);
+                    }
+                    status.setRollbackOnly();
+                    throw new SkipCallbackWrapperException(e);
+                } catch (Throwable t) {
+                    status.setRollbackOnly();
+                    throw new SkipCallbackWrapperException(t);
+                } finally {
+                    RootContext.unbindTccLocalTxActive();
+                }
+            });
+        }
     }
 
     /**
@@ -145,33 +173,53 @@ public class SpringFenceHandler implements FenceHandler {
      */
     @Override
     public boolean commitFence(Method commitMethod, Object targetTCCBean,
-                                      String xid, Long branchId, Object[] args) {
-        return transactionTemplate.execute(status -> {
+                               String xid, Long branchId, Object[] args) {
+        if (hasTransactionAspectBeforeInterceptor(commitMethod, targetTCCBean, TccFenceCommitInterceptor.class)) {
             try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
-                if (commonFenceDO == null) {
-                    throw new CommonFenceException(String.format("Common fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
-                            FrameworkErrorCode.RecordNotExists);
-                }
-                if (CommonFenceConstant.STATUS_COMMITTED == commonFenceDO.getStatus()) {
-                    LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
-                    return true;
-                }
-                if (CommonFenceConstant.STATUS_ROLLBACKED == commonFenceDO.getStatus() || CommonFenceConstant.STATUS_SUSPENDED == commonFenceDO.getStatus()) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
-                    }
-                    return false;
-                }
-                boolean result = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_COMMITTED, status, args);
-                LOGGER.info("Common fence commit result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                // The tcc transaction is activated on the service side.
+                RootContext.bindTccLocalTxActive(TccLocalTxActive.ACTIVE);
+                RootContext.bindTccCommitResult(false);
+                commitMethod.invoke(targetTCCBean, args);
+                Boolean result = RootContext.getTccCommitResult();
                 return result;
-            } catch (Throwable t) {
-                status.setRollbackOnly();
-                throw new SkipCallbackWrapperException(t);
+            } catch (Throwable e) {
+                throw new SkipCallbackWrapperException(ExceptionUtil.unwrap(e));
+            } finally {
+                RootContext.unbindTccLocalTxActive();
+                RootContext.unbindTccCommitResult();
             }
-        });
+        } else {
+            return transactionTemplate.execute(status -> {
+                try {
+                    // The tcc transaction is not activated on the service side.
+                    RootContext.bindTccLocalTxActive(TccLocalTxActive.UN_ACTIVE);
+                    Connection conn = DataSourceUtils.getConnection(dataSource);
+                    CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
+                    if (commonFenceDO == null) {
+                        throw new CommonFenceException(String.format("Common fence record not exists, commit fence method failed. xid= %s, branchId= %s", xid, branchId),
+                                FrameworkErrorCode.RecordNotExists);
+                    }
+                    if (CommonFenceConstant.STATUS_COMMITTED == commonFenceDO.getStatus()) {
+                        LOGGER.info("Branch transaction has already committed before. idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
+                        return true;
+                    }
+                    if (CommonFenceConstant.STATUS_ROLLBACKED == commonFenceDO.getStatus() || CommonFenceConstant.STATUS_SUSPENDED == commonFenceDO.getStatus()) {
+                        if (LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
+                        }
+                        return false;
+                    }
+                    boolean result = updateStatusAndInvokeTargetMethod(conn, commitMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_COMMITTED, status, args);
+                    LOGGER.info("Common fence commit result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                    return result;
+                } catch (Throwable t) {
+                    status.setRollbackOnly();
+                    throw new SkipCallbackWrapperException(t);
+                } finally {
+                    RootContext.unbindTccLocalTxActive();
+                }
+            });
+        }
     }
 
     /**
@@ -187,40 +235,111 @@ public class SpringFenceHandler implements FenceHandler {
      */
     @Override
     public boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
-                                        String xid, Long branchId, Object[] args, String actionName) {
-        return transactionTemplate.execute(status -> {
+                                 String xid, Long branchId, Object[] args, String actionName) {
+        if (hasTransactionAspectBeforeInterceptor(rollbackMethod, targetTCCBean, TccFenceRollbackInterceptor.class)) {
             try {
-                Connection conn = DataSourceUtils.getConnection(dataSource);
-                CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
-                // non_rollback
-                if (commonFenceDO == null) {
-                    boolean result = insertCommonFenceLog(conn, xid, branchId, actionName, CommonFenceConstant.STATUS_SUSPENDED);
-                    LOGGER.info("Insert common fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
-                    if (!result) {
-                        throw new CommonFenceException(String.format("Insert common fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
-                                FrameworkErrorCode.InsertRecordError);
-                    }
-                    return true;
-                } else {
-                    if (CommonFenceConstant.STATUS_ROLLBACKED == commonFenceDO.getStatus() || CommonFenceConstant.STATUS_SUSPENDED == commonFenceDO.getStatus()) {
-                        LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
-                        return true;
-                    }
-                    if (CommonFenceConstant.STATUS_COMMITTED == commonFenceDO.getStatus()) {
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
-                        }
-                        return false;
-                    }
-                }
-                boolean result = updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_ROLLBACKED, status, args);
-                LOGGER.info("Common fence rollback result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                // The tcc transaction is activated on the service side.
+                RootContext.bindTccLocalTxActive(TccLocalTxActive.ACTIVE);
+                RootContext.bindTccRollbackResult(false);
+                rollbackMethod.invoke(targetTCCBean, args);
+                Boolean result = RootContext.getTccRollbackResult();
                 return result;
-            } catch (Throwable t) {
-                status.setRollbackOnly();
-                throw new SkipCallbackWrapperException(t);
+            } catch (Exception e) {
+                throw new SkipCallbackWrapperException(ExceptionUtil.unwrap(e));
+            } finally {
+                RootContext.unbindTccLocalTxActive();
+                RootContext.unbindTccRollbackResult();
             }
-        });
+        } else {
+            return transactionTemplate.execute(status -> {
+                try {
+                    // The tcc transaction is not activated on the service side.
+                    RootContext.bindTccLocalTxActive(TccLocalTxActive.UN_ACTIVE);
+                    Connection conn = DataSourceUtils.getConnection(dataSource);
+                    CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
+                    // non_rollback
+                    if (commonFenceDO == null) {
+                        boolean result = insertCommonFenceLog(conn, xid, branchId, actionName, CommonFenceConstant.STATUS_SUSPENDED);
+                        LOGGER.info("Insert common fence record result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                        if (!result) {
+                            throw new CommonFenceException(String.format("Insert common fence record error, rollback fence method failed. xid= %s, branchId= %s", xid, branchId),
+                                    FrameworkErrorCode.InsertRecordError);
+                        }
+                        return true;
+                    } else {
+                        if (CommonFenceConstant.STATUS_ROLLBACKED == commonFenceDO.getStatus() || CommonFenceConstant.STATUS_SUSPENDED == commonFenceDO.getStatus()) {
+                            LOGGER.info("Branch transaction had already rollbacked before, idempotency rejected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
+                            return true;
+                        }
+                        if (CommonFenceConstant.STATUS_COMMITTED == commonFenceDO.getStatus()) {
+                            if (LOGGER.isWarnEnabled()) {
+                                LOGGER.warn("Branch transaction status is unexpected. xid: {}, branchId: {}, status: {}", xid, branchId, commonFenceDO.getStatus());
+                            }
+                            return false;
+                        }
+                    }
+                    boolean result = updateStatusAndInvokeTargetMethod(conn, rollbackMethod, targetTCCBean, xid, branchId, CommonFenceConstant.STATUS_ROLLBACKED, status, args);
+                    LOGGER.info("Common fence rollback result: {}. xid: {}, branchId: {}", result, xid, branchId);
+                    return result;
+                } catch (Throwable t) {
+                    status.setRollbackOnly();
+                    Throwable cause = t.getCause();
+                    if (cause != null && cause instanceof SQLException) {
+                        SQLException sqlException = (SQLException) cause;
+                        String sqlState = sqlException.getSQLState();
+                        int errorCode = sqlException.getErrorCode();
+                        if ("40001".equals(sqlState) && errorCode == 1213) {
+                            // MySQL deadlock exception
+                            LOGGER.error("Common fence rollback fail. xid: {}, branchId: {}, This exception may be due to the deadlock caused by the transaction isolation level being Repeatable Read. The seata server will try to roll back again, so you can ignore this exception. (To avoid this exception, you can set transaction isolation to Read Committed.)", xid, branchId);
+                        }
+                    }
+                    throw new SkipCallbackWrapperException(t);
+                } finally {
+                    RootContext.unbindTccLocalTxActive();
+                }
+            });
+        }
+    }
+
+    /**
+     * Check whether the transaction has been activated
+     * @return boolean
+     */
+    public static boolean isTransactionActive() {
+        return TransactionSynchronizationManager.isActualTransactionActive();
+    }
+
+    /**
+     * Check that the business method's transaction interceptor precedes the target interceptor
+     * @param method business method
+     * @param proxy proxy
+     * @param targetInterceptorClass the target interceptor class
+     * @return boolean
+     */
+    public static boolean hasTransactionAspectBeforeInterceptor(Method method, Object proxy, Class<?> targetInterceptorClass) {
+        // Gets the interceptor for the proxy object
+        if (proxy instanceof Advised) {
+            Advised advised = (Advised) proxy;
+            Advisor[] advisors = advised.getAdvisors();
+
+            // Iterate over all interceptors to check if the transaction plane is before the target interceptor
+            boolean foundTransactionAspect = false;
+            for (Advisor advisor : advisors) {
+                if (targetInterceptorClass.isInstance(advisor.getAdvice())) {
+                    break;
+                }
+                if (advisor.getAdvice() instanceof TransactionInterceptor) {
+                    // Check if the method is matched by the transaction interceptor's transaction attribute source
+                    TransactionAttributeSource attributeSource = ((TransactionInterceptor) advisor.getAdvice()).getTransactionAttributeSource();
+                    if (attributeSource != null) {
+                        foundTransactionAspect = attributeSource.getTransactionAttribute(method, proxy.getClass()) != null;
+                    }
+                    break;
+                }
+            }
+            return foundTransactionAspect;
+        }
+        return false;
     }
 
     /**
@@ -232,7 +351,7 @@ public class SpringFenceHandler implements FenceHandler {
      * @param status   the status
      * @return the boolean
      */
-    private static boolean insertCommonFenceLog(Connection conn, String xid, Long branchId, String actionName, Integer status) {
+    protected static boolean insertCommonFenceLog(Connection conn, String xid, Long branchId, String actionName, Integer status) {
         CommonFenceDO commonFenceDO = new CommonFenceDO();
         commonFenceDO.setXid(xid);
         commonFenceDO.setBranchId(branchId);
@@ -342,7 +461,7 @@ public class SpringFenceHandler implements FenceHandler {
         logCleanExecutor.submit(fenceLogCleanRunnable);
     }
 
-    private static void addToLogCleanQueue(final String xid, final long branchId) {
+    protected static void addToLogCleanQueue(final String xid, final long branchId) {
         FenceLogIdentity logIdentity = new FenceLogIdentity();
         logIdentity.setXid(xid);
         logIdentity.setBranchId(branchId);
