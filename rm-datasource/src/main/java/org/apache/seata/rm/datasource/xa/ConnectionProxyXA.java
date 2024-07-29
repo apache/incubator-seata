@@ -227,8 +227,10 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             checkTimeout(now);
             setPrepareTime(now);
             int prepare = xaResource.prepare(xaBranchXid);
-            if (prepare == XAResource.XA_RDONLY
-                    && JdbcConstants.ORACLE.equals(resource.getDbType())) {
+            // Based on the four databases: MySQL (8), Oracle (12c), Postgres (16), and MSSQL Server (2022),
+            // only Oracle has read-only optimization; the others do not provide read-only feedback.
+            // Therefore, the database type check can be eliminated here.
+            if (prepare == XAResource.XA_RDONLY) {
                 // Branch Report to TC: RDONLY
                 reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
             }
