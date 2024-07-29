@@ -161,6 +161,21 @@ public interface Constants {
     String UNDOLOG_DELETE = "UndologDelete";
 
     /**
+     * The constant SYNC_PROCESSING
+     */
+    String SYNC_PROCESSING = "SyncProcessing";
+
+    /**
+     * The constant Committing
+     */
+    String COMMITTING = "Committing";
+
+    /**
+     * The constant Rollbacking
+     */
+    String ROLLBACKING = "Rollbacking";
+
+    /**
      * The constant AUTO_COMMIT
      */
     String AUTO_COMMIT = "autoCommit";
@@ -204,4 +219,5 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
 }

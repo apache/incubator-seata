@@ -18,14 +18,12 @@ package org.apache.seata.server.controller;
 
 import org.apache.seata.server.ServerRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  */
-@Controller
-@RequestMapping
+@RestController
 public class HealthController {
 
     private static final String OK = "ok";
@@ -36,8 +34,8 @@ public class HealthController {
 
 
     @RequestMapping("/health")
-    @ResponseBody
     String healthCheck() {
         return serverRunner.started() ? OK : NOT_OK;
     }
+
 }
