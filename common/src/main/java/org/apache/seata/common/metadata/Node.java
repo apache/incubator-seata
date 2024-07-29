@@ -23,7 +23,6 @@ import java.util.Objects;
 
 public class Node {
 
-    Map<String, Object> metadata = new HashMap<>();
     private Endpoint control;
 
     private Endpoint transaction;
@@ -38,6 +37,8 @@ public class Node {
     private ClusterRole role = ClusterRole.MEMBER;
 
     private String version;
+
+    private Map<String, Object> metadata = new HashMap<>();
 
     public Node() {}
 
