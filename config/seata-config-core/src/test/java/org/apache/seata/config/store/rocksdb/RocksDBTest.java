@@ -25,13 +25,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
 
 
 class RocksDBTest {
     private static RocksDBConfigStoreManager configStoreManager;
 
-    private static final String dataId = "seata.properties";
+    private static final String dataId = DEFAULT_STORE_DATA_ID;
     private static final String namespace = DEFAULT_STORE_NAMESPACE;
     @BeforeAll
     static void setUp() {
@@ -153,5 +154,7 @@ class RocksDBTest {
         Assertions.assertTrue(configStoreManager.putConfigMap(configMap));
         Map<String, Map<String, Object>> other = configStoreManager.getConfigMap();
         Assertions.assertEquals(other, configMap);
+
+        Assertions.assertDoesNotThrow(()->configStoreManager.getAll(namespace1, dataId1));
     }
 }

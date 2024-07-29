@@ -41,7 +41,6 @@ public class RocksDBOptionsFactory {
 
     public static final String ROCKSDB_SUFFIX = "rocksdb";
     private static volatile DBOptions options = null;
-
     private static final Map<String/*namespace*/, ColumnFamilyOptions> columnFamilyOptionsMap = new ConcurrentHashMap<>();
     public static DBOptions getDBOptions() {
         if (options == null){
@@ -65,7 +64,6 @@ public class RocksDBOptionsFactory {
                 opts = newOpts;
             }
         }
-        new ColumnFamilyOptions(opts);
         return opts;
     }
     public static String getDBPath() {
@@ -124,4 +122,5 @@ public class RocksDBOptionsFactory {
         options = null;
         columnFamilyOptionsMap.clear();
     }
+
 }

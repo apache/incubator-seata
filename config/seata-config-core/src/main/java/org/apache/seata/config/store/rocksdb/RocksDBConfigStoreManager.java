@@ -113,7 +113,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private ColumnFamilyHandle getOrCreateColumnFamilyHandle(String namespace) throws RocksDBException{
         ColumnFamilyHandle handle = columnFamilyHandleMap.get(namespace);
         if (handle == null) {
-            synchronized (columnFamilyHandleMap) {
+            synchronized (RocksDBConfigStoreManager.class) {
                 handle = columnFamilyHandleMap.get(namespace);
                 if (handle == null) {
                     handle = rocksdb.createColumnFamily(new ColumnFamilyDescriptor(
@@ -294,9 +294,10 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             HashMap<String, Object> configs = new HashMap<>();
             ReentrantReadWriteLock lock = acquireLock(namespace);
             lock.readLock().lock();
-            try (
-                    ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
-                    RocksIterator iterator = rocksdb.newIterator(handle)) {
+            RocksIterator iterator = null;
+            try {
+                ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
+                iterator = rocksdb.newIterator(handle);
                 for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                     String key = new String(iterator.key(), DEFAULT_CHARSET);
                     String value = new String(iterator.value(), DEFAULT_CHARSET);
@@ -306,6 +307,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             } catch (RocksDBException e) {
                 LOGGER.error("Failed to get configMap in namespace : {}", namespace, e);
             } finally {
+                if (iterator != null) {
+                    iterator.close();
+                }
                 lock.readLock().unlock();
             }
         }
