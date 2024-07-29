@@ -17,7 +17,6 @@
 package io.seata;
 
 import io.seata.core.rpc.netty.Action1Impl;
-import io.seata.core.rpc.netty.ConfigurationTestHelper;
 import io.seata.core.rpc.netty.ProtocolTestConstants;
 import io.seata.core.rpc.netty.RmClientTest;
 import io.seata.core.rpc.netty.RmRpcClient;
@@ -28,8 +27,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.junit.jupiter.api.AfterAll;
@@ -52,8 +49,6 @@ public class MockTest {
 
     @BeforeAll
     public static void before() {
-        ConfigurationFactory.reload();
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
