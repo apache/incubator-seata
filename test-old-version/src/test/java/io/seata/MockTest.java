@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 public class MockTest {
 
     static String RESOURCE_ID = "mock-action-061";
-
     Logger logger = LoggerFactory.getLogger(MockTest.class);
 
     @BeforeAll
