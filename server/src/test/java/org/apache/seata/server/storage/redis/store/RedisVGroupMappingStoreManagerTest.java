@@ -38,6 +38,7 @@ public class RedisVGroupMappingStoreManagerTest {
     @Test
     public void testLoadVGroups() {
         Instance instance = Instance.getInstance();
+        instance.setNamespace("public");
         instance.setClusterName("testCluster");
         instance.setUnit("123");
         MappingDO mappingDO = new MappingDO();
