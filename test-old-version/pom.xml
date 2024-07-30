@@ -70,12 +70,6 @@
             <artifactId>seata-rm</artifactId>
             <version>0.6.1</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-test</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 
