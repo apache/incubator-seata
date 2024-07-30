@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileVGroupMappingStoreManager.class);
 
-    public static final String ROOT_MAPPING_MANAGER_NAME = "mapping.json";
+    public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping.json";
 
     private final ReentrantLock writeLock = new ReentrantLock();
 
