@@ -47,6 +47,7 @@ public class MockTest {
 
     @BeforeAll
     public static void before() {
+        System.setProperty("server.servicePort", ProtocolTestConstants.MOCK_SERVER_PORT+"");
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
