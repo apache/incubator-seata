@@ -224,6 +224,12 @@ const branchSessionStatusList:Array<StatusType> = [
     iconType: 'error',
     iconColor: '#FF3333',
   },
+  {
+    label: 'PhaseOne_RDONLY',
+    value: 13,
+    iconType: 'ellipsis',
+    iconColor: 'rgb(3, 193, 253)',
+  },
 ];
 
 class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState> {
