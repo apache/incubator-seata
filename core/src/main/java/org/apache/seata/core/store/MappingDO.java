@@ -14,36 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.constants;
+package org.apache.seata.core.store;
 
-public interface NamingServerConstants {
-    /**
-     * The constant HTTP_PREFIX
-     */
-    String HTTP_PREFIX = "http://";
+public class MappingDO {
+    private String namespace;
 
-    /**
-     * The constant HTTP_ADD_GROUP_SUFFIX
-     */
-    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
+    private String cluster;
 
-    /**
-     * The constant CONSTANT_UNIT
-     */
-    String CONSTANT_UNIT = "unit";
+    private String unit;
 
-    /**
-     * The constant CONSTANT_GROUP
-     */
-    String CONSTANT_GROUP = "vGroup";
+    private String vGroup;
 
-    /**
-     * The constant HTTP_REMOVE_GROUP_SUFFIX
-     */
-    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
 
-    /**
-     * The constant IP_PORT_SPLIT_CHAR
-     */
-    String IP_PORT_SPLIT_CHAR = ":";
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(String cluster) {
+        this.cluster = cluster;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getVGroup() {
+        return vGroup;
+    }
+
+    public void setVGroup(String vGroup) {
+        this.vGroup = vGroup;
+    }
+
 }
