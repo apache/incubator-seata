@@ -100,10 +100,11 @@ public class MockTest {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
+        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
+        logger.info("doTestCommit(0.6.1) xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
-        logger.info("branch register ok, branchId=" + branchId);
+        logger.info("branch register(0.6.1) ok, branchId=" + branchId);
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
@@ -113,11 +114,11 @@ public class MockTest {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
-        logger.info("doTestRollback xid:{}", xid);
+        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
+        logger.info("doTestRollback(0.6.1) xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
-        logger.info("branch register ok, branchId=" + branchId);
+        logger.info("branch register(0.6.1) ok, branchId=" + branchId);
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
         return xid;
