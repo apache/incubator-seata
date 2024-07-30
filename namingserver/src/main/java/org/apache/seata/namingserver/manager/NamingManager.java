@@ -26,7 +26,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.namingserver.constants.NamingServerConstants;
+import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 
-import static org.apache.seata.namingserver.constants.NamingServerConstants.CONSTANT_GROUP;
+import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 
 @Component
 public class NamingManager {
