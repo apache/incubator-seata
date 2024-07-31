@@ -20,7 +20,7 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.saga.engine.tm.SagaTransactionalTemplate;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.TransactionalExecutor.ExecutionException;
 import org.apache.seata.tm.api.transaction.TransactionInfo;

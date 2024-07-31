@@ -53,7 +53,7 @@ import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.mockserver.call.CallRm;
 import org.apache.seata.server.AbstractTCInboundHandler;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.slf4j.Logger;

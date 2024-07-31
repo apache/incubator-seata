@@ -203,9 +203,9 @@ public class CollectionUtils {
         }
     }
 
-    private static final String KV_SPLIT = "=";
+    public static final String KV_SPLIT = "=";
 
-    private static final String PAIR_SPLIT = "&";
+    public static final String PAIR_SPLIT = "&";
 
     /**
      * Encode map to string
