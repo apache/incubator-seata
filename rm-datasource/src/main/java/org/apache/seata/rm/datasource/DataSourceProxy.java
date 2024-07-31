@@ -31,6 +31,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
@@ -65,6 +66,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String kernelVersion;
 
     private String productVersion;
+
+    private SeataDataSourceProxyMetadata dataSourceProxyMetadata;
 
     /**
      * POLARDB-X 1.X -> TDDL
@@ -105,6 +108,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             if (JdbcConstants.ORACLE.equals(dbType)) {
                 userName = connection.getMetaData().getUserName();
             } else if (JdbcConstants.MYSQL.equals(dbType)) {
+                dataSourceProxyMetadata = new MySQLDataSourceProxyMetadata().init(dataSource);
                 validMySQLVersion(connection);
                 checkDerivativeProduct();
             }
