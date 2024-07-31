@@ -14,36 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.constants;
+package io.seata.core.rpc.netty;
 
-public interface NamingServerConstants {
-    /**
-     * The constant HTTP_PREFIX
-     */
-    String HTTP_PREFIX = "http://";
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.LocalTCC;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
-    /**
-     * The constant HTTP_ADD_GROUP_SUFFIX
-     */
-    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
+import java.util.Map;
 
-    /**
-     * The constant CONSTANT_UNIT
-     */
-    String CONSTANT_UNIT = "unit";
+/**
+ * The interface Action1.
+ *
+ */
+@LocalTCC
+public interface Action1 {
 
-    /**
-     * The constant CONSTANT_GROUP
-     */
-    String CONSTANT_GROUP = "vGroup";
+    @TwoPhaseBusinessAction(name = "mock-action", commitMethod = "commitTcc", rollbackMethod = "cancel"
+//            , useTCCFence = true
+    )
+    String insert(@BusinessActionContextParameter Long reqId,
+            @BusinessActionContextParameter(paramName = "params") Map<String, String> params
+    );
 
-    /**
-     * The constant HTTP_REMOVE_GROUP_SUFFIX
-     */
-    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
 
-    /**
-     * The constant IP_PORT_SPLIT_CHAR
-     */
-    String IP_PORT_SPLIT_CHAR = ":";
+    boolean commitTcc(BusinessActionContext actionContext);
+
+
+    boolean cancel(BusinessActionContext actionContext);
 }

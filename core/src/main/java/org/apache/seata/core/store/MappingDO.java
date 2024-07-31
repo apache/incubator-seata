@@ -14,47 +14,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.metadata;
+package org.apache.seata.core.store;
 
-import org.apache.seata.common.metadata.namingserver.Unit;
+public class MappingDO {
+    private String namespace;
 
-import java.util.ArrayList;
-import java.util.List;
+    private String cluster;
 
-public class Cluster {
-    private String clusterName;
-    private String clusterType;
-    private List<Unit> unitData = new ArrayList<>();
+    private String unit;
+
+    private String vGroup;
 
 
-    public Cluster() {
+    public String getNamespace() {
+        return namespace;
     }
 
-    public String getClusterName() {
-        return clusterName;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
+    public String getCluster() {
+        return cluster;
     }
 
-    public String getClusterType() {
-        return clusterType;
+    public void setCluster(String cluster) {
+        this.cluster = cluster;
     }
 
-    public void setClusterType(String clusterType) {
-        this.clusterType = clusterType;
+    public String getUnit() {
+        return unit;
     }
 
-    public List<Unit> getUnitData() {
-        return unitData;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
-    public void setUnitData(List<Unit> unitData) {
-        this.unitData = unitData;
+    public String getVGroup() {
+        return vGroup;
     }
 
+    public void setVGroup(String vGroup) {
+        this.vGroup = vGroup;
+    }
 
 }
-
-

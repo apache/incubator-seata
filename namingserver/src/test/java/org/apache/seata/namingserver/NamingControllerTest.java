@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.UUID;
 
 
-import static org.apache.seata.namingserver.constants.NamingServerConstants.CONSTANT_GROUP;
+import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 import static org.junit.jupiter.api.Assertions.*;
 
 
