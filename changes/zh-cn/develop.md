@@ -16,7 +16,8 @@
 - [[#6628](https://github.com/seata/seata/pull/6628)] 修复 Alibaba Dubbo 转换错误
 - [[#6632](https://github.com/seata/seata/pull/6632)] 修复 hsf ConsumerModel 转换错误
 - [[#6661](https://github.com/seata/seata/pull/6661)] 修复`tableMeta`缓存定时刷新失效问题
-
+- [[#6715](https://github.com/apache/incubator-seata/pull/6715)] 修复达梦数据库的getRollbackInfo没有解压缩的问题
+- 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
 - [[#6361](https://github.com/seata/seata/pull/6361)] 优化部分链接 401 的问题
@@ -37,5 +38,6 @@
 - [funky-eyes](https://github.com/funky-eyes)
 - [laywin](https://github.com/laywin)
 - [wuwen5](https://github.com/wuwen5)
+- [caohdgege](https://github.com/caohdgege)
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。

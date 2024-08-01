@@ -16,6 +16,7 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6628](https://github.com/seata/seata/pull/6628)] fix Alibaba Dubbo convert error.
 - [[#6632](https://github.com/seata/seata/pull/6632)] fix hsf ConsumerModel convert error.
 - [[#6661](https://github.com/seata/seata/pull/6661)] fix `tableMeta` cache scheduled refresh issue
+- [[#6715](https://github.com/apache/incubator-seata/pull/6715)] fix dameng rollback info un compress fail
 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
@@ -37,5 +38,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [funky-eyes](https://github.com/funky-eyes)
 - [laywin](https://github.com/laywin)
 - [wuwen5](https://github.com/wuwen5)
+- [caohdgege](https://github.com/caohdgege)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
