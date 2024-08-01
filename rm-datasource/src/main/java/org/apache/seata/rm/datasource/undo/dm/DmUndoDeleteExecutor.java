@@ -69,7 +69,17 @@ public class DmUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
+        return "SET IDENTITY_INSERT " +
+                sqlUndoLog.getTableName() +
+                " ON; INSERT INTO " +
+                sqlUndoLog.getTableName() +
+                " (" +
+                insertColumns +
+                ") VALUES (" +
+                insertValues +
+                "); SET IDENTITY_INSERT " +
+                sqlUndoLog.getTableName() +
+                " OFF;";
     }
 
     @Override
