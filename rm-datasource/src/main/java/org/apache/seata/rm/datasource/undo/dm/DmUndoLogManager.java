@@ -81,13 +81,6 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
                 State.GlobalFinished, conn);
     }
 
-    @Override
-    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
-        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
-        return rollbackInfo;
-    }
-
     private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
                                State state, Connection conn) throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
