@@ -17,7 +17,8 @@ Add changes here for all PR submitted to the develop branch.
 - [[#6632](https://github.com/seata/seata/pull/6632)] fix hsf ConsumerModel convert error.
 - [[#6661](https://github.com/seata/seata/pull/6661)] fix `tableMeta` cache scheduled refresh issue
 - [[#6715](https://github.com/apache/incubator-seata/pull/6715)] fix dameng rollback info un compress fail
-
+- [[#6716](https://github.com/apache/incubator-seata/pull/6716)] fix dameng delete undo fail
+- 
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
 - [[#6361](https://github.com/seata/seata/pull/6361)] optimize 401 issues for some links
