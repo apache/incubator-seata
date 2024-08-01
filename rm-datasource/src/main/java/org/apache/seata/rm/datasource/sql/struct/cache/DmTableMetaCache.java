@@ -61,12 +61,16 @@ public class DmTableMetaCache extends OracleTableMetaCache {
         result.setTableName(tableNameMeta.getTableName());
         try (ResultSet rsColumns = dbmd.getColumns("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, tableNameMeta.getSchema(), tableNameMeta.getTableName(), false, true);
-             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
+             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName());
+             ResultSet rsOnUpdate = dbmd.getVersionColumns(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())
+        ) {
             processColumns(result, rsColumns);
 
             processIndexes(result, rsIndex);
 
             processPrimaries(result, rsPrimary);
+
+            processOnUpdates(result, rsOnUpdate);
 
             if (result.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
@@ -130,6 +134,16 @@ public class DmTableMetaCache extends OracleTableMetaCache {
                 i.getValues().stream()
                         .filter(c -> finalPkColName.equals(c.getColumnName()))
                         .forEach(c -> i.setIndextype(IndexType.PRIMARY));
+            }
+        }
+    }
+
+    private void processOnUpdates(TableMeta result, ResultSet rsOnUpdate) throws SQLException {
+        while (rsOnUpdate.next()) {
+            String columnName = rsOnUpdate.getString("COLUMN_NAME");
+            ColumnMeta columnMeta = result.getAllColumns().get(columnName);
+            if (columnMeta != null) {
+                columnMeta.setOnUpdate(true);
             }
         }
     }
