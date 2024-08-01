@@ -18,7 +18,6 @@ package org.apache.seata.rm.datasource.undo.dm;
 
 
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.BlobUtils;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -27,10 +26,8 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
