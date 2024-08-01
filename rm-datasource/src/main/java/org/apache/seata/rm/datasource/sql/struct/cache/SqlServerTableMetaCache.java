@@ -114,6 +114,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet rsColumns = metaData.getColumns(catalogName, schemaName, pureTableName, "%");
              ResultSet rsIndex = metaData.getIndexInfo(catalogName, schemaName, pureTableName, false, true);
+             ResultSet rsTable = metaData.getTables(catalogName, schemaName, pureTableName, new String[]{"TABLE"});
              ResultSet rsPrimary = metaData.getPrimaryKeys(catalogName, schemaName, pureTableName)) {
             //get column metaData
             while (rsColumns.next()) {
@@ -189,6 +190,19 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+            }
+
+            while (rsTable.next()) {
+                String rsTableName = rsTable.getString("TABLE_NAME");
+                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                //set origin tableName with schema if necessary
+                if ("dbo".equalsIgnoreCase(rsTableSchema)) {
+                    //for compatibility reasons, old clients generally do not have the 'dbo' default schema by default.
+                    tm.setTableName(rsTableName);
+                } else {
+                    //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
+                    tm.setTableName(rsTableSchema + "." + rsTableName);
+                }
             }
         }
         return tm;

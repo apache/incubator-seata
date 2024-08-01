@@ -75,7 +75,6 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
-        tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
@@ -91,6 +90,10 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         } else {
             tableName = tableName.toUpperCase();
         }
+        //   https://github.com/apache/incubator-seata/issues/6612
+        //   The parsed table name may contain both uppercase and lowercase letters,
+        //   resulting in inconsistent metadata information for the same table on different clients.
+        tm.setTableName(tableName);
         tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");

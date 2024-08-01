@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
+import java.io.ByteArrayInputStream;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -33,7 +34,6 @@ import javax.sql.rowset.serial.SerialDatalink;
 
 import com.alibaba.fastjson.JSON;
 
-import org.apache.seata.common.util.BlobUtils;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -169,7 +169,14 @@ public abstract class AbstractUndoExecutor {
             if (type == JDBCType.BLOB.getVendorTypeNumber()) {
                 SerialBlob serialBlob = (SerialBlob) value;
                 if (serialBlob != null) {
-                    undoPST.setBytes(undoIndex, BlobUtils.blob2Bytes(serialBlob));
+                    undoPST.setObject(undoIndex, serialBlob.getBinaryStream());
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
+            } else if (type == JDBCType.LONGVARBINARY.getVendorTypeNumber()) {
+                if (value != null) {
+                    byte[] bytes = (byte[]) value;
+                    undoPST.setObject(undoIndex, new ByteArrayInputStream(bytes));
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
