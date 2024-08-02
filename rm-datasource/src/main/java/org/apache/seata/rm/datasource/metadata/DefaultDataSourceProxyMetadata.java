@@ -19,7 +19,7 @@ package org.apache.seata.rm.datasource.metadata;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
-public class DefaultDataSourceProxyMeta extends AbstractDataSourceProxyMetadata {
+public class DefaultDataSourceProxyMetadata extends AbstractDataSourceProxyMetadata {
 
     @Override
     public void init(DataSource dataSource) throws SQLException {

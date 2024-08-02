@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.seata.rm.datasource.metadata.DefaultDataSourceProxyMeta;
+import org.apache.seata.rm.datasource.metadata.DefaultDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
@@ -35,7 +35,7 @@ public class SeataDataSourceProxyMetadataFactory {
             if (JdbcConstants.MYSQL.equals(dbType)) {
                 dataSourceProxyMetadata = new MySQLDataSourceProxyMetadata();
             } else {
-                dataSourceProxyMetadata = new DefaultDataSourceProxyMeta();
+                dataSourceProxyMetadata = new DefaultDataSourceProxyMetadata();
             }
         }
         dataSourceProxyMetadata.init(dataSource);
