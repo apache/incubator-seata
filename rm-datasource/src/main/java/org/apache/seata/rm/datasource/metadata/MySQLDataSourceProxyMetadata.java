@@ -25,20 +25,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.rm.datasource.SeataDataSourceProxyMetadata;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 
 /**
  * mysql datasource proxy metadata
  */
-public class MySQLDataSourceProxyMetadata implements SeataDataSourceProxyMetadata {
+public class MySQLDataSourceProxyMetadata extends AbstractDataSourceProxyMetadata {
+
+    /**
+     * POLARDB-X 1.X -> TDDL
+     * POLARDB-X 2.X & MySQL 5.6 -> PXC
+     * POLARDB-X 2.X & MySQL 5.7 -> AliSQL-X
+     */
+    private static final String[] POLARDB_X_PRODUCT_KEYWORD = {"TDDL", "AliSQL-X", "PXC"};
 
     private final Map<String, String> variables = new HashMap<>();
+    private String kernelVersion;
+    private String productVersion;
 
     @Override
-    public SeataDataSourceProxyMetadata init(DataSource dataSource) throws SQLException {
+    public void init(DataSource dataSource) throws SQLException {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement("SHOW VARIABLES");
              ResultSet rs = preparedStatement.executeQuery()) {
+            jdbcUrl = connection.getMetaData().getURL();
+            dbType = JdbcUtils.getDbType(jdbcUrl);
+            userName = connection.getMetaData().getUserName();
             while (rs.next()) {
                 String name = rs.getString(1);
                 String value = rs.getString(2);
@@ -46,8 +59,11 @@ public class MySQLDataSourceProxyMetadata implements SeataDataSourceProxyMetadat
                     variables.put(name.toLowerCase(), value);
                 }
             }
+            checkUndoLogTableExist(connection);
         }
-        return this;
+
+        validMySQLVersion();
+        checkDerivativeProduct();
     }
 
     @Override
@@ -55,4 +71,47 @@ public class MySQLDataSourceProxyMetadata implements SeataDataSourceProxyMetadat
         return variables.get(name);
     }
 
+    @Override
+    public String getKernelVersion() {
+        return kernelVersion;
+    }
+
+    private void validMySQLVersion() {
+        String version = variables.get("version");
+        if (org.apache.commons.lang.StringUtils.isBlank(version)) {
+            return;
+        }
+        int dashIdx = version.indexOf('-');
+        // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
+        if (dashIdx > 0) {
+            kernelVersion = version.substring(0, dashIdx);
+            productVersion = version.substring(dashIdx + 1);
+        } else {
+            kernelVersion = version;
+            productVersion = version;
+        }
+    }
+
+    /**
+     * Define derivative product version for MySQL Kernel
+     */
+    private void checkDerivativeProduct() {
+        // check for polardb-x
+        if (isPolardbXProduct()) {
+            dbType = JdbcConstants.POLARDBX;
+        }
+        // check for other products base on mysql kernel
+    }
+
+    private boolean isPolardbXProduct() {
+        if (org.apache.commons.lang.StringUtils.isBlank(productVersion)) {
+            return false;
+        }
+        for (String keyword : POLARDB_X_PRODUCT_KEYWORD) {
+            if (productVersion.contains(keyword)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

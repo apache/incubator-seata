@@ -20,14 +20,53 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
 /**
  * The type Data source proxy metadata.
  *
  */
 public interface SeataDataSourceProxyMetadata {
 
-    SeataDataSourceProxyMetadata init(DataSource dataSource) throws SQLException;
+    /**
+     * Init datasource metadata
+     * @param dataSource the datasource
+     * @throws SQLException sql exception
+     */
+    void init(DataSource dataSource) throws SQLException;
 
+    /**
+     * Get variable value by name
+     * @param name the name
+     * @return value
+     */
     String getVariableValue(String name);
+
+    /**
+     * Get jdbc url
+     * @return jdbc url
+     */
+    String getJdbcUrl();
+
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
+    String getDbType();
+
+    /**
+     * Get database connection username
+     * @return username
+     */
+    String getUserName();
+
+    /**
+     * Get kernel version
+     * @return kernel version
+     */
+    String getKernelVersion();
 
 }

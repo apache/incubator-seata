@@ -16,36 +16,22 @@
  */
 package org.apache.seata.rm.datasource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
-import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.apache.seata.rm.datasource.undo.UndoLogManager;
-import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
-
 /**
  * The type Data source proxy.
- *
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
@@ -63,18 +49,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String userName;
 
-    private String kernelVersion;
-
-    private String productVersion;
-
     private SeataDataSourceProxyMetadata dataSourceProxyMetadata;
-
-    /**
-     * POLARDB-X 1.X -> TDDL
-     * POLARDB-X 2.X & MySQL 5.6 -> PXC
-     * POLARDB-X 2.X & MySQL 5.7 -> AliSQL-X
-     */
-    private static final String[] POLARDB_X_PRODUCT_KEYWORD = {"TDDL","AliSQL-X","PXC"};
 
     /**
      * Instantiates a new Data source proxy.
@@ -102,22 +77,15 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
-        try (Connection connection = dataSource.getConnection()) {
-            jdbcUrl = connection.getMetaData().getURL();
-            dbType = JdbcUtils.getDbType(jdbcUrl);
-            if (JdbcConstants.ORACLE.equals(dbType)) {
-                userName = connection.getMetaData().getUserName();
-            } else if (JdbcConstants.MYSQL.equals(dbType)) {
-                dataSourceProxyMetadata = new MySQLDataSourceProxyMetadata().init(dataSource);
-                validMySQLVersion(connection);
-                checkDerivativeProduct();
-            }
-            checkUndoLogTableExist(connection);
-
+        try {
+            dataSourceProxyMetadata = SeataDataSourceProxyMetadataFactory.create(dataSource);
         } catch (SQLException e) {
-            throw new IllegalStateException("can not init dataSource", e);
+            throw new IllegalStateException("can not init datasource metadata", e);
         }
-        if (JdbcConstants.SQLSERVER.equals(dbType)) {
+        jdbcUrl = dataSourceProxyMetadata.getJdbcUrl();
+        dbType = dataSourceProxyMetadata.getDbType();
+        userName = dataSourceProxyMetadata.getUserName();
+        if (JdbcConstants.SQLSERVER.equals(dataSourceProxyMetadata.getDbType())) {
             LOGGER.info("SQLServer support in AT mode is currently an experimental function, " +
                     "if you have any problems in use, please feedback to us");
         }
@@ -126,59 +94,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         TableMetaCacheFactory.registerTableMeta(this);
         //Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
-    }
-
-    /**
-     * Define derivative product version for MySQL Kernel
-     *
-     */
-    private void checkDerivativeProduct() {
-        if (!JdbcConstants.MYSQL.equals(dbType)) {
-            return;
-        }
-        // check for polardb-x
-        if (isPolardbXProduct()) {
-            dbType = JdbcConstants.POLARDBX;
-            return;
-        }
-        // check for other products base on mysql kernel
-    }
-
-    private boolean isPolardbXProduct() {
-        if (StringUtils.isBlank(productVersion)) {
-            return false;
-        }
-        for (String keyword : POLARDB_X_PRODUCT_KEYWORD) {
-            if (productVersion.contains(keyword)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * check existence of undolog table
-     *
-     * if the table not exist fast fail, or else keep silence
-     *
-     * @param conn db connection
-     */
-    private void checkUndoLogTableExist(Connection conn) {
-        UndoLogManager undoLogManager;
-        try {
-            undoLogManager = UndoLogManagerFactory.getUndoLogManager(dbType);
-        } catch (EnhancedServiceNotFoundException e) {
-            String errMsg = String.format("AT mode don't support the dbtype: %s", dbType);
-            throw new IllegalStateException(errMsg, e);
-        }
-
-        boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
-        if (!undoLogTableExist) {
-            String undoLogTableName = ConfigurationFactory.getInstance()
-                    .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
-            String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
-            throw new IllegalStateException(errMsg);
-        }
     }
 
     /**
@@ -205,6 +120,14 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public String getDbType() {
         return dbType;
+    }
+
+    /**
+     * Get datasource proxy metadata
+     * @return seata datasource proxy metadata
+     */
+    public SeataDataSourceProxyMetadata getDataSourceProxyMetadata() {
+        return dataSourceProxyMetadata;
     }
 
     @Override
@@ -365,7 +288,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * The general form of the connection URL for SqlServer is
      * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
      * required connection properties: [INSTANCENAME], [databaseName,database]
-     *
      */
     private void initSqlServerResourceId() {
         if (jdbcUrl.contains(";")) {
@@ -399,33 +321,4 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         return BranchType.AT;
     }
 
-    public String getKernelVersion() {
-        return kernelVersion;
-    }
-
-    private void validMySQLVersion(Connection connection) {
-        if (!JdbcConstants.MYSQL.equals(dbType)) {
-            return;
-        }
-        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
-             ResultSet versionResult = preparedStatement.executeQuery()) {
-            if (versionResult.next()) {
-                String version = versionResult.getString("VERSION()");
-                if (StringUtils.isBlank(version)) {
-                    return;
-                }
-                int dashIdx = version.indexOf('-');
-                // in mysql: 5.6.45, in polardb-x: 5.6.45-TDDL-xxx
-                if (dashIdx > 0) {
-                    kernelVersion = version.substring(0, dashIdx);
-                    productVersion = version.substring(dashIdx + 1);
-                } else {
-                    kernelVersion = version;
-                    productVersion = version;
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("check mysql version fail error: {}", e.getMessage());
-        }
-    }
 }
