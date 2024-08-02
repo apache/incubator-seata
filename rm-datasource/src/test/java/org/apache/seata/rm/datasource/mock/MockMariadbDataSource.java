@@ -18,11 +18,12 @@ package org.apache.seata.rm.datasource.mock;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
 
 public class MockMariadbDataSource extends MockDataSource {
     @Override
     public Connection getConnection() throws SQLException {
-        return new MockConnection(new MockDriver(), "jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
+        return new MockConnection(new MockDriver(), "jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true", new Properties());
     }
 }
