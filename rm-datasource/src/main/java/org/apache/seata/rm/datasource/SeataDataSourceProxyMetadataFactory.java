@@ -22,7 +22,6 @@ import java.sql.SQLException;
 
 import org.apache.seata.rm.datasource.metadata.DefaultDataSourceProxyMeta;
 import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
-import org.apache.seata.rm.datasource.metadata.OracleDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 

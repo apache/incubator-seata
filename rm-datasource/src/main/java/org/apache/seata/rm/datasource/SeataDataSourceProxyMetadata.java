@@ -17,12 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
-import org.apache.seata.rm.datasource.util.JdbcUtils;
-import org.apache.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type Data source proxy metadata.
