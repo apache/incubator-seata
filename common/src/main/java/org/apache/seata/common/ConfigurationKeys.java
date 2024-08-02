@@ -1011,4 +1011,29 @@ public interface ConfigurationKeys {
      * The constant ROCKET_MQ_MSG_TIMEOUT
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
+
+    /**
+     * The constant RATE_LIMIT_PREFIX.
+     */
+    String RATE_LIMIT_PREFIX = SERVER_PREFIX + "ratelimit.";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_SECOND_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_SECOND_NUM = RATE_LIMIT_PREFIX + "bucketTokenSecondNum";
+
+    /**
+     * The constant RATE_LIMIT_ENABLE.
+     */
+    String RATE_LIMIT_ENABLE = RATE_LIMIT_PREFIX + "enable";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_MAX_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_MAX_NUM = RATE_LIMIT_PREFIX + "bucketTokenMaxNum";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + "bucketTokenInitialNum";
 }

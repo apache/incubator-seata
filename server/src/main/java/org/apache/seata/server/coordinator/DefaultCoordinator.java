@@ -16,18 +16,8 @@
  */
 package org.apache.seata.server.coordinator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.channel.Channel;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
@@ -65,16 +55,27 @@ import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
 import org.apache.seata.server.metrics.MetricsPublisher;
+import org.apache.seata.server.ratelimit.RateLimiterHandler;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
 import static org.apache.seata.common.Constants.COMMITTING;
@@ -193,6 +194,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
+    private static final boolean RATE_LIMIT_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+            org.apache.seata.common.ConfigurationKeys.RATE_LIMIT_ENABLE, false);
+
+    private RateLimiterHandler rateLimiterHandler;
+
     private RemotingServer remotingServer;
 
     private final DefaultCore core;
@@ -222,6 +228,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     new ThreadPoolExecutor.CallerRunsPolicy());
         } else {
             branchRemoveExecutor = null;
+        }
+        // create server rate limter
+        if (RATE_LIMIT_ENABLE) {
+            rateLimiterHandler = RateLimiterHandler.getInstance();
         }
     }
 
@@ -638,7 +648,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
-
+        AbstractResultMessage resultMessage = processRateLimit(request, context);
+        if (resultMessage != null) {
+            return resultMessage;
+        }
         return transactionRequest.handle(context);
     }
 
@@ -758,5 +771,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
+    }
+
+    private AbstractResultMessage processRateLimit(AbstractMessage request, RpcContext context) {
+        if (RATE_LIMIT_ENABLE) {
+            AbstractResultMessage resultMessage = rateLimiterHandler.handle(request, context);
+            if (resultMessage != null) {
+                return resultMessage;
+            }
+        }
+        return null;
     }
 }

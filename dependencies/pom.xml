@@ -68,6 +68,7 @@
         <sofa.registry.version>6.3.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.82</jcommander.version>
+        <bucket4j.version>8.1.0</bucket4j.version>
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
@@ -553,6 +554,11 @@
                 <version>${jcommander.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.bucket4j</groupId>
+                <artifactId>bucket4j_jdk8-core</artifactId>
+                <version>${bucket4j.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-testing</artifactId>

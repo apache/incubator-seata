@@ -14,20 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-syntax = "proto3";
+package org.apache.seata.server.ratelimit;
 
-package org.apache.seata.protocol.protobuf;
-
-option java_multiple_files = true;
-option java_outer_classname = "ResultCode";
-option java_package = "org.apache.seata.serializer.protobuf.generated";
-
-// PublishRequest is a publish request.
-enum ResultCodeProto {
-
-    Failed = 0;
-
-    Success = 1;
-
-    RateLimited = 2;
+/**
+ * RateLimiter
+ */
+public interface RateLimiter {
+    /**
+     * check whether the request can pass
+     *
+     * @return the boolean
+     */
+    boolean canPass();
 }

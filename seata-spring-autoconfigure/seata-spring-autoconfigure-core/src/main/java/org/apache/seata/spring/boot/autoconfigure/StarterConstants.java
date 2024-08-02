@@ -68,6 +68,7 @@ public interface StarterConstants {
 
 
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
+    String SERVER_RATELIMIT_PREFIX = SERVER_PREFIX + ".ratelimit";
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
     String SERVER_RAFT_PREFIX = SERVER_PREFIX + ".raft";
     String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
