@@ -14,36 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.constants;
+package org.apache.seata.integration.tx.api.remoting.parser;
 
-public interface NamingServerConstants {
-    /**
-     * The constant HTTP_PREFIX
-     */
-    String HTTP_PREFIX = "http://";
-
-    /**
-     * The constant HTTP_ADD_GROUP_SUFFIX
-     */
-    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
-
-    /**
-     * The constant CONSTANT_UNIT
-     */
-    String CONSTANT_UNIT = "unit";
-
-    /**
-     * The constant CONSTANT_GROUP
-     */
-    String CONSTANT_GROUP = "vGroup";
-
-    /**
-     * The constant HTTP_REMOVE_GROUP_SUFFIX
-     */
-    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
-
-    /**
-     * The constant IP_PORT_SPLIT_CHAR
-     */
-    String IP_PORT_SPLIT_CHAR = ":";
+@RemoteBean
+public class SimpleRemoteBean {
 }

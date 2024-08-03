@@ -14,38 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server;
+package io.seata.core.rpc.netty;
 
-import org.apache.seata.common.util.IdWorker;
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import io.seata.rm.tcc.api.LocalTCC;
+import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+
+import java.util.Map;
 
 /**
- * The type Uuid generator.
+ * The interface Action1.
  *
  */
-public class UUIDGenerator {
+@LocalTCC
+public interface Action1 {
 
-    private static volatile IdWorker idWorker;
+    @TwoPhaseBusinessAction(name = "mock-action", commitMethod = "commitTcc", rollbackMethod = "cancel"
+//            , useTCCFence = true
+    )
+    String insert(@BusinessActionContextParameter Long reqId,
+            @BusinessActionContextParameter(paramName = "params") Map<String, String> params
+    );
 
-    /**
-     * generate UUID using snowflake algorithm
-     * @return UUID
-     */
-    public static long generateUUID() {
-        if (idWorker == null) {
-            synchronized (UUIDGenerator.class) {
-                if (idWorker == null) {
-                    init(null);
-                }
-            }
-        }
-        return idWorker.nextId();
-    }
 
-    /**
-     * init IdWorker
-     * @param serverNode the server node id, consider as machine id in snowflake
-     */
-    public static void init(Long serverNode) {
-        idWorker = new IdWorker(serverNode);
-    }
+    boolean commitTcc(BusinessActionContext actionContext);
+
+
+    boolean cancel(BusinessActionContext actionContext);
 }
