@@ -111,8 +111,6 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
 
     @Test
     public void testSerializeAndDeserializeDmdbTimestamp() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IOException {
-        Assumptions.assumeTrue(checkClassExists("dm.jdbc.driver.DmdbTimestamp"), "DmdbTimestamp class not found, skipping tests.");
-
         java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
         reflectField.setAccessible(true);
         ObjectMapper mapper = (ObjectMapper)reflectField.get(parser);
