@@ -17,11 +17,17 @@
 package org.apache.seata.rm.datasource.undo.parser;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 
@@ -32,6 +38,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
 
@@ -99,6 +106,48 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+    }
+
+    @Test
+    public void testSerializeAndDeserializeDmdbTimestamp() throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IOException {
+        Assumptions.assumeTrue(checkClassExists("dm.jdbc.driver.DmdbTimestamp"), "DmdbTimestamp class not found, skipping tests.");
+
+        java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
+        reflectField.setAccessible(true);
+        ObjectMapper mapper = (ObjectMapper)reflectField.get(parser);
+
+        Class<?> dmdbTimestampClass = Class.forName("dm.jdbc.driver.DmdbTimestamp");
+        Method valueOfMethod = dmdbTimestampClass.getMethod("valueOf", ZonedDateTime.class);
+        Method valueOfDateMethod = dmdbTimestampClass.getMethod("valueOf", Date.class);
+
+        Object dmdbTimestamp = valueOfMethod.invoke(null, Instant.ofEpochMilli(1721985847000L).atZone(ZoneId.systemDefault()));
+        Field field = new Field("dmdb_timestamp", JDBCType.TIMESTAMP.getVendorTypeNumber(), dmdbTimestamp);
+        byte[] bytes = mapper.writeValueAsBytes(field);
+        Field sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+        Object originalTimestamp = valueOfDateMethod.invoke(null, new Date(1721985847000L));
+        field = new Field("dmdb_timestamp_type2", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp);
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertFalse(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+        Object dmdbTimestampnanos = valueOfMethod.invoke(null, Instant.ofEpochMilli(1721985847000L).plusNanos(12345L).atZone(ZoneId.systemDefault()));
+        field = new Field("dmdb_timestamp_nanos", JDBCType.TIMESTAMP.getVendorTypeNumber(), dmdbTimestampnanos);
+        bytes = mapper.writeValueAsBytes(field);
+        sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+    }
+
+    private boolean checkClassExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     @Override
