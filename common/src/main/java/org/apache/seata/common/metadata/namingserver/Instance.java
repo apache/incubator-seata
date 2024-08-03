@@ -39,6 +39,7 @@ public class Instance {
     private double weight = 1.0;
     private boolean healthy = true;
     private long term;
+    private long timestamp;
     private ClusterRole role = ClusterRole.MEMBER;
     private Map<String, Object> metadata = new HashMap<>();
 
@@ -124,6 +125,14 @@ public class Instance {
         this.term = term;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public void addMetadata(String key, Object value) {
         this.metadata.put(key, value);
     }
@@ -173,6 +182,7 @@ public class Instance {
         resultMap.put("weight", String.valueOf(weight));
         resultMap.put("healthy", String.valueOf(healthy));
         resultMap.put("term", String.valueOf(term));
+        resultMap.put("timestamp",String.valueOf(timestamp));
         resultMap.put("metadata", mapToJsonString(metadata));
 
         return resultMap;

@@ -21,9 +21,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.seata.common.metadata.Instance;
-import org.apache.seata.common.metadata.MetaResponse;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -146,7 +146,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         Instance instance = Instance.getInstance();
         instance.setTransactionEndpoint(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
 
-        instance.setTimeStamp(System.currentTimeMillis());
+        instance.setTimestamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
 
         if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
@@ -155,7 +155,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
         heartBeatScheduledFuture = this.executorService.scheduleAtFixedRate(() -> {
             try {
-                instance.setTimeStamp(System.currentTimeMillis());
+                instance.setTimestamp(System.currentTimeMillis());
                 doRegister(instance, getNamingAddrs());
             } catch (Exception e) {
                 LOGGER.error("Naming server register Exception", e);
