@@ -72,6 +72,11 @@ public class MySQLDataSourceProxyMetadata extends AbstractDataSourceProxyMetadat
     }
 
     @Override
+    public Map<String, String> getVariables() {
+        return new HashMap<>(variables);
+    }
+
+    @Override
     public String getKernelVersion() {
         return kernelVersion;
     }

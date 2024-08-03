@@ -18,15 +18,16 @@ package org.apache.seata.rm.datasource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Map;
 
 /**
  * The type Data source proxy metadata.
- *
  */
 public interface SeataDataSourceProxyMetadata {
 
     /**
      * Init datasource metadata
+     *
      * @param dataSource the datasource
      * @throws SQLException sql exception
      */
@@ -34,13 +35,22 @@ public interface SeataDataSourceProxyMetadata {
 
     /**
      * Get variable value by name
+     *
      * @param name the name
      * @return value
      */
     String getVariableValue(String name);
 
     /**
+     * Get variables
+     *
+     * @return all variable
+     */
+    Map<String, String> getVariables();
+
+    /**
      * Get jdbc url
+     *
      * @return jdbc url
      */
     String getJdbcUrl();
@@ -54,12 +64,14 @@ public interface SeataDataSourceProxyMetadata {
 
     /**
      * Get database connection username
+     *
      * @return username
      */
     String getUserName();
 
     /**
      * Get kernel version
+     *
      * @return kernel version
      */
     String getKernelVersion();

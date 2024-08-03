@@ -36,7 +36,6 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.google.common.collect.Lists;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
@@ -44,24 +43,23 @@ import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
+import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.mock.MockDriver;
-import org.apache.seata.rm.datasource.mock.MockResultSet;
-import org.apache.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -91,7 +89,7 @@ public class MySQLInsertExecutorTest {
     protected MySQLInsertExecutor newInsertExecutor;
 
     protected final int pkIndex = 0;
-    protected HashMap<String,Integer> pkIndexMap;
+    protected HashMap<String, Integer> pkIndexMap;
 
     @BeforeEach
     public void init() throws SQLException {
@@ -104,16 +102,12 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
 
-        MockResultSet resultSet = new MockResultSet(statementProxy);
-        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
-        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
-
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new MySQLInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String,Integer>(){
+        pkIndexMap = new HashMap<String, Integer>() {
             {
                 put(ID_COLUMN, pkIndex);
             }
@@ -121,21 +115,21 @@ public class MySQLInsertExecutorTest {
 
         // new test init property
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "user_id", "name", "sex", "update_time");
-        Object[][] returnValue = new Object[][] {
-                new Object[] {1, 1, "will", 1, 0},
+        Object[][] returnValue = new Object[][]{
+                new Object[]{1, 1, "will", 1, 0},
         };
-        Object[][] columnMetas = new Object[][] {
-                new Object[] {"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "sex", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "update_time", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        Object[][] columnMetas = new Object[][]{
+                new Object[]{"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "sex", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "update_time", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
-        Object[][] indexMetas = new Object[][] {
-                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
-                new Object[] {"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
+        Object[][] indexMetas = new Object[][]{
+                new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[]{"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
         };
-        Object[][] onUpdateColumnsReturnValue = new Object[][] {
+        Object[][] onUpdateColumnsReturnValue = new Object[][]{
                 new Object[]{0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
         };
 
@@ -238,8 +232,8 @@ public class MySQLInsertExecutorTest {
     @Test
     public void testAfterImage_ByColumn() throws SQLException {
         doReturn(true).when(insertExecutor).containsPK();
-        Map<String,List<Object>> pkValuesMap =new HashMap<>();
-        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        Map<String, List<Object>> pkValuesMap = new HashMap<>();
+        pkValuesMap.put("id", Arrays.asList(new Object[]{PK_VALUE}));
         doReturn(pkValuesMap).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
@@ -253,8 +247,8 @@ public class MySQLInsertExecutorTest {
     public void testAfterImage_ByAuto() throws SQLException {
         doReturn(false).when(insertExecutor).containsPK();
         doReturn(true).when(insertExecutor).containsColumns();
-        Map<String,List<Object>> pkValuesMap =new HashMap<>();
-        pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+        Map<String, List<Object>> pkValuesMap = new HashMap<>();
+        pkValuesMap.put("id", Arrays.asList(new Object[]{PK_VALUE}));
         doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValuesMap);
@@ -269,8 +263,8 @@ public class MySQLInsertExecutorTest {
         Assertions.assertThrows(SQLException.class, () -> {
             doReturn(false).when(insertExecutor).containsPK();
             doReturn(true).when(insertExecutor).containsColumns();
-            Map<String,List<Object>> pkValuesMap =new HashMap<>();
-            pkValuesMap.put("id",Arrays.asList(new Object[]{PK_VALUE}));
+            Map<String, List<Object>> pkValuesMap = new HashMap<>();
+            pkValuesMap.put("id", Arrays.asList(new Object[]{PK_VALUE}));
             doReturn(pkValuesMap).when(insertExecutor).getPkValuesByAuto();
             doReturn(null).when(insertExecutor).buildTableRecords(pkValuesMap);
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
@@ -301,7 +295,7 @@ public class MySQLInsertExecutorTest {
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
-        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
@@ -326,13 +320,17 @@ public class MySQLInsertExecutorTest {
         ColumnMeta cm = new ColumnMeta();
         cm.setColumnName(ID_COLUMN);
         cm.setIsAutoincrement("YES");
-        when(tableMeta.getPrimaryKeyMap()).thenReturn(new HashMap<String, ColumnMeta>(){{put(ID_COLUMN,cm);}});
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(new HashMap<String, ColumnMeta>() {{
+            put(ID_COLUMN, cm);
+        }});
         List<Object> pkValuesAuto = new ArrayList<>();
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
-        doReturn(new HashMap<String,List<Object>>(){{put(ID_COLUMN,pkValuesAuto);}}).when(insertExecutor).getPkValuesByAuto();
+        doReturn(new HashMap<String, List<Object>>() {{
+            put(ID_COLUMN, pkValuesAuto);
+        }}).when(insertExecutor).getPkValuesByAuto();
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
-        Map<String,List<Object>> pkValuesList  = insertExecutor.getPkValuesByColumn();
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
         Assertions.assertIterableEquals(pkValuesList.get(ID_COLUMN), pkValuesAuto);
@@ -383,7 +381,7 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getGeneratedKeys()).thenThrow(e);
         ResultSet genKeys = mock(ResultSet.class);
         when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
-        Map<String,List<Object>> pkValueMap=insertExecutor.getPkValuesByAuto();
+        Map<String, List<Object>> pkValueMap = insertExecutor.getPkValuesByAuto();
         Assertions.assertTrue(pkValueMap.get(ID_COLUMN).isEmpty());
     }
 
@@ -401,8 +399,8 @@ public class MySQLInsertExecutorTest {
         when(statementProxy.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
-        Map<String,List<Object>> pkValues = insertExecutor.getPkValuesByAuto();
-        Assertions.assertEquals(pkValues.get(ID_COLUMN).size(),0);
+        Map<String, List<Object>> pkValues = insertExecutor.getPkValuesByAuto();
+        Assertions.assertEquals(pkValues.get(ID_COLUMN).size(), 0);
     }
 
     @Test
@@ -421,7 +419,7 @@ public class MySQLInsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
         Assertions.assertIterableEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
@@ -442,7 +440,7 @@ public class MySQLInsertExecutorTest {
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        Map<String,List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByAuto();
         Assertions.assertIterableEquals(pkValuesList.get(ID_COLUMN), pkValues);
     }
 
@@ -456,13 +454,12 @@ public class MySQLInsertExecutorTest {
 
 
     @Test
-    public void test_checkPkValuesForMultiPk()
-    {
-        Map<String,List<Object>> pkValues = new HashMap<>();
+    public void test_checkPkValuesForMultiPk() {
+        Map<String, List<Object>> pkValues = new HashMap<>();
         List pkValues1 = new ArrayList();
         List pkValues2 = new ArrayList();
-        pkValues.put("id",pkValues1);
-        pkValues.put("userCode",pkValues2);
+        pkValues.put("id", pkValues1);
+        pkValues.put("userCode", pkValues2);
 
         //all pk support value
         pkValues1.add(1);
@@ -692,7 +689,15 @@ public class MySQLInsertExecutorTest {
     }
 
     @Test
-    public void test_autoGeneratePks() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void test_autoGeneratePks() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+        MySQLDataSourceProxyMetadata dataSourceProxyMetadata = (MySQLDataSourceProxyMetadata)
+                insertExecutor.statementProxy.getConnectionProxy().getDataSourceProxy().getDataSourceProxyMetadata();
+        Map<String, String> variables = new HashMap<>();
+        variables.put("auto_increment_increment", "1");
+        Field variablesField = dataSourceProxyMetadata.getClass().getDeclaredField("variables");
+        variablesField.setAccessible(true);
+        variablesField.set(dataSourceProxyMetadata, variables);
+
         Method method = MySQLInsertExecutor.class.getDeclaredMethod("autoGeneratePks", new Class[]{BigDecimal.class, String.class, Integer.class});
         method.setAccessible(true);
         Object resp = method.invoke(insertExecutor, BigDecimal.ONE, "ID", 3);
@@ -716,7 +721,7 @@ public class MySQLInsertExecutorTest {
     }
 
     private void mockParameters() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(PK_VALUE);
         ArrayList arrayList1 = new ArrayList<>();
@@ -734,7 +739,7 @@ public class MySQLInsertExecutorTest {
     }
 
     private void mockParametersPkWithNull() {
-        Map<Integer,ArrayList<Object>> parameters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -752,7 +757,7 @@ public class MySQLInsertExecutorTest {
     }
 
     private void mockParametersOfOnePk() {
-        Map<Integer,ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
         paramters.put(1, arrayList1);

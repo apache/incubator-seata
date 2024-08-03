@@ -18,6 +18,8 @@ package org.apache.seata.rm.datasource.metadata;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultDataSourceProxyMetadata extends AbstractDataSourceProxyMetadata {
 
@@ -29,6 +31,11 @@ public class DefaultDataSourceProxyMetadata extends AbstractDataSourceProxyMetad
     @Override
     public String getVariableValue(String name) {
         return null;
+    }
+
+    @Override
+    public Map<String, String> getVariables() {
+        return new HashMap<>();
     }
 
     @Override
