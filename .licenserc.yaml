@@ -37,36 +37,18 @@ header:
 
   paths-ignore:
     - '.gitignore'
-    - '.gitattributes'
-    - '.travis.yml'
-    - 'codecov.yml'
-    - 'CONTRIBUTING.md'
-    - 'CONTRIBUTING_CN.md'
-    - 'CODE_OF_CONDUCT.md'
-    - 'README.md'
+    - '*.md'
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
     - '**/*.md'
     - '.github/**'
-    #SPI、spring.factories、spring-configuration-metadata.json、additional-spring-configuration-metadata.json
-    - '**/src/test/resources/META-INF/**'
-    - '**/src/main/resources/META-INF/**'
     - '**/target/**'
     - '**/*.iml'
-    - 'mvnw'
-    - 'mvnw.cmd'
-    - '*.sh'
     - 'changes/**'
     - 'style/**'
-    - 'script/**'
-    - 'seata-plugins/**'
-    - '.mvn/**'
     - 'sessionStore/**'
-    - 'distribution/LICENSE-BIN'
-    - 'distribution/NOTICE-BIN'
     - 'test/src/test/resources/**'
-    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/org/apache/seata/protocol/transcation/*.proto'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
@@ -80,8 +62,6 @@ header:
     - 'server/src/main/resources/lua/redislocker/redislock.lua'
     - 'server/src/main/resources/banner.txt'
     - '**/*.json'
-
-
   comment: on-failure
 dependency:
   files:

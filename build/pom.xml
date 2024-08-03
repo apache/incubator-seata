@@ -24,6 +24,7 @@
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>19</version>
+        <relativePath/>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.seata</groupId>
@@ -87,6 +88,7 @@
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
         <kafka-clients.version>3.6.1</kafka-clients.version>
         <snakeyaml.version>2.0</snakeyaml.version>
+        <jackson-mapper.version>1.9.13</jackson-mapper.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -134,7 +136,7 @@
         <license.skip>true</license.skip>
         <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
-        <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+        <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <maven.surefire.excludes></maven.surefire.excludes>
 
@@ -353,6 +355,9 @@
         <!-- profile: release -->
         <profile>
             <id>release</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
             <build>
                 <plugins>
                     <!-- Javadoc -->
@@ -398,6 +403,7 @@
             <properties>
                 <gpg.arg1>--pinentry-mode</gpg.arg1>
                 <gpg.arg2>loopback</gpg.arg2>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
 

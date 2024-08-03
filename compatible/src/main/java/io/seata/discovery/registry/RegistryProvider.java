@@ -21,7 +21,7 @@ package io.seata.discovery.registry;
  * Notes: used for io.seata SPI interface
  */
 @Deprecated
-public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider{
+public interface RegistryProvider extends org.apache.seata.discovery.registry.RegistryProvider {
     /**
      * provide a registry implementation instance
      *

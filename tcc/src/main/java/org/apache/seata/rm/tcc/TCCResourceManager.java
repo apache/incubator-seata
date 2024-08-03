@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -143,7 +144,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
     }
@@ -202,7 +203,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
     }
@@ -213,10 +214,10 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @param businessActionContext businessActionContext
      * @return args
      */
-    private Object[] getTwoPhaseCommitArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
+    protected Object[] getTwoPhaseCommitArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
         String[] keys = tccResource.getPhaseTwoCommitKeys();
         Class<?>[] argsCommitClasses = tccResource.getCommitArgsClasses();
-        return BusinessActionContextUtil.getTwoPhaseMethodParams(keys, argsCommitClasses, businessActionContext);
+        return getTwoPhaseMethodParams(keys, argsCommitClasses, businessActionContext);
     }
 
     /**
@@ -228,7 +229,19 @@ public class TCCResourceManager extends AbstractResourceManager {
     private Object[] getTwoPhaseRollbackArgs(TCCResource tccResource, BusinessActionContext businessActionContext) {
         String[] keys = tccResource.getPhaseTwoRollbackKeys();
         Class<?>[] argsRollbackClasses = tccResource.getRollbackArgsClasses();
-        return BusinessActionContextUtil.getTwoPhaseMethodParams(keys, argsRollbackClasses, businessActionContext);
+        return getTwoPhaseMethodParams(keys, argsRollbackClasses, businessActionContext);
+    }
+
+    protected Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
+        Object[] args = new Object[argsClasses.length];
+        for (int i = 0; i < argsClasses.length; i++) {
+            if (argsClasses[i].equals(BusinessActionContext.class)) {
+                args[i] = businessActionContext;
+            } else {
+                args[i] = businessActionContext.getActionContext(keys[i], argsClasses[i]);
+            }
+        }
+        return args;
     }
 
     @Override
