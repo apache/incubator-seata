@@ -17,6 +17,7 @@
 package io.seata.rm.datasource;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -61,6 +62,7 @@ public class DataSourceProxyTest {
         dataSource.setDriver(mockDriver);
         dataSource.setUsername(username);
         dataSource.setPassword("password");
+        dataSource.setConnectProperties(new Properties());
 
         Throwable throwable = Assertions.assertThrows(IllegalStateException.class, () -> new DataSourceProxy(dataSource));
         assertThat(throwable).hasMessageContaining("AT mode don't support the dbtype");
