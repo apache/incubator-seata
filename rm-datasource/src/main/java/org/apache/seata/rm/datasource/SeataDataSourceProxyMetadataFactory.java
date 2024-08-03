@@ -25,6 +25,9 @@ import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
+/**
+ * datasource proxy metadata factory
+ */
 public class SeataDataSourceProxyMetadataFactory {
 
     public static SeataDataSourceProxyMetadata create(DataSource dataSource) throws SQLException {
@@ -32,7 +35,9 @@ public class SeataDataSourceProxyMetadataFactory {
         try (Connection connection = dataSource.getConnection()) {
             String jdbcUrl = connection.getMetaData().getURL();
             String dbType = JdbcUtils.getDbType(jdbcUrl);
-            if (JdbcConstants.MYSQL.equals(dbType)) {
+            if (JdbcConstants.MYSQL.equals(dbType)
+                    || JdbcConstants.MARIADB.equals(dbType)
+                    || JdbcConstants.POLARDBX.equals(dbType)) {
                 dataSourceProxyMetadata = new MySQLDataSourceProxyMetadata();
             } else {
                 dataSourceProxyMetadata = new DefaultDataSourceProxyMetadata();

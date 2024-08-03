@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource.exec;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -33,10 +32,9 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.rm.datasource.exec.polardbx.PolarDBXInsertExecutor;
+import org.apache.seata.rm.datasource.metadata.MySQLDataSourceProxyMetadata;
 import org.apache.seata.rm.datasource.mock.MockDriver;
-import org.apache.seata.rm.datasource.mock.MockResultSet;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
@@ -48,7 +46,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * Insert executor test for PolarDB-X
- *
  */
 public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
     @BeforeEach
@@ -60,16 +57,15 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
         DataSourceProxy dataSourceProxy = mock(DataSourceProxy.class);
         when(dataSourceProxy.getResourceId()).thenReturn("jdbc:mysql://127.0.0.1:3306/seata");
         when(dataSourceProxy.getDbType()).thenReturn(JdbcConstants.POLARDBX);
+        MySQLDataSourceProxyMetadata dataSourceProxyMetadata = Mockito.mock(MySQLDataSourceProxyMetadata.class);
+        when(dataSourceProxyMetadata.getVariableValue("auto_increment_increment")).thenReturn("1");
+        when(dataSourceProxy.getDataSourceProxyMetadata()).thenReturn(dataSourceProxyMetadata);
 
         when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
 
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
-
-        MockResultSet resultSet = new MockResultSet(statementProxy);
-        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
-        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
 
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
@@ -84,21 +80,21 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
 
         // new test init property
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "user_id", "name", "sex", "update_time");
-        Object[][] returnValue = new Object[][] {
-                new Object[] {1, 1, "will", 1, 0},
+        Object[][] returnValue = new Object[][]{
+                new Object[]{1, 1, "will", 1, 0},
         };
-        Object[][] columnMetas = new Object[][] {
-                new Object[] {"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "sex", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "update_time", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        Object[][] columnMetas = new Object[][]{
+                new Object[]{"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "sex", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
+                new Object[]{"", "", "table_insert_executor_test", "update_time", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
-        Object[][] indexMetas = new Object[][] {
-                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
-                new Object[] {"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
+        Object[][] indexMetas = new Object[][]{
+                new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[]{"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
         };
-        Object[][] onUpdateColumnsReturnValue = new Object[][] {
+        Object[][] onUpdateColumnsReturnValue = new Object[][]{
                 new Object[]{0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
         };
 
