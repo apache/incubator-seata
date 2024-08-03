@@ -139,6 +139,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         return instance;
     }
 
+
     @Override
     public void register(InetSocketAddress address) throws Exception {
         unregister(address);
