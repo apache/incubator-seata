@@ -137,6 +137,60 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BATCH_RESULT_MSG:
                 msgCodec = new BatchResultMessageCodec(version);
                 break;
+            case MessageType.TYPE_GLOBAL_BEGIN:
+                msgCodec = new GlobalBeginRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_COMMIT:
+                msgCodec = new GlobalCommitRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_ROLLBACK:
+                msgCodec = new GlobalRollbackRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_STATUS:
+                msgCodec = new GlobalStatusRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_LOCK_QUERY:
+                msgCodec = new GlobalLockQueryRequestCodec();
+                break;
+            case MessageType.TYPE_BRANCH_REGISTER:
+                msgCodec = new BranchRegisterRequestCodec();
+                break;
+            case MessageType.TYPE_BRANCH_STATUS_REPORT:
+                msgCodec = new BranchReportRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
+                msgCodec = new GlobalBeginResponseCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_COMMIT_RESULT:
+                msgCodec = new GlobalCommitResponseCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_ROLLBACK_RESULT:
+                msgCodec = new GlobalRollbackResponseCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_STATUS_RESULT:
+                msgCodec = new GlobalStatusResponseCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT:
+                msgCodec = new GlobalLockQueryResponseCodec();
+                break;
+            case MessageType.TYPE_BRANCH_REGISTER_RESULT:
+                msgCodec = new BranchRegisterResponseCodec();
+                break;
+            case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
+                msgCodec = new BranchReportResponseCodec();
+                break;
+            case MessageType.TYPE_BRANCH_COMMIT_RESULT:
+                msgCodec = new BranchCommitResponseCodec();
+                break;
+            case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
+                msgCodec = new BranchRollbackResponseCodec();
+                break;
+            case MessageType.TYPE_RM_DELETE_UNDOLOG:
+                msgCodec = new UndoLogDeleteRequestCodec();
+                break;
+            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
+                msgCodec = new GlobalReportResponseCodec();
+                break;
             default:
                 break;
         }
@@ -145,82 +199,7 @@ public class MessageCodecFactory {
             return msgCodec;
         }
 
-        try {
-            msgCodec = getMergeRequestMessageSeataCodec(typeCode, version);
-        } catch (Exception exx) {
-        }
-
-        if (msgCodec != null) {
-            return msgCodec;
-        }
-
-        msgCodec = getMergeResponseMessageSeataCodec(typeCode, version);
-
-        return msgCodec;
-    }
-
-    /**
-     * Gets merge request instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge request instance by code
-     */
-    protected static MessageSeataCodec getMergeRequestMessageSeataCodec(int typeCode, byte version) {
-        switch (typeCode) {
-            case MessageType.TYPE_GLOBAL_BEGIN:
-                return new GlobalBeginRequestCodec();
-            case MessageType.TYPE_GLOBAL_COMMIT:
-                return new GlobalCommitRequestCodec();
-            case MessageType.TYPE_GLOBAL_ROLLBACK:
-                return new GlobalRollbackRequestCodec();
-            case MessageType.TYPE_GLOBAL_STATUS:
-                return new GlobalStatusRequestCodec();
-            case MessageType.TYPE_GLOBAL_LOCK_QUERY:
-                return new GlobalLockQueryRequestCodec();
-            case MessageType.TYPE_BRANCH_REGISTER:
-                return new BranchRegisterRequestCodec();
-            case MessageType.TYPE_BRANCH_STATUS_REPORT:
-                return new BranchReportRequestCodec();
-            case MessageType.TYPE_GLOBAL_REPORT:
-                return new GlobalReportRequestCodec();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
-        }
-    }
-
-    /**
-     * Gets merge response instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge response instance by code
-     */
-    protected static MessageSeataCodec getMergeResponseMessageSeataCodec(int typeCode, byte version) {
-        switch (typeCode) {
-            case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
-                return new GlobalBeginResponseCodec();
-            case MessageType.TYPE_GLOBAL_COMMIT_RESULT:
-                return new GlobalCommitResponseCodec();
-            case MessageType.TYPE_GLOBAL_ROLLBACK_RESULT:
-                return new GlobalRollbackResponseCodec();
-            case MessageType.TYPE_GLOBAL_STATUS_RESULT:
-                return new GlobalStatusResponseCodec();
-            case MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT:
-                return new GlobalLockQueryResponseCodec();
-            case MessageType.TYPE_BRANCH_REGISTER_RESULT:
-                return new BranchRegisterResponseCodec();
-            case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
-                return new BranchReportResponseCodec();
-            case MessageType.TYPE_BRANCH_COMMIT_RESULT:
-                return new BranchCommitResponseCodec();
-            case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
-                return new BranchRollbackResponseCodec();
-            case MessageType.TYPE_RM_DELETE_UNDOLOG:
-                return new UndoLogDeleteRequestCodec();
-            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
-                return new GlobalReportResponseCodec();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
-        }
+        throw new IllegalArgumentException("not support typeCode," + typeCode);
     }
 
     /**
@@ -268,6 +247,54 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BATCH_RESULT_MSG:
                 abstractMessage = new BatchResultMessage();
                 break;
+            case MessageType.TYPE_GLOBAL_BEGIN:
+                abstractMessage = new GlobalBeginRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_COMMIT:
+                abstractMessage = new GlobalCommitRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_ROLLBACK:
+                abstractMessage = new GlobalRollbackRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_STATUS:
+                abstractMessage = new GlobalStatusRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_LOCK_QUERY:
+                abstractMessage = new GlobalLockQueryRequest();
+                break;
+            case MessageType.TYPE_BRANCH_REGISTER:
+                abstractMessage = new BranchRegisterRequest();
+                break;
+            case MessageType.TYPE_BRANCH_STATUS_REPORT:
+                abstractMessage = new BranchReportRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
+                abstractMessage = new GlobalBeginResponse();
+                break;
+            case MessageType.TYPE_GLOBAL_COMMIT_RESULT:
+                abstractMessage = new GlobalCommitResponse();
+                break;
+            case MessageType.TYPE_GLOBAL_ROLLBACK_RESULT:
+                abstractMessage = new GlobalRollbackResponse();
+                break;
+            case MessageType.TYPE_GLOBAL_STATUS_RESULT:
+                abstractMessage = new GlobalStatusResponse();
+                break;
+            case MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT:
+                abstractMessage = new GlobalLockQueryResponse();
+                break;
+            case MessageType.TYPE_BRANCH_REGISTER_RESULT:
+                abstractMessage = new BranchRegisterResponse();
+                break;
+            case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
+                abstractMessage = new BranchReportResponse();
+                break;
+            case MessageType.TYPE_BRANCH_COMMIT_RESULT:
+                abstractMessage = new BranchCommitResponse();
+                break;
+            case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
+                abstractMessage = new BranchRollbackResponse();
+                break;
             default:
                 break;
         }
@@ -276,78 +303,7 @@ public class MessageCodecFactory {
             return abstractMessage;
         }
 
-        try {
-            abstractMessage = getMergeRequestInstanceByCode(typeCode);
-        } catch (Exception exx) {
-        }
-
-        if (abstractMessage != null) {
-            return abstractMessage;
-        }
-
-        return getMergeResponseInstanceByCode(typeCode);
-    }
-
-    /**
-     * Gets merge request instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge request instance by code
-     */
-    protected static AbstractMessage getMergeRequestInstanceByCode(int typeCode) {
-        switch (typeCode) {
-            case MessageType.TYPE_GLOBAL_BEGIN:
-                return new GlobalBeginRequest();
-            case MessageType.TYPE_GLOBAL_COMMIT:
-                return new GlobalCommitRequest();
-            case MessageType.TYPE_GLOBAL_ROLLBACK:
-                return new GlobalRollbackRequest();
-            case MessageType.TYPE_GLOBAL_STATUS:
-                return new GlobalStatusRequest();
-            case MessageType.TYPE_GLOBAL_LOCK_QUERY:
-                return new GlobalLockQueryRequest();
-            case MessageType.TYPE_BRANCH_REGISTER:
-                return new BranchRegisterRequest();
-            case MessageType.TYPE_BRANCH_STATUS_REPORT:
-                return new BranchReportRequest();
-            case MessageType.TYPE_GLOBAL_REPORT:
-                return new GlobalReportRequest();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
-        }
-    }
-
-    /**
-     * Gets merge response instance by code.
-     *
-     * @param typeCode the type code
-     * @return the merge response instance by code
-     */
-    protected static AbstractMessage getMergeResponseInstanceByCode(int typeCode) {
-        switch (typeCode) {
-            case MessageType.TYPE_GLOBAL_BEGIN_RESULT:
-                return new GlobalBeginResponse();
-            case MessageType.TYPE_GLOBAL_COMMIT_RESULT:
-                return new GlobalCommitResponse();
-            case MessageType.TYPE_GLOBAL_ROLLBACK_RESULT:
-                return new GlobalRollbackResponse();
-            case MessageType.TYPE_GLOBAL_STATUS_RESULT:
-                return new GlobalStatusResponse();
-            case MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT:
-                return new GlobalLockQueryResponse();
-            case MessageType.TYPE_BRANCH_REGISTER_RESULT:
-                return new BranchRegisterResponse();
-            case MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT:
-                return new BranchReportResponse();
-            case MessageType.TYPE_BRANCH_COMMIT_RESULT:
-                return new BranchCommitResponse();
-            case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
-                return new BranchRollbackResponse();
-            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
-                return new GlobalReportResponse();
-            default:
-                throw new IllegalArgumentException("not support typeCode," + typeCode);
-        }
+        throw new IllegalArgumentException("not support typeCode," + typeCode);
     }
 
 }
