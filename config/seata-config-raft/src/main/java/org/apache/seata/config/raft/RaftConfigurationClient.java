@@ -47,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -70,6 +71,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static final String CONFIG_DATA_ID;
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
+    private static final String CONFIG_KEY = "config";
+    private static final String VERSION_KEY = "version";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
 
@@ -89,6 +92,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static final AtomicBoolean CLOSED = new AtomicBoolean(false);
     private static final AtomicBoolean CONFIG_CLOSED = new AtomicBoolean(false);
     private static volatile Properties seataConfig = new Properties();
+    private static final AtomicLong CONFIG_VERSION = new AtomicLong(0);
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
@@ -236,7 +240,17 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     try {
                         configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<Map<String, Object>>>() {});
                         if(configDataResponse.getSuccess()) {
-                            return configDataResponse.getResult();
+                            Map<String, Object> result = configDataResponse.getResult();
+                            Map<String, Object> configMap = (Map<String, Object>) result.get(CONFIG_KEY);
+                            Long version = ((Integer)result.get(VERSION_KEY)).longValue();
+                            Long currentVersion = CONFIG_VERSION.get();
+                            if (version < currentVersion) {
+                                LOGGER.info("The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.", version, CONFIG_VERSION.get());
+                                throw new RetryableException("Expired configuration!");
+                            }else{
+                                CONFIG_VERSION.set(version);
+                                return configMap;
+                            }
                         }else{
                             throw new RetryableException(configDataResponse.getErrMsg());
                         }
@@ -404,6 +418,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         Map<String, String> param = new HashMap<>();
         param.put("namespace", CONFIG_NAMESPACE);
         param.put("dataId", CONFIG_DATA_ID);
+        param.put("version", CONFIG_VERSION.toString());
         if (isTokenExpired()) {
             refreshToken(tcAddress);
         }

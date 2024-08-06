@@ -19,6 +19,7 @@ package org.apache.seata.server.cluster.raft.processor.request;
 import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
 
 import java.io.Serializable;
+import java.util.Map;
 
 
 public class ConfigOperationRequest implements Serializable {
@@ -27,7 +28,7 @@ public class ConfigOperationRequest implements Serializable {
     private String namespace;
     private String dataId;
     private String key;
-    private String value;
+    private Object value;
 
     public ConfigOperationRequest() {
     }
@@ -45,7 +46,7 @@ public class ConfigOperationRequest implements Serializable {
         this.key = key;
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId, String key, String value) {
+    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId, String key, Object value) {
         this.optType = optType;
         this.namespace = namespace;
         this.dataId = dataId;
@@ -64,10 +65,26 @@ public class ConfigOperationRequest implements Serializable {
     public static ConfigOperationRequest buildDeleteRequest(String namespace, String dataId, String key) {
         return new ConfigOperationRequest(ConfigOperationType.DELETE, namespace, dataId, key);
     }
+    public static ConfigOperationRequest buildDeleteAllRequest(String namespace, String dataId) {
+        return new ConfigOperationRequest(ConfigOperationType.DELETE_ALL, namespace, dataId);
+    }
 
     public static ConfigOperationRequest buildGetAllRequest(String namespace, String dataId) {
         return new ConfigOperationRequest(ConfigOperationType.GET_ALL, namespace, dataId);
     }
+
+    public static ConfigOperationRequest buildUploadRequest(String namespace, String dataId, Map<String, Object> configMap) {
+        return new ConfigOperationRequest(ConfigOperationType.UPLOAD, namespace, dataId, null, configMap);
+    }
+
+    public static ConfigOperationRequest buildGetNamespaces() {
+        return new ConfigOperationRequest(ConfigOperationType.GET_NAMESPACES, null, null);
+    }
+
+    public static ConfigOperationRequest buildGetDataIds(String namespace) {
+        return new ConfigOperationRequest(ConfigOperationType.GET_DATA_IDS, namespace, null);
+    }
+
 
     public ConfigOperationType getOptType() {
         return optType;
@@ -100,11 +117,22 @@ public class ConfigOperationRequest implements Serializable {
         this.key = key;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigOperationRequest{" +
+                "optType=" + optType +
+                ", namespace='" + namespace + '\'' +
+                ", dataId='" + dataId + '\'' +
+                ", key='" + key + '\'' +
+                ", value=" + value +
+                '}';
     }
 }

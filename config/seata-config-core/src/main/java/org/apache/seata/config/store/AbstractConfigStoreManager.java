@@ -18,7 +18,10 @@ package org.apache.seata.config.store;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,6 +78,31 @@ public abstract class AbstractConfigStoreManager implements ConfigStoreManager {
 
     @Override
     public Boolean clearData() {
+        return Boolean.FALSE;
+    }
+
+    @Override
+    public List<String> getAllNamespaces() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getAllDataIds(String namespace) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Long getConfigVersion(String namespace, String dataId) {
+        return 0L;
+    }
+
+    @Override
+    public Boolean putConfigVersion(String namespace, String dataId, Long version) {
+        return Boolean.FALSE;
+    }
+
+    @Override
+    public Boolean deleteConfigVersion(String namespace, String dataId) {
         return Boolean.FALSE;
     }
 

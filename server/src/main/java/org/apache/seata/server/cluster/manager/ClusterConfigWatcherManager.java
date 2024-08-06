@@ -17,6 +17,7 @@
 package org.apache.seata.server.cluster.manager;
 
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeListener;
 import org.apache.seata.server.cluster.watch.ConfigWatcher;
@@ -83,8 +84,10 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
         String namespace = event.getNamespace();
         String dataId = event.getDataId();
         Map<String, Queue<ConfigWatcher<?>>> dataIdWatchersMap = WATCHERS.get(namespace);
-        Optional.ofNullable(dataIdWatchersMap.remove(dataId))
-                .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+        if (CollectionUtils.isNotEmpty(dataIdWatchersMap)) {
+            Optional.ofNullable(dataIdWatchersMap.remove(dataId))
+                    .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+        }
     }
 
     private void notify(ConfigWatcher<?> watcher) {

@@ -32,8 +32,8 @@ public class ConfigOperationDTO implements Serializable {
     private static final long serialVersionUID = -1237293571963636954L;
 
     private ConfigOperationType optType;
-    private String namespace = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(CONFIG_STORE_NAMESPACE, DEFAULT_STORE_NAMESPACE);;
-    private String dataId = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(CONFIG_STORE_DATA_ID, DEFAULT_STORE_DATA_ID);
+    private String namespace;
+    private String dataId;
     private String key;
     private Object value;
 

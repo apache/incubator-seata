@@ -18,6 +18,7 @@ package org.apache.seata.config.store.rocksdb;
 
 
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.*;
 import org.apache.seata.config.store.AbstractConfigStoreManager;
@@ -32,6 +33,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 
 import static org.apache.seata.common.ConfigurationKeys.*;
@@ -66,6 +68,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private static volatile RocksDBConfigStoreManager instance;
     private RocksDB rocksdb;
     private final Map<String, ColumnFamilyHandle> columnFamilyHandleMap = new ConcurrentHashMap<>();
+    private final String VERSION_COLUMN_FAMILY = "config_version";
     private static final List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
             STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX, LOG_PREFIX, TCC_PREFIX);
 
@@ -98,8 +101,10 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 String namespace = new String(cf);
                 descriptors.add(new ColumnFamilyDescriptor(cf, RocksDBOptionsFactory.getColumnFamilyOptionsMap(namespace)));
             }
+            // create default column family and config version column family
             if (CollectionUtils.isEmpty(descriptors)) {
                 descriptors.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, RocksDBOptionsFactory.getColumnFamilyOptionsMap(new String(RocksDB.DEFAULT_COLUMN_FAMILY))));
+                descriptors.add(new ColumnFamilyDescriptor(VERSION_COLUMN_FAMILY.getBytes(DEFAULT_CHARSET), RocksDBOptionsFactory.getColumnFamilyOptionsMap(VERSION_COLUMN_FAMILY)));
             }
             this.rocksdb = RocksDBFactory.getInstance(DB_PATH, DB_OPTIONS, descriptors, handles);
             for (ColumnFamilyHandle handle : handles) {
@@ -151,25 +156,26 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 }
             });
             putAll(CURRENT_NAMESPACE, CURRENT_DATA_ID, seataConfigs);
+            LOGGER.info("Load initialization configuration file sucessfully in namespace: {}, dataId: {}", CURRENT_NAMESPACE, CURRENT_DATA_ID);
         }
     }
 
     /**
-     * acquire lock of the given namespace
+     * Acquire lock of the given namespace
      * @param namespace
      */
     private ReentrantReadWriteLock acquireLock(String namespace) {
-        namespace = StringUtils.isEmpty(namespace)? CURRENT_NAMESPACE : namespace;
         return LOCK_MAP.computeIfAbsent(namespace, k -> new ReentrantReadWriteLock());
     }
 
-    /*
-    * Get config map of the given namespace and dataId
-    *
-    */
+    /**
+     * Get config map of the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @return
+     * @throws RocksDBException
+     */
     private Map<String, Object> getConfigMap(String namespace, String dataId) throws RocksDBException{
-        dataId = StringUtils.isEmpty(dataId)? CURRENT_DATA_ID : dataId;
-        namespace = StringUtils.isEmpty(namespace)? CURRENT_NAMESPACE : namespace;
         ReentrantReadWriteLock lock = acquireLock(namespace);
         lock.readLock().lock();
         try {
@@ -186,7 +192,13 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         }
     }
 
-
+    /**
+     * Get the config value of the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @param key
+     * @return
+     */
     @Override
     public String get(String namespace, String dataId, String key) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -202,6 +214,12 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return null;
     }
 
+    /**
+     * Get all config items of the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @return
+     */
     @Override
     public Map<String, Object> getAll(String namespace, String dataId) {
         try {
@@ -212,6 +230,14 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return null;
     }
 
+    /**
+     * Put a config item to the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @param key
+     * @param value
+     * @return
+     */
     @Override
     public Boolean put(String namespace, String dataId, String key, Object value) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -222,6 +248,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
             rocksdb.put(handle, dataId.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
+            updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
         }catch (RocksDBException e){
@@ -232,6 +259,13 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return false;
     }
 
+    /**
+     * Delete a config item with the given key from the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @param key
+     * @return
+     */
     @Override
     public Boolean delete(String namespace, String dataId, String key) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -242,6 +276,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
             rocksdb.put(handle, dataId.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
+            updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
         }catch (RocksDBException e){
@@ -252,6 +287,13 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return false;
     }
 
+    /**
+     * Put all config items into the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @param configMap
+     * @return
+     */
     @Override
     public Boolean putAll(String namespace, String dataId, Map<String, Object> configMap) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -260,6 +302,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
             rocksdb.put(handle, dataId.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
+            updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
         }catch (RocksDBException e){
@@ -270,6 +313,12 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return false;
     }
 
+    /**
+     * Delete all config items in the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @return
+     */
     @Override
     public Boolean deleteAll(String namespace, String dataId) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -277,6 +326,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         try {
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
             rocksdb.delete(handle, dataId.getBytes(DEFAULT_CHARSET));
+            deleteConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, null));
             return true;
         } catch (RocksDBException e) {
@@ -287,6 +337,11 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return false;
     }
 
+
+    /**
+     * Get all key-values pairs in all namespaces, mainly used for backup or snapshot
+     * @return Map(namespace -> Map(dataId -> value))
+     */
     @Override
     public Map<String, Map<String, Object>> getConfigMap() {
         Map<String, Map<String, Object>> configMap = new HashMap<>();
@@ -316,6 +371,11 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         return configMap;
     }
 
+    /**
+     * Put all key-value pairs into the specified column family, mainly used for backup or snapshot
+     * @param configMap Map(namespace -> Map(dataId -> value))
+     * @return
+     */
     @Override
     public Boolean putConfigMap(Map<String, Map<String, Object>> configMap) {
         try (WriteBatch batch = new WriteBatch(); WriteOptions writeOptions = new WriteOptions()) {
@@ -340,7 +400,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 String namespace = entry.getKey();
                 Map<String, Object> configs = entry.getValue();
                 for (Map.Entry<String, Object> kv : configs.entrySet()) {
-                    notifyConfigChange(namespace, kv.getKey(), new ConfigurationChangeEvent(namespace, kv.getKey(), kv.getValue().toString()));
+                    String dataId = kv.getKey();
+                    updateConfigVersion(namespace, dataId);
+                    notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, kv.getKey(), kv.getValue().toString()));
                 }
             }
             return true;
@@ -350,6 +412,10 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         }
     }
 
+    /**
+     * Empty all data in rocksdb, i.e. delete all key-value pairs in all column family
+     * @return
+     */
     @Override
     public Boolean clearData() {
         Map<String, Set<String>> clearDataMap = new HashMap<>();
@@ -373,6 +439,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             for (Map.Entry<String, Set<String>> entry : clearDataMap.entrySet()) {
                 String namespace = entry.getKey();
                 for (String key : entry.getValue()) {
+                    deleteConfigVersion(namespace, key);
                     notifyConfigChange(namespace, key, new ConfigurationChangeEvent(namespace, key, null));
                 }
             }
@@ -383,9 +450,135 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         }
     }
 
+    /**
+     * Check whether the config data exists in the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @return
+     */
     @Override
     public Boolean isEmpty(String namespace, String dataId) {
         return CollectionUtils.isEmpty(getAll(namespace, dataId));
+    }
+
+    /**
+     * Get all namespaces in current rocksdb instance
+     * @return
+     */
+    @Override
+    public List<String> getAllNamespaces() {
+        return columnFamilyHandleMap.keySet().stream()
+                .filter(namespace -> !namespace.equals(VERSION_COLUMN_FAMILY))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all dataIds in the given namespace
+     * @param namespace
+     * @return
+     */
+    @Override
+    public List<String> getAllDataIds(String namespace) {
+        if (StringUtils.isEmpty(namespace) || !columnFamilyHandleMap.containsKey(namespace)) {
+            return Collections.emptyList();
+        }
+        List<String> dataIds = new ArrayList<>();
+        ReentrantReadWriteLock lock = acquireLock(namespace);
+        lock.readLock().lock();
+        RocksIterator iterator = null;
+        try {
+            ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
+            iterator = rocksdb.newIterator(handle);
+            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+                String dataId = new String(iterator.key(), DEFAULT_CHARSET);
+                dataIds.add(dataId);
+            }
+        }catch (RocksDBException e) {
+            LOGGER.error("Failed to get all dataIds in namespace: {}", namespace, e);
+        }finally {
+            if (iterator != null) {
+                iterator.close();
+            }
+            lock.readLock().unlock();
+        }
+        return dataIds;
+    }
+
+    /**
+     * Get the config version in the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @return
+     */
+    @Override
+    public Long getConfigVersion(String namespace, String dataId) {
+        ReentrantReadWriteLock lock = acquireLock(VERSION_COLUMN_FAMILY);
+        lock.readLock().lock();
+        try {
+            String configVersionKey = getConfigVersionKey(namespace, dataId);
+            ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
+            byte[] value = rocksdb.get(handle, configVersionKey.getBytes(DEFAULT_CHARSET));
+            return value != null ? NumberUtils.bytesToLong(value) : null;
+        }catch (RocksDBException | IllegalArgumentException e) {
+            LOGGER.error("Failed to get config version in namespace: {} and dataId: {}", namespace, dataId, e);
+        }finally {
+            lock.readLock().unlock();
+        }
+        return null;
+    }
+
+    /**
+     * Put the config version in the given namespace and dataId
+     * @param namespace
+     * @param dataId
+     * @param version
+     * @return
+     */
+    @Override
+    public Boolean putConfigVersion(String namespace, String dataId, Long version) {
+        ReentrantReadWriteLock lock = acquireLock(VERSION_COLUMN_FAMILY);
+        lock.writeLock().lock();
+        try {
+            String configVersionKey = getConfigVersionKey(namespace, dataId);
+            ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
+            rocksdb.put(handle, configVersionKey.getBytes(DEFAULT_CHARSET), NumberUtils.longToBytes(version));
+            return true;
+        }catch (RocksDBException | IllegalArgumentException e) {
+            LOGGER.error("Failed to put config version in namespace: {} and dataId: {}", namespace, dataId, e);
+        }finally {
+            lock.writeLock().unlock();
+        }
+        return false;
+    }
+
+    /**
+     * Delete the config version in the given namespace and dataId when the config data is deleted.
+     * @param namespace
+     * @param dataId
+     * @return
+     */
+    @Override
+    public Boolean deleteConfigVersion(String namespace, String dataId) {
+        ReentrantReadWriteLock lock = acquireLock(VERSION_COLUMN_FAMILY);
+        lock.writeLock().lock();
+        try {
+            String configVersionKey = getConfigVersionKey(namespace, dataId);
+            ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
+            rocksdb.delete(handle, configVersionKey.getBytes(DEFAULT_CHARSET));
+            return true;
+        }catch (RocksDBException | IllegalArgumentException e) {
+            LOGGER.error("Failed to put config version in namespace: {} and dataId: {}", namespace, dataId, e);
+        }finally {
+            lock.writeLock().unlock();
+        }
+        return false;
+    }
+
+    private String getConfigVersionKey(String namespace, String dataId) {
+        if (StringUtils.isEmpty(namespace) || StringUtils.isEmpty(dataId)) {
+            throw new IllegalArgumentException("Invalid config namespace or dataId");
+        }
+        return namespace + "_" + dataId;
     }
 
     // todo
@@ -443,6 +636,14 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 configChangeListeners.remove(listener);
             }
         }
+    }
+
+    private void updateConfigVersion(String namespace, String dataId) {
+        Long version = getConfigVersion(namespace, dataId);
+        if (version == null) {
+            version = 0L;
+        }
+        putConfigVersion(namespace, dataId, version + 1);
     }
 
 

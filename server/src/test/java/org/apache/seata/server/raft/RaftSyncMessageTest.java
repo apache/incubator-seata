@@ -205,7 +205,7 @@ public class RaftSyncMessageTest {
     @Test
     public void testConfigMsgSerialize() throws IOException{
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
-        ConfigOperationDTO configOperationDTO = new ConfigOperationDTO(ConfigOperationType.PUT, "group", "key", "value");
+        ConfigOperationDTO configOperationDTO = new ConfigOperationDTO(ConfigOperationType.PUT, "namespace", "dataId", "key", "value");
         RaftConfigOperationSyncMsg configSyncMsg = new RaftConfigOperationSyncMsg(configOperationDTO);
         raftSyncMessage.setBody(configSyncMsg);
         byte[] msg = RaftSyncMessageSerializer.encode(raftSyncMessage);
@@ -213,7 +213,8 @@ public class RaftSyncMessageTest {
         Assertions.assertEquals(configSyncMsg.getMsgType(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getMsgType());
         Assertions.assertEquals(configSyncMsg.getConfigOperation().getKey(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getKey());
         Assertions.assertEquals(configSyncMsg.getConfigOperation().getValue(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getValue());
-        Assertions.assertEquals(configSyncMsg.getConfigOperation().getGroup(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getGroup());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getNamespace(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getNamespace());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getDataId(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getDataId());
         Assertions.assertEquals(configSyncMsg.getConfigOperation().getOptType(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getOptType());
     }
 }

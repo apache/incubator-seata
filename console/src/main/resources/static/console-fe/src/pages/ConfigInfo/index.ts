@@ -14,16 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.execute.config;
+import ConfigInfo from './ConfigInfo';
 
-import org.apache.seata.config.store.ConfigStoreManager;
-import org.apache.seata.config.store.ConfigStoreManagerFactory;
-import org.apache.seata.server.cluster.raft.execute.RaftMsgExecute;
+export * from './ConfigInfo';
 
-
-
-public abstract class AbstractRaftConfigMsgExecute implements RaftMsgExecute<Object> {
-
-    protected ConfigStoreManager configStoreManager = ConfigStoreManagerFactory.getInstance();
-
-}
+export default ConfigInfo;

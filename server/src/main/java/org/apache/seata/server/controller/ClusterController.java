@@ -16,14 +16,16 @@
  */
 package org.apache.seata.server.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -35,6 +37,9 @@ import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.processor.ConfigProcessor;
+import org.apache.seata.config.store.ConfigStoreManager;
+import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.apache.seata.console.result.Result;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.manager.ClusterConfigWatcherManager;
@@ -53,6 +58,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
@@ -74,9 +81,19 @@ public class ClusterController {
 
     private ServerProperties serverProperties;
 
+    private final ConfigStoreManager configStoreManager = ConfigStoreManagerFactory.getInstance();
     @Resource
     ApplicationContext applicationContext;
 
+    private static final LinkedHashMap<String, String> SUFFIX_MAP = new LinkedHashMap<String, String>(8) {
+        {
+            put("txt", "properties");
+            put("text", "properties");
+            put("properties", "properties");
+            put("yml", "yaml");
+            put("yaml", "yaml");
+        }
+    };
     @PostConstruct
     private void init() {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
@@ -178,68 +195,128 @@ public class ClusterController {
 
     @GetMapping("/config/get")
     public ConfigOperationResponse getConfig(String namespace, String dataId, String key) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildGetRequest(namespace, dataId, key);
-
-        PeerId leader = RaftConfigServerManager.getLeader();
-        if (leader == null) {
-            return ConfigOperationResponse.fail("failed to get leader");
-        }
-        InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                SerializerType.JACKSON.getCode());
-        CliClientServiceImpl cliClientService = (CliClientServiceImpl)RaftConfigServerManager.getCliClientServiceInstance();
         try {
-            return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get value for key: {} in namespace: {} and dataId: {}!",key, namespace, dataId, e);
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+            checkParam(key, "key");
+        }catch (IllegalArgumentException e){
             return ConfigOperationResponse.fail(e.getMessage());
         }
+        ConfigOperationRequest request = ConfigOperationRequest.buildGetRequest(namespace, dataId, key);
+        return executeConfigOperationRequest(request);
     }
 
     @PostMapping("/config/put")
     public ConfigOperationResponse putConfig(String namespace, String dataId, String key, String value) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildPutRequest(namespace, dataId, key, value);
-
-        PeerId leader = RaftConfigServerManager.getLeader();
-        if (leader == null) {
-            return ConfigOperationResponse.fail("failed to get leader");
-        }
-        CliClientServiceImpl cliClientService = (CliClientServiceImpl)RaftConfigServerManager.getCliClientServiceInstance();
-        InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                SerializerType.JACKSON.getCode());
         try {
-            return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
-        } catch (Exception e) {
-            LOGGER.error("Failed to put value: {} for key: {} in namespace: {} and dataId: {}!", value, key, namespace, dataId, e);
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+            checkParam(key, "key");
+            checkParam(value, "value");
+        }catch (IllegalArgumentException e){
             return ConfigOperationResponse.fail(e.getMessage());
         }
+        ConfigOperationRequest request = ConfigOperationRequest.buildPutRequest(namespace, dataId, key, value);
+        return executeConfigOperationRequest(request);
     }
 
     @DeleteMapping("/config/delete")
     public ConfigOperationResponse deleteConfig(String namespace, String dataId, String key) {
-        ConfigOperationRequest request = ConfigOperationRequest.buildDeleteRequest(namespace, dataId, key);
-
-        PeerId leader = RaftConfigServerManager.getLeader();
-        if (leader == null) {
-            return ConfigOperationResponse.fail("failed to get leader");
-        }
-        CliClientServiceImpl cliClientService = (CliClientServiceImpl)RaftConfigServerManager.getCliClientServiceInstance();
-        InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                SerializerType.JACKSON.getCode());
         try {
-            return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
-        } catch (Exception e) {
-            LOGGER.error("Failed to delete key: {} in namespace: {} and dataId: {}!", key, namespace, dataId, e);
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+            checkParam(key, "key");
+        }catch (IllegalArgumentException e){
             return ConfigOperationResponse.fail(e.getMessage());
         }
+        ConfigOperationRequest request = ConfigOperationRequest.buildDeleteRequest(namespace, dataId, key);
+        return executeConfigOperationRequest(request);
+    }
+
+    @DeleteMapping("/config/deleteAll")
+    public ConfigOperationResponse deleteConfig(String namespace, String dataId) {
+        try {
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+        }catch (IllegalArgumentException e){
+            return ConfigOperationResponse.fail(e.getMessage());
+        }
+        ConfigOperationRequest request = ConfigOperationRequest.buildDeleteAllRequest(namespace, dataId);
+        return executeConfigOperationRequest(request);
     }
 
     @GetMapping("/config/getAll")
     public ConfigOperationResponse getAllConfig(String namespace, String dataId) {
+        try {
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+        }catch (IllegalArgumentException e){
+            return ConfigOperationResponse.fail(e.getMessage());
+        }
         ConfigOperationRequest request = ConfigOperationRequest.buildGetAllRequest(namespace, dataId);
+        return executeConfigOperationRequest(request);
+    }
 
+    @PostMapping("/config/upload")
+    public ConfigOperationResponse uploadConfig(@RequestParam("namespace") String namespace, @RequestParam("dataId") String dataId, @RequestParam("file") MultipartFile file) {
+        try {
+            checkParam(namespace, "namespace");
+            checkParam(dataId, "dataId");
+        }catch (IllegalArgumentException e){
+            return ConfigOperationResponse.fail(e.getMessage());
+        }
+        if (file == null || file.isEmpty()) {
+            return ConfigOperationResponse.fail("The configuration file cannot be empty!");
+        }
+        String fileName = file.getOriginalFilename();
+        String dataType = SUFFIX_MAP.get(getFileType(fileName));
+        if (StringUtils.isEmpty(dataType)){
+            return ConfigOperationResponse.fail("The configuration file type is not supported!");
+        }
+        StringBuilder sb = new StringBuilder();
+        Map<String, Object> configMap = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+            Properties properties = ConfigProcessor.processConfig(sb.toString(), dataType);
+            for (String key : properties.stringPropertyNames()) {
+                configMap.put(key, properties.getProperty(key));
+            }
+        }catch (IOException e){
+            LOGGER.error("Failed to read config file: {}", e.getMessage());
+            return ConfigOperationResponse.fail("Failed to read config file");
+        }
+        ConfigOperationRequest request = ConfigOperationRequest.buildUploadRequest(namespace, dataId, configMap);
+        return executeConfigOperationRequest(request);
+    }
+
+    private static String getFileType(String fileName) {
+        if (StringUtils.isEmpty(fileName)) {
+            return null;
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    @GetMapping("/config/getNamespaces")
+    public ConfigOperationResponse getNamespaces() {
+        ConfigOperationRequest request = ConfigOperationRequest.buildGetNamespaces();
+        return executeConfigOperationRequest(request);
+    }
+
+    @GetMapping("/config/getDataIds")
+    public ConfigOperationResponse getDataIds(String namespace) {
+        try {
+            checkParam(namespace, "namespace");
+        }catch (IllegalArgumentException e){
+            return ConfigOperationResponse.fail(e.getMessage());
+        }
+        ConfigOperationRequest request = ConfigOperationRequest.buildGetDataIds(namespace);
+        return executeConfigOperationRequest(request);
+    }
+
+    private ConfigOperationResponse executeConfigOperationRequest(ConfigOperationRequest request) {
         PeerId leader = RaftConfigServerManager.getLeader();
         if (leader == null) {
             return ConfigOperationResponse.fail("failed to get leader");
@@ -251,11 +328,16 @@ public class ClusterController {
         try {
             return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
-            LOGGER.error("Failed to get all configs in namespace: {} and dataId: {}!", namespace, dataId, e);
+            LOGGER.error("Failed to execute request: {}", request.toString());
             return ConfigOperationResponse.fail(e.getMessage());
         }
     }
 
+    private void checkParam(final String param, final String key) {
+        if (StringUtils.isEmpty(param)) {
+            throw new IllegalArgumentException("Param '" + key + "' is required.");
+        }
+    }
 
     @PostMapping("/watch")
     public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
@@ -270,8 +352,17 @@ public class ClusterController {
     }
 
     @PostMapping("/config/watch")
-    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId,
+    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam Long version,
                       @RequestParam(defaultValue = "28000") int timeout) {
+        Long currentVersion = configStoreManager.getConfigVersion(namespace, dataId);
+        // if the config version of client is lower than the server, return directly
+        if (version == null || version < currentVersion) {
+            AsyncContext context = request.startAsync();
+            HttpServletResponse httpServletResponse = (HttpServletResponse) context.getResponse();
+            httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+            context.complete();
+            return;
+        }
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
         ConfigWatcher<AsyncContext> configWatcher = new ConfigWatcher<>(namespace, dataId, context, timeout);

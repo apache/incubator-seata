@@ -1,12 +1,11 @@
 package org.apache.seata.config.raft;
 
 import org.apache.seata.common.exception.NotSupportYetException;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.*;
 import org.apache.seata.config.store.ConfigStoreManager;
-import org.apache.seata.config.store.ConfigStoreManagerProvider;
+import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static org.apache.seata.common.ConfigurationKeys.*;
 import static org.apache.seata.common.Constants.*;
-import static org.apache.seata.common.DefaultValues.DEFAULT_DB_TYPE;
+
 
 
 public class RaftConfigurationServer extends AbstractConfiguration {
@@ -33,8 +32,7 @@ public class RaftConfigurationServer extends AbstractConfiguration {
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     private static void initServerConfig() {
-        String dbType = FILE_CONFIG.getConfig(CONFIG_STORE_TYPE, DEFAULT_DB_TYPE);
-        configStoreManager = EnhancedServiceLoader.load(ConfigStoreManagerProvider.class, Objects.requireNonNull(dbType), false).provide();
+        configStoreManager = ConfigStoreManagerFactory.getInstance();
         CURRENT_NAMESPACE = FILE_CONFIG.getConfig(CONFIG_STORE_NAMESPACE, DEFAULT_STORE_NAMESPACE);
         CURRENT_DATA_ID = FILE_CONFIG.getConfig(CONFIG_STORE_DATA_ID, DEFAULT_STORE_DATA_ID);
         // load config from store

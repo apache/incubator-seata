@@ -23,6 +23,7 @@ import org.apache.seata.config.processor.ConfigProcessor;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -50,6 +51,16 @@ public interface ConfigStoreManager {
     Boolean putConfigMap(Map<String, Map<String, Object>> configMap);
 
     Boolean clearData();
+
+    List<String> getAllNamespaces();
+
+    List<String> getAllDataIds(String namespace);
+
+    Long getConfigVersion(String namespace, String dataId);
+
+    Boolean putConfigVersion(String namespace, String dataId, Long version);
+
+    Boolean deleteConfigVersion(String namespace, String dataId);
     void destroy();
 
     default void addConfigListener(String group, String dataId, ConfigurationChangeListener listener) {};

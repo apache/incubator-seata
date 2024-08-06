@@ -157,4 +157,25 @@ class RocksDBTest {
 
         Assertions.assertDoesNotThrow(()->configStoreManager.getAll(namespace1, dataId1));
     }
+
+    @Test
+    void configVersionTest() {
+        configStoreManager.clearData();
+        Long version = 0L;
+
+        String key = "aaa";
+        String value = "bbb";
+        String newValue = "ccc";
+
+        Assertions.assertTrue(configStoreManager.put(namespace, dataId, key, value));
+        version++;
+        Assertions.assertEquals(version, configStoreManager.getConfigVersion(namespace, dataId));
+
+        Assertions.assertTrue(configStoreManager.put(namespace, dataId, key, newValue));
+        version++;
+        Assertions.assertEquals(version, configStoreManager.getConfigVersion(namespace, dataId));
+
+        Assertions.assertTrue(configStoreManager.deleteAll(namespace, dataId));
+        Assertions.assertNull(configStoreManager.getConfigVersion(namespace, dataId));
+    }
 }

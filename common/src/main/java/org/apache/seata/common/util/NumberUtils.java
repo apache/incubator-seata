@@ -60,4 +60,22 @@ public class NumberUtils {
         }
         return null;
     }
+
+    public static byte[] longToBytes(long x) {
+        byte[] result = new byte[8];
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte)(x & 0xFF);
+            x >>= 8;
+        }
+        return result;
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        long result = 0;
+        for (int i = 0; i < 8; i++) {
+            result <<= 8;
+            result |= (bytes[i] & 0xFF);
+        }
+        return result;
+    }
 }
