@@ -42,4 +42,10 @@ public class ConfigStoreManagerFactory {
         }
         return instance;
     }
+
+    public static void destroy() {
+        if (instance != null) {
+            instance.shutdown();
+        }
+    }
 }

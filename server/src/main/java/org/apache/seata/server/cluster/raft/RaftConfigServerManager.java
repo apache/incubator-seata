@@ -35,7 +35,9 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigType;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.server.ServerRunner;
 import org.apache.seata.server.cluster.raft.processor.ConfigOperationRequestProcessor;
 import org.apache.seata.server.cluster.raft.processor.PutNodeInfoRequestProcessor;
 import org.apache.seata.server.cluster.raft.serializer.JacksonBoltSerializer;
@@ -154,7 +156,11 @@ public class RaftConfigServerManager {
                 throw new RuntimeException("start raft node fail!");
             }
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(RaftConfigServerManager::destroy));
+        // ensure that close the configStoreManager at last.
+        ServerRunner.addDisposable(() -> {
+            RaftConfigServerManager.destroy();
+            ConfigStoreManagerFactory.destroy();
+        });
     }
 
 

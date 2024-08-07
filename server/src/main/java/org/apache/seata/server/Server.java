@@ -95,7 +95,7 @@ public class Server {
         nettyRemotingServer.setHandler(coordinator);
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
-        ServerRunner.addDisposable(coordinator);
+        ServerRunner.addToFirstDisposable(coordinator);
 
         nettyRemotingServer.init();
     }

@@ -53,6 +53,10 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
         DISPOSABLE_LIST.add(disposable);
     }
 
+    public static void addToFirstDisposable(Disposable disposable) {
+        DISPOSABLE_LIST.add(0, disposable);
+    }
+
     @Override
     public void run(String... args) {
         try {

@@ -62,6 +62,7 @@ public interface ConfigStoreManager {
 
     Boolean deleteConfigVersion(String namespace, String dataId);
     void destroy();
+    void shutdown();
 
     default void addConfigListener(String group, String dataId, ConfigurationChangeListener listener) {};
 

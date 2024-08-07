@@ -122,6 +122,10 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
 
   componentDidMount() {
     this.init();
+    this.pollingInterval = setInterval(this.refreshConfigData, 10000); // 每10秒刷新一次
+  }
+  componentWillUnmount() {
+    clearInterval(this.pollingInterval);
   }
 
   init = async () => {
@@ -146,6 +150,12 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     }
   }
 
+  refreshConfigData = () => {
+    this.fetchNamespaces();
+    if (this.state.configParam.namespace) {
+      this.fetchDataIds(this.state.configParam.namespace);
+    }
+  }
   fetchNamespaces = async () => {
     try {
       const response = await getAllNamespaces();
@@ -170,7 +180,6 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     this.setState({ loading: true });
     try {
       const response = await getConfig({namespace: this.state.configParam.namespace, dataId: this.state.configParam.dataId});
-      console.log(response)
       if (response.success && response.result){
         const { config } = response.result;
         const configList = Object.keys(config).map((key) => ({ key, value: config[key] }));

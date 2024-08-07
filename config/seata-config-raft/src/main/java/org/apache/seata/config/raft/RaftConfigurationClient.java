@@ -656,8 +656,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     }
                 }
                 seataConfig = seataConfigNew;
-                // todo : test code remove
-                System.out.println(seataConfigNew);
                 return;
             }
         }

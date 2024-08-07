@@ -109,6 +109,6 @@ public abstract class AbstractConfigStoreManager implements ConfigStoreManager {
     @Override
     public void destroy() {}
 
-    public abstract void shutdown();
-
+    @Override
+    public void shutdown() {}
 }
