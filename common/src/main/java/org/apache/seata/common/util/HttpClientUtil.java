@@ -17,7 +17,6 @@
 package org.apache.seata.common.util;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -52,7 +51,7 @@ public class HttpClientUtil {
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-        new PoolingHttpClientConnectionManager();
+            new PoolingHttpClientConnectionManager();
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -62,7 +61,7 @@ public class HttpClientUtil {
                 //delay 3s, make sure unregister http request send successfully
                 Thread.sleep(3000);
                 client.close();
-            } catch (IOException|InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }
         })));
@@ -93,10 +92,10 @@ public class HttpClientUtil {
                 }
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build());
+                    k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                            .build());
             return client.execute(httpPost);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -135,7 +134,6 @@ public class HttpClientUtil {
     }
 
 
-
     // get request
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
                                               int timeout) throws IOException {
@@ -152,10 +150,10 @@ public class HttpClientUtil {
                 header.forEach(httpGet::addHeader);
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                    .build());
+                    k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                            .build());
             return client.execute(httpGet);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
