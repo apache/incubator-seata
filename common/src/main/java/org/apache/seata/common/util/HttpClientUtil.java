@@ -92,10 +92,10 @@ public class HttpClientUtil {
                 }
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                    k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                            .build());
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
             return client.execute(httpPost);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -122,10 +122,10 @@ public class HttpClientUtil {
                 }
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                    k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                            .build());
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
             return client.execute(httpPost);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -150,10 +150,10 @@ public class HttpClientUtil {
                 header.forEach(httpGet::addHeader);
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
-                    k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                            .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                                    .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
-                            .build());
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
             return client.execute(httpGet);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
