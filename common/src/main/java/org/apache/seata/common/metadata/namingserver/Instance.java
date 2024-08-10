@@ -88,16 +88,16 @@ public class Instance {
         return control;
     }
 
-    public void setControl(Node.Endpoint Control) {
-        this.control = Control;
+    public void setControl(Node.Endpoint control) {
+        this.control = control;
     }
 
     public Node.Endpoint getTransaction() {
         return transaction;
     }
 
-    public void setTransaction(Node.Endpoint Transaction) {
-        this.transaction = Transaction;
+    public void setTransaction(Node.Endpoint transaction) {
+        this.transaction = transaction;
     }
 
     public double getWeight() {
