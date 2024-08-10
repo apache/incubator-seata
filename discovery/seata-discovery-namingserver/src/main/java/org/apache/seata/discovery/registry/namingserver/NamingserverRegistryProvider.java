@@ -21,7 +21,7 @@ import org.apache.seata.discovery.registry.RegistryProvider;
 import org.apache.seata.discovery.registry.RegistryService;
 
 
-@LoadLevel(name = "Namingserver", order = 1)
+@LoadLevel(name = "NamingServer", order = 1)
 public class NamingserverRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {

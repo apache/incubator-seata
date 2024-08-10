@@ -34,8 +34,8 @@ public class Instance {
     private String namespace;
     private String clusterName;
     private String unit;
-    private Node.Endpoint controlEndpoint = new Node.Endpoint();
-    private Node.Endpoint transactionEndpoint = new Node.Endpoint();
+    private Node.Endpoint control = new Node.Endpoint();
+    private Node.Endpoint transaction = new Node.Endpoint();
     private double weight = 1.0;
     private boolean healthy = true;
     private long term;
@@ -84,20 +84,20 @@ public class Instance {
         this.role = role;
     }
 
-    public Node.Endpoint getControlEndpoint() {
-        return controlEndpoint;
+    public Node.Endpoint getControl() {
+        return control;
     }
 
-    public void setControlEndpoint(Node.Endpoint controlEndpoint) {
-        this.controlEndpoint = controlEndpoint;
+    public void setControl(Node.Endpoint Control) {
+        this.control = Control;
     }
 
-    public Node.Endpoint getTransactionEndpoint() {
-        return transactionEndpoint;
+    public Node.Endpoint getTransaction() {
+        return transaction;
     }
 
-    public void setTransactionEndpoint(Node.Endpoint transactionEndpoint) {
-        this.transactionEndpoint = transactionEndpoint;
+    public void setTransaction(Node.Endpoint Transaction) {
+        this.transaction = Transaction;
     }
 
     public double getWeight() {
@@ -143,7 +143,7 @@ public class Instance {
 
     @Override
     public int hashCode() {
-        return Objects.hash(controlEndpoint, transactionEndpoint);
+        return Objects.hash(control, transaction);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class Instance {
             return false;
         }
         Instance instance = (Instance) o;
-        return Objects.equals(controlEndpoint, instance.controlEndpoint) && Objects.equals(transactionEndpoint, instance.transactionEndpoint);
+        return Objects.equals(control, instance.control) && Objects.equals(transaction, instance.transaction);
     }
 
 
@@ -177,8 +177,8 @@ public class Instance {
         resultMap.put("namespace", namespace);
         resultMap.put("clusterName", clusterName);
         resultMap.put("unit", unit);
-        resultMap.put("controlEndpoint", controlEndpoint.toString());
-        resultMap.put("transactionEndpoint", transactionEndpoint.toString());
+        resultMap.put("control", control.toString());
+        resultMap.put("transaction", transaction.toString());
         resultMap.put("weight", String.valueOf(weight));
         resultMap.put("healthy", String.valueOf(healthy));
         resultMap.put("term", String.valueOf(term));

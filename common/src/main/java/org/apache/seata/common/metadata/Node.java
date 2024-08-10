@@ -204,6 +204,25 @@ public class Node {
         }
 
         @Override
+        public int hashCode() {
+            return Objects.hash(host,port,protocol);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Endpoint endpoint = (Endpoint) o;
+            return Objects.equals(endpoint.host,this.host)
+                    && Objects.equals(endpoint.port,this.port)
+                    && Objects.equals(endpoint.protocol,this.protocol);
+        }
+
+        @Override
         public String toString() {
             return "Endpoint{" + "host='" + host + '\'' + ", port=" + port + '}';
         }

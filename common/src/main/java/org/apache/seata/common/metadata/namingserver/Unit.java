@@ -24,7 +24,7 @@ public class Unit {
 
     private String unitName;
 
-    private List<Node> nodeList;
+    private List<NamingServerNode> nodeList;
 
     public String getUnitName() {
         return unitName;
@@ -34,11 +34,11 @@ public class Unit {
         this.unitName = unitName;
     }
 
-    public List<Node> getNamingInstanceList() {
+    public List<NamingServerNode> getNamingInstanceList() {
         return nodeList;
     }
 
-    public void setNamingInstanceList(List<Node> nodeList) {
+    public void setNamingInstanceList(List<NamingServerNode> nodeList) {
         this.nodeList = nodeList;
     }
 

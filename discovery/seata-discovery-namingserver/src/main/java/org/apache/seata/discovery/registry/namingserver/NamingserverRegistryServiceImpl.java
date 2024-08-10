@@ -145,7 +145,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         unregister(address);
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
-        instance.setTransactionEndpoint(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
+        instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
 
         instance.setTimestamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
@@ -175,13 +175,13 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String namespace = instance.getNamespace();
             String clusterName = instance.getClusterName();
             String unit = instance.getUnit();
-            Map<String,String> jsonBody = instance.toMap();
+            String jsonBody = instance.toJsonString();
             String params = "namespace=" + namespace + "&clusterName=" + clusterName + "&unit=" + unit;
             url += params;
             Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody,header,30000)) {
+            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody,header,3000)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     if (LOGGER.isDebugEnabled()) {
@@ -199,8 +199,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     public boolean doHealthCheck(String url) {
         url = HTTP_PREFIX + url + "/naming/v1/health";
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, null, header, 30000)) {
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, null, header, 3000)) {
             int statusCode = response.getStatusLine().getStatusCode();
             return statusCode == 200;
         } catch (Exception e) {
@@ -217,17 +217,16 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         }
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
-        instance.setTransactionEndpoint(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
+        instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
         for (String urlSuffix : getNamingAddrs()) {
             String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister?";
             String unit = instance.getUnit();
-            Map<String,String> jsonBody = instance.toMap();
+            String jsonBody = instance.toJsonString();
             String params = "unit=" + unit;
             url += params;
             Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 30000)) {
+            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
@@ -235,7 +234,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                     LOGGER.warn("instance has been unregistered unsuccessfully:{}", statusCode);
                 }
             } catch (Exception e) {
-                LOGGER.error("instance has been unregistered failed in namingserver {}", url);
+                LOGGER.error("instance has been unregistered failed in namingserver {}", url, e);
             }
         }
     }
@@ -288,9 +287,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 .append("&clientAddr=").append(clientAddr);
         String watchAddr = watchAddrBuilder.toString();
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(watchAddr, null, header , 30000)) {
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(watchAddr, (String) null, header , 3000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -363,8 +362,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         paraMap.put(NAMESPACE_KEY, getNamespace());
         String url = HTTP_PREFIX + namingAddr + "/naming/v1/discovery";
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 30000)) {
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 3000)) {
             if (response == null) {
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup);
             }

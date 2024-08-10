@@ -58,12 +58,7 @@ public class NamingServerNode extends Node {
 
         // check each member variable
         return Objects.equals(getControl(), otherNode.getControl()) &&
-                Objects.equals(getTransaction(), otherNode.getTransaction()) &&
-                Double.compare(otherNode.weight, weight) == 0 &&
-                healthy == otherNode.healthy &&
-                Objects.equals(getRole(), otherNode.getRole()) &&
-                term == otherNode.term &&
-                Objects.equals(getMetadata(), otherNode.getMetadata());
+                Objects.equals(getTransaction(), otherNode.getTransaction());
     }
 
     // convert to String

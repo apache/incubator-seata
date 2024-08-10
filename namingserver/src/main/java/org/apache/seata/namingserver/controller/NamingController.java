@@ -73,7 +73,7 @@ public class NamingController {
 
     @PostMapping("/unregister")
     public Result<String> unregisterInstance(@RequestParam String unit,
-                                        @RequestBody Node registerBody) {
+                                        @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
         if (isSuccess) {
@@ -112,7 +112,7 @@ public class NamingController {
             return removeGroupResult;
         }
         namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + "successfully!");
+        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
     }
 
     /**
@@ -142,5 +142,9 @@ public class NamingController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/health")
+    public String healthCheck(){
+        return "ok";
+    }
 
 }
