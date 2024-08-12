@@ -86,8 +86,7 @@ jobs:
                        apt-get install -y python3 python3-pip python3-distutils && \
                        apt-get install -y build-essential && \
                        mvn -version && \
-                       mvn -T 4C clean install \
-                           -Dspring-boot.version=${{ matrix.springboot }} \
+                       mvn clean install \
                            -Prelease-seata \
                            -DskipTests \
                            -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
