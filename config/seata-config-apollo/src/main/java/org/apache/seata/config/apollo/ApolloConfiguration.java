@@ -99,6 +99,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         }
     }
 
+
     /**
      * Gets instance.
      *
