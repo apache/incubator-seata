@@ -51,16 +51,17 @@ public class Unit {
     /**
      * @param node node
      */
-    public void addInstance(NamingServerNode node) {
+    public boolean addInstance(NamingServerNode node) {
         if (nodeList.contains(node)) {
-            Node node1 = nodeList.get(nodeList.indexOf(node));
-            if (node.isTotalEqual(node1)) {
-                return;
-            } else {
+            NamingServerNode node1 = nodeList.get(nodeList.indexOf(node));
+            if (node1.isChanged(node)) {
                 nodeList.remove(node1);
+            } else {
+                return false;
             }
         }
         nodeList.add(node);
+        return true;
 
     }
 

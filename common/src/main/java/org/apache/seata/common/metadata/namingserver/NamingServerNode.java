@@ -28,6 +28,26 @@ public class NamingServerNode extends Node {
     private boolean healthy = true;
     private long term;
 
+    public double getWeight() {
+        return weight;
+    }
+
+    public boolean isHealthy() {
+        return healthy;
+    }
+
+    public void setHealthy(boolean healthy) {
+        this.healthy = healthy;
+    }
+
+    public long getTerm() {
+        return term;
+    }
+
+    public void setTerm(long term) {
+        this.term = term;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(getControl(), getTransaction());
@@ -45,20 +65,15 @@ public class NamingServerNode extends Node {
         return Objects.equals(getControl(), node.getControl()) && Objects.equals(getTransaction(), node.getTransaction());
     }
 
-    public boolean isTotalEqual(Object obj) {
-        if (this == obj) {
-            return true;
-        }
 
-        if (obj == null || getClass() != obj.getClass()) {
+    public boolean isChanged(Object obj) {
+        if(Objects.isNull(obj)){
             return false;
         }
-
         NamingServerNode otherNode = (NamingServerNode) obj;
 
-        // check each member variable
-        return Objects.equals(getControl(), otherNode.getControl()) &&
-                Objects.equals(getTransaction(), otherNode.getTransaction());
+        // 对方的term是否比自己大
+        return otherNode.term > term;
     }
 
     // convert to String

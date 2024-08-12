@@ -119,25 +119,6 @@ public class Node {
         return Objects.equals(control, node.control) && Objects.equals(transaction, node.transaction);
     }
 
-    public boolean isTotalEqual(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-
-        Node otherNode = (Node) obj;
-
-        // check each member variable
-        return Objects.equals(control, otherNode.control) &&
-            Objects.equals(transaction, otherNode.transaction) &&
-            Double.compare(otherNode.weight, weight) == 0 &&
-            healthy == otherNode.healthy &&
-            Objects.equals(role, otherNode.role) &&
-            Objects.equals(metadata, otherNode.metadata);
-    }
 
     // convert to String
     public String toJsonString() {
