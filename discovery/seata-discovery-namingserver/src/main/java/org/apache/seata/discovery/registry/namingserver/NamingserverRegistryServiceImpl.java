@@ -85,7 +85,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final int THREAD_POOL_NUM = 1;
     private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
     private volatile long term = 0;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private ScheduledFuture<?> heartBeatScheduledFuture;
     private volatile boolean isSubscribed = false;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
@@ -98,7 +98,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
 
     private NamingserverRegistryServiceImpl() {
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         String heartBeatKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, HEART_BEAT_KEY);
         HEARTBEAT_PERIOD = FILE_CONFIG.getInt(heartBeatKey, HEARTBEAT_PERIOD);
         List<String> urlList = getNamingAddrs();
@@ -397,7 +397,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
             response.close();
             // jsonResponse -> MetaResponse
-            MetaResponse metaResponse = objectMapper.readValue(jsonResponse, new TypeReference<MetaResponse>() {
+            MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
             // MetaResponse -> endpoint list
             List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream()
