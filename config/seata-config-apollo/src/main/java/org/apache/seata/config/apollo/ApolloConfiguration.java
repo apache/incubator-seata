@@ -126,6 +126,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         return (String) configFuture.get();
     }
 
+
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         throw new NotSupportYetException("not support putConfig");
