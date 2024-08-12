@@ -72,7 +72,7 @@ public class NamingServerNode extends Node {
         }
         NamingServerNode otherNode = (NamingServerNode) obj;
 
-        // 对方的term是否比自己大
+        // other node is newer than me
         return otherNode.term > term;
     }
 
