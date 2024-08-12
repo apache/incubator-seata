@@ -67,7 +67,7 @@ public class NamingServerNode extends Node {
 
 
     public boolean isChanged(Object obj) {
-        if(Objects.isNull(obj)){
+        if (Objects.isNull(obj)) {
             return false;
         }
         NamingServerNode otherNode = (NamingServerNode) obj;
