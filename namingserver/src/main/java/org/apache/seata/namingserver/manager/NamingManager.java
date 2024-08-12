@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -60,9 +61,9 @@ import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 @Component
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
-    private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
+    private final ConcurrentMap<InetSocketAddress, Long>                                                    instanceLiveTable;
     private final ConcurrentMap<String/* VGroup */,
-        ConcurrentMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>>>    vGroupMap;
+        ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>>>                                                                   vGroupMap;
     private final ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
 
     @Value("${heartbeat.threshold:90000}")
@@ -108,15 +109,16 @@ public class NamingManager {
             LOGGER.warn("no cluster in namespace:" + namespace);
         }
 
-        for (Map.Entry<String, ConcurrentMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
+        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, Set<String>>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
-            Map<String, Pair<String, String>> namespaceMap = entry.getValue();
-            Pair<String, String> pair = namespaceMap.get(namespace);
-            String clusterName = pair.getKey();
-            ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
-            if (clusterVO != null) {
-                clusterVO.addMapping(vGroup);
-            }
+            ConcurrentMap<String, ConcurrentMap<String, Set<String>>> namespaceMap = entry.getValue();
+            ConcurrentMap<String, Set<String>> pair = namespaceMap.get(namespace);
+            pair.keySet().stream().findFirst().ifPresent(clusterName->{
+                ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
+                if (clusterVO != null) {
+                    clusterVO.addMapping(vGroup);
+                }
+            });
         }
 
         return new ArrayList<>(clusterVOHashMap.values());
@@ -190,11 +192,9 @@ public class NamingManager {
 
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
-            Pair<String, String> pair = Pair.of(clusterName, unitName);
-            ConcurrentMap<String, Pair<String, String>> stringPairHashMap = new ConcurrentHashMap<>();
-            stringPairHashMap.put(namespace, pair);
-            if (!vGroupMap.containsKey(vGroup) || !vGroupMap.get(vGroup).equals(stringPairHashMap)) {
-                vGroupMap.put(vGroup, stringPairHashMap);
+            Set<String> units = vGroupMap.computeIfAbsent(vGroup, k -> new ConcurrentHashMap<>()).computeIfAbsent(namespace, k -> new ConcurrentHashMap<>()).computeIfAbsent(clusterName, k -> ConcurrentHashMap.newKeySet());
+            if (!vGroupMap.containsKey(vGroup) && !units.contains(unitName)) {
+                units.add(unitName);
                 applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
             }
         } catch (Exception e) {
@@ -203,21 +203,19 @@ public class NamingManager {
     }
 
     public void notifyClusterChange(String namespace, String clusterName, String unitName) {
-        for (Map.Entry<String, ConcurrentMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
+        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, Set<String>>>> entry : vGroupMap
+            .entrySet()) {
             String vGroup = entry.getKey();
-            Map<String, Pair<String, String>> namespaceMap = entry.getValue();
-
-            // Iterating through an internal HashMap
-            for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
-                String namespace1 = innerEntry.getKey();
-                Pair<String, String> pair = innerEntry.getValue();
-                String clusterName1 = pair.getKey();
-                String unitName1 = pair.getValue();
-                if (namespace1.equals(namespace) && clusterName1.equals(clusterName)
-                    && (unitName1 == null || unitName1.equals(unitName))) {
-                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
-                }
-            }
+            Map<String, ConcurrentMap<String, Set<String>>> namespaceMap = entry.getValue();
+            namespaceMap.forEach((namespace1, pair) -> {
+                pair.forEach((clusterName1, unitName1) -> {
+                    if (namespace1.equals(namespace) && clusterName1.equals(clusterName)
+                        && (unitName1 == null || unitName1.contains(unitName))) {
+                        applicationContext
+                            .publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
+                    }
+                });
+            });
         }
 
     }
@@ -280,22 +278,24 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        ConcurrentMap<String/* namespace */, Pair<String/* clusterName */, String/* unitName */>> map =
+        ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>> map =
             vGroupMap.get(vGroup);
+        List<Cluster> clusterList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(map)) {
-            Pair<String, String> clusterUnitPair = map.get(namespace);
+            ConcurrentMap<String, Set<String>> clusterUnitPair = map.get(namespace);
             if (clusterUnitPair != null) {
-                String clusterName = clusterUnitPair.getKey();
-                String unitName = clusterUnitPair.getValue();
-                List<Cluster> clusterList = new ArrayList<>();
-                Optional.ofNullable(namespaceClusterDataMap.get(namespace))
-                    .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName))).ifPresent(data -> {
-                        clusterList.add(data.getClusterByUnit(unitName));
-                    });
-                return clusterList;
+                clusterUnitPair.forEach((clusterName, unitNameSet) -> {
+                    Optional.ofNullable(namespaceClusterDataMap.get(namespace))
+                        .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName)))
+                        .ifPresent(data -> {
+                            for (String unitName : unitNameSet) {
+                                clusterList.add(data.getClusterByUnit(unitName));
+                            }
+                        });
+                });
             }
         }
-        return Collections.emptyList();
+        return clusterList;
     }
 
     public List<Node> getInstances(String namespace, String clusterName) {

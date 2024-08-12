@@ -185,6 +185,7 @@ seata:
       branch-table: branch_table
       lock-table: lock_table
       distributed-lock-table: distributed_lock
+      vgroup-table: vgroup_table
       query-limit: 1000
       max-wait: 5000
     redis:
