@@ -32,11 +32,6 @@
     <name>seata-all ${project.version}</name>
     <description>compatible with io.seata API</description>
     <properties>
-        <mockito.version>4.11.0</mockito.version>
-        <druid.version>1.2.20</druid.version>
-        <mysql.version>5.1.42</mysql.version>
-        <mariadb.version>2.7.2</mariadb.version>
-        <assertj-core.version>3.12.2</assertj-core.version>
         <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
     </properties>
     <dependencies>
@@ -96,9 +91,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-tcc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.13</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -110,48 +109,17 @@
                     <artifactId>spring-expression</artifactId>
                 </exclusion>
             </exclusions>
-            <version>5.3.26</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.27.1</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-tcc</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
             <scope>provided</scope>
-            <version>${druid.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj-core.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -162,13 +130,11 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>${mariadb.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
             <scope>test</scope>
         </dependency>
 
@@ -178,7 +144,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
