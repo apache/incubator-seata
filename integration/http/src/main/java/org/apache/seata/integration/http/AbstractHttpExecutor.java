@@ -16,12 +16,16 @@
  */
 package org.apache.seata.integration.http;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.core.context.RootContext;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,12 +38,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.Args;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Abstract http executor.
@@ -48,6 +50,11 @@ import java.util.Map;
 public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpExecutor.class);
+    private static final ParserConfig LOCAL_CONFIG = new ParserConfig();
+
+    static {
+        LOCAL_CONFIG.setSafeMode(true);
+    }
 
     @Override
     public <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
@@ -84,10 +91,15 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         if (paramObject != null) {
             String content;
             if (paramObject instanceof String) {
-                String sParam = (String) paramObject;
+                String sParam = (String)paramObject;
                 JSONObject jsonObject = null;
                 try {
-                    jsonObject = JSON.parseObject(sParam);
+                    Object obj = JSON.parse(sParam, LOCAL_CONFIG);
+                    if (obj instanceof JSONObject) {
+                        jsonObject = (JSONObject)obj;
+                    } else {
+                        jsonObject = (JSONObject)JSON.toJSON(obj);
+                    }
                     content = jsonObject.toJSONString();
                 } catch (JSONException e) {
                     //Interface provider process parse exception
@@ -99,8 +111,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
             } else {
                 content = JSON.toJSONString(paramObject);
-            }
-            entity = new StringEntity(content, ContentType.APPLICATION_JSON);
+            } entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         }
 
         return buildEntity(entity, paramObject);
@@ -165,11 +176,12 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
 
     public static Map<String, String> convertParamOfBean(Object sourceParam) {
-        return CollectionUtils.toStringMap(JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class));
+        return CollectionUtils.toStringMap(JSON.parseObject(
+            JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty,
+                SerializerFeature.WriteMapNullValue), Map.class, LOCAL_CONFIG));
     }
 
-    @SuppressWarnings("lgtm[java/unsafe-deserialization]")
     public static <T> Map<String, String> convertParamOfJsonString(String jsonStr, Class<T> returnType) {
-        return convertParamOfBean(JSON.parseObject(jsonStr, returnType));
+        return convertParamOfBean(JSON.parseObject(jsonStr, returnType, LOCAL_CONFIG));
     }
 }
