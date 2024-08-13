@@ -140,7 +140,7 @@ public class NamingManager {
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                 if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                     return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
                         "add vGroup in new cluster failed");
@@ -170,7 +170,7 @@ public class NamingManager {
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
                     try (CloseableHttpResponse closeableHttpResponse =
-                        HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+                        HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                         if (closeableHttpResponse == null
                             || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                             LOGGER.warn("remove vGroup in old cluster failed");
