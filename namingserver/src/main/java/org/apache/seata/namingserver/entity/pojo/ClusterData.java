@@ -131,7 +131,7 @@ public class ClusterData {
         }
         Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
             Unit unit = new Unit();
-            List<Node> instances = new CopyOnWriteArrayList<>();
+            List<NamingServerNode> instances = new CopyOnWriteArrayList<>();
             unit.setUnitName(unitName);
             unit.setNamingInstanceList(instances);
             return unit;
