@@ -89,7 +89,7 @@ public class ConsistentHashLoadBalance implements LoadBalance {
             long hash = 0;
             for (int i = 0; i < 8 && i < digest.length; i++) {
                 hash <<= 8;
-                hash |= (digest[i] & 0xff);
+                hash |= digest[i] & 0xff;
             }
             return hash;
         }
