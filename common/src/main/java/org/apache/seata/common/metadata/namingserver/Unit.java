@@ -24,7 +24,7 @@ public class Unit {
 
     private String unitName;
 
-    private List<Node> nodeList;
+    private List<NamingServerNode> nodeList;
 
     public String getUnitName() {
         return unitName;
@@ -34,11 +34,11 @@ public class Unit {
         this.unitName = unitName;
     }
 
-    public List<Node> getNamingInstanceList() {
+    public List<NamingServerNode> getNamingInstanceList() {
         return nodeList;
     }
 
-    public void setNamingInstanceList(List<Node> nodeList) {
+    public void setNamingInstanceList(List<NamingServerNode> nodeList) {
         this.nodeList = nodeList;
     }
 
@@ -51,16 +51,17 @@ public class Unit {
     /**
      * @param node node
      */
-    public void addInstance(NamingServerNode node) {
+    public boolean addInstance(NamingServerNode node) {
         if (nodeList.contains(node)) {
-            Node node1 = nodeList.get(nodeList.indexOf(node));
-            if (node.isTotalEqual(node1)) {
-                return;
-            } else {
+            NamingServerNode node1 = nodeList.get(nodeList.indexOf(node));
+            if (node1.isChanged(node)) {
                 nodeList.remove(node1);
+            } else {
+                return false;
             }
         }
         nodeList.add(node);
+        return true;
 
     }
 

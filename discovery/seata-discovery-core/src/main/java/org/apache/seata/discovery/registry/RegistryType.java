@@ -60,7 +60,11 @@ public enum RegistryType {
     /**
      * Custom registry type
      */
-    Custom;
+    Custom,
+    /**
+     * NamingServer registry type
+     */
+    NamingServer;
 
     /**
      * Gets type.
