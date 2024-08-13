@@ -16,6 +16,7 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -29,7 +30,6 @@ import static org.apache.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 
 /**
  * The type consistent hash load balance.
- *
  */
 @LoadLevel(name = LoadBalanceFactory.CONSISTENT_HASH_LOAD_BALANCE)
 public class ConsistentHashLoadBalance implements LoadBalance {
@@ -37,11 +37,13 @@ public class ConsistentHashLoadBalance implements LoadBalance {
     /**
      * The constant LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES.
      */
-    public static final String LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES = LoadBalanceFactory.LOAD_BALANCE_PREFIX + "virtualNodes";
+    public static final String LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES = LoadBalanceFactory.LOAD_BALANCE_PREFIX
+        + "virtualNodes";
     /**
      * The constant VIRTUAL_NODES_NUM.
      */
-    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
+    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance().getInt(
+        LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
 
     @Override
     public <T> T select(List<T> invokers, String xid) {
@@ -51,7 +53,7 @@ public class ConsistentHashLoadBalance implements LoadBalance {
     private static final class ConsistentHashSelector<T> {
 
         private final SortedMap<Long, T> virtualInvokers = new TreeMap<>();
-        private final HashFunction hashFunction = new MD5Hash();
+        private final HashFunction hashFunction = new SHA256Hash();
 
         ConsistentHashSelector(List<T> invokers, int virtualNodes) {
             for (T invoker : invokers) {
@@ -68,12 +70,12 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         }
     }
 
-    @SuppressWarnings("lgtm[java/weak-cryptographic-algorithm]")
-    private static class MD5Hash implements HashFunction {
+    private static class SHA256Hash implements HashFunction {
         MessageDigest instance;
-        public MD5Hash() {
+
+        public SHA256Hash() {
             try {
-                instance = MessageDigest.getInstance("MD5");
+                instance = MessageDigest.getInstance("SHA-256");
             } catch (NoSuchAlgorithmException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
@@ -83,13 +85,13 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         public long hash(String key) {
             instance.reset();
             instance.update(key.getBytes());
-            byte[] digest = instance.digest();
-            long h = 0;
-            for (int i = 0; i < 4; i++) {
-                h <<= 8;
-                h |= ((int) digest[i]) & 0xFF;
+            byte[] digest = instance.digest(key.getBytes(StandardCharsets.UTF_8));
+            long hash = 0;
+            for (int i = 0; i < 8 && i < digest.length; i++) {
+                hash <<= 8;
+                hash |= (digest[i] & 0xff);
             }
-            return h;
+            return hash;
         }
     }
 
