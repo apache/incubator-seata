@@ -352,11 +352,11 @@ public class ClusterController {
     }
 
     @PostMapping("/config/watch")
-    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam Long version,
+    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam(required = false) Long version,
                       @RequestParam(defaultValue = "28000") int timeout) {
         Long currentVersion = configStoreManager.getConfigVersion(namespace, dataId);
         // if the config version of client is lower than the server, return directly
-        if (version == null || version < currentVersion) {
+        if (version == null || (currentVersion != null && version < currentVersion)) {
             AsyncContext context = request.startAsync();
             HttpServletResponse httpServletResponse = (HttpServletResponse) context.getResponse();
             httpServletResponse.setStatus(HttpServletResponse.SC_OK);

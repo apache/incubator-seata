@@ -156,7 +156,7 @@ public class RaftConfigServerManager {
                 throw new RuntimeException("start raft node fail!");
             }
         }
-        // ensure that close the configStoreManager at last.
+        // Make sure to close it at the end, as other components may still use the configuration, such as ShutdownWaitTime.
         ServerRunner.addDisposable(() -> {
             RaftConfigServerManager.destroy();
             ConfigStoreManagerFactory.destroy();

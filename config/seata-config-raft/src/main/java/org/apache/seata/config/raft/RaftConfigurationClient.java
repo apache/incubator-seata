@@ -242,7 +242,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                         if(configDataResponse.getSuccess()) {
                             Map<String, Object> result = configDataResponse.getResult();
                             Map<String, Object> configMap = (Map<String, Object>) result.get(CONFIG_KEY);
-                            Long version = ((Integer)result.get(VERSION_KEY)).longValue();
+                            Long version = result.get(VERSION_KEY) == null ? -1 : ((Integer)result.get(VERSION_KEY)).longValue();
                             Long currentVersion = CONFIG_VERSION.get();
                             if (version < currentVersion) {
                                 LOGGER.info("The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.", version, CONFIG_VERSION.get());

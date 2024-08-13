@@ -31,7 +31,7 @@ public class ConfigStoreProperties {
     private String type = "rocksdb";
     private String dir = "configStore";
     private boolean destroyOnShutdown = false;
-    private String namespace = "SEATA_GROUP";
+    private String namespace = "default";
     private String dataId = "seata.properties";
 
     public String getType() {
