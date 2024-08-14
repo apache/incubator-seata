@@ -137,7 +137,7 @@ class NamingControllerTest {
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
-        Map<String,Object> vGroups = new HashMap();
+        Map<String,Object> vGroups = new HashMap<>();
         vGroups.put("vgroup1",null);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
