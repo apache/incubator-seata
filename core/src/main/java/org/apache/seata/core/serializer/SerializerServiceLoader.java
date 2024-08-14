@@ -55,7 +55,7 @@ public final class SerializerServiceLoader {
     private SerializerServiceLoader() {
     }
 
-    private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
+    private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.core.serializer.protobuf.generated.ProtobufSerializer";
 
     /**
      * Load the service of {@link Serializer}

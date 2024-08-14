@@ -78,7 +78,7 @@
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
 
-        <protobuf.version>3.16.3</protobuf.version>
+        <protobuf.version>3.21.12</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
         <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>

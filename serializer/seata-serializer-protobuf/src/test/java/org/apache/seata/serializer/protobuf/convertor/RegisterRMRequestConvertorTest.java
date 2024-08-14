@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.serializer.protobuf.convertor;
+package org.apache.seata.core.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.RegisterRMRequestProto;
+import org.apache.seata.core.serializer.protobuf.generated.RegisterRMRequestProto;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.junit.jupiter.api.Test;
 

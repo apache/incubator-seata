@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.serializer.protobuf.convertor;
+package org.apache.seata.core.serializer.protobuf.convertor;
 
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.BatchResultMessage;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
-import org.apache.seata.serializer.protobuf.generated.BatchResultMessageProto;
+import org.apache.seata.core.serializer.protobuf.generated.BatchResultMessageProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

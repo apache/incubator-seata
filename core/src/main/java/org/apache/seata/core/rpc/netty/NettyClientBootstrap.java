@@ -17,24 +17,25 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollMode;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
+import io.netty.handler.codec.http2.Http2MultiplexHandler;
+import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
+import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.rpc.RemotingBootstrap;
+import org.apache.seata.core.rpc.netty.grpc.GrpcDecoder;
+import org.apache.seata.core.rpc.netty.grpc.GrpcEncoder;
 import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
 import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
 import org.slf4j.Logger;
@@ -130,12 +131,19 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ChannelPipeline pipeline = ch.pipeline();
-                    pipeline
-                        .addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                    pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                             nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                            nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                        .addLast(new ProtocolDecoderV1())
-                        .addLast(new ProtocolEncoderV1());
+                            nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                    if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
+                        pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
+                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()))
+                                .addLast(new GrpcDecoder())
+                                .addLast(new GrpcEncoder());
+                    } else {
+                        pipeline.addLast(new ProtocolDecoderV1())
+                                .addLast(new ProtocolEncoderV1());
+                    }
+
                     if (channelHandlers != null) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
@@ -177,9 +185,28 @@ public class NettyClientBootstrap implements RemotingBootstrap {
             } else {
                 channel = f.channel();
             }
+
+            // TODO tmp only for grpc
+            if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
+                Http2StreamChannelBootstrap bootstrap = new Http2StreamChannelBootstrap(channel);
+                bootstrap.handler(new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+                        Channel channel = ctx.channel();
+                        channel.pipeline().addLast(new GrpcDecoder());
+                        channel.pipeline().addLast(new GrpcEncoder());
+                        if (channelHandlers != null) {
+                            addChannelPipelineLast(channel, channelHandlers);
+                        }
+                    }
+                });
+                channel = bootstrap.open().get();
+            }
+
         } catch (Exception e) {
             throw new FrameworkException(e, "can not connect to services-server.");
         }
+
         return channel;
     }
 

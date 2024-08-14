@@ -242,13 +242,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-serializer-protobuf</artifactId>
-            <version>${project.version}</version>
-            <!-- Slimming down for 'seata-all.jar' -->
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.seata</groupId>
             <artifactId>seata-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
