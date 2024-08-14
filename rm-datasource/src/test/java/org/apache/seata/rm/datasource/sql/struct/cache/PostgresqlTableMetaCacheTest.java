@@ -61,7 +61,7 @@ public class PostgresqlTableMetaCacheTest {
 
     private static Object[][] tableMetas =
             new Object[][]{
-                    new Object[]{"pt1", "public"}
+                    new Object[]{"", "public", "pt1"}
             };
 
     @Test
@@ -81,6 +81,7 @@ public class PostgresqlTableMetaCacheTest {
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "Pt1", proxy.getResourceId());
         Assertions.assertNotNull(tableMeta);
         Assertions.assertEquals("pt1", tableMeta.getTableName());
+        Assertions.assertEquals("public.pt1", tableMeta.getFullTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.pt1", proxy.getResourceId());
 

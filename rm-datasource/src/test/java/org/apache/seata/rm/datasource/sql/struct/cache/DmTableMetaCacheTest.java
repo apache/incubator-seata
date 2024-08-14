@@ -59,9 +59,14 @@ public class DmTableMetaCacheTest {
             new Object[] {"id"}
         };
 
+    private static Object[][] tableMetas =
+            new Object[][]{
+                    new Object[]{"", "t", "dt1"}
+            };
+
     @Test
     public void getTableMetaTest() throws SQLException {
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas, tableMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -73,6 +78,8 @@ public class DmTableMetaCacheTest {
         TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "dt1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
+        Assertions.assertEquals("DT1", tableMeta.getTableName());
+        Assertions.assertEquals("t.dt1", tableMeta.getFullTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "dt1", proxy.getResourceId());
 

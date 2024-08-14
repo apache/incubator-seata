@@ -63,7 +63,7 @@ public class SqlServerTableMetaCacheTest {
 
     private static Object[][] tableMetas =
             new Object[][]{
-                    new Object[]{"st1", "m"}
+                    new Object[]{"", "m", "st1"}
             };
 
     private TableMetaCache getTableMetaCache() {
@@ -94,6 +94,7 @@ public class SqlServerTableMetaCacheTest {
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
 
         Assertions.assertEquals("m.st1", tableMeta.getTableName());
+        Assertions.assertEquals("m.st1", tableMeta.getFullTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());

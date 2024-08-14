@@ -98,6 +98,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsTable = dbmd.getTables("", schemaName, tableName, new String[]{"TABLE"});
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
@@ -195,6 +196,14 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                         }
                     }
                 }
+            }
+
+            while (rsTable.next()) {
+                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
+                //set full tableName
+                String fullTableName = buildFullTableName("", rsTableSchema, rsTableName);
+                tm.setFullTableName(fullTableName);
             }
         }
         return tm;

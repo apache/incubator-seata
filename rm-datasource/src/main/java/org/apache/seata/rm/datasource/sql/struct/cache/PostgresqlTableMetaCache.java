@@ -185,8 +185,9 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsTable.next()) {
-                String rsTableName = rsTable.getString("TABLE_NAME");
+                String rsTableCat = rsTable.getString("TABLE_CAT");
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
                 //set origin tableName with schema if necessary
                 if ("public".equalsIgnoreCase(rsTableSchema)) {
                     //for compatibility reasons, old clients generally do not have the 'public' default schema by default.
@@ -195,6 +196,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                     //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
                     tm.setTableName(rsTableSchema + "." + rsTableName);
                 }
+
+                //set full tableName
+                String fullTableName = buildFullTableName(rsTableCat, rsTableSchema, rsTableName);
+                tm.setFullTableName(fullTableName);
             }
         }
 

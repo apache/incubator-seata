@@ -61,12 +61,15 @@ public class DmTableMetaCache extends OracleTableMetaCache {
         result.setTableName(tableNameMeta.getTableName());
         try (ResultSet rsColumns = dbmd.getColumns("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, tableNameMeta.getSchema(), tableNameMeta.getTableName(), false, true);
+             ResultSet rsTable = dbmd.getTables("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), new String[]{"TABLE"});
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
             processColumns(result, rsColumns);
 
             processIndexes(result, rsIndex);
 
             processPrimaries(result, rsPrimary);
+
+            processTableInfo(result, rsTable);
 
             if (result.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
@@ -172,5 +175,15 @@ public class DmTableMetaCache extends OracleTableMetaCache {
             result.setIndextype(IndexType.NORMAL);
         }
         return result;
+    }
+
+    protected void processTableInfo(TableMeta tableMeta, ResultSet rsTable) throws SQLException {
+        while (rsTable.next()) {
+            String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+            String rsTableName = rsTable.getString("TABLE_NAME");
+            //set full tableName
+            String fullTableName = buildFullTableName("", rsTableSchema, rsTableName);
+            tableMeta.setFullTableName(fullTableName);
+        }
     }
 }

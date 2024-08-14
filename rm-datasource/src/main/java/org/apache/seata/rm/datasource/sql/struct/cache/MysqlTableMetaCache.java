@@ -26,6 +26,7 @@ import java.sql.Statement;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
@@ -119,6 +120,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
+             ResultSet rsTable = dbmd.getTables(catalogName, schemaName, tableName, new String[]{"TABLE"});
              ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
@@ -184,6 +186,14 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
+            }
+            while (rsTable.next()) {
+                String rsTableCat = rsTable.getString("TABLE_CAT");
+                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
+                //set full tableName
+                String fullTableName = buildFullTableName(rsTableCat, rsTableSchema, rsTableName);
+                tm.setFullTableName(fullTableName);
             }
         }
         return tm;
