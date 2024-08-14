@@ -78,7 +78,6 @@ public class Server {
             // load cluster name
             String clusterName = environment.getProperty(CLUSTER_NAME_KEY, "default");
             instance.setClusterName(clusterName);
-            instance.setTerm(System.currentTimeMillis());
 
             // load cluster type
             String clusterType = String.valueOf(StoreConfig.getSessionMode());
