@@ -18,7 +18,6 @@ package org.apache.seata.namingserver.controller;
 
 
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
-import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.namingserver.listener.Watcher;
@@ -57,9 +56,9 @@ public class NamingController {
 
     @PostMapping("/register")
     public Result<String> registerInstance(@RequestParam String namespace,
-                                      @RequestParam String clusterName,
-                                      @RequestParam String unit,
-                                      @RequestBody NamingServerNode registerBody) {
+                                           @RequestParam String clusterName,
+                                           @RequestParam String unit,
+                                           @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
         if (isSuccess) {
@@ -73,7 +72,7 @@ public class NamingController {
 
     @PostMapping("/unregister")
     public Result<String> unregisterInstance(@RequestParam String unit,
-                                        @RequestBody Node registerBody) {
+                                             @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
         if (isSuccess) {
@@ -98,9 +97,9 @@ public class NamingController {
 
     @PostMapping("/changeGroup")
     public Result<String> changeGroup(@RequestParam String namespace,
-                                 @RequestParam String clusterName,
-                                 @RequestParam String unitName,
-                                 @RequestParam String vGroup) {
+                                      @RequestParam String clusterName,
+                                      @RequestParam String unitName,
+                                      @RequestParam String vGroup) {
 
         Result<String> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
@@ -112,7 +111,7 @@ public class NamingController {
             return removeGroupResult;
         }
         namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
-        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + "successfully!");
+        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
     }
 
     /**

@@ -164,4 +164,5 @@ class NamingControllerTest {
         cluster = metaResponse.getClusterList().get(0);
         assertEquals(0, cluster.getUnitData().size());
     }
+
 }
