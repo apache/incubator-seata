@@ -67,7 +67,7 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
             Map<String, String> mappingKeyMap = jedis.hgetAll(namespace);
             HashMap<String, Object> result = new HashMap<>();
             for (Map.Entry<String, String> entry : mappingKeyMap.entrySet()) {
-                if (StringUtils.equals(clusterName, entry.getKey())) {
+                if (StringUtils.equals(clusterName, entry.getValue())) {
                     result.put(entry.getKey(), null);
                 }
             }
