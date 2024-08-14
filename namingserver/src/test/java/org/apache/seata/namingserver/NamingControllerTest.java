@@ -63,7 +63,7 @@ class NamingControllerTest {
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",null);
+        vGroups.put("vgroup1",unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
@@ -94,7 +94,7 @@ class NamingControllerTest {
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",null);
+        vGroups.put("vgroup1",unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         NamingServerNode node2 = new NamingServerNode();
@@ -123,9 +123,7 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(1, metaResponse.getClusterList().size());
-        cluster = metaResponse.getClusterList().get(0);
-        assertEquals(0, cluster.getUnitData().size());
+        assertEquals(0, metaResponse.getClusterList().size());
     }
 
     @Test
@@ -137,8 +135,8 @@ class NamingControllerTest {
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
-        Map<String,Object> vGroups = new HashMap();
-        vGroups.put("vgroup1",null);
+        Map<String,Object> vGroups = new HashMap<>();
+        vGroups.put("vgroup1",unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         String vGroup = "vgroup1";
@@ -161,9 +159,7 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(1, metaResponse.getClusterList().size());
-        cluster = metaResponse.getClusterList().get(0);
-        assertEquals(0, cluster.getUnitData().size());
+        assertEquals(0, metaResponse.getClusterList().size());
     }
 
 }

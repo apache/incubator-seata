@@ -227,10 +227,10 @@ public class NamingManager {
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
-                key -> new ClusterData(clusterName, (String)node.getMetadata().remove("cluster-type")));
+                key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
-            Optional.ofNullable(node.getMetadata().remove(CONSTANT_GROUP)).ifPresent(mappingObj -> {
+            Optional.ofNullable(node.getMetadata().get(CONSTANT_GROUP)).ifPresent(mappingObj -> {
                 if (mappingObj instanceof Map) {
                     Map<String, Object> vGroups = (Map<String, Object>) mappingObj;
                     vGroups.forEach((k, v) -> {
@@ -263,6 +263,11 @@ public class NamingManager {
                     clusterMap.forEach((clusterName, clusterData) -> {
                         if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
                             clusterData.removeInstance(node, unitName);
+                            Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
+                            if (vgroupMap instanceof Map) {
+                                ((Map<String, Object>)vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group)
+                                    .get(namespace).get(clusterName).remove(realUnitName));
+                            }
                             notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
                             instanceLiveTable.remove(new InetSocketAddress(node.getTransaction().getHost(),
                                 node.getTransaction().getPort()));
@@ -285,15 +290,13 @@ public class NamingManager {
         if (!CollectionUtils.isEmpty(map)) {
             ConcurrentMap<String, Set<String>> clusterUnitPair = map.get(namespace);
             if (clusterUnitPair != null) {
-                clusterUnitPair.forEach((clusterName, unitNameSet) -> {
-                    Optional.ofNullable(namespaceClusterDataMap.get(namespace))
-                        .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName)))
-                        .ifPresent(data -> {
-                            for (String unitName : unitNameSet) {
-                                clusterList.add(data.getClusterByUnit(unitName));
-                            }
-                        });
-                });
+                clusterUnitPair.forEach((clusterName, unitNameSet) -> Optional.ofNullable(namespaceClusterDataMap.get(namespace))
+                    .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName)))
+                    .ifPresent(data -> {
+                        for (String unitName : unitNameSet) {
+                            clusterList.add(data.getClusterByUnit(unitName));
+                        }
+                    }));
             }
         }
         return clusterList;
@@ -313,8 +316,8 @@ public class NamingManager {
         for (String namespace : namespaceClusterDataMap.keySet()) {
             for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
-                    List<Node> removeList = new ArrayList<>();
-                    for (Node instance : unit.getNamingInstanceList()) {
+                    List<NamingServerNode> removeList = new ArrayList<>();
+                    for (NamingServerNode instance : unit.getNamingInstanceList()) {
                         InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(),
                             instance.getTransaction().getPort());
                         long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
@@ -325,8 +328,16 @@ public class NamingManager {
                     }
                     if (!CollectionUtils.isEmpty(removeList)) {
                         unit.getNamingInstanceList().removeAll(removeList);
-                        for (Node instance : removeList) {
+                        for (NamingServerNode instance : removeList) {
                             clusterData.removeInstance(instance, unit.getUnitName());
+                            Object vgoupMap = instance.getMetadata().get(CONSTANT_GROUP);
+                            if (vgoupMap instanceof Map) {
+                                ((Map<String, Object>)vgoupMap).forEach((group, unitName) -> {
+                                    vGroupMap.get(group).get(namespace).get(clusterData.getClusterName())
+                                        .remove(unitName);
+                                });
+                            }
+
                             LOGGER.warn("{} instance has gone offline",
                                 instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
