@@ -73,7 +73,7 @@ public class NamingController {
 
     @PostMapping("/unregister")
     public Result<String> unregisterInstance(@RequestParam String unit,
-                                        @RequestBody Node registerBody) {
+                                        @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
         if (isSuccess) {
@@ -130,7 +130,7 @@ public class NamingController {
                       HttpServletRequest request) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), clientAddr);
+        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt("28000"), Long.parseLong(clientTerm), clientAddr);
         clusterWatcherManager.registryWatcher(watcher);
     }
 

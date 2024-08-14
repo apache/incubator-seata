@@ -65,43 +65,46 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 public class Server {
 
     public static void metadataInit() {
+        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+        if (StringUtils.equals(ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY
+                + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE), NAMING_SERVER)) {
+            ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
-        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+            // load node properties
+            Instance instance = Instance.getInstance();
+            // load namespace
+            String namespace = environment.getProperty(NAMESPACE_KEY, "public");
+            instance.setNamespace(namespace);
+            // load cluster name
+            String clusterName = environment.getProperty(CLUSTER_NAME_KEY, "default");
+            instance.setClusterName(clusterName);
+            instance.setTerm(System.currentTimeMillis());
 
-        // load node properties
-        Instance instance = Instance.getInstance();
-        // load namespace
-        String namespace = environment.getProperty(NAMESPACE_KEY, "public");
-        instance.setNamespace(namespace);
-        // load cluster name
-        String clusterName = environment.getProperty(CLUSTER_NAME_KEY, "default");
-        instance.setClusterName(clusterName);
+            // load cluster type
+            String clusterType = String.valueOf(StoreConfig.getSessionMode());
+            instance.addMetadata("cluster-type", "raft".equals(clusterType) ? clusterType : "default");
 
-        // load cluster type
-        String clusterType = String.valueOf(StoreConfig.getSessionMode());
-        instance.addMetadata("cluster-type", "raft".equals(clusterType) ? clusterType : "default");
+            // load unit name
+            instance.setUnit(String.valueOf(UUID.randomUUID()));
 
-        // load unit name
-        instance.setUnit(String.valueOf(UUID.randomUUID()));
+            // load node Endpoint
+            instance.setControl(new Node.Endpoint(NetUtil.getLocalIp(), Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))), "http"));
 
-        // load node Endpoint
-        instance.setControlEndpoint(new Node.Endpoint(NetUtil.getLocalIp(), Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))), "http"));
-
-        // load metadata
-        for (PropertySource<?> propertySource : environment.getPropertySources()) {
-            if (propertySource instanceof EnumerablePropertySource) {
-                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
-                for (String propertyName : enumerablePropertySource.getPropertyNames()) {
-                    if (propertyName.startsWith(META_PREFIX)) {
-                        instance.addMetadata(propertyName.substring(META_PREFIX.length()), enumerablePropertySource.getProperty(propertyName));
+            // load metadata
+            for (PropertySource<?> propertySource : environment.getPropertySources()) {
+                if (propertySource instanceof EnumerablePropertySource) {
+                    EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
+                    for (String propertyName : enumerablePropertySource.getPropertyNames()) {
+                        if (propertyName.startsWith(META_PREFIX)) {
+                            instance.addMetadata(propertyName.substring(META_PREFIX.length()), enumerablePropertySource.getProperty(propertyName));
+                        }
                     }
                 }
             }
-        }
 
-        // load vgroup mapping relationship
-        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
-        instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
+            // load vgroup mapping relationship
+            instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
+        }
         vGroupMappingStoreManager.notifyMapping();
     }
 
@@ -157,10 +160,8 @@ public class Server {
 
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
-        if (StringUtils.equals(ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY
-                + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE), NAMING_SERVER)) {
-            metadataInit();
-        }
+        metadataInit();
+
         nettyRemotingServer.init();
     }
 }

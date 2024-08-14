@@ -139,11 +139,11 @@ public class ClusterData {
         // ensure that when adding an instance, the remove side will not delete the unit.
         lock.lock();
         try {
-            currentUnit.addInstance(instance);
+            return currentUnit.addInstance(instance);
         } finally {
             lock.unlock();
         }
-        return true;
+
     }
 
 
