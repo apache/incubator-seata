@@ -126,7 +126,7 @@
 
         <!-- # for web -->
         <spring-webmvc.version>5.3.26</spring-webmvc.version>
-        <tomcat-embed.version>9.0.83</tomcat-embed.version>
+        <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>

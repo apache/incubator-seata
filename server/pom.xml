@@ -35,7 +35,7 @@
         <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
         <spring-framework-for-server.version>5.3.37</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>9.0.83</tomcat-embed.version>
+        <tomcat-embed.version>9.0.90</tomcat-embed.version>
     </properties>
 
     <dependencyManagement>
@@ -281,6 +281,12 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>${jackson-mapper.version}</version>
         </dependency>
 
         <!--rate limit-->

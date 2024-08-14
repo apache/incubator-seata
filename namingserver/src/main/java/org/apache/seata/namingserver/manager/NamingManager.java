@@ -26,7 +26,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.namingserver.constants.NamingServerConstants;
+import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 
-import static org.apache.seata.namingserver.constants.NamingServerConstants.CONSTANT_GROUP;
+import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 
 @Component
 public class NamingManager {
@@ -140,7 +140,7 @@ public class NamingManager {
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                 if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                     return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
                         "add vGroup in new cluster failed");
@@ -170,7 +170,7 @@ public class NamingManager {
                     Map<String, String> header = new HashMap<>();
                     header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
                     try (CloseableHttpResponse closeableHttpResponse =
-                        HttpClientUtil.doGet(httpUrl, params, header, 30000)) {
+                        HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                         if (closeableHttpResponse == null
                             || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                             LOGGER.warn("remove vGroup in old cluster failed");
