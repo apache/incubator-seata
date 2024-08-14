@@ -213,7 +213,7 @@ public class NamingManager {
 
                 Pair<String, String> pair = innerEntry.getValue();
                 String clusterName1 = pair.getKey();
-                if(StringUtils.equals(clusterName1,clusterName)){
+                if (StringUtils.equals(clusterName1,clusterName)) {
                     applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
                 }
             }
@@ -236,7 +236,8 @@ public class NamingManager {
                 if (mappingObj instanceof Map) {
                     Map<String, Object> vGroups = (Map) mappingObj;
                     vGroups.forEach((k, v) -> {
-                        // 非raft模式unit与节点一对一，存节点unitName；raft模式unitName等于raft-group，不能使用节点的unitName
+                        // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
+                        // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
                         changeGroup(namespace, clusterName, v == null ? unitName : (String)v, k);
                     });
                 }

@@ -78,7 +78,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
-        if (event.getTerm() > 0 || event.getTerm()==-1) {
+        if (event.getTerm() > 0 || event.getTerm() == -1) {
             GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
             // Notifications are made of changes in cluster information
 
