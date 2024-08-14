@@ -193,8 +193,10 @@ public class NamingManager {
 
     public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
-            Set<String> units = vGroupMap.computeIfAbsent(vGroup, k -> new ConcurrentHashMap<>()).computeIfAbsent(namespace, k -> new ConcurrentHashMap<>()).computeIfAbsent(clusterName, k -> ConcurrentHashMap.newKeySet());
-            if (!vGroupMap.containsKey(vGroup) && !units.contains(unitName)) {
+            Set<String> units = vGroupMap.computeIfAbsent(vGroup, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(namespace, k -> new ConcurrentHashMap<>())
+                .computeIfAbsent(clusterName, k -> ConcurrentHashMap.newKeySet());
+            if (!units.contains(unitName)) {
                 units.add(unitName);
                 applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
             }
@@ -230,7 +232,7 @@ public class NamingManager {
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Optional.ofNullable(node.getMetadata().remove(CONSTANT_GROUP)).ifPresent(mappingObj -> {
                 if (mappingObj instanceof Map) {
-                    Map<String, Object> vGroups = (Map) mappingObj;
+                    Map<String, Object> vGroups = (Map<String, Object>) mappingObj;
                     vGroups.forEach((k, v) -> {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
