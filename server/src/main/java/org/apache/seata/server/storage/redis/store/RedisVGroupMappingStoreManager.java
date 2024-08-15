@@ -31,12 +31,12 @@ import java.util.Map;
 @LoadLevel(name = "redis")
 public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager {
 
-    private static final String REDIS_SPLIT_KEY = ":";
+    private static final String REDIS_PREFIX = "SEATA_NAMINGSERVER_NAMESPACE_";
 
     @Override
     public boolean addVGroup(MappingDO mappingDO) {
         String vGroup = mappingDO.getVGroup();
-        String namespace = mappingDO.getNamespace();
+        String namespace = REDIS_PREFIX + mappingDO.getNamespace();
         String clusterName = mappingDO.getCluster();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hset(namespace, vGroup, clusterName);
@@ -49,7 +49,7 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     @Override
     public boolean removeVGroup(String vGroup) {
         Instance instance = Instance.getInstance();
-        String namespace = instance.getNamespace();
+        String namespace = REDIS_PREFIX + instance.getNamespace();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hdel(namespace, vGroup);
             return true;
@@ -61,16 +61,16 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     @Override
     public HashMap<String, Object> loadVGroups() {
         Instance instance = Instance.getInstance();
-        String namespace = instance.getNamespace();
+        String namespace = REDIS_PREFIX + instance.getNamespace();
         String clusterName = instance.getClusterName();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> mappingKeyMap = jedis.hgetAll(namespace);
             HashMap<String, Object> result = new HashMap<>();
-            for (Map.Entry<String, String> entry : mappingKeyMap.entrySet()) {
-                if (StringUtils.equals(clusterName, entry.getKey())) {
-                    result.put(entry.getKey(), null);
+            mappingKeyMap.forEach((vgroup,clusterNameValue) -> {
+                if (StringUtils.equals(clusterName, clusterNameValue)) {
+                    result.put(vgroup, null);
                 }
-            }
+            });
             return result;
         } catch (Exception ex) {
             throw new RedisException(ex);
