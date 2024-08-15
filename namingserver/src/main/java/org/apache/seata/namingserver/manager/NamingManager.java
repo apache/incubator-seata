@@ -16,7 +16,6 @@
  */
 package org.apache.seata.namingserver.manager;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
@@ -110,11 +109,12 @@ public class NamingManager {
             LOGGER.warn("no cluster in namespace:" + namespace);
         }
 
-        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, Set<String>>>> entry : vGroupMap.entrySet()) {
+        for (Map.Entry<String, ConcurrentMap<String, ConcurrentMap<String, Set<String>>>> entry : vGroupMap
+            .entrySet()) {
             String vGroup = entry.getKey();
             ConcurrentMap<String, ConcurrentMap<String, Set<String>>> namespaceMap = entry.getValue();
             ConcurrentMap<String, Set<String>> pair = namespaceMap.get(namespace);
-            pair.keySet().stream().findFirst().ifPresent(clusterName->{
+            pair.keySet().stream().findFirst().ifPresent(clusterName -> {
                 ClusterVO clusterVO = clusterVOHashMap.get(clusterName);
                 if (clusterVO != null) {
                     clusterVO.addMapping(vGroup);
