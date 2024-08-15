@@ -84,7 +84,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     public void refresh(final Connection connection, String resourceId) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Map.Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(connection, entry.getValue().getTableName(), resourceId);
+            String key = getCacheKey(connection, entry.getValue().getOriginalTableName(), resourceId);
+            LOGGER.info("refresh use key: " + key);
             if (entry.getKey().equals(key)) {
                 try {
                     String freshTableName = StringUtils.isBlank(entry.getValue().getOriginalTableName()) ?
