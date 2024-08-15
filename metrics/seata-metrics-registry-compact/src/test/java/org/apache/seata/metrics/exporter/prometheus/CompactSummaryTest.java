@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Iterator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class CompactSummaryTest {
@@ -69,7 +70,7 @@ public class CompactSummaryTest {
         compactSummary.increase(10);
         compactSummary.increase(15);
         // Assuming that the time taken is 1 second
-        assertEquals(2000,compactSummary.tps(), 2000);
+        assertTrue(compactSummary.tps() >0);
     }
 
     @Test
