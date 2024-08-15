@@ -67,6 +67,7 @@ public class NamingController {
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
         boolean rst = vGroupMappingStoreManager.addVGroup(mappingDO);
+        Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
@@ -86,6 +87,7 @@ public class NamingController {
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
         boolean rst = vGroupMappingStoreManager.removeVGroup(vGroup);
+        Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");

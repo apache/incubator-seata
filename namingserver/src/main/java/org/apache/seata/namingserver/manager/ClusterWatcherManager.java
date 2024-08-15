@@ -22,6 +22,7 @@ import org.apache.seata.namingserver.listener.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
@@ -62,7 +63,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 Optional.ofNullable(WATCHERS.remove(group))
                         .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                             if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                notify(watcher, 304);
+                                notify(watcher, HttpStatus.NOT_MODIFIED.value());
                             }
                             if (!watcher.isDone()) {
                                 // Re-register
@@ -77,7 +78,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
-        if (event.getTerm() > 0) {
+        if (event.getTerm() > 0 || event.getTerm() == -1) {
             GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
             // Notifications are made of changes in cluster information
 
