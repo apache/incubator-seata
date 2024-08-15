@@ -26,7 +26,6 @@ import java.sql.Statement;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
