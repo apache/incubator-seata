@@ -54,7 +54,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
