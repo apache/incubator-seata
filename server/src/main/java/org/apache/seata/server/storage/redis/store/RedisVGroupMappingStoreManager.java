@@ -19,6 +19,7 @@ package org.apache.seata.server.storage.redis.store;
 import org.apache.seata.common.exception.RedisException;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
@@ -66,7 +67,9 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
             Map<String, String> mappingKeyMap = jedis.hgetAll(namespace);
             HashMap<String, Object> result = new HashMap<>();
             for (Map.Entry<String, String> entry : mappingKeyMap.entrySet()) {
-                result.put(entry.getKey(), null);
+                if (StringUtils.equals(clusterName, entry.getValue())) {
+                    result.put(entry.getKey(), null);
+                }
             }
             return result;
         } catch (Exception ex) {

@@ -47,13 +47,17 @@ public interface VGroupMappingStoreManager {
      */
     HashMap<String, Object> loadVGroups();
 
+    default HashMap<String, Object> readVGroups() {
+        return loadVGroups();
+    }
+
     /**
      * notify mapping relationship to all namingserver nodes
      */
     default void notifyMapping() {
 
         Instance instance = Instance.getInstance();
-        instance.addMetadata("vGroup", this.loadVGroups());
+        instance.addMetadata("vGroup", this.readVGroups());
         try {
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
             for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
