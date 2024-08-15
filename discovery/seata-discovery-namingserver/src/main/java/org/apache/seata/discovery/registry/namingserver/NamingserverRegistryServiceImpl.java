@@ -152,7 +152,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        unregister(address);
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
@@ -233,6 +232,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String unit = instance.getUnit();
             String jsonBody = instance.toJsonString();
             String params = "unit=" + unit;
+            params = params + "&cluster=" + instance.getClusterName();
+            params = params + "&namespace=" + instance.getNamespace();
             url += params;
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());

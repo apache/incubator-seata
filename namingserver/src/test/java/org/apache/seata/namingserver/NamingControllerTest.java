@@ -81,12 +81,12 @@ class NamingControllerTest {
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
         assertEquals(8091, node1.getTransaction().getPort());
-        namingController.unregisterInstance(unitName, node);
+        namingController.unregisterInstance(namespace, clusterName, unitName, node);
     }
 
     @Test
     void mockUnregisterGracefully() {
-        String clusterName = "cluster2";
+        String clusterName = "cluster1";
         String namespace = "public2";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
@@ -119,7 +119,7 @@ class NamingControllerTest {
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
         assertEquals(8091, node1.getTransaction().getPort());
-        namingController.unregisterInstance(unitName, node);
+        namingController.unregisterInstance(namespace, clusterName, unitName, node);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -163,7 +163,7 @@ class NamingControllerTest {
     }
 
     @Test
-    void mockDiscoveryMultiNode() throws InterruptedException {
+    void mockDiscoveryMultiNode() {
         String clusterName = "cluster1";
         String namespace = "public4";
         String unitName = String.valueOf(UUID.randomUUID());
@@ -195,7 +195,7 @@ class NamingControllerTest {
         Unit unit = cluster.getUnitData().get(0);
         assertNotNull(unit.getNamingInstanceList());
         assertEquals(1, unit.getNamingInstanceList().size());
-        namingController.unregisterInstance(unitName, node);
+        namingController.unregisterInstance(namespace, clusterName, unitName, node);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());

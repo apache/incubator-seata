@@ -71,10 +71,10 @@ public class NamingController {
     }
 
     @PostMapping("/unregister")
-    public Result<String> unregisterInstance(@RequestParam String unit,
-                                             @RequestBody NamingServerNode registerBody) {
+    public Result<String> unregisterInstance(@RequestParam String namespace, @RequestParam String clusterName,
+        @RequestParam String unit, @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
-        boolean isSuccess = namingManager.unregisterInstance(unit, registerBody);
+        boolean isSuccess = namingManager.unregisterInstance(namespace, clusterName, unit, registerBody);
         if (isSuccess) {
             result.setMessage("node has unregistered successfully!");
         } else {

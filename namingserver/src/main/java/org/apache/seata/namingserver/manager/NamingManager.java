@@ -54,6 +54,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 
@@ -254,26 +256,23 @@ public class NamingManager {
         return true;
     }
 
-    public boolean unregisterInstance(String unitName, NamingServerNode node) {
+    public boolean unregisterInstance(String namespace,  String clusterName, String unitName, NamingServerNode node) {
         try {
-            for (String namespace : namespaceClusterDataMap.keySet()) {
                 Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
                 if (clusterMap != null) {
-                    clusterMap.forEach((clusterName, clusterData) -> {
-                        if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
-                            clusterData.removeInstance(node, unitName);
-                            Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
-                            if (vgroupMap instanceof Map) {
-                                ((Map<String, Object>)vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group)
-                                    .get(namespace).get(clusterName).remove(realUnitName));
-                            }
-                            notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
-                            instanceLiveTable.remove(new InetSocketAddress(node.getTransaction().getHost(),
-                                node.getTransaction().getPort()));
+                    ClusterData clusterData = clusterMap.get(clusterName);
+                    if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
+                        clusterData.removeInstance(node, unitName);
+                        Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
+                        if (vgroupMap instanceof Map) {
+                            ((Map<String, Object>)vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group)
+                                .get(namespace).get(clusterName).remove(realUnitName));
                         }
-                    });
+                        notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
+                        instanceLiveTable.remove(
+                            new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
+                    }
                 }
-            }
         } catch (Exception e) {
             LOGGER.error("Instance unregistered failed!");
             return false;
