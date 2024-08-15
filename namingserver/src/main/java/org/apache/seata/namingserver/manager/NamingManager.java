@@ -16,6 +16,22 @@
  */
 package org.apache.seata.namingserver.manager;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
@@ -38,23 +54,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
-
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 
@@ -284,19 +283,20 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>> map =
-            vGroupMap.get(vGroup);
+        ConcurrentMap<String/* namespace */,
+            ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>> vgroupNamespaceMap =
+                vGroupMap.get(vGroup);
         List<Cluster> clusterList = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(map)) {
-            ConcurrentMap<String, Set<String>> clusterUnitPair = map.get(namespace);
-            if (clusterUnitPair != null) {
-                clusterUnitPair.forEach((clusterName, unitNameSet) -> Optional.ofNullable(namespaceClusterDataMap.get(namespace))
-                    .flatMap(clusterDataMap -> Optional.ofNullable(clusterDataMap.get(clusterName)))
-                    .ifPresent(data -> {
-                        for (String unitName : unitNameSet) {
-                            clusterList.add(data.getClusterByUnit(unitName));
-                        }
-                    }));
+        if (!CollectionUtils.isEmpty(vgroupNamespaceMap)) {
+            ConcurrentMap<String, Set<String>> clusterUnitPair = vgroupNamespaceMap.get(namespace);
+            ConcurrentMap<String/* clusterName */, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
+            if (clusterUnitPair != null && !CollectionUtils.isEmpty(clusterDataMap)) {
+                clusterUnitPair.forEach((clusterName, unitNameSet) -> {
+                    ClusterData clusterData = clusterDataMap.get(clusterName);
+                    if (clusterData != null) {
+                        clusterList.add(clusterData.getClusterByUnits(unitNameSet));
+                    }
+                });
             }
         }
         return clusterList;

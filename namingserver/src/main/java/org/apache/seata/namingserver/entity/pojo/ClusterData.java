@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -34,7 +35,6 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 public class ClusterData {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterData.class);
@@ -107,16 +107,18 @@ public class ClusterData {
     }
 
 
-    public Cluster getClusterByUnit(String unitName) {
+    public Cluster getClusterByUnits(Set<String> unitNames) {
         Cluster clusterResponse = new Cluster();
         clusterResponse.setClusterName(clusterName);
         clusterResponse.setClusterType(clusterType);
-        if (!StringUtils.hasLength(unitName)) {
-            clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
+        if (CollectionUtils.isEmpty(unitNames)) {
+            clusterResponse.appendUnits(new ArrayList<>(unitData.values()));
         } else {
-            List<Unit> unitList = new ArrayList<>();
-            Optional.ofNullable(unitData.get(unitName)).ifPresent(unitList::add);
-            clusterResponse.setUnitData(unitList);
+            for (String unitName : unitNames) {
+                List<Unit> unitList = new ArrayList<>();
+                Optional.ofNullable(unitData.get(unitName)).ifPresent(unitList::add);
+                clusterResponse.appendUnits(unitList);
+            }
         }
 
         return clusterResponse;

@@ -54,6 +54,13 @@ public class Cluster {
         this.unitData = unitData;
     }
 
+    public void appendUnits(List<Unit> unitData) {
+        this.unitData.addAll(unitData);
+    }
+    public void appendUnit(Unit unitData) {
+        this.unitData.add(unitData);
+    }
+
 
 }
 

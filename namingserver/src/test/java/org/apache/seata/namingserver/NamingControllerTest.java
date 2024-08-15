@@ -162,4 +162,49 @@ class NamingControllerTest {
         assertEquals(0, metaResponse.getClusterList().size());
     }
 
+    @Test
+    void mockDiscoveryMultiNode() throws InterruptedException {
+        String clusterName = "cluster1";
+        String namespace = "public";
+        String unitName = String.valueOf(UUID.randomUUID());
+        NamingServerNode node = new NamingServerNode();
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> meatadata = node.getMetadata();
+        Map<String,Object> vGroups = new HashMap<>();
+        vGroups.put("vgroup1",unitName);
+        meatadata.put(CONSTANT_GROUP, vGroups);
+        NamingServerNode node2 = new NamingServerNode();
+        String unitName2 = String.valueOf(UUID.randomUUID());
+        node2.setTransaction(new Node.Endpoint("127.0.0.1", 8092, "netty"));
+        node2.setControl(new Node.Endpoint("127.0.0.1", 7092, "http"));
+        vGroups = new HashMap<>();
+        vGroups.put("vgroup1",unitName2);
+        node2.getMetadata().put(CONSTANT_GROUP, vGroups);
+        namingController.registerInstance(namespace, clusterName, unitName, node);
+        namingController.registerInstance(namespace, clusterName, unitName2, node2);
+        String vGroup = "vgroup1";
+        //namingController.changeGroup(namespace, clusterName, vGroup, vGroup);
+        MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
+        assertNotNull(metaResponse);
+        assertNotNull(metaResponse.getClusterList());
+        assertEquals(1, metaResponse.getClusterList().size());
+        Cluster cluster = metaResponse.getClusterList().get(0);
+        assertNotNull(cluster.getUnitData());
+        assertEquals(2, cluster.getUnitData().size());
+        Unit unit = cluster.getUnitData().get(0);
+        assertNotNull(unit.getNamingInstanceList());
+        assertEquals(1, unit.getNamingInstanceList().size());
+        namingController.unregisterInstance(unitName, node);
+        metaResponse = namingController.discovery(vGroup, namespace);
+        assertNotNull(metaResponse);
+        assertNotNull(metaResponse.getClusterList());
+        assertEquals(1, metaResponse.getClusterList().size());
+        cluster = metaResponse.getClusterList().get(0);
+        assertNotNull(cluster.getUnitData());
+        assertEquals(1, cluster.getUnitData().size());
+        unit = cluster.getUnitData().get(0);
+        assertNotNull(unit.getNamingInstanceList());
+    }
+
 }
