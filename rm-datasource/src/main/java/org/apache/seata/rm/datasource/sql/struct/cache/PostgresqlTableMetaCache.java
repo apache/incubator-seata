@@ -73,6 +73,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         DatabaseMetaData dbmd = connection.getMetaData();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : null;
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
@@ -196,10 +197,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                     //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
                     tm.setTableName(rsTableSchema + "." + rsTableName);
                 }
-
-                //set full tableName
-                String fullTableName = buildFullTableName(rsTableCat, rsTableSchema, rsTableName);
-                tm.setFullTableName(fullTableName);
             }
         }
 

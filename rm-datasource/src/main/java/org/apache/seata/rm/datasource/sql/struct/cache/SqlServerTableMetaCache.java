@@ -88,6 +88,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
 
         tableName = ColumnUtils.delEscape(tableName, JdbcConstants.SQLSERVER);
         String[] schemaTable = tableName.split("\\.");
@@ -200,10 +201,6 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
                     //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
                     tm.setTableName(rsTableSchema + "." + rsTableName);
                 }
-
-                //set full tableName
-                String fullTableName = buildFullTableName(rsTableCat, rsTableSchema, rsTableName);
-                tm.setFullTableName(fullTableName);
             }
         }
         return tm;

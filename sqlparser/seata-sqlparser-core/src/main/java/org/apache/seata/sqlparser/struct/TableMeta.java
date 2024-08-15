@@ -39,7 +39,7 @@ import org.apache.seata.sqlparser.util.ColumnUtils;
 public class TableMeta {
     private String tableName;
 
-    private String fullTableName;
+    private String originalTableName;
 
     private boolean isCaseSensitive;
 
@@ -72,21 +72,21 @@ public class TableMeta {
     }
 
     /**
-     * Gets full table name, maybe include database | schema etc.
+     * Gets original table name.
      *
      * @return the table name
      */
-    public String getFullTableName() {
-        return fullTableName;
+    public String getOriginalTableName() {
+        return originalTableName;
     }
 
     /**
-     * Sets full table name.
+     * Sets original table name.
      *
-     * @param fullTableName the full table name
+     * @param originalTableName the table name
      */
-    public void setFullTableName(String fullTableName) {
-        this.fullTableName = fullTableName;
+    public void setOriginalTableName(String originalTableName) {
+        this.originalTableName = originalTableName;
     }
 
     /**

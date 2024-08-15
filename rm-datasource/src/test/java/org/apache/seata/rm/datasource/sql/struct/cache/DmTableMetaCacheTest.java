@@ -79,7 +79,7 @@ public class DmTableMetaCacheTest {
 
         Assertions.assertNotNull(tableMeta);
         Assertions.assertEquals("DT1", tableMeta.getTableName());
-        Assertions.assertEquals("t.dt1", tableMeta.getFullTableName());
+        Assertions.assertEquals("dt1", tableMeta.getOriginalTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "dt1", proxy.getResourceId());
 

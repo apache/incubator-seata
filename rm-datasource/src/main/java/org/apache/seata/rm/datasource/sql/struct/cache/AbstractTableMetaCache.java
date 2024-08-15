@@ -87,8 +87,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             String key = getCacheKey(connection, entry.getValue().getTableName(), resourceId);
             if (entry.getKey().equals(key)) {
                 try {
-                    String freshTableName = StringUtils.isBlank(entry.getValue().getFullTableName()) ?
-                            entry.getValue().getTableName() : entry.getValue().getFullTableName();
+                    String freshTableName = StringUtils.isBlank(entry.getValue().getOriginalTableName()) ?
+                            entry.getValue().getTableName() : entry.getValue().getOriginalTableName();
                     TableMeta tableMeta = fetchSchema(connection, freshTableName);
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
@@ -101,22 +101,6 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         }
     }
 
-    protected String buildFullTableName(String catalogName, String schemaName, String tableName) {
-        StringBuilder sb = new StringBuilder();
-        if (StringUtils.isNotBlank(catalogName)) {
-            sb.append(catalogName).append(".");
-        }
-        if (StringUtils.isNotBlank(schemaName)) {
-            sb.append(schemaName).append(".");
-        }
-        if (StringUtils.isNotBlank(tableName)) {
-            sb.append(tableName);
-        }
-        if (sb.length() > 0) {
-            return sb.toString();
-        }
-        return "";
-    }
 
     /**
      * generate cache key

@@ -81,7 +81,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData(), tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
+    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String originalTableName)
         throws SQLException {
         //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
@@ -111,6 +111,10 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         // May be not consistent with lower_case_table_names
         tm.setCaseSensitive(true);
 
+        // Save the original table name information for active cache refresh
+        // to avoid refresh failure caused by missing catalog information
+        tm.setOriginalTableName(originalTableName);
+
         /*
          * here has two different type to get the data
          * make sure the table name was right
@@ -120,7 +124,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
              ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
-             ResultSet rsTable = dbmd.getTables(catalogName, schemaName, tableName, new String[]{"TABLE"});
              ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
@@ -186,14 +189,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-            while (rsTable.next()) {
-                String rsTableCat = rsTable.getString("TABLE_CAT");
-                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
-                String rsTableName = rsTable.getString("TABLE_NAME");
-                //set full tableName
-                String fullTableName = buildFullTableName(rsTableCat, rsTableSchema, rsTableName);
-                tm.setFullTableName(fullTableName);
             }
         }
         return tm;

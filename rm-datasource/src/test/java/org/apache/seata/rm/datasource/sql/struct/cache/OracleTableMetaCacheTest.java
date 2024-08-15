@@ -79,7 +79,7 @@ public class OracleTableMetaCacheTest {
 
         Assertions.assertNotNull(tableMeta);
         Assertions.assertEquals("OT1", tableMeta.getTableName());
-        Assertions.assertEquals("t.ot1", tableMeta.getFullTableName());
+        Assertions.assertEquals("t.ot1", tableMeta.getOriginalTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"ot1\"", proxy.getResourceId());
 

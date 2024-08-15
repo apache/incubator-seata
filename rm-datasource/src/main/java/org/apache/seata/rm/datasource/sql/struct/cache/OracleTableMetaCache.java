@@ -75,6 +75,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
+        //  Save the original table name information for active cache refresh
+        //  to avoid refresh failure caused by missing catalog information
+        tm.setOriginalTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
@@ -196,14 +199,6 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                         }
                     }
                 }
-            }
-
-            while (rsTable.next()) {
-                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
-                String rsTableName = rsTable.getString("TABLE_NAME");
-                //set full tableName
-                String fullTableName = buildFullTableName("", rsTableSchema, rsTableName);
-                tm.setFullTableName(fullTableName);
             }
         }
         return tm;

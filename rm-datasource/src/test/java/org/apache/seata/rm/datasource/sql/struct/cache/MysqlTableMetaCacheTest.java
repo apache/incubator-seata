@@ -98,7 +98,7 @@ public class MysqlTableMetaCacheTest {
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt1", proxy.getResourceId());
 
         Assertions.assertEquals("mt1", tableMeta.getTableName());
-        Assertions.assertEquals("seata.mt1", tableMeta.getFullTableName());
+        Assertions.assertEquals("mt1", tableMeta.getOriginalTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());

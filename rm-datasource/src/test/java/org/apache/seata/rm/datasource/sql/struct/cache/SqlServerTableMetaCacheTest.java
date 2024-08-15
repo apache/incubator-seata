@@ -94,7 +94,7 @@ public class SqlServerTableMetaCacheTest {
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
 
         Assertions.assertEquals("m.st1", tableMeta.getTableName());
-        Assertions.assertEquals("m.st1", tableMeta.getFullTableName());
+        Assertions.assertEquals("m.st1", tableMeta.getOriginalTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
