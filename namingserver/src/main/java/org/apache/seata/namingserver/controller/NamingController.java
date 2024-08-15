@@ -141,9 +141,5 @@ public class NamingController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/health")
-    public String healthCheck() {
-        return "ok";
-    }
 
 }
