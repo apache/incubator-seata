@@ -1035,7 +1035,7 @@ public interface ConfigurationKeys {
     /**
      * The constant MAPPING_TABLE_NAME
      */
-    String MAPPING_TABLE_NAME = STORE_DB_PREFIX  + "mapping-table";
+    String MAPPING_TABLE_NAME = STORE_DB_PREFIX + "mapping-table";
 
     /**
      * The constant NAMESPACE_KEY

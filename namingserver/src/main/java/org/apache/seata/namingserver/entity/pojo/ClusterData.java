@@ -131,7 +131,7 @@ public class ClusterData {
         }
         Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
             Unit unit = new Unit();
-            List<Node> instances = new CopyOnWriteArrayList<>();
+            List<NamingServerNode> instances = new CopyOnWriteArrayList<>();
             unit.setUnitName(unitName);
             unit.setNamingInstanceList(instances);
             return unit;
@@ -139,11 +139,11 @@ public class ClusterData {
         // ensure that when adding an instance, the remove side will not delete the unit.
         lock.lock();
         try {
-            currentUnit.addInstance(instance);
+            return currentUnit.addInstance(instance);
         } finally {
             lock.unlock();
         }
-        return true;
+
     }
 
 
