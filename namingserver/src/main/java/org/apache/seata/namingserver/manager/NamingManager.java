@@ -331,8 +331,9 @@ public class NamingManager {
                             Object vgoupMap = instance.getMetadata().get(CONSTANT_GROUP);
                             if (vgoupMap instanceof Map) {
                                 ((Map<String, Object>)vgoupMap).forEach((group, unitName) -> {
-                                    vGroupMap.get(group).get(namespace).get(clusterData.getClusterName())
-                                        .remove(unitName);
+                                    Set<String> units =
+                                        vGroupMap.get(group).get(namespace).get(clusterData.getClusterName());
+                                    units.remove(unitName);
                                 });
                             }
 
