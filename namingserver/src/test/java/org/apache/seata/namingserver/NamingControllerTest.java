@@ -56,7 +56,7 @@ class NamingControllerTest {
     @Test
     void mockRegister() {
         String clusterName = "cluster1";
-        String namespace = "public";
+        String namespace = "public1";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
@@ -86,8 +86,8 @@ class NamingControllerTest {
 
     @Test
     void mockUnregisterGracefully() {
-        String clusterName = "cluster1";
-        String namespace = "public";
+        String clusterName = "cluster2";
+        String namespace = "public2";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
@@ -123,13 +123,13 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(0, metaResponse.getClusterList().size());
+        assertEquals(0, metaResponse.getClusterList().get(0).getUnitData().size());
     }
 
     @Test
     void mockUnregisterUngracefully() throws InterruptedException {
         String clusterName = "cluster1";
-        String namespace = "public";
+        String namespace = "public3";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
@@ -159,13 +159,13 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(0, metaResponse.getClusterList().size());
+        assertEquals(0, metaResponse.getClusterList().get(0).getUnitData().size());
     }
 
     @Test
     void mockDiscoveryMultiNode() throws InterruptedException {
         String clusterName = "cluster1";
-        String namespace = "public";
+        String namespace = "public4";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
