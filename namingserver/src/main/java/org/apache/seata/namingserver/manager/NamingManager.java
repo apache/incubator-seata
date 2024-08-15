@@ -256,23 +256,23 @@ public class NamingManager {
         return true;
     }
 
-    public boolean unregisterInstance(String namespace,  String clusterName, String unitName, NamingServerNode node) {
+    public boolean unregisterInstance(String namespace, String clusterName, String unitName, NamingServerNode node) {
         try {
-                Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
-                if (clusterMap != null) {
-                    ClusterData clusterData = clusterMap.get(clusterName);
-                    if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
-                        clusterData.removeInstance(node, unitName);
-                        Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
-                        if (vgroupMap instanceof Map) {
-                            ((Map<String, Object>)vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group)
-                                .get(namespace).get(clusterName).remove(realUnitName));
-                        }
-                        notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
-                        instanceLiveTable.remove(
-                            new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
+            Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
+            if (clusterMap != null) {
+                ClusterData clusterData = clusterMap.get(clusterName);
+                if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
+                    clusterData.removeInstance(node, unitName);
+                    Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
+                    if (vgroupMap instanceof Map) {
+                        ((Map<String, Object>)vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group)
+                            .get(namespace).get(clusterName).remove(realUnitName));
                     }
+                    notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
+                    instanceLiveTable.remove(
+                        new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
                 }
+            }
         } catch (Exception e) {
             LOGGER.error("Instance unregistered failed!");
             return false;
