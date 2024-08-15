@@ -27,6 +27,7 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.NamingServerConstants;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
@@ -202,20 +203,18 @@ public class NamingManager {
         }
     }
 
-    public void notifyClusterChange(String namespace, String clusterName, String unitName) {
+    public void notifyClusterChange(String namespace, String clusterName, String unitName,long term) {
         for (Map.Entry<String, ConcurrentMap<String, Pair<String, String>>> entry : vGroupMap.entrySet()) {
             String vGroup = entry.getKey();
             Map<String, Pair<String, String>> namespaceMap = entry.getValue();
 
             // Iterating through an internal HashMap
             for (Map.Entry<String, Pair<String, String>> innerEntry : namespaceMap.entrySet()) {
-                String namespace1 = innerEntry.getKey();
+
                 Pair<String, String> pair = innerEntry.getValue();
                 String clusterName1 = pair.getKey();
-                String unitName1 = pair.getValue();
-                if (namespace1.equals(namespace) && clusterName1.equals(clusterName)
-                    && (unitName1 == null || unitName1.equals(unitName))) {
-                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
+                if (StringUtils.equals(clusterName1,clusterName)) {
+                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
                 }
             }
         }
@@ -234,17 +233,19 @@ public class NamingManager {
 
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Optional.ofNullable(node.getMetadata().remove(CONSTANT_GROUP)).ifPresent(mappingObj -> {
-                if (mappingObj instanceof List) {
-                    List<String> vGroups = (List<String>)mappingObj;
-                    for (String vGroup : vGroups) {
-                        changeGroup(namespace, clusterName, unitName, vGroup);
-                    }
+                if (mappingObj instanceof Map) {
+                    Map<String, Object> vGroups = (Map) mappingObj;
+                    vGroups.forEach((k, v) -> {
+                        // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
+                        // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
+                        changeGroup(namespace, clusterName, v == null ? unitName : (String)v, k);
+                    });
                 }
             });
 
             boolean hasChanged = clusterData.registerInstance(node, unitName);
             if (hasChanged) {
-                notifyClusterChange(namespace, clusterName, unitName);
+                notifyClusterChange(namespace, clusterName, unitName,node.getTerm());
             }
             instanceLiveTable.put(
                 new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
@@ -256,7 +257,7 @@ public class NamingManager {
         return true;
     }
 
-    public boolean unregisterInstance(String unitName, Node node) {
+    public boolean unregisterInstance(String unitName, NamingServerNode node) {
         try {
             for (String namespace : namespaceClusterDataMap.keySet()) {
                 Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
@@ -264,7 +265,7 @@ public class NamingManager {
                     clusterMap.forEach((clusterName, clusterData) -> {
                         if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
                             clusterData.removeInstance(node, unitName);
-                            notifyClusterChange(namespace, clusterName, unitName);
+                            notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
                             instanceLiveTable.remove(new InetSocketAddress(node.getTransaction().getHost(),
                                 node.getTransaction().getPort()));
                         }
@@ -329,7 +330,7 @@ public class NamingManager {
                             LOGGER.warn("{} instance has gone offline",
                                 instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
-                        notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName());
+                        notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName(),-1);
                     }
                 }
             }
