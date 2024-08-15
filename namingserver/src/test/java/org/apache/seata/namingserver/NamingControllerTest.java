@@ -253,15 +253,16 @@ class NamingControllerTest {
         Unit unit = cluster.getUnitData().get(0);
         assertNotNull(unit.getNamingInstanceList());
         assertEquals(1, unit.getNamingInstanceList().size());
-        Node node1 = unit.getNamingInstanceList().get(0);
-        assertEquals("127.0.0.1", node1.getTransaction().getHost());
-        assertEquals(8091, node1.getTransaction().getPort());
         int timeGap = threshold + period;
         Thread.sleep(timeGap);
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
         assertEquals(1, metaResponse.getClusterList().get(0).getUnitData().size());
+        unit = metaResponse.getClusterList().get(0).getUnitData().get(0);
+        Node node1 = unit.getNamingInstanceList().get(0);
+        assertEquals("127.0.0.1", node1.getTransaction().getHost());
+        assertEquals(8091, node1.getTransaction().getPort());
     }
 
 }
