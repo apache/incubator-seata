@@ -134,6 +134,7 @@ seata:
       group: SEATA_GROUP
       address-wait-time: 3000
 
+
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
