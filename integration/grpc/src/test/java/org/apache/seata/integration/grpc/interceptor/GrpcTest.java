@@ -76,22 +76,22 @@ public class GrpcTest {
 
         //server
         grpcCleanup.register(InProcessServerBuilder.forName(serverName).executor(executorService)
-                .addService(ServerInterceptors.intercept(new ContextRpcGrpc.ContextRpcImplBase() {
-                    @Override
-                    public void contextRpc(Request request, StreamObserver<Response> responseObserver) {
-                        context[0] = RootContext.getXID();
-                        context[1] = RootContext.getBranchType().name();
-                        countDownLatch.countDown();
-                        responseObserver.onNext(Response.newBuilder().setGreet("hello! " + request.getName()).build());
-                        responseObserver.onCompleted();
-                    }
-                }, mockServerInterceptor))
-                .build().start());
+            .addService(ServerInterceptors.intercept(new ContextRpcGrpc.ContextRpcImplBase() {
+                @Override
+                public void contextRpc(Request request, StreamObserver<Response> responseObserver) {
+                    context[0] = RootContext.getXID();
+                    context[1] = RootContext.getBranchType().name();
+                    countDownLatch.countDown();
+                    responseObserver.onNext(Response.newBuilder().setGreet("hello! " + request.getName()).build());
+                    responseObserver.onCompleted();
+                }
+            }, mockServerInterceptor))
+            .build().start());
 
         //client
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(serverName).executor(executorService).build());
         ContextRpcGrpc.ContextRpcFutureStub stub = ContextRpcGrpc.newFutureStub(
-                ClientInterceptors.intercept(channel, new ClientTransactionInterceptor()));
+            ClientInterceptors.intercept(channel, new ClientTransactionInterceptor()));
         RootContext.bind(XID);
         RootContext.bindBranchType(BranchType.TCC);
         ListenableFuture<Response> future = stub.contextRpc(Request.newBuilder().setName("seata").build());
