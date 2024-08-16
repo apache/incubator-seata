@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -352,21 +353,22 @@ public class NamingManager {
         ConcurrentMap<String, ConcurrentMap<String, Set<String>>> namespaceMap =
             new ConcurrentHashMap<>(vGroupMap.get(vGroup));
         createGroup(namespace, vGroup, clusterName, unitName);
+        AtomicReference<Result<String>> result = new AtomicReference<>();
         namespaceMap.forEach((currentNamespace, clusterMap) -> clusterMap.forEach((currentCluster, unitSet) -> {
             for (String currentUnitName : unitSet) {
                 if (StringUtils.isBlank(unitName)) {
                     if (StringUtils.equalsIgnoreCase(clusterName, currentCluster)) {
                         continue;
                     }
-                    removeGroup(currentNamespace, clusterName, vGroup, unitName);
+                    result.set(removeGroup(currentNamespace, clusterName, vGroup, unitName));
                 } else {
                     if (!StringUtils.equalsIgnoreCase(unitName, currentUnitName)) {
-                        removeGroup(currentNamespace, clusterName, vGroup, unitName);
+                        result.set(removeGroup(currentNamespace, clusterName, vGroup, unitName));
                     }
                 }
             }
         }));
-        return new Result<>("200", "change vGroup successfully!");
+        return Optional.ofNullable(result.get()).orElseGet(() -> new Result<>("200", "change vGroup successfully!"));
     }
 
 }
