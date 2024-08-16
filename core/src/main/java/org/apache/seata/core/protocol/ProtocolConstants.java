@@ -19,8 +19,8 @@ package org.apache.seata.core.protocol;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ConfigurationKeys;
-import org.apache.seata.core.serializer.SerializerServiceLoader;
-import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.serializer.SerializerServiceLoader;
+import org.apache.seata.serializer.SerializerType;
 
 /**
  * @since 0.7.0

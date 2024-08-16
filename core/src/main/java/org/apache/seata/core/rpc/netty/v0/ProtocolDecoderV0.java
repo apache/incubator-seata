@@ -25,9 +25,9 @@ import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.ProtocolDecoder;
-import org.apache.seata.core.serializer.Serializer;
-import org.apache.seata.core.serializer.SerializerServiceLoader;
-import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.serializer.Serializer;
+import org.apache.seata.serializer.SerializerServiceLoader;
+import org.apache.seata.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

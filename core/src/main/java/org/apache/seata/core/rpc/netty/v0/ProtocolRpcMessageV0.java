@@ -20,7 +20,7 @@ import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
-import org.apache.seata.core.serializer.SerializerType;
+import org.apache.seata.serializer.SerializerType;
 
 import java.util.concurrent.atomic.AtomicLong;
 

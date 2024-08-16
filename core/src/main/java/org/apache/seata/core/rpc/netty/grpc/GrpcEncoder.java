@@ -1,7 +1,6 @@
 package org.apache.seata.core.rpc.netty.grpc;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -12,8 +11,9 @@ import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
-import org.apache.seata.core.serializer.protobuf.convertor.PbConvertor;
-import org.apache.seata.core.serializer.protobuf.manager.ProtobufConvertManager;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
+import org.apache.seata.core.serializer.SerializerType;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -43,10 +43,10 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
         }
 
-        PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(body.getClass().getName());
-        Any grpcBody = Any.pack((Message) pbConvertor.convert2Proto(body));
+        Serializer  serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+        Any messageBody = Any.parseFrom(serializer.serialize(body));
         GrpcMessageProto grpcMessageProto = GrpcMessageProto.newBuilder()
-                .setBody(grpcBody)
+                .setBody(messageBody)
                 .putAllHeadMap(headMap)
                 .setMessageType(messageType)
                 .setId(id).build();

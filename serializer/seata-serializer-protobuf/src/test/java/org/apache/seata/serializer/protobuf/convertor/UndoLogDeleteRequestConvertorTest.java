@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.serializer.protobuf.convertor;
+package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.core.serializer.protobuf.generated.UndoLogDeleteRequestProto;
+import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.junit.jupiter.api.Test;

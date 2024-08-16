@@ -1,18 +1,17 @@
 package org.apache.seata.core.rpc.netty.grpc;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http2.Http2DataFrame;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.util.ReferenceCounted;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
-import org.apache.seata.core.serializer.protobuf.convertor.PbConvertor;
-import org.apache.seata.core.serializer.protobuf.manager.ProtobufConvertManager;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
+import org.apache.seata.core.serializer.SerializerType;
 
 public class GrpcDecoder extends ChannelDuplexHandler {
 
@@ -46,34 +45,21 @@ public class GrpcDecoder extends ChannelDuplexHandler {
         Any body = grpcMessageProto.getBody();
         int messageType = grpcMessageProto.getMessageType();
         int messageId = grpcMessageProto.getId();
-        final Class clazz = ProtobufConvertManager.getInstance().fetchProtoClass(
-                getTypeNameFromTypeUrl(body.getTypeUrl()));
-        if (body.is(clazz)) {
-            try {
-                Object ob = body.unpack(clazz);
-                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz.getName());
-                Object model = pbConvertor.convert2Model(ob);
+        byte[] byteArray = body.toByteArray();
 
-                RpcMessage rpcMsg = new RpcMessage();
-                rpcMsg.setMessageType((byte) messageType);
-                rpcMsg.setBody(model);
-                rpcMsg.setId(messageId);
-                rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
+        Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+        Object messageBody = serializer.deserialize(byteArray);
 
-                ctx.fireChannelRead(rpcMsg);
-            } catch (InvalidProtocolBufferException e) {
-                throw new ShouldNeverHappenException(e);
-            }
-        }
+        RpcMessage rpcMsg = new RpcMessage();
+        rpcMsg.setMessageType((byte) messageType);
+        rpcMsg.setBody(messageBody);
+        rpcMsg.setId(messageId);
+        rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
+
+        ctx.fireChannelRead(rpcMsg);
     }
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO 后续可以解压缩逻辑
     }
-
-    private String getTypeNameFromTypeUrl(String typeUri) {
-        int pos = typeUri.lastIndexOf('/');
-        return pos == -1 ? "" : typeUri.substring(pos + 1);
-    }
-
 }

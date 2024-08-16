@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.serializer.protobuf.convertor;
+package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.core.serializer.protobuf.generated.GlobalStatusResponseProto;
+import org.apache.seata.serializer.protobuf.generated.GlobalStatusResponseProto;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;

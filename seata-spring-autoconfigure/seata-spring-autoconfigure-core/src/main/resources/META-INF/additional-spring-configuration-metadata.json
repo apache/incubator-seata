@@ -179,7 +179,7 @@
         {
           "name": "handle-as",
           "parameters": {
-            "target": "org.apache.seata.core.serializer.SerializerType"
+            "target": "org.apache.seata.serializer.SerializerType"
           }
         }
       ]

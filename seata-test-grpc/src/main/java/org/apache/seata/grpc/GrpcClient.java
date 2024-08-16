@@ -4,8 +4,8 @@ import com.google.protobuf.Any;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import org.apache.seata.core.serializer.protobuf.generated.AbstractIdentifyRequestProto;
-import org.apache.seata.core.serializer.protobuf.generated.RegisterTMRequestProto;
+import org.apache.seata.serializer.protobuf.generated.AbstractIdentifyRequestProto;
+import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 import org.apache.seata.grpc.generated.GrpcMessageProto;
 import org.apache.seata.grpc.generated.SeataServiceGrpc;
 
