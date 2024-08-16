@@ -61,10 +61,11 @@ import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 @Component
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
-    private final ConcurrentMap<InetSocketAddress, Long>                                                    instanceLiveTable;
-    private final ConcurrentMap<String/* VGroup */,
-        ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>>>                                                                   vGroupMap;
-    private final ConcurrentMap<String/* namespace */, ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
+    private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
+    private final ConcurrentMap<String/* VGroup */, ConcurrentMap<String/* namespace */,
+        ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>>> vGroupMap;
+    private final ConcurrentMap<String/* namespace */,
+        ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
 
     @Value("${heartbeat.threshold:90000}")
     private int heartbeatTimeThreshold;
@@ -125,7 +126,7 @@ public class NamingManager {
         return new ArrayList<>(clusterVOHashMap.values());
     }
 
-    public Result<String> addGroup(String namespace, String vGroup, String clusterName, String unitName) {
+    public Result<String> createGroup(String namespace, String vGroup, String clusterName, String unitName) {
         // add vGroup in new cluster
         List<Node> nodeList = getInstances(namespace, clusterName);
         if (nodeList == null || nodeList.size() == 0) {
@@ -153,11 +154,11 @@ public class NamingManager {
                 return new Result<>("500", "add vGroup in new cluster failed");
             }
         }
-        changeGroup(namespace,clusterName,unitName,vGroup);
+        addGroup(namespace,clusterName,unitName,vGroup);
         return new Result<>("200", "add vGroup successfully!");
     }
 
-    public Result<String> removeGroup(String namespace, String vGroup, String unitName) {
+    public Result<String> removeGroup(String namespace, String clusterName,String vGroup, String unitName) {
         List<Cluster> clusterList = getClusterListByVgroup(vGroup, namespace);
         for (Cluster cluster : clusterList) {
             if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
@@ -191,7 +192,7 @@ public class NamingManager {
         return new Result<>("200", "remove group in old cluster successfully!");
     }
 
-    public void changeGroup(String namespace, String clusterName, String unitName, String vGroup) {
+    public void addGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
             Set<String> units = vGroupMap.computeIfAbsent(vGroup, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(namespace, k -> new ConcurrentHashMap<>())
@@ -236,7 +237,7 @@ public class NamingManager {
                     vGroups.forEach((k, v) -> {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
-                        changeGroup(namespace, clusterName, v == null ? unitName : (String)v, k);
+                        addGroup(namespace, clusterName, v == null ? unitName : (String)v, k);
                     });
                 }
             });
@@ -345,6 +346,27 @@ public class NamingManager {
                 }
             }
         }
+    }
+
+    public Result<String> changeGroup(String namespace, String vGroup, String clusterName, String unitName) {
+        ConcurrentMap<String, ConcurrentMap<String, Set<String>>> namespaceMap =
+            new ConcurrentHashMap<>(vGroupMap.get(vGroup));
+        createGroup(namespace, vGroup, clusterName, unitName);
+        namespaceMap.forEach((currentNamespace, clusterMap) -> clusterMap.forEach((currentCluster, unitSet) -> {
+            for (String currentUnitName : unitSet) {
+                if (StringUtils.isBlank(unitName)) {
+                    if (StringUtils.equalsIgnoreCase(clusterName, currentCluster)) {
+                        continue;
+                    }
+                    removeGroup(currentNamespace, clusterName, vGroup, unitName);
+                } else {
+                    if (!StringUtils.equalsIgnoreCase(unitName, currentUnitName)) {
+                        removeGroup(currentNamespace, clusterName, vGroup, unitName);
+                    }
+                }
+            }
+        }));
+        return new Result<>("200", "change vGroup successfully!");
     }
 
 }

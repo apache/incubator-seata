@@ -95,22 +95,29 @@ public class NamingController {
                 clusterWatcherManager.getTermByvGroup(vGroup));
     }
 
+    @PostMapping("/addGroup")
+    public Result<String> addGroup(@RequestParam String namespace,
+                                      @RequestParam String clusterName,
+                                      @RequestParam String unitName,
+                                      @RequestParam String vGroup) {
+
+        Result<String> addGroupResult = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
+        if (!addGroupResult.isSuccess()) {
+            return addGroupResult;
+        }
+        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
+    }
+
     @PostMapping("/changeGroup")
     public Result<String> changeGroup(@RequestParam String namespace,
                                       @RequestParam String clusterName,
                                       @RequestParam String unitName,
                                       @RequestParam String vGroup) {
 
-        Result<String> addGroupResult = namingManager.addGroup(namespace, vGroup, clusterName, unitName);
+        Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
-        // remove vGroup in old cluster
-        Result<String> removeGroupResult = namingManager.removeGroup(namespace, vGroup, unitName);
-        if (!removeGroupResult.isSuccess()) {
-            return removeGroupResult;
-        }
-        namingManager.changeGroup(namespace, clusterName, unitName, vGroup);
         return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
     }
 

@@ -206,7 +206,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     }
 
     public boolean doHealthCheck(String url) {
-        url = HTTP_PREFIX + url + "/naming/v1/health";
+        url = HTTP_PREFIX + url + "/health";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         try (CloseableHttpResponse response = HttpClientUtil.doGet(url, null, header, 3000)) {
