@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.seata.common.ConfigurationKeys.MAPPING_TABLE_NAME;
+import static org.apache.seata.common.ConfigurationKeys.VGROUP_TABLE_NAME;
 import static org.apache.seata.common.ConfigurationKeys.REGISTRY_NAMINGSERVER_CLUSTER;
 import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPING;
 
@@ -50,7 +50,7 @@ public class VGroupMappingDataBaseDAO {
 
     public VGroupMappingDataBaseDAO(DataSource vGroupMappingDataSource) {
         this.vGroupMappingDataSource = vGroupMappingDataSource;
-        this.vMapping = CONFIG.getConfig(MAPPING_TABLE_NAME, DEFAULT_VGROUP_MAPPING);
+        this.vMapping = CONFIG.getConfig(VGROUP_TABLE_NAME, DEFAULT_VGROUP_MAPPING);
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {
