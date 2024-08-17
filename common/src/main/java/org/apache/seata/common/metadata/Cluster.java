@@ -19,6 +19,7 @@ package org.apache.seata.common.metadata;
 import org.apache.seata.common.metadata.namingserver.Unit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Cluster {
@@ -54,9 +55,10 @@ public class Cluster {
         this.unitData = unitData;
     }
 
-    public void appendUnits(List<Unit> unitData) {
+    public void appendUnits(Collection<Unit> unitData) {
         this.unitData.addAll(unitData);
     }
+
     public void appendUnit(Unit unitData) {
         this.unitData.add(unitData);
     }

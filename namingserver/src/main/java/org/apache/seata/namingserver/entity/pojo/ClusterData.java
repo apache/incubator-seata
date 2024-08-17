@@ -112,7 +112,7 @@ public class ClusterData {
         clusterResponse.setClusterName(clusterName);
         clusterResponse.setClusterType(clusterType);
         if (CollectionUtils.isEmpty(unitNames)) {
-            clusterResponse.appendUnits(new ArrayList<>(unitData.values()));
+            clusterResponse.appendUnits(unitData.values());
         } else {
             for (String unitName : unitNames) {
                 List<Unit> unitList = new ArrayList<>();
