@@ -17,7 +17,6 @@
 package org.apache.seata.server.storage.file.store;
 
 
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -32,7 +31,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @LoadLevel(name = "file")
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
@@ -40,9 +41,12 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping.json";
 
-    private final ReentrantLock writeLock = new ReentrantLock();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private String storePath;
+
+    HashMap<String, Object> vGroupMapping = new HashMap<>();
+
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
@@ -56,29 +60,50 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     @Override
     public boolean addVGroup(MappingDO mappingDO) {
-        HashMap<String, Object> vGroupMapping = loadVGroups();
-        vGroupMapping.put(mappingDO.getVGroup(), mappingDO.getUnit());
-        boolean isSaved = save(vGroupMapping);
-        if (!isSaved) {
-            LOGGER.error("add mapping relationship failed!");
+        Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        try {
+            vGroupMapping.put(mappingDO.getVGroup(), mappingDO.getUnit());
+            boolean isSaved = save(vGroupMapping);
+
+            if (!isSaved) {
+                LOGGER.error("add mapping relationship failed!");
+            }
+            return isSaved;
+        } finally {
+            writeLock.unlock();
         }
-        return isSaved;
     }
 
     @Override
     public boolean removeVGroup(String vGroup) {
-        HashMap<String, Object> vGroupMapping = loadVGroups();
-        vGroupMapping.remove(vGroup);
-        boolean isSaved = save(vGroupMapping);
-        if (!isSaved) {
-            LOGGER.error("remove mapping relationship failed!");
+        Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        try {
+            vGroupMapping.remove(vGroup);
+            boolean isSaved = save(vGroupMapping);
+            if (!isSaved) {
+                LOGGER.error("remove mapping relationship failed!");
+            }
+            return isSaved;
+        } finally {
+            writeLock.unlock();
         }
-        return isSaved;
+    }
+
+    @Override
+    public HashMap<String, Object> readVGroups() {
+        Lock readLock = lock.readLock();
+        readLock.lock();
+        try {
+            return vGroupMapping;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
     public HashMap<String, Object> loadVGroups() {
-        HashMap<String, Object> vGroupMapping = new HashMap<>();
         try {
             File fileToLoad = new File(storePath);
             if (!fileToLoad.exists()) {
@@ -112,7 +137,6 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
 
     public boolean save(HashMap<String, Object> vGroupMapping) {
-        writeLock.lock();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonMapping = objectMapper.writeValueAsString(vGroupMapping);
@@ -121,8 +145,6 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
         } catch (IOException e) {
             LOGGER.error("mapping relationship saved failed! ", e);
             return false;
-        } finally {
-            writeLock.unlock();
         }
     }
 }

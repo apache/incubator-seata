@@ -17,7 +17,6 @@
 package org.apache.seata.common.metadata.namingserver;
 
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -133,6 +132,10 @@ public class Instance {
         this.timestamp = timestamp;
     }
 
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
     public void addMetadata(String key, Object value) {
         this.metadata.put(key, value);
     }
@@ -182,7 +185,7 @@ public class Instance {
         resultMap.put("weight", String.valueOf(weight));
         resultMap.put("healthy", String.valueOf(healthy));
         resultMap.put("term", String.valueOf(term));
-        resultMap.put("timestamp",String.valueOf(timestamp));
+        resultMap.put("timestamp", String.valueOf(timestamp));
         resultMap.put("metadata", mapToJsonString(metadata));
 
         return resultMap;
