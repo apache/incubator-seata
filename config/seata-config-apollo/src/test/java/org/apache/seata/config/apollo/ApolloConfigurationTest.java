@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/**
+ * The type Apollo configuration test.
+ */
 public class ApolloConfigurationTest {
 
     private static final int PORT = 8081;
@@ -33,6 +36,11 @@ public class ApolloConfigurationTest {
 
     private static ApolloConfiguration apolloConfiguration;
 
+    /**
+     * Sets up.
+     *
+     * @throws IOException the io exception
+     */
     @BeforeAll
     public static void setUp() throws IOException {
         System.setProperty("seataEnv", "test");
@@ -40,6 +48,9 @@ public class ApolloConfigurationTest {
         apolloConfiguration = ApolloConfiguration.getInstance();
     }
 
+    /**
+     * Test get config.
+     */
     @Test
     public void testGetConfig() {
         String value = apolloConfiguration.getConfig("seata.test");
@@ -52,6 +63,9 @@ public class ApolloConfigurationTest {
         Assertions.assertEquals("default", value);
     }
 
+    /**
+     * Test update config.
+     */
     @Test
     public void testUpdateConfig() {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
@@ -65,6 +79,9 @@ public class ApolloConfigurationTest {
         });
     }
 
+    /**
+     * Test listener.
+     */
     @Test
     public void testListener() {
         ConfigurationChangeListener listener = new ConfigurationChangeListener() {
@@ -82,6 +99,11 @@ public class ApolloConfigurationTest {
 
     }
 
+    /**
+     * Tear down.
+     *
+     * @throws IOException the io exception
+     */
     @AfterAll
     public static void tearDown() throws IOException {
         System.clearProperty("seataEnv");
