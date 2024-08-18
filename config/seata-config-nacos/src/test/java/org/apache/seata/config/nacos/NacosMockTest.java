@@ -84,7 +84,7 @@ public class NacosMockTest {
         configStrValue = configuration.getConfig(SUB_NACOS_DATAID, "TEST", 5000);
         Assertions.assertEquals("SYS-TEST", configStrValue);
         ConfigurationCache.clear();
-        System.setProperty(SUB_NACOS_DATAID, "");
+        System.clearProperty(SUB_NACOS_DATAID);
 
         ConfigurationCache.clear();
         int configIntValue = configuration.getInt(SUB_NACOS_DATAID);
@@ -177,11 +177,12 @@ public class NacosMockTest {
         configuration.putConfig(NACOS_DATAID, "KEY=VALUE");
         latch.await(3000, TimeUnit.MILLISECONDS);
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(SUB_NACOS_DATAID);
-        Assertions.assertEquals(1, listeners.size());
+        //configcache listener + user listener
+        Assertions.assertEquals(2, listeners.size());
 
         configuration.removeConfigListener(SUB_NACOS_DATAID, listener);
         listeners = configuration.getConfigListeners(SUB_NACOS_DATAID);
-        Assertions.assertEquals(null, listeners);
+        Assertions.assertEquals(1, listeners.size());
     }
 
     @AfterEach

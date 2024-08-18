@@ -38,6 +38,7 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
+import org.apache.seata.config.Dispose;
 import org.apache.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * The type Nacos configuration.
  *
  */
-public class NacosConfiguration extends AbstractConfiguration {
+public class NacosConfiguration extends AbstractConfiguration implements Dispose {
     private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
@@ -66,10 +67,10 @@ public class NacosConfiguration extends AbstractConfiguration {
     private static final String RAM_ROLE_NAME_KEY = "ramRoleName";
     private static final String USE_PARSE_RULE = "false";
     private static final String CONTEXT_PATH = "contextPath";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
+    private static volatile ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
             = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
 
@@ -203,7 +204,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         }
     }
 
-    private static Properties getConfigProperties() {
+    private Properties getConfigProperties() {
         Properties properties = new Properties();
         properties.setProperty(ConfigurationKeys.IS_USE_CLOUD_NAMESPACE_PARSING, USE_PARSE_RULE);
         properties.setProperty(ConfigurationKeys.IS_USE_ENDPOINT_PARSING_RULE, USE_PARSE_RULE);
@@ -242,7 +243,7 @@ public class NacosConfiguration extends AbstractConfiguration {
      * @param sourceProperties the source properties
      * @return auth properties
      */
-    private static boolean initNacosAuthProperties(Properties sourceProperties) {
+    private boolean initNacosAuthProperties(Properties sourceProperties) {
         String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
             String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
@@ -310,15 +311,15 @@ public class NacosConfiguration extends AbstractConfiguration {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, RAM_ROLE_NAME_KEY);
     }
 
-    private static String getNacosGroup() {
+    private String getNacosGroup() {
         return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
-    private static String getNacosDataId() {
+    private String getNacosDataId() {
         return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
     }
 
-    private static String getNacosDataType() {
+    private String getNacosDataType() {
         return ConfigProcessor.resolverConfigDataType(getNacosDataId());
     }
 
@@ -339,7 +340,7 @@ public class NacosConfiguration extends AbstractConfiguration {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
     }
 
-    private static void initSeataConfig() {
+    private void initSeataConfig() {
         try {
             String nacosDataId = getNacosDataId();
             String config = configService.getConfig(nacosDataId, getNacosGroup(), DEFAULT_CONFIG_TIMEOUT);
@@ -360,10 +361,27 @@ public class NacosConfiguration extends AbstractConfiguration {
         return CONFIG_TYPE;
     }
 
+    @Override
+    public void dispose() {
+        if (null != CONFIG_LISTENERS_MAP) {
+            CONFIG_LISTENERS_MAP.clear();
+        }
+        if (null != seataConfig) {
+            seataConfig.clear();
+        }
+        if (null != configService) {
+            configService = null;
+        }
+        if (null != instance) {
+            instance = null;
+        }
+        FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    }
+
     /**
      * Non-blocking subscriptions prohibit adding subscriptions in the thread pool to prevent thread termination
      */
-    public static class NacosListener extends AbstractSharedListener {
+    public class NacosListener extends AbstractSharedListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
 
