@@ -132,6 +132,7 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
+        <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
     </properties>
 
