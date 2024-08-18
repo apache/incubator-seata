@@ -27,13 +27,12 @@ import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
 
-import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.ConfigurationProvider;
+import org.apache.seata.config.Dispose;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -53,14 +52,15 @@ public class NacosMockTest {
     @BeforeAll
     public static void setup() throws NacosException {
         System.setProperty("seataEnv", "mock");
+        NacosConfiguration configuration = NacosConfiguration.getInstance();
+        if (configuration instanceof Dispose) {
+            ((Dispose)configuration).dispose();
+        }
         ConfigurationFactory.reload();
-        ConfigurationCache.clear();
         Properties properties = new Properties();
         properties.setProperty("serverAddr", NACOS_ENDPOINT);
         configService = NacosFactory.createConfigService(properties);
         configService.removeConfig(NACOS_DATAID, NACOS_GROUP);
-        EnhancedServiceLoader.unloadAll();
-        EnhancedServiceLoader.load(ConfigurationProvider.class, "Nacos");
     }
 
     @Test
@@ -189,6 +189,5 @@ public class NacosMockTest {
     public void afterEach() throws NacosException {
         configService.removeConfig(NACOS_DATAID, NACOS_GROUP);
         ConfigurationFactory.reload();
-        ConfigurationCache.clear();
     }
 }
