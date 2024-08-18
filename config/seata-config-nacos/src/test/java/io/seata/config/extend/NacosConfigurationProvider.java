@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config.nacos;
+package io.seata.config.extend;
 
 import io.seata.config.Configuration;
 import org.apache.seata.common.loader.LoadLevel;
