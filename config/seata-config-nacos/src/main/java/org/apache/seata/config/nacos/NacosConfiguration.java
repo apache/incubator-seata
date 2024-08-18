@@ -67,7 +67,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
     private static final String RAM_ROLE_NAME_KEY = "ramRoleName";
     private static final String USE_PARSE_RULE = "false";
     private static final String CONTEXT_PATH = "contextPath";
-    private Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+    private Configuration fileConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static volatile ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
@@ -211,7 +211,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         if (System.getProperty(PRO_SERVER_ADDR_KEY) != null) {
             properties.setProperty(PRO_SERVER_ADDR_KEY, System.getProperty(PRO_SERVER_ADDR_KEY));
         } else {
-            String address = FILE_CONFIG.getConfig(getNacosAddrFileKey());
+            String address = fileConfig.getConfig(getNacosAddrFileKey());
             if (address != null) {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
@@ -220,7 +220,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         if (System.getProperty(PRO_NAMESPACE_KEY) != null) {
             properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
         } else {
-            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            String namespace = fileConfig.getConfig(getNacosNameSpaceFileKey());
             if (namespace == null) {
                 namespace = DEFAULT_NAMESPACE;
             }
@@ -229,7 +229,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         if (!initNacosAuthProperties(properties)) {
             LOGGER.info("Nacos config auth properties empty.");
         }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : FILE_CONFIG.getConfig(getNacosContextPathKey());
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : fileConfig.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
@@ -244,9 +244,9 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
      * @return auth properties
      */
     private boolean initNacosAuthProperties(Properties sourceProperties) {
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : FILE_CONFIG.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : fileConfig.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : FILE_CONFIG.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : fileConfig.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 sourceProperties.setProperty(USER_NAME, userName);
                 sourceProperties.setProperty(PASSWORD, password);
@@ -254,10 +254,10 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
                 return true;
             }
         } else {
-            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : FILE_CONFIG.getConfig(getNacosAccessKey());
-            String ramRoleName = StringUtils.isNotBlank(System.getProperty(RAM_ROLE_NAME_KEY)) ? System.getProperty(RAM_ROLE_NAME_KEY) : FILE_CONFIG.getConfig(getNacosRamRoleNameKey());
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : fileConfig.getConfig(getNacosAccessKey());
+            String ramRoleName = StringUtils.isNotBlank(System.getProperty(RAM_ROLE_NAME_KEY)) ? System.getProperty(RAM_ROLE_NAME_KEY) : fileConfig.getConfig(getNacosRamRoleNameKey());
             if (StringUtils.isNotBlank(accessKey)) {
-                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : FILE_CONFIG.getConfig(getNacosSecretKey());
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : fileConfig.getConfig(getNacosSecretKey());
                 if (StringUtils.isNotBlank(secretKey)) {
                     sourceProperties.put(ACCESS_KEY, accessKey);
                     sourceProperties.put(SECRET_KEY, secretKey);
@@ -312,11 +312,11 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
     }
 
     private String getNacosGroup() {
-        return FILE_CONFIG.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
+        return fileConfig.getConfig(getNacosGroupKey(), DEFAULT_GROUP);
     }
 
     private String getNacosDataId() {
-        return FILE_CONFIG.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
+        return fileConfig.getConfig(getNacosDataIdKey(), DEFAULT_DATA_ID);
     }
 
     private String getNacosDataType() {
@@ -375,7 +375,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         if (null != instance) {
             instance = null;
         }
-        FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+        fileConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     }
 
     /**
