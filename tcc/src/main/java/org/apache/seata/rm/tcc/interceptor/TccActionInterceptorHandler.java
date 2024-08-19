@@ -83,8 +83,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             try {
                 TwoPhaseBusinessActionParam businessActionParam = createTwoPhaseBusinessActionParam(businessAction);
                 //Handler the TCC Aspect, and return the business result
-                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
-                        invocation::proceed);
+                return actionInterceptorHandler.proceed(invocation, xid, businessActionParam);
             } finally {
                 //if not TCC, unbind branchType
                 if (getBranchType() != previousBranchType) {

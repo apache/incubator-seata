@@ -25,6 +25,7 @@ import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.TccLocalTxActive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -59,6 +60,26 @@ public class RootContext {
      * The constant KEY_TIMEOUT.
      */
     public static final String KEY_TIMEOUT = "TX_TIMEOUT";
+
+    /**
+     * The constant KEY_RESOURCE_ID.
+     */
+    public static final String KEY_RESOURCE_ID = "TX_RESOURCE_ID";
+
+    /**
+     * The constant KEY_TCC_LOCAL_TX_ACTIVE.
+     */
+    public static final String KEY_TCC_LOCAL_TX_ACTIVE = "TCC_LOCAL_TX_ACTIVE";
+
+    /**
+     * The constant KEY_TCC_COMMIT_RESULT.
+     */
+    public static final String KEY_TCC_COMMIT_RESULT = "KEY_TCC_COMMIT_RESULT";
+
+    /**
+     * The constant KEY_TCC_ROLLBACK_RESULT.
+     */
+    public static final String KEY_TCC_ROLLBACK_RESULT = "KEY_TCC_ROLLBACK_RESULT";
 
     /**
      * The constant MDC_KEY_XID for logback
@@ -140,6 +161,81 @@ public class RootContext {
 
     public static void setTimeout(Integer timeout) {
         CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
+    }
+
+    public static String getBranchId() {
+        return (String) CONTEXT_HOLDER.get(KEY_BRANCHID);
+    }
+
+    public static void bindBranchId(String branchId) {
+        CONTEXT_HOLDER.put(KEY_BRANCHID, branchId);
+    }
+
+    public static void unbindBranchId() {
+        String branchId = (String) CONTEXT_HOLDER.remove(KEY_BRANCHID);
+        if (LOGGER.isDebugEnabled() && branchId != null) {
+            LOGGER.debug("unbind branch id");
+        }
+    }
+
+    public static String getResourceId() {
+        return (String) CONTEXT_HOLDER.get(KEY_RESOURCE_ID);
+    }
+
+    public static void bindResourceId(String resourceId) {
+        CONTEXT_HOLDER.put(KEY_RESOURCE_ID, resourceId);
+    }
+
+    public static void unbindResourceId() {
+        String resourceId = (String) CONTEXT_HOLDER.remove(KEY_RESOURCE_ID);
+        if (LOGGER.isDebugEnabled() && resourceId != null) {
+            LOGGER.debug("unbind tcc resource id");
+        }
+    }
+
+    public static TccLocalTxActive getTccLocalTxActive() {
+        return (TccLocalTxActive) CONTEXT_HOLDER.get(KEY_TCC_LOCAL_TX_ACTIVE);
+    }
+
+    public static void bindTccLocalTxActive(TccLocalTxActive tccLocalTxActive) {
+        CONTEXT_HOLDER.put(KEY_TCC_LOCAL_TX_ACTIVE, tccLocalTxActive);
+    }
+
+    public static void unbindTccLocalTxActive() {
+        TccLocalTxActive tccLocalTxActive = (TccLocalTxActive) CONTEXT_HOLDER.remove(KEY_TCC_LOCAL_TX_ACTIVE);
+        if (LOGGER.isDebugEnabled() && tccLocalTxActive != null) {
+            LOGGER.debug("unbind tcc local tx active identification");
+        }
+    }
+
+    public static Boolean getTccCommitResult() {
+        return (Boolean) CONTEXT_HOLDER.get(KEY_TCC_COMMIT_RESULT);
+    }
+
+    public static void bindTccCommitResult(Boolean tccCommitResult) {
+        CONTEXT_HOLDER.put(KEY_TCC_COMMIT_RESULT, tccCommitResult);
+    }
+
+    public static void unbindTccCommitResult() {
+        Boolean tccCommitResult = (Boolean) CONTEXT_HOLDER.remove(KEY_TCC_COMMIT_RESULT);
+        if (LOGGER.isDebugEnabled() && tccCommitResult != null) {
+            LOGGER.debug("unbind tcc commit result");
+        }
+    }
+
+    public static Boolean getTccRollbackResult() {
+        return (Boolean) CONTEXT_HOLDER.get(KEY_TCC_ROLLBACK_RESULT);
+    }
+
+    public static void bindTccRollbackResult(Boolean tccRollbackResult) {
+        CONTEXT_HOLDER.put(KEY_TCC_ROLLBACK_RESULT, tccRollbackResult);
+    }
+
+    public static void unbindTccRollbackResult() {
+        Boolean tccRollbackResult = (Boolean) CONTEXT_HOLDER.remove(KEY_TCC_ROLLBACK_RESULT);
+        if (LOGGER.isDebugEnabled() && tccRollbackResult != null) {
+            LOGGER.debug("unbind tcc rollback result");
+        }
     }
 
     /**

@@ -26,6 +26,7 @@ import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
+import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -121,6 +122,10 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
+            RootContext.bind(xid);
+            RootContext.bindBranchId(String.valueOf(branchId));
+            RootContext.bindResourceId(resourceId);
+            RootContext.bindBranchType(BranchType.TCC);
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
@@ -146,6 +151,11 @@ public class TCCResourceManager extends AbstractResourceManager {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+        } finally {
+            RootContext.unbind();
+            RootContext.unbindBranchId();
+            RootContext.unbindResourceId();
+            RootContext.unbindBranchType();
         }
     }
 
@@ -179,6 +189,10 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             Object ret;
             boolean result;
+            RootContext.bind(xid);
+            RootContext.bindBranchId(String.valueOf(branchId));
+            RootContext.bindResourceId(resourceId);
+            RootContext.bindBranchType(BranchType.TCC);
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
@@ -205,6 +219,11 @@ public class TCCResourceManager extends AbstractResourceManager {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+        } finally {
+            RootContext.unbind();
+            RootContext.unbindBranchId();
+            RootContext.unbindResourceId();
+            RootContext.unbindBranchType();
         }
     }
 

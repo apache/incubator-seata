@@ -14,22 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.fence;
+package org.apache.seata.core.model;
 
-import org.apache.seata.common.executor.Callback;
+/**
+ * Identifies whether tcc transactions are activated on the business side
+ */
+public enum TccLocalTxActive {
 
-import java.lang.reflect.Method;
-import java.util.Date;
+    /**
+     * The tcc transaction is not activated on the service side.
+     */
+    UN_ACTIVE(0),
+
+    /**
+     * The tcc transaction is activated on the service side.
+     */
+    ACTIVE(1);
 
 
-public interface FenceHandler {
+    private final int code;
 
-    Object prepareFence(Method prepareMethod, Object targetTCCBean, String xid, Long branchId, String actionName, Callback<Object> targetCallback);
-
-    boolean commitFence(Method commitMethod, Object targetTCCBean, String xid, Long branchId, Object[] args);
-
-    boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, String xid, Long branchId, Object[] args, String actionName);
-
-    int deleteFenceByDate(Date datetime);
-
+    TccLocalTxActive(int code) {
+        this.code = code;
+    }
 }
