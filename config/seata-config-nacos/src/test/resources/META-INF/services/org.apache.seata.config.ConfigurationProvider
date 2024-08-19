@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-io.seata.config.extend.NacosConfigurationProvider
+org.apache.seata.config.nacos.NacosConfigurationProvider

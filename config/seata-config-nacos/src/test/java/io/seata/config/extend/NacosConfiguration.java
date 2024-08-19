@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config.nacos;
+package io.seata.config.extend;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -23,8 +23,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
@@ -245,7 +243,6 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             NACOS_DATA_ID_KEY);
     }
 
-
     private static String getNacosGroup() {
         return FILE_CONFIG.getString(getNacosGroupKey());
     }
@@ -316,17 +313,17 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                         }
                     }
                     //Get all the monitored dataids and judge whether it has been modified
-                    for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                    for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
+                        CONFIG_LISTENERS_MAP.entrySet()) {
                         String listenedDataId = entry.getKey();
                         String propertyOld = seataConfig.getProperty(listenedDataId, "");
                         String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
                         if (!propertyOld.equals(propertyNew)) {
-                            ConfigurationChangeEvent event =
-                                new ConfigurationChangeEvent().setDataId(listenedDataId).setNewValue(propertyNew)
-                                    .setNamespace(group);
+                            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(listenedDataId)
+                                .setNewValue(propertyNew).setNamespace(group);
 
-                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners =
-                                entry.getValue();
+                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners
+                                = entry.getValue();
                             for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                                 configListener.onProcessEvent(event);
                             }
@@ -340,8 +337,8 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                 LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
             //Compatible with old writing
-            ConfigurationChangeEvent event =
-                new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo).setNamespace(group);
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
+                .setNamespace(group);
             listener.onProcessEvent(event);
         }
     }
