@@ -184,7 +184,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsTable.next()) {
-                String rsTableCat = rsTable.getString("TABLE_CAT");
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
                 String rsTableName = rsTable.getString("TABLE_NAME");
                 //set origin tableName with schema if necessary
