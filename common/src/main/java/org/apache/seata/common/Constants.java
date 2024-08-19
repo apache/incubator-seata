@@ -225,4 +225,14 @@ public interface Constants {
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
 
+    /**
+     * The constant DEAD_LOCK_SQL_STATE
+     */
+    String DEAD_LOCK_SQL_STATE = "40001";
+
+    /**
+     * The constant DEAD_LOCK_ERROR_CODE
+     */
+    int DEAD_LOCK_ERROR_CODE = 1213;
+
 }
