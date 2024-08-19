@@ -134,6 +134,7 @@ seata:
       group: SEATA_GROUP
       address-wait-time: 3000
 
+
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
@@ -185,6 +186,7 @@ seata:
       branch-table: branch_table
       lock-table: lock_table
       distributed-lock-table: distributed_lock
+      vgroup-table: vgroup_table
       query-limit: 1000
       max-wait: 5000
     redis:
