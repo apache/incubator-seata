@@ -14,15 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config.nacos;
+package org.apache.seata.config;
 
-import io.seata.config.Configuration;
-import org.apache.seata.common.loader.LoadLevel;
-
-@LoadLevel(name = "Test", order = 1)
-public class NacosConfigurationProvider implements io.seata.config.ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        return NacosConfiguration.getInstance();
-    }
+/**
+ * The interface Dispose.
+ */
+public interface Dispose {
+    /**
+     * Dispose.
+     */
+    void dispose();
 }
