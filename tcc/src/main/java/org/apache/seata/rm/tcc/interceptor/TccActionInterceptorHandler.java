@@ -102,6 +102,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         return invocation.proceed();
     }
 
+    /**
+     * Initializes the transaction annotation context
+     * @param method                   the method
+     * @param targetBean               the target bean
+     * @param businessActionContext    the business action context
+     */
     private void initTransactionalAnnotationContext(Method method, Object targetBean, Map<String, Object> businessActionContext) {
         Transactional transactionalAnnotation = MethodUtils.getTransactionalAnnotationByMethod(method, targetBean);
         if (transactionalAnnotation != null) {
