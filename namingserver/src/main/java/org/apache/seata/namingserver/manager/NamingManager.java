@@ -89,7 +89,6 @@ public class NamingManager {
 
     public NamingManager() {
         this.instanceLiveTable = new ConcurrentHashMap<>();
-        this.vGroupMap = new ConcurrentHashMap<>();
         this.namespaceClusterDataMap = new ConcurrentHashMap<>();
     }
 
@@ -212,17 +211,12 @@ public class NamingManager {
 
     public void addGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
-            ClusterBO clusterBO = vGroupMap.computeIfAbsent(vGroup, k -> new ConcurrentHashMap<>())
+            ClusterBO clusterBO = vGroupMap.get(vGroup, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(namespace, k -> new NamespaceBO()).getCluster(clusterName);
             if (clusterBO != null && !clusterBO.getUnitNames().contains(unitName)) {
                 clusterBO.addUnit(unitName);
-                //TODO
-                ConcurrentMap<String, Set<String>> clusterMap = vGroupMap.getIfPresent(vGroup).get(namespace);
-                clusterMap.keySet().forEach(currentClusterName -> {
-                    if (!StringUtils.equals(currentClusterName, clusterName)) {
-                        clusterMap.remove(currentClusterName);
-                    }
-                });
+                NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
+                namespaceBO.removeOldCluster(clusterName);
                 applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
             }
         } catch (Exception e) {
@@ -304,8 +298,7 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        HashMap<String/* VGroup */, ConcurrentMap<String/* namespace */,
-                ConcurrentMap<String/* clusterName */, Set<String>/* unitName */>>> concurrentVgroupMap = new HashMap<>(vGroupMap.asMap());
+        HashMap<String/* VGroup */, ConcurrentMap<String/* namespace */,NamespaceBO>> concurrentVgroupMap = new HashMap<>(vGroupMap.asMap());
         ConcurrentMap<String/* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
         List<Cluster> clusterList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(vgroupNamespaceMap)) {
