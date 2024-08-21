@@ -14,19 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config.nacos;
+package io.seata.config.extend;
 
 import java.security.SecureRandom;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import com.typesafe.config.Config;
@@ -42,7 +38,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class TestConfigCustomSPI {
+public class TestConfigFromExtendSPI {
 
     private static  Config FILE_CONFIG;
     private static ConfigService configService;
@@ -67,7 +63,7 @@ public class TestConfigCustomSPI {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
         String postfix = generateRandomString();
-        String dataId = "nacos.config.custom.spi." + postfix;
+        String dataId = "nacos.config.extension.spi." + postfix;
         String group = FILE_CONFIG.getString("config.test.group");
         String content = "seata";
         CountDownLatch listenerCountDown = new CountDownLatch(1);
