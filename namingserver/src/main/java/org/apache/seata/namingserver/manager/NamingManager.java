@@ -177,7 +177,9 @@ public class NamingManager {
     public Result<String> removeGroup(String namespace, String clusterName,String vGroup, String unitName) {
         List<Cluster> clusterList = getClusterListByVgroup(vGroup, namespace);
         for (Cluster cluster : clusterList) {
-            if (!StringUtils.equals(clusterName, cluster.getClusterName())) continue;
+            if (!StringUtils.equals(clusterName, cluster.getClusterName())) {
+                continue;
+            }
             if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
                 Unit unit = cluster.getUnitData().get(0);
                 if (unit != null && unit.getNamingInstanceList() != null && unit.getNamingInstanceList().size() > 0) {
@@ -282,7 +284,7 @@ public class NamingManager {
                     Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
                     if (vgroupMap instanceof Map) {
                         ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group, k -> new ConcurrentHashMap<>())
-                                .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : realUnitName));
+                                .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName));
                     }
                     notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
                     instanceLiveTable.remove(
