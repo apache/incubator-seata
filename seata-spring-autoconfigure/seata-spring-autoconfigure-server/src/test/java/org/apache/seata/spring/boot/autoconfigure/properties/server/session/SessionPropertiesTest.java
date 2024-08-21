@@ -14,15 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.config.nacos;
+package org.apache.seata.spring.boot.autoconfigure.properties.server.session;
 
-import io.seata.config.Configuration;
-import org.apache.seata.common.loader.LoadLevel;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-@LoadLevel(name = "Test", order = 1)
-public class NacosConfigurationProvider implements io.seata.config.ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        return NacosConfiguration.getInstance();
+public class SessionPropertiesTest {
+
+    @Test
+    public void testSessionProperties() {
+        SessionProperties sessionProperties = new SessionProperties();
+        sessionProperties.setEnableBranchAsync(true);
+        sessionProperties.setBranchAsyncQueueSize(1);
+
+        Assertions.assertTrue(sessionProperties.getEnableBranchAsync());
+        Assertions.assertEquals(1, sessionProperties.getBranchAsyncQueueSize());
     }
 }
