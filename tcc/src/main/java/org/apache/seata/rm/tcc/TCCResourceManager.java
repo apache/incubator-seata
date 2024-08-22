@@ -119,6 +119,8 @@ public class TCCResourceManager extends AbstractResourceManager {
                     applicationData);
 
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -146,6 +148,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+        } finally {
+            // clear the action context
+            BusinessActionContextUtil.clear();
         }
     }
 
@@ -177,6 +182,8 @@ public class TCCResourceManager extends AbstractResourceManager {
             BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -205,6 +212,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+        } finally {
+            // clear the action context
+            BusinessActionContextUtil.clear();
         }
     }
 
