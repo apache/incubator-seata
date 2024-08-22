@@ -102,6 +102,11 @@ public interface Constants {
     String TX_ACTION_CONTEXT = "actionContext";
 
     /**
+     * isolation
+     */
+    String TX_ISOLATION = "isolation";
+
+    /**
      * default charset name
      */
     String DEFAULT_CHARSET_NAME = "UTF-8";
