@@ -31,8 +31,8 @@ public class GrpcDecoder extends ChannelDuplexHandler {
         byte[] bytes = new byte[content.readableBytes()];
         content.readBytes(bytes);
 
-        // 第一个字节默认是0，表示无需解压缩
-        // 读取后面四个字节的值，作为body的长度
+        // The first byte defaults to 0, indicating that no decompression is required
+        // Read the value of the next four bytes as the length of the body
         int length = ((bytes[1] & 0xFF) << 24) |
                 ((bytes[2] & 0xFF) << 16) |
                 ((bytes[3] & 0xFF) << 8) |
@@ -60,6 +60,6 @@ public class GrpcDecoder extends ChannelDuplexHandler {
     }
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
-        // TODO 后续可以解压缩逻辑
+        // TODO Subsequent decompression logic is possible
     }
 }

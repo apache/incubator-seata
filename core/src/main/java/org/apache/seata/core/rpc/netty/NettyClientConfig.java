@@ -20,7 +20,13 @@ import io.netty.channel.Channel;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.TransportServerType;
 
-import static org.apache.seata.common.DefaultValues.*;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
  * The type Netty client config.

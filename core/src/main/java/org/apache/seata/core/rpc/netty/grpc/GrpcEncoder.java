@@ -54,14 +54,14 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         if (bodyBytes != null)
         {
             byte[] messageWithPrefix = new byte[bodyBytes.length + 5];
-            // 第一个字节为0，表示不压缩
+            // The first byte is 0, indicating no compression
             messageWithPrefix[0] = 0;
             ByteBuffer buffer = ByteBuffer.allocate(4);
             buffer.putInt(bodyBytes.length);
             byte[] lengthBytes = buffer.array();
-            // 后四个字节表示长度
+            // The last four bytes indicate the length
             System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
-            // 剩余字节是body
+            // The remaining bytes are body
             System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
             ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)));
         }
