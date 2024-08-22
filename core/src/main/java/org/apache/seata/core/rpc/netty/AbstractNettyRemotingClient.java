@@ -460,10 +460,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
-                        String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-                        Channel channel = clientChannelManager.acquireChannel(serverAddress);
-
-                        AbstractNettyRemotingClient.this.sendAsyncRequest(channel, HeartbeatMessage.PING);
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING);
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }
