@@ -55,7 +55,7 @@ public class NamespaceBO {
         return clusterMap.computeIfAbsent(clusterName, k -> new ClusterBO());
     }
 
-    public void removeOldCluster(String clusterName){
+    public void removeOldCluster(String clusterName) {
         clusterMap.keySet().forEach(currentClusterName -> {
             if (!StringUtils.equals(currentClusterName, clusterName)) {
                 clusterMap.remove(currentClusterName);
