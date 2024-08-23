@@ -62,7 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-
 public class NamingserverRegistryServiceImpl implements RegistryService<NamingListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingserverRegistryServiceImpl.class);
 
@@ -163,15 +162,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             heartBeatScheduledFuture.cancel(false);
         }
 
-        heartBeatScheduledFuture = this.executorService.scheduleAtFixedRate(() -> {
-            try {
-                instance.setTimestamp(System.currentTimeMillis());
-                doRegister(instance, getNamingAddrs());
-            } catch (Exception e) {
-                LOGGER.error("Naming server register Exception", e);
-            }
-        }, HEARTBEAT_PERIOD, HEARTBEAT_PERIOD, TimeUnit.MILLISECONDS);
-
     }
 
     public void doRegister(Instance instance, List<String> urlList) {
@@ -232,7 +222,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String unit = instance.getUnit();
             String jsonBody = instance.toJsonString();
             String params = "unit=" + unit;
-            params = params + "&cluster=" + instance.getClusterName();
+            params = params + "&clusterName=" + instance.getClusterName();
             params = params + "&namespace=" + instance.getNamespace();
             url += params;
             Map<String, String> header = new HashMap<>();

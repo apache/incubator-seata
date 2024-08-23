@@ -27,6 +27,15 @@ public class NamingServerNode extends Node {
     private double weight = 1.0;
     private boolean healthy = true;
     private long term;
+    private String unit;
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
 
     public double getWeight() {
         return weight;
