@@ -95,13 +95,15 @@ public class NamingManager {
     @PostConstruct
     public void init() {
         this.vGroupMap = Caffeine.newBuilder()
-                .expireAfterAccess(10000, TimeUnit.MILLISECONDS) // expired time
+                .expireAfterAccess(heartbeatTimeThreshold, TimeUnit.MILLISECONDS) // expired time
                 .maximumSize(Integer.MAX_VALUE)
                 .removalListener(new RemovalListener<Object, Object>() {
 
                     @Override
                     public void onRemoval(@Nullable Object key, @Nullable Object value, @NonNull RemovalCause cause) {
-                        System.err.println("out " + key + " " + value);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("instance kv expired,key:{},value:{}", key, value);
+                        }
                     }
                 })
                 .build(k -> new ConcurrentHashMap<>());
