@@ -102,7 +102,7 @@ public class NamingManager {
                     @Override
                     public void onRemoval(@Nullable Object key, @Nullable Object value, @NonNull RemovalCause cause) {
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("instance kv expired,key:{},value:{}", key, value);
+                            LOGGER.debug("vgroup map expired,vgroup:{},namespace:{}", key, value);
                         }
                     }
                 })
