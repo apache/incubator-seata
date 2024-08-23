@@ -69,7 +69,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 public class Server {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    protected static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
+    protected static final ScheduledExecutorService EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
 
     public static void metadataInit() {
         VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
@@ -111,7 +111,7 @@ public class Server {
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
         }
-        executorService.scheduleAtFixedRate(() -> {
+        EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
             try {
                 vGroupMappingStoreManager.notifyMapping();
             } catch (Exception e) {
