@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.ratelimit;
 
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 
 /**
  * The type Rate limit info.
