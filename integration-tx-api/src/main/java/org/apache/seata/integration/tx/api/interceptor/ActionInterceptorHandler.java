@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.seata.common.Constants;
@@ -32,6 +33,8 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
+import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.integration.tx.api.util.JsonUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
@@ -87,7 +90,7 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
-
+            doBeforeTccPrepare(xid, branchId, actionName);
             if (businessActionParam.getUseCommonFence()) {
                 try {
                     // Use common Fence, and return the business result
@@ -105,6 +108,7 @@ public class ActionInterceptorHandler {
             }
         } finally {
             try {
+                doAfterTccPrepare(xid, branchId, actionName);
                 //to report business action context finally if the actionContext.getUpdated() is true
                 BusinessActionContextUtil.reportContext(actionContext);
             } finally {
@@ -115,6 +119,46 @@ public class ActionInterceptorHandler {
                     // clear the action context
                     BusinessActionContextUtil.clear();
                 }
+            }
+        }
+    }
+
+    /**
+     * to do some business operations before tcc prepare
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doBeforeTccPrepare(String xid, String branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccPrepare(xid, Long.valueOf(branchId), actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccPrepare in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after tcc prepare
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doAfterTccPrepare(String xid, String branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccPrepare(xid, Long.valueOf(branchId), actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccPrepare in hook {}", e.getMessage(), e);
             }
         }
     }

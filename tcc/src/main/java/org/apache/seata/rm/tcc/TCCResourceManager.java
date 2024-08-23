@@ -18,6 +18,7 @@ package org.apache.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +32,8 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
+import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
 import org.apache.seata.rm.AbstractResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
@@ -121,6 +124,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(businessActionContext);
+            doBeforeTccCommit(xid, branchId, tccResource.getActionName());
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -149,6 +153,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } finally {
+            doAfterTccCommit(xid, branchId, tccResource.getActionName());
             // clear the action context
             BusinessActionContextUtil.clear();
         }
@@ -184,6 +189,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(businessActionContext);
+            doBeforeTccRollback(xid, branchId, tccResource.getActionName());
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -213,8 +219,89 @@ public class TCCResourceManager extends AbstractResourceManager {
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } finally {
+            doAfterTccRollback(xid, branchId, tccResource.getActionName());
             // clear the action context
             BusinessActionContextUtil.clear();
+        }
+    }
+
+    /**
+     * to do some business operations before tcc rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doBeforeTccRollback(String xid, long branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccRollback(xid, branchId, actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after tcc rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doAfterTccRollback(String xid, long branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccRollback(xid, branchId, actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations before tcc commit
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doBeforeTccCommit(String xid, long branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccCommit(xid, branchId, actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccCommit in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after tcc commit
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     */
+    private void doAfterTccCommit(String xid, long branchId, String actionName) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccCommit(xid, branchId, actionName);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccCommit in hook {}", e.getMessage(), e);
+            }
         }
     }
 
