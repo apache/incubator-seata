@@ -348,7 +348,7 @@ public class NamingManager {
                                 ((Map<String, Object>)vgoupMap).forEach((group, unitName) -> {
                                     ClusterBO clusterBO =
                                         vGroupMap.get(group)
-                                                .computeIfAbsent(namespace, k-> new NamespaceBO())
+                                                .computeIfAbsent(namespace, k -> new NamespaceBO())
                                                 .getCluster(clusterData.getClusterName());
                                     Set<String> units = clusterBO.getUnitNames();
                                     if (units != null) {
