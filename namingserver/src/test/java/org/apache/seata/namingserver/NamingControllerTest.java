@@ -263,41 +263,4 @@ class NamingControllerTest {
         assertEquals(8091, node1.getTransaction().getPort());
     }
 
-    @Test
-    void mockIntermediateState() {
-        String clusterName = "cluster1";
-        String namespace = "public6";
-        String vGroup = "vgroup1";
-        String unitName = String.valueOf(UUID.randomUUID());
-        NamingServerNode node = new NamingServerNode();
-        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
-        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
-        Map<String, Object> meatadata = node.getMetadata();
-        Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put(vGroup,unitName);
-        meatadata.put(CONSTANT_GROUP, vGroups);
-        namingController.registerInstance(namespace, clusterName, unitName, node);
-        NamingServerNode node2 = new NamingServerNode();
-        node2.setTransaction(new Node.Endpoint("127.0.0.1", 8092, "netty"));
-        node2.setControl(new Node.Endpoint("127.0.0.1", 7092, "http"));
-        Map<String, Object> meatadata2 = node2.getMetadata();
-        Map<String,Object> vGroups2 = new HashMap<>();
-        String unitName2 = UUID.randomUUID().toString();
-        vGroups2.put(vGroup,unitName2);
-        meatadata2.put(CONSTANT_GROUP, vGroups2);
-        namingController.registerInstance(namespace, "clusterName2", unitName2, node2);
-        MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
-        assertNotNull(metaResponse);
-        assertNotNull(metaResponse.getClusterList());
-        assertEquals(2, metaResponse.getClusterList().size());
-        Cluster cluster = metaResponse.getClusterList().get(1);
-        assertNotNull(cluster.getUnitData());
-        assertEquals(1, cluster.getUnitData().size());
-        Unit unit = cluster.getUnitData().get(0);
-        assertNotNull(unit.getNamingInstanceList());
-        assertEquals(1, unit.getNamingInstanceList().size());
-        Node unit2 = unit.getNamingInstanceList().get(0);
-        assertEquals(unit2.getTransaction(), node2.getTransaction());
-    }
-
 }
