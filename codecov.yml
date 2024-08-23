@@ -36,6 +36,7 @@ ignore:
  - "rm-datasource/src/test/java/org/apache/seata/rm/datasource/mock"
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/antlr/.*"
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/parser/.*"
+ - "com/alibaba/druid/util/JdbcUtils.java"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
