@@ -347,7 +347,9 @@ public class NamingManager {
                             if (vgoupMap instanceof Map) {
                                 ((Map<String, Object>)vgoupMap).forEach((group, unitName) -> {
                                     ClusterBO clusterBO =
-                                        vGroupMap.get(group, k -> new ConcurrentHashMap<>()).get(namespace).getCluster(clusterData.getClusterName());
+                                        vGroupMap.get(group, k -> new ConcurrentHashMap<>())
+                                                .computeIfAbsent(namespace, k -> new NamespaceBO())
+                                                .getCluster(clusterData.getClusterName());
                                     Set<String> units = clusterBO.getUnitNames();
                                     if (units != null) {
                                         units.remove(unitName == null ? instance.getUnit() : unitName);
