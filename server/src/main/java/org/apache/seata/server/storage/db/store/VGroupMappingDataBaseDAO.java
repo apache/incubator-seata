@@ -54,7 +54,6 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {
-        clearMappingDOByVGroup(mappingDO.getVGroup());
         String sql = "INSERT INTO " + vMapping + " (vgroup,namespace, cluster) VALUES (?, ?, ?)";
         Connection conn = null;
         PreparedStatement ps = null;
@@ -105,7 +104,7 @@ public class VGroupMappingDataBaseDAO {
             ps.setString(2, instance.getClusterName());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new SeataRuntimeException(ErrorCode.ERROR_SQL,e);
+            throw new SeataRuntimeException(ErrorCode.ERROR_SQL, e);
         } finally {
             IOUtil.close(ps, conn);
         }

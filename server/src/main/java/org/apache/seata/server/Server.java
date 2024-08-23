@@ -19,6 +19,8 @@ package org.apache.seata.server;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -39,6 +41,8 @@ import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -63,6 +67,9 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  * The type Server.
  */
 public class Server {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+
+    protected static final ScheduledExecutorService EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
 
     public static void metadataInit() {
         VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
@@ -104,7 +111,13 @@ public class Server {
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
         }
-        vGroupMappingStoreManager.notifyMapping();
+        EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
+            try {
+                vGroupMappingStoreManager.notifyMapping();
+            } catch (Exception e) {
+                LOGGER.error("Naming server register Exception", e);
+            }
+        }, 0, 5000, TimeUnit.MILLISECONDS);
     }
 
 
@@ -123,9 +136,9 @@ public class Server {
         MetricsManager.get().init();
 
         ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
-            NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-            new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+                NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
+                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
 
         //127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -142,14 +155,14 @@ public class Server {
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         ConfigurableListableBeanFactory beanFactory =
-            ((GenericWebApplicationContext) ObjectHolder.INSTANCE
-                .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
+                ((GenericWebApplicationContext) ObjectHolder.INSTANCE
+                        .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         if (coordinator instanceof ApplicationListener) {
             beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
             beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
             ((GenericWebApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                .addApplicationListener((ApplicationListener<?>) coordinator);
+                    .addApplicationListener((ApplicationListener<?>) coordinator);
         }
         //log store mode : file, db, redis
         SessionHolder.init();
