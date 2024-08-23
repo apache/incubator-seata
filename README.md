@@ -5,7 +5,7 @@
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
 [![Build Status](https://github.com/apache/incubator-seata/workflows/build/badge.svg?branch=develop)](https://github.com/apache/incubator-seata/actions)
-[![codecov](https://codecov.io/gh/apache/incubator-seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/apache/incubator-seata)
+[![codecov](https://codecov.io/gh/apache/incubator-seata/graph/badge.svg?token=tbmHt2ZfxO)](https://codecov.io/gh/apache/incubator-seata)
 [![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![maven](https://img.shields.io/maven-central/v/io.apache/incubator-seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
 
