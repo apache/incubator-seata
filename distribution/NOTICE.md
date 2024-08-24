@@ -273,8 +273,8 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── spring-web-5.3.30.jar
     ├── spring-webmvc-5.3.30.jar
     ├── xstream-1.4.20.jar
-    ├── mysql-connector-java-8.0.28.jar
     └── jdbc
+        ├── mysql-connector-java-8.0.28.jar
         └── NOTICE.md
 
 ```
@@ -555,8 +555,8 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── spring-web-5.3.30.jar
     ├── spring-webmvc-5.3.30.jar
     ├── xstream-1.4.20.jar
-    ├── mysql-connector-java-8.0.28.jar
     └── jdbc
+        ├── mysql-connector-java-8.0.28.jar
         └── NOTICE.md
 
 ```

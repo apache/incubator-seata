@@ -16,6 +16,8 @@
  */
 package org.apache.seata.core.store.db;
 
+import javax.sql.DataSource;
+
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.util.ConfigTools;
@@ -26,8 +28,6 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.constants.DBType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
