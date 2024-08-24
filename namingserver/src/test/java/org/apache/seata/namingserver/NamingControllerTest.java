@@ -29,9 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -106,7 +104,7 @@ class NamingControllerTest {
         String unitName2 = UUID.randomUUID().toString();
         vGroups2.put("vgroup2",unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
-        namingController.registerInstance(namespace, "cluster2", unitName2, node2);
+        namingController.registerInstance(namespace, "cluster1", unitName2, node2);
         String vGroup = "vgroup1";
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
@@ -125,7 +123,7 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(0, metaResponse.getClusterList().get(0).getUnitData().size());
+        assertEquals(1, metaResponse.getClusterList().get(0).getUnitData().size());
     }
 
     @Test
