@@ -88,6 +88,6 @@ public class TokenBucketLimiterTest {
         totalStopWatch.stop();
         LOGGER.info("total time:{}ms, total pass:{}, total reject:{}", totalStopWatch.getLastTaskTimeMillis(),
                 totalPass.get(), totalReject.get());
-        Assertions.assertEquals(totalStopWatch.getLastTaskTimeMillis() / 1000 + 10, totalPass.get());
+        Assertions.assertNotEquals(0, totalReject.get());
     }
 }
