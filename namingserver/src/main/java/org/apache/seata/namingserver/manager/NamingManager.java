@@ -281,7 +281,7 @@ public class NamingManager {
                     clusterData.removeInstance(node, unitName);
                     Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
                     if (vgroupMap instanceof Map) {
-                        ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) ->{
+                        ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> {
                             vGroupMap.get(group, k -> new ConcurrentHashMap<>())
                                 .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName);
                             notifyClusterChange(group, namespace, clusterName, unitName, node.getTerm());
