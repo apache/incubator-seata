@@ -95,6 +95,6 @@ CREATE TABLE IF NOT EXISTS `vgroup_table`
     `vGroup`    VARCHAR(255),
     `namespace` VARCHAR(255),
     `cluster`   VARCHAR(255),
-    primary key (`vGroup,namespace,cluster`)
+  UNIQUE KEY `idx_vgroup_namespace_cluster` (`vGroup`,`namespace`,`cluster`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
