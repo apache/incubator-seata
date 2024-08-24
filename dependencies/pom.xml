@@ -50,7 +50,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
-        <curator-test.version>5.1.0</curator-test.version>
+        <curator.version>5.1.0</curator.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <apollo-client.version>2.0.1</apollo-client.version>
         <eureka-clients.version>1.10.18</eureka-clients.version>
@@ -354,8 +354,18 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
-                <version>${curator-test.version}</version>
+                <version>${curator.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
