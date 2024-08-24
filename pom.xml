@@ -339,8 +339,8 @@
                 <configuration>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumPriority>2</minimumPriority>
-                    <printFailingErrors>true</printFailingErrors>
                     <failOnViolation>true</failOnViolation>
+                    <printFailingErrors>true</printFailingErrors>
                     <rulesets>
                         <ruleset>rulesets/java/ali-comment.xml</ruleset>
                         <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
