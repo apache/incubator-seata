@@ -406,30 +406,6 @@
                     <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>verify</phase> <!-- 指定执行的生命周期阶段 -->
-                        <goals>
-                            <goal>run</goal> <!-- 执行 Ant 任务 -->
-                        </goals>
-                        <configuration>
-                            <target>
-                                <available file="${project.build.directory}/pmd.xml" property="pmd.report.exists"/>
-                                <condition property="pmd.report.exists">
-                                    <isset property="pmd.report.exists"/>
-                                </condition>
-                                <echo message="PMD Report:" />
-                                <loadfile property="pmd.report" srcFile="${project.build.directory}/pmd.xml"/>
-                                <echo message="${pmd.report}"/>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

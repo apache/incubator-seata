@@ -77,18 +77,18 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
 
     @Override
     public void init() {
-        final Configuration CONFIG = ConfigurationFactory.getInstance();
-        this.enable = CONFIG.getBoolean(ConfigurationKeys.RATE_LIMIT_ENABLE);
+        final Configuration config = ConfigurationFactory.getInstance();
+        this.enable = config.getBoolean(ConfigurationKeys.RATE_LIMIT_ENABLE);
         if (this.enable) {
-            String tokenSecondNum = CONFIG.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_SECOND_NUM);
+            String tokenSecondNum = config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_SECOND_NUM);
             if (StringUtils.isBlank(tokenSecondNum)) {
                 throw new IllegalArgumentException("rate limiter tokenSecondNum is blank");
             }
-            String tokenMaxNum = CONFIG.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_MAX_NUM);
+            String tokenMaxNum = config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_MAX_NUM);
             if (StringUtils.isBlank(tokenMaxNum)) {
                 throw new IllegalArgumentException("rate limiter tokenMaxNum is blank");
             }
-            String tokenInitialNum = CONFIG.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM);
+            String tokenInitialNum = config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM);
             if (StringUtils.isBlank(tokenInitialNum)) {
                 throw new IllegalArgumentException("rate limiter tokenInitialNum is blank");
             }
