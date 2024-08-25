@@ -93,6 +93,8 @@ public class Server {
             // load unit name
             instance.setUnit(String.valueOf(UUID.randomUUID()));
 
+            instance.setTerm(System.currentTimeMillis());
+
             // load node Endpoint
             instance.setControl(new Node.Endpoint(NetUtil.getLocalIp(), Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))), "http"));
 
