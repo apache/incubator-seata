@@ -38,6 +38,7 @@ ignore:
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/parser/.*"
  - "com/alibaba/druid/util/JdbcUtils.java"
  - "com/alibaba/druid/support/monitor/annotation"
+ - "com/alibaba/druid/**/*"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
