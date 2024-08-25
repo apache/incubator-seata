@@ -228,16 +228,13 @@ public class NamingManager {
         }
     }
 
-    public void notifyClusterChange(String namespace, String clusterName, String unitName, long term) {
-        vGroupMap.asMap().forEach((vGroup, namespaceMap) -> {
-            Optional.ofNullable(namespaceMap.get(namespace))
-                .flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))
-                .ifPresent(clusterBO -> {
-                    Set<String> units = clusterBO.getUnitNames();
-                    if (StringUtils.isBlank(unitName) || units.contains(unitName)) {
-                        applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
-                    }
-                });
+    public void notifyClusterChange(String vGroup, String namespace, String clusterName, String unitName, long term) {
+
+        Optional.ofNullable(vGroupMap.asMap().get(vGroup)).flatMap(map -> Optional.ofNullable(map.get(namespace)).flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))).ifPresent(clusterBO -> {
+            Set<String> units = clusterBO.getUnitNames();
+            if (StringUtils.isBlank(unitName) || units.contains(unitName)) {
+                applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
+            }
         });
     }
 
@@ -250,7 +247,7 @@ public class NamingManager {
             // create cluster when there is no cluster in clusterDataHashMap
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
                 key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
-
+            boolean hasChanged = clusterData.registerInstance(node, unitName);
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             Optional.ofNullable(node.getMetadata().get(CONSTANT_GROUP)).ifPresent(mappingObj -> {
                 if (mappingObj instanceof Map) {
@@ -259,13 +256,12 @@ public class NamingManager {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
                         addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
+                        if (hasChanged) {
+                            notifyClusterChange(k,namespace, clusterName, unitName,node.getTerm());
+                        }
                     });
                 }
             });
-            boolean hasChanged = clusterData.registerInstance(node, unitName);
-            if (hasChanged) {
-                notifyClusterChange(namespace, clusterName, unitName,node.getTerm());
-            }
             instanceLiveTable.put(
                 new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
                 System.currentTimeMillis());
@@ -285,10 +281,13 @@ public class NamingManager {
                     clusterData.removeInstance(node, unitName);
                     Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
                     if (vgroupMap instanceof Map) {
-                        ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> vGroupMap.get(group, k -> new ConcurrentHashMap<>())
-                                .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName));
+                        ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> {
+                            vGroupMap.get(group, k -> new ConcurrentHashMap<>())
+                                .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName);
+                            notifyClusterChange(group, namespace, clusterName, unitName, node.getTerm());
+                        });
                     }
-                    notifyClusterChange(namespace, clusterName, unitName, node.getTerm());
+
                     instanceLiveTable.remove(
                         new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
                 }
@@ -353,6 +352,7 @@ public class NamingManager {
                                     Set<String> units = clusterBO.getUnitNames();
                                     if (units != null) {
                                         units.remove(unitName == null ? instance.getUnit() : unitName);
+                                        notifyClusterChange(group,namespace, clusterData.getClusterName(), unit.getUnitName(),-1);
                                     }
                                 });
                             }
@@ -360,7 +360,6 @@ public class NamingManager {
                             LOGGER.warn("{} instance has gone offline",
                                 instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
                         }
-                        notifyClusterChange(namespace, clusterData.getClusterName(), unit.getUnitName(),-1);
                     }
                 }
             }
