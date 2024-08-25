@@ -69,7 +69,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 public class Server {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    protected static final ScheduledExecutorService EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
+    protected static volatile ScheduledExecutorService EXECUTOR_SERVICE;
 
     @Resource
     RegistryNamingServerProperties registryNamingServerProperties;
@@ -80,6 +80,7 @@ public class Server {
     public void metadataInit() {
         VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         if (StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
+            EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
             ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
             // load node properties
@@ -124,6 +125,7 @@ public class Server {
                     LOGGER.error("Naming server register Exception", e);
                 }
             }, registryNamingServerProperties.getHeartbeatPeriod(),  registryNamingServerProperties.getHeartbeatPeriod(), TimeUnit.MILLISECONDS);
+            ServerRunner.addDisposable(EXECUTOR_SERVICE::shutdown);
         }
     }
 
@@ -177,10 +179,9 @@ public class Server {
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 
+        metadataInit();
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
-        metadataInit();
-
         nettyRemotingServer.init();
     }
 }

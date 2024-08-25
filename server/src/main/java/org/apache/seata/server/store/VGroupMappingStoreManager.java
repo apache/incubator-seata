@@ -59,9 +59,6 @@ public interface VGroupMappingStoreManager {
     default void notifyMapping() {
         Instance instance = Instance.getInstance();
         Map<String, Object> map = this.readVGroups();
-        if (CollectionUtils.isEmpty(map)) {
-            return;
-        }
         instance.addMetadata("vGroup", map);
         try {
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());

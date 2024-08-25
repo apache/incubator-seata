@@ -43,33 +43,10 @@ seata:
     type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: namingserver
-    metadata:
-      weight: 1
-    namingserver:
-      server-addr: 127.0.0.1:8080
-      cluster: default
-      namespace: public
-      heartbeat-period: 5000
+    type: file
   store:
     # support: file 、 db 、 redis 、 raft
-    mode: db
-    db:
-      datasource: druid
-      db-type: mariadb
-      driver-class-name: org.mariadb.jdbc.Driver
-      url: jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true
-      user: root
-      password: 123456
-      min-conn: 10
-      max-conn: 100
-      global-table: global_table
-      branch-table: branch_table
-      lock-table: lock_table
-      distributed-lock-table: distributed_lock
-      vgroup-table: vgroup_table
-      query-limit: 1000
-      max-wait: 5000
+    mode: file
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:
