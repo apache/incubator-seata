@@ -80,12 +80,12 @@ seata:
     type: file
     preferred-networks: 30.240.*
     metadata:
-      weight: 1
+      weight: 100
     namingserver:
       server-addr: 127.0.0.1:8080
       cluster: default
       namespace: public
-      heartbeat-period: 1000
+      heartbeat-period: 5000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848

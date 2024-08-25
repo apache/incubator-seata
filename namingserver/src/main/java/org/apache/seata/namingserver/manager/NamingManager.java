@@ -247,24 +247,25 @@ public class NamingManager {
             // create cluster when there is no cluster in clusterDataHashMap
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
                 key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
-            boolean hasChanged = clusterData.registerInstance(node, unitName);
+            Object mappingObj = node.getMetadata().get(CONSTANT_GROUP);
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
-            Optional.ofNullable(node.getMetadata().get(CONSTANT_GROUP)).ifPresent(mappingObj -> {
-                if (mappingObj instanceof Map) {
-                    Map<String, String> vGroups = (Map<String, String>) mappingObj;
+            if (mappingObj instanceof Map) {
+                Map<String, String> vGroups = (Map<String, String>)mappingObj;
+                if (!CollectionUtils.isEmpty(vGroups)) {
+                    boolean hasChanged = clusterData.registerInstance(node, unitName);
+                    instanceLiveTable.put(
+                        new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
+                        System.currentTimeMillis());
                     vGroups.forEach((k, v) -> {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
                         addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
                         if (hasChanged) {
-                            notifyClusterChange(k,namespace, clusterName, unitName,node.getTerm());
+                            notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
                         }
                     });
                 }
-            });
-            instanceLiveTable.put(
-                new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
-                System.currentTimeMillis());
+            }
         } catch (Exception e) {
             LOGGER.error("Instance registered failed!", e);
             return false;

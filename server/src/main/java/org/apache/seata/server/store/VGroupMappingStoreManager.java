@@ -18,12 +18,14 @@ package org.apache.seata.server.store;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Map;
 
 public interface VGroupMappingStoreManager {
     /**
@@ -55,12 +57,15 @@ public interface VGroupMappingStoreManager {
      * notify mapping relationship to all namingserver nodes
      */
     default void notifyMapping() {
-
         Instance instance = Instance.getInstance();
-        instance.addMetadata("vGroup", this.readVGroups());
+        Map<String, Object> map = this.readVGroups();
+        if (CollectionUtils.isEmpty(map)) {
+            return;
+        }
+        instance.addMetadata("vGroup", map);
         try {
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
-            for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+            for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }
         } catch (Exception e) {
