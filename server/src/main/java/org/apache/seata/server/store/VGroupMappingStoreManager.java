@@ -18,7 +18,6 @@ package org.apache.seata.server.store;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.namingserver.Instance;
-import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
