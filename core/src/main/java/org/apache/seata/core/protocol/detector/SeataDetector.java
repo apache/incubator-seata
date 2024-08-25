@@ -2,8 +2,7 @@ package org.apache.seata.core.protocol.detector;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
-import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
-import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
+import org.apache.seata.core.rpc.netty.MultiProtocolDecoder;
 
 public class SeataDetector implements ProtocolDetector {
     private final byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
@@ -28,12 +27,8 @@ public class SeataDetector implements ProtocolDetector {
 
     @Override
     public ChannelHandler[] getHandlers() {
-        ChannelHandler[] ret = new ChannelHandler[2 + serverHandlers.length];
-        ret[0] = new ProtocolDecoderV1();
-        ret[1] = new ProtocolEncoderV1();
-        for (int i = 0; i < serverHandlers.length; i++) {
-            ret[2 + i] = serverHandlers[i];
-        }
-        return ret;
+        MultiProtocolDecoder multiProtocolDecoder = new MultiProtocolDecoder(serverHandlers);
+
+        return new ChannelHandler[]{multiProtocolDecoder};
     }
 }

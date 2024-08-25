@@ -28,35 +28,44 @@ public class GrpcDecoder extends ChannelDuplexHandler {
 
     public void onDataRead(ChannelHandlerContext ctx, Http2DataFrame msg) throws Exception {
         ByteBuf content = msg.content();
-        byte[] bytes = new byte[content.readableBytes()];
+        int readableBytes = content.readableBytes();
+        byte[] bytes = new byte[readableBytes];
         content.readBytes(bytes);
+        if (bytes.length < 5) {
+            return;
+        }
 
-        // The first byte defaults to 0, indicating that no decompression is required
-        // Read the value of the next four bytes as the length of the body
-        int length = ((bytes[1] & 0xFF) << 24) |
-                ((bytes[2] & 0xFF) << 16) |
-                ((bytes[3] & 0xFF) << 8) |
-                (bytes[4] & 0xFF);
+        int srcPos = 0;
+        while (srcPos < readableBytes) {
+            // The first byte defaults to 0, indicating that no decompression is required
+            // Read the value of the next four bytes as the length of the body
+            int length = ((bytes[srcPos + 1] & 0xFF) << 24) |
+                    ((bytes[srcPos + 2] & 0xFF) << 16) |
+                    ((bytes[srcPos + 3] & 0xFF) << 8) |
+                    (bytes[srcPos + 4] & 0xFF);
 
-        byte[] data = new byte[length];
-        System.arraycopy(bytes, 5, data, 0, length);
+            byte[] data = new byte[length];
+            System.arraycopy(bytes, srcPos + 5, data, 0, length);
 
-        GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
-        Any body = grpcMessageProto.getBody();
-        int messageType = grpcMessageProto.getMessageType();
-        int messageId = grpcMessageProto.getId();
-        byte[] byteArray = body.toByteArray();
+            GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
+            Any body = grpcMessageProto.getBody();
+            int messageType = grpcMessageProto.getMessageType();
+            int messageId = grpcMessageProto.getId();
+            byte[] byteArray = body.toByteArray();
 
-        Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
-        Object messageBody = serializer.deserialize(byteArray);
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+            Object messageBody = serializer.deserialize(byteArray);
 
-        RpcMessage rpcMsg = new RpcMessage();
-        rpcMsg.setMessageType((byte) messageType);
-        rpcMsg.setBody(messageBody);
-        rpcMsg.setId(messageId);
-        rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
+            RpcMessage rpcMsg = new RpcMessage();
+            rpcMsg.setMessageType((byte) messageType);
+            rpcMsg.setBody(messageBody);
+            rpcMsg.setId(messageId);
+            rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
 
-        ctx.fireChannelRead(rpcMsg);
+            ctx.fireChannelRead(rpcMsg);
+
+            srcPos += length + 5;
+        }
     }
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {

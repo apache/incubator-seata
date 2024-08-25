@@ -1,0 +1,17 @@
+syntax = "proto3";
+package org.apache.seata.protocol.protobuf;
+import "google/protobuf/any.proto";
+option java_multiple_files = true;
+option java_outer_classname = "GrpcMessage";
+option java_package = "org.apache.seata.serializer.protobuf.generated";
+
+message GrpcMessageProto {
+    int32 id = 1;
+    int32 messageType = 2;
+    map<string, string> headMap = 3;
+    google.protobuf.Any body = 4;
+}
+
+service SeataService {
+    rpc sendRequest (stream GrpcMessageProto) returns (stream GrpcMessageProto);
+}

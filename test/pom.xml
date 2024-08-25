@@ -40,6 +40,23 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <configuration>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
+                    </protocArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -153,6 +170,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 
 </project>

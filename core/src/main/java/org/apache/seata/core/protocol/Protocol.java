@@ -5,7 +5,7 @@ package org.apache.seata.core.protocol;
  */
 public enum Protocol {
 
-    GPRC("gprc"),
+    GPRC("grpc"),
 
     SEATA("seata");
 
