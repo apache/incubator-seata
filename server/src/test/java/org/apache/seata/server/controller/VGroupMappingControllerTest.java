@@ -17,11 +17,14 @@
 package org.apache.seata.server.controller;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 @SpringBootTest
 class VGroupMappingControllerTest {
@@ -30,8 +33,13 @@ class VGroupMappingControllerTest {
     private VGroupMappingController VGroupMappingController;
 
     static {
-        System.setProperty("registry.type","namingserver");
+        System.setProperty("registry.type", "namingserver");
         EnhancedServiceLoader.unloadAll();
+    }
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) throws InterruptedException {
+        System.setProperty("registry.type", "namingserver");
     }
 
     @AfterAll
