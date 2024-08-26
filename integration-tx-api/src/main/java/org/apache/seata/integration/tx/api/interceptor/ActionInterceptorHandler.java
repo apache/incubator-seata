@@ -90,7 +90,7 @@ public class ActionInterceptorHandler {
         try {
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
-            doBeforeTccPrepare(xid, branchId, actionName);
+            doBeforeTccPrepare(xid, branchId, actionName, actionContext);
             if (businessActionParam.getUseCommonFence()) {
                 try {
                     // Use common Fence, and return the business result
@@ -108,7 +108,7 @@ public class ActionInterceptorHandler {
             }
         } finally {
             try {
-                doAfterTccPrepare(xid, branchId, actionName);
+                doAfterTccPrepare(xid, branchId, actionName, actionContext);
                 //to report business action context finally if the actionContext.getUpdated() is true
                 BusinessActionContextUtil.reportContext(actionContext);
             } finally {
@@ -128,15 +128,16 @@ public class ActionInterceptorHandler {
      * @param xid          the xid
      * @param branchId     the branchId
      * @param actionName   the actionName
+     * @param context      the business action context
      */
-    private void doBeforeTccPrepare(String xid, String branchId, String actionName) {
+    private void doBeforeTccPrepare(String xid, String branchId, String actionName, BusinessActionContext context) {
         List<TccHook> hooks = TccHookManager.getHooks();
         if (hooks.isEmpty()) {
             return;
         }
         for (TccHook hook : hooks) {
             try {
-                hook.beforeTccPrepare(xid, Long.valueOf(branchId), actionName);
+                hook.beforeTccPrepare(xid, Long.valueOf(branchId), actionName, context);
             } catch (Exception e) {
                 LOGGER.error("Failed execute beforeTccPrepare in hook {}", e.getMessage(), e);
             }
@@ -148,15 +149,16 @@ public class ActionInterceptorHandler {
      * @param xid          the xid
      * @param branchId     the branchId
      * @param actionName   the actionName
+     * @param context      the business action context
      */
-    private void doAfterTccPrepare(String xid, String branchId, String actionName) {
+    private void doAfterTccPrepare(String xid, String branchId, String actionName, BusinessActionContext context) {
         List<TccHook> hooks = TccHookManager.getHooks();
         if (hooks.isEmpty()) {
             return;
         }
         for (TccHook hook : hooks) {
             try {
-                hook.afterTccPrepare(xid, Long.valueOf(branchId), actionName);
+                hook.afterTccPrepare(xid, Long.valueOf(branchId), actionName, context);
             } catch (Exception e) {
                 LOGGER.error("Failed execute afterTccPrepare in hook {}", e.getMessage(), e);
             }
