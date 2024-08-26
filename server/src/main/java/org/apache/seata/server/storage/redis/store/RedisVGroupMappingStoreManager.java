@@ -51,8 +51,13 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
         Instance instance = Instance.getInstance();
         String namespace = REDIS_PREFIX + instance.getNamespace();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.hdel(namespace, vGroup);
-            return true;
+            String currentVgroup = jedis.hget(namespace, vGroup);
+            if (StringUtils.equalsIgnoreCase(currentVgroup, instance.getClusterName())) {
+                jedis.hdel(namespace, vGroup);
+                return true;
+            } else {
+                return false;
+            }
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
