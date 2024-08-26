@@ -38,7 +38,7 @@ public class ZkConfigurationTest {
     public static void adBeforeClass() throws Exception {
         System.setProperty("config.type", "zk");
         System.setProperty("config.zk.serverAddr", "127.0.0.1:2181");
-        server = new TestingServer(2182, true);
+        server = new TestingServer(2181, true);
         server.start();
     }
 
@@ -61,7 +61,7 @@ public class ZkConfigurationTest {
         ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final boolean[] listened = {false};
-        String dataId = "mockDataId";
+        String dataId = "putMockDataId";
         zookeeperConfiguration.putConfig(dataId, "value");
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
@@ -92,7 +92,7 @@ public class ZkConfigurationTest {
         ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration();
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final boolean[] listened = {false};
-        String dataId = "mockDataId";
+        String dataId = "removeMockDataId";
         zookeeperConfiguration.putConfig(dataId, "value");
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
