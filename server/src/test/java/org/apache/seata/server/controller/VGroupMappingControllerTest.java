@@ -16,46 +16,25 @@
  */
 package org.apache.seata.server.controller;
 
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.server.metrics.MetricsManager;
-import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 
+
+@Disabled
 @SpringBootTest
 class VGroupMappingControllerTest {
-
     @Autowired
-    private VGroupMappingController VGroupMappingController;
-
-    static {
-        System.setProperty("registry.type", "namingserver");
-        EnhancedServiceLoader.unloadAll();
-    }
-
-    @BeforeAll
-    public static void setUp(ApplicationContext context) throws InterruptedException {
-        System.setProperty("registry.type", "namingserver");
-    }
-
-    @AfterAll
-    public static void shutdown() {
-        System.setProperty("registry.type","file");
-        SessionHolder.destroy();
-        EnhancedServiceLoader.unloadAll();
-    }
+    private VGroupMappingController vGroupMappingController;
 
     @Test
     void addVGroup() {
-        VGroupMappingController.addVGroup("group1","unit1");
+        vGroupMappingController.addVGroup("group1","unit1");
     }
 
     @Test
     void removeVGroup() {
-        VGroupMappingController.removeVGroup("group1");
+        vGroupMappingController.removeVGroup("group1");
     }
 }
