@@ -19,6 +19,7 @@ package org.apache.seata.namingserver.manager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -167,47 +168,38 @@ public class NamingManager {
                     return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
                         "add vGroup in new cluster failed");
                 }
+                LOGGER.info("namespace: {} add vGroup: {} in new cluster: {} successfully!", namespace, vGroup, clusterName);
             } catch (IOException e) {
                 LOGGER.warn("add vGroup in new cluster failed");
                 return new Result<>("500", "add vGroup in new cluster failed");
             }
         }
-        addGroup(namespace,clusterName,unitName,vGroup);
         return new Result<>("200", "add vGroup successfully!");
     }
 
-    public Result<String> removeGroup(String namespace, String clusterName,String vGroup, String unitName) {
-        List<Cluster> clusterList = getClusterListByVgroup(vGroup, namespace);
-        for (Cluster cluster : clusterList) {
-            if (!StringUtils.equals(clusterName, cluster.getClusterName())) {
-                continue;
-            }
-            if (cluster.getUnitData() != null && cluster.getUnitData().size() > 0) {
-                Unit unit = cluster.getUnitData().get(0);
-                if (unit != null && unit.getNamingInstanceList() != null && unit.getNamingInstanceList().size() > 0) {
-                    Node node = unit.getNamingInstanceList().get(0);
-                    String httpUrl = NamingServerConstants.HTTP_PREFIX + node.getControl().getHost()
-                        + NamingServerConstants.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
-                        + NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX;
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put(CONSTANT_GROUP, vGroup);
-                    params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
-                    Map<String, String> header = new HashMap<>();
-                    header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-                    try (CloseableHttpResponse closeableHttpResponse =
-                        HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                        if (closeableHttpResponse == null
-                            || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                            LOGGER.warn("remove vGroup in old cluster failed");
-                            return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
-                                "removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
-                        }
-                    } catch (IOException e) {
-                        LOGGER.warn("handle removing vGroup in old cluster failed");
-                        return new Result<>("500",
-                            "handle removing vGroup " + vGroup + " in old cluster " + cluster + " failed");
-                    }
+    public Result<String> removeGroup(Unit unit, String vGroup, String clusterName, String namespace, String unitName) {
+        if (unit != null && !CollectionUtils.isEmpty(unit.getNamingInstanceList())) {
+            Node node = unit.getNamingInstanceList().get(0);
+            String httpUrl = NamingServerConstants.HTTP_PREFIX + node.getControl().getHost()
+                + NamingServerConstants.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
+                + NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX;
+            HashMap<String, String> params = new HashMap<>();
+            params.put(CONSTANT_GROUP, vGroup);
+            params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
+            Map<String, String> header = new HashMap<>();
+            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
+                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    LOGGER.warn("remove vGroup in old cluster failed");
+                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                        "removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
                 }
+                LOGGER.info("namespace: {} remove vGroup: {} in new cluster: {} successfully!", namespace, vGroup,
+                    clusterName);
+            } catch (IOException e) {
+                LOGGER.warn("handle removing vGroup in old cluster failed");
+                return new Result<>("500",
+                    "handle removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
             }
         }
         return new Result<>("200", "remove group in old cluster successfully!");
@@ -248,20 +240,21 @@ public class NamingManager {
             ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
                 key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
             boolean hasChanged = clusterData.registerInstance(node, unitName);
+            Object mappingObj = node.getMetadata().get(CONSTANT_GROUP);
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
-            Optional.ofNullable(node.getMetadata().get(CONSTANT_GROUP)).ifPresent(mappingObj -> {
-                if (mappingObj instanceof Map) {
-                    Map<String, String> vGroups = (Map<String, String>) mappingObj;
+            if (mappingObj instanceof Map) {
+                Map<String, String> vGroups = (Map<String, String>)mappingObj;
+                if (!CollectionUtils.isEmpty(vGroups)) {
                     vGroups.forEach((k, v) -> {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
                         addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
                         if (hasChanged) {
-                            notifyClusterChange(k,namespace, clusterName, unitName,node.getTerm());
+                            notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
                         }
                     });
                 }
-            });
+            }
             instanceLiveTable.put(
                 new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
                 System.currentTimeMillis());
@@ -367,24 +360,26 @@ public class NamingManager {
     }
 
     public Result<String> changeGroup(String namespace, String vGroup, String clusterName, String unitName) {
-        ConcurrentMap<String, NamespaceBO> namespaceMap =
-            new ConcurrentHashMap<>(vGroupMap.get(vGroup));
+        ConcurrentMap<String, NamespaceBO> namespaceMap = new ConcurrentHashMap<>(vGroupMap.get(vGroup));
+        Set<String> currentNamespaces = namespaceMap.keySet();
+        Map<String, Set<String>> namespaceClusters = new HashMap<>();
+        for (String currentNamespace : currentNamespaces) {
+            namespaceClusters.put(currentNamespace,
+                new HashSet<>(namespaceMap.get(currentNamespace).getClusterMap().keySet()));
+        }
         createGroup(namespace, vGroup, clusterName, unitName);
         AtomicReference<Result<String>> result = new AtomicReference<>();
-        namespaceMap.forEach((currentNamespace, namespaceBO) -> namespaceBO.getClusterMap().forEach((currentCluster, clusterBO) -> {
-            for (String currentUnitName : clusterBO.getUnitNames()) {
-                if (StringUtils.isBlank(unitName)) {
-                    if (StringUtils.equalsIgnoreCase(clusterName, currentCluster)) {
-                        continue;
-                    }
-                    result.set(removeGroup(currentNamespace, currentCluster, vGroup, unitName));
-                } else {
-                    if (!StringUtils.equalsIgnoreCase(unitName, currentUnitName)) {
-                        result.set(removeGroup(currentNamespace, currentCluster, vGroup, unitName));
-                    }
-                }
+        namespaceClusters.forEach((oldNamespace, clusters) -> {
+            for (String cluster : clusters) {
+                Optional.ofNullable(namespaceClusterDataMap.get(oldNamespace))
+                    .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
+                        if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
+                            clusterData.getUnitData().forEach((unit, unitData) -> result
+                                .set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName)));
+                        }
+                    });
             }
-        }));
+        });
         return Optional.ofNullable(result.get()).orElseGet(() -> new Result<>("200", "change vGroup successfully!"));
     }
 

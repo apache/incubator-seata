@@ -24,6 +24,7 @@ import org.apache.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Map;
 
 public interface VGroupMappingStoreManager {
     /**
@@ -55,12 +56,12 @@ public interface VGroupMappingStoreManager {
      * notify mapping relationship to all namingserver nodes
      */
     default void notifyMapping() {
-
         Instance instance = Instance.getInstance();
-        instance.addMetadata("vGroup", this.readVGroups());
+        Map<String, Object> map = this.readVGroups();
+        instance.addMetadata("vGroup", map);
         try {
             InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
-            for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
+            for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }
         } catch (Exception e) {
