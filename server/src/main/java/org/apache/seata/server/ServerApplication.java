@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(scanBasePackages = {"org.apache.seata"})
 public class ServerApplication {
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException {
         // run the spring-boot application
         SpringApplication.run(ServerApplication.class, args);
     }
