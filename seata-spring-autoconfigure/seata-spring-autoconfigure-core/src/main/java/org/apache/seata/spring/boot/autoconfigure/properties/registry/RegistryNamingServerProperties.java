@@ -25,7 +25,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 @ConfigurationProperties(prefix = REGISTRY_NAMINGSERVER_PREFIX)
 public class RegistryNamingServerProperties {
     private String cluster = "default";
-    private String serverAddr = "127.0.0.1:8500";
+    private String serverAddr = "127.0.0.1:8081";
     private String namespace = "public";
 
     private int heartbeatPeriod = 5000;
