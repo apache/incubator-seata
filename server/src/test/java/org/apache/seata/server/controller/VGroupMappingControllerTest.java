@@ -16,25 +16,38 @@
  */
 package org.apache.seata.server.controller;
 
-import org.junit.jupiter.api.Disabled;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-
-@Disabled
 @SpringBootTest
-class NamingControllerTest {
+class VGroupMappingControllerTest {
+
     @Autowired
-    private NamingController namingController;
+    private VGroupMappingController VGroupMappingController;
+
+    static {
+        System.setProperty("registry.type","namingserver");
+        EnhancedServiceLoader.unloadAll();
+    }
+
+    @AfterAll
+    public static void shutdown() {
+        System.setProperty("registry.type","file");
+        SessionHolder.destroy();
+        EnhancedServiceLoader.unloadAll();
+    }
 
     @Test
     void addVGroup() {
-        namingController.addVGroup("group1","unit1");
+        VGroupMappingController.addVGroup("group1","unit1");
     }
 
     @Test
     void removeVGroup() {
-        namingController.removeVGroup("group1");
+        VGroupMappingController.removeVGroup("group1");
     }
 }
