@@ -132,11 +132,10 @@ public class NamingController {
     public void watch(@RequestParam String clientTerm,
                       @RequestParam String vGroup,
                       @RequestParam String timeout,
-                      @RequestParam String clientAddr,
                       HttpServletRequest request) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), clientAddr);
+        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), request.getRemoteAddr());
         clusterWatcherManager.registryWatcher(watcher);
     }
 
