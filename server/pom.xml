@@ -169,7 +169,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-console</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+        </dependency>
 
         <!-- for database -->
         <dependency>
