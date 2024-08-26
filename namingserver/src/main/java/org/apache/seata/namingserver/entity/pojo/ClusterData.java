@@ -42,20 +42,20 @@ public class ClusterData {
     private String clusterType;
     private final Map<String, Unit> unitData;
     
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
 
     public ClusterData() {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
     }
 
     public ClusterData(String clusterName) {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
     }
 
     public ClusterData(String clusterName, String clusterType) {
-        unitData = new ConcurrentHashMap<>(32);
+        unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
         this.clusterType = clusterType;
     }
