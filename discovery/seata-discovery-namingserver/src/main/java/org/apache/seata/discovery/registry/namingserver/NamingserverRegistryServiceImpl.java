@@ -85,7 +85,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
     private volatile long term = 0;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private ScheduledFuture<?> heartBeatScheduledFuture;
     private volatile boolean isSubscribed = false;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private String namingServerAddressCache;
@@ -152,14 +151,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
-
         instance.setTimestamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
-
-        if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
-            heartBeatScheduledFuture.cancel(false);
-        }
-
     }
 
     public void doRegister(Instance instance, List<String> urlList) {
@@ -207,11 +200,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public void unregister(InetSocketAddress address) {
-        // stop heartbeat
-
-        if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
-            heartBeatScheduledFuture.cancel(true);
-        }
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
