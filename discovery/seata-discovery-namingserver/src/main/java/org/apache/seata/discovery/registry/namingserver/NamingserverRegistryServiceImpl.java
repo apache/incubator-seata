@@ -77,10 +77,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String HTTP_PREFIX = "http://";
     private static final String TIME_OUT_KEY = "timeout";
 
-    private static final String HEART_BEAT_KEY = "heartbeat-period";
-    private static int HEARTBEAT_PERIOD = 30 * 1000;
-    private static final int HEALTHCHECK_PERIOD = 3 * 1000;
-    private static final int PULL_PERIOD = 30 * 1000;
+    private static final String HEART_BEAT_KEY    = "heartbeat-period";
+    private static int healthcheckPeriod = 5 * 1000;
+    private static final int    PULL_PERIOD       = 30 * 1000;
     private static final int LONG_POLL_TIME_OUT_PERIOD = 28 * 1000;
     private static final int THREAD_POOL_NUM = 1;
     private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
@@ -100,12 +99,11 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private NamingserverRegistryServiceImpl() {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         String heartBeatKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, HEART_BEAT_KEY);
-        HEARTBEAT_PERIOD = FILE_CONFIG.getInt(heartBeatKey, HEARTBEAT_PERIOD);
+        healthcheckPeriod = FILE_CONFIG.getInt(heartBeatKey, healthcheckPeriod);
         List<String> urlList = getNamingAddrs();
         checkAvailableNamingAddr(urlList);
-        this.executorService.scheduleAtFixedRate(() -> {
-            checkAvailableNamingAddr(urlList);
-        }, HEARTBEAT_PERIOD, HEALTHCHECK_PERIOD, TimeUnit.MILLISECONDS);
+        this.executorService.scheduleAtFixedRate(() -> checkAvailableNamingAddr(urlList), healthcheckPeriod,
+                healthcheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private void checkAvailableNamingAddr(List<String> urlList) {
