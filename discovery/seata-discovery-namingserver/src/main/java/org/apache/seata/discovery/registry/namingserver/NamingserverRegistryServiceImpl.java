@@ -79,7 +79,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     private static final String HEART_BEAT_KEY    = "heartbeat-period";
     private static int healthcheckPeriod = 5 * 1000;
-    private static final int    PULL_PERIOD       = 30 * 1000;
+    private static final int PULL_PERIOD = 30 * 1000;
     private static final int LONG_POLL_TIME_OUT_PERIOD = 28 * 1000;
     private static final int THREAD_POOL_NUM = 1;
     private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
