@@ -117,3 +117,12 @@ INSERT INTO [distributed_lock] (lock_key, lock_value, expire) VALUES ('RetryComm
 INSERT INTO [distributed_lock] (lock_key, lock_value, expire) VALUES ('RetryRollbacking', ' ', 0);
 INSERT INTO [distributed_lock] (lock_key, lock_value, expire) VALUES ('TxTimeoutCheck', ' ', 0);
 INSERT INTO [distributed_lock] (lock_key, lock_value, expire) VALUES ('UndologDelete', ' ', 0);
+
+CREATE TABLE [vgroup_table]
+(
+    [vGroup]    nvarchar(255) NOT NULL,
+    [namespace] nvarchar(255) NOT NULL,
+    [cluster]   nvarchar(255) NOT NULL,
+    PRIMARY KEY CLUSTERED ([vGroup])
+        WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+)

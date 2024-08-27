@@ -21,12 +21,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
+
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mock driver

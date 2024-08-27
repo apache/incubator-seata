@@ -39,7 +39,7 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
+        <bytebuddy.version>1.14.15</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -108,9 +108,10 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
-        <druid.version>1.2.7</druid.version>
+        <druid.version>1.2.20</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
+        <caffeine.version>2.8.8</caffeine.version>
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
@@ -125,7 +126,7 @@
 
         <!-- # for web -->
         <spring-webmvc.version>5.3.26</spring-webmvc.version>
-        <tomcat-embed.version>9.0.83</tomcat-embed.version>
+        <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
@@ -396,6 +397,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.alibaba.spring</groupId>
                 <artifactId>spring-context-support</artifactId>
                 <version>${spring-context-support.version}</version>
@@ -475,6 +481,12 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>listenablefuture</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
@@ -552,6 +564,16 @@
                 <artifactId>grpc-testing</artifactId>
                 <version>${grpc.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>

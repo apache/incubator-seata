@@ -20,5 +20,6 @@ package io.seata.config;
  * The processing configuration.
  * Notes: used for io.seata SPI interface
  */
+@Deprecated
 public interface Processor extends org.apache.seata.config.processor.Processor {
 }

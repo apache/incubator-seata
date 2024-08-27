@@ -26,33 +26,41 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       # step 2
+      - name: "Use Python 3.x"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      # step 3
       - name: "Set up Java JDK"
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      # step 3
+      # step 4
       - name: "Print maven version"
         run: ./mvnw -version
-      # step 4.1
+      # step 5.1
       - name: "Test, Check style, Check PMD, Check license with Maven and Java8"
         if: matrix.java == '8'
         run: |
           ./mvnw -T 4C clean test \
-                 -Dcheckstyle.skip=false -Dpmd.skip=false -Dlicense.skip=false \
-                 -Dmaven.git-commit-id.skip=true -DredisCaseEnabled=true \
+                 -Dcheckstyle.skip=false -Dpmd.skip=false -Dlicense.skip=false -DredisCaseEnabled=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      # step 4.2
+      # step 5.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         if: matrix.java != '8'
         run: |
           ./mvnw -T 4C clean test \
-                 -Dmaven.git-commit-id.skip=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      # step 5
+      # step 6
       - name: "Codecov"
         if: matrix.java == '8'
-        uses: codecov/codecov-action@v3.1.4
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          version: v0.6.0
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
@@ -74,13 +82,11 @@ jobs:
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
-                       apt-get install python2 -y && \
-                       python2 --version && \
-                       apt-get install make gcc g++ -y && \
                        apt-get install maven -y && \
+                       apt-get install -y python3 python3-pip python3-distutils && \
+                       apt-get install -y build-essential && \
                        mvn -version && \
                        mvn clean install \
                            -Prelease-seata \
                            -DskipTests \
-                           -Dmaven.git-commit-id.skip=true \
                            -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'

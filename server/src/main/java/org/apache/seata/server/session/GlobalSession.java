@@ -41,7 +41,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.store.SessionStorable;
@@ -204,6 +204,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean isDeadSession() {
         return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
+    }
+
+    /**
+     * prevent could not handle committing and rollbacking transaction
+     * @return time to dead session. if not greater than 0, then deadSession
+     */
+    public long timeToDeadSession() {
+        return beginTime + RETRY_DEAD_THRESHOLD - System.currentTimeMillis();
     }
 
     @Override

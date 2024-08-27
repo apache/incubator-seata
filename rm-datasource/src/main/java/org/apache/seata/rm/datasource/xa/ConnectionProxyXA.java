@@ -226,7 +226,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long now = System.currentTimeMillis();
             checkTimeout(now);
             setPrepareTime(now);
-            xaResource.prepare(xaBranchXid);
+            int prepare = xaResource.prepare(xaBranchXid);
+            // Based on the four databases: MySQL (8), Oracle (12c), Postgres (16), and MSSQL Server (2022),
+            // only Oracle has read-only optimization; the others do not provide read-only feedback.
+            // Therefore, the database type check can be eliminated here.
+            if (prepare == XAResource.XA_RDONLY) {
+                // Branch Report to TC: RDONLY
+                reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
+            }
         } catch (XAException xe) {
             // Branch Report to TC: Failed
             reportStatusToTC(BranchStatus.PhaseOne_Failed);
@@ -290,6 +297,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void cleanXABranchContext() {
+        xaEnded = false;
         branchRegisterTime = null;
         prepareTime = null;
         xaActive = false;
@@ -323,7 +331,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         // Force close the physical connection
         physicalConn.close();
-        xaEnded = false;
         rollBacked = false;
         cleanXABranchContext();
         originalConnection.close();

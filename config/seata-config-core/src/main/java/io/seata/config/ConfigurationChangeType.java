@@ -16,6 +16,10 @@
  */
 package io.seata.config;
 
+/**
+ * The enum Configuration change type.
+ */
+@Deprecated
 public enum ConfigurationChangeType {
     /**
      * Add configuration change type.

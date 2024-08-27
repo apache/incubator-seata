@@ -16,6 +16,12 @@
  */
 package io.seata.integration.tx.api.interceptor;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.common.util.CollectionUtils;
@@ -23,11 +29,6 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.tcc.api.ParamType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Extracting TCC Context from Method

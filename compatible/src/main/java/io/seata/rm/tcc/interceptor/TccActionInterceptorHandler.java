@@ -26,8 +26,18 @@ import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.common.Constants;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 
+/**
+ * The type Tcc action interceptor handler.
+ */
+@Deprecated
 public class TccActionInterceptorHandler extends org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler {
 
+    /**
+     * Instantiates a new Tcc action interceptor handler.
+     *
+     * @param targetBean     the target bean
+     * @param methodsToProxy the methods to proxy
+     */
     public TccActionInterceptorHandler(Object targetBean, Set<String> methodsToProxy) {
         super(targetBean, methodsToProxy);
         actionInterceptorHandler = new ActionInterceptorHandler();

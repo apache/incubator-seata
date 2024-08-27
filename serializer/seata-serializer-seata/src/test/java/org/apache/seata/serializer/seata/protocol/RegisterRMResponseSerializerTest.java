@@ -20,7 +20,7 @@ import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Test;
-
+import org.apache.seata.core.protocol.ProtocolConstants;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -33,7 +33,7 @@ public class RegisterRMResponseSerializerTest {
     /**
      * The Seata codec.
      */
-    SeataSerializer seataSerializer = new SeataSerializer();
+    SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
 
     /**
      * Test codec.

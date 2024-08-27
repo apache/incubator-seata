@@ -19,6 +19,7 @@ package io.seata.tm.api;
 /**
  * Role of current thread involve in a global transaction.
  */
+@Deprecated
 public enum GlobalTransactionRole {
 
     /**

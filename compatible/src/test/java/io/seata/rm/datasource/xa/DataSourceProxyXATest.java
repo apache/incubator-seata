@@ -29,15 +29,13 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
-import io.seata.rm.datasource.mock.MockDataSource;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
 
 import static org.mockito.ArgumentMatchers.any;
 

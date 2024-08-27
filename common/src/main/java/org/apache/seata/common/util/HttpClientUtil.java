@@ -17,7 +17,6 @@
 package org.apache.seata.common.util;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -52,15 +51,17 @@ public class HttpClientUtil {
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-        new PoolingHttpClientConnectionManager();
+            new PoolingHttpClientConnectionManager();
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
             try {
+                //delay 3s, make sure unregister http request send successfully
+                Thread.sleep(3000);
                 client.close();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }
         })));
@@ -88,10 +89,35 @@ public class HttpClientUtil {
                     String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
                     httpPost.setEntity(stringEntity);
-                } else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    String requestBody = objectMapper.writeValueAsString(params);
-                    StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
+                }
+            }
+            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
+            return client.execute(httpPost);
+        } catch (URISyntaxException | ClientProtocolException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    // post request
+    public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header,
+                                               int timeout) throws IOException {
+        try {
+            URIBuilder builder = new URIBuilder(url);
+            URI uri = builder.build();
+            HttpPost httpPost = new HttpPost(uri);
+            String contentType = "";
+            if (header != null) {
+                header.forEach(httpPost::addHeader);
+                contentType = header.get("Content-Type");
+            }
+            if (StringUtils.isNotBlank(contentType)) {
+                if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
+                    StringEntity stringEntity = new StringEntity(body, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(stringEntity);
                 }
             }
@@ -106,6 +132,7 @@ public class HttpClientUtil {
         }
         return null;
     }
+
 
     // get request
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,

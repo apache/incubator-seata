@@ -25,7 +25,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.server.ParameterParser;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -83,7 +83,7 @@ public class MockServer {
                     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            close();
+                            LOGGER.info("system is closing , pid info: " + ManagementFactory.getRuntimeMXBean().getName());
                         }
                     }));
                     LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());

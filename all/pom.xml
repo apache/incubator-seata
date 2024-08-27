@@ -148,6 +148,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
+            <artifactId>seata-discovery-namingserver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-brpc</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -566,11 +571,6 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

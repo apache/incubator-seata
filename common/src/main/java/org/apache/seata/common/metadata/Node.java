@@ -18,21 +18,27 @@ package org.apache.seata.common.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class Node {
 
-    Map<String, Object> metadata = new HashMap<>();
     private Endpoint control;
 
     private Endpoint transaction;
 
     private Endpoint internal;
 
+    private double weight = 1.0;
+    private boolean healthy = true;
+    private long timeStamp;
+
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;
 
     private String version;
+
+    private Map<String, Object> metadata = new HashMap<>();
 
     public Node() {}
 
@@ -96,6 +102,49 @@ public class Node {
         this.internal = internal;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(control, transaction);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Node node = (Node) o;
+        return Objects.equals(control, node.control) && Objects.equals(transaction, node.transaction);
+    }
+
+
+    // convert to String
+    public String toJsonString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"controlEndpoint\": ").append(control.toString()).append(", ");
+        sb.append("\"transactionEndpoint\": ").append(transaction.toString()).append(", ");
+        sb.append("\"weight\": ").append(weight).append(", ");
+        sb.append("\"healthy\": ").append(healthy).append(", ");
+        sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
+        sb.append("\"metadata\": {");
+
+        // handle metadata k-v map
+        int i = 0;
+        for (Map.Entry<String, Object> entry : metadata.entrySet()) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
+            i++;
+        }
+
+        sb.append("}}");
+        return sb.toString();
+    }
+
     public static class Endpoint {
 
         private String host;
@@ -107,6 +156,12 @@ public class Node {
         public Endpoint(String host, int port) {
             this.host = host;
             this.port = port;
+        }
+
+        public Endpoint(String host, int port, String protocol) {
+            this.host = host;
+            this.port = port;
+            this.protocol = protocol;
         }
 
         public String getHost() {
@@ -127,6 +182,25 @@ public class Node {
 
         public String createAddress() {
             return host + ":" + port;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(host,port,protocol);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Endpoint endpoint = (Endpoint) o;
+            return Objects.equals(endpoint.host,this.host)
+                    && Objects.equals(endpoint.port,this.port)
+                    && Objects.equals(endpoint.protocol,this.protocol);
         }
 
         @Override

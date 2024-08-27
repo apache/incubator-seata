@@ -16,16 +16,17 @@
  */
 package io.seata.saga.engine;
 
+import java.util.Map;
+
+import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.exception.ForwardInvalidException;
-import io.seata.saga.statelang.domain.StateMachineInstance;
-
-import java.util.Map;
 
 /**
  * State machine engine
  *
  */
+@Deprecated
 public interface StateMachineEngine {
 
     /**

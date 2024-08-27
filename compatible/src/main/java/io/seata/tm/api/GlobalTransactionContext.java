@@ -24,6 +24,7 @@ import io.seata.core.model.GlobalStatus;
 /**
  * GlobalTransaction API
  */
+@Deprecated
 public class GlobalTransactionContext {
 
     private GlobalTransactionContext() {

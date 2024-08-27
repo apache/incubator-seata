@@ -3,7 +3,6 @@ name: "test"
 on:
   push:
     branches: [ test*, "*.*.*" ]
-
 jobs:
   # job 1
   test:
@@ -33,28 +32,37 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       # step 2
+      - name: "Use Python 3.x"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      # step 3
       - name: "Set up Java JDK"
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      # step 3
-      ## step 3.1: for Ubuntu and MacOS
+      # step 4
+      ## step 4.1: for Ubuntu and MacOS
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
-          ./mvnw     -version;
-          ./mvnw     -T 4C clean test \
-                     -P args-for-client-test \
-                     -Dspring-boot.version=${{ matrix.springboot }} \
-                     -Dmaven.git-commit-id.skip=true \
-                     -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      ## step 3.2: for Windows
+          if [ "${{ matrix.os }}" == "macos" ]; then
+             python3 -m ensurepip --upgrade;
+             python3 -m pip install --upgrade pip setuptools;
+             if ! python3 -c "import distutils" &>/dev/null; then
+                python3 -m pip install --upgrade setuptools
+             fi
+            ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dspring-boot.version=${{ matrix.springboot }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
+      ## step 4.2: for Windows
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: matrix.os == 'windows'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -D maven.git-commit-id.skip=true -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 2
   test-springboot3x:
@@ -79,28 +87,37 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       # step 2
+      - name: "Use Python 3.x"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      # step 3
       - name: "Set up Java JDK"
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
-      # step 3
-      ## step 3.1: for Ubuntu and MacOS
+      # step 4
+      ## step 4.1: for Ubuntu and MacOS
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: matrix.os != 'windows'
         run: |
-          ./mvnw     -version;
-          ./mvnw     -T 4C clean install \
-                     -P args-for-client-test \
-                     -Dspring-boot.version=${{ matrix.springboot }} \
-                     -Dmaven.git-commit-id.skip=true \
-                     -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      ## step 3.2: for Windows
+          if [ "${{ matrix.os }}" == "macos" ]; then
+             python3 -m ensurepip --upgrade;
+             python3 -m pip install --upgrade pip setuptools;
+             if ! python3 -c "import distutils" &>/dev/null; then
+                python3 -m pip install --upgrade setuptools
+             fi
+            ./mvnw -T 4C clean test -P args-for-client-test  -P arrch64 -Dspring-boot.version=${{ matrix.springboot }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean test -P args-for-client-test -Dspring-boot.version=${{ matrix.springboot }} -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
+      ## step 4.2: for Windows
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: matrix.os == 'windows'
         run: | # Skip tests, because too many errors in unit-test.
           ./mvnw.cmd -version;
-          ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -D maven.git-commit-id.skip=true -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
   # job 3
   test-arm64:
@@ -134,10 +151,11 @@ jobs:
             arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
+                       apt-get install -y python3 python3-pip python3-distutils && \
+                       apt-get install -y build-essential && \
                        mvn -version && \
                        mvn -T 4C clean install \
                            -Dspring-boot.version=${{ matrix.springboot }} \
                            -Prelease-seata \
                            -DskipTests \
-                           -Dmaven.git-commit-id.skip=true \
                            -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
