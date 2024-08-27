@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -77,7 +76,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String HTTP_PREFIX = "http://";
     private static final String TIME_OUT_KEY = "timeout";
 
-    private static final String HEART_BEAT_KEY    = "heartbeat-period";
+    private static final String HEART_BEAT_KEY = "heartbeat-period";
     private static int healthcheckPeriod = 5 * 1000;
     private static final int PULL_PERIOD = 30 * 1000;
     private static final int LONG_POLL_TIME_OUT_PERIOD = 28 * 1000;
