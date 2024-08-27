@@ -136,11 +136,7 @@ public class ActionInterceptorHandler {
             return;
         }
         for (TccHook hook : hooks) {
-            try {
-                hook.beforeTccPrepare(xid, Long.valueOf(branchId), actionName, context);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute beforeTccPrepare in hook {}", e.getMessage(), e);
-            }
+            hook.beforeTccPrepare(xid, Long.valueOf(branchId), actionName, context);
         }
     }
 
@@ -157,11 +153,7 @@ public class ActionInterceptorHandler {
             return;
         }
         for (TccHook hook : hooks) {
-            try {
-                hook.afterTccPrepare(xid, Long.valueOf(branchId), actionName, context);
-            } catch (Exception e) {
-                LOGGER.error("Failed execute afterTccPrepare in hook {}", e.getMessage(), e);
-            }
+            hook.afterTccPrepare(xid, Long.valueOf(branchId), actionName, context);
         }
     }
 
