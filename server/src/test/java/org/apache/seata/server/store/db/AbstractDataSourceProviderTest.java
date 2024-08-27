@@ -35,6 +35,8 @@ public class AbstractDataSourceProviderTest {
 
     private final String hikariDatasourceType = "hikari";
 
+    private final String mysqlJdbcDriver = "com.mysql.jdbc.Driver";
+
     @Test
     public void testDbcpDataSourceProvider() {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
@@ -51,5 +53,12 @@ public class AbstractDataSourceProviderTest {
     public void testHikariDataSourceProvider() {
         DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType).provide();
         Assertions.assertNotNull(dataSource);
+    }
+
+    @Test
+    public void testMySQLDataSourceProvider() throws ClassNotFoundException {
+        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        Class<?> driverClass = Class.forName(mysqlJdbcDriver, true, classLoader);
+        Assertions.assertNotNull(driverClass);
     }
 }
