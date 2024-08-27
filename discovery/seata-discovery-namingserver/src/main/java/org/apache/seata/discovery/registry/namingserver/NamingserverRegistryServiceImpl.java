@@ -385,9 +385,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 term = metaResponse.getTerm();
             }
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
-            removeOfflineAddressesIfNecessary(vGroup, newAddressList);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             throw new RemoteException();
         }
 
