@@ -79,7 +79,7 @@
     "@alicloud/console-components-app-layout": "^1.1.4",
     "@alicloud/console-components-console-menu": "^1.2.12",
     "@babel/traverse": "^7.23.7",
-    "axios": "^1.6.6",
+    "axios": "^1.7.4",
     "browserify-sign": "^4.2.2",
     "decode-uri-component": "^0.4.1",
     "history": "^4.10.1",
