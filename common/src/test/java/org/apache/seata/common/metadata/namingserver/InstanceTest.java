@@ -37,8 +37,9 @@ class InstanceTest {
         mmap.put("k","v");
         map.put("k",mmap);
         instance.setMetadata(map);
-        instance.setControlEndpoint(new Node.Endpoint("1.1.1.1",888));
-        instance.setTransactionEndpoint(new Node.Endpoint("2.2.2.2",999));
+        instance.setControl(new Node.Endpoint("1.1.1.1",888));
+        instance.setTransaction(new Node.Endpoint("2.2.2.2",999));
+        System.out.println(instance.toJsonString());
         assertEquals(instance.toJsonString(),objectMapper.writeValueAsString(instance));
     }
 }

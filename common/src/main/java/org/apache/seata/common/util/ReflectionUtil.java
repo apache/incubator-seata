@@ -90,6 +90,21 @@ public final class ReflectionUtil {
     }
 
     /**
+     * Is class present boolean.
+     *
+     * @param className the class name
+     * @return boolean true if the class is present
+     */
+    public static boolean isClassPresent(String className) {
+        try {
+            Class.forName(className, false, Thread.currentThread().getContextClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * Get the wrapped class
      *
      * @param clazz the class

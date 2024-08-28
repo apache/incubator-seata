@@ -34,7 +34,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.seata.common.ConfigurationKeys.MAPPING_TABLE_NAME;
+import static org.apache.seata.common.ConfigurationKeys.VGROUP_TABLE_NAME;
 import static org.apache.seata.common.ConfigurationKeys.REGISTRY_NAMINGSERVER_CLUSTER;
 import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPING;
 
@@ -42,7 +42,7 @@ import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPI
 public class VGroupMappingDataBaseDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(VGroupMappingDataBaseDAO.class);
 
-    protected DataSource vGroupMappingDataSource = null;
+    protected DataSource vGroupMappingDataSource;
 
     protected final String vMapping;
 
@@ -50,11 +50,10 @@ public class VGroupMappingDataBaseDAO {
 
     public VGroupMappingDataBaseDAO(DataSource vGroupMappingDataSource) {
         this.vGroupMappingDataSource = vGroupMappingDataSource;
-        this.vMapping = CONFIG.getConfig(MAPPING_TABLE_NAME, DEFAULT_VGROUP_MAPPING);
+        this.vMapping = CONFIG.getConfig(VGROUP_TABLE_NAME, DEFAULT_VGROUP_MAPPING);
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {
-        clearMappingDOByVGroup(mappingDO.getVGroup());
         String sql = "INSERT INTO " + vMapping + " (vgroup,namespace, cluster) VALUES (?, ?, ?)";
         Connection conn = null;
         PreparedStatement ps = null;
@@ -99,13 +98,12 @@ public class VGroupMappingDataBaseDAO {
         PreparedStatement ps = null;
         try {
             conn = vGroupMappingDataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, vGroup);
             ps.setString(2, instance.getClusterName());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new SeataRuntimeException(ErrorCode.ERROR_SQL,e);
+            throw new SeataRuntimeException(ErrorCode.ERROR_SQL, e);
         } finally {
             IOUtil.close(ps, conn);
         }
