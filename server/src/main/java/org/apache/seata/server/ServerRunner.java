@@ -19,6 +19,7 @@ package org.apache.seata.server;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.annotation.Resource;
 import org.apache.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +54,14 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
         DISPOSABLE_LIST.add(disposable);
     }
 
+    @Resource
+    Server seataServer;
+
     @Override
     public void run(String... args) {
         try {
             long start = System.currentTimeMillis();
-            Server.start(args);
+            seataServer.start(args);
             started = true;
 
             long cost = System.currentTimeMillis() - start;
