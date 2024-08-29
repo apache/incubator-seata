@@ -24,17 +24,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Disabled
 @SpringBootTest
-class NamingControllerTest {
+class VGroupMappingControllerTest {
     @Autowired
-    private NamingController namingController;
+    private VGroupMappingController vGroupMappingController;
 
     @Test
     void addVGroup() {
-        namingController.addVGroup("group1","unit1");
+        vGroupMappingController.addVGroup("group1","unit1");
     }
 
     @Test
     void removeVGroup() {
-        namingController.removeVGroup("group1");
+        vGroupMappingController.removeVGroup("group1");
     }
 }
