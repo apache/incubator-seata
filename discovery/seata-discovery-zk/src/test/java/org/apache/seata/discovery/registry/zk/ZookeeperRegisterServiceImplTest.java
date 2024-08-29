@@ -136,6 +136,7 @@ public class ZookeeperRegisterServiceImplTest {
     @Test
     public void testRemovePreventEmptyPushCase() {
         Map<String, List<InetSocketAddress>> addresses = service.CURRENT_ADDRESS_MAP.computeIfAbsent("default_tx_group", k -> new HashMap<>());
+
         addresses.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
 
         service.removeOfflineAddressesIfNecessary("default_tx_group", "cluster", Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
