@@ -51,16 +51,16 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_E
 @Component("serverInstance")
 public class ServerInstance {
     @Resource
-    private static RegistryProperties registryProperties;
+    private RegistryProperties registryProperties;
 
     protected static volatile ScheduledExecutorService EXECUTOR_SERVICE;
 
     @Resource
-    private static RegistryNamingServerProperties registryNamingServerProperties;
+    private RegistryNamingServerProperties registryNamingServerProperties;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    public static void serverInstanceInit() {
+    public void serverInstanceInit() {
         VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         if (StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
             EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
