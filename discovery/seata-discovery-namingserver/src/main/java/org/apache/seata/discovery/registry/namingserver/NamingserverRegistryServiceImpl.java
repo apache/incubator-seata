@@ -19,12 +19,13 @@ package org.apache.seata.discovery.registry.namingserver;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,6 +51,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -399,6 +401,31 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             namespace = DEFAULT_NAMESPACE;
         }
         return namespace;
+    }
+
+    @Override
+    public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+                k -> new ConcurrentHashMap<>());
+
+        List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(transactionServiceGroup);
+        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
+            return inetSocketAddresses;
+        }
+
+        // fall back to addresses of any cluster
+        return clusterAddressMap.values().stream().filter(CollectionUtils::isNotEmpty)
+                .findAny().orElse(Collections.emptyList());
+    }
+
+    @Override
+    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
+                                                      List<InetSocketAddress> aliveAddress) {
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+                key -> new ConcurrentHashMap<>());
+
+
+        return clusterAddressMap.put(transactionServiceGroup, aliveAddress);
     }
 
 

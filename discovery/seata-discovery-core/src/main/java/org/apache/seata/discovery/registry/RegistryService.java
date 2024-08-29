@@ -130,7 +130,8 @@ public interface RegistryService<T> {
         }
 
         // fall back to addresses of any cluster
-        return clusterAddressMap.values().stream().findAny().orElse(Collections.emptyList());
+        return clusterAddressMap.values().stream().filter(CollectionUtils::isNotEmpty)
+                .findAny().orElse(Collections.emptyList());
     }
 
     default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
@@ -165,7 +166,10 @@ public interface RegistryService<T> {
                 .stream().filter(newAddressed::contains).collect(
                         Collectors.toList());
 
-        clusterAddressMap.put(clusterName, inetSocketAddresses);
+        // prevent empty update
+        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
+            clusterAddressMap.put(clusterName, inetSocketAddresses);
+        }
     }
 
 }
