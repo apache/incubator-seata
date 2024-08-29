@@ -160,7 +160,7 @@ public interface RegistryService<T> {
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService,
             key -> new ConcurrentHashMap<>());
 
-        List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, new ArrayList<>());
+        List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, Collections.emptyList());
 
         List<InetSocketAddress> inetSocketAddresses = currentAddresses
                 .stream().filter(newAddressed::contains).collect(
