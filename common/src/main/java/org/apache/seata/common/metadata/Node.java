@@ -16,6 +16,9 @@
  */
 package org.apache.seata.common.metadata;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -122,27 +125,12 @@ public class Node {
 
     // convert to String
     public String toJsonString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("\"controlEndpoint\": ").append(control.toString()).append(", ");
-        sb.append("\"transactionEndpoint\": ").append(transaction.toString()).append(", ");
-        sb.append("\"weight\": ").append(weight).append(", ");
-        sb.append("\"healthy\": ").append(healthy).append(", ");
-        sb.append("\"timeStamp\": ").append(timeStamp).append(", ");
-        sb.append("\"metadata\": {");
-
-        // handle metadata k-v map
-        int i = 0;
-        for (Map.Entry<String, Object> entry : metadata.entrySet()) {
-            if (i > 0) {
-                sb.append(", ");
-            }
-            sb.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\"");
-            i++;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-
-        sb.append("}}");
-        return sb.toString();
     }
 
     public static class Endpoint {
