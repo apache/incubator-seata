@@ -18,9 +18,7 @@ package org.apache.seata.discovery.registry.zk;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -128,18 +126,21 @@ public class ZookeeperRegisterServiceImplTest {
 
     @Test
     public void testRemoveOfflineAddressesIfNecessaryNoRemoveCase() {
-        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
-        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        Map<String, List<InetSocketAddress>> addresses = service.CURRENT_ADDRESS_MAP.computeIfAbsent("default_tx_group", k -> new HashMap<>());
+        addresses.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        service.removeOfflineAddressesIfNecessary("default_tx_group","cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
 
-        Assertions.assertEquals(1, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+        Assertions.assertEquals(1, service.CURRENT_ADDRESS_MAP.get("default_tx_group").get("cluster").size());
     }
 
     @Test
     public void testRemoveOfflineAddressesIfNecessaryRemoveCase() {
-        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
-        service.removeOfflineAddressesIfNecessary("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+        Map<String, List<InetSocketAddress>> addresses = service.CURRENT_ADDRESS_MAP.computeIfAbsent("default_tx_group", k -> new HashMap<>());
+        addresses.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
 
-        Assertions.assertEquals(0, service.CURRENT_ADDRESS_MAP.get("cluster").size());
+        service.removeOfflineAddressesIfNecessary("default_tx_group", "cluster", Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
+
+        Assertions.assertEquals(0, service.CURRENT_ADDRESS_MAP.get("default_tx_group").get("cluster").size());
     }
 
     @Test
@@ -148,7 +149,8 @@ public class ZookeeperRegisterServiceImplTest {
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
 
-        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
+        Map<String, List<InetSocketAddress>> addresses = service.CURRENT_ADDRESS_MAP.computeIfAbsent("default_tx_group", k -> new HashMap<>());
+        addresses.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
         List<InetSocketAddress> result = service.aliveLookup("default_tx_group");
 
         Assertions.assertEquals(result, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
@@ -161,12 +163,11 @@ public class ZookeeperRegisterServiceImplTest {
         System.setProperty("txServiceGroup", "default_tx_group");
         System.setProperty("service.vgroupMapping.default_tx_group", "cluster");
 
-        service.CURRENT_ADDRESS_MAP.put("cluster", Collections.singletonList(new InetSocketAddress("127.0.0.1", 8091)));
 
         service.refreshAliveLookup("default_tx_group",
                 Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
 
-        Assertions.assertEquals(service.CURRENT_ADDRESS_MAP.get("cluster"),
+        Assertions.assertEquals(service.CURRENT_ADDRESS_MAP.get("default_tx_group").get("cluster"),
                 Collections.singletonList(new InetSocketAddress("127.0.0.2", 8091)));
     }
 }

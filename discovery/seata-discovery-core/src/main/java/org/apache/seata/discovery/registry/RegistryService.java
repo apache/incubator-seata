@@ -16,6 +16,9 @@
  */
 package org.apache.seata.discovery.registry;
 
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.config.ConfigurationFactory;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,8 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import org.apache.seata.config.ConfigurationFactory;
 
 /**
  * The interface Registry service.
@@ -54,7 +55,7 @@ public interface RegistryService<T> {
     /**
      * Service node health check
      */
-    Map<String,List<InetSocketAddress>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
+    Map<String, Map<String, List<InetSocketAddress>>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
     /**
      * Register.
      *
@@ -119,12 +120,28 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        return CURRENT_ADDRESS_MAP.computeIfAbsent(getServiceGroup(transactionServiceGroup), k -> new ArrayList<>());
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+                k -> new ConcurrentHashMap<>());
+
+        String clusterName = getServiceGroup(transactionServiceGroup);
+        List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(clusterName);
+        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
+            return inetSocketAddresses;
+        }
+
+        // fall back to addresses of any cluster
+        return clusterAddressMap.values().stream().findAny().orElse(Collections.emptyList());
     }
 
     default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
         List<InetSocketAddress> aliveAddress) {
-        return CURRENT_ADDRESS_MAP.put(getServiceGroup(transactionServiceGroup), aliveAddress);
+
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+                key -> new ConcurrentHashMap<>());
+
+        String clusterName = getServiceGroup(transactionServiceGroup);
+
+        return clusterAddressMap.put(clusterName, aliveAddress);
     }
 
 
@@ -137,15 +154,18 @@ public interface RegistryService<T> {
      * @param clusterName
      * @param newAddressed
      */
-    default void removeOfflineAddressesIfNecessary(String clusterName, Collection<InetSocketAddress> newAddressed) {
+    default void removeOfflineAddressesIfNecessary(String transactionGroupService, String clusterName, Collection<InetSocketAddress> newAddressed) {
 
-        List<InetSocketAddress> currentAddresses = CURRENT_ADDRESS_MAP.getOrDefault(clusterName, Collections.emptyList());
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService,
+                key -> new ConcurrentHashMap<>());
+
+        List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, new ArrayList<>());
 
         List<InetSocketAddress> inetSocketAddresses = currentAddresses
                 .stream().filter(newAddressed::contains).collect(
                         Collectors.toList());
 
-        CURRENT_ADDRESS_MAP.put(clusterName, inetSocketAddresses);
+        clusterAddressMap.put(clusterName, inetSocketAddresses);
     }
 
 }

@@ -74,6 +74,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static final long KEY_TTL = 5L;
     private static final long KEY_REFRESH_PERIOD = 2000L;
 
+    private String transactionServiceGroup;
+
     private ScheduledExecutorService threadPoolExecutorForSubscribe = new ScheduledThreadPoolExecutor(1,
             new NamedThreadFactory("RedisRegistryService-subscribe", 1));
     private ScheduledExecutorService threadPoolExecutorForUpdateMap = new ScheduledThreadPoolExecutor(1,
@@ -219,6 +221,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) {
+        transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -280,7 +283,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
         socketAddresses.remove(inetSocketAddress);
 
-        removeOfflineAddressesIfNecessary(notifyCluserName, socketAddresses);
+        removeOfflineAddressesIfNecessary(transactionServiceGroup, notifyCluserName, socketAddresses);
     }
 
     @Override

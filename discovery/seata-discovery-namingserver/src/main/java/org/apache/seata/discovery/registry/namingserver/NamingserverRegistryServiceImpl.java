@@ -16,7 +16,6 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
@@ -41,22 +40,22 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -320,17 +319,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     public void unsubscribe(String vGroup) throws Exception {
         LISTENER_SERVICE_MAP.remove(vGroup);
         isSubscribed = false;
-    }
-
-    @Override
-    public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ArrayList<>());
-    }
-
-    @Override
-    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-                                                      List<InetSocketAddress> aliveAddress) {
-        return CURRENT_ADDRESS_MAP.put(transactionServiceGroup, aliveAddress);
     }
 
     /**
