@@ -121,7 +121,7 @@ public interface RegistryService<T> {
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-                k -> new ConcurrentHashMap<>());
+            k -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
         List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(clusterName);
@@ -138,7 +138,7 @@ public interface RegistryService<T> {
         List<InetSocketAddress> aliveAddress) {
 
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
 
@@ -158,7 +158,7 @@ public interface RegistryService<T> {
     default void removeOfflineAddressesIfNecessary(String transactionGroupService, String clusterName, Collection<InetSocketAddress> newAddressed) {
 
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
 
         List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, new ArrayList<>());
 

@@ -406,7 +406,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     @Override
     public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-                k -> new ConcurrentHashMap<>());
+            k -> new ConcurrentHashMap<>());
 
         List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(transactionServiceGroup);
         if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
@@ -422,7 +422,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
                                                       List<InetSocketAddress> aliveAddress) {
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-                key -> new ConcurrentHashMap<>());
+            key -> new ConcurrentHashMap<>());
 
 
         return clusterAddressMap.put(transactionServiceGroup, aliveAddress);
