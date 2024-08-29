@@ -57,12 +57,6 @@ public class Server {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     @Resource
-    RegistryNamingServerProperties registryNamingServerProperties;
-
-    @Resource
-    RegistryProperties registryProperties;
-
-    @Resource
     ServerInstance serverInstance;
 
     /**

@@ -43,6 +43,8 @@ public class Node {
 
     private Map<String, Object> metadata = new HashMap<>();
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     public Node() {}
 
     public Endpoint createEndpoint(String host, int port, String protocol) {
@@ -125,7 +127,6 @@ public class Node {
 
     // convert to String
     public String toJsonString() {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {

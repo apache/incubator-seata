@@ -85,16 +85,6 @@ public class NamingServerNode extends Node {
         return otherNode.term > term;
     }
 
-    // convert to String
-    public String toJsonString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void setWeight(double weight) {
         this.weight = weight;
     }

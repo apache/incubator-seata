@@ -41,7 +41,7 @@ public class Instance {
     private long timestamp;
     private ClusterRole role = ClusterRole.MEMBER;
     private Map<String, Object> metadata = new HashMap<>();
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Instance() {
     }
@@ -164,7 +164,6 @@ public class Instance {
 
     // Recursively convert metadata to JSON
     public String toJsonString() {
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
