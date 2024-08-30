@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common.metadata.namingserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.Node;
 
 import java.util.Objects;

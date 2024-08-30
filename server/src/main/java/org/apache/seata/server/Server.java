@@ -35,8 +35,6 @@ import org.apache.seata.server.instance.ServerInstance;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
