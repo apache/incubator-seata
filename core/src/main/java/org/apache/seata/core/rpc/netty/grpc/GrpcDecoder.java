@@ -53,7 +53,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
             int messageId = grpcMessageProto.getId();
             byte[] byteArray = body.toByteArray();
 
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte) 0);
             Object messageBody = serializer.deserialize(byteArray);
 
             RpcMessage rpcMsg = new RpcMessage();

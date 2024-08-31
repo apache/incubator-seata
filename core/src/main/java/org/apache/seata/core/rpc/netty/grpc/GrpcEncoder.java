@@ -43,7 +43,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
         }
 
-        Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+        Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte) 0);
         Any messageBody = Any.parseFrom(serializer.serialize(body));
         GrpcMessageProto grpcMessageProto = GrpcMessageProto.newBuilder()
                 .setBody(messageBody)
