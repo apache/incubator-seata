@@ -44,27 +44,10 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <configuration>
-                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
+                    <protoSourceRoot>${project.basedir}/src/test/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
                     </protocArtifact>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <configuration>
-                    <protocArtifact>
-                        com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
-                    </protocArtifact>
-                    <pluginId>grpc-java</pluginId>
                     <pluginArtifact>
                         io.grpc:protoc-gen-grpc-java:1.27.1:exe:${os.detected.classifier}
                     </pluginArtifact>
@@ -73,7 +56,6 @@
                     <execution>
                         <goals>
                             <goal>compile</goal>
-                            <goal>compile-custom</goal>
                         </goals>
                     </execution>
                 </executions>
