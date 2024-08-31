@@ -374,7 +374,6 @@
                         <artifactId>p3c-pmd</artifactId>
                         <version>${p3c-pmd.version}</version>
                     </dependency>
-                    
                 </dependencies>
             </plugin>
             <!-- JaCoCo -->
