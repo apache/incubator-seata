@@ -16,36 +16,51 @@
  */
 package org.apache.seata.server.console.controller;
 
-import javax.annotation.Resource;
-
-import org.apache.seata.common.result.PageResult;
+import com.alibaba.fastjson.JSON;
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.console.param.GlobalLockParam;
-import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.apache.seata.server.console.param.ParamUtil.*;
 
 
 /**
  * Global Lock Controller
  */
-@RestController
-@RequestMapping("/api/v1/console/globalLock")
-public class GlobalLockController {
+@Component
+public class GlobalLockController implements HttpController {
 
     @Resource(type = GlobalLockService.class)
     private GlobalLockService globalLockService;
 
-    /**
-     * Query locks by param
-     * @param param the param
-     * @return the list of GlobalLockVO
-     */
-    @GetMapping("query")
-    public PageResult<GlobalLockVO> query(@ModelAttribute GlobalLockParam param) {
-        return globalLockService.query(param);
+    @Override
+    public Set<String> getPath() {
+        return new HashSet<String>() {{
+            add("/api/v1/console/globalLock");
+        }};
     }
 
+    @Override
+    public String handle(String path, Map<String, List<String>> paramMap) {
+        GlobalLockParam globalLockParam = new GlobalLockParam();
+        globalLockParam.setBranchId(getStringParam(paramMap, "branchId"));
+        globalLockParam.setPk(getStringParam(paramMap, "pk"));
+        globalLockParam.setTableName(getStringParam(paramMap, "tableName"));
+        globalLockParam.setTransactionId(getStringParam(paramMap, "transactionId"));
+        globalLockParam.setXid(getStringParam(paramMap, "xid"));
+        globalLockParam.setResourceId(getStringParam(paramMap, "resourceId"));
+        globalLockParam.setPageNum(getIntParam(paramMap, "pageNum"));
+        globalLockParam.setPageSize(getIntParam(paramMap, "pageSize"));
+        globalLockParam.setTimeEnd(getLongParam(paramMap, "timeEnd"));
+        globalLockParam.setTimeStart(getLongParam(paramMap, "timeStart"));
+
+        return JSON.toJSONString(globalLockService.query(globalLockParam));
+    }
 }

@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
@@ -164,7 +165,7 @@ public class Server {
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
         ConfigurableListableBeanFactory beanFactory =
-                ((GenericWebApplicationContext) ObjectHolder.INSTANCE
+                ((AnnotationConfigApplicationContext) ObjectHolder.INSTANCE
                         .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         if (coordinator instanceof ApplicationListener) {

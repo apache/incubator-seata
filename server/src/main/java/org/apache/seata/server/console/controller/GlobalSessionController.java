@@ -16,35 +16,45 @@
  */
 package org.apache.seata.server.console.controller;
 
-import javax.annotation.Resource;
-
+import com.alibaba.fastjson.JSON;
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.console.param.GlobalSessionParam;
-import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.apache.seata.server.console.service.GlobalSessionService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-/**
- * Global Session Controller
- */
-@RestController
-@RequestMapping("/api/v1/console/globalSession")
-public class GlobalSessionController {
+import javax.annotation.Resource;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import static org.apache.seata.server.console.param.ParamUtil.*;
+
+@Component
+public class GlobalSessionController implements HttpController {
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;
 
-    /**
-     * Query all globalSession
-     * @param param param for query globalSession
-     * @return  the list of GlobalSessionVO
-     */
-    @GetMapping("query")
-    public PageResult<GlobalSessionVO> query(@ModelAttribute GlobalSessionParam param) {
-        return globalSessionService.query(param);
+    @Override
+    public Set<String> getPath() {
+        return new HashSet<String>() {{
+            add("/api/v1/console/globalSession");
+        }};
     }
 
+    @Override
+    public String handle(String path, Map<String, List<String>> paramMap) {
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setXid(getStringParam(paramMap, "xid"));
+        param.setApplicationId(getStringParam(paramMap, "applicationId"));
+        param.setStatus(getIntParam(paramMap, "status"));
+        param.setTransactionName(getStringParam(paramMap, "transactionName"));
+        param.setWithBranch(getBooleanParam(paramMap, "withBranch"));
+        param.setPageSize(getIntParam(paramMap, "pageSize"));
+        param.setPageNum(getIntParam(paramMap, "pageNum"));
+        param.setTimeEnd(getLongParam(paramMap, "timeEnd"));
+        param.setTimeStart(getLongParam(paramMap, "timeStart"));
+
+        return JSON.toJSONString(globalSessionService.query(param));
+    }
 }
