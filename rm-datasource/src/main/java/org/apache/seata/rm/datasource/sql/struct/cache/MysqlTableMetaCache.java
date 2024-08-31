@@ -50,9 +50,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         cacheKey.append(".");
         //original: remove single quote and separate it to catalogName and tableName
         //now: Use the original table name to avoid cache errors of tables with the same name across databases
-        String defaultTableName = tableName.replace("`", "");
+        String defaultTableName = ColumnUtils.delEscape(tableName, JdbcConstants.MYSQL);
 
-        DatabaseMetaData databaseMetaData = null;
+        DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
