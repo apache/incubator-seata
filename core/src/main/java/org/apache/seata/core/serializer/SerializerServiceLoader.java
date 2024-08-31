@@ -56,6 +56,7 @@ public final class SerializerServiceLoader {
     }
 
     private static final String PROTOBUF_SERIALIZER_CLASS_NAME = "org.apache.seata.serializer.protobuf.ProtobufSerializer";
+    private static final boolean CONTAINS_PROTOBUF_DEPENDENCY = ReflectionUtil.isClassPresent(PROTOBUF_SERIALIZER_CLASS_NAME);
 
     /**
      * Load the service of {@link Serializer}
@@ -65,14 +66,12 @@ public final class SerializerServiceLoader {
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static Serializer load(SerializerType type, byte version) throws EnhancedServiceNotFoundException {
-        if (type == SerializerType.PROTOBUF) {
-            try {
-                ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
-            } catch (ClassNotFoundException e) {
-                throw new EnhancedServiceNotFoundException("'ProtobufSerializer' not found. " +
-                        "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency ", e);
-            }
+        // The following code is only used to kindly prompt users to add missing dependencies.
+        if (type == SerializerType.PROTOBUF && !CONTAINS_PROTOBUF_DEPENDENCY) {
+            throw new EnhancedServiceNotFoundException("The class '" + PROTOBUF_SERIALIZER_CLASS_NAME + "' not found. " +
+                    "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency.");
         }
+
 
         String key = serializerKey(type, version);
         Serializer serializer = SERIALIZER_MAP.get(key);
@@ -82,6 +81,33 @@ public final class SerializerServiceLoader {
             } else {
                 serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
             }
+            SERIALIZER_MAP.put(key, serializer);
+        }
+        return serializer;
+    }
+
+    /**
+     * Load the service of {@link Serializer}
+     *
+     * @param type the serializer type
+     * @return the service of {@link Serializer}
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
+     */
+    public static Serializer load(SerializerType type) throws EnhancedServiceNotFoundException {
+        if (type == SerializerType.PROTOBUF) {
+            try {
+                ReflectionUtil.getClassByName(PROTOBUF_SERIALIZER_CLASS_NAME);
+            } catch (ClassNotFoundException e) {
+                throw new EnhancedServiceNotFoundException("'ProtobufSerializer' not found. " +
+                        "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency ", e);
+            }
+        }
+
+        String key = type.name();
+        Serializer serializer = SERIALIZER_MAP.get(key);
+        if (serializer == null) {
+            serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+
             SERIALIZER_MAP.put(key, serializer);
         }
         return serializer;
