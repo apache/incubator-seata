@@ -53,6 +53,7 @@ public interface StarterConstants {
     String REGISTRY_REDIS_PREFIX = REGISTRY_PREFIX + ".redis";
     String REGISTRY_ZK_PREFIX = REGISTRY_PREFIX + ".zk";
     String REGISTRY_CONSUL_PREFIX = REGISTRY_PREFIX + ".consul";
+    String REGISTRY_NAMINGSERVER_PREFIX = REGISTRY_PREFIX + ".namingserver";
     String REGISTRY_ETCD3_PREFIX = REGISTRY_PREFIX + ".etcd3";
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
     String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
@@ -97,4 +98,5 @@ public interface StarterConstants {
     String SPECIAL_KEY_GROUPLIST = "grouplist";
     String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
+
 }
