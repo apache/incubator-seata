@@ -164,7 +164,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String namespace = instance.getNamespace();
             String clusterName = instance.getClusterName();
             String unit = instance.getUnit();
-            String jsonBody = instance.toJsonString();
+            String jsonBody = instance.toJsonString(OBJECT_MAPPER);
             String params = "namespace=" + namespace + "&clusterName=" + clusterName + "&unit=" + unit;
             url += params;
             Map<String, String> header = new HashMap<>();
@@ -205,7 +205,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         for (String urlSuffix : getNamingAddrs()) {
             String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister?";
             String unit = instance.getUnit();
-            String jsonBody = instance.toJsonString();
+            String jsonBody = instance.toJsonString(OBJECT_MAPPER);
             String params = "unit=" + unit;
             params = params + "&clusterName=" + instance.getClusterName();
             params = params + "&namespace=" + instance.getNamespace();
