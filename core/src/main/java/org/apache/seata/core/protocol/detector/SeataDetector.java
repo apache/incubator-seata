@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandler;
 import org.apache.seata.core.rpc.netty.MultiProtocolDecoder;
 
 public class SeataDetector implements ProtocolDetector {
-    private final byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
+    private static final byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
     private ChannelHandler[] serverHandlers;
 
     public SeataDetector(ChannelHandler[] serverHandlers) {

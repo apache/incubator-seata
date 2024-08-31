@@ -40,7 +40,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        if (!(msg instanceof RpcMessage)){
+        if (!(msg instanceof RpcMessage)) {
             throw new UnsupportedOperationException("GrpcEncoder not support class:" + msg.getClass());
         }
 
