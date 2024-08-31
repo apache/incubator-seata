@@ -17,12 +17,18 @@
 package org.apache.seata.core.protocol;
 
 /**
- *
+ * seata transport protocol
  */
 public enum Protocol {
 
+    /**
+     * grpc
+     */
     GPRC("grpc"),
 
+    /**
+     * seata
+     */
     SEATA("seata");
 
     public final String value;
