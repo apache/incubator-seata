@@ -73,7 +73,6 @@ public class TccHookTest {
         Map<String, Resource> tccResourceCache = new ConcurrentHashMap<>();
         tccResourceCache.put(actionName, tccResource);
         setPrivateField(tccResourceManagerObject, "tccResourceCache", tccResourceCache);
-        tccResourceManagerObject.registerResource();
         tccResourceManager = Mockito.spy(tccResourceManagerObject);
     }
 
