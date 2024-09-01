@@ -57,7 +57,7 @@
                 <configuration>
                     <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
                     <protocArtifact>
-                        com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
+                        com.google.protobuf:protoc:3.22.3:exe:${os.detected.classifier}
                     </protocArtifact>
                 </configuration>
                 <executions>
@@ -70,4 +70,34 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Profile for x86 architecture -->
+        <profile>
+            <id>x86_64</id>
+            <activation>
+                <property>
+                    <name>os.arch</name>
+                    <value>x86_64</value>
+                </property>
+            </activation>
+            <properties>
+                <os.detected.classifier>osx-x86_64</os.detected.classifier>
+            </properties>
+        </profile>
+
+        <!-- Since there is no ARM version of protobuf, the x86 version is used forcibly. -->
+        <profile>
+            <id>aarch64</id>
+            <activation>
+                <property>
+                    <name>os.arch</name>
+                    <value>aarch64</value>
+                </property>
+            </activation>
+            <properties>
+                <os.detected.classifier>osx-x86_64</os.detected.classifier>
+            </properties>
+        </profile>
+    </profiles>
 </project>
