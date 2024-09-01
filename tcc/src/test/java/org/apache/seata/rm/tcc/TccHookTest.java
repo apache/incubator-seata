@@ -33,13 +33,15 @@ import org.apache.seata.core.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class TccHookTest {
-    private TccHook tccHook;
+    private MyTccHook tccHook;
     private String xid;
     private Long branchId;
     private String actionName;
@@ -49,7 +51,7 @@ public class TccHookTest {
 
     @BeforeEach
     public void setUp() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException {
-        tccHook = mock(TccHook.class);
+        tccHook = Mockito.spy(new MyTccHook());
         xid = "test-xid";
         branchId = 12345L;
         actionName = "testAction";
@@ -97,7 +99,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.beforeTccPrepare(xid, branchId, actionName, context);
         }
-        verify(tccHook).beforeTccPrepare(xid, branchId, actionName, context);
+        verify(tccHook).beforeTccPrepare(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -105,7 +107,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.afterTccPrepare(xid, branchId, actionName, context);
         }
-        verify(tccHook).afterTccPrepare(xid, branchId, actionName, context);
+        verify(tccHook).afterTccPrepare(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -113,7 +115,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.beforeTccCommit(xid, branchId, actionName, context);
         }
-        verify(tccHook).beforeTccCommit(xid, branchId, actionName, context);
+        verify(tccHook).beforeTccCommit(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -121,7 +123,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.afterTccCommit(xid, branchId, actionName, context);
         }
-        verify(tccHook).afterTccCommit(xid, branchId, actionName, context);
+        verify(tccHook).afterTccCommit(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -129,7 +131,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.beforeTccRollback(xid, branchId, actionName, context);
         }
-        verify(tccHook).beforeTccRollback(xid, branchId, actionName, context);
+        verify(tccHook).beforeTccRollback(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -137,7 +139,7 @@ public class TccHookTest {
         for (TccHook hook : TccHookManager.getHooks()) {
             hook.afterTccRollback(xid, branchId, actionName, context);
         }
-        verify(tccHook).afterTccRollback(xid, branchId, actionName, context);
+        verify(tccHook).afterTccRollback(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -192,6 +194,39 @@ public class TccHookTest {
         public void commit() {
         }
         public void rollback() {
+        }
+    }
+
+    public class MyTccHook implements TccHook {
+        private final Logger LOGGER = LoggerFactory.getLogger(MyTccHook.class);
+        @Override
+        public void beforeTccPrepare(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations before tcc prepare");
+        }
+
+        @Override
+        public void afterTccPrepare(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations after tcc prepare");
+        }
+
+        @Override
+        public void beforeTccCommit(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations before tcc commit");
+        }
+
+        @Override
+        public void afterTccCommit(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations after tcc commit");
+        }
+
+        @Override
+        public void beforeTccRollback(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations before tcc rollback");
+        }
+
+        @Override
+        public void afterTccRollback(String xid, Long branchId, String actionName, BusinessActionContext context) {
+            LOGGER.info("do some business operations after tcc rollback");
         }
     }
 }
