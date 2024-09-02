@@ -42,7 +42,6 @@ public class Instance {
     private ClusterRole role = ClusterRole.MEMBER;
     private Map<String, Object> metadata = new HashMap<>();
 
-
     private Instance() {
     }
 
@@ -162,9 +161,7 @@ public class Instance {
     }
 
 
-    // Recursively convert metadata to JSON
-    public String toJsonString() {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public String toJsonString(ObjectMapper objectMapper) {
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
