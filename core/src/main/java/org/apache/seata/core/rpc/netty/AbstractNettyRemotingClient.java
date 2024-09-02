@@ -89,6 +89,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      */
     protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
 
+    protected final Map<Integer, Integer> childToParentMap = new ConcurrentHashMap<>();
+
     /**
      * When batch sending is enabled, the message will be stored to basketMap
      * Send via asynchronous thread {@link AbstractNettyRemotingClient.MergedSendRunnable}

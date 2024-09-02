@@ -71,6 +71,8 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
      */
     private Map<Integer, MergeMessage> mergeMsgMap;
 
+    private Map<Integer, Integer> childToParentMap;
+
     /**
      * The Futures from org.apache.seata.core.rpc.netty.AbstractNettyRemoting#futures
      */
@@ -82,9 +84,10 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     private final TransactionMessageHandler transactionMessageHandler;
 
     public ClientOnResponseProcessor(Map<Integer, MergeMessage> mergeMsgMap,
-                                     ConcurrentHashMap<Integer, MessageFuture> futures,
+                                     ConcurrentHashMap<Integer, MessageFuture> futures, Map<Integer,Integer> childToParentMap,
                                      TransactionMessageHandler transactionMessageHandler) {
         this.mergeMsgMap = mergeMsgMap;
+        this.childToParentMap = childToParentMap;
         this.futures = futures;
         this.transactionMessageHandler = transactionMessageHandler;
     }
@@ -122,14 +125,24 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 mergeMsgMap.clear();
             }
         } else {
-            MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-            if (messageFuture != null) {
-                messageFuture.setResultMessage(rpcMessage.getBody());
-            } else {
-                if (rpcMessage.getBody() instanceof AbstractResultMessage) {
-                    if (transactionMessageHandler != null) {
-                        transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), null);
+            Integer id = rpcMessage.getId();
+            try {
+                MessageFuture messageFuture = futures.remove(id);
+                if (messageFuture != null) {
+                    messageFuture.setResultMessage(rpcMessage.getBody());
+                } else {
+                    if (rpcMessage.getBody() instanceof AbstractResultMessage) {
+                        if (transactionMessageHandler != null) {
+                            transactionMessageHandler.onResponse((AbstractResultMessage)rpcMessage.getBody(), null);
+                        }
                     }
+                }
+            } finally {
+                // In version 2.3.0, the server does not return MergeResultMessage and BatchResultMessage
+                // so it is necessary to clear childToParentMap and mergeMsgMap here.
+                Integer parentId = childToParentMap.remove(id);
+                if (parentId != null) {
+                    mergeMsgMap.remove(parentId);
                 }
             }
         }
