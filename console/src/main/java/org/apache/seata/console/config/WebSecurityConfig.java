@@ -101,9 +101,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // custom token authorize exception handler
             .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
             // since we use jwt, session is not necessary
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-            // since we use jwt, csrf is not necessary
-            .csrf().disable();
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable();
+            // don't disable csrf, jwt may be implemented based on cookies
         http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
             UsernamePasswordAuthenticationFilter.class);
 
