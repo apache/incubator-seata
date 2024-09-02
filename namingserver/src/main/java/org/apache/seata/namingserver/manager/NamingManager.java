@@ -96,7 +96,7 @@ public class NamingManager {
     @PostConstruct
     public void init() {
         this.vGroupMap = Caffeine.newBuilder()
-                .expireAfterAccess(heartbeatTimeThreshold, TimeUnit.MILLISECONDS) // expired time
+                .expireAfterAccess(heartbeatTimeThreshold + 1000, TimeUnit.MILLISECONDS) // expired time
                 .maximumSize(Integer.MAX_VALUE)
                 .removalListener(new RemovalListener<Object, Object>() {
 
