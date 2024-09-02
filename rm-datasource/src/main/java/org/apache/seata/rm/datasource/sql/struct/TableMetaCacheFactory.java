@@ -135,6 +135,7 @@ public class TableMetaCacheFactory {
                         }
                     } catch (Exception exx) {
                         LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
+                        lastRefreshFinishTime = System.nanoTime();
                     }
                 }
             });
