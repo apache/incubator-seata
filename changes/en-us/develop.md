@@ -22,6 +22,7 @@ Add changes here for all PR submitted to the develop branch.
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] optimize derivative product check base on mysql
 - [[#6361](https://github.com/seata/seata/pull/6361)] optimize 401 issues for some links
+- [[#6903](https://github.com/apache/incubator-seata/pull/6903)] optimize `tableMeta` cache scheduled refresh issue
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] A brief and accurate description of PR
