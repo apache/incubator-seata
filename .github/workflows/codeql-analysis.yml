@@ -3,7 +3,7 @@ name: "CodeQL"
 on:
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ 2.x, develop ]
+    branches: [ 2.x, develop, 2.0.0 ]
   schedule:
     - cron: '36 19 * * 6'
 
