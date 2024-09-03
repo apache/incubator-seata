@@ -35,10 +35,6 @@
 
 if [ -z "$MAVEN_SKIP_RC" ] ; then
 
-  if [ -f /usr/local/etc/mavenrc ] ; then
-    . /usr/local/etc/mavenrc
-  fi
-
   if [ -f /etc/mavenrc ] ; then
     . /etc/mavenrc
   fi
@@ -61,9 +57,9 @@ case "`uname`" in
     # See https://developer.apple.com/library/mac/qa/qa1170/_index.html
     if [ -z "$JAVA_HOME" ]; then
       if [ -x "/usr/libexec/java_home" ]; then
-        JAVA_HOME="`/usr/libexec/java_home`"; export JAVA_HOME
+        export JAVA_HOME="`/usr/libexec/java_home`"
       else
-        JAVA_HOME="/Library/Java/Home"; export JAVA_HOME
+        export JAVA_HOME="/Library/Java/Home"
       fi
     fi
     ;;
@@ -75,8 +71,36 @@ if [ -z "$JAVA_HOME" ] ; then
   fi
 fi
 
+if [ -z "$M2_HOME" ] ; then
+  ## resolve links - $0 may be a link to maven's home
+  PRG="$0"
+
+  # need this for relative symlinks
+  while [ -h "$PRG" ] ; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+      PRG="$link"
+    else
+      PRG="`dirname "$PRG"`/$link"
+    fi
+  done
+
+  saveddir=`pwd`
+
+  M2_HOME=`dirname "$PRG"`/..
+
+  # make it fully qualified
+  M2_HOME=`cd "$M2_HOME" && pwd`
+
+  cd "$saveddir"
+  # echo Using m2 at $M2_HOME
+fi
+
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
+  [ -n "$M2_HOME" ] &&
+    M2_HOME=`cygpath --unix "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$CLASSPATH" ] &&
@@ -85,8 +109,11 @@ fi
 
 # For Mingw, ensure paths are in UNIX format before anything is touched
 if $mingw ; then
+  [ -n "$M2_HOME" ] &&
+    M2_HOME="`(cd "$M2_HOME"; pwd)`"
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
+  # TODO classpath?
 fi
 
 if [ -z "$JAVA_HOME" ]; then
@@ -118,7 +145,7 @@ if [ -z "$JAVACMD" ] ; then
       JAVACMD="$JAVA_HOME/bin/java"
     fi
   else
-    JAVACMD="`\\unset -f command; \\command -v java`"
+    JAVACMD="`which java`"
   fi
 fi
 
@@ -132,9 +159,12 @@ if [ -z "$JAVA_HOME" ] ; then
   echo "Warning: JAVA_HOME environment variable is not set."
 fi
 
+CLASSWORLDS_LAUNCHER=org.codehaus.plexus.classworlds.launcher.Launcher
+
 # traverses directory structure from process work directory to filesystem root
 # first directory with .mvn subdirectory is considered project base directory
 find_maven_basedir() {
+
   if [ -z "$1" ]
   then
     echo "Path not specified to find_maven_basedir"
@@ -154,7 +184,7 @@ find_maven_basedir() {
     fi
     # end of workaround
   done
-  printf '%s' "$(cd "$basedir"; pwd)"
+  echo "${basedir}"
 }
 
 # concatenates all lines of a file
@@ -164,12 +194,12 @@ concat_lines() {
   fi
 }
 
-BASE_DIR=$(find_maven_basedir "$(dirname $0)")
+BASE_DIR=`find_maven_basedir "$(pwd)"`
 if [ -z "$BASE_DIR" ]; then
   exit 1;
 fi
 
-MAVEN_PROJECTBASEDIR=${MAVEN_BASEDIR:-"$BASE_DIR"}; export MAVEN_PROJECTBASEDIR
+export MAVEN_PROJECTBASEDIR=${MAVEN_BASEDIR:-"$BASE_DIR"}
 if [ "$MVNW_VERBOSE" = true ]; then
   echo $MAVEN_PROJECTBASEDIR
 fi
@@ -264,6 +294,8 @@ MAVEN_OPTS="$(concat_lines "$MAVEN_PROJECTBASEDIR/.mvn/jvm.config") $MAVEN_OPTS"
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
+  [ -n "$M2_HOME" ] &&
+    M2_HOME=`cygpath --path --windows "$M2_HOME"`
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
   [ -n "$CLASSPATH" ] &&
@@ -272,16 +304,10 @@ if $cygwin; then
     MAVEN_PROJECTBASEDIR=`cygpath --path --windows "$MAVEN_PROJECTBASEDIR"`
 fi
 
-# Provide a "standardized" way to retrieve the CLI args that will
-# work with both Windows and non-Windows executions.
-MAVEN_CMD_LINE_ARGS="$MAVEN_CONFIG $@"
-export MAVEN_CMD_LINE_ARGS
-
 WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
 exec "$JAVACMD" \
   $MAVEN_OPTS \
-  $MAVEN_DEBUG_OPTS \
   -classpath "$MAVEN_PROJECTBASEDIR/.mvn/wrapper/maven-wrapper.jar" \
-  "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
+  "-Dmaven.home=${M2_HOME}" "-Dmaven.multiModuleProjectDirectory=${MAVEN_PROJECTBASEDIR}" \
   ${WRAPPER_LAUNCHER} $MAVEN_CONFIG "$@"
