@@ -36,6 +36,8 @@ jobs:
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: "Autobuild"
         uses: github/codeql-action/autobuild@v2
+        env:
+          MVNW_VERBOSE: true
 
       # step 4
       - name: "Perform CodeQL Analysis"
