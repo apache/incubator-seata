@@ -135,7 +135,7 @@ public class TableMetaCacheFactory {
                         }
                     } catch (Exception exx) {
                         LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
-                        //Avoid dead loop logging and high CPU during exceptions
+                        // Avoid high CPU usage due to infinite loops caused by database exceptions
                         lastRefreshFinishTime = System.nanoTime();
                     }
                 }
