@@ -84,10 +84,12 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     public void refresh(final Connection connection, String resourceId) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Map.Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(connection, entry.getValue().getTableName(), resourceId);
+            String key = getCacheKey(connection, entry.getValue().getOriginalTableName(), resourceId);
             if (entry.getKey().equals(key)) {
                 try {
-                    TableMeta tableMeta = fetchSchema(connection, entry.getValue().getTableName());
+                    String freshTableName = StringUtils.isBlank(entry.getValue().getOriginalTableName()) ?
+                            entry.getValue().getTableName() : entry.getValue().getOriginalTableName();
+                    TableMeta tableMeta = fetchSchema(connection, freshTableName);
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                         LOGGER.info("table meta change was found, update table meta cache automatically.");
@@ -98,6 +100,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             }
         }
     }
+
 
     /**
      * generate cache key

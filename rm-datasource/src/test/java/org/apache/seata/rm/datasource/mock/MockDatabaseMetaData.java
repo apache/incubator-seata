@@ -79,8 +79,9 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     );
 
     private static List<String> tableMetaColumnLabels = Arrays.asList(
-            "TABLE_NAME",
-            "TABLE_SCHEM"
+            "TABLE_CAT",
+            "TABLE_SCHEM",
+            "TABLE_NAME"
     );
 
     private Object[][] columnsMetasReturnValue;
