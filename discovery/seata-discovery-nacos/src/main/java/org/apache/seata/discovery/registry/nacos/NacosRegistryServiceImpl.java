@@ -84,6 +84,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
     private static volatile Boolean useSLBWay;
 
+    private String transactionServiceGroup;
+
     private NacosRegistryServiceImpl() {
         String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
         Pattern patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
@@ -193,7 +195,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                                     .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
 
-                            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
+                            removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
                         }
                     });
                 }
