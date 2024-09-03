@@ -1,6 +1,6 @@
-# Contributing to Seata
+# Contributing to Apache Seata(incubating)
 
-It is warmly welcomed if you have interest to hack on Seata. First, we encourage this kind of willing very much. And here is a list of contributing guide for you.
+It is warmly welcomed if you have interest to hack on Apache Seata(incubating). First, we encourage this kind of willing very much. And here is a list of contributing guide for you.
 
 [[中文贡献文档](./CONTRIBUTING_CN.md)]
 
@@ -15,11 +15,11 @@ It is warmly welcomed if you have interest to hack on Seata. First, we encourage
 
 ## Reporting security issues
 
-Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of Seata, please do not discuss it in public and even do not open a public issue. Instead we encourage you to send us a private email to  [dev-seata@googlegroups.com](mailto:dev-seata@googlegroups.com) to report this.
+Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues. If you find a security issue of Apache Seata(incubating), please do not discuss it in public and even do not open a public issue. Instead we encourage you to send us a private email to  [private@seata.apache.org](mailto:private@seata.apache.org) to report this.
 
 ## Reporting general issues
 
-To be honest, we regard every user of Seata as a very kind contributor. After experiencing Seata, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/seata/seata/issues/new/choose).
+To be honest, we regard every user of Seata as a very kind contributor. After experiencing Seata, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/apache/incubator-seata/issues/new/choose).
 
 Since we collaborate project Seata in a distributed way, we appreciate **WELL-WRITTEN**, **DETAILED**, **EXPLICIT** issue reports. To make the communication more efficient, we wish everyone could search if your issue is an existing one in the searching list. If you find it existing, please add your details in comments under the existing issue instead of opening a brand new one.
 
@@ -70,14 +70,14 @@ Since you are ready to improve Seata with a PR, we suggest you could take a look
 
 To put forward a PR, we assume you have registered a GitHub ID. Then you could finish the preparation in the following steps:
 
-1. **FORK** Seata to your repository. To make this work, you just need to click the button Fork in right-left of [seata/seata](https://github.com/seata/seata) main page. Then you will end up with your repository in `https://github.com/<your-username>/seata`, in which `your-username` is your GitHub username.
+1. **FORK** Seata to your repository. To make this work, you just need to click the button Fork in right-left of [apache/incubator-seata](https://github.com/apache/incubator-seata) main page. Then you will end up with your repository in `https://github.com/<your-username>/incubator-seata`, in which `your-username` is your GitHub username.
 
-1. **CLONE** your own repository to develop locally. Use `git clone git@github.com:<your-username>/seata.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
+1. **CLONE** your own repository to develop locally. Use `git clone git@github.com:<your-username>/incubator-seata.git` to clone repository to your local machine. Then you can create new branches to finish the change you wish to make.
 
-1. **Set Remote** upstream to be `git@github.com:seata/seata.git` using the following two commands:
+1. **Set Remote** upstream to be `git@github.com:apache/incubator-seata.git` using the following two commands:
 
 ```bash
-git remote add upstream git@github.com:seata/seata.git
+git remote add upstream git@github.com:apache/incubator-seata.git
 git remote set-url --push upstream no-pushing
 ```
 
@@ -85,9 +85,9 @@ With this remote setting, you can check your git remote configuration like this:
 
 ```shell
 $ git remote -v
-origin     git@github.com:<your-username>/seata.git (fetch)
-origin     git@github.com:<your-username>/seata.git (push)
-upstream   git@github.com:seata/seata.git (fetch)
+origin     git@github.com:<your-username>/incubator-seata.git (fetch)
+origin     git@github.com:<your-username>/incubator-seata.git (push)
+upstream   git@github.com:apache/incubator-seata.git (fetch)
 upstream   no-pushing (push)
 ```
 
@@ -95,11 +95,11 @@ Adding this, we can easily synchronize local branches with upstream branches.
 
 ### Branch Definition
 
-Right now we assume every contribution via pull request is for [branch develop](https://github.com/seata/seata/tree/develop) in Seata. Before contributing, be aware of branch definition would help a lot.
+Right now we assume every contribution via pull request is for [branch develop](https://github.com/apache/incubator-seata/tree/2.x) in Seata. Before contributing, be aware of branch definition would help a lot.
 
 As a contributor, keep in mind again that every contribution via pull request is for branch develop. While in project Seata, there are several other branches, we generally call them release branches(such as 0.6.0,0.6.1), feature branches, hotfix branches and master branch.
 
-When officially releasing a version, there will be a release branch and named with the version number. 
+When officially releasing a version, there will be a release branch and named with the version number.
 
 After the release, we will merge the commit of the release branch into the master branch.
 
@@ -186,7 +186,7 @@ Seata code style Comply with Alibaba Java Coding Guidelines.
 
 
 ### Guidelines
-[Alibaba-Java-Coding-Guidelines](https://alibaba.github.io/Alibaba-Java-Coding-Guidelines/) 
+[Alibaba-Java-Coding-Guidelines](https://alibaba.github.io/Alibaba-Java-Coding-Guidelines/)
 
 
 ### IDE Plugin Install（not necessary）
@@ -195,7 +195,7 @@ Seata code style Comply with Alibaba Java Coding Guidelines.
 
 
 #### idea IDE
-[p3c-idea-plugin-install](https://github.com/alibaba/p3c/blob/master/idea-plugin/README.md) 
+[p3c-idea-plugin-install](https://github.com/alibaba/p3c/blob/master/idea-plugin/README.md)
 
 #### eclipse IDE
 [p3c-eclipse-plugin-install](https://github.com/alibaba/p3c/blob/master/eclipse-plugin/README.md)

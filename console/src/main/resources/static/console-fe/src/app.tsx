@@ -1,11 +1,12 @@
-/**
- * Copyright 1999-2019 Seata.io Group.
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,6 +44,7 @@ export type AppPropsType = StateToPropsType & DispathToPropsType & RouteComponen
 
 export type AppStateType = {
   loading: object;
+  version: string;
 };
 
 class App extends React.Component<AppPropsType, AppStateType> {
@@ -53,6 +55,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
 
   state: AppStateType = {
     loading: {},
+    version: '',
   };
 
   constructor(props: AppPropsType) {
@@ -63,7 +66,14 @@ class App extends React.Component<AppPropsType, AppStateType> {
     console.log('this.props: ', this.props, history);
     const language: string = getCurrentLanguage();
     this.props.changeLanguage(language);
+    this.getVersion();
   }
+
+  getVersion = () => {
+    fetch('version.json').then(response =>
+      response.json().then(json => this.setState({ ...this.state, version: json.version }))
+    );
+  };
 
   get menu() {
     const { locale }: AppPropsType = this.props;
@@ -100,7 +110,30 @@ class App extends React.Component<AppPropsType, AppStateType> {
           <Route path="/login" component={Login} />
           <Layout
             nav={({ location }: any) => (
-              <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
+              <>
+                <div
+                  style={{
+                    height: 'calc(100% - 100px)',
+                    minHeight: '300px',
+                  }}
+                >
+                  <CCConsoleMenu {...this.menu} activeKey={location.pathname} />
+                </div>
+                <div
+                  style={{
+                    backgroundColor: '#c2ccd0',
+                    height: '100px',
+                    textAlign: 'center',
+                    paddingTop: '20px',
+                    paddingBottom: '20px',
+                  }}
+                >
+                  <span>Apache Seata (Incubating)</span>
+                  <br />
+                  <br />
+                  <span>Version:{this.state.version}</span>
+                </div>
+              </>
             )}
           >
             <Route path={'/'} exact render={() => <Redirect to="/transaction/list" />} />
@@ -110,7 +143,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
                 <Iframe title={'Seata'} src={'./saga-statemachine-designer/designer.html'} />
               )}
             />
-            {router.map(item => (
+            {router.map((item) => (
               <Route key={item.path} {...item} />
             ))}
           </Layout>
@@ -135,10 +168,7 @@ const mapStateToProps = (state: GlobalStateModel, ownProps: OwnProps): StateToPr
 });
 
 const mapDispatchToProps = (dispatch: Dispatch): DispathToPropsType => ({
-  changeLanguage: lang => changeLanguage(lang)(dispatch),
+  changeLanguage: (lang) => changeLanguage(lang)(dispatch),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(App as any);
+export default connect(mapStateToProps, mapDispatchToProps)(App as any);

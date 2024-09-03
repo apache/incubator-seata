@@ -11,8 +11,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 11, 17, 21 ]
         druid: [
+          1.2.20,
           1.2.19,
           #1.2.18, # Unit test triggered a bug in Druid, see the commit https://github.com/alibaba/druid/commit/6c493f852852fb287ed5fd31ee16c27ead0ea5cf
           #1.2.17, # Unit test triggered a bug in Druid, see the commit https://github.com/alibaba/druid/commit/6c493f852852fb287ed5fd31ee16c27ead0ea5cf
@@ -50,15 +50,13 @@ jobs:
         uses: actions/setup-java@v3.12.0
         with:
           distribution: 'zulu'
-          java-version: ${{ matrix.java }}
+          java-version: 8
       # step 3
       - name: "Print maven version"
         run: ./mvnw -version
       # step 4
-      - name: "Test with Maven"
+      - name: "Test with Maven and Druid ${{ matrix.druid }}"
         run: |
-          if [ "${{ matrix.java }}" == "8" ]; then
-            ./mvnw -T 4C clean test -Ddruid.version=${{ matrix.druid }} -Dcheckstyle.skip=false -Dlicense.skip=false -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          else
-            ./mvnw -T 4C clean test -Ddruid.version=${{ matrix.druid }} -Dcheckstyle.skip=true  -Dlicense.skip=true  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          fi
+          ./mvnw -T 4C clean test \
+                 -Ddruid.version=${{ matrix.druid }} \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;

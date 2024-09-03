@@ -1,3 +1,20 @@
+--
+-- Licensed to the Apache Software Foundation (ASF) under one or more
+-- contributor license agreements.  See the NOTICE file distributed with
+-- this work for additional information regarding copyright ownership.
+-- The ASF licenses this file to You under the Apache License, Version 2.0
+-- (the "License"); you may not use this file except in compliance with
+-- the License.  You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
+--
+
 -- -------------------------------- The script used when storeMode is 'db' --------------------------------
 -- the table to store GlobalSession data
 CREATE TABLE IF NOT EXISTS public.global_table
@@ -16,8 +33,8 @@ CREATE TABLE IF NOT EXISTS public.global_table
     CONSTRAINT pk_global_table PRIMARY KEY (xid)
 );
 
-CREATE INDEX idx_status_gmt_modified ON public.global_table (status, gmt_modified);
-CREATE INDEX idx_transaction_id ON public.global_table (transaction_id);
+CREATE INDEX idx_global_table_status_gmt_modified ON public.global_table (status, gmt_modified);
+CREATE INDEX idx_global_table_transaction_id ON public.global_table (transaction_id);
 
 -- the table to store BranchSession data
 CREATE TABLE IF NOT EXISTS public.branch_table
@@ -36,7 +53,7 @@ CREATE TABLE IF NOT EXISTS public.branch_table
     CONSTRAINT pk_branch_table PRIMARY KEY (branch_id)
 );
 
-CREATE INDEX idx_xid ON public.branch_table (xid);
+CREATE INDEX idx_branch_table_xid ON public.branch_table (xid);
 
 -- the table to store lock data
 CREATE TABLE IF NOT EXISTS public.lock_table
@@ -55,9 +72,9 @@ CREATE TABLE IF NOT EXISTS public.lock_table
 );
 
 comment on column public.lock_table.status is '0:locked ,1:rollbacking';
-CREATE INDEX idx_branch_id ON public.lock_table (branch_id);
-CREATE INDEX idx_xid ON public.lock_table (xid);
-CREATE INDEX idx_status ON public.lock_table (status);
+CREATE INDEX idx_lock_table_branch_id ON public.lock_table (branch_id);
+CREATE INDEX idx_lock_table_xid ON public.lock_table (xid);
+CREATE INDEX idx_lock_table_status ON public.lock_table (status);
 
 CREATE TABLE distributed_lock (
     lock_key     VARCHAR(20)  NOT NULL,

@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,25 +21,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.GlobalStatus;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import io.seata.server.storage.file.ReloadableStore;
-import io.seata.server.store.SessionStorable;
-import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionStoreManager.LogOperation;
-import io.seata.server.storage.file.TransactionWriteStore;
-import io.seata.server.storage.file.store.FileTransactionStoreManager;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionCondition;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.file.ReloadableStore;
+import org.apache.seata.server.store.SessionStorable;
+import org.apache.seata.server.store.TransactionStoreManager;
+import org.apache.seata.server.store.TransactionStoreManager.LogOperation;
+import org.apache.seata.server.storage.file.TransactionWriteStore;
+import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
 
 
 /**
  * The type Write store test.
  *
- * @author slievrly
  * write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
  * cost:160541   65535*5  2000 per open  init 1024 write cost:82953,read cost:157736   65535*5  2000 per open  init
  * 65535*5*9 write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s

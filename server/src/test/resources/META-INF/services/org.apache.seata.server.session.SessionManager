@@ -1,0 +1,3 @@
+org.apache.seata.server.storage.file.session.FileSessionManager
+org.apache.seata.server.storage.db.session.DataBaseSessionManager
+org.apache.seata.server.storage.redis.session.RedisSessionManager

@@ -1,17 +1,20 @@
 #!/bin/bash
-# Copyright 1999-2019 Seata.io Group.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 # Setup JVM parameters for seata server
 
@@ -131,6 +134,7 @@ LOADER_PATH=$LOADER_PATH
 LOG_HOME=$LOG_HOME
 if [ -z "$LOG_HOME" ]; then
     LOG_HOME="$HOME/logs/seata"
+    mkdir -p $LOG_HOME
 fi
 JAVA_OPT="${JAVA_OPT} -Dlog.home=${LOG_HOME} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xss${JVM_XSS:="640k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_HOME}/java_heapdump.hprof -XX:+DisableExplicitGC"
@@ -140,9 +144,7 @@ if [[ "$JAVA_MAJOR_VERSION" -eq "1" ]] ; then
   JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $2}')
 fi
 if [[ "$JAVA_MAJOR_VERSION" -ge "9" ]] ; then
-  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${LOG_HOME}/seata_gc.log:time,tags:filecount=10,filesize=102400"
-elif [[ "$JAVA_MAJOR_VERSION" -ge "17" ]] ; then
-  JAVA_OPT="${JAVA_OPT} -Xlog:gc=trace:file=${LOG_HOME}/seata_gc.log:time,tags:filecount=10,filesize=10M"
+  JAVA_OPT="${JAVA_OPT} -Xlog:gc*:file=${LOG_HOME}/seata_gc.log:time,tags:filecount=10,filesize=10M"
 else
   JAVA_OPT="${JAVA_OPT} -Xloggc:${LOG_HOME}/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 fi

@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2019 Seata.io Group.
-  ~
-  ~  Licensed under the Apache License, Version 2.0 (the "License");
-  ~  you may not use this file except in compliance with the License.
-  ~  You may obtain a copy of the License at
-  ~
-  ~       http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~  Unless required by applicable law or agreed to in writing, software
-  ~  distributed under the License is distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  See the License for the specific language governing permissions and
-  ~  limitations under the License.
-  -->
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>io.seata</groupId>
+        <groupId>org.apache.seata</groupId>
         <artifactId>seata-build</artifactId>
         <version>${revision}</version>
         <relativePath>../build/pom.xml</relativePath>
@@ -36,9 +39,9 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <bytebuddy.version>1.12.17</bytebuddy.version>
+        <bytebuddy.version>1.14.15</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
-        <sofa.rpc.version>5.5.3</sofa.rpc.version>
+        <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
@@ -46,17 +49,17 @@
         <commons-lang.version>2.6</commons-lang.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
-        <apache-zookeeper.version>3.5.9</apache-zookeeper.version>
+        <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
         <curator-test.version>5.1.0</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
-        <mock-jedis.version>0.3.0</mock-jedis.version>
         <apollo-client.version>2.0.1</apollo-client.version>
-        <eureka-clients.version>1.10.17</eureka-clients.version>
+        <eureka-clients.version>1.10.18</eureka-clients.version>
+        <jettison.version>1.5.4</jettison.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.2</nacos-client.version>
+        <nacos-client.version>1.4.6</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
-        <guava.version>30.1-jre</guava.version>
+        <guava.version>32.1.3-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
         <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
@@ -68,10 +71,12 @@
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
-        <jraft.version>1.3.13</jraft.version>
+        <jraft.version>1.3.14</jraft.version>
         <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
+        <netty.version>4.1.94.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
+        <sofa.bolt.version>1.6.7</sofa.bolt.version>
 
         <protobuf.version>3.16.3</protobuf.version>
         <grpc.version>1.27.1</grpc.version>
@@ -88,9 +93,8 @@
 
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
-        <logback.version>1.2.9</logback.version>
+        <logback.version>1.3.14</logback.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
-        <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
 
         <!-- redis -->
         <jedis.version>3.8.0</jedis.version>
@@ -100,7 +104,7 @@
         <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <dm.version>8.1.2.192</dm.version>
-        <postgresql.version>42.3.3</postgresql.version>
+        <postgresql.version>42.3.8</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <!-- db connection pool -->
@@ -112,13 +116,19 @@
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
         <mysql8.version>8.0.27</mysql8.version>
+        <!-- rocketmq -->
+        <rocketmq-version>5.0.0</rocketmq-version>
 
         <!-- # for kotlin -->
-        <kotlin.version>1.4.32</kotlin.version>
-        <kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
+        <kotlin.version>1.7.22</kotlin.version>
+        <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
+
+        <!-- # for web -->
+        <spring-webmvc.version>5.3.26</spring-webmvc.version>
+        <tomcat-embed.version>9.0.83</tomcat-embed.version>
 
         <!-- # for test -->
-        <mockito.version>2.23.4</mockito.version>
+        <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.7</janino-version>
@@ -155,6 +165,10 @@
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-core</artifactId>
+                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
@@ -175,6 +189,11 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${sofa.hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>bolt</artifactId>
+                <version>${sofa.bolt.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -329,7 +348,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>io.netty</groupId>
-                        <artifactId>netty</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -397,11 +416,6 @@
                 <version>${jedis.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.github.microwww</groupId>
-                <artifactId>redis-server</artifactId>
-                <version>${mock-jedis.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
@@ -410,7 +424,16 @@
                         <groupId>javax.servlet</groupId>
                         <artifactId>servlet-api</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.jettison</groupId>
+                        <artifactId>jettison</artifactId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>${jettison.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.netflix.archaius</groupId>
@@ -452,6 +475,12 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>listenablefuture</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
@@ -529,6 +558,16 @@
                 <artifactId>grpc-testing</artifactId>
                 <version>${grpc.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
@@ -687,6 +726,17 @@
                 <groupId>com.github.danielwegener</groupId>
                 <artifactId>logback-kafka-appender</artifactId>
                 <version>${kafka-appender.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.kafka</groupId>
+                        <artifactId>kafka-clients</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka-clients.version}</version>
             </dependency>
 
 
@@ -699,6 +749,11 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
                 <version>${mockito.version}</version>
             </dependency>
             <dependency>
@@ -745,6 +800,22 @@
                 <groupId>org.codehaus.janino</groupId>
                 <artifactId>janino</artifactId>
                 <version>${janino-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq-version}</version>
+            </dependency>
+
+            <!-- web -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring-webmvc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
             </dependency>
         </dependencies>
     </dependencyManagement>

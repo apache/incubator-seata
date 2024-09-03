@@ -1,11 +1,12 @@
-/**
- * Copyright 1999-2019 Seata.io Group.
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,12 +19,6 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process')
 
-const mkdir = dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-};
-
 // copy seata-saga-statemachine-designer to console
 const designerDir = path.join(__dirname, '../../../../../../../saga/seata-saga-statemachine-designer');
 if (!fs.existsSync(path.join(designerDir, "dist"))) {
@@ -33,18 +28,10 @@ if (!fs.existsSync(path.join(designerDir, "dist"))) {
 
 // copy file
 const designerDestDir = path.join(__dirname,'../public/saga-statemachine-designer');
-const designerHtmlFileName = path.join(designerDestDir, 'designer.html');
-const designerBundleFileName = path.join(designerDestDir, 'dist/bundle.js');
-
-mkdir(path.dirname(designerHtmlFileName));
-mkdir(path.dirname(designerBundleFileName));
-
-fs.createReadStream(path.join(designerDir, 'index.html'))
-.pipe(
-  fs.createWriteStream(designerHtmlFileName)
-  );
-
-fs.createReadStream(path.join(designerDir, 'dist/bundle.js'))
-.pipe(
-  fs.createWriteStream(designerBundleFileName)
-  );
+if (!fs.existsSync(designerDestDir)) {
+  fs.mkdirSync(designerDestDir)
+}
+fs.readdirSync(path.join(designerDir, 'dist')).forEach(file => {
+  fs.copyFileSync(path.join(designerDir, 'dist', file), path.join(designerDestDir, file));
+});
+fs.renameSync(path.join(designerDestDir, 'index.html'), path.join(designerDestDir, 'designer.html'));

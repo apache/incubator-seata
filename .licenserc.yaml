@@ -1,11 +1,12 @@
 #
-# Copyright 1999-2019 Seata.io Group.
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 header:
   license:
     spdx-id: Apache-2.0
-    copyright-owner: Seata.io
+    copyright-owner: Apache Software Foundation
     content: |
-      Copyright 1999-2019 Seata.io Group.
-    
-      Licensed under the Apache License, Version 2.0 (the "License");
-      you may not use this file except in compliance with the License.
-      You may obtain a copy of the License at
+      Licensed to the Apache Software Foundation (ASF) under one or more
+      contributor license agreements.  See the NOTICE file distributed with
+      this work for additional information regarding copyright ownership.
+      The ASF licenses this file to You under the Apache License, Version 2.0
+      (the "License"); you may not use this file except in compliance with
+      the License.  You may obtain a copy of the License at
       
       http://www.apache.org/licenses/LICENSE-2.0
       
@@ -43,6 +46,7 @@ header:
     - 'README.md'
     - 'LICENSE'
     - 'NOTICE'
+    - 'DISCLAIMER'
     - '**/*.md'
     - '.github/**'
     #SPI、spring.factories、spring-configuration-metadata.json、additional-spring-configuration-metadata.json
@@ -62,19 +66,20 @@ header:
     - 'distribution/LICENSE-BIN'
     - 'distribution/NOTICE-BIN'
     - 'test/src/test/resources/**'
-    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/io/seata/protocol/transcation/*.proto'
+    - 'serializer/seata-serializer-protobuf/src/main/resources/protobuf/org/apache/seata/protocol/transcation/*.proto'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
     - '**/src/test/resources/statelang/**'
     - 'console/src/main/resources/static/console-fe/**'
-    - '**/io/seata/sqlparser/antlr/**/*.g4'
-    - '**/io/seata/sqlparser/antlr/mysql/parser/*'
+    - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
+    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
     - '**/integration/**/*.proto'
     - 'console/src/main/resources/static/**'
     - 'ext/apm-seata-skywalking-plugin/config/agent.config'
     - 'server/src/main/resources/lua/redislocker/redislock.lua'
     - 'server/src/main/resources/banner.txt'
+    - '**/*.json'
 
 
   comment: on-failure
@@ -84,7 +89,7 @@ dependency:
     - saga/seata-saga-statemachine-designer/package.json
     - console/src/main/resources/static/console-fe/package.json
   excludes:
-    - name: io.seata:*
+    - name: org.apache.seata:*
       recursive: false
     # exclude manually confirmed license
     # BSD-3-Clause https://www.npmjs.com/package/universal-canvas-context
