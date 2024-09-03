@@ -8,7 +8,6 @@ target/
 *.class
 .flattened-pom.xml
 dependency-reduced-pom.xml
-.mvn/wrapper/maven-wrapper.jar
 
 # eclipse ignore
 .settings/
