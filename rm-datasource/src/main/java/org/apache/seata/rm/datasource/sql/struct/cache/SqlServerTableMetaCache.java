@@ -47,28 +47,24 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
-        String[] tableNameWithSchema = tableName.split("\\.");
-        String defaultTableName = tableNameWithSchema[tableNameWithSchema.length - 1];
-
         DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         try {
             //prevent duplicated cache key
             if (databaseMetaData.supportsMixedCaseIdentifiers()) {
-                cacheKey.append(defaultTableName);
+                cacheKey.append(tableName);
             } else {
-                cacheKey.append(defaultTableName.toUpperCase());
+                cacheKey.append(tableName.toUpperCase());
             }
         } catch (SQLException e) {
             LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         return cacheKey.toString();
@@ -88,6 +84,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
 
         tableName = ColumnUtils.delEscape(tableName, JdbcConstants.SQLSERVER);
         String[] schemaTable = tableName.split("\\.");
@@ -189,8 +186,8 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsTable.next()) {
-                String rsTableName = rsTable.getString("TABLE_NAME");
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
                 //set origin tableName with schema if necessary
                 if ("dbo".equalsIgnoreCase(rsTableSchema)) {
                     //for compatibility reasons, old clients generally do not have the 'dbo' default schema by default.
