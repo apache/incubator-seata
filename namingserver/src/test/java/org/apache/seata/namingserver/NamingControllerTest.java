@@ -213,16 +213,16 @@ class NamingControllerTest {
         String namespace = "public5";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
-        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
-        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8094, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7094, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
         vGroups.put("vgroup1",unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         NamingServerNode node2 = new NamingServerNode();
-        node2.setTransaction(new Node.Endpoint("127.0.0.1", 8092, "netty"));
-        node2.setControl(new Node.Endpoint("127.0.0.1", 7092, "http"));
+        node2.setTransaction(new Node.Endpoint("127.0.0.1", 8093, "netty"));
+        node2.setControl(new Node.Endpoint("127.0.0.1", 7093, "http"));
         Map<String, Object> meatadata2 = node2.getMetadata();
         Map<String,Object> vGroups2 = new HashMap<>();
         String unitName2 = UUID.randomUUID().toString();
@@ -260,7 +260,7 @@ class NamingControllerTest {
         unit = metaResponse.getClusterList().get(0).getUnitData().get(0);
         Node node1 = unit.getNamingInstanceList().get(0);
         assertEquals("127.0.0.1", node1.getTransaction().getHost());
-        assertEquals(8091, node1.getTransaction().getPort());
+        assertEquals(8094, node1.getTransaction().getPort());
     }
 
 }
