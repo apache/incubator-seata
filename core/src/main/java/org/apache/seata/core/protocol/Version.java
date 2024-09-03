@@ -87,27 +87,21 @@ public class Version {
      * @return true: client version is above or equal version 1.5.0, false: on the contrary
      */
     public static boolean isAboveOrEqualVersion150(String version) {
-        boolean isAboveOrEqualVersion150 = false;
-        try {
-            long clientVersion = convertVersion(version);
-            long divideVersion = convertVersion(VERSION_1_5_0);
-            isAboveOrEqualVersion150 = clientVersion >= divideVersion;
-        } catch (Exception e) {
-            LOGGER.error("convert version error, clientVersion:{}", version, e);
-        }
-        return isAboveOrEqualVersion150;
+        return isAboveOrEqualVersion(version, VERSION_1_5_0);
     }
 
     public static boolean isAboveOrEqualVersion230(String version) {
-        boolean isAboveOrEqualVersion230 = false;
+        return isAboveOrEqualVersion(version, VERSION_2_3_0);
+    }
+
+    public static boolean isAboveOrEqualVersion(String clientVersion, String divideVersion) {
+        boolean isAboveOrEqualVersion = false;
         try {
-            long clientVersion = convertVersion(version);
-            long divideVersion = convertVersion(VERSION_2_3_0);
-            isAboveOrEqualVersion230 = clientVersion >= divideVersion;
+            isAboveOrEqualVersion = convertVersion(clientVersion) >= convertVersion(divideVersion);
         } catch (Exception e) {
-            LOGGER.error("convert version error, clientVersion:{}", version, e);
+            LOGGER.error("convert version error, clientVersion:{}", clientVersion, e);
         }
-        return isAboveOrEqualVersion230;
+        return isAboveOrEqualVersion;
     }
 
     public static long convertVersion(String version) throws IncompatibleVersionException {
