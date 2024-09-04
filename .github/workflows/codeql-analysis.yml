@@ -33,7 +33,7 @@ jobs:
 
       # step 3
       - name: "Build"
-        run: ./mvnw -T 4C clean package -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+        run: ./mvnw -T 4C clean compile -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
       # step 4
       - name: "Perform CodeQL Analysis"
