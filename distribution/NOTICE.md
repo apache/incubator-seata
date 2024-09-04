@@ -150,35 +150,35 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── proto-google-common-protos-1.17.0.jar
     ├── reflectasm-1.11.9.jar
     ├── registry-client-all-6.3.0.jar
-    ├── seata-common-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-all-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-bzip2-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-deflater-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-gzip-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-lz4-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-zip-2.1.0-SNAPSHOT.jar
-    ├── seata-config-all-2.1.0-SNAPSHOT.jar
-    ├── seata-config-apollo-2.1.0-SNAPSHOT.jar
-    ├── seata-config-consul-2.1.0-SNAPSHOT.jar
-    ├── seata-config-core-2.1.0-SNAPSHOT.jar
-    ├── seata-config-etcd3-2.1.0-SNAPSHOT.jar
-    ├── seata-config-nacos-2.1.0-SNAPSHOT.jar
-    ├── seata-config-spring-cloud-2.1.0-SNAPSHOT.jar
-    ├── seata-config-zk-2.1.0-SNAPSHOT.jar
-    ├── seata-core-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-consul-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-custom-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-etcd3-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-nacos-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-redis-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-sofa-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-api-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-core-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-registry-compact-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-all-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-hessian-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-kryo-2.1.0-SNAPSHOT.jar
-    ├── seata-spring-autoconfigure-server-2.1.0-SNAPSHOT.jar
+    ├── seata-common-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-all-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-bzip2-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-deflater-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-gzip-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-lz4-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-zip-2.2.0-SNAPSHOT.jar
+    ├── seata-config-all-2.2.0-SNAPSHOT.jar
+    ├── seata-config-apollo-2.2.0-SNAPSHOT.jar
+    ├── seata-config-consul-2.2.0-SNAPSHOT.jar
+    ├── seata-config-core-2.2.0-SNAPSHOT.jar
+    ├── seata-config-etcd3-2.2.0-SNAPSHOT.jar
+    ├── seata-config-nacos-2.2.0-SNAPSHOT.jar
+    ├── seata-config-spring-cloud-2.2.0-SNAPSHOT.jar
+    ├── seata-config-zk-2.2.0-SNAPSHOT.jar
+    ├── seata-core-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-consul-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-custom-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-etcd3-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-nacos-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-redis-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-sofa-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-api-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-core-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-registry-compact-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-all-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-hessian-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-kryo-2.2.0-SNAPSHOT.jar
+    ├── seata-spring-autoconfigure-server-2.2.0-SNAPSHOT.jar
     ├── servo-core-0.12.21.jar
     ├── simpleclient-0.15.0.jar
     ├── simpleclient_common-0.15.0.jar
@@ -252,17 +252,17 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── protobuf-java-3.16.3.jar
     ├── protobuf-java-util-3.11.0.jar
     ├── rocksdbjni-7.7.3.jar
-    ├── seata-compressor-zstd-2.1.0-SNAPSHOT.jar
-    ├── seata-console-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-all-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-core-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-eureka-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-zk-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-all-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-exporter-prometheus-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-protobuf-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-seata-2.1.0-SNAPSHOT.jar
-    ├── seata-spring-autoconfigure-core-2.1.0-SNAPSHOT.jar
+    ├── seata-compressor-zstd-2.2.0-SNAPSHOT.jar
+    ├── seata-console-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-all-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-core-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-eureka-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-zk-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-all-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-exporter-prometheus-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-protobuf-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-seata-2.2.0-SNAPSHOT.jar
+    ├── seata-spring-autoconfigure-core-2.2.0-SNAPSHOT.jar
     ├── simpleclient_httpserver-0.15.0.jar
     ├── slf4j-api-1.7.36.jar
     ├── spring-boot-2.7.17.jar
@@ -432,35 +432,35 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── proto-google-common-protos-1.17.0.jar
     ├── reflectasm-1.11.9.jar
     ├── registry-client-all-6.3.0.jar
-    ├── seata-common-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-all-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-bzip2-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-deflater-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-gzip-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-lz4-2.1.0-SNAPSHOT.jar
-    ├── seata-compressor-zip-2.1.0-SNAPSHOT.jar
-    ├── seata-config-all-2.1.0-SNAPSHOT.jar
-    ├── seata-config-apollo-2.1.0-SNAPSHOT.jar
-    ├── seata-config-consul-2.1.0-SNAPSHOT.jar
-    ├── seata-config-core-2.1.0-SNAPSHOT.jar
-    ├── seata-config-etcd3-2.1.0-SNAPSHOT.jar
-    ├── seata-config-nacos-2.1.0-SNAPSHOT.jar
-    ├── seata-config-spring-cloud-2.1.0-SNAPSHOT.jar
-    ├── seata-config-zk-2.1.0-SNAPSHOT.jar
-    ├── seata-core-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-consul-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-custom-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-etcd3-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-nacos-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-redis-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-sofa-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-api-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-core-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-registry-compact-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-all-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-hessian-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-kryo-2.1.0-SNAPSHOT.jar
-    ├── seata-spring-autoconfigure-server-2.1.0-SNAPSHOT.jar
+    ├── seata-common-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-all-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-bzip2-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-deflater-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-gzip-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-lz4-2.2.0-SNAPSHOT.jar
+    ├── seata-compressor-zip-2.2.0-SNAPSHOT.jar
+    ├── seata-config-all-2.2.0-SNAPSHOT.jar
+    ├── seata-config-apollo-2.2.0-SNAPSHOT.jar
+    ├── seata-config-consul-2.2.0-SNAPSHOT.jar
+    ├── seata-config-core-2.2.0-SNAPSHOT.jar
+    ├── seata-config-etcd3-2.2.0-SNAPSHOT.jar
+    ├── seata-config-nacos-2.2.0-SNAPSHOT.jar
+    ├── seata-config-spring-cloud-2.2.0-SNAPSHOT.jar
+    ├── seata-config-zk-2.2.0-SNAPSHOT.jar
+    ├── seata-core-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-consul-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-custom-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-etcd3-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-nacos-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-redis-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-sofa-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-api-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-core-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-registry-compact-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-all-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-hessian-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-kryo-2.2.0-SNAPSHOT.jar
+    ├── seata-spring-autoconfigure-server-2.2.0-SNAPSHOT.jar
     ├── servo-core-0.12.21.jar
     ├── simpleclient-0.15.0.jar
     ├── simpleclient_common-0.15.0.jar
@@ -534,17 +534,17 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     ├── protobuf-java-3.16.3.jar
     ├── protobuf-java-util-3.11.0.jar
     ├── rocksdbjni-7.7.3.jar
-    ├── seata-compressor-zstd-2.1.0-SNAPSHOT.jar
-    ├── seata-console-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-all-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-core-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-eureka-2.1.0-SNAPSHOT.jar
-    ├── seata-discovery-zk-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-all-2.1.0-SNAPSHOT.jar
-    ├── seata-metrics-exporter-prometheus-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-protobuf-2.1.0-SNAPSHOT.jar
-    ├── seata-serializer-seata-2.1.0-SNAPSHOT.jar
-    ├── seata-spring-autoconfigure-core-2.1.0-SNAPSHOT.jar
+    ├── seata-compressor-zstd-2.2.0-SNAPSHOT.jar
+    ├── seata-console-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-all-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-core-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-eureka-2.2.0-SNAPSHOT.jar
+    ├── seata-discovery-zk-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-all-2.2.0-SNAPSHOT.jar
+    ├── seata-metrics-exporter-prometheus-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-protobuf-2.2.0-SNAPSHOT.jar
+    ├── seata-serializer-seata-2.2.0-SNAPSHOT.jar
+    ├── seata-spring-autoconfigure-core-2.2.0-SNAPSHOT.jar
     ├── simpleclient_httpserver-0.15.0.jar
     ├── slf4j-api-1.7.36.jar
     ├── spring-boot-2.7.17.jar
