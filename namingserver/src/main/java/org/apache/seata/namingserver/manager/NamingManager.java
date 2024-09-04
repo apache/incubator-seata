@@ -225,7 +225,7 @@ public class NamingManager {
         Optional.ofNullable(vGroupMap.asMap().get(vGroup)).flatMap(map -> Optional.ofNullable(map.get(namespace)).flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))).ifPresent(clusterBO -> {
             Set<String> units = clusterBO.getUnitNames();
 //            if (!CollectionUtils.isEmpty(units)) {
-                applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
+            applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
 //            }
         });
     }
@@ -377,13 +377,13 @@ public class NamingManager {
             for (String cluster : clusters) {
                 Optional.ofNullable(namespaceClusterDataMap.get(oldNamespace))
                     .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
-                        if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
-                            clusterData.getUnitData().forEach((unit, unitData) -> {result
-                                .set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName));
-                                notifyClusterChange(vGroup, namespace, cluster, unit, -1);
-                            });
-                        }
-                    });
+                            if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
+                                clusterData.getUnitData().forEach((unit, unitData) -> {
+                                    result.set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName));
+                                    notifyClusterChange(vGroup, namespace, cluster, unit, -1);
+                                });
+                            }
+                        });
             }
         });
         return Optional.ofNullable(result.get()).orElseGet(() -> new Result<>("200", "change vGroup successfully!"));
