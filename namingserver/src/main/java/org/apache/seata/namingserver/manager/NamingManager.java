@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 
@@ -376,13 +377,16 @@ public class NamingManager {
         namespaceClusters.forEach((oldNamespace, clusters) -> {
             for (String cluster : clusters) {
                 Optional.ofNullable(namespaceClusterDataMap.get(oldNamespace))
-                    .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
+                        .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
                             if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
-                                clusterData.getUnitData().forEach((unit, unitData) -> {
+                                Optional<Map.Entry<String, Unit>> optionalEntry =
+                                        clusterData.getUnitData().entrySet().stream().findFirst();
+                                if (optionalEntry.isPresent()) {
+                                    String unit = optionalEntry.get().getKey();
+                                    Unit unitData = optionalEntry.get().getValue();
                                     result.set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName));
                                     notifyClusterChange(vGroup, namespace, cluster, unit, -1);
-                                    return;
-                                });
+                                }
                             }
                         });
             }
