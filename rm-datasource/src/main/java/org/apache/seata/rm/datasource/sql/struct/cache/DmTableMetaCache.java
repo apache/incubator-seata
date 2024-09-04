@@ -59,6 +59,7 @@ public class DmTableMetaCache extends OracleTableMetaCache {
 
         TableNameMeta tableNameMeta = toTableNameMeta(tableName, dbmd.getConnection().getSchema());
         result.setTableName(tableNameMeta.getTableName());
+        result.setOriginalTableName(tableName);
         try (ResultSet rsColumns = dbmd.getColumns("", tableNameMeta.getSchema(), tableNameMeta.getTableName(), "%");
              ResultSet rsIndex = dbmd.getIndexInfo(null, tableNameMeta.getSchema(), tableNameMeta.getTableName(), false, true);
              ResultSet rsPrimary = dbmd.getPrimaryKeys(null, tableNameMeta.getSchema(), tableNameMeta.getTableName())) {
@@ -67,7 +68,6 @@ public class DmTableMetaCache extends OracleTableMetaCache {
             processIndexes(result, rsIndex);
 
             processPrimaries(result, rsPrimary);
-
             if (result.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
             }
