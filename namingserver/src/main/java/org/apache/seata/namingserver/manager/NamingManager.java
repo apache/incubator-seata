@@ -381,6 +381,7 @@ public class NamingManager {
                                 clusterData.getUnitData().forEach((unit, unitData) -> {
                                     result.set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName));
                                     notifyClusterChange(vGroup, namespace, cluster, unit, -1);
+                                    return;
                                 });
                             }
                         });
