@@ -137,6 +137,7 @@
         <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
+        <maven.frontend.skip>false</maven.frontend.skip>
         <maven.surefire.argLine></maven.surefire.argLine>
         <maven.surefire.excludes></maven.surefire.excludes>
 
@@ -246,6 +247,9 @@
                     <groupId>com.github.eirslett</groupId>
                     <artifactId>frontend-maven-plugin</artifactId>
                     <version>${frontend-maven-plugin.version}</version>
+                    <configuration>
+                        <skip>${maven.frontend.skip}</skip>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
