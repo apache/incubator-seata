@@ -14,18 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:console/src/main/java/org/apache/seata/console/result/SingleResult.java
-package org.apache.seata.console.result;
-
-import java.io.Serializable;
-
-import org.apache.seata.console.constant.Code;
-========
 package org.apache.seata.common.result;
 
 import java.io.Serializable;
 
->>>>>>>> upstream/2.x:common/src/main/java/org/apache/seata/common/result/SingleResult.java
 
 /**
  * The single result

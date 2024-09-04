@@ -14,19 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:console/src/main/java/org/apache/seata/console/result/PageResult.java
-package org.apache.seata.console.result;
-========
 package org.apache.seata.common.result;
->>>>>>>> upstream/2.x:common/src/main/java/org/apache/seata/common/result/PageResult.java
 
 import java.io.Serializable;
 import java.util.List;
 
-<<<<<<<< HEAD:console/src/main/java/org/apache/seata/console/result/PageResult.java
-import org.apache.seata.console.param.BaseParam;
-========
->>>>>>>> upstream/2.x:common/src/main/java/org/apache/seata/common/result/PageResult.java
 /**
  * The page result
  *

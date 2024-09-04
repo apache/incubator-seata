@@ -14,11 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:console/src/main/java/org/apache/seata/console/result/Result.java
-package org.apache.seata.console.result;
-========
 package org.apache.seata.common.result;
->>>>>>>> upstream/2.x:common/src/main/java/org/apache/seata/common/result/Result.java
 
 import java.io.Serializable;
 

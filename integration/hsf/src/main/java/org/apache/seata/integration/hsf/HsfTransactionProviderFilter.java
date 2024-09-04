@@ -29,12 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-<<<<<<<< HEAD:integration/hsf/src/main/java/org/apache/seata/integration/hsf/HsfTransactionFilter.java
- * The type Transaction propagation filter.
- *
-========
  * The type Hsf transaction provider filter.
->>>>>>>> upstream/2.x:integration/hsf/src/main/java/org/apache/seata/integration/hsf/HsfTransactionProviderFilter.java
  */
 public class HsfTransactionProviderFilter implements ServerFilter {
 

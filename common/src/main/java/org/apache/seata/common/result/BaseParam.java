@@ -14,11 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-<<<<<<<< HEAD:console/src/main/java/org/apache/seata/console/param/BaseParam.java
-package org.apache.seata.console.param;
-========
 package org.apache.seata.common.result;
->>>>>>>> upstream/2.x:common/src/main/java/org/apache/seata/common/result/BaseParam.java
 
 import java.io.Serializable;
 

@@ -23,27 +23,16 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
-<<<<<<<< HEAD:integration/dubbo-alibaba/src/main/java/org/apache/seata/integration/dubbo/alibaba/AlibabaDubboTransactionPropagationFilter.java
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.constants.DubboConstants;
-========
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.constants.DubboConstants;
 import org.apache.seata.core.context.RootContext;
->>>>>>>> upstream/2.x:integration/dubbo-alibaba/src/main/java/org/apache/seata/integration/dubbo/alibaba/AlibabaDubboTransactionProviderFilter.java
 import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-<<<<<<<< HEAD:integration/dubbo-alibaba/src/main/java/org/apache/seata/integration/dubbo/alibaba/AlibabaDubboTransactionPropagationFilter.java
- * The type Transaction propagation filter.
- *
-========
  * The type Alibaba dubbo transaction provider filter.
->>>>>>>> upstream/2.x:integration/dubbo-alibaba/src/main/java/org/apache/seata/integration/dubbo/alibaba/AlibabaDubboTransactionProviderFilter.java
  */
 @Activate(group = {DubboConstants.PROVIDER}, order = 100)
 public class AlibabaDubboTransactionProviderFilter implements Filter {

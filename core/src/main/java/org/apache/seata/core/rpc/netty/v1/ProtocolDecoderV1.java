@@ -28,20 +28,14 @@ import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-========
 import org.apache.seata.core.rpc.netty.ProtocolDecoder;
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-========
 
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
 /**
  * <pre>
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
@@ -65,13 +59,9 @@ import org.slf4j.LoggerFactory;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
- * @see ProtocolV1Encoder
-========
  * @see ProtocolEncoderV1
  * @author Geng Zhang
  * @see ProtocolEncoderV1
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
  * @since 0.7.0
  */
 public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements ProtocolDecoder {
@@ -79,19 +69,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDecoderV1.class);
     private final List<SerializerType> supportDeSerializerTypes;
 
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-    private final List<SerializerType> supportDeSerializerTypes;
-
-
-    public ProtocolV1Decoder() {
-        // default is 8M
-        this(ProtocolConstants.MAX_FRAME_LENGTH);
-    }
-
-    public ProtocolV1Decoder(int maxFrameLength) {
-========
     public ProtocolDecoderV1() {
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
         /*
         int maxFrameLength,
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
@@ -99,11 +77,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-        super(maxFrameLength, 3, 4, -7, 0);
-========
         super(ProtocolConstants.MAX_FRAME_LENGTH, 3, 4, -7, 0);
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
         supportDeSerializerTypes = SerializerServiceLoader.getSupportedSerializers();
         if (supportDeSerializerTypes.isEmpty()) {
             throw new IllegalArgumentException("No serializer found");
@@ -155,17 +129,10 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
                 bs = compressor.decompress(bs);
                 SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
                 if (this.supportDeSerializerTypes.contains(protocolType)) {
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-                    Serializer serializer = SerializerServiceLoader.load(protocolType);
-                    rpcMessage.setBody(serializer.deserialize(bs));
-                } else {
-                    throw new IllegalArgumentException("SerializerType not match: " + protocolType.name());
-========
                     Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
                     throw new IllegalArgumentException("SerializerType not match");
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
                 }
             }
         }
@@ -173,8 +140,6 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         return rpcMessage.protocolMsg2RpcMsg();
     }
 
-<<<<<<<< HEAD:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolV1Decoder.java
-========
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object decoded;
@@ -194,6 +159,5 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         }
         return decoded;
     }
->>>>>>>> upstream/2.x:core/src/main/java/org/apache/seata/core/rpc/netty/v1/ProtocolDecoderV1.java
 
 }
