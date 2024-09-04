@@ -223,7 +223,7 @@ public class NamingManager {
     public void notifyClusterChange(String vGroup, String namespace, String clusterName, String unitName, long term) {
 
         Optional.ofNullable(vGroupMap.asMap().get(vGroup)).flatMap(map -> Optional.ofNullable(map.get(namespace)).flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))).ifPresent(clusterBO -> {
-            Set<String> units = clusterBO.getUnitNames();
+//            Set<String> units = clusterBO.getUnitNames();
 //            if (!CollectionUtils.isEmpty(units)) {
             applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
 //            }
