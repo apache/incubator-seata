@@ -3,7 +3,7 @@ name: "CodeQL"
 on:
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ 2.x, develop, 2.0.0 ]
+    branches: [ 2.x, develop ]
   schedule:
     - cron: '36 19 * * 6'
 
@@ -27,20 +27,14 @@ jobs:
 
       # step 2: Initializes the CodeQL tools for scanning.
       - name: "Initialize CodeQL"
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
 
-      # step 3
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-      # If this step fails, then you should remove it and run the build manually (see below)
-      - name: "Autobuild"
-        uses: github/codeql-action/autobuild@v2
-        env:
-          MVNW_VERBOSE: true
+      - run: ./mvnw -T 4C clean install -DskipTests
 
-      # step 4
+      # step 3
       - name: "Perform CodeQL Analysis"
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{matrix.language}}"

@@ -46,6 +46,12 @@ public class ReflectionUtilTest {
     }
 
     @Test
+    public void testIsClassPresent() {
+        Assertions.assertTrue(ReflectionUtil.isClassPresent("java.lang.String"));
+        Assertions.assertFalse(ReflectionUtil.isClassPresent("java.lang.String2"));
+    }
+
+    @Test
     public void testGetWrappedClass() {
         Assertions.assertEquals(Byte.class, ReflectionUtil.getWrappedClass(byte.class));
         Assertions.assertEquals(Boolean.class, ReflectionUtil.getWrappedClass(boolean.class));

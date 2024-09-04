@@ -80,21 +80,6 @@ public class Version {
     }
 
     /**
-     * Check version string.
-     *
-     * @param version the version
-     * @throws IncompatibleVersionException the incompatible version exception
-     */
-    public static void checkVersion(String version) throws IncompatibleVersionException {
-        long current = convertVersion(CURRENT);
-        long clientVersion = convertVersion(version);
-        long divideVersion = convertVersion(VERSION_0_7_1);
-        if ((current > divideVersion && clientVersion < divideVersion) || (current < divideVersion && clientVersion > divideVersion)) {
-            throw new IncompatibleVersionException("incompatible client version:" + version);
-        }
-    }
-
-    /**
      * Determine whether the client version is greater than or equal to version 1.5.0
      *
      * @param version client version
@@ -148,6 +133,16 @@ public class Version {
             LOGGER.error("convert version error,version:{}", version, e);
         }
         return -1;
+    }
+
+    public static byte calcProtocolVersion(String sdkVersion) throws IncompatibleVersionException {
+        long version = convertVersion(sdkVersion);
+        long v0 = convertVersion(VERSION_0_7_1);
+        if (version <= v0) {
+            return ProtocolConstants.VERSION_0;
+        } else {
+            return ProtocolConstants.VERSION_1;
+        }
     }
 
     private static long calculatePartValue(String partNumeric, int size, int index) {

@@ -50,7 +50,7 @@
                 </dependency>
             </dependencies>
             <build>
-                <finalName>seata</finalName>
+                <finalName>apache-seata</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -59,6 +59,43 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>release-seata.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release-seata-namingserver</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.seata</groupId>
+                    <artifactId>seata-namingserver</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <finalName>apache-seata-namingserver</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>${maven-assembly-plugin.version}</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>release-seata-namingserver.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
