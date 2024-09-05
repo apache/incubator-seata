@@ -39,7 +39,7 @@
                 <include>bin/seata-server.sh</include>
                 <include>bin/seata-setup.sh</include>
             </includes>
-            <outputDirectory>seata-server/bin/</outputDirectory>
+            <outputDirectory>seata-server/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
 
@@ -67,7 +67,7 @@
                 <include>bin/seata-namingserver.sh</include>
                 <include>bin/seata-namingserver-setup.sh</include>
             </includes>
-            <outputDirectory>seata-namingserver/bin/</outputDirectory>
+            <outputDirectory>seata-namingserver/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
