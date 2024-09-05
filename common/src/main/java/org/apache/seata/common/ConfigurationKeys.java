@@ -812,6 +812,11 @@ public interface ConfigurationKeys {
     String SERVER_ENABLE_CHECK_AUTH = SERVER_PREFIX + "enableCheckAuth";
 
     /**
+     * The constant NAMING_SERVER
+     */
+    String NAMING_SERVER = "namingserver";
+
+    /**
      * The constant APPLICATION_ID.
      */
     String APPLICATION_ID = "applicationId";
@@ -1011,4 +1016,39 @@ public interface ConfigurationKeys {
      * The constant ROCKET_MQ_MSG_TIMEOUT
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
+
+    /**
+     *
+     */
+    String NAMINGSERVER_REGISTRY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + NAMING_SERVER + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     *
+     */
+    String SEATA_NAMINGSERVER_REGISTRY_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + NAMINGSERVER_REGISTRY_PREFIX;
+
+    /**
+     * The constant REGISTRY_NAMINGSERVER_CLUSTER
+     */
+    String REGISTRY_NAMINGSERVER_CLUSTER = NAMINGSERVER_REGISTRY_PREFIX + "cluster";
+
+    /**
+     * The constant VGROUP_TABLE_NAME
+     */
+    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "vgroup-table";
+
+    /**
+     * The constant NAMESPACE_KEY
+     */
+    String NAMESPACE_KEY = SEATA_NAMINGSERVER_REGISTRY_PREFIX + "namespace";
+
+    /**
+     * The constant CLUSTER_NAME_KEY
+     */
+    String CLUSTER_NAME_KEY = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_NAMINGSERVER_CLUSTER;
+
+    /**
+     * The constant META_PREFIX
+     */
+    String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
 }

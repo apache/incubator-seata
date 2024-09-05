@@ -47,28 +47,24 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
-        String[] tableNameWithSchema = tableName.split("\\.");
-        String defaultTableName = tableNameWithSchema[tableNameWithSchema.length - 1];
-
         DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         try {
             //prevent duplicated cache key
             if (databaseMetaData.supportsMixedCaseIdentifiers()) {
-                cacheKey.append(defaultTableName);
+                cacheKey.append(tableName);
             } else {
-                cacheKey.append(defaultTableName.toUpperCase());
+                cacheKey.append(tableName.toUpperCase());
             }
         } catch (SQLException e) {
             LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         return cacheKey.toString();
@@ -88,6 +84,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
 
         tableName = ColumnUtils.delEscape(tableName, JdbcConstants.SQLSERVER);
         String[] schemaTable = tableName.split("\\.");
@@ -113,6 +110,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
         DatabaseMetaData metaData = connection.getMetaData();
         try (ResultSet rsColumns = metaData.getColumns(catalogName, schemaName, pureTableName, "%");
              ResultSet rsIndex = metaData.getIndexInfo(catalogName, schemaName, pureTableName, false, true);
+             ResultSet rsTable = metaData.getTables(catalogName, schemaName, pureTableName, new String[]{"TABLE"});
              ResultSet rsPrimary = metaData.getPrimaryKeys(catalogName, schemaName, pureTableName)) {
             //get column metaData
             while (rsColumns.next()) {
@@ -185,6 +183,19 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+            }
+
+            while (rsTable.next()) {
+                String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
+                //set origin tableName with schema if necessary
+                if ("dbo".equalsIgnoreCase(rsTableSchema)) {
+                    //for compatibility reasons, old clients generally do not have the 'dbo' default schema by default.
+                    tm.setTableName(rsTableName);
+                } else {
+                    //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
+                    tm.setTableName(rsTableSchema + "." + rsTableName);
+                }
             }
         }
         return tm;

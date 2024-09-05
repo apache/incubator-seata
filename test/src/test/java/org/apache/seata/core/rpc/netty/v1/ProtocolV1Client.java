@@ -45,8 +45,6 @@ import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.serializer.SerializerType;
-import org.apache.seata.core.rpc.netty.CompatibleProtocolDecoder;
-import org.apache.seata.core.rpc.netty.CompatibleProtocolEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,8 +80,9 @@ public class ProtocolV1Client {
             @Override
             protected void initChannel(Channel channel) throws Exception {
                 ChannelPipeline pipeline = channel.pipeline();
-                pipeline.addLast(new CompatibleProtocolEncoder());
-                pipeline.addLast(new CompatibleProtocolDecoder(8 * 1024 * 1024));
+                pipeline
+                    .addLast(new ProtocolDecoderV1())
+                    .addLast(new ProtocolEncoderV1());
                 pipeline.addLast(new ClientChannelHandler(ProtocolV1Client.this));
             }
         });
@@ -95,13 +94,13 @@ public class ProtocolV1Client {
         } else {
             Throwable cause = channelFuture.cause();
             throw new RuntimeException("Failed to connect " + host + ":" + port +
-                    (cause != null ? ". Cause by: " + cause.getMessage() : "."));
+                (cause != null ? ". Cause by: " + cause.getMessage() : "."));
         }
     }
 
     private EventLoopGroup createWorkerGroup() {
         NamedThreadFactory threadName =
-                new NamedThreadFactory("CLI-WORKER", false);
+            new NamedThreadFactory("CLI-WORKER", false);
         return new NioEventLoopGroup(10, threadName);
     }
 
@@ -158,7 +157,7 @@ public class ProtocolV1Client {
         final AtomicLong cnt = new AtomicLong(0);
         // no queue
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
+            new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));
         for (int i = 0; i < threads; i++) {
             service1.execute(() -> {
                 while (true) {

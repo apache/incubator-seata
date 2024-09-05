@@ -38,7 +38,9 @@ import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
 import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import org.apache.seata.rm.tcc.utils.MethodUtils;
 import org.slf4j.MDC;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
@@ -82,6 +84,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             }
             try {
                 TwoPhaseBusinessActionParam businessActionParam = createTwoPhaseBusinessActionParam(businessAction);
+                initTransactionalAnnotationContext(method, targetBean, businessActionParam.getBusinessActionContext());
                 //Handler the TCC Aspect, and return the business result
                 return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
                         invocation::proceed);
@@ -97,6 +100,19 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
 
         //not TCC try method
         return invocation.proceed();
+    }
+
+    /**
+     * Initializes the transaction annotation context
+     * @param method                   the method
+     * @param targetBean               the target bean
+     * @param businessActionContext    the business action context
+     */
+    private void initTransactionalAnnotationContext(Method method, Object targetBean, Map<String, Object> businessActionContext) {
+        Transactional transactionalAnnotation = MethodUtils.getTransactionalAnnotationByMethod(method, targetBean);
+        if (transactionalAnnotation != null) {
+            businessActionContext.put(Constants.TX_ISOLATION, transactionalAnnotation.isolation().value());
+        }
     }
 
     private Annotation parseAnnotation(Method methodKey) throws NoSuchMethodException {
