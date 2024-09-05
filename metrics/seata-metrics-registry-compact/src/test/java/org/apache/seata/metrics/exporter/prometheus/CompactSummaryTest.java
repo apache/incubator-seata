@@ -66,6 +66,7 @@ public class CompactSummaryTest {
 
     @Test
     public void testTps() {
+        CompactSummary compactSummary = new CompactSummary(id);
         compactSummary.increase(51111);
         compactSummary.increase(1111110);
         compactSummary.increase(111115);

@@ -60,6 +60,17 @@
             <directory>../server/target/lib/</directory>
             <outputDirectory>seata-server/lib</outputDirectory>
         </fileSet>
+
+        <fileSet>
+            <directory>../script/</directory>
+            <outputDirectory>seata-server/script</outputDirectory>
+            <includes>
+                <include>**/server/</include>
+                <include>**/logstash/</include>
+                <include>**/config-center/</include>
+            </includes>
+        </fileSet>
+
         <!-- namingserver -->
         <fileSet>
             <includes>
