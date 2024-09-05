@@ -41,7 +41,11 @@ public class RootContext {
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     private static BranchType convertIoSeata(@Nonnull org.apache.seata.core.model.BranchType branchType) {
-        return BranchType.get(branchType.name());
+        if (branchType == null) {
+            return null;
+        } else {
+            return BranchType.get(branchType.name());
+        }
     }
 
     /**
@@ -148,12 +152,7 @@ public class RootContext {
      */
     @Nullable
     public static BranchType getBranchType() {
-        org.apache.seata.core.model.BranchType branchType = org.apache.seata.core.context.RootContext.getBranchType();
-        if (branchType != null) {
-            return convertIoSeata(branchType);
-        } else {
-            return null;
-        }
+        return convertIoSeata(org.apache.seata.core.context.RootContext.getBranchType());
     }
 
     /**
@@ -172,12 +171,7 @@ public class RootContext {
      */
     @Nullable
     public static BranchType unbindBranchType() {
-        org.apache.seata.core.model.BranchType branchType = org.apache.seata.core.context.RootContext.unbindBranchType();
-        if (branchType != null) {
-            return convertIoSeata(branchType);
-        } else {
-            return null;
-        }
+        return convertIoSeata(org.apache.seata.core.context.RootContext.unbindBranchType());
     }
 
     /**
