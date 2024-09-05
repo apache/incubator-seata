@@ -42,7 +42,7 @@ public class RootContext {
      */
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
-    private static BranchType convertIoSeata(@Nonnull org.apache.seata.core.model.BranchType branchType) {
+    private static BranchType convertIoSeata(org.apache.seata.core.model.BranchType branchType) {
         if (branchType == null) {
             return null;
         } else {
