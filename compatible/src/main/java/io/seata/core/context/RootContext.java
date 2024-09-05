@@ -16,7 +16,6 @@
  */
 package io.seata.core.context;
 
-import io.seata.core.model.BranchType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
