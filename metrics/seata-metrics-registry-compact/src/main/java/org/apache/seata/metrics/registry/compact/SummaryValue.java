@@ -43,6 +43,8 @@ public class SummaryValue {
         if (currentMilliseconds <= startMilliseconds) {
             return 0;
         }
+        System.out
+            .println("total.doubleValue(): " + total.doubleValue() + "  (currentMilliseconds - startMilliseconds) * 1000.0 " +  (currentMilliseconds - startMilliseconds) * 1000.0);
         return total.doubleValue() / (currentMilliseconds - startMilliseconds) * 1000.0;
     }
 
