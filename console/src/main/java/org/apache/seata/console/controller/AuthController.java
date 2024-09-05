@@ -18,9 +18,9 @@ package org.apache.seata.console.controller;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.seata.common.result.Code;
 import org.apache.seata.console.config.WebSecurityConfig;
-import org.apache.seata.console.constant.Code;
-import org.apache.seata.console.result.SingleResult;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.security.User;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
