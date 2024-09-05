@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "",
+  "license": "Apache-2.0",
   "dependencies": {
     "chai": "3.5.0",
     "jwebdriver": "2.2.6",

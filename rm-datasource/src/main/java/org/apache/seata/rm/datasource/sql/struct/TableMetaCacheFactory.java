@@ -93,7 +93,7 @@ public class TableMetaCacheFactory {
      */
     public static void tableMetaRefreshEvent(String resourceId) {
         TableMetaRefreshHolder refreshHolder = TABLE_META_REFRESH_HOLDER_MAP.get(resourceId);
-        boolean offer = refreshHolder.tableMetaRefreshQueue.offer(System.currentTimeMillis());
+        boolean offer = refreshHolder.tableMetaRefreshQueue.offer(System.nanoTime());
         if (!offer) {
             LOGGER.error("table refresh event offer error:{}", resourceId);
         }
@@ -110,31 +110,33 @@ public class TableMetaCacheFactory {
 
         TableMetaRefreshHolder(DataSourceProxy dataSource) {
             this.dataSource = dataSource;
-            this.lastRefreshFinishTime = System.currentTimeMillis() - TABLE_META_REFRESH_INTERVAL_TIME;
+            this.lastRefreshFinishTime = System.nanoTime() - TimeUnit.MILLISECONDS.toNanos(TABLE_META_REFRESH_INTERVAL_TIME);
             this.tableMetaRefreshQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
 
             tableMetaRefreshExecutor.execute(() -> {
                 while (true) {
                     // 1. check table meta
                     if (ENABLE_TABLE_META_CHECKER_ENABLE
-                        && System.currentTimeMillis() - lastRefreshFinishTime > TABLE_META_CHECKER_INTERVAL) {
+                        && System.nanoTime() - lastRefreshFinishTime > TimeUnit.MILLISECONDS.toNanos(TABLE_META_CHECKER_INTERVAL)) {
                         tableMetaRefreshEvent(dataSource.getResourceId());
                     }
 
                     // 2. refresh table meta
                     try {
-                        Long eventTime = tableMetaRefreshQueue.take();
+                        Long eventTime = tableMetaRefreshQueue.poll(TABLE_META_REFRESH_INTERVAL_TIME, TimeUnit.MILLISECONDS);
                         // if it has bean refreshed not long ago, skip
-                        if (eventTime - lastRefreshFinishTime > TABLE_META_REFRESH_INTERVAL_TIME) {
+                        if (eventTime != null && eventTime - lastRefreshFinishTime > TimeUnit.MILLISECONDS.toNanos(TABLE_META_REFRESH_INTERVAL_TIME)) {
                             try (Connection connection = dataSource.getConnection()) {
                                 TableMetaCache tableMetaCache =
                                     TableMetaCacheFactory.getTableMetaCache(dataSource.getDbType());
                                 tableMetaCache.refresh(connection, dataSource.getResourceId());
                             }
-                            lastRefreshFinishTime = System.currentTimeMillis();
+                            lastRefreshFinishTime = System.nanoTime();
                         }
                     } catch (Exception exx) {
                         LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
+                        // Avoid high CPU usage due to infinite loops caused by database exceptions
+                        lastRefreshFinishTime = System.nanoTime();
                     }
                 }
             });

@@ -101,9 +101,9 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
                 new Object[]{0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
         };
 
-        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue);
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue, new Object[][]{});
         DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setUrl("jdbc:mock:xxx1");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy newDataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);

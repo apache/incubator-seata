@@ -34,7 +34,6 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.IncompatibleVersionException;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.RpcContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +132,6 @@ public class ChannelManager {
      */
     public static void registerTMChannel(RegisterTMRequest request, Channel channel)
         throws IncompatibleVersionException {
-        Version.checkVersion(request.getVersion());
         RpcContext rpcContext = buildChannelHolder(NettyPoolKey.TransactionRole.TMROLE, request.getVersion(),
             request.getApplicationId(),
             request.getTransactionServiceGroup(),
@@ -155,7 +153,6 @@ public class ChannelManager {
      */
     public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
         throws IncompatibleVersionException {
-        Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
         if (!IDENTIFIED_CHANNELS.containsKey(channel)) {

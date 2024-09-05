@@ -18,10 +18,12 @@ package org.apache.seata.rm.tcc;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -30,6 +32,8 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
+import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
 import org.apache.seata.rm.AbstractResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
@@ -112,12 +116,16 @@ public class TCCResourceManager extends AbstractResourceManager {
         if (targetTCCBean == null || commitMethod == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
+        BusinessActionContext businessActionContext = null;
         try {
             //BusinessActionContext
-            BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
+            businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
 
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(businessActionContext);
+            doBeforeTccCommit(xid, branchId, tccResource.getActionName(), businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -143,8 +151,12 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+        } finally {
+            doAfterTccCommit(xid, branchId, tccResource.getActionName(), businessActionContext);
+            // clear the action context
+            BusinessActionContextUtil.clear();
         }
     }
 
@@ -171,11 +183,15 @@ public class TCCResourceManager extends AbstractResourceManager {
         if (targetTCCBean == null || rollbackMethod == null) {
             throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
+        BusinessActionContext businessActionContext = null;
         try {
             //BusinessActionContext
-            BusinessActionContext businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
+            businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
+            //share actionContext implicitly
+            BusinessActionContextUtil.setContext(businessActionContext);
+            doBeforeTccRollback(xid, branchId, tccResource.getActionName(), businessActionContext);
             Object ret;
             boolean result;
             // add idempotent and anti hanging
@@ -202,8 +218,96 @@ public class TCCResourceManager extends AbstractResourceManager {
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
-            LOGGER.error(msg, t);
+            LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+        } finally {
+            doAfterTccRollback(xid, branchId, tccResource.getActionName(), businessActionContext);
+            // clear the action context
+            BusinessActionContextUtil.clear();
+        }
+    }
+
+    /**
+     * to do some business operations before tcc rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doBeforeTccRollback(String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after tcc rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doAfterTccRollback(String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations before tcc commit
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doBeforeTccCommit(String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccCommit(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccCommit in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after tcc commit
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doAfterTccCommit(String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccCommit(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccCommit in hook {}", e.getMessage(), e);
+            }
         }
     }
 
