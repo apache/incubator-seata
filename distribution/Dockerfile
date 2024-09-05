@@ -34,11 +34,13 @@ WORKDIR /$BASE_DIR
 
 # ADD FORM distribution
 ADD bin/ /seata-server/bin
-ADD ext/ /seata-server/ext
-ADD target/ /seata-server/target
-ADD lib/ /seata-server/lib
 ADD conf/ /seata-server/conf
+ADD ext/ /seata-server/ext
+ADD lib/ /seata-server/lib
+ADD script/ /seata-server/script
+ADD target/ /seata-server/target
 ADD LICENSE /seata-server/LICENSE
+ADD NOTICE /seata-server/NOTICE
 
 # set extra environment
 ENV LOADER_PATH="/seata-server/lib"
