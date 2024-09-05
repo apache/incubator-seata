@@ -17,9 +17,10 @@
 package io.seata.core.context;
 
 
+import java.util.Map;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 
 import io.seata.core.model.BranchType;
 
