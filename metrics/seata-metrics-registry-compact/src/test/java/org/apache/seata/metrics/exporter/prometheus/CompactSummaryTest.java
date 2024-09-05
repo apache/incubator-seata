@@ -66,8 +66,8 @@ public class CompactSummaryTest {
 
     @Test
     public void testTps() {
+        CompactSummary compactSummary = new CompactSummary(new Id("test"));
         System.out.println("current: "+ System.currentTimeMillis());
-        CompactSummary compactSummary = new CompactSummary(id);
         compactSummary.increase(51111);
         System.out.println("tps: "+ compactSummary.tps()+", count: "+compactSummary.count()+ " ,total:"+compactSummary.total());
         compactSummary.increase(1111110);
