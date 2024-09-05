@@ -442,32 +442,19 @@ Apache-2.0 licenses
     org.lz4:lz4-java 1.7.1 Apache-2.0
     org.objenesis:objenesis 3.3 Apache-2.0
     org.objenesis:objenesis 3.2 Apache-2.0
-    org.springframework.boot:spring-boot 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-autoconfigure 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-autoconfigure 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-configuration-processor 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-configuration-processor 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter-json 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter-json 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter-logging 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter-logging 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter-security 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter-security 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter-tomcat 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter-tomcat 2.5.15 Apache-2.0
-    org.springframework.boot:spring-boot-starter-web 2.7.17 Apache-2.0
-    org.springframework.boot:spring-boot-starter-web 2.5.15 Apache-2.0
+    org.springframework.boot:spring-boot 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-autoconfigure 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-configuration-processor 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-json 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-logging 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-security 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-tomcat 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-web 2.7.18 Apache-2.0
     org.springframework.security:spring-security-config 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-config 5.5.8 Apache-2.0
     org.springframework.security:spring-security-core 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-core 5.5.8 Apache-2.0
     org.springframework.security:spring-security-crypto 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-crypto 5.5.8 Apache-2.0
     org.springframework.security:spring-security-web 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-web 5.5.8 Apache-2.0
     org.xerial.snappy:snappy-java 1.1.10.5 Apache-2.0
     org.xerial.snappy:snappy-java 1.1.8.4 Apache-2.0
     org.yaml:snakeyaml 2.0 Apache-2.0
@@ -491,28 +478,17 @@ Apache-2.0 licenses
     org.apache.tomcat.embed:tomcat-embed-core 9.0.82 Apache-2.0
     net.java.dev.jna:jna 5.5.0 Apache-2.0
     org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
-    org.springframework:spring-aop 5.3.27 Apache-2.0
-    org.springframework:spring-aop 5.3.26 Apache-2.0
-    org.springframework:spring-aop 5.3.30 Apache-2.0
-    org.springframework:spring-beans 5.3.27 Apache-2.0
-    org.springframework:spring-beans 5.3.30 Apache-2.0
-    org.springframework:spring-context 5.3.27 Apache-2.0
-    org.springframework:spring-context 5.3.30 Apache-2.0
-    org.springframework:spring-context-support 5.3.27 Apache-2.0
-    org.springframework:spring-core 5.3.27 Apache-2.0
-    org.springframework:spring-core 5.3.26 Apache-2.0
-    org.springframework:spring-core 5.3.30 Apache-2.0
-    org.springframework:spring-expression 5.3.27 Apache-2.0
-    org.springframework:spring-expression 5.3.30 Apache-2.0
-    org.springframework:spring-jcl 5.3.27 Apache-2.0
-    org.springframework:spring-jcl 5.3.26 Apache-2.0
-    org.springframework:spring-jcl 5.3.30 Apache-2.0
-    org.springframework:spring-jdbc 5.3.27 Apache-2.0
-    org.springframework:spring-tx 5.3.27 Apache-2.0
-    org.springframework:spring-web 5.3.27 Apache-2.0
-    org.springframework:spring-web 5.3.30 Apache-2.0
-    org.springframework:spring-webmvc 5.3.26 Apache-2.0
-    org.springframework:spring-webmvc 5.3.30 Apache-2.0
+    org.springframework:spring-aop 5.3.39 Apache-2.0
+    org.springframework:spring-beans 5.3.39 Apache-2.0
+    org.springframework:spring-context 5.3.39 Apache-2.0
+    org.springframework:spring-context-support 5.3.39 Apache-2.0
+    org.springframework:spring-core 5.3.39 Apache-2.0
+    org.springframework:spring-expression 5.3.39 Apache-2.0
+    org.springframework:spring-jcl 5.3.39 Apache-2.0
+    org.springframework:spring-jdbc 5.3.39 Apache-2.0
+    org.springframework:spring-tx 5.3.39 Apache-2.0
+    org.springframework:spring-web 5.3.39 Apache-2.0
+    org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.apache.commons:commons-math 2.2 Apache-2.0
 
 ========================================================================
@@ -567,13 +543,9 @@ BSD-3-Clause licenses
     com.thoughtworks.xstream:xstream 1.4.20 BSD-3-Clause
     org.antlr:ST4 4.3  The BSD License
     org.antlr:antlr-runtime 3.5.2 The BSD License
-    org.antlr:antlr-runtime  3.4  The BSD License
     org.antlr:antlr4 4.8 The BSD License
     org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause
-    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause
-    org.codehaus.janino:commons-compiler 3.1.9 BSD-3-Clause
     org.codehaus.janino:janino 3.1.10 BSD-3-Clause
-    org.codehaus.janino:janino 3.1.7 BSD-3-Clause
     org.antlr:stringtemplate 3.2.1 BSD-3-Clause
     antlr:antlr 2.7.7 BSD-3-Clause
     org.antlr:antlr4-runtime 4.8 BSD-3-Clause

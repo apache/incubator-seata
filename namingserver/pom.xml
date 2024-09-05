@@ -33,7 +33,7 @@
     <properties>
         <java.version>1.8</java.version>
         <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
-        <spring-framework-for-server.version>5.3.37</spring-framework-for-server.version>
+        <spring-framework-for-server.version>5.3.39</spring-framework-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -68,12 +68,10 @@
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>commons-compiler</artifactId>
-            <scope>compile</scope>
         </dependency>
 
 
