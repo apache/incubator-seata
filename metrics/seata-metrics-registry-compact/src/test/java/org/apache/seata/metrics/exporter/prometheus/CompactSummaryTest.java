@@ -66,9 +66,9 @@ public class CompactSummaryTest {
 
     @Test
     public void testTps() {
-        compactSummary.increase(5);
-        compactSummary.increase(10);
-        compactSummary.increase(15);
+        compactSummary.increase(51111);
+        compactSummary.increase(1111110);
+        compactSummary.increase(111115);
         // Assuming that the time taken is 1 second
         assertTrue(compactSummary.tps() >0);
     }
