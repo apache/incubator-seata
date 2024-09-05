@@ -66,18 +66,11 @@ public class CompactSummaryTest {
 
     @Test
     public void testTps() {
-        CompactSummary compactSummary = new CompactSummary(new Id("test"));
-        System.out.println("current: "+ System.currentTimeMillis());
-        compactSummary.increase(51111);
-        System.out.println("tps: "+ compactSummary.tps()+", count: "+compactSummary.count()+ " ,total:"+compactSummary.total());
-        compactSummary.increase(1111110);
-        System.out.println("tps: "+ compactSummary.tps()+", count: "+compactSummary.count()+ " ,total:"+compactSummary.total());
-        compactSummary.increase(111115);
-        System.out.println("tps: "+ compactSummary.tps()+", count: "+compactSummary.count()+ " ,total:"+compactSummary.total());
+        compactSummary.increase(5);
+        compactSummary.increase(10);
+        compactSummary.increase(15);
         // Assuming that the time taken is 1 second
-        System.out.println("tps time: "+ System.currentTimeMillis());
         assertTrue(compactSummary.tps() >0);
-        System.out.println("tps endtime: "+ System.currentTimeMillis());
     }
 
     @Test

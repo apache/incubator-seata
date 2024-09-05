@@ -38,15 +38,9 @@ public class SummaryValue {
     }
 
     public double getTps(double currentMilliseconds) {
-        System.out
-            .println("currentMilliseconds: " + currentMilliseconds + " , startMilliseconds: " + startMilliseconds);
         if (currentMilliseconds <= startMilliseconds) {
-            System.out
-                .println("getTps: 0");
             return 0;
         }
-        System.out
-            .println("total.doubleValue(): " + total.doubleValue() + "  (currentMilliseconds - startMilliseconds) * 1000.0 " +  (currentMilliseconds - startMilliseconds) * 1000.0);
         return total.doubleValue() / (currentMilliseconds - startMilliseconds) * 1000.0;
     }
 
