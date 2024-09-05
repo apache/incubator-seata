@@ -213,7 +213,7 @@ public class NamingManager {
                 boolean needNotify = !clusterBO.getUnitNames().contains(unitName);
                 NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
                 namespaceBO.removeOldCluster(clusterName);
-                if(needNotify){
+                if (needNotify) {
                     clusterBO.addUnit(unitName);
                 }
                 return needNotify;
