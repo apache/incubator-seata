@@ -66,12 +66,15 @@ public class CompactSummaryTest {
 
     @Test
     public void testTps() {
+        System.out.println("current: "+ System.currentTimeMillis());
         CompactSummary compactSummary = new CompactSummary(id);
         compactSummary.increase(51111);
         compactSummary.increase(1111110);
         compactSummary.increase(111115);
         // Assuming that the time taken is 1 second
+        System.out.println("tps time: "+ System.currentTimeMillis());
         assertTrue(compactSummary.tps() >0);
+        System.out.println("tps endtime: "+ System.currentTimeMillis());
     }
 
     @Test
