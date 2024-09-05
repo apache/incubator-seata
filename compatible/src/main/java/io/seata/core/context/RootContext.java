@@ -22,6 +22,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import io.seata.core.model.BranchType;
+
 /**
  * The type Root context.
  */
