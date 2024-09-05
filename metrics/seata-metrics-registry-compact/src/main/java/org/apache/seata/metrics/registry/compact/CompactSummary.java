@@ -80,6 +80,7 @@ public class CompactSummary implements Summary {
 
     @Override
     public double tps() {
+        System.out.println("clock.getCurrentMilliseconds(): "+clock.getCurrentMilliseconds());
         return this.value.getTps(clock.getCurrentMilliseconds());
     }
 
